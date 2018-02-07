@@ -1,6 +1,7 @@
 #![no_std]
 
 pub mod image;
+// pub mod fonts;
 
 pub trait Drawing {
 	fn set_pixel(&mut self, x: u32, y: u32, value: u8);
