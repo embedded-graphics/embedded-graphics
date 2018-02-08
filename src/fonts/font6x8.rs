@@ -3,69 +3,39 @@ use super::super::image::{ Image1BPP };
 
 const font: &[u8] = include_bytes!("../../font6x8_1bpp.raw");
 const font_widths: &[u8] = include_bytes!("../../font6x8_widths.raw");
-const char_height: u8 = 8;
-const char_width: u8 = 6;
-const first_charcode: u8 = 32;		// A space
-const image_width: u8 = 192;
-const max_stride: u8 = 1;	// 2 bytes is max glyph width
-const byte_width: u8 = image_width / 8;
+const char_height: u32 = 8;
+const char_width: u32 = 6;
+const first_charcode: u32 = 32;		// A space
+const image_width: u32 = 192;
+const max_stride: u32 = 1;	// 2 bytes is max glyph width
+const byte_width: u32 = image_width / 8;
+const max_string_length: u32 = 8;
+
+use super::{ FontBuffer1BPP, FONT_BUFFER_SIZE };
 
 pub struct Font6x8 {}
 
-impl Font6x8 {}
+impl Font for Font6x8 {
+	fn render_str(text: &str) -> Result<(FontBuffer1BPP, u32, u32), &'static str> {
+		let bytes_per_char = char_height;
 
-impl Font6x8 {
-	fn render_str(text: &str) {
-		for c in text.chars() {
-			let byte_offset = (c as u8 - first_charcode);
+		let bytes_in_row = FONT_BUFFER_SIZE as u32 / char_height as u32;
 
-			println!("charcode = {}, byte = {} {}", (c as u8 - first_charcode), byte_offset, byte_width);
+		if text.len() * bytes_per_char as usize > FONT_BUFFER_SIZE {
+			Err("String exceeds max length")
+		} else {
+			let mut bitmap: FontBuffer1BPP = [0; FONT_BUFFER_SIZE];
 
-			let bytes = [
-				font[(byte_offset) as usize],
-				font[(byte_offset + byte_width) as usize],
-				font[(byte_offset + byte_width * 2) as usize],
-				font[(byte_offset + byte_width * 3) as usize],
-				font[(byte_offset + byte_width * 4) as usize],
-				font[(byte_offset + byte_width * 5) as usize],
-				font[(byte_offset + byte_width * 6) as usize],
-				font[(byte_offset + byte_width * 7) as usize],
-			];
+			for row in 0..char_height {
+				for (idx, c) in text.chars().enumerate() {
+					let char_offset = c as u32 - first_charcode;
+					let font_byte_offset = char_offset + (byte_width * row);
 
-			println!("{:?}", bytes);
+					bitmap[idx + (bytes_in_row * row) as usize] = font[font_byte_offset as usize];
+				}
+			}
+
+			Ok((bitmap, (text.len() * 8) as u32, char_height))
 		}
 	}
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn render_str() {
-        Font6x8::render_str("!");
-    }
-}
-
-// Offset x, offset y, char block width
-// fn char_pixel_info(c: char) -> (u8, u8, u8) {
-// 	let char_index = (c as u8 - first_charcode) as usize;
-
-// 	// As if all the chars were on one line, compute the char X offset for a variable width font
-// 	let cum_offset: u32 = font_widths
-// 		.iter()
-// 		.take(char_index)
-// 		.fold(0u32, |accum, &width| accum + width as u32);
-
-// 	let char_width = font_widths[char_index];
-
-// 	let row_offset = (cum_offset / image_width as u32) as u8;
-
-// 	let pixel_offset = cum_offset - (row_offset * image_width) as u32;
-
-// 	(
-// 		pixel_offset as u8,
-// 		row_offset * char_height,
-// 		char_width
-// 	)
-// }
