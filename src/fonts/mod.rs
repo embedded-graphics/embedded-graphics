@@ -1,6 +1,6 @@
 mod font6x8;
 
-const FONT_BUFFER_SIZE: usize = 24;
+const FONT_BUFFER_SIZE: usize = 1024;
 
 pub use self::font6x8::Font6x8;
 
