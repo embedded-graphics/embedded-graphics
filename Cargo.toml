@@ -3,5 +3,7 @@ name = "embedded-graphics"
 version = "0.1.0"
 authors = ["James Waples <jamwaffles@gmail.com>"]
 repository = "https://github.com/jamwaffles/embedded-graphics"
+categories = ["embedded", "no-std", "graphics"]
+keywords = ["rtfm", "graphics", "embedded"]
 
 [dependencies]
