@@ -1,8 +1,8 @@
 use super::*;
 
-const FONT_IMAGE: &[u8] = include_bytes!("../../font6x8_1bpp.raw");
+const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
 // TODO: Non-fixed-width font
-// const FONT_CHAR_WIDTHS: &[u8] = include_bytes!("../../font6x8_widths.raw");
+// const FONT_CHAR_WIDTHS: &[u8] = include_bytes!("../../data/font6x8_widths.raw");
 const CHAR_HEIGHT: u32 = 8;
 const CHAR_WIDTH: u32 = 6;
 const FIRST_CHARCODE: u32 = 32;		// A space
