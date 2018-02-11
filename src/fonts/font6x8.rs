@@ -1,12 +1,10 @@
 use super::*;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
-// TODO: Non-fixed-width font
-// const FONT_CHAR_WIDTHS: &[u8] = include_bytes!("../../data/font6x8_widths.raw");
 const CHAR_HEIGHT: u32 = 8;
 const CHAR_WIDTH: u32 = 6;
 const FIRST_CHARCODE: u32 = 32;		// A space
-const FONT_IMAGE_WIDTH: u32 = 192;
+const FONT_IMAGE_WIDTH: u32 = 240;
 const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
 use super::{ FontBuffer1BPP, FONT_BUFFER_SIZE };
@@ -40,7 +38,7 @@ impl Font for Font6x8 {
 					// Walk along each row of character box
 					for char_walk_x in 0..CHAR_WIDTH {
 						// (x, y) coord turned into a bit index from top left (0, 0) of font bitmap
-						let bitmap_bit_index = 
+						let bitmap_bit_index =
 							char_x 		// X pixel offset for char
 							+ (FONT_IMAGE_WIDTH * char_y)		// Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
 							+ char_walk_x		// X offset for the pixel block that comprises this char
