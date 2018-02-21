@@ -17,4 +17,6 @@ pub trait Drawing {
 	fn draw_image_8bpp(&mut self, image: &image::Image8BPP, x: u32, y: u32);
 	fn draw_image_1bpp(&mut self, image: &image::Image1BPP, x: u32, y: u32);
 	fn draw_text_1bpp(&mut self, text: &str, x: u32, y: u32);
+	fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8);
+	fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8);
 }
