@@ -19,4 +19,5 @@ pub trait Drawing {
 	fn draw_text_1bpp(&mut self, text: &str, x: u32, y: u32);
 	fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8);
 	fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8);
+	fn center_circle(&mut self, center: (u32, u32), radius: u32, value: u8);
 }
