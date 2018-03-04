@@ -21,3 +21,7 @@ pub trait Drawing {
 	fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8);
 	fn center_circle(&mut self, center: (u32, u32), radius: u32, value: u8);
 }
+
+mod line;
+
+pub use line::Line;
