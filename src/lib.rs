@@ -12,6 +12,10 @@
 
 pub mod image;
 pub mod fonts;
+pub mod drawable;
+pub mod primitives;
+
+// TODO: Prelude: drawable::Drawable
 
 pub trait Drawing {
 	fn draw_image_8bpp(&mut self, image: &image::Image8BPP, x: u32, y: u32);
@@ -20,8 +24,6 @@ pub trait Drawing {
 	fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8);
 	fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8);
 	fn center_circle(&mut self, center: (u32, u32), radius: u32, value: u8);
+
+	fn draw<T>(&mut self, item_pixels: T) where T: Iterator<Item = drawable::Pixel>;
 }
-
-mod line;
-
-pub use line::Line;
