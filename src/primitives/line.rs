@@ -27,8 +27,8 @@ impl<'a> IntoIterator for &'a Line {
 		let mut dx: u32 = (x2 as i32 - x1 as i32).abs() as u32;
 		let mut dy: u32 = (y2 as i32 - y1 as i32).abs() as u32;
 
-		let signx: i32 = if (x2 as i32 - x1 as i32) >= 0 { 1 } else { -1 };
-		let signy: i32 = if (y2 as i32 - y1 as i32) >= 0 { 1 } else { -1 };
+		let signx: i32 = if (x2 as i32 - x1 as i32) > 0 { 1 } else if (x2 as i32 - x1 as i32) < 0 { -1 } else { 0 };
+		let signy: i32 = if (y2 as i32 - y1 as i32) > 0 { 1 } else if (y2 as i32 - y1 as i32) < 0 { -1 } else { 0 };
 
 		if dy > dx {
 		    let tmp = dy;
