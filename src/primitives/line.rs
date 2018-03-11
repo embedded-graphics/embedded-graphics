@@ -38,7 +38,7 @@ impl<'a> IntoIterator for &'a Line {
 		    swapped = true;
 		}
 
-		let e: f32 = 2.0 * (dy - dx) as f32;
+		let e: i32 = 2 * dy as i32 - dx as i32;
 
         LineIterator {
         	line: self,
@@ -68,7 +68,7 @@ pub struct LineIterator<'a> {
     dy: u32,
     signx: i32,
     signy: i32,
-    e: f32,
+    e: i32,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -81,14 +81,14 @@ impl<'a> Iterator for LineIterator<'a> {
 
 		let coord = (self.x, self.y);
 
-	    while self.e >= 0.0 {
+	    while self.e >= 0 {
 	        if self.swapped {
 	            self.x += 1;
 	        } else {
 	            self.y += 1;
 	        }
 
-	        self.e -= 2.0 * self.dx as f32;
+	        self.e -= 2 * self.dx as i32;
 	    }
 
 	    if self.swapped {
@@ -97,7 +97,7 @@ impl<'a> Iterator for LineIterator<'a> {
 			self.x = (self.x as i32 + self.signx) as u32;
 	    }
 
-	    self.e += 2.0 * self.dy as f32;
+	    self.e += 2 * self.dy as i32;
 
 	    self.idx += 1;
 
