@@ -8,6 +8,16 @@ pub struct Circle {
     pub color: Color,
 }
 
+impl Circle {
+    pub fn new(center: Coord, radius: u32, color: u8) -> Self {
+        Circle {
+            center,
+            radius,
+            color,
+        }
+    }
+}
+
 impl<'a> IntoIterator for &'a Circle {
     type Item = Pixel;
     type IntoIter = CircleIterator;

@@ -8,6 +8,16 @@ pub struct Rect {
     pub color: Color,
 }
 
+impl Rect {
+    pub fn new(top_left: Coord, bottom_right: Coord, color: u8) -> Self {
+        Rect {
+            top_left,
+            bottom_right,
+            color,
+        }
+    }
+}
+
 impl<'a> IntoIterator for &'a Rect {
     type Item = Pixel;
     type IntoIter = RectIterator;

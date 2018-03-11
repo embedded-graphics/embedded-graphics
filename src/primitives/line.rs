@@ -8,6 +8,12 @@ pub struct Line {
     pub color: Color,
 }
 
+impl Line {
+    pub fn new(start: Coord, end: Coord, color: u8) -> Self {
+        Line { start, end, color }
+    }
+}
+
 impl<'a> IntoIterator for &'a Line {
     type Item = Pixel;
     type IntoIter = LineIterator<'a>;
