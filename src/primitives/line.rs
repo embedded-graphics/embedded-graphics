@@ -15,11 +15,11 @@ impl<'a> IntoIterator for &'a Line {
     fn into_iter(self) -> Self::IntoIter {
     	let &Line { start, end, .. } = self;
 
-		let x1 = start.0;
-		let y1 = start.1;
-
-		let x2 = end.0;
-		let y2 = end.1;
+		let (x1, y1, x2, y2) = if start.0 > end.0 {
+			(end.0, end.1, start.0, start.1)
+		} else {
+			(start.0, start.1, end.0, end.1)
+		};
 
 		let mut swapped: bool = false;
 		let x: u32 = x1;
