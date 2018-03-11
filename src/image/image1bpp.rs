@@ -11,7 +11,11 @@ impl<'a> IntoIterator for &'a Image1BPP<'a> {
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
-        Image1BPPIterator { im: self, x: 0, y: 0 }
+        Image1BPPIterator {
+            im: self,
+            x: 0,
+            y: 0,
+        }
     }
 }
 

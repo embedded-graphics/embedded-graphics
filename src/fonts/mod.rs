@@ -8,5 +8,5 @@ pub use self::font6x8::Font6x8;
 pub type FontBuffer1BPP = [u8; FONT_BUFFER_SIZE];
 
 pub trait Font {
-	fn render_str(chars: &str) -> Result<(FontBuffer1BPP, u32, u32), &'static str>;
+    fn render_str(chars: &str) -> Result<(FontBuffer1BPP, u32, u32), &'static str>;
 }

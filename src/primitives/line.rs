@@ -3,9 +3,9 @@ use super::super::drawable::*;
 // TODO: Impl Default so people can leave the color bit out
 #[derive(Debug, Copy, Clone)]
 pub struct Line {
-	pub start: Coord,
-	pub end: Coord,
-	pub color: Color,
+    pub start: Coord,
+    pub end: Coord,
+    pub color: Color,
 }
 
 impl<'a> IntoIterator for &'a Line {
@@ -13,47 +13,59 @@ impl<'a> IntoIterator for &'a Line {
     type IntoIter = LineIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-    	let &Line { start, end, .. } = self;
+        let &Line { start, end, .. } = self;
 
-		let (x1, y1, x2, y2) = if start.0 > end.0 {
-			(end.0, end.1, start.0, start.1)
-		} else {
-			(start.0, start.1, end.0, end.1)
-		};
+        let (x1, y1, x2, y2) = if start.0 > end.0 {
+            (end.0, end.1, start.0, start.1)
+        } else {
+            (start.0, start.1, end.0, end.1)
+        };
 
-		let mut swapped: bool = false;
-		let x: u32 = x1;
-		let y: u32 = y1;
-		let mut dx: u32 = (x2 as i32 - x1 as i32).abs() as u32;
-		let mut dy: u32 = (y2 as i32 - y1 as i32).abs() as u32;
+        let mut swapped: bool = false;
+        let x: u32 = x1;
+        let y: u32 = y1;
+        let mut dx: u32 = (x2 as i32 - x1 as i32).abs() as u32;
+        let mut dy: u32 = (y2 as i32 - y1 as i32).abs() as u32;
 
-		let signx: i32 = if (x2 as i32 - x1 as i32) > 0 { 1 } else if (x2 as i32 - x1 as i32) < 0 { -1 } else { 0 };
-		let signy: i32 = if (y2 as i32 - y1 as i32) > 0 { 1 } else if (y2 as i32 - y1 as i32) < 0 { -1 } else { 0 };
+        let signx: i32 = if (x2 as i32 - x1 as i32) > 0 {
+            1
+        } else if (x2 as i32 - x1 as i32) < 0 {
+            -1
+        } else {
+            0
+        };
+        let signy: i32 = if (y2 as i32 - y1 as i32) > 0 {
+            1
+        } else if (y2 as i32 - y1 as i32) < 0 {
+            -1
+        } else {
+            0
+        };
 
-		if dy > dx {
-		    let tmp = dy;
-		    dy = dx;
-		    dx = tmp;
+        if dy > dx {
+            let tmp = dy;
+            dy = dx;
+            dx = tmp;
 
-		    swapped = true;
-		}
+            swapped = true;
+        }
 
-		let e: i32 = 2 * dy as i32 - dx as i32;
+        let e: i32 = 2 * dy as i32 - dx as i32;
 
         LineIterator {
-        	line: self,
-        	idx: 0,
+            line: self,
+            idx: 0,
 
-        	swapped,
-        	x,
-        	y,
-        	dx,
-        	dy,
-        	signx,
-        	signy,
-        	e,
+            swapped,
+            x,
+            y,
+            dx,
+            dy,
+            signx,
+            signy,
+            e,
         }
-	}
+    }
 }
 
 #[derive(Debug)]
@@ -77,35 +89,35 @@ impl<'a> Iterator for LineIterator<'a> {
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf
     fn next(&mut self) -> Option<Self::Item> {
-    	let &Line { color, .. } = self.line;
+        let &Line { color, .. } = self.line;
 
-		let coord = (self.x, self.y);
+        let coord = (self.x, self.y);
 
-	    while self.e >= 0 {
-	        if self.swapped {
-	            self.x += 1;
-	        } else {
-	            self.y += 1;
-	        }
+        while self.e >= 0 {
+            if self.swapped {
+                self.x += 1;
+            } else {
+                self.y += 1;
+            }
 
-	        self.e -= 2 * self.dx as i32;
-	    }
+            self.e -= 2 * self.dx as i32;
+        }
 
-	    if self.swapped {
-	        self.y = (self.y as i32 + self.signy) as u32;
-	    } else {
-			self.x = (self.x as i32 + self.signx) as u32;
-	    }
+        if self.swapped {
+            self.y = (self.y as i32 + self.signy) as u32;
+        } else {
+            self.x = (self.x as i32 + self.signx) as u32;
+        }
 
-	    self.e += 2 * self.dy as i32;
+        self.e += 2 * self.dy as i32;
 
-	    self.idx += 1;
+        self.idx += 1;
 
-	    if self.idx > self.dx {
-	    	None
-	    } else {
-	    	Some((coord, color))
-	    }
+        if self.idx > self.dx {
+            None
+        } else {
+            Some((coord, color))
+        }
     }
 }
 
