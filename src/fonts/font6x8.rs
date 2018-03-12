@@ -7,13 +7,13 @@ const FIRST_CHARCODE: u32 = 32; // A space
 const FONT_IMAGE_WIDTH: u32 = 240;
 const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
-use super::{FontBuffer1BPP, FONT_BUFFER_SIZE};
+use super::{FontBuffer1BPP, RenderedText, FONT_BUFFER_SIZE};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8 {}
 
 impl Font for Font6x8 {
-    fn render_str(text: &str) -> Result<(FontBuffer1BPP, u32, u32), &'static str> {
+    fn render_str(text: &str) -> Result<RenderedText, &'static str> {
         let bytes_in_row = FONT_BUFFER_SIZE as u32 / CHAR_HEIGHT;
         let bits_in_row = bytes_in_row * 8;
 
@@ -67,7 +67,11 @@ impl Font for Font6x8 {
                 }
             }
 
-            Ok((bitmap, bits_in_row, CHAR_HEIGHT))
+            Ok(RenderedText {
+                width: bits_in_row,
+                height: CHAR_HEIGHT,
+                bitmap,
+            })
         }
     }
 }

@@ -1,7 +1,7 @@
 #![no_std]
 // TODO: Docs
 // #![deny(missing_docs)]
-#![deny(missing_debug_implementations)]
+// #![deny(missing_debug_implementations)]
 #![deny(missing_copy_implementations)]
 #![deny(trivial_casts)]
 #![deny(trivial_numeric_casts)]
@@ -15,7 +15,7 @@ pub mod fonts;
 pub mod drawable;
 pub mod primitives;
 
-// TODO: Prelude: drawable::Drawable, primitives?
+// TODO: Prelude: drawable::Drawable, primitives, text::Text?
 
 pub trait Drawing {
     fn draw_image_8bpp(&mut self, image: &image::Image8BPP, x: u32, y: u32);
