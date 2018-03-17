@@ -1,4 +1,5 @@
-use super::*;
+use super::super::drawable::Pixel;
+use super::Font;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
 const CHAR_HEIGHT: u32 = 8;
@@ -7,71 +8,88 @@ const FIRST_CHARCODE: u32 = 32; // A space
 const FONT_IMAGE_WIDTH: u32 = 240;
 const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
-use super::{FontBuffer1BPP, RenderedText, FONT_BUFFER_SIZE};
+#[derive(Debug, Clone, Copy)]
+pub struct Font6x8<'a> {
+    text: &'a str,
+}
+
+impl<'a> Font<'a> for Font6x8<'a> {
+    fn render_str(text: &'a str) -> Font6x8<'a> {
+        Self { text }
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
-pub struct Font6x8 {}
+pub struct Font6x8Iterator<'a> {
+    text: &'a str,
+    current_char: Option<char>,
+    idx: usize,
+    char_walk_x: u32,
+    char_walk_y: u32,
+}
 
-impl Font for Font6x8 {
-    fn render_str(text: &str) -> Result<RenderedText, &'static str> {
-        let bytes_in_row = FONT_BUFFER_SIZE as u32 / CHAR_HEIGHT;
-        let bits_in_row = bytes_in_row * 8;
+impl<'a> IntoIterator for &'a Font6x8<'a> {
+    type IntoIter = Font6x8Iterator<'a>;
+    type Item = Pixel;
 
-        // Would we fill the buffer up by rendering this string?
-        if text.len() * (CHAR_WIDTH * CHAR_HEIGHT) as usize > FONT_BUFFER_SIZE * 8 {
-            Err("String exceeds max length")
-        } else {
-            let mut bitmap: FontBuffer1BPP = [0; FONT_BUFFER_SIZE];
+    fn into_iter(self) -> Self::IntoIter {
+        Font6x8Iterator {
+            current_char: self.text.chars().next(),
+            idx: 0,
+            text: self.text,
+            char_walk_x: 0,
+            char_walk_y: 0,
+        }
+    }
+}
 
-            for (idx, c) in text.chars().enumerate() {
-                // Char _code_ offset from first char, most often a space
-                // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
-                let char_offset = c as u32 - FIRST_CHARCODE;
-                let row = char_offset / CHARS_PER_ROW;
+impl<'a> Iterator for Font6x8Iterator<'a> {
+    type Item = Pixel;
 
-                // Top left corner of character, in pixels
-                let char_x = (char_offset - (row * CHARS_PER_ROW)) * CHAR_WIDTH;
-                let char_y = row * CHAR_HEIGHT;
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(current_char) = self.current_char {
+            // Char _code_ offset from first char, most often a space
+            // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
+            let char_offset = current_char as u32 - FIRST_CHARCODE;
+            let row = char_offset / CHARS_PER_ROW;
 
-                // Walk down column of character box
-                for char_walk_y in 0..CHAR_HEIGHT {
-                    // Walk along each row of character box
-                    for char_walk_x in 0..CHAR_WIDTH {
-                        // (x, y) coord turned into a bit index from top left (0, 0) of font bitmap
-                        // Bit index
-                        // = X pixel offset for char
-                        // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
-                        // + X offset for the pixel block that comprises this char
-                        // + Y offset for pixel block
-                        let bitmap_bit_index = char_x + (FONT_IMAGE_WIDTH * char_y) + char_walk_x
-                            + (char_walk_y * FONT_IMAGE_WIDTH);
+            // Top left corner of character, in pixels
+            let char_x = (char_offset - (row * CHARS_PER_ROW)) * CHAR_WIDTH;
+            let char_y = row * CHAR_HEIGHT;
 
-                        // Where to put the value of this bit into the resulting output array
-                        let out_bit_index =
-                            (idx as u32 * CHAR_WIDTH) + char_walk_x + (char_walk_y * bits_in_row);
+            // Bit index
+            // = X pixel offset for char
+            // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
+            // + X offset for the pixel block that comprises this char
+            // + Y offset for pixel block
+            let bitmap_bit_index = char_x + (FONT_IMAGE_WIDTH * char_y) + self.char_walk_x
+                + (self.char_walk_y * FONT_IMAGE_WIDTH);
 
-                        let bitmap_byte = bitmap_bit_index / 8;
-                        let bitmap_bit = 7 - (bitmap_bit_index % 8);
+            let bitmap_byte = bitmap_bit_index / 8;
+            let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
-                        let out_byte = out_bit_index / 8;
-                        let out_bit = 7 - (out_bit_index % 8);
+            let bit_value = (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1;
 
-                        let bit_value = (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1;
+            self.char_walk_x += 1;
 
-                        if bit_value == 0 {
-                            bitmap[out_byte as usize] &= !(1 << out_bit);
-                        } else {
-                            bitmap[out_byte as usize] |= 1 << out_bit;
-                        }
-                    }
+            if self.char_walk_x >= CHAR_WIDTH {
+                self.char_walk_x = 0;
+                self.char_walk_y += 1;
+
+                // Done with this char, move on to the next one
+                if self.char_walk_y >= CHAR_HEIGHT {
+                    self.char_walk_y = 0;
+                    self.idx += 1;
+                    self.current_char = self.text.chars().skip(self.idx).next();
                 }
             }
 
-            Ok(RenderedText {
-                width: bits_in_row,
-                height: CHAR_HEIGHT,
-                bitmap,
-            })
+            let x = (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
+            let y = self.char_walk_y;
+
+            Some(((x, y), bit_value))
+        } else {
+            None
         }
     }
 }
