@@ -51,7 +51,7 @@ pub struct CircleIterator {
 }
 
 impl Iterator for CircleIterator {
-    type Item = (Coord, Color);
+    type Item = Pixel;
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
     fn next(&mut self) -> Option<Self::Item> {

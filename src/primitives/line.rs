@@ -91,7 +91,7 @@ pub struct LineIterator<'a> {
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
 impl<'a> Iterator for LineIterator<'a> {
-    type Item = (Coord, Color);
+    type Item = Pixel;
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf
     fn next(&mut self) -> Option<Self::Item> {

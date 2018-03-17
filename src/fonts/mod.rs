@@ -1,3 +1,5 @@
+use super::drawable::Pixel;
+
 mod font6x8;
 
 const FONT_BUFFER_SIZE: usize = 1024;
@@ -25,7 +27,7 @@ pub struct RenderedTextIterator {
 
 impl IntoIterator for RenderedText {
     type IntoIter = RenderedTextIterator;
-    type Item = (u32, u32, u8);
+    type Item = Pixel;
 
     fn into_iter(self) -> Self::IntoIter {
         RenderedTextIterator {
@@ -39,7 +41,7 @@ impl IntoIterator for RenderedText {
 }
 
 impl Iterator for RenderedTextIterator {
-    type Item = (u32, u32, u8);
+    type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
         // TODO: Move pixel iterator crap from SSD1306 crate into here
