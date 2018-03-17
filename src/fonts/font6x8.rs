@@ -1,4 +1,4 @@
-use super::super::drawable::Pixel;
+use super::super::drawable::{Coord, Pixel};
 use super::Font;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
@@ -10,22 +10,24 @@ const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8<'a> {
+    pos: Coord,
     text: &'a str,
 }
 
 impl<'a> Font<'a> for Font6x8<'a> {
-    fn render_str(text: &'a str) -> Font6x8<'a> {
-        Self { text }
+    fn render_str(text: &'a str, pos: Coord) -> Font6x8<'a> {
+        Self { pos, text }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8Iterator<'a> {
-    text: &'a str,
-    current_char: Option<char>,
-    idx: usize,
     char_walk_x: u32,
     char_walk_y: u32,
+    current_char: Option<char>,
+    idx: usize,
+    pos: Coord,
+    text: &'a str,
 }
 
 impl<'a> IntoIterator for &'a Font6x8<'a> {
@@ -39,6 +41,7 @@ impl<'a> IntoIterator for &'a Font6x8<'a> {
             text: self.text,
             char_walk_x: 0,
             char_walk_y: 0,
+            pos: self.pos,
         }
     }
 }
@@ -84,8 +87,8 @@ impl<'a> Iterator for Font6x8Iterator<'a> {
                 }
             }
 
-            let x = (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
-            let y = self.char_walk_y;
+            let x = self.pos.0 + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
+            let y = self.pos.1 + self.char_walk_y;
 
             Some(((x, y), bit_value))
         } else {
