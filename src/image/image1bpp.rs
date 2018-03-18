@@ -1,12 +1,27 @@
+use super::Image;
+use super::super::drawable::{Coord, Pixel};
+
 #[derive(Debug)]
 pub struct Image1BPP<'a> {
-    pub width: u32,
-    pub height: u32,
-    pub imagedata: &'a [u8],
+    width: u32,
+    height: u32,
+    imagedata: &'a [u8],
+    offset: Coord,
+}
+
+impl<'a> Image<'a> for Image1BPP<'a> {
+    fn new(imagedata: &'a [u8], width: u32, height: u32, offset: Coord) -> Self {
+        Self {
+            width,
+            height,
+            imagedata,
+            offset,
+        }
+    }
 }
 
 impl<'a> IntoIterator for &'a Image1BPP<'a> {
-    type Item = (u32, u32, u8);
+    type Item = Pixel;
     type IntoIter = Image1BPPIterator<'a>;
 
     // NOTE: `self` is a reference already, no copies here!
@@ -27,7 +42,7 @@ pub struct Image1BPPIterator<'a> {
 }
 
 impl<'a> Iterator for Image1BPPIterator<'a> {
-    type Item = (u32, u32, u8);
+    type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
         let w = self.im.width;
@@ -50,7 +65,7 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
         let bit_offset = 7 - (x - (row_byte_index * 8));
         let bit_value = (self.im.imagedata[byte_index as usize] >> bit_offset) & 1;
 
-        let current_pixel: Self::Item = (x, y, bit_value);
+        let current_pixel: Self::Item = ((x + self.im.offset.0, y + self.im.offset.1), bit_value);
 
         // Increment stuff
         self.x += 1;
