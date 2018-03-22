@@ -7,13 +7,14 @@ It currently only supports monochrome displays. Contributions to support full co
 ## Features
 
 * Primitives
-      * Lines
-      * Squares/rects
-      * Circles
+	* Lines
+	* Squares/rects
+	* Circles
 * Images
-      * 1BPP images as `&[u8]`s
+	* 1BPP images as `&[u8]`s
+     * 8BPP images as `&[u8]`s (downsampled badly to 1BPP)
 * Text
-      * 6x8 bitmap font
+	* 6x8 bitmap font
       
 ## TODO
 
