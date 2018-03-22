@@ -2,7 +2,24 @@
 
 A small 2D graphics library to (eventually) use for drawing things on small graphical LCDs, like the SSD1306 OLED display.
 
-WIP.
+It currently only supports monochrome displays. Contributions to support full colour as well are very welcome!
+
+## Features
+
+* Primitives
+      * Lines
+      * Squares/rects
+      * Circles
+* Images
+      * 1BPP images as `&[u8]`s
+* Text
+      * 6x8 bitmap font
+      
+## TODO
+
+* [ ] Translations
+* [ ] General matrix transforms
+* [ ] Full colour support
 
 ## Attribution
 
