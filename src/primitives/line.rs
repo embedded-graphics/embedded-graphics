@@ -119,7 +119,7 @@ impl<'a> Iterator for LineIterator<'a> {
 
         self.idx += 1;
 
-        if self.idx > self.dx {
+        if self.idx > self.dx + 1 {
             None
         } else {
             Some((coord, color))
