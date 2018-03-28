@@ -46,7 +46,7 @@ impl Iterator for RectIterator {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.x >= self.bottom_right.0 && self.y >= self.bottom_right.1 {
+        if self.y > self.bottom_right.1 {
             return None;
         }
 
