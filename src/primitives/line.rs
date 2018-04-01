@@ -1,4 +1,5 @@
 use super::super::drawable::*;
+use super::super::transform::*;
 
 // TODO: Impl Default so people can leave the color bit out
 #[derive(Debug, Copy, Clone)]
@@ -128,3 +129,26 @@ impl<'a> Iterator for LineIterator<'a> {
 }
 
 impl Drawable for Line {}
+
+impl Transform for Line {
+    /// Translate the line from its current position to a new position by (x, y) pixels, returning
+    /// a new `Line`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Line;
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let line = Line::new((5, 10), (15, 20), 1);
+    /// let moved = line.translate((10, 10));
+    ///
+    /// assert_eq!(moved.start, (15, 20));
+    /// assert_eq!(moved.end, (25, 30));
+    /// ```
+    fn translate(&self, by: Coord) -> Self {
+        Self {
+            start: (self.start.0 + by.0, self.start.1 + by.1),
+            end: (self.end.0 + by.0, self.end.1 + by.1),
+            ..*self
+        }
+    }
+}

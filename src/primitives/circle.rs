@@ -1,4 +1,5 @@
 use super::super::drawable::*;
+use super::super::transform::*;
 
 // TODO: Impl Default so people can leave the color bit out
 #[derive(Debug, Copy, Clone)]
@@ -97,3 +98,24 @@ impl Iterator for CircleIterator {
 }
 
 impl Drawable for Circle {}
+
+impl Transform for Circle {
+    /// Translate the circle center from its current position to a new position by (x, y) pixels,
+    /// returning a new `Circle`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Circle;
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let circle = Circle::new((5, 10), 10, 1);
+    /// let moved = circle.translate((10, 10));
+    ///
+    /// assert_eq!(moved.center, (15, 20));
+    /// ```
+    fn translate(&self, by: Coord) -> Self {
+        Self {
+            center: (self.center.0 + by.0, self.center.1 + by.1),
+            ..*self
+        }
+    }
+}
