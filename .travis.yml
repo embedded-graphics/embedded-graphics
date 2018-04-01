@@ -82,6 +82,7 @@ before_install:
   - rustup self update
 
 install:
+  - cargo install cargo-travis || true
   - rustup override set nightly
 
 script:
@@ -89,6 +90,10 @@ script:
   - cargo build --release
   - cargo test
   - cargo test --release
+  - cargo doc --release
+
+after_success:
+  - cargo doc-upload --branch docs
 
 cache: cargo
 before_cache:
