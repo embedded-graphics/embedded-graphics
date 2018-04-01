@@ -1,15 +1,24 @@
+//! The circle primitive
+
 use super::super::drawable::*;
 use super::super::transform::*;
 
 // TODO: Impl Default so people can leave the color bit out
+/// Circle primitive
 #[derive(Debug, Copy, Clone)]
 pub struct Circle {
+    /// Center point of circle
     pub center: Coord,
+
+    /// Radius of the circle
     pub radius: u32,
+
+    /// Line colour of circle
     pub color: Color,
 }
 
 impl Circle {
+    /// Create a new circle with center point, radius and border color
     pub fn new(center: Coord, radius: u32, color: u8) -> Self {
         Circle {
             center,
@@ -38,6 +47,7 @@ impl<'a> IntoIterator for &'a Circle {
     }
 }
 
+/// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
 pub struct CircleIterator {
     center: Coord,

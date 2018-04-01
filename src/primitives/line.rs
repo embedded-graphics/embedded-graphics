@@ -1,15 +1,24 @@
+//! The line primitive
+
 use super::super::drawable::*;
 use super::super::transform::*;
 
 // TODO: Impl Default so people can leave the color bit out
+/// Line primitive
 #[derive(Debug, Copy, Clone)]
 pub struct Line {
+    /// Start point
     pub start: Coord,
+
+    /// End point
     pub end: Coord,
+
+    /// Line color
     pub color: Color,
 }
 
 impl Line {
+    /// Create a new line
     pub fn new(start: Coord, end: Coord, color: u8) -> Self {
         Line { start, end, color }
     }
@@ -75,6 +84,7 @@ impl<'a> IntoIterator for &'a Line {
     }
 }
 
+/// Pixel iterator for each pixel in the line
 #[derive(Debug)]
 pub struct LineIterator<'a> {
     idx: u32,

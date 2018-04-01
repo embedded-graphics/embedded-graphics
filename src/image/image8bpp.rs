@@ -1,16 +1,37 @@
+//! 8 bit per pixel image. Each byte of input data defines the on/off state for each pixel. This
+//! currently only supports monochrome displays, so if the pixel value is 0, it's off, anything
+//! above 0 is on.
+//!
+//! You can convert an image to 8BPP for inclusion with `include_bytes!()` using the following
+//! Imagemagick command:
+//!
+//! ```bash
+//! convert image.png -depth 8 gray:"image.raw"
+//! ```
+
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 
+/// 8 bit per pixel image
 #[derive(Debug)]
 pub struct Image8BPP<'a> {
+    /// Image width
     width: u32,
+
+    /// Image height
     height: u32,
+
+    /// Image data, 1 byte per pixel
     imagedata: &'a [u8],
+
+    /// Top left corner offset from display origin (0,0)
     pub offset: Coord,
 }
 
 impl<'a> Image<'a> for Image8BPP<'a> {
+    /// Create a new 8BPP image with given data, width and height. Data length *must* equal
+    /// `width * height`
     fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
         Self {
             width,
