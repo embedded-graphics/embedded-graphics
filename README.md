@@ -1,5 +1,7 @@
 # Embedded graphics
 
+[![Build Status](https://travis-ci.org/jamwaffles/embedded-graphics.svg?branch=master)](https://travis-ci.org/jamwaffles/embedded-graphics)
+
 A small 2D graphics library to (eventually) use for drawing things on small graphical LCDs, like the SSD1306 OLED display.
 
 It currently only supports monochrome displays. Contributions to support full colour as well are very welcome!
@@ -15,7 +17,7 @@ It currently only supports monochrome displays. Contributions to support full co
      * 8BPP images as `&[u8]`s (downsampled badly to 1BPP)
 * Text
 	* 6x8 bitmap font
-      
+
 ## TODO
 
 * [ ] Translations
