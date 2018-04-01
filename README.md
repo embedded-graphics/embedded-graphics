@@ -6,8 +6,6 @@ A small 2D graphics library to (eventually) use for drawing things on small grap
 
 It currently only supports monochrome displays. Contributions to support full colour as well are very welcome!
 
-Examples for the STM32F103C "Blue Pill" board can be found in the [`examples/`](examples) folder.
-
 ## [Documentation](https://jamwaffles.github.io/embedded-graphics)
 
 ## Features
