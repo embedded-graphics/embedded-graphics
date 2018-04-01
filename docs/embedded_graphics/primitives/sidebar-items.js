@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["circle","The circle primitive"],["line","The line primitive"],["rect","The rectangle primitive. Also good for drawing squares."]]});
