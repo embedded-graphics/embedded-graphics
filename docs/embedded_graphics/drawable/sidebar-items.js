@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Drawable","Marks an object as \"drawable\". Must be implemented for all graphics objects"]],"type":[["Color","Monochrome colour type"],["Coord","2D coordinate type"],["Pixel","A single pixel"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Line","Line primitive"],["LineIterator","Pixel iterator for each pixel in the line"]]});
