@@ -93,7 +93,7 @@ script:
   - cargo doc --release
 
 after_success:
-  - cargo doc-upload --branch docs
+  - cargo doc-upload
 
 cache: cargo
 before_cache:
