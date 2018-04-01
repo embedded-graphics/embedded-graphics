@@ -17,10 +17,10 @@ It currently only supports monochrome displays. Contributions to support full co
      * 8BPP images as `&[u8]`s (downsampled badly to 1BPP)
 * Text
 	* 6x8 bitmap font
+* Translations: move an object around the screen
 
 ## TODO
 
-* [ ] Translations
 * [ ] General matrix transforms
 * [ ] Full colour support
 
