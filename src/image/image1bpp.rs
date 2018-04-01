@@ -1,12 +1,30 @@
+//! 1 bit per pixel image. Each byte of input data defines the on/off state of 8 horizontal pixels
+//! to be displayed on the screen.
+//!
+//! You can convert an image to 1BPP for inclusion with `include_bytes!()` using the following
+//! Imagemagick command:
+//!
+//! ```bash
+//! convert image.png -depth 1 gray:"image.raw"
+//! ```
+
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 
+/// 1 bit per pixel image
 #[derive(Debug)]
 pub struct Image1BPP<'a> {
+    /// Image width in pixels
     width: u32,
+
+    /// Image height in pixels
     height: u32,
+
+    /// Image data, 1 bit per byte, 1 byte per 8 horizontal pixels
     imagedata: &'a [u8],
+
+    /// Image offset in pixels from screen origin (0,0)
     pub offset: Coord,
 }
 
@@ -42,6 +60,7 @@ pub struct Image1BPPIterator<'a> {
     im: &'a Image1BPP<'a>,
 }
 
+/// Iterator over every pixel in the source image
 impl<'a> Iterator for Image1BPPIterator<'a> {
     type Item = Pixel;
 

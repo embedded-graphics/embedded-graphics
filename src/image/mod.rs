@@ -1,8 +1,12 @@
+//! Image object
+
 mod image1bpp;
 mod image8bpp;
 
 // TODO: Add to crate prelude
+/// Image trait
 pub trait Image<'a> {
+    /// Create a new image with given pixel data, width and height
     fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self;
 }
 

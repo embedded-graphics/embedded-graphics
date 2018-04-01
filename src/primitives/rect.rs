@@ -1,15 +1,25 @@
+//! The rectangle primitive. Also good for drawing squares.
+
 use super::super::drawable::*;
 use super::super::transform::*;
 
 // TODO: Impl Default so people can leave the color bit out
+/// Rectangle primitive
 #[derive(Debug, Copy, Clone)]
 pub struct Rect {
+    /// Top left point of the rect
     pub top_left: Coord,
+
+    /// Bottom right point of the rect
     pub bottom_right: Coord,
+
+    /// Border color
     pub color: Color,
 }
 
 impl Rect {
+    /// Create a new rectangle from the top left point to the bottom right point with a given border
+    /// color
     pub fn new(top_left: Coord, bottom_right: Coord, color: u8) -> Self {
         Rect {
             top_left,
@@ -34,6 +44,7 @@ impl<'a> IntoIterator for &'a Rect {
     }
 }
 
+/// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Copy, Clone)]
 pub struct RectIterator {
     top_left: Coord,

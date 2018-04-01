@@ -1,3 +1,5 @@
+//! 6x8 pixel font. Image data taken from the [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps)
+
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
@@ -9,9 +11,13 @@ const FIRST_CHARCODE: u32 = 32; // A space
 const FONT_IMAGE_WIDTH: u32 = 240;
 const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
+/// Container struct to hold a positioned piece of text
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8<'a> {
+    /// Top left corner of the text
     pub pos: Coord,
+
+    /// Text to draw
     text: &'a str,
 }
 
