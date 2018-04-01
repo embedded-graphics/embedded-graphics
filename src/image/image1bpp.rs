@@ -1,21 +1,22 @@
+use super::super::drawable::*;
+use super::super::transform::*;
 use super::Image;
-use super::super::drawable::{Coord, Pixel};
 
 #[derive(Debug)]
 pub struct Image1BPP<'a> {
     width: u32,
     height: u32,
     imagedata: &'a [u8],
-    offset: Coord,
+    pub offset: Coord,
 }
 
 impl<'a> Image<'a> for Image1BPP<'a> {
-    fn new(imagedata: &'a [u8], width: u32, height: u32, offset: Coord) -> Self {
+    fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
         Self {
             width,
             height,
             imagedata,
-            offset,
+            offset: (0, 0),
         }
     }
 }
@@ -77,5 +78,30 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
         }
 
         Some(current_pixel)
+    }
+}
+
+impl<'a> Drawable for Image1BPP<'a> {}
+
+impl<'a> Transform for Image1BPP<'a> {
+    /// Translate the image from its current position to a new position by (x, y) pixels, returning
+    /// a new `Image1BPP`.
+    ///
+    /// ```
+    /// # use embedded_graphics::image::{ Image, Image1BPP };
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// // 8px x 1px test image
+    /// let image = Image1BPP::new(&[ 0xff ], 8, 1);
+    /// let moved = image.translate((25, 30));
+    ///
+    /// assert_eq!(image.offset, (0, 0));
+    /// assert_eq!(moved.offset, (25, 30));
+    /// ```
+    fn translate(&self, by: Coord) -> Self {
+        Self {
+            offset: (self.offset.0 + by.0, self.offset.1 + by.1),
+            ..*self
+        }
     }
 }

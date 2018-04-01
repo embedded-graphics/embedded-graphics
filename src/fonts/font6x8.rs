@@ -1,4 +1,5 @@
-use super::super::drawable::{Coord, Pixel};
+use super::super::drawable::*;
+use super::super::transform::*;
 use super::Font;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
@@ -10,13 +11,13 @@ const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8<'a> {
-    pos: Coord,
+    pub pos: Coord,
     text: &'a str,
 }
 
 impl<'a> Font<'a> for Font6x8<'a> {
-    fn render_str(text: &'a str, pos: Coord) -> Font6x8<'a> {
-        Self { pos, text }
+    fn render_str(text: &'a str) -> Font6x8<'a> {
+        Self { pos: (0, 0), text }
     }
 }
 
@@ -93,6 +94,31 @@ impl<'a> Iterator for Font6x8Iterator<'a> {
             Some(((x, y), bit_value))
         } else {
             None
+        }
+    }
+}
+
+impl<'a> Drawable for Font6x8<'a> {}
+
+impl<'a> Transform for Font6x8<'a> {
+    /// Translate the image from its current position to a new position by (x, y) pixels, returning
+    /// a new `Font6x8`.
+    ///
+    /// ```
+    /// # use embedded_graphics::fonts::{ Font, Font6x8 };
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// // 8px x 1px test image
+    /// let text = Font6x8::render_str("Hello world");
+    /// let moved = text.translate((25, 30));
+    ///
+    /// assert_eq!(text.pos, (0, 0));
+    /// assert_eq!(moved.pos, (25, 30));
+    /// ```
+    fn translate(&self, by: Coord) -> Self {
+        Self {
+            pos: (self.pos.0 + by.0, self.pos.1 + by.1),
+            ..*self
         }
     }
 }
