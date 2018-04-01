@@ -1,4 +1,5 @@
 use super::super::drawable::*;
+use super::super::transform::*;
 
 // TODO: Impl Default so people can leave the color bit out
 #[derive(Debug, Copy, Clone)]
@@ -72,3 +73,26 @@ impl Iterator for RectIterator {
 }
 
 impl Drawable for Rect {}
+
+impl Transform for Rect {
+    /// Translate the rect from its current position to a new position by (x, y) pixels, returning
+    /// a new `Rect`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Rect;
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let rect = Rect::new((5, 10), (15, 20), 1);
+    /// let moved = rect.translate((10, 10));
+    ///
+    /// assert_eq!(moved.top_left, (15, 20));
+    /// assert_eq!(moved.bottom_right, (25, 30));
+    /// ```
+    fn translate(&self, by: Coord) -> Self {
+        Self {
+            top_left: (self.top_left.0 + by.0, self.top_left.1 + by.1),
+            bottom_right: (self.bottom_right.0 + by.0, self.bottom_right.1 + by.1),
+            ..*self
+        }
+    }
+}
