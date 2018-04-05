@@ -168,10 +168,15 @@ impl Transform for Line {
 mod tests {
     use super::*;
 
-    fn test_expected_line(start: Coord, end: Coord, expected: &[Coord], error_message: &'static str) {
+    fn test_expected_line(
+        start: Coord,
+        end: Coord,
+        expected: &[Coord],
+        error_message: &'static str,
+    ) {
         let line = Line::new(start, end, 1);
         for (idx, (coord, _)) in line.into_iter().enumerate() {
-            assert!( coord == expected[idx], error_message);
+            assert!(coord == expected[idx], error_message);
         }
     }
 
@@ -179,8 +184,7 @@ mod tests {
     fn draws_octant_1_correctly() {
         let start = (10, 10);
         let end = (15, 13);
-        let expected = [(10, 10), (11, 11), (12, 11),
-                         (13, 12), (14, 12), (15, 13)];
+        let expected = [(10, 10), (11, 11), (12, 11), (13, 12), (14, 12), (15, 13)];
         test_expected_line(start, end, &expected, "Octant 1 failed to draw correctly");
     }
 
@@ -188,8 +192,7 @@ mod tests {
     fn draws_octant_2_correctly() {
         let start = (10, 10);
         let end = (13, 15);
-        let expected = [(10, 10), (11, 11), (11, 12),
-                         (12, 13), (12, 14), (13, 15)];
+        let expected = [(10, 10), (11, 11), (11, 12), (12, 13), (12, 14), (13, 15)];
         test_expected_line(start, end, &expected, "Octant 2 failed to draw correctly");
     }
 
@@ -197,8 +200,7 @@ mod tests {
     fn draws_octant_3_correctly() {
         let start = (10, 10);
         let end = (7, 15);
-        let expected = [(10, 10), (9, 11), (9, 12),
-                         (8, 13), (8, 14), (7, 15)];
+        let expected = [(10, 10), (9, 11), (9, 12), (8, 13), (8, 14), (7, 15)];
         test_expected_line(start, end, &expected, "Octant 3 failed to draw correctly");
     }
 
@@ -206,8 +208,7 @@ mod tests {
     fn draws_octant_4_correctly() {
         let start = (10, 10);
         let end = (5, 13);
-        let expected = [(5, 13), (6, 12), (7, 12),
-                         (8, 11), (9, 11), (10, 10)];
+        let expected = [(5, 13), (6, 12), (7, 12), (8, 11), (9, 11), (10, 10)];
         test_expected_line(start, end, &expected, "Octant 4 failed to draw correctly");
     }
 
@@ -215,8 +216,7 @@ mod tests {
     fn draws_octant_5_correctly() {
         let start = (10, 10);
         let end = (5, 7);
-        let expected = [(5, 7), (6, 8), (7, 8),
-                         (8, 9), (9, 9), (10, 10)];
+        let expected = [(5, 7), (6, 8), (7, 8), (8, 9), (9, 9), (10, 10)];
         test_expected_line(start, end, &expected, "Octant 5 failed to draw correctly");
     }
 
@@ -224,8 +224,7 @@ mod tests {
     fn draws_octant_6_correctly() {
         let start = (10, 10);
         let end = (7, 5);
-        let expected = [(7, 5), (8, 6), (8, 7),
-                         (9, 8), (9, 9), (10, 10)];
+        let expected = [(7, 5), (8, 6), (8, 7), (9, 8), (9, 9), (10, 10)];
         test_expected_line(start, end, &expected, "Octant 6 failed to draw correctly");
     }
 
@@ -233,8 +232,7 @@ mod tests {
     fn draws_octant_7_correctly() {
         let start = (10, 10);
         let end = (13, 5);
-        let expected = [(13, 5), (12, 6), (12, 7),
-                         (11, 8), (11, 9), (10, 10)];
+        let expected = [(13, 5), (12, 6), (12, 7), (11, 8), (11, 9), (10, 10)];
         test_expected_line(start, end, &expected, "Octant 7 failed to draw correctly");
     }
 
@@ -242,8 +240,7 @@ mod tests {
     fn draws_octant_8_correctly() {
         let start = (10, 10);
         let end = (15, 7);
-        let expected = [(10, 10), (11, 9), (12, 9),
-                         (13, 8), (14, 8), (15, 7)];
+        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
         test_expected_line(start, end, &expected, "Octant 8 failed to draw correctly");
     }
 }
