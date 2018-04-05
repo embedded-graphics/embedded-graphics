@@ -29,57 +29,67 @@ impl<'a> IntoIterator for &'a Line {
     type IntoIter = LineIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let &Line { start, end, .. } = self;
+        let &Line { start:(x0, y0), end:(x1, y1), .. } = self;
 
-        let (x1, y1, x2, y2) = if start.0 > end.0 {
-            (end.0, end.1, start.0, start.1)
-        } else {
-            (start.0, start.1, end.0, end.1)
-        };
+        // Find out if our line is steep or shallow
+        let is_steep = (y1 as i32 - y0 as i32).abs() > (x1 as i32 - x0 as i32).abs();
 
-        let mut swapped: bool = false;
-        let x: u32 = x1;
-        let y: u32 = y1;
-        let mut dx: u32 = (x2 as i32 - x1 as i32).abs() as u32;
-        let mut dy: u32 = (y2 as i32 - y1 as i32).abs() as u32;
+        // Determine if endpoints should be switched
+        // based on the "quick" direction
+        let (x0, y0, x1, y1) = 
+            if is_steep {
+                if y0 > y1 {
+                    (x1, y1, x0, y0)
+                } else {
+                    (x0, y0, x1, y1)
+                }
+            } else {
+                if x0 > x1 {
+                    (x1, y1, x0, y0)
+                } else {
+                    (x0, y0, x1, y1)
+                }
+            };
 
-        let signx: i32 = if (x2 as i32 - x1 as i32) > 0 {
-            1
-        } else if (x2 as i32 - x1 as i32) < 0 {
-            -1
-        } else {
-            0
-        };
-        let signy: i32 = if (y2 as i32 - y1 as i32) > 0 {
-            1
-        } else if (y2 as i32 - y1 as i32) < 0 {
-            -1
-        } else {
-            0
-        };
+        // Setup our pre-calculated values
+        let (dquick, mut dslow) = if is_steep {
+                (y1 as i32 - y0 as i32,
+                 x1 as i32 - x0 as i32)
+            } else {
+                (x1 as i32 - x0 as i32,
+                 y1 as i32 - y0 as i32)
+            };
 
-        if dy > dx {
-            let tmp = dy;
-            dy = dx;
-            dx = tmp;
+        // Determine how we should increment the slow direction
+        let increment = if dslow < 0 { 
+                dslow = -dslow;
+                -1
+            } else { 
+                1 
+            };
 
-            swapped = true;
-        }
+        // Compute the default error
+        let error = 2*dslow - dquick;
 
-        let e: i32 = 2 * dy as i32 - dx as i32;
+        // Set our inital quick & slow
+        let (quick, slow, end) = if is_steep {
+                (y0, x0, y1)
+            } else {
+                (x0, y0, x1)
+            };
 
         LineIterator {
             line: self,
-            idx: 0,
 
-            swapped,
-            x,
-            y,
-            dx,
-            dy,
-            signx,
-            signy,
-            e,
+            is_steep,
+            dquick,
+            dslow,
+            increment,
+            error,
+
+            quick,
+            slow,
+            end,
         }
     }
 }
@@ -87,54 +97,48 @@ impl<'a> IntoIterator for &'a Line {
 /// Pixel iterator for each pixel in the line
 #[derive(Debug)]
 pub struct LineIterator<'a> {
-    idx: u32,
     line: &'a Line,
 
-    swapped: bool,
-    x: u32,
-    y: u32,
-    dx: u32,
-    dy: u32,
-    signx: i32,
-    signy: i32,
-    e: i32,
+    dquick: i32,
+    dslow: i32,
+    increment: i32,
+    error: i32,
+    is_steep: bool,
+
+    quick: u32,
+    slow: u32,
+    end: u32,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
 impl<'a> Iterator for LineIterator<'a> {
     type Item = Pixel;
 
-    // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf
     fn next(&mut self) -> Option<Self::Item> {
+        if self.quick == self.end {
+            return None
+        }
+
+        // Get the next point
         let &Line { color, .. } = self.line;
-
-        let coord = (self.x, self.y);
-
-        while self.e >= 0 {
-            if self.swapped {
-                self.x += 1;
+        let coord = if self.is_steep {
+                (self.slow, self.quick)
             } else {
-                self.y += 1;
-            }
+                (self.quick, self.slow)
+            };
 
-            self.e -= 2 * self.dx as i32;
+        // Update error and increment slow direction
+        if self.error > 0 {
+            self.slow = (self.slow as i32 + self.increment) as u32;
+            self.error -= 2*self.dquick;
         }
+        self.error += 2*self.dslow;
 
-        if self.swapped {
-            self.y = (self.y as i32 + self.signy) as u32;
-        } else {
-            self.x = (self.x as i32 + self.signx) as u32;
-        }
+        // Increment fast direction
+        self.quick += 1;
 
-        self.e += 2 * self.dy as i32;
-
-        self.idx += 1;
-
-        if self.idx > self.dx + 1 {
-            None
-        } else {
-            Some((coord, color))
-        }
+        // Return
+        Some((coord, color))
     }
 }
 
