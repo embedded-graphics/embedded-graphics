@@ -31,10 +31,16 @@ impl<'a> IntoIterator for &'a Line {
     fn into_iter(self) -> Self::IntoIter {
         let &Line { start, end, .. } = self;
 
-        let (x1, y1, x2, y2) = if start.0 > end.0 {
-            (end.0, end.1, start.0, start.1)
+        let (x1, x2) = if start.0 < end.0 {
+            (start.0, end.0)
         } else {
-            (start.0, start.1, end.0, end.1)
+            (end.0, start.0)
+        };
+
+        let (y1, y2) = if start.1 < end.1 {
+            (start.1, end.1)
+        } else {
+            (end.1, start.1)
         };
 
         let mut swapped: bool = false;
@@ -159,6 +165,53 @@ impl Transform for Line {
             start: (self.start.0 + by.0, self.start.1 + by.1),
             end: (self.end.0 + by.0, self.end.1 + by.1),
             ..*self
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_draws_within_bounding_box_at_any_angle() {
+        for angle in 0..360 {
+            let start = (100, 100);
+
+            let x = ((angle as f32).to_radians().sin() * 100.6) as i32;
+            let y = ((angle as f32).to_radians().cos() * 100.6) as i32;
+
+            let end = ((x + 100) as u32, (y + 100) as u32);
+
+            let line = Line::new(start, end, 1);
+
+            for (coord, _color) in line.into_iter() {
+                assert!(
+                    {
+                        let x_in_range = match angle {
+                            0...180 => coord.0 >= start.0 && coord.0 <= end.0,
+                            _ => coord.0 <= start.0 && coord.0 >= end.0,
+                        };
+
+                        let y_in_range = match angle {
+                            0...90 | 270...360 => coord.1 >= start.1 && coord.1 <= end.1,
+                            _ => coord.1 <= start.1 && coord.1 >= end.1,
+                        };
+
+                        x_in_range && y_in_range
+                    },
+                    "Pixel at ({}, {}) not within bounds ({}, {}), ({}, {}), angle {} [{}, {}]",
+                    coord.0,
+                    coord.1,
+                    start.0,
+                    start.1,
+                    end.0,
+                    end.1,
+                    angle,
+                    x,
+                    y
+                );
+            }
         }
     }
 }
