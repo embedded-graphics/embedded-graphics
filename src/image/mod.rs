@@ -3,7 +3,6 @@
 mod image1bpp;
 mod image8bpp;
 
-// TODO: Add to crate prelude
 /// Image trait
 pub trait Image<'a> {
     /// Create a new image with given pixel data, width and height
