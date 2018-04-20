@@ -56,6 +56,14 @@
         };
     }
 
+    function getPageId() {
+        var id = document.location.href.split('#')[1];
+        if (id) {
+            return id.split('?')[0].split('&')[0];
+        }
+        return null;
+    }
+
     function hasClass(elem, className) {
         if (elem && className && elem.className) {
             var elemClass = elem.className;
@@ -1291,14 +1299,78 @@
             printTab(currentTab);
         }
 
-        function search(e) {
-            var query,
-                obj, i, len,
-                results = {"in_args": [], "returned": [], "others": []},
-                resultIndex;
-            var params = getQueryStringParams();
+        function execSearch(query, searchWords) {
+            var queries = query.raw.split(",");
+            var results = {
+                'in_args': [],
+                'returned': [],
+                'others': [],
+            };
 
-            query = getQuery(document.getElementsByClassName('search-input')[0].value);
+            for (var i = 0; i < queries.length; ++i) {
+                var query = queries[i].trim();
+                if (query.length !== 0) {
+                    var tmp = execQuery(getQuery(query), searchWords);
+
+                    results['in_args'].push(tmp['in_args']);
+                    results['returned'].push(tmp['returned']);
+                    results['others'].push(tmp['others']);
+                }
+            }
+            if (queries.length > 1) {
+                function getSmallest(arrays, positions) {
+                    var start = null;
+
+                    for (var it = 0; it < positions.length; ++it) {
+                        if (arrays[it].length > positions[it] &&
+                            (start === null || start > arrays[it][positions[it]].lev)) {
+                            start = arrays[it][positions[it]].lev;
+                        }
+                    }
+                    return start;
+                }
+
+                function mergeArrays(arrays) {
+                    var ret = [];
+                    var positions = [];
+
+                    for (var x = 0; x < arrays.length; ++x) {
+                        positions.push(0);
+                    }
+                    while (ret.length < MAX_RESULTS) {
+                        var smallest = getSmallest(arrays, positions);
+                        if (smallest === null) {
+                            break;
+                        }
+                        for (x = 0; x < arrays.length && ret.length < MAX_RESULTS; ++x) {
+                            if (arrays[x].length > positions[x] &&
+                                    arrays[x][positions[x]].lev === smallest) {
+                                ret.push(arrays[x][positions[x]]);
+                                positions[x] += 1;
+                            }
+                        }
+                    }
+                    return ret;
+                }
+
+                return {
+                    'in_args': mergeArrays(results['in_args']),
+                    'returned': mergeArrays(results['returned']),
+                    'others': mergeArrays(results['others']),
+                };
+            } else {
+                return {
+                    'in_args': results['in_args'][0],
+                    'returned': results['returned'][0],
+                    'others': results['others'][0],
+                };
+            }
+        }
+
+        function search(e) {
+            var params = getQueryStringParams();
+            var query = getQuery(document.getElementsByClassName('search-input')[0].value);
+
             if (e) {
                 e.preventDefault();
             }
@@ -1320,8 +1392,7 @@
                 }
             }
 
-            results = execQuery(query, index);
-            showResults(results);
+            showResults(execSearch(query, index));
         }
 
         function buildIndex(rawSearchIndex) {
@@ -1643,7 +1714,7 @@
         }
     }
 
-    function toggleAllDocs() {
+    function toggleAllDocs(pageId) {
         var toggle = document.getElementById("toggle-all-docs");
         if (hasClass(toggle, "will-expand")) {
             updateLocalStorage("rustdoc-collapse", "false");
@@ -1664,12 +1735,12 @@
             toggle.title = "expand all docs";
 
             onEach(document.getElementsByClassName("collapse-toggle"), function(e) {
-                collapseDocs(e, "hide");
+                collapseDocs(e, "hide", pageId);
             });
         }
     }
 
-    function collapseDocs(toggle, mode) {
+    function collapseDocs(toggle, mode, pageId) {
         if (!toggle || !toggle.parentNode) {
             return;
         }
@@ -1745,14 +1816,18 @@
                 }
             }
 
-            var relatedDoc = toggle.parentNode;
+            var parentElem = toggle.parentNode;
+            var relatedDoc = parentElem;
             var docblock = relatedDoc.nextElementSibling;
 
             while (!hasClass(relatedDoc, "impl-items")) {
                 relatedDoc = relatedDoc.nextElementSibling;
             }
 
-            if (!relatedDoc && !hasClass(docblock, "docblock")) {
+            if ((!relatedDoc && !hasClass(docblock, "docblock")) ||
+                (pageId && onEach(relatedDoc.childNodes, function(e) {
+                    return e.id === pageId;
+                }) === true)) {
                 return;
             }
 
@@ -1782,7 +1857,7 @@
         }
     }
 
-    function autoCollapseAllImpls() {
+    function autoCollapseAllImpls(pageId) {
         // Automatically minimize all non-inherent impls
         onEach(document.getElementsByClassName('impl'), function(n) {
             // inherent impl ids are like 'impl' or impl-<number>'
@@ -1790,7 +1865,7 @@
             if (!inherent) {
                 onEach(n.childNodes, function(m) {
                     if (hasClass(m, "collapse-toggle")) {
-                        collapseDocs(m, "hide");
+                        collapseDocs(m, "hide", pageId);
                     }
                 });
             }
@@ -1900,7 +1975,7 @@
         }
     })
 
-    autoCollapseAllImpls();
+    autoCollapseAllImpls(getPageId());
 
     function createToggleWrapper() {
         var span = document.createElement('span');
@@ -2030,7 +2105,7 @@
     };
 
     if (getCurrentValue("rustdoc-collapse") === "true") {
-        toggleAllDocs();
+        toggleAllDocs(getPageId());
     }
 }());
 
