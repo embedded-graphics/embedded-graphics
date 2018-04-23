@@ -3,11 +3,36 @@
 [![Build Status](https://travis-ci.org/jamwaffles/embedded-graphics.svg?branch=master)](https://travis-ci.org/jamwaffles/embedded-graphics)
 [![Crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange.svg?longCache=true)](https://crates.io/crates/embedded-graphics)
 
+## [Documentation](https://jamwaffles.github.io/embedded-graphics)
+
 A small 2D graphics library to draw things on embedded graphical LCDs, like the SSD1306 OLED display.
+
+This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
+following:
+
+* 1 bit-per-pixel images
+* 8 bit-per-pixel images (downsampled to 1BPP currently)
+* Primitives
+    * Lines
+    * Rectangles (and squares)
+    * Circles
+* Text with a 6x8 pixel font
+
+A core goal is to do the above without using any buffers; the crate should work without a
+dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
+takes an `Iterator` based approach, where pixel values and positions are calculated on the fly,
+with the minimum of saved state. This allows the consuming application to use far less RAM at
+little to no performance penalty.
+
+To use this crate in a driver, you only need to implement the `Drawing` trait to start drawing
+things.
+
+You can also add your own objects by implementing `IntoIterator<Item = Pixel>` to create an
+iterator that `Drawable#draw()` can consume.
 
 It currently only supports monochrome displays. Contributions to support full colour as well are very welcome!
 
-Example from the [SSD1306 driver](https://github.com/jamwaffles/ssd1306):
+Example usage from the [SSD1306 driver](https://github.com/jamwaffles/ssd1306):
 
 ```rust
 #![no_std]
@@ -56,21 +81,6 @@ fn main() {
     disp.flush().unwrap();
 }
 ```
-
-## [Documentation](https://jamwaffles.github.io/embedded-graphics)
-
-## Features
-
-* Primitives
-	* Lines
-	* Squares/rects
-	* Circles
-* Images
-	* 1BPP images as `&[u8]`s
-     * 8BPP images as `&[u8]`s (downsampled badly to 1BPP)
-* Text
-	* 6x8 bitmap font
-* Translations: move an object around the screen
 
 ## TODO
 
