@@ -1,7 +1,7 @@
 # Embedded graphics
 
 [![Build Status](https://travis-ci.org/jamwaffles/embedded-graphics.svg?branch=master)](https://travis-ci.org/jamwaffles/embedded-graphics)
-[![Crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange.svg?longCache=true)](https://crates.io/crates/embedded-graphics)
+[![Crates.io](https://img.shields.io/crates/v/embedded-graphics.svg)](https://crates.io/crates/embedded-graphics)
 
 ## [Documentation](https://jamwaffles.github.io/embedded-graphics)
 
