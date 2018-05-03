@@ -1,21 +1,6 @@
-[package]
-name = "embedded-graphics"
-description = "Embedded graphics library for small hardware displays"
-version = "0.1.1"
-authors = ["James Waples <jamwaffles@gmail.com>"]
-repository = "https://github.com/jamwaffles/embedded-graphics"
-documentation = "https://jamwaffles.github.io/embedded-graphics"
-categories = ["embedded", "no-std"]
-keywords = ["rtfm", "graphics", "embedded"]
-readme = "README.md"
-license = "MIT OR Apache-2.0"
-exclude = [
-	".travis.yml",
-	".gitignore",
-	"convert_1bpp.sh",
+[workspace]
+
+members = [
+    "embedded-graphics",
+    "simulator",
 ]
-
-[badges]
-travis-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
-
-[dependencies]
