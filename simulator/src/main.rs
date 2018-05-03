@@ -20,7 +20,11 @@ fn main() {
     display.draw(Line::new((64, 64), (0, 64), 1).into_iter());
     display.draw(Line::new((64, 64), (80, 80), 1).into_iter());
 
-    display.draw(Font6x8::render_str("Hello World!").translate((5, 50)).into_iter());
+    display.draw(
+        Font6x8::render_str("Hello World!")
+            .translate((5, 50))
+            .into_iter(),
+    );
 
     loop {
         let end = display.run_once();
