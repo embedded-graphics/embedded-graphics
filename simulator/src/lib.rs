@@ -1,7 +1,6 @@
 extern crate sdl2;
 extern crate embedded_graphics;
 
-use embedded_graphics::prelude::*;
 use embedded_graphics::Drawing;
 use embedded_graphics::drawable::Pixel;
 
@@ -29,8 +28,8 @@ impl Display {
             .build()
             .unwrap();
 
-        let mut canvas = window.into_canvas().build().unwrap();
-        let mut event_pump = sdl_context.event_pump().unwrap();
+        let canvas = window.into_canvas().build().unwrap();
+        let event_pump = sdl_context.event_pump().unwrap();
 
         Self {
             pixels: [[false; DISPLAY_SIZE]; DISPLAY_SIZE],
