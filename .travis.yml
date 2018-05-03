@@ -86,14 +86,14 @@ install:
   - rustup override set nightly
 
 script:
-  - cargo -p embedded-graphics build
-  - cargo -p embedded-graphics build --release
-  - cargo -p embedded-graphics test
-  - cargo -p embedded-graphics test --release
-  - cargo -p embedded-graphics doc --release
+  - cargo build -p embedded-graphics
+  - cargo build --release -p embedded-graphics
+  - cargo test -p embedded-graphics
+  - cargo test --release -p embedded-graphics
+  - cargo doc --release -p embedded-graphics
 
 after_success:
-  - cargo -p embedded-graphics doc-upload
+  - cargo doc-upload -p embedded-graphics
 
 cache: cargo
 before_cache:
