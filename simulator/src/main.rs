@@ -1,12 +1,12 @@
 extern crate embedded_graphics;
 extern crate simulator;
 
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
+use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics::fonts::Font6x8;
 
 use simulator::Display;
 
