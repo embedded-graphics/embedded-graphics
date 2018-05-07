@@ -1,8 +1,10 @@
 //! Pixel based fonts
 
 mod font6x8;
+mod font6x12;
 
 pub use self::font6x8::Font6x8;
+pub use self::font6x12::Font6x12;
 
 /// Common methods for all fonts
 pub trait Font<'a> {
