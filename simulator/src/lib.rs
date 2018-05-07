@@ -1,14 +1,14 @@
-extern crate sdl2;
 extern crate embedded_graphics;
+extern crate sdl2;
 
-use embedded_graphics::Drawing;
 use embedded_graphics::drawable::Pixel;
+use embedded_graphics::Drawing;
 
-use sdl2::render;
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
 use sdl2::rect::Rect;
+use sdl2::render;
 
 const DISPLAY_SIZE: usize = 128;
 
@@ -23,7 +23,12 @@ impl Display {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
-        let window = video_subsystem.window("graphics-emulator", DISPLAY_SIZE as u32, DISPLAY_SIZE as u32)
+        let window = video_subsystem
+            .window(
+                "graphics-emulator",
+                DISPLAY_SIZE as u32,
+                DISPLAY_SIZE as u32,
+            )
             .position_centered()
             .build()
             .unwrap();
@@ -42,11 +47,13 @@ impl Display {
         // Handle events
         for event in self.event_pump.poll_iter() {
             match event {
-                Event::Quit {..} | 
-                Event::KeyDown { keycode: 
-                    Some(Keycode::Escape), .. } => {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => {
                     return true;
-                },
+                }
                 _ => {}
             }
         }
@@ -64,7 +71,7 @@ impl Display {
                 }
             }
         }
-        
+
         self.canvas.present();
         false
     }
@@ -72,7 +79,9 @@ impl Display {
 
 impl Drawing for Display {
     fn draw<T>(&mut self, item_pixels: T)
-    where T: Iterator<Item = Pixel> {
+    where
+        T: Iterator<Item = Pixel>,
+    {
         for ((x, y), color) in item_pixels {
             if x >= DISPLAY_SIZE as u32 || y >= DISPLAY_SIZE as u32 {
                 continue;
@@ -81,4 +90,3 @@ impl Drawing for Display {
         }
     }
 }
-
