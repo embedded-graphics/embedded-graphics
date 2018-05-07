@@ -1,19 +1,19 @@
-//! 8x8 pixel font. Image data taken from the [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps)
+//! 12x16 pixel font. Image data taken from the [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps)
 
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
 
-const FONT_IMAGE: &[u8] = include_bytes!("../../data/font8x8_1bpp.raw");
-const CHAR_HEIGHT: u32 = 8;
-const CHAR_WIDTH: u32 = 8;
+const FONT_IMAGE: &[u8] = include_bytes!("../../data/font12x16_1bpp.raw");
+const CHAR_HEIGHT: u32 = 16;
+const CHAR_WIDTH: u32 = 12;
 const FIRST_CHARCODE: u32 = 32; // A space
-const FONT_IMAGE_WIDTH: u32 = 256;
+const FONT_IMAGE_WIDTH: u32 = 480;
 const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
 /// Container struct to hold a positioned piece of text
 #[derive(Debug, Clone, Copy)]
-pub struct Font8x8<'a> {
+pub struct Font12x16<'a> {
     /// Top left corner of the text
     pub pos: Coord,
 
@@ -21,14 +21,14 @@ pub struct Font8x8<'a> {
     text: &'a str,
 }
 
-impl<'a> Font<'a> for Font8x8<'a> {
-    fn render_str(text: &'a str) -> Font8x8<'a> {
+impl<'a> Font<'a> for Font12x16<'a> {
+    fn render_str(text: &'a str) -> Font12x16<'a> {
         Self { pos: (0, 0), text }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Font8x8Iterator<'a> {
+pub struct Font12x16Iterator<'a> {
     char_walk_x: u32,
     char_walk_y: u32,
     current_char: Option<char>,
@@ -37,12 +37,12 @@ pub struct Font8x8Iterator<'a> {
     text: &'a str,
 }
 
-impl<'a> IntoIterator for &'a Font8x8<'a> {
-    type IntoIter = Font8x8Iterator<'a>;
+impl<'a> IntoIterator for &'a Font12x16<'a> {
+    type IntoIter = Font12x16Iterator<'a>;
     type Item = Pixel;
 
     fn into_iter(self) -> Self::IntoIter {
-        Font8x8Iterator {
+        Font12x16Iterator {
             current_char: self.text.chars().next(),
             idx: 0,
             text: self.text,
@@ -53,7 +53,7 @@ impl<'a> IntoIterator for &'a Font8x8<'a> {
     }
 }
 
-impl<'a> Iterator for Font8x8Iterator<'a> {
+impl<'a> Iterator for Font12x16Iterator<'a> {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -104,18 +104,18 @@ impl<'a> Iterator for Font8x8Iterator<'a> {
     }
 }
 
-impl<'a> Drawable for Font8x8<'a> {}
+impl<'a> Drawable for Font12x16<'a> {}
 
-impl<'a> Transform for Font8x8<'a> {
+impl<'a> Transform for Font12x16<'a> {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `Font8x8`.
+    /// a new `Font12x16`.
     ///
     /// ```
-    /// # use embedded_graphics::fonts::{ Font, Font8x8 };
+    /// # use embedded_graphics::fonts::{ Font, Font12x16 };
     /// # use embedded_graphics::transform::Transform;
     ///
     /// // 8px x 1px test image
-    /// let text = Font8x8::render_str("Hello world");
+    /// let text = Font12x16::render_str("Hello world");
     /// let moved = text.translate((25, 30));
     ///
     /// assert_eq!(text.pos, (0, 0));
