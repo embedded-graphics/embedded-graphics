@@ -5,8 +5,8 @@ use super::super::transform::*;
 use super::Font;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font8x16_1bpp.raw");
-const CHAR_HEIGHT: u32 = 8;
-const CHAR_WIDTH: u32 = 16;
+const CHAR_HEIGHT: u32 = 16;
+const CHAR_WIDTH: u32 = 8;
 const FIRST_CHARCODE: u32 = 32; // A space
 const FONT_IMAGE_WIDTH: u32 = 128;
 const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
