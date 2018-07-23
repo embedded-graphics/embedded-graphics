@@ -82,6 +82,10 @@ fn main() {
 }
 ```
 
+## Features
+
+* `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std` support to use as the `Coord` type. This should allow you to use most Nalgebra methods on objects rendered by embedded_graphics.
+
 ## TODO
 
 * [ ] General matrix transforms
