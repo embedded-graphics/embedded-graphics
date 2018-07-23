@@ -1,7 +1,8 @@
 extern crate embedded_graphics;
 extern crate sdl2;
 
-use embedded_graphics::drawable::{Coord, Pixel};
+use embedded_graphics::coord::Coord;
+use embedded_graphics::drawable::Pixel;
 use embedded_graphics::Drawing;
 
 use sdl2::event::Event;
