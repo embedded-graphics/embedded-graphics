@@ -2,6 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
+use coord::Coord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
@@ -92,7 +93,7 @@ impl Transform for Rect {
     /// ```
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
     /// let moved = rect.translate(Coord::new(10, 10));
@@ -113,7 +114,7 @@ impl Transform for Rect {
     /// ```
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
     /// rect.translate_mut(Coord::new(10, 10));

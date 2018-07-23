@@ -1,6 +1,7 @@
 extern crate embedded_graphics;
 
-use embedded_graphics::drawable::{Coord, Pixel};
+use embedded_graphics::coord::Coord;
+use embedded_graphics::drawable::Pixel;
 use embedded_graphics::primitives::{Circle, Rect};
 use embedded_graphics::Drawing;
 

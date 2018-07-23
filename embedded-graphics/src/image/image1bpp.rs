@@ -11,6 +11,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
+use coord::Coord;
 
 /// 1 bit per pixel image
 #[derive(Debug)]
@@ -109,7 +110,7 @@ impl<'a> Transform for Image1BPP<'a> {
     /// ```
     /// # use embedded_graphics::image::{ Image, Image1BPP };
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 8px x 1px test image
     /// let image = Image1BPP::new(&[ 0xff ], 8, 1);
@@ -130,7 +131,7 @@ impl<'a> Transform for Image1BPP<'a> {
     /// ```
     /// # use embedded_graphics::image::{ Image, Image1BPP };
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let mut image = Image1BPP::new(&[ 0xff ], 8, 1);
     /// image.translate_mut(Coord::new(25, 30));

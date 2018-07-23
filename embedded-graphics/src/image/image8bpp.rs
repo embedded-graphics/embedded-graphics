@@ -12,6 +12,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
+use coord::Coord;
 
 /// 8 bit per pixel image
 #[derive(Debug)]
@@ -104,7 +105,7 @@ impl<'a> Transform for Image8BPP<'a> {
     /// ```
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 1px x 1px test image
     /// let image = Image8BPP::new(&[ 0xff ], 1, 1);
@@ -125,7 +126,7 @@ impl<'a> Transform for Image8BPP<'a> {
     /// ```
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 1px x 1px test image
     /// let mut image = Image8BPP::new(&[ 0xff ], 1, 1);

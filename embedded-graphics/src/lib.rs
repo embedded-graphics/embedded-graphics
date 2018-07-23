@@ -37,6 +37,7 @@
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
 
+pub mod coord;
 pub mod drawable;
 pub mod fonts;
 pub mod image;

@@ -3,6 +3,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
+use coord::Coord;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
 const CHAR_HEIGHT: u32 = 8;
@@ -118,7 +119,7 @@ impl<'a> Transform for Font6x8<'a> {
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 8px x 1px test image
     /// let text = Font6x8::render_str("Hello world");
@@ -139,7 +140,7 @@ impl<'a> Transform for Font6x8<'a> {
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let mut text = Font6x8::render_str("Hello world");
     /// text.translate_mut(Coord::new(25, 30));

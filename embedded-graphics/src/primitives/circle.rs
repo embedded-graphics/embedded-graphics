@@ -2,6 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
+use coord::Coord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -117,7 +118,7 @@ impl Transform for Circle {
     /// ```
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let circle = Circle::new(Coord::new(5, 10), 10, 1);
     /// let moved = circle.translate(Coord::new(10, 10));
@@ -136,7 +137,7 @@ impl Transform for Circle {
     /// ```
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Coord;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1);
     /// circle.translate_mut(Coord::new(10, 10));
