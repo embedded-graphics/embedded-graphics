@@ -38,8 +38,8 @@ impl<'a> IntoIterator for &'a Rect {
             top_left: self.top_left,
             bottom_right: self.bottom_right,
             color: self.color,
-            x: self.top_left.0,
-            y: self.top_left.1,
+            x: self.top_left[0],
+            y: self.top_left[1],
         }
     }
 }
@@ -58,24 +58,24 @@ impl Iterator for RectIterator {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y > self.bottom_right.1 {
+        if self.y > self.bottom_right[1] {
             return None;
         }
 
         let coord = Coord::new(self.x, self.y);
 
         // Step across 1 if rendering top/bottom lines
-        if self.y == self.top_left.1 || self.y == self.bottom_right.1 {
+        if self.y == self.top_left[1] || self.y == self.bottom_right[1] {
             self.x += 1;
         }
         // Skip across rect empty space if rendering left/right lines
         else {
-            self.x += self.bottom_right.0 - self.top_left.0;
+            self.x += self.bottom_right[0] - self.top_left[0];
         }
 
         // Reached end of row? Jump down one line
-        if self.x > self.bottom_right.0 {
-            self.x = self.top_left.0;
+        if self.x > self.bottom_right[0] {
+            self.x = self.top_left[0];
             self.y += 1;
         }
 

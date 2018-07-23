@@ -70,7 +70,8 @@ impl Iterator for CircleIterator {
             return None;
         }
 
-        let Coord(mx, my) = self.center;
+        let mx = self.center[0];
+        let my = self.center[1];
 
         if self.octant > 7 {
             self.octant = 0;

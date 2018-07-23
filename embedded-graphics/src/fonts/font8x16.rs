@@ -99,8 +99,8 @@ impl<'a> Iterator for Font8x16Iterator<'a> {
                 }
             }
 
-            let x = self.pos.0 + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
-            let y = self.pos.1 + self.char_walk_y;
+            let x = self.pos[0] + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
+            let y = self.pos[1] + self.char_walk_y;
 
             Some((Coord::new(x, y), bit_value))
         } else {

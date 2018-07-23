@@ -80,10 +80,7 @@ impl<'a> Iterator for Image8BPPIterator<'a> {
         let offset = (y * w) + x;
         let bit_value = self.im.imagedata[offset as usize];
 
-        let current_pixel: Self::Item = (
-            Coord::new(self.im.offset.0 + x, self.im.offset.1 + y),
-            bit_value,
-        );
+        let current_pixel: Self::Item = (self.im.offset + Coord::new(x, y), bit_value);
 
         // Increment stuff
         self.x += 1;

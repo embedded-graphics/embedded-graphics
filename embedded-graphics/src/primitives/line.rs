@@ -29,11 +29,10 @@ impl<'a> IntoIterator for &'a Line {
     type IntoIter = LineIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let &Line {
-            start: Coord(x0, y0),
-            end: Coord(x1, y1),
-            ..
-        } = self;
+        let x0 = self.start[0];
+        let y0 = self.start[1];
+        let x1 = self.end[0];
+        let y1 = self.end[1];
 
         // Find out if our line is steep or shallow
         let is_steep = (y1 as i32 - y0 as i32).abs() > (x1 as i32 - x0 as i32).abs();
