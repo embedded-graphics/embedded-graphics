@@ -102,8 +102,8 @@ impl Transform for Rect {
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            top_left: Coord::new(self.top_left.0 + by.0, self.top_left.1 + by.1),
-            bottom_right: Coord::new(self.bottom_right.0 + by.0, self.bottom_right.1 + by.1),
+            top_left: self.top_left + by,
+            bottom_right: self.bottom_right + by,
             ..*self
         }
     }
@@ -122,9 +122,23 @@ impl Transform for Rect {
     /// assert_eq!(rect.bottom_right, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.top_left = Coord::new(self.top_left.0 + by.0, self.top_left.1 + by.1);
-        self.bottom_right = Coord::new(self.bottom_right.0 + by.0, self.bottom_right.1 + by.1);
+        self.top_left += by;
+        self.bottom_right += by;
 
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_can_be_translated() {
+        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+        let moved = rect.translate(Coord::new(10, 10));
+
+        assert_eq!(moved.top_left, Coord::new(15, 20));
+        assert_eq!(moved.bottom_right, Coord::new(25, 30));
     }
 }

@@ -125,7 +125,7 @@ impl Transform for Circle {
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            center: Coord::new(self.center.0 + by.0, self.center.1 + by.1),
+            center: self.center + by,
             ..*self
         }
     }
@@ -143,7 +143,7 @@ impl Transform for Circle {
     /// assert_eq!(circle.center, Coord::new(15, 20));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.center = Coord::new(self.center.0 + by.0, self.center.1 + by.1);
+        self.center += by;
 
         self
     }

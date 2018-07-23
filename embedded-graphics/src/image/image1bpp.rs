@@ -123,7 +123,7 @@ impl<'a> Transform for Image1BPP<'a> {
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            offset: Coord::new(self.offset.0 + by.0, self.offset.1 + by.1),
+            offset: self.offset + by,
             ..*self
         }
     }
@@ -141,7 +141,7 @@ impl<'a> Transform for Image1BPP<'a> {
     /// assert_eq!(image.offset, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.offset = Coord::new(self.offset.0 + by.0, self.offset.1 + by.1);
+        self.offset += by;
 
         self
     }

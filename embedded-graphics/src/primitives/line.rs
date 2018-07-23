@@ -158,8 +158,8 @@ impl Transform for Line {
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            start: Coord::new(self.start.0 + by.0, self.start.1 + by.1),
-            end: Coord::new(self.end.0 + by.0, self.end.1 + by.1),
+            start: self.start + by,
+            end: self.end + by,
             ..*self
         }
     }
@@ -178,8 +178,8 @@ impl Transform for Line {
     /// assert_eq!(line.end, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.start = Coord::new(self.start.0 + by.0, self.start.1 + by.1);
-        self.end = Coord::new(self.end.0 + by.0, self.end.1 + by.1);
+        self.start += by;
+        self.end += by;
 
         self
     }

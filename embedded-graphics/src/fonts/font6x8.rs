@@ -129,7 +129,7 @@ impl<'a> Transform for Font6x8<'a> {
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            pos: Coord::new(self.pos.0 + by.0, self.pos.1 + by.1),
+            pos: self.pos + by,
             ..*self
         }
     }
@@ -147,7 +147,7 @@ impl<'a> Transform for Font6x8<'a> {
     /// assert_eq!(text.pos, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.pos = Coord::new(self.pos.0 + by.0, self.pos.1 + by.1);
+        self.pos += by;
 
         self
     }
