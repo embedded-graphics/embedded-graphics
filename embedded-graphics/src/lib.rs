@@ -34,6 +34,9 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+#[cfg(feature = "nalgebra_support")]
+extern crate nalgebra;
+
 pub mod drawable;
 pub mod fonts;
 pub mod image;

@@ -19,3 +19,8 @@ exclude = [
 travis-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
 [dependencies]
+nalgebra = { version = "0.16.0", optional = true, default-features = false }
+
+[features]
+default = []
+nalgebra_support = [ "nalgebra" ]

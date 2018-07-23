@@ -23,7 +23,10 @@ pub struct Font12x16<'a> {
 
 impl<'a> Font<'a> for Font12x16<'a> {
     fn render_str(text: &'a str) -> Font12x16<'a> {
-        Self { pos: (0, 0), text }
+        Self {
+            pos: Coord::new(0, 0),
+            text,
+        }
     }
 }
 
@@ -99,7 +102,7 @@ impl<'a> Iterator for Font12x16Iterator<'a> {
             let x = self.pos.0 + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
             let y = self.pos.1 + self.char_walk_y;
 
-            Some(((x, y), bit_value))
+            Some((Coord::new(x, y), bit_value))
         } else {
             None
         }
@@ -115,16 +118,17 @@ impl<'a> Transform for Font12x16<'a> {
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font12x16 };
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::drawable::Coord;
     ///
     /// let text = Font12x16::render_str("Hello world");
-    /// let moved = text.translate((25, 30));
+    /// let moved = text.translate(Coord::new(25, 30));
     ///
-    /// assert_eq!(text.pos, (0, 0));
-    /// assert_eq!(moved.pos, (25, 30));
+    /// assert_eq!(text.pos, Coord::new(0, 0));
+    /// assert_eq!(moved.pos, Coord::new(25, 30));
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            pos: (self.pos.0 + by.0, self.pos.1 + by.1),
+            pos: Coord::new(self.pos.0 + by.0, self.pos.1 + by.1),
             ..*self
         }
     }
@@ -134,14 +138,15 @@ impl<'a> Transform for Font12x16<'a> {
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font12x16 };
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::drawable::Coord;
     ///
     /// let mut text = Font12x16::render_str("Hello world");
-    /// text.translate_mut((25, 30));
+    /// text.translate_mut(Coord::new(25, 30));
     ///
-    /// assert_eq!(text.pos, (25, 30));
+    /// assert_eq!(text.pos, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.pos = (self.pos.0 + by.0, self.pos.1 + by.1);
+        self.pos = Coord::new(self.pos.0 + by.0, self.pos.1 + by.1);
 
         self
     }
