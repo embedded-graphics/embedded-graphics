@@ -1,6 +1,6 @@
 //! Transformations for graphics objects
 
-use super::drawable::Coord;
+use coord::Coord;
 
 /// Transform operations
 pub trait Transform {

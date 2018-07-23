@@ -22,6 +22,12 @@
 //!
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel>` to create an
 //! iterator that `Drawable#draw()` can consume.
+//!
+//! ## Crate features
+//!
+//! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
+//! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
+//! objects rendered by embedded_graphics.
 
 #![no_std]
 #![deny(missing_docs)]
@@ -34,6 +40,10 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+#[cfg(feature = "nalgebra_support")]
+extern crate nalgebra;
+
+pub mod coord;
 pub mod drawable;
 pub mod fonts;
 pub mod image;

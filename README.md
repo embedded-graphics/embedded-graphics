@@ -16,7 +16,7 @@ following:
     * Lines
     * Rectangles (and squares)
     * Circles
-* Text with a 6x8 pixel font
+* Text with [multiple bitmap fonts](src/fonts)
 
 A core goal is to do the above without using any buffers; the crate should work without a
 dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
@@ -72,7 +72,7 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate((32, 0));
+    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Coord::new(32, 0));
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 
     disp.init().unwrap();
@@ -81,6 +81,10 @@ fn main() {
     disp.flush().unwrap();
 }
 ```
+
+## Features
+
+* `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std` support to use as the `Coord` type. This should allow you to use most Nalgebra methods on objects rendered by embedded_graphics.
 
 ## TODO
 

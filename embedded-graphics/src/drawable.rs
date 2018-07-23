@@ -1,7 +1,6 @@
 //! `Drawable` trait and helpers
 
-/// 2D coordinate type
-pub type Coord = (u32, u32);
+use super::coord::Coord;
 
 // TODO: Refactor to use both with monochrome and multicolour displays
 /// Monochrome colour type

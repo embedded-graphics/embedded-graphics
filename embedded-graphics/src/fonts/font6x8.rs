@@ -3,6 +3,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
+use coord::Coord;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
 const CHAR_HEIGHT: u32 = 8;
@@ -23,7 +24,10 @@ pub struct Font6x8<'a> {
 
 impl<'a> Font<'a> for Font6x8<'a> {
     fn render_str(text: &'a str) -> Font6x8<'a> {
-        Self { pos: (0, 0), text }
+        Self {
+            pos: Coord::new(0, 0),
+            text,
+        }
     }
 }
 
@@ -96,10 +100,10 @@ impl<'a> Iterator for Font6x8Iterator<'a> {
                 }
             }
 
-            let x = self.pos.0 + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
-            let y = self.pos.1 + self.char_walk_y;
+            let x = self.pos[0] + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
+            let y = self.pos[1] + self.char_walk_y;
 
-            Some(((x, y), bit_value))
+            Some((Coord::new(x, y), bit_value))
         } else {
             None
         }
@@ -115,17 +119,18 @@ impl<'a> Transform for Font6x8<'a> {
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 8px x 1px test image
     /// let text = Font6x8::render_str("Hello world");
-    /// let moved = text.translate((25, 30));
+    /// let moved = text.translate(Coord::new(25, 30));
     ///
-    /// assert_eq!(text.pos, (0, 0));
-    /// assert_eq!(moved.pos, (25, 30));
+    /// assert_eq!(text.pos, Coord::new(0, 0));
+    /// assert_eq!(moved.pos, Coord::new(25, 30));
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            pos: (self.pos.0 + by.0, self.pos.1 + by.1),
+            pos: self.pos + by,
             ..*self
         }
     }
@@ -135,14 +140,15 @@ impl<'a> Transform for Font6x8<'a> {
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// let mut text = Font6x8::render_str("Hello world");
-    /// text.translate_mut((25, 30));
+    /// text.translate_mut(Coord::new(25, 30));
     ///
-    /// assert_eq!(text.pos, (25, 30));
+    /// assert_eq!(text.pos, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.pos = (self.pos.0 + by.0, self.pos.1 + by.1);
+        self.pos += by;
 
         self
     }

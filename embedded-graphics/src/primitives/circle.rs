@@ -2,6 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
+use coord::Coord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -70,7 +71,8 @@ impl Iterator for CircleIterator {
             return None;
         }
 
-        let (mx, my) = self.center;
+        let mx = self.center[0];
+        let my = self.center[1];
 
         if self.octant > 7 {
             self.octant = 0;
@@ -86,14 +88,14 @@ impl Iterator for CircleIterator {
         }
 
         let item = match self.octant {
-            0 => Some((mx + self.x, my + self.y)),
-            1 => Some((mx + self.x, my - self.y)),
-            2 => Some((mx - self.x, my + self.y)),
-            3 => Some((mx - self.x, my - self.y)),
-            4 => Some((mx + self.y, my + self.x)),
-            5 => Some((mx + self.y, my - self.x)),
-            6 => Some((mx - self.y, my + self.x)),
-            7 => Some((mx - self.y, my - self.x)),
+            0 => Some(Coord::new(mx + self.x, my + self.y)),
+            1 => Some(Coord::new(mx + self.x, my - self.y)),
+            2 => Some(Coord::new(mx - self.x, my + self.y)),
+            3 => Some(Coord::new(mx - self.x, my - self.y)),
+            4 => Some(Coord::new(mx + self.y, my + self.x)),
+            5 => Some(Coord::new(mx + self.y, my - self.x)),
+            6 => Some(Coord::new(mx - self.y, my + self.x)),
+            7 => Some(Coord::new(mx - self.y, my - self.x)),
             _ => None,
         };
 
@@ -116,15 +118,16 @@ impl Transform for Circle {
     /// ```
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
-    /// let circle = Circle::new((5, 10), 10, 1);
-    /// let moved = circle.translate((10, 10));
+    /// let circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let moved = circle.translate(Coord::new(10, 10));
     ///
-    /// assert_eq!(moved.center, (15, 20));
+    /// assert_eq!(moved.center, Coord::new(15, 20));
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            center: (self.center.0 + by.0, self.center.1 + by.1),
+            center: self.center + by,
             ..*self
         }
     }
@@ -134,14 +137,15 @@ impl Transform for Circle {
     /// ```
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut circle = Circle::new((5, 10), 10, 1);
-    /// circle.translate_mut((10, 10));
+    /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// circle.translate_mut(Coord::new(10, 10));
     ///
-    /// assert_eq!(circle.center, (15, 20));
+    /// assert_eq!(circle.center, Coord::new(15, 20));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.center = (self.center.0 + by.0, self.center.1 + by.1);
+        self.center += by;
 
         self
     }

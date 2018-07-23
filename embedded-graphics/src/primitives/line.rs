@@ -2,6 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
+use coord::Coord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -29,11 +30,10 @@ impl<'a> IntoIterator for &'a Line {
     type IntoIter = LineIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let &Line {
-            start: (x0, y0),
-            end: (x1, y1),
-            ..
-        } = self;
+        let x0 = self.start[0];
+        let y0 = self.start[1];
+        let x1 = self.end[0];
+        let y1 = self.end[1];
 
         // Find out if our line is steep or shallow
         let is_steep = (y1 as i32 - y0 as i32).abs() > (x1 as i32 - x0 as i32).abs();
@@ -119,9 +119,9 @@ impl<'a> Iterator for LineIterator<'a> {
         // Get the next point
         let &Line { color, .. } = self.line;
         let coord = if self.is_steep {
-            (self.slow, self.quick)
+            Coord::new(self.slow, self.quick)
         } else {
-            (self.quick, self.slow)
+            Coord::new(self.quick, self.slow)
         };
 
         // Update error and increment slow direction
@@ -148,17 +148,18 @@ impl Transform for Line {
     /// ```
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
-    /// let line = Line::new((5, 10), (15, 20), 1);
-    /// let moved = line.translate((10, 10));
+    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let moved = line.translate(Coord::new(10, 10));
     ///
-    /// assert_eq!(moved.start, (15, 20));
-    /// assert_eq!(moved.end, (25, 30));
+    /// assert_eq!(moved.start, Coord::new(15, 20));
+    /// assert_eq!(moved.end, Coord::new(25, 30));
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            start: (self.start.0 + by.0, self.start.1 + by.1),
-            end: (self.end.0 + by.0, self.end.1 + by.1),
+            start: self.start + by,
+            end: self.end + by,
             ..*self
         }
     }
@@ -168,16 +169,17 @@ impl Transform for Line {
     /// ```
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut line = Line::new((5, 10), (15, 20), 1);
-    /// line.translate_mut((10, 10));
+    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// line.translate_mut(Coord::new(10, 10));
     ///
-    /// assert_eq!(line.start, (15, 20));
-    /// assert_eq!(line.end, (25, 30));
+    /// assert_eq!(line.start, Coord::new(15, 20));
+    /// assert_eq!(line.end, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.start = (self.start.0 + by.0, self.start.1 + by.1);
-        self.end = (self.end.0 + by.0, self.end.1 + by.1);
+        self.start += by;
+        self.end += by;
 
         self
     }
@@ -201,65 +203,121 @@ mod tests {
 
     #[test]
     fn draws_octant_1_correctly() {
-        let start = (10, 10);
-        let end = (15, 13);
-        let expected = [(10, 10), (11, 11), (12, 11), (13, 12), (14, 12), (15, 13)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(15, 13);
+        let expected = [
+            Coord::new(10, 10),
+            Coord::new(11, 11),
+            Coord::new(12, 11),
+            Coord::new(13, 12),
+            Coord::new(14, 12),
+            Coord::new(15, 13),
+        ];
         test_expected_line(start, end, &expected, "Octant 1 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_2_correctly() {
-        let start = (10, 10);
-        let end = (13, 15);
-        let expected = [(10, 10), (11, 11), (11, 12), (12, 13), (12, 14), (13, 15)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(13, 15);
+        let expected = [
+            Coord::new(10, 10),
+            Coord::new(11, 11),
+            Coord::new(11, 12),
+            Coord::new(12, 13),
+            Coord::new(12, 14),
+            Coord::new(13, 15),
+        ];
         test_expected_line(start, end, &expected, "Octant 2 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_3_correctly() {
-        let start = (10, 10);
-        let end = (7, 15);
-        let expected = [(10, 10), (9, 11), (9, 12), (8, 13), (8, 14), (7, 15)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(7, 15);
+        let expected = [
+            Coord::new(10, 10),
+            Coord::new(9, 11),
+            Coord::new(9, 12),
+            Coord::new(8, 13),
+            Coord::new(8, 14),
+            Coord::new(7, 15),
+        ];
         test_expected_line(start, end, &expected, "Octant 3 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_4_correctly() {
-        let start = (10, 10);
-        let end = (5, 13);
-        let expected = [(5, 13), (6, 12), (7, 12), (8, 11), (9, 11), (10, 10)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(5, 13);
+        let expected = [
+            Coord::new(5, 13),
+            Coord::new(6, 12),
+            Coord::new(7, 12),
+            Coord::new(8, 11),
+            Coord::new(9, 11),
+            Coord::new(10, 10),
+        ];
         test_expected_line(start, end, &expected, "Octant 4 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_5_correctly() {
-        let start = (10, 10);
-        let end = (5, 7);
-        let expected = [(5, 7), (6, 8), (7, 8), (8, 9), (9, 9), (10, 10)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(5, 7);
+        let expected = [
+            Coord::new(5, 7),
+            Coord::new(6, 8),
+            Coord::new(7, 8),
+            Coord::new(8, 9),
+            Coord::new(9, 9),
+            Coord::new(10, 10),
+        ];
         test_expected_line(start, end, &expected, "Octant 5 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_6_correctly() {
-        let start = (10, 10);
-        let end = (7, 5);
-        let expected = [(7, 5), (8, 6), (8, 7), (9, 8), (9, 9), (10, 10)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(7, 5);
+        let expected = [
+            Coord::new(7, 5),
+            Coord::new(8, 6),
+            Coord::new(8, 7),
+            Coord::new(9, 8),
+            Coord::new(9, 9),
+            Coord::new(10, 10),
+        ];
         test_expected_line(start, end, &expected, "Octant 6 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_7_correctly() {
-        let start = (10, 10);
-        let end = (13, 5);
-        let expected = [(13, 5), (12, 6), (12, 7), (11, 8), (11, 9), (10, 10)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(13, 5);
+        let expected = [
+            Coord::new(13, 5),
+            Coord::new(12, 6),
+            Coord::new(12, 7),
+            Coord::new(11, 8),
+            Coord::new(11, 9),
+            Coord::new(10, 10),
+        ];
         test_expected_line(start, end, &expected, "Octant 7 failed to draw correctly");
     }
 
     #[test]
     fn draws_octant_8_correctly() {
-        let start = (10, 10);
-        let end = (15, 7);
-        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
+        let start = Coord::new(10, 10);
+        let end = Coord::new(15, 7);
+        let expected = [
+            Coord::new(10, 10),
+            Coord::new(11, 9),
+            Coord::new(12, 9),
+            Coord::new(13, 8),
+            Coord::new(14, 8),
+            Coord::new(15, 7),
+        ];
         test_expected_line(start, end, &expected, "Octant 8 failed to draw correctly");
     }
 }

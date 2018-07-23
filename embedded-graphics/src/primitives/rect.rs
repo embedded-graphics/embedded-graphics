@@ -2,10 +2,11 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
+use coord::Coord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Rect {
     /// Top left point of the rect
     pub top_left: Coord,
@@ -38,14 +39,14 @@ impl<'a> IntoIterator for &'a Rect {
             top_left: self.top_left,
             bottom_right: self.bottom_right,
             color: self.color,
-            x: self.top_left.0,
-            y: self.top_left.1,
+            x: self.top_left[0],
+            y: self.top_left[1],
         }
     }
 }
 
 /// Pixel iterator for each pixel in the rect border
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct RectIterator {
     top_left: Coord,
     bottom_right: Coord,
@@ -58,24 +59,24 @@ impl Iterator for RectIterator {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y > self.bottom_right.1 {
+        if self.y > self.bottom_right[1] {
             return None;
         }
 
-        let coord = (self.x, self.y);
+        let coord = Coord::new(self.x, self.y);
 
         // Step across 1 if rendering top/bottom lines
-        if self.y == self.top_left.1 || self.y == self.bottom_right.1 {
+        if self.y == self.top_left[1] || self.y == self.bottom_right[1] {
             self.x += 1;
         }
         // Skip across rect empty space if rendering left/right lines
         else {
-            self.x += self.bottom_right.0 - self.top_left.0;
+            self.x += self.bottom_right[0] - self.top_left[0];
         }
 
         // Reached end of row? Jump down one line
-        if self.x > self.bottom_right.0 {
-            self.x = self.top_left.0;
+        if self.x > self.bottom_right[0] {
+            self.x = self.top_left[0];
             self.y += 1;
         }
 
@@ -92,17 +93,18 @@ impl Transform for Rect {
     /// ```
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
-    /// let rect = Rect::new((5, 10), (15, 20), 1);
-    /// let moved = rect.translate((10, 10));
+    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let moved = rect.translate(Coord::new(10, 10));
     ///
-    /// assert_eq!(moved.top_left, (15, 20));
-    /// assert_eq!(moved.bottom_right, (25, 30));
+    /// assert_eq!(moved.top_left, Coord::new(15, 20));
+    /// assert_eq!(moved.bottom_right, Coord::new(25, 30));
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            top_left: (self.top_left.0 + by.0, self.top_left.1 + by.1),
-            bottom_right: (self.bottom_right.0 + by.0, self.bottom_right.1 + by.1),
+            top_left: self.top_left + by,
+            bottom_right: self.bottom_right + by,
             ..*self
         }
     }
@@ -112,17 +114,32 @@ impl Transform for Rect {
     /// ```
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut rect = Rect::new((5, 10), (15, 20), 1);
-    /// rect.translate_mut((10, 10));
+    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// rect.translate_mut(Coord::new(10, 10));
     ///
-    /// assert_eq!(rect.top_left, (15, 20));
-    /// assert_eq!(rect.bottom_right, (25, 30));
+    /// assert_eq!(rect.top_left, Coord::new(15, 20));
+    /// assert_eq!(rect.bottom_right, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.top_left = (self.top_left.0 + by.0, self.top_left.1 + by.1);
-        self.bottom_right = (self.bottom_right.0 + by.0, self.bottom_right.1 + by.1);
+        self.top_left += by;
+        self.bottom_right += by;
 
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_can_be_translated() {
+        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+        let moved = rect.translate(Coord::new(10, 10));
+
+        assert_eq!(moved.top_left, Coord::new(15, 20));
+        assert_eq!(moved.bottom_right, Coord::new(25, 30));
     }
 }

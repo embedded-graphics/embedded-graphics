@@ -12,6 +12,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
+use coord::Coord;
 
 /// 8 bit per pixel image
 #[derive(Debug)]
@@ -37,7 +38,7 @@ impl<'a> Image<'a> for Image8BPP<'a> {
             width,
             height,
             imagedata,
-            offset: (0, 0),
+            offset: Coord::new(0, 0),
         }
     }
 }
@@ -80,7 +81,7 @@ impl<'a> Iterator for Image8BPPIterator<'a> {
         let offset = (y * w) + x;
         let bit_value = self.im.imagedata[offset as usize];
 
-        let current_pixel: Self::Item = ((self.im.offset.0 + x, self.im.offset.1 + y), bit_value);
+        let current_pixel: Self::Item = (self.im.offset + Coord::new(x, y), bit_value);
 
         // Increment stuff
         self.x += 1;
@@ -104,17 +105,18 @@ impl<'a> Transform for Image8BPP<'a> {
     /// ```
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 1px x 1px test image
     /// let image = Image8BPP::new(&[ 0xff ], 1, 1);
-    /// let moved = image.translate((25, 30));
+    /// let moved = image.translate(Coord::new(25, 30));
     ///
-    /// assert_eq!(image.offset, (0, 0));
-    /// assert_eq!(moved.offset, (25, 30));
+    /// assert_eq!(image.offset, Coord::new(0, 0));
+    /// assert_eq!(moved.offset, Coord::new(25, 30));
     /// ```
     fn translate(&self, by: Coord) -> Self {
         Self {
-            offset: (self.offset.0 + by.0, self.offset.1 + by.1),
+            offset: self.offset + by,
             ..*self
         }
     }
@@ -124,15 +126,16 @@ impl<'a> Transform for Image8BPP<'a> {
     /// ```
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
+    /// # use embedded_graphics::coord::Coord;
     ///
     /// // 1px x 1px test image
     /// let mut image = Image8BPP::new(&[ 0xff ], 1, 1);
-    /// image.translate_mut((25, 30));
+    /// image.translate_mut(Coord::new(25, 30));
     ///
-    /// assert_eq!(image.offset, (25, 30));
+    /// assert_eq!(image.offset, Coord::new(25, 30));
     /// ```
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.offset = (self.offset.0 + by.0, self.offset.1 + by.1);
+        self.offset += by;
 
         self
     }
