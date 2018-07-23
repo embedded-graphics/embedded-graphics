@@ -87,7 +87,7 @@ impl Drawable for Rect {}
 
 impl Transform for Rect {
     /// Translate the rect from its current position to a new position by (x, y) pixels, returning
-    /// a new `Rect`.
+    /// a new `Rect`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
@@ -105,5 +105,24 @@ impl Transform for Rect {
             bottom_right: (self.bottom_right.0 + by.0, self.bottom_right.1 + by.1),
             ..*self
         }
+    }
+
+    /// Translate the rect from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Rect;
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let mut rect = Rect::new((5, 10), (15, 20), 1);
+    /// rect.translate_mut((10, 10));
+    ///
+    /// assert_eq!(rect.top_left, (15, 20));
+    /// assert_eq!(rect.bottom_right, (25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+        self.top_left = (self.top_left.0 + by.0, self.top_left.1 + by.1);
+        self.bottom_right = (self.bottom_right.0 + by.0, self.bottom_right.1 + by.1);
+
+        self
     }
 }

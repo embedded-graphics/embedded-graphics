@@ -6,9 +6,9 @@
 //! * 1 bit-per-pixel images
 //! * 8 bit-per-pixel images (downsampled to 1BPP currently)
 //! * Primitives
-//! 	* Lines
-//! 	* Rectangles (and squares)
-//! 	* Circles
+//!     * Lines
+//!     * Rectangles (and squares)
+//!     * Circles
 //! * Text with a 6x8 pixel font
 //!
 //! A core goal is to do the above without using any buffers; the crate should work without a

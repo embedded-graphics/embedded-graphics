@@ -111,7 +111,7 @@ impl Drawable for Circle {}
 
 impl Transform for Circle {
     /// Translate the circle center from its current position to a new position by (x, y) pixels,
-    /// returning a new `Circle`.
+    /// returning a new `Circle`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
@@ -127,5 +127,22 @@ impl Transform for Circle {
             center: (self.center.0 + by.0, self.center.1 + by.1),
             ..*self
         }
+    }
+
+    /// Translate the circle center from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Circle;
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let mut circle = Circle::new((5, 10), 10, 1);
+    /// circle.translate_mut((10, 10));
+    ///
+    /// assert_eq!(circle.center, (15, 20));
+    /// ```
+    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+        self.center = (self.center.0 + by.0, self.center.1 + by.1);
+
+        self
     }
 }
