@@ -143,7 +143,7 @@ impl Drawable for Line {}
 
 impl Transform for Line {
     /// Translate the line from its current position to a new position by (x, y) pixels, returning
-    /// a new `Line`.
+    /// a new `Line`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
@@ -161,6 +161,25 @@ impl Transform for Line {
             end: (self.end.0 + by.0, self.end.1 + by.1),
             ..*self
         }
+    }
+
+    /// Translate the line from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Line;
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let mut line = Line::new((5, 10), (15, 20), 1);
+    /// line.translate_mut((10, 10));
+    ///
+    /// assert_eq!(line.start, (15, 20));
+    /// assert_eq!(line.end, (25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+        self.start = (self.start.0 + by.0, self.start.1 + by.1);
+        self.end = (self.end.0 + by.0, self.end.1 + by.1);
+
+        self
     }
 }
 

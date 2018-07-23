@@ -99,14 +99,14 @@ impl<'a> Drawable for Image8BPP<'a> {}
 
 impl<'a> Transform for Image8BPP<'a> {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `Image8BPP`.
+    /// a new `Image8BPP`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
     ///
-    /// // 8px x 1px test image
-    /// let image = Image8BPP::new(&[ 0xff ], 8, 1);
+    /// // 1px x 1px test image
+    /// let image = Image8BPP::new(&[ 0xff ], 1, 1);
     /// let moved = image.translate((25, 30));
     ///
     /// assert_eq!(image.offset, (0, 0));
@@ -117,5 +117,23 @@ impl<'a> Transform for Image8BPP<'a> {
             offset: (self.offset.0 + by.0, self.offset.1 + by.1),
             ..*self
         }
+    }
+
+    /// Translate the image from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::image::{ Image, Image8BPP };
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// // 1px x 1px test image
+    /// let mut image = Image8BPP::new(&[ 0xff ], 1, 1);
+    /// image.translate_mut((25, 30));
+    ///
+    /// assert_eq!(image.offset, (25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+        self.offset = (self.offset.0 + by.0, self.offset.1 + by.1);
+
+        self
     }
 }

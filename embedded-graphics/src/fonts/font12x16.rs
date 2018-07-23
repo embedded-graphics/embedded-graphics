@@ -72,7 +72,9 @@ impl<'a> Iterator for Font12x16Iterator<'a> {
             // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
             // + X offset for the pixel block that comprises this char
             // + Y offset for pixel block
-            let bitmap_bit_index = char_x + (FONT_IMAGE_WIDTH * char_y) + self.char_walk_x
+            let bitmap_bit_index = char_x
+                + (FONT_IMAGE_WIDTH * char_y)
+                + self.char_walk_x
                 + (self.char_walk_y * FONT_IMAGE_WIDTH);
 
             let bitmap_byte = bitmap_bit_index / 8;
@@ -107,14 +109,13 @@ impl<'a> Iterator for Font12x16Iterator<'a> {
 impl<'a> Drawable for Font12x16<'a> {}
 
 impl<'a> Transform for Font12x16<'a> {
-    /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `Font12x16`.
+    /// Translate the font origin from its current position to a new position by (x, y) pixels,
+    /// returning a new `Font12x16`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font12x16 };
     /// # use embedded_graphics::transform::Transform;
     ///
-    /// // 8px x 1px test image
     /// let text = Font12x16::render_str("Hello world");
     /// let moved = text.translate((25, 30));
     ///
@@ -126,5 +127,22 @@ impl<'a> Transform for Font12x16<'a> {
             pos: (self.pos.0 + by.0, self.pos.1 + by.1),
             ..*self
         }
+    }
+
+    /// Translate the font origin from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::fonts::{ Font, Font12x16 };
+    /// # use embedded_graphics::transform::Transform;
+    ///
+    /// let mut text = Font12x16::render_str("Hello world");
+    /// text.translate_mut((25, 30));
+    ///
+    /// assert_eq!(text.pos, (25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+        self.pos = (self.pos.0 + by.0, self.pos.1 + by.1);
+
+        self
     }
 }
