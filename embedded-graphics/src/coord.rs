@@ -4,7 +4,7 @@
 mod internal_coord {
     use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 
-    /// 2D coordinate type (without Nalgebra support)
+    /// 2D coordinate type
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct Coord(pub u32, pub u32);
 
