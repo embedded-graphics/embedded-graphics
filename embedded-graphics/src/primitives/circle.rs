@@ -67,45 +67,55 @@ impl Iterator for CircleIterator {
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
     fn next(&mut self) -> Option<Self::Item> {
-        if self.x > self.y {
-            return None;
-        }
-
-        let mx = self.center[0];
-        let my = self.center[1];
-
-        if self.octant > 7 {
-            self.octant = 0;
-
-            self.x += 1;
-
-            if self.d < 0 {
-                self.d += 2 * self.x as i32 + 3;
-            } else {
-                self.d += 2 * (self.x as i32 - self.y as i32) + 5;
-                self.y -= 1;
+        let item = loop {
+            if self.x > self.y {
+                break None;
             }
-        }
 
-        let item = match self.octant {
-            0 => Some(Coord::new(mx + self.x, my + self.y)),
-            1 => Some(Coord::new(mx + self.x, my - self.y)),
-            2 => Some(Coord::new(mx - self.x, my + self.y)),
-            3 => Some(Coord::new(mx - self.x, my - self.y)),
-            4 => Some(Coord::new(mx + self.y, my + self.x)),
-            5 => Some(Coord::new(mx + self.y, my - self.x)),
-            6 => Some(Coord::new(mx - self.y, my + self.x)),
-            7 => Some(Coord::new(mx - self.y, my - self.x)),
-            _ => None,
+            let mx = self.center[0];
+            let my = self.center[1];
+
+            if self.octant > 7 {
+                self.octant = 0;
+
+                self.x += 1;
+
+                if self.d < 0 {
+                    self.d += 2 * self.x as i32 + 3;
+                } else {
+                    self.d += 2 * (self.x as i32 - self.y as i32) + 5;
+                    self.y -= 1;
+                }
+            }
+
+            let item = match self.octant {
+                0 => Some((mx + self.x as i32, my + self.y as i32)),
+                1 => Some((mx + self.x as i32, my - self.y as i32)),
+                2 => Some((mx - self.x as i32, my + self.y as i32)),
+                3 => Some((mx - self.x as i32, my - self.y as i32)),
+                4 => Some((mx + self.y as i32, my + self.x as i32)),
+                5 => Some((mx + self.y as i32, my - self.x as i32)),
+                6 => Some((mx - self.y as i32, my + self.x as i32)),
+                7 => Some((mx - self.y as i32, my - self.x as i32)),
+                _ => None,
+            };
+
+            self.octant += 1;
+
+            if let Some(i) = item {
+                if i.0 > 0 && i.1 > 0 {
+                    break item;
+                }
+            }
         };
 
-        self.octant += 1;
+        // if item.is_none() {
+        //     None
+        // } else {
+        //     Some((item.unwrap(), self.color))
+        // }
 
-        if item.is_none() {
-            None
-        } else {
-            Some((item.unwrap(), self.color))
-        }
+        item.map(|(x, y)| (Coord::new(x, y), self.color))
     }
 }
 
@@ -148,5 +158,24 @@ impl Transform for Circle {
         self.center += by;
 
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_handles_offscreen_coords() {
+        let mut circ = Circle::new(Coord::new(-10, -10), 5, 1).into_iter();
+
+        assert_eq!(circ.next(), None);
+    }
+
+    #[test]
+    fn it_handles_partially_on_screen_coords() {
+        let mut circ = Circle::new(Coord::new(-5, -5), 30, 1).into_iter();
+
+        assert!(circ.next().is_some());
     }
 }
