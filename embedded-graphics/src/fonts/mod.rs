@@ -37,5 +37,5 @@ pub trait Font<'a> {
     ///     disp.draw(text.into_iter());
     /// }
     /// ```
-    fn render_str(chars: &'a str) -> Self;
+    fn render_str(chars: &'a str, color: u8) -> Self;
 }

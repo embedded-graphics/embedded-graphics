@@ -19,11 +19,14 @@ pub struct Font6x8<'a> {
 
     /// Text to draw
     text: &'a str,
+
+    /// Color
+    color: u8,
 }
 
 impl<'a> Font<'a> for Font6x8<'a> {
-    fn render_str(text: &'a str) -> Font6x8<'a> {
-        Self { pos: (0, 0), text }
+    fn render_str(text: &'a str, color: u8) -> Font6x8<'a> {
+        Self { pos: (0, 0), text, color }
     }
 }
 
@@ -35,6 +38,7 @@ pub struct Font6x8Iterator<'a> {
     idx: usize,
     pos: Coord,
     text: &'a str,
+    color: u8
 }
 
 impl<'a> IntoIterator for &'a Font6x8<'a> {
@@ -49,6 +53,7 @@ impl<'a> IntoIterator for &'a Font6x8<'a> {
             char_walk_x: 0,
             char_walk_y: 0,
             pos: self.pos,
+            color: self.color
         }
     }
 }
@@ -78,7 +83,11 @@ impl<'a> Iterator for Font6x8Iterator<'a> {
             let bitmap_byte = bitmap_bit_index / 8;
             let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
-            let bit_value = (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1;
+            let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
+                self.color
+            } else {
+                0 // black
+            };
 
             self.char_walk_x += 1;
 
@@ -97,7 +106,7 @@ impl<'a> Iterator for Font6x8Iterator<'a> {
             let x = self.pos.0 + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
             let y = self.pos.1 + self.char_walk_y;
 
-            Some(((x, y), bit_value))
+            Some(((x, y), color))
         } else {
             None
         }
