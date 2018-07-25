@@ -1,6 +1,7 @@
 extern crate embedded_graphics;
 extern crate sdl2;
 
+use embedded_graphics::coord::Coord;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::Drawing;
 
@@ -82,7 +83,7 @@ impl Drawing for Display {
     where
         T: Iterator<Item = Pixel>,
     {
-        for ((x, y), color) in item_pixels {
+        for (Coord(x, y), color) in item_pixels {
             if x >= DISPLAY_SIZE as u32 || y >= DISPLAY_SIZE as u32 {
                 continue;
             }
