@@ -131,7 +131,7 @@ impl<'a> Transform for Font12x16<'a> {
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let text = Font12x16::render_str("Hello world");
+    /// let text = Font12x16::render_str("Hello world", 1);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -151,7 +151,7 @@ impl<'a> Transform for Font12x16<'a> {
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut text = Font12x16::render_str("Hello world");
+    /// let mut text = Font12x16::render_str("Hello world", 1);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));
