@@ -41,6 +41,7 @@ impl<'a> IntoIterator for &'a Rect {
             color: self.color,
             x: self.top_left[0],
             y: self.top_left[1],
+            screen_size: (self.bottom_right - self.top_left).abs(),
         }
     }
 }
@@ -51,34 +52,49 @@ pub struct RectIterator {
     top_left: Coord,
     bottom_right: Coord,
     color: Color,
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
+    screen_size: Coord,
 }
 
 impl Iterator for RectIterator {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y > self.bottom_right[1] {
+        // Entire object is off the top left of the screen, so render nothing
+        if (self.top_left[0] < 0 || self.top_left[1] < 0)
+            && (self.bottom_right[0] < 0 || self.bottom_right[1] < 0)
+        {
             return None;
         }
 
-        let coord = Coord::new(self.x, self.y);
+        let coord = loop {
+            // If we're below the rect, it's completely rendered and we're done
+            if self.y > self.bottom_right[1] {
+                return None;
+            }
 
-        // Step across 1 if rendering top/bottom lines
-        if self.y == self.top_left[1] || self.y == self.bottom_right[1] {
-            self.x += 1;
-        }
-        // Skip across rect empty space if rendering left/right lines
-        else {
-            self.x += self.bottom_right[0] - self.top_left[0];
-        }
+            let coord = Coord::new(self.x, self.y);
 
-        // Reached end of row? Jump down one line
-        if self.x > self.bottom_right[0] {
-            self.x = self.top_left[0];
-            self.y += 1;
-        }
+            // Step across 1 if rendering top/bottom lines
+            if self.y == self.top_left[1] || self.y == self.bottom_right[1] {
+                self.x += 1;
+            }
+            // Skip across rect empty space if rendering left/right lines
+            else {
+                self.x += self.screen_size[0];
+            }
+
+            // Reached end of row? Jump down one line
+            if self.x > self.bottom_right[0] {
+                self.x = self.top_left[0];
+                self.y += 1;
+            }
+
+            if coord[0] >= 0 && coord[1] >= 0 {
+                break coord;
+            }
+        };
 
         Some((coord, self.color))
     }
@@ -141,5 +157,34 @@ mod tests {
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
         assert_eq!(moved.bottom_right, Coord::new(25, 30));
+    }
+
+    #[test]
+    fn it_draws_unfilled_rect() {
+        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), 1).into_iter();
+
+        assert_eq!(rect.next(), Some((Coord::new(2, 2), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(3, 2), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(4, 2), 1)));
+
+        assert_eq!(rect.next(), Some((Coord::new(2, 3), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(4, 3), 1)));
+
+        assert_eq!(rect.next(), Some((Coord::new(2, 4), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(3, 4), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(4, 4), 1)));
+    }
+
+    #[test]
+    fn it_can_be_negative() {
+        let mut rect = Rect::new(Coord::new(-2, -2), Coord::new(2, 2), 1).into_iter();
+
+        // TODO: Macro
+        // Only the bottom right corner of the rect should be visible
+        assert_eq!(rect.next(), Some((Coord::new(2, 0), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(2, 1), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(0, 2), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(1, 2), 1)));
+        assert_eq!(rect.next(), Some((Coord::new(2, 2), 1)));
     }
 }
