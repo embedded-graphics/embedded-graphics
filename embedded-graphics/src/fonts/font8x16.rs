@@ -30,7 +30,7 @@ impl<'a> Font<'a> for Font8x16<'a> {
         Self {
             pos: Coord::new(0, 0),
             text,
-            color
+            color,
         }
     }
 }
@@ -68,52 +68,59 @@ impl<'a> Iterator for Font8x16Iterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(current_char) = self.current_char {
-            // Char _code_ offset from first char, most often a space
-            // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
-            let char_offset = current_char as u32 - FIRST_CHARCODE;
-            let row = char_offset / CHARS_PER_ROW;
+            let pixel = loop {
+                // Char _code_ offset from first char, most often a space
+                // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
+                let char_offset = current_char as u32 - FIRST_CHARCODE;
+                let row = char_offset / CHARS_PER_ROW;
 
-            // Top left corner of character, in pixels
-            let char_x = (char_offset - (row * CHARS_PER_ROW)) * CHAR_WIDTH;
-            let char_y = row * CHAR_HEIGHT;
+                // Top left corner of character, in pixels
+                let char_x = (char_offset - (row * CHARS_PER_ROW)) * CHAR_WIDTH;
+                let char_y = row * CHAR_HEIGHT;
 
-            // Bit index
-            // = X pixel offset for char
-            // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
-            // + X offset for the pixel block that comprises this char
-            // + Y offset for pixel block
-            let bitmap_bit_index = char_x
-                + (FONT_IMAGE_WIDTH * char_y)
-                + self.char_walk_x
-                + (self.char_walk_y * FONT_IMAGE_WIDTH);
+                // Bit index
+                // = X pixel offset for char
+                // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
+                // + X offset for the pixel block that comprises this char
+                // + Y offset for pixel block
+                let bitmap_bit_index = char_x
+                    + (FONT_IMAGE_WIDTH * char_y)
+                    + self.char_walk_x
+                    + (self.char_walk_y * FONT_IMAGE_WIDTH);
 
-            let bitmap_byte = bitmap_bit_index / 8;
-            let bitmap_bit = 7 - (bitmap_bit_index % 8);
+                let bitmap_byte = bitmap_bit_index / 8;
+                let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
-            let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
-                self.color
-            } else {
-                0 // black
+                let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
+                    self.color
+                } else {
+                    0 // black
+                };
+
+                self.char_walk_x += 1;
+
+                if self.char_walk_x >= CHAR_WIDTH {
+                    self.char_walk_x = 0;
+                    self.char_walk_y += 1;
+
+                    // Done with this char, move on to the next one
+                    if self.char_walk_y >= CHAR_HEIGHT {
+                        self.char_walk_y = 0;
+                        self.idx += 1;
+                        self.current_char = self.text.chars().skip(self.idx).next();
+                    }
+                }
+
+                let x =
+                    self.pos[0] + (CHAR_WIDTH * self.idx as u32) as i32 + self.char_walk_x as i32;
+                let y = self.pos[1] + self.char_walk_y as i32;
+
+                if x >= 0 && y >= 0 {
+                    break Some((Coord::new(x, y), color));
+                }
             };
 
-            self.char_walk_x += 1;
-
-            if self.char_walk_x >= CHAR_WIDTH {
-                self.char_walk_x = 0;
-                self.char_walk_y += 1;
-
-                // Done with this char, move on to the next one
-                if self.char_walk_y >= CHAR_HEIGHT {
-                    self.char_walk_y = 0;
-                    self.idx += 1;
-                    self.current_char = self.text.chars().skip(self.idx).next();
-                }
-            }
-
-            let x = self.pos[0] + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
-            let y = self.pos[1] + self.char_walk_y;
-
-            Some((Coord::new(x, y), color))
+            pixel
         } else {
             None
         }
