@@ -66,36 +66,49 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let w = self.im.width;
-        let h = self.im.height;
-        let x = self.x;
-        let y = self.y;
-
-        // End iterator if we've run out of stuff
-        if x >= w || y >= h {
+        // If we're outside the upper left screen bounds, bail
+        if (self.im.offset[0] + self.im.width as i32) < 0
+            && (self.im.offset[1] + self.im.height as i32) < 0
+        {
             return None;
         }
 
-        // Rows are padded to a full byte. Rust integer division rounds down, so add 1 full byte if there are remaining pixels
-        let bytes_in_row = (w / 8) + if w % 8 > 0 { 1 } else { 0 };
+        let current_pixel = loop {
+            let w = self.im.width;
+            let h = self.im.height;
+            let x = self.x;
+            let y = self.y;
 
-        let row_start = bytes_in_row * y;
+            // End iterator if we've run out of stuff
+            if x >= w || y >= h {
+                return None;
+            }
 
-        let row_byte_index = x / 8;
-        let byte_index = row_start + row_byte_index;
-        let bit_offset = 7 - (x - (row_byte_index * 8));
-        let bit_value = (self.im.imagedata[byte_index as usize] >> bit_offset) & 1;
+            // Rows are padded to a full byte. Rust integer division rounds down, so add 1 full byte if there are remaining pixels
+            let bytes_in_row = (w / 8) + if w % 8 > 0 { 1 } else { 0 };
 
-        let current_pixel: Self::Item = (self.im.offset + Coord::new(x, y), bit_value);
+            let row_start = bytes_in_row * y;
 
-        // Increment stuff
-        self.x += 1;
+            let row_byte_index = x / 8;
+            let byte_index = row_start + row_byte_index;
+            let bit_offset = 7 - (x - (row_byte_index * 8));
+            let bit_value = (self.im.imagedata[byte_index as usize] >> bit_offset) & 1;
 
-        // Step down a row if we've hit the end of this one
-        if self.x >= w {
-            self.x = 0;
-            self.y += 1;
-        }
+            let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
+
+            // Increment stuff
+            self.x += 1;
+
+            // Step down a row if we've hit the end of this one
+            if self.x >= w {
+                self.x = 0;
+                self.y += 1;
+            }
+
+            if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
+                break (current_pixel, bit_value);
+            }
+        };
 
         Some(current_pixel)
     }

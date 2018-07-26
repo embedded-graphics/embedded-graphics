@@ -68,29 +68,35 @@ impl<'a> Iterator for Image8BPPIterator<'a> {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let w = self.im.width;
-        let h = self.im.height;
-        let x = self.x;
-        let y = self.y;
+        let current_pixel = loop {
+            let w = self.im.width;
+            let h = self.im.height;
+            let x = self.x;
+            let y = self.y;
 
-        // End iterator if we've run out of stuff
-        if x >= w || y >= h {
-            return None;
-        }
+            // End iterator if we've run out of stuff
+            if x >= w || y >= h {
+                return None;
+            }
 
-        let offset = (y * w) + x;
-        let bit_value = self.im.imagedata[offset as usize];
+            let offset = (y * w) + x;
+            let bit_value = self.im.imagedata[offset as usize];
 
-        let current_pixel: Self::Item = (self.im.offset + Coord::new(x, y), bit_value);
+            let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
 
-        // Increment stuff
-        self.x += 1;
+            // Increment stuff
+            self.x += 1;
 
-        // Step down a row if we've hit the end of this one
-        if self.x >= w {
-            self.x = 0;
-            self.y += 1;
-        }
+            // Step down a row if we've hit the end of this one
+            if self.x >= w {
+                self.x = 0;
+                self.y += 1;
+            }
+
+            if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
+                break (current_pixel, bit_value);
+            }
+        };
 
         Some(current_pixel)
     }
@@ -138,5 +144,27 @@ impl<'a> Transform for Image8BPP<'a> {
         self.offset += by;
 
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_can_have_negative_offsets() {
+        let image = Image8BPP::new(
+            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
+            3,
+            3,
+        ).translate(Coord::new(-1, -1));
+        let mut it = image.into_iter();
+
+        assert_eq!(it.next(), Some((Coord::new(0, 0), 0xcc)));
+        assert_eq!(it.next(), Some((Coord::new(1, 0), 0x00)));
+        assert_eq!(it.next(), Some((Coord::new(0, 1), 0x00)));
+        assert_eq!(it.next(), Some((Coord::new(1, 1), 0xaa)));
+
+        assert_eq!(it.next(), None);
     }
 }
