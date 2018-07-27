@@ -67,6 +67,12 @@ impl<'a> Iterator for Font6x12Iterator<'a> {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.pos[0] + ((self.text.len() as i32 * CHAR_WIDTH as i32)) < 0
+            || self.pos[1] + (CHAR_HEIGHT as i32) < 0
+        {
+            return None;
+        }
+
         if let Some(current_char) = self.current_char {
             let pixel = loop {
                 // Char _code_ offset from first char, most often a space
@@ -168,5 +174,18 @@ impl<'a> Transform for Font6x12<'a> {
         self.pos += by;
 
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn off_screen_text_does_not_infinite_loop() {
+        let text = Font6x12::render_str("Hello World!", 1).translate(Coord::new(5, -20));
+        let mut it = text.into_iter();
+
+        assert_eq!(it.next(), None);
     }
 }
