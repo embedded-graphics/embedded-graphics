@@ -12,7 +12,7 @@ This crate aims to make drawing 2D graphics primitives super easy. It currently 
 following:
 
 * 1 bit-per-pixel images
-* 8 bit-per-pixel images (downsampled to 1BPP currently)
+* 8 bit-per-pixel images
 * Primitives
     * Lines
     * Rectangles (and squares)
