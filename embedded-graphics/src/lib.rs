@@ -50,6 +50,7 @@ pub mod image;
 pub mod prelude;
 pub mod primitives;
 pub mod transform;
+pub mod unsignedcoord;
 
 /// The main trait of this crate. All graphics objects must implement it.
 pub trait Drawing {
