@@ -2,8 +2,9 @@
 
 [![Build Status](https://travis-ci.org/jamwaffles/embedded-graphics.svg?branch=master)](https://travis-ci.org/jamwaffles/embedded-graphics)
 [![Crates.io](https://img.shields.io/crates/v/embedded-graphics.svg)](https://crates.io/crates/embedded-graphics)
+[![Docs.rs](https://docs.rs/embedded-graphics/badge.svg)](https://docs.rs/embedded-graphics)
 
-## [Documentation](https://jamwaffles.github.io/embedded-graphics)
+## [Documentation](https://docs.rs/embedded-graphics)
 
 A small 2D graphics library to draw things on embedded graphical LCDs, like the SSD1306 OLED display.
 
