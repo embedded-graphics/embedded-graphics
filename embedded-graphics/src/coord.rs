@@ -88,7 +88,7 @@ use nalgebra;
 
 #[cfg(feature = "nalgebra_support")]
 /// 2D coordinate type with Nalgebra support
-pub type Coord = nalgebra::Vector2<u32>;
+pub type Coord = nalgebra::Vector2<CoordPart>;
 
 #[cfg(test)]
 mod tests {
