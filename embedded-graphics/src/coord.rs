@@ -1,10 +1,12 @@
 //! 2D coordinate in screen space
 
+use super::unsignedcoord::UnsignedCoord;
+
 type CoordPart = i32;
 
 #[cfg(not(feature = "nalgebra_support"))]
 mod internal_coord {
-    use super::CoordPart;
+    use super::*;
     use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 
     /// 2D coordinate type
@@ -86,9 +88,29 @@ pub use self::internal_coord::Coord;
 #[cfg(feature = "nalgebra_support")]
 use nalgebra;
 
-#[cfg(feature = "nalgebra_support")]
 /// 2D coordinate type with Nalgebra support
+#[cfg(feature = "nalgebra_support")]
 pub type Coord = nalgebra::Vector2<CoordPart>;
+
+/// Convert a value to an unsigned coordinate
+pub trait ToUnsigned {
+    /// Convert the signed coordinate to an unsigned coordinate
+    fn to_unsigned(self) -> UnsignedCoord;
+}
+
+impl ToUnsigned for Coord {
+    /// Convert to a positive-only coordinate, clamping negative values to zero
+    ///
+    /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::unsignedcoord::UnsignedCoord;
+    /// #
+    /// let coord = Coord::new(-5, 10);
+    ///
+    /// assert_eq!(coord.to_unsigned(), UnsignedCoord::new(0, 10));
+    fn to_unsigned(self) -> UnsignedCoord {
+        UnsignedCoord::new(self[0].max(0) as u32, self[1].max(0) as u32)
+    }
+}
 
 #[cfg(test)]
 mod tests {

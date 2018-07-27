@@ -2,7 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use coord::Coord;
+use coord::{Coord, ToUnsigned};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
@@ -96,7 +96,7 @@ impl Iterator for RectIterator {
             }
         };
 
-        Some((coord, self.color))
+        Some((coord.to_unsigned(), self.color))
     }
 }
 
@@ -149,6 +149,7 @@ impl Transform for Rect {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use unsignedcoord::UnsignedCoord;
 
     #[test]
     fn it_can_be_translated() {
@@ -163,16 +164,16 @@ mod tests {
     fn it_draws_unfilled_rect() {
         let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), 1).into_iter();
 
-        assert_eq!(rect.next(), Some((Coord::new(2, 2), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(3, 2), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(4, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 2), 1)));
 
-        assert_eq!(rect.next(), Some((Coord::new(2, 3), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(4, 3), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 3), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 3), 1)));
 
-        assert_eq!(rect.next(), Some((Coord::new(2, 4), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(3, 4), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(4, 4), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 4), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 4), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 4), 1)));
     }
 
     #[test]
@@ -181,10 +182,10 @@ mod tests {
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible
-        assert_eq!(rect.next(), Some((Coord::new(2, 0), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(2, 1), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(0, 2), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(1, 2), 1)));
-        assert_eq!(rect.next(), Some((Coord::new(2, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 0), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 1), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(0, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(1, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), 1)));
     }
 }

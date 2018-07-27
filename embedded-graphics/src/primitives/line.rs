@@ -2,7 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use coord::Coord;
+use coord::{Coord, ToUnsigned};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -135,7 +135,7 @@ impl<'a> Iterator for LineIterator<'a> {
         self.quick += 1;
 
         // Return
-        Some((coord, color))
+        Some((coord.to_unsigned(), color))
     }
 }
 
@@ -188,11 +188,12 @@ impl Transform for Line {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use unsignedcoord::UnsignedCoord;
 
-    fn test_expected_line(start: Coord, end: Coord, expected: &[Coord]) {
+    fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
         let line = Line::new(start, end, 1);
         for (idx, (coord, _)) in line.into_iter().enumerate() {
-            assert_eq!(coord, expected[idx]);
+            assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }
     }
 
@@ -200,14 +201,7 @@ mod tests {
     fn draws_octant_1_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(15, 13);
-        let expected = [
-            Coord::new(10, 10),
-            Coord::new(11, 11),
-            Coord::new(12, 11),
-            Coord::new(13, 12),
-            Coord::new(14, 12),
-            Coord::new(15, 13),
-        ];
+        let expected = [(10, 10), (11, 11), (12, 11), (13, 12), (14, 12), (15, 13)];
         test_expected_line(start, end, &expected);
     }
 
@@ -215,14 +209,7 @@ mod tests {
     fn draws_octant_2_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(13, 15);
-        let expected = [
-            Coord::new(10, 10),
-            Coord::new(11, 11),
-            Coord::new(11, 12),
-            Coord::new(12, 13),
-            Coord::new(12, 14),
-            Coord::new(13, 15),
-        ];
+        let expected = [(10, 10), (11, 11), (11, 12), (12, 13), (12, 14), (13, 15)];
         test_expected_line(start, end, &expected);
     }
 
@@ -230,14 +217,7 @@ mod tests {
     fn draws_octant_3_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(7, 15);
-        let expected = [
-            Coord::new(10, 10),
-            Coord::new(9, 11),
-            Coord::new(9, 12),
-            Coord::new(8, 13),
-            Coord::new(8, 14),
-            Coord::new(7, 15),
-        ];
+        let expected = [(10, 10), (9, 11), (9, 12), (8, 13), (8, 14), (7, 15)];
         test_expected_line(start, end, &expected);
     }
 
@@ -245,14 +225,7 @@ mod tests {
     fn draws_octant_4_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(5, 13);
-        let expected = [
-            Coord::new(5, 13),
-            Coord::new(6, 12),
-            Coord::new(7, 12),
-            Coord::new(8, 11),
-            Coord::new(9, 11),
-            Coord::new(10, 10),
-        ];
+        let expected = [(5, 13), (6, 12), (7, 12), (8, 11), (9, 11), (10, 10)];
         test_expected_line(start, end, &expected);
     }
 
@@ -260,14 +233,7 @@ mod tests {
     fn draws_octant_5_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(5, 7);
-        let expected = [
-            Coord::new(5, 7),
-            Coord::new(6, 8),
-            Coord::new(7, 8),
-            Coord::new(8, 9),
-            Coord::new(9, 9),
-            Coord::new(10, 10),
-        ];
+        let expected = [(5, 7), (6, 8), (7, 8), (8, 9), (9, 9), (10, 10)];
         test_expected_line(start, end, &expected);
     }
 
@@ -275,14 +241,7 @@ mod tests {
     fn draws_octant_6_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(7, 5);
-        let expected = [
-            Coord::new(7, 5),
-            Coord::new(8, 6),
-            Coord::new(8, 7),
-            Coord::new(9, 8),
-            Coord::new(9, 9),
-            Coord::new(10, 10),
-        ];
+        let expected = [(7, 5), (8, 6), (8, 7), (9, 8), (9, 9), (10, 10)];
         test_expected_line(start, end, &expected);
     }
 
@@ -290,14 +249,7 @@ mod tests {
     fn draws_octant_7_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(13, 5);
-        let expected = [
-            Coord::new(13, 5),
-            Coord::new(12, 6),
-            Coord::new(12, 7),
-            Coord::new(11, 8),
-            Coord::new(11, 9),
-            Coord::new(10, 10),
-        ];
+        let expected = [(13, 5), (12, 6), (12, 7), (11, 8), (11, 9), (10, 10)];
         test_expected_line(start, end, &expected);
     }
 
@@ -306,12 +258,12 @@ mod tests {
         let start = Coord::new(10, 10);
         let end = Coord::new(15, 7);
         let expected = [
-            Coord::new(10, 10),
-            Coord::new(11, 9),
-            Coord::new(12, 9),
-            Coord::new(13, 8),
-            Coord::new(14, 8),
-            Coord::new(15, 7),
+            (10, 10).into(),
+            (11, 9).into(),
+            (12, 9).into(),
+            (13, 8).into(),
+            (14, 8).into(),
+            (15, 7).into(),
         ];
         test_expected_line(start, end, &expected);
     }
@@ -320,7 +272,7 @@ mod tests {
     fn it_truncates_lines_out_of_bounds() {
         let start = Coord::new(-2, -2);
         let end = Coord::new(2, 2);
-        let expected = [Coord::new(0, 0), Coord::new(1, 1), Coord::new(2, 2)];
+        let expected = [(0, 0).into(), (1, 1).into(), (2, 2).into()];
         test_expected_line(start, end, &expected);
     }
 }

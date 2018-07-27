@@ -3,7 +3,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
-use coord::Coord;
+use coord::{Coord, ToUnsigned};
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font12x16_1bpp.raw");
 const CHAR_HEIGHT: u32 = 16;
@@ -116,7 +116,7 @@ impl<'a> Iterator for Font12x16Iterator<'a> {
                 let y = self.pos[1] + self.char_walk_y as i32;
 
                 if x >= 0 && y >= 0 {
-                    break Some((Coord::new(x, y), color));
+                    break Some((Coord::new(x, y).to_unsigned(), color));
                 }
             };
 

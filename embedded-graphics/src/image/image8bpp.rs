@@ -12,7 +12,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
-use coord::Coord;
+use coord::{Coord, ToUnsigned};
 
 /// 8 bit per pixel image
 #[derive(Debug)]
@@ -94,7 +94,7 @@ impl<'a> Iterator for Image8BPPIterator<'a> {
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break (current_pixel, bit_value);
+                break (current_pixel.to_unsigned(), bit_value);
             }
         };
 
@@ -150,6 +150,7 @@ impl<'a> Transform for Image8BPP<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use unsignedcoord::UnsignedCoord;
 
     #[test]
     fn it_can_have_negative_offsets() {
@@ -160,10 +161,10 @@ mod tests {
         ).translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(it.next(), Some((Coord::new(0, 0), 0xcc)));
-        assert_eq!(it.next(), Some((Coord::new(1, 0), 0x00)));
-        assert_eq!(it.next(), Some((Coord::new(0, 1), 0x00)));
-        assert_eq!(it.next(), Some((Coord::new(1, 1), 0xaa)));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 0), 0xcc)));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 0), 0x00)));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 1), 0x00)));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 1), 0xaa)));
 
         assert_eq!(it.next(), None);
     }

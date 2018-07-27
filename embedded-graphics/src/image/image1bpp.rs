@@ -11,7 +11,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
-use coord::Coord;
+use coord::{Coord, ToUnsigned};
 
 /// 1 bit per pixel image
 #[derive(Debug)]
@@ -106,7 +106,7 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break (current_pixel, bit_value);
+                break (current_pixel.to_unsigned(), bit_value);
             }
         };
 

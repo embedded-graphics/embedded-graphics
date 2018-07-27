@@ -2,7 +2,7 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use coord::Coord;
+use coord::{Coord, ToUnsigned};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -109,13 +109,7 @@ impl Iterator for CircleIterator {
             }
         };
 
-        // if item.is_none() {
-        //     None
-        // } else {
-        //     Some((item.unwrap(), self.color))
-        // }
-
-        item.map(|(x, y)| (Coord::new(x, y), self.color))
+        item.map(|(x, y)| (Coord::new(x, y).to_unsigned(), self.color))
     }
 }
 
