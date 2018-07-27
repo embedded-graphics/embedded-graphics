@@ -31,11 +31,11 @@ pub trait Font<'a> {
     ///
     /// fn main() {
     ///     let disp = Display {};
-    ///
-    ///     let text = Font6x8::render_str("Hello world");
+    ///     // Render a string with a 8bit color
+    ///     let text = Font6x8::render_str("Hello world", 1);  
     ///
     ///     disp.draw(text.into_iter());
     /// }
     /// ```
-    fn render_str(chars: &'a str) -> Self;
+    fn render_str(chars: &'a str, color: u8) -> Self;
 }

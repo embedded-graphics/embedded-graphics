@@ -22,7 +22,7 @@ fn main() {
     display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80), 1).into_iter());
 
     display.draw(
-        Font6x8::render_str("Hello World!")
+        Font6x8::render_str("Hello World!", 1)
             .translate(Coord::new(5, 50))
             .into_iter(),
     );

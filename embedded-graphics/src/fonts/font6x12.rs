@@ -20,13 +20,17 @@ pub struct Font6x12<'a> {
 
     /// Text to draw
     text: &'a str,
+
+    /// Fill Color of font
+    color: u8
 }
 
 impl<'a> Font<'a> for Font6x12<'a> {
-    fn render_str(text: &'a str) -> Font6x12<'a> {
+    fn render_str(text: &'a str, color: u8) -> Font6x12<'a> {
         Self {
             pos: Coord::new(0, 0),
             text,
+            color
         }
     }
 }
@@ -39,6 +43,7 @@ pub struct Font6x12Iterator<'a> {
     idx: usize,
     pos: Coord,
     text: &'a str,
+    color: u8,
 }
 
 impl<'a> IntoIterator for &'a Font6x12<'a> {
@@ -53,6 +58,7 @@ impl<'a> IntoIterator for &'a Font6x12<'a> {
             char_walk_x: 0,
             char_walk_y: 0,
             pos: self.pos,
+            color: self.color,
         }
     }
 }
@@ -84,7 +90,11 @@ impl<'a> Iterator for Font6x12Iterator<'a> {
             let bitmap_byte = bitmap_bit_index / 8;
             let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
-            let bit_value = (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1;
+            let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
+                self.color
+            } else {
+                0 // black
+            };
 
             self.char_walk_x += 1;
 
@@ -103,7 +113,7 @@ impl<'a> Iterator for Font6x12Iterator<'a> {
             let x = self.pos[0] + (CHAR_WIDTH * self.idx as u32) + self.char_walk_x;
             let y = self.pos[1] + self.char_walk_y;
 
-            Some((Coord::new(x, y), bit_value))
+            Some((Coord::new(x, y), color))
         } else {
             None
         }
@@ -121,7 +131,7 @@ impl<'a> Transform for Font6x12<'a> {
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let text = Font6x8::render_str("Hello world");
+    /// let text = Font6x8::render_str("Hello world", 1);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -142,7 +152,7 @@ impl<'a> Transform for Font6x12<'a> {
     /// # use embedded_graphics::coord::Coord;
     ///
     /// // 8px x 1px test image
-    /// let mut text = Font6x12::render_str("Hello world");
+    /// let mut text = Font6x12::render_str("Hello world", 1);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));
