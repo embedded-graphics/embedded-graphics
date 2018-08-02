@@ -48,7 +48,7 @@ pub mod drawable;
 pub mod fonts;
 // pub mod image;
 pub mod prelude;
-// pub mod primitives;
+pub mod primitives;
 pub mod transform;
 pub mod unsignedcoord;
 
