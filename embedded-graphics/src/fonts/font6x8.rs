@@ -198,7 +198,6 @@ mod tests {
     fn off_screen_text_does_not_infinite_loop() {
         let text = Font6x8::render_str("Hello World!", Color::new(1)).translate(Coord::new(5, -10));
         let mut it = text.into_iter();
-        // TODO FIX
         assert_eq!(it.next(), None);
     }
 }
