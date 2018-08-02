@@ -3,11 +3,12 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use pixelcolor::PixelColor;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
 #[derive(Debug, Clone, Copy)]
-pub struct Rect {
+pub struct Rect<C: PixelColor> {
     /// Top left point of the rect
     pub top_left: Coord,
 
@@ -15,13 +16,16 @@ pub struct Rect {
     pub bottom_right: Coord,
 
     /// Border color
-    pub color: Color,
+    pub color: C,
 }
 
-impl Rect {
+impl<C> Rect<C>
+where
+    C: PixelColor,
+{
     /// Create a new rectangle from the top left point to the bottom right point with a given border
     /// color
-    pub fn new(top_left: Coord, bottom_right: Coord, color: u8) -> Self {
+    pub fn new(top_left: Coord, bottom_right: Coord, color: C) -> Self {
         Rect {
             top_left,
             bottom_right,
@@ -30,9 +34,12 @@ impl Rect {
     }
 }
 
-impl<'a> IntoIterator for &'a Rect {
-    type Item = Pixel;
-    type IntoIter = RectIterator;
+impl<'a, C> IntoIterator for &'a Rect<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = RectIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         RectIterator {
@@ -48,17 +55,23 @@ impl<'a> IntoIterator for &'a Rect {
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Clone, Copy)]
-pub struct RectIterator {
+pub struct RectIterator<C: PixelColor>
+where
+    C: PixelColor,
+{
     top_left: Coord,
     bottom_right: Coord,
-    color: Color,
+    color: C,
     x: i32,
     y: i32,
     screen_size: Coord,
 }
 
-impl Iterator for RectIterator {
-    type Item = Pixel;
+impl<C> Iterator for RectIterator<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // Entire object is off the top left of the screen, so render nothing
@@ -96,13 +109,16 @@ impl Iterator for RectIterator {
             }
         };
 
-        Some((coord.to_unsigned(), self.color))
+        Some(Pixel(coord.to_unsigned(), self.color))
     }
 }
 
-impl Drawable for Rect {}
+impl<C> Drawable for Rect<C> where C: PixelColor {}
 
-impl Transform for Rect {
+impl<C> Transform for Rect<C>
+where
+    C: PixelColor,
+{
     /// Translate the rect from its current position to a new position by (x, y) pixels, returning
     /// a new `Rect`. For a mutating transform, see `translate_mut`.
     ///
@@ -117,11 +133,11 @@ impl Transform for Rect {
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
     /// assert_eq!(moved.bottom_right, Coord::new(25, 30));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(self, by: Coord) -> Self {
         Self {
             top_left: self.top_left + by,
             bottom_right: self.bottom_right + by,
-            ..*self
+            ..self
         }
     }
 

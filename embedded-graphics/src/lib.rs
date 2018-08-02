@@ -45,14 +45,15 @@ extern crate nalgebra;
 
 pub mod coord;
 pub mod drawable;
-// pub mod fonts;
-// pub mod image;
+pub mod fonts;
+pub mod image;
+pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
 pub mod transform;
 pub mod unsignedcoord;
 
-use drawable::PixelColor;
+use pixelcolor::PixelColor;
 
 /// The main trait of this crate. All graphics objects must implement it.
 pub trait Drawing<C>

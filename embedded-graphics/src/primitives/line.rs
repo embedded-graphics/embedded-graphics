@@ -3,11 +3,12 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use pixelcolor::PixelColor;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
 #[derive(Debug, Copy, Clone)]
-pub struct Line<C: PixelColor + Clone> {
+pub struct Line<C: PixelColor> {
     /// Start point
     pub start: Coord,
 
@@ -20,7 +21,7 @@ pub struct Line<C: PixelColor + Clone> {
 
 impl<C> Line<C>
 where
-    C: PixelColor + Clone,
+    C: PixelColor,
 {
     /// Create a new line
     pub fn new(start: Coord, end: Coord, color: C) -> Self {
@@ -28,7 +29,7 @@ where
     }
 }
 
-impl<'a, C: PixelColor + Clone> IntoIterator for &'a Line<C> {
+impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type Item = Pixel<C>;
     type IntoIter = LineIterator<'a, C>;
 
@@ -98,7 +99,7 @@ impl<'a, C: PixelColor + Clone> IntoIterator for &'a Line<C> {
 #[derive(Debug)]
 pub struct LineIterator<'a, C: 'a>
 where
-    C: PixelColor + Clone,
+    C: PixelColor,
 {
     line: &'a Line<C>,
 
@@ -114,7 +115,7 @@ where
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<'a, C: PixelColor + Clone> Iterator for LineIterator<'a, C> {
+impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -145,11 +146,11 @@ impl<'a, C: PixelColor + Clone> Iterator for LineIterator<'a, C> {
     }
 }
 
-impl<C> Drawable for Line<C> where C: PixelColor + Clone {}
+impl<C> Drawable for Line<C> where C: PixelColor {}
 
 impl<C> Transform for Line<C>
 where
-    C: PixelColor + Clone,
+    C: PixelColor,
 {
     /// Translate the line from its current position to a new position by (x, y) pixels, returning
     /// a new `Line`. For a mutating transform, see `translate_mut`.
@@ -200,7 +201,7 @@ mod tests {
     use drawable::Pixel;
     use unsignedcoord::UnsignedCoord;
 
-    #[derive(Clone)]
+    #[derive(Copy, Clone)]
     struct TestPixel(u8);
 
     impl PixelColor for TestPixel {}

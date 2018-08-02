@@ -9,9 +9,10 @@ pub use self::font12x16::Font12x16;
 pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
+use pixelcolor::PixelColor;
 
 /// Common methods for all fonts
-pub trait Font<'a> {
+pub trait Font<'a, C: PixelColor> {
     /// Render a string in the implementing font's typeface.
     ///
     /// ```rust
@@ -32,10 +33,10 @@ pub trait Font<'a> {
     /// fn main() {
     ///     let disp = Display {};
     ///     // Render a string with a 8bit color
-    ///     let text = Font6x8::render_str("Hello world", 1);  
+    ///     let text = Font6x8::render_str("Hello world", 1);
     ///
     ///     disp.draw(text.into_iter());
     /// }
     /// ```
-    fn render_str(chars: &'a str, color: u8) -> Self;
+    fn render_str(chars: &'a str, color: C) -> Self;
 }

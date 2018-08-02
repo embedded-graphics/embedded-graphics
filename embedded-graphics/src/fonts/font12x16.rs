@@ -4,6 +4,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
 use coord::{Coord, ToUnsigned};
+use pixelcolor::PixelColor;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font12x16_1bpp.raw");
 const CHAR_HEIGHT: u32 = 16;
@@ -14,7 +15,7 @@ const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
 /// Container struct to hold a positioned piece of text
 #[derive(Debug, Clone, Copy)]
-pub struct Font12x16<'a> {
+pub struct Font12x16<'a, C: PixelColor> {
     /// Top left corner of the text
     pub pos: Coord,
 
@@ -22,11 +23,14 @@ pub struct Font12x16<'a> {
     text: &'a str,
 
     /// Fill Color of font
-    color: u8,
+    color: C,
 }
 
-impl<'a> Font<'a> for Font12x16<'a> {
-    fn render_str(text: &'a str, color: u8) -> Font12x16<'a> {
+impl<'a, C> Font<'a, C> for Font12x16<'a, C>
+where
+    C: PixelColor,
+{
+    fn render_str(text: &'a str, color: C) -> Font12x16<'a, C> {
         Self {
             pos: Coord::new(0, 0),
             text,
@@ -36,19 +40,22 @@ impl<'a> Font<'a> for Font12x16<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Font12x16Iterator<'a> {
+pub struct Font12x16Iterator<'a, C> {
     char_walk_x: u32,
     char_walk_y: u32,
     current_char: Option<char>,
     idx: usize,
     pos: Coord,
     text: &'a str,
-    color: u8,
+    color: C,
 }
 
-impl<'a> IntoIterator for &'a Font12x16<'a> {
-    type IntoIter = Font12x16Iterator<'a>;
-    type Item = Pixel;
+impl<'a, C> IntoIterator for &'a Font12x16<'a, C>
+where
+    C: PixelColor,
+{
+    type IntoIter = Font12x16Iterator<'a, C>;
+    type Item = Pixel<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         Font12x16Iterator {
@@ -63,11 +70,14 @@ impl<'a> IntoIterator for &'a Font12x16<'a> {
     }
 }
 
-impl<'a> Iterator for Font12x16Iterator<'a> {
-    type Item = Pixel;
+impl<'a, C> Iterator for Font12x16Iterator<'a, C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pos[0] + ((self.text.len() as i32 * CHAR_WIDTH as i32)) < 0
+        if self.pos[0] + (self.text.len() as i32 * CHAR_WIDTH as i32) < 0
             || self.pos[1] + (CHAR_HEIGHT as i32) < 0
         {
             return None;
@@ -122,7 +132,7 @@ impl<'a> Iterator for Font12x16Iterator<'a> {
                 let y = self.pos[1] + self.char_walk_y as i32;
 
                 if x >= 0 && y >= 0 {
-                    break Some((Coord::new(x, y).to_unsigned(), color));
+                    break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
                 }
             };
 
@@ -133,9 +143,12 @@ impl<'a> Iterator for Font12x16Iterator<'a> {
     }
 }
 
-impl<'a> Drawable for Font12x16<'a> {}
+impl<'a, C> Drawable for Font12x16<'a, C> where C: PixelColor {}
 
-impl<'a> Transform for Font12x16<'a> {
+impl<'a, C> Transform for Font12x16<'a, C>
+where
+    C: PixelColor,
+{
     /// Translate the font origin from its current position to a new position by (x, y) pixels,
     /// returning a new `Font12x16`. For a mutating transform, see `translate_mut`.
     ///
@@ -150,10 +163,10 @@ impl<'a> Transform for Font12x16<'a> {
     /// assert_eq!(text.pos, Coord::new(0, 0));
     /// assert_eq!(moved.pos, Coord::new(25, 30));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(self, by: Coord) -> Self {
         Self {
             pos: self.pos + by,
-            ..*self
+            ..self
         }
     }
 

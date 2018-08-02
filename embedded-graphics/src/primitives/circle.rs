@@ -3,11 +3,12 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use pixelcolor::PixelColor;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
 #[derive(Debug, Copy, Clone)]
-pub struct Circle {
+pub struct Circle<C: PixelColor> {
     /// Center point of circle
     pub center: Coord,
 
@@ -15,12 +16,15 @@ pub struct Circle {
     pub radius: u32,
 
     /// Line colour of circle
-    pub color: Color,
+    pub color: C,
 }
 
-impl Circle {
+impl<C> Circle<C>
+where
+    C: PixelColor,
+{
     /// Create a new circle with center point, radius and border color
-    pub fn new(center: Coord, radius: u32, color: u8) -> Self {
+    pub fn new(center: Coord, radius: u32, color: C) -> Self {
         Circle {
             center,
             radius,
@@ -29,9 +33,12 @@ impl Circle {
     }
 }
 
-impl<'a> IntoIterator for &'a Circle {
-    type Item = Pixel;
-    type IntoIter = CircleIterator;
+impl<'a, C> IntoIterator for &'a Circle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = CircleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         CircleIterator {
@@ -50,10 +57,10 @@ impl<'a> IntoIterator for &'a Circle {
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
-pub struct CircleIterator {
+pub struct CircleIterator<C> {
     center: Coord,
     radius: u32,
-    color: Color,
+    color: C,
 
     octant: u32,
     idx: u32,
@@ -62,8 +69,11 @@ pub struct CircleIterator {
     d: i32,
 }
 
-impl Iterator for CircleIterator {
-    type Item = Pixel;
+impl<C> Iterator for CircleIterator<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
     fn next(&mut self) -> Option<Self::Item> {
@@ -109,13 +119,16 @@ impl Iterator for CircleIterator {
             }
         };
 
-        item.map(|(x, y)| (Coord::new(x, y).to_unsigned(), self.color))
+        item.map(|(x, y)| Pixel(Coord::new(x, y).to_unsigned(), self.color))
     }
 }
 
-impl Drawable for Circle {}
+impl<C> Drawable for Circle<C> where C: PixelColor {}
 
-impl Transform for Circle {
+impl<C> Transform for Circle<C>
+where
+    C: PixelColor,
+{
     /// Translate the circle center from its current position to a new position by (x, y) pixels,
     /// returning a new `Circle`. For a mutating transform, see `translate_mut`.
     ///
@@ -129,10 +142,10 @@ impl Transform for Circle {
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(self, by: Coord) -> Self {
         Self {
             center: self.center + by,
-            ..*self
+            ..self
         }
     }
 

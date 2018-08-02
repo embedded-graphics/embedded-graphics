@@ -12,10 +12,12 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 use coord::{Coord, ToUnsigned};
+use core::marker::PhantomData;
+use pixelcolor::PixelColor;
 
 /// 1 bit per pixel image
 #[derive(Debug)]
-pub struct Image1BPP<'a> {
+pub struct Image1BPP<'a, C> {
     /// Image width in pixels
     width: u32,
 
@@ -27,22 +29,31 @@ pub struct Image1BPP<'a> {
 
     /// Image offset in pixels from screen origin (0,0)
     pub offset: Coord,
+
+    pixel_type: PhantomData<C>,
 }
 
-impl<'a> Image<'a> for Image1BPP<'a> {
+impl<'a, C> Image<'a> for Image1BPP<'a, C>
+where
+    C: PixelColor,
+{
     fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
         Self {
             width,
             height,
             imagedata,
             offset: Coord::new(0, 0),
+            pixel_type: PhantomData,
         }
     }
 }
 
-impl<'a> IntoIterator for &'a Image1BPP<'a> {
-    type Item = Pixel;
-    type IntoIter = Image1BPPIterator<'a>;
+impl<'a, C> IntoIterator for &'a Image1BPP<'a, C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = Image1BPPIterator<'a, C>;
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
@@ -55,15 +66,18 @@ impl<'a> IntoIterator for &'a Image1BPP<'a> {
 }
 
 #[derive(Debug)]
-pub struct Image1BPPIterator<'a> {
+pub struct Image1BPPIterator<'a, C: 'a> {
     x: u32,
     y: u32,
-    im: &'a Image1BPP<'a>,
+    im: &'a Image1BPP<'a, C>,
 }
 
 /// Iterator over every pixel in the source image
-impl<'a> Iterator for Image1BPPIterator<'a> {
-    type Item = Pixel;
+impl<'a, C> Iterator for Image1BPPIterator<'a, C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // If we're outside the upper left screen bounds, bail
@@ -106,7 +120,7 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break (current_pixel.to_unsigned(), bit_value);
+                break Pixel(current_pixel.to_unsigned(), bit_value);
             }
         };
 
@@ -114,9 +128,9 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
     }
 }
 
-impl<'a> Drawable for Image1BPP<'a> {}
+impl<'a, C> Drawable for Image1BPP<'a, C> {}
 
-impl<'a> Transform for Image1BPP<'a> {
+impl<'a, C> Transform for Image1BPP<'a, C> {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
     /// a new `Image1BPP`. For a mutating transform, see `translate_mut`.
     ///
@@ -132,10 +146,10 @@ impl<'a> Transform for Image1BPP<'a> {
     /// assert_eq!(image.offset, Coord::new(0, 0));
     /// assert_eq!(moved.offset, Coord::new(25, 30));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(self, by: Coord) -> Self {
         Self {
             offset: self.offset + by,
-            ..*self
+            ..self
         }
     }
 
