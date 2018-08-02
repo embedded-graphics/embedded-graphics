@@ -55,7 +55,7 @@ pub mod unsignedcoord;
 /// The main trait of this crate. All graphics objects must implement it.
 pub trait Drawing {
     /// Data type to store color
-    type C : Clone + Copy;
+    type C : Clone + Copy + PartialEq;
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item_pixels: T)
     where

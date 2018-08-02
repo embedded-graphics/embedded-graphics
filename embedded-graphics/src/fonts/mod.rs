@@ -1,13 +1,13 @@
 //! Pixel based fonts
 
-// mod font12x16;
-// mod font6x12;
-// mod font8x16;
+mod font12x16;
+mod font6x12;
+mod font8x16;
 mod font6x8;
 
-// pub use self::font12x16::Font12x16;
-// pub use self::font6x12::Font6x12;
-// pub use self::font8x16::Font8x16;
+pub use self::font12x16::Font12x16;
+pub use self::font6x12::Font6x12;
+pub use self::font8x16::Font8x16;
 pub use self::font6x8::Font6x8;
 
 use drawable::Color;
@@ -15,7 +15,7 @@ use drawable::Color;
 /// Common methods for all fonts
 pub trait Font<'a> {
     /// Data type to store color
-    type C : Clone + Copy;
+    type C : Clone + Copy + PartialEq;
 
     /// Render a string in the implementing font's typeface.
     ///

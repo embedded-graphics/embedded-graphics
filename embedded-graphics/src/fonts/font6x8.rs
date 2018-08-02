@@ -15,7 +15,7 @@ const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 /// Container struct to hold a positioned piece of text
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8<'a, C: 'a> 
-    where C: Clone + Copy
+    where C: Clone + Copy + PartialEq
 {
     /// Top left corner of the text
     pub pos: Coord,
@@ -28,7 +28,7 @@ pub struct Font6x8<'a, C: 'a>
 }
 
 impl<'a, C> Font<'a> for Font6x8<'a, C> 
-    where C: Clone + Copy
+    where C: Clone + Copy + PartialEq
 {
     type C = C;
     fn render_str(text: &'a str, color: Color<C>) -> Font6x8<'a, C> {
@@ -42,7 +42,7 @@ impl<'a, C> Font<'a> for Font6x8<'a, C>
 
 #[derive(Debug, Clone, Copy)]
 pub struct Font6x8Iterator<'a, C: 'a> 
-    where C: Clone + Copy
+    where C: Clone + Copy + PartialEq
 {
     char_walk_x: u32,
     char_walk_y: u32,
@@ -54,7 +54,7 @@ pub struct Font6x8Iterator<'a, C: 'a>
 }
 
 impl<'a, C> IntoIterator for &'a Font6x8<'a, C> 
-    where C: Clone + Copy
+    where C: Clone + Copy + PartialEq
 {
     type IntoIter = Font6x8Iterator<'a, C>;
     type Item = Pixel<C>;
@@ -73,7 +73,7 @@ impl<'a, C> IntoIterator for &'a Font6x8<'a, C>
 }
 
 impl<'a, C> Iterator for Font6x8Iterator<'a, C> 
-    where C: Clone + Copy
+    where C: Clone + Copy + PartialEq
 {
     type Item = Pixel<C>;
 
@@ -130,10 +130,6 @@ impl<'a, C> Iterator for Font6x8Iterator<'a, C>
                     if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
                         break Some((Coord::new(x, y).to_unsigned(), self.color))
                     }
-                    // TODO
-                    // else {
-                    //     break Some((Coord::new(x, y).to_unsigned(), 0))
-                    // }
                 }
             };
 
@@ -145,10 +141,10 @@ impl<'a, C> Iterator for Font6x8Iterator<'a, C>
 }
 
 impl<'a, C> Drawable for Font6x8<'a, C> 
-    where C: Clone + Copy {}
+    where C: Clone + Copy + PartialEq {}
 
 impl<'a, C> Transform for Font6x8<'a, C> 
-    where C: Clone + Copy
+    where C: Clone + Copy + PartialEq
 {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
     /// a new `Font6x8`. For a mutating transform, see `translate_mut`.
@@ -200,6 +196,6 @@ mod tests {
         let text = Font6x8::render_str("Hello World!", Color::new(1)).translate(Coord::new(5, -10));
         let mut it = text.into_iter();
         // TODO FIX
-        // assert_eq!(it.next(), None);
+        assert_eq!(it.next(), None);
     }
 }
