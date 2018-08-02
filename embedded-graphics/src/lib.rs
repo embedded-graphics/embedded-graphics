@@ -45,17 +45,22 @@ extern crate nalgebra;
 
 pub mod coord;
 pub mod drawable;
-pub mod fonts;
-pub mod image;
+// pub mod fonts;
+// pub mod image;
 pub mod prelude;
 pub mod primitives;
 pub mod transform;
 pub mod unsignedcoord;
 
+use drawable::PixelColor;
+
 /// The main trait of this crate. All graphics objects must implement it.
-pub trait Drawing {
+pub trait Drawing<C>
+where
+    C: PixelColor + Clone,
+{
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel>;
+        T: Iterator<Item = drawable::Pixel<C>>;
 }

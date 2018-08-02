@@ -1,16 +1,21 @@
 extern crate embedded_graphics;
 
 use embedded_graphics::coord::Coord;
-use embedded_graphics::drawable::Pixel;
+use embedded_graphics::drawable::{Pixel, PixelColor};
 use embedded_graphics::primitives::{Circle, Rect};
 use embedded_graphics::Drawing;
 
 struct FakeDisplay {}
 
-impl Drawing for FakeDisplay {
+#[derive(Clone)]
+pub struct FakePixelColor(pub bool);
+
+impl PixelColor for FakePixelColor {}
+
+impl Drawing<FakePixelColor> for FakeDisplay {
     fn draw<T>(&mut self, _item_pixels: T)
     where
-        T: Iterator<Item = Pixel>,
+        T: Iterator<Item = Pixel<FakePixelColor>>,
     {
         // Noop
     }
