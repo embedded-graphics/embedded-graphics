@@ -123,7 +123,11 @@ where
     }
 }
 
-impl<C> Drawable for Circle<C> where C: PixelColor {}
+impl<C> Drawable for Circle<C>
+where
+    C: PixelColor,
+{
+}
 
 impl<C> Transform for Circle<C>
 where
@@ -137,7 +141,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let circle = Circle::new(Coord::new(5, 10), 10, 1u8);
     /// let moved = circle.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
@@ -156,7 +160,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1u8);
     /// circle.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(circle.center, Coord::new(15, 20));
@@ -174,14 +178,14 @@ mod tests {
 
     #[test]
     fn it_handles_offscreen_coords() {
-        let mut circ = Circle::new(Coord::new(-10, -10), 5, 1).into_iter();
+        let mut circ = Circle::new(Coord::new(-10, -10), 5, 1u8).into_iter();
 
         assert_eq!(circ.next(), None);
     }
 
     #[test]
     fn it_handles_partially_on_screen_coords() {
-        let mut circ = Circle::new(Coord::new(-5, -5), 30, 1).into_iter();
+        let mut circ = Circle::new(Coord::new(-5, -5), 30, 1u8).into_iter();
 
         assert!(circ.next().is_some());
     }

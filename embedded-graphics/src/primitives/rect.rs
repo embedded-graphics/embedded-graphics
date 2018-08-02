@@ -113,7 +113,11 @@ where
     }
 }
 
-impl<C> Drawable for Rect<C> where C: PixelColor {}
+impl<C> Drawable for Rect<C>
+where
+    C: PixelColor,
+{
+}
 
 impl<C> Transform for Rect<C>
 where
@@ -127,7 +131,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -148,7 +152,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
     /// rect.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(rect.top_left, Coord::new(15, 20));
@@ -179,7 +183,7 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), PixelColorU8(1)).into_iter();
+        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), 1u8).into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
@@ -195,7 +199,7 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect = Rect::new(Coord::new(-2, -2), Coord::new(2, 2), 1).into_iter();
+        let mut rect = Rect::new(Coord::new(-2, -2), Coord::new(2, 2), 1u8).into_iter();
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible

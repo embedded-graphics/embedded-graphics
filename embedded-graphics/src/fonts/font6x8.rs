@@ -149,7 +149,11 @@ where
     }
 }
 
-impl<'a, C> Drawable for Font6x8<'a, C> where C: PixelColor {}
+impl<'a, C> Drawable for Font6x8<'a, C>
+where
+    C: PixelColor,
+{
+}
 
 impl<'a, C> Transform for Font6x8<'a, C>
 where
@@ -164,7 +168,7 @@ where
     /// # use embedded_graphics::coord::Coord;
     ///
     /// // 8px x 1px test image
-    /// let text = Font6x8::render_str("Hello world", 1);
+    /// let text = Font6x8::render_str("Hello world", 1u8);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -184,7 +188,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut text = Font6x8::render_str("Hello world", 1);
+    /// let mut text = Font6x8::render_str("Hello world", 1u8);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));
@@ -202,7 +206,7 @@ mod tests {
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text = Font6x8::render_str("Hello World!", 1).translate(Coord::new(5, -10));
+        let text = Font6x8::render_str("Hello World!", 1u8).translate(Coord::new(5, -10));
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);

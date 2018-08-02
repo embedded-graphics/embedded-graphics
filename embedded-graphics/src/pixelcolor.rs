@@ -18,6 +18,12 @@ impl From<u8> for PixelColorU8 {
 }
 
 impl PixelColorU8 {
+    /// Get the inner value of the pixel
+    /// #
+    /// # use pixelcolor::PixelColorU16;
+    /// #
+    /// let color = PixelColoru16(100u16);
+    /// assert_eq!(color.into_inner(), 100u16);
     pub fn into_inner(self) -> u8 {
         self.0
     }
@@ -42,6 +48,12 @@ impl From<u16> for PixelColorU16 {
 }
 
 impl PixelColorU16 {
+    /// Get the inner value of the pixel
+    /// #
+    /// # use pixelcolor::PixelColorU8;
+    /// #
+    /// let color = PixelColoru8(100u8);
+    /// assert_eq!(color.into_inner(), 100u8);
     pub fn into_inner(self) -> u16 {
         self.0
     }
@@ -66,6 +78,12 @@ impl From<u32> for PixelColorU32 {
 }
 
 impl PixelColorU32 {
+    /// Get the inner value of the pixel
+    /// #
+    /// # use pixelcolor::PixelColorU32;
+    /// #
+    /// let color = PixelColoru32(100u32);
+    /// assert_eq!(color.into_inner(), 100u32);
     pub fn into_inner(self) -> u32 {
         self.0
     }

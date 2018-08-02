@@ -146,7 +146,11 @@ impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
     }
 }
 
-impl<C> Drawable for Line<C> where C: PixelColor {}
+impl<C> Drawable for Line<C>
+where
+    C: PixelColor,
+{
+}
 
 impl<C> Transform for Line<C>
 where
@@ -160,7 +164,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -181,7 +185,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));
