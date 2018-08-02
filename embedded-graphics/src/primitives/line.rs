@@ -166,11 +166,11 @@ where
     /// assert_eq!(moved.start, Coord::new(15, 20));
     /// assert_eq!(moved.end, Coord::new(25, 30));
     /// ```
-    fn translate(self, by: Coord) -> Self {
+    fn translate(&self, by: Coord) -> Self {
         Self {
             start: self.start + by,
             end: self.end + by,
-            ..self
+            ..self.clone()
         }
     }
 
@@ -199,15 +199,11 @@ where
 mod tests {
     use super::*;
     use drawable::Pixel;
+    use pixelcolor::PixelColorU8;
     use unsignedcoord::UnsignedCoord;
 
-    #[derive(Copy, Clone)]
-    struct TestPixel(u8);
-
-    impl PixelColor for TestPixel {}
-
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end, TestPixel(1));
+        let line = Line::new(start, end, PixelColorU8(1));
         for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
             assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }

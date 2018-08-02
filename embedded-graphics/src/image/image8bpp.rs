@@ -132,18 +132,19 @@ where
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::pixelcolor::PixelColorU8;
     ///
     /// // 1px x 1px test image
-    /// let image = Image8BPP::new(&[ 0xff ], 1, 1);
+    /// let image: Image8BPP<PixelColorU8> = Image8BPP::new(&[ 0xff ], 1, 1);
     /// let moved = image.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(image.offset, Coord::new(0, 0));
     /// assert_eq!(moved.offset, Coord::new(25, 30));
     /// ```
-    fn translate(self, by: Coord) -> Self {
+    fn translate(&self, by: Coord) -> Self {
         Self {
             offset: self.offset + by,
-            ..self
+            ..*self.clone()
         }
     }
 
@@ -153,9 +154,10 @@ where
     /// # use embedded_graphics::image::{ Image, Image8BPP };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::pixelcolor::PixelColorU8;
     ///
     /// // 1px x 1px test image
-    /// let mut image = Image8BPP::new(&[ 0xff ], 1, 1);
+    /// let mut image: Image8BPP<PixelColorU8> = Image8BPP::new(&[ 0xff ], 1, 1);
     /// image.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(image.offset, Coord::new(25, 30));
@@ -170,21 +172,34 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pixelcolor::PixelColorU8;
     use unsignedcoord::UnsignedCoord;
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image = Image8BPP::new(
+        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
         ).translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 0), 0xcc)));
-        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 0), 0x00)));
-        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 1), 0x00)));
-        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 1), 0xaa)));
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc.into()))
+        );
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(1, 0), 0x00.into()))
+        );
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(0, 1), 0x00.into()))
+        );
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa.into()))
+        );
 
         assert_eq!(it.next(), None);
     }

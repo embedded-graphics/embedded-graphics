@@ -167,10 +167,10 @@ where
     /// assert_eq!(text.pos, Coord::new(0, 0));
     /// assert_eq!(moved.pos, Coord::new(25, 30));
     /// ```
-    fn translate(self, by: Coord) -> Self {
+    fn translate(&self, by: Coord) -> Self {
         Self {
             pos: self.pos + by,
-            ..self
+            ..self.clone()
         }
     }
 

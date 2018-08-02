@@ -133,11 +133,11 @@ where
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
     /// assert_eq!(moved.bottom_right, Coord::new(25, 30));
     /// ```
-    fn translate(self, by: Coord) -> Self {
+    fn translate(&self, by: Coord) -> Self {
         Self {
             top_left: self.top_left + by,
             bottom_right: self.bottom_right + by,
-            ..self
+            ..self.clone()
         }
     }
 
@@ -165,11 +165,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pixelcolor::PixelColorU8;
     use unsignedcoord::UnsignedCoord;
 
     #[test]
     fn it_can_be_translated() {
-        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), PixelColorU8(1));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -178,18 +179,18 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), 1).into_iter();
+        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), PixelColorU8(1)).into_iter();
 
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 2), 1)));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
 
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 3), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 3), 1)));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(4, 3), 1.into())));
 
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 4), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 4), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 4), 1)));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(3, 4), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(4, 4), 1.into())));
     }
 
     #[test]
@@ -198,10 +199,10 @@ mod tests {
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 0), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 1), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(0, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(1, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), 1)));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 1), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(0, 2), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(1, 2), 1.into())));
+        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
     }
 }

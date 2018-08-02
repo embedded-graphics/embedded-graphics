@@ -138,18 +138,19 @@ impl<'a, C> Transform for Image1BPP<'a, C> {
     /// # use embedded_graphics::image::{ Image, Image1BPP };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
-    ///
+    /// # use embedded_graphics::pixelcolor::PixelColorU8;
+    /// #
     /// // 8px x 1px test image
-    /// let image = Image1BPP::new(&[ 0xff ], 8, 1);
+    /// let image: Image1BPP<PixelColorU8> = Image1BPP::new(&[ 0xff ], 8, 1);
     /// let moved = image.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(image.offset, Coord::new(0, 0));
     /// assert_eq!(moved.offset, Coord::new(25, 30));
     /// ```
-    fn translate(self, by: Coord) -> Self {
+    fn translate(&self, by: Coord) -> Self {
         Self {
             offset: self.offset + by,
-            ..self
+            ..*self.clone()
         }
     }
 
@@ -159,8 +160,9 @@ impl<'a, C> Transform for Image1BPP<'a, C> {
     /// # use embedded_graphics::image::{ Image, Image1BPP };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut image = Image1BPP::new(&[ 0xff ], 8, 1);
+    /// # use embedded_graphics::pixelcolor::PixelColorU8;
+    /// #
+    /// let mut image: Image1BPP<PixelColorU8> = Image1BPP::new(&[ 0xff ], 8, 1);
     /// image.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(image.offset, Coord::new(25, 30));

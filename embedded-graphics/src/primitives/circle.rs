@@ -142,10 +142,10 @@ where
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
     /// ```
-    fn translate(self, by: Coord) -> Self {
+    fn translate(&self, by: Coord) -> Self {
         Self {
             center: self.center + by,
-            ..self
+            ..self.clone()
         }
     }
 
