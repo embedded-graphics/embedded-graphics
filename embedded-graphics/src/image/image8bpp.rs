@@ -111,7 +111,7 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), bit_value);
+                break Pixel(current_pixel.to_unsigned(), bit_value.into());
             }
         };
 

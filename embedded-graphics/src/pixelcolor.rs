@@ -1,4 +1,6 @@
 //! Pixel color trait
-pub trait PixelColor: Clone + Copy {}
+
+/// Pixel color
+pub trait PixelColor: Clone + Copy + From<u8> {}
 
 impl PixelColor for u8 {}

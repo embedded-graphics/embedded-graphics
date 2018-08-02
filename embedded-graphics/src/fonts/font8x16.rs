@@ -113,7 +113,7 @@ where
                 let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
                     self.color
                 } else {
-                    0 // black
+                    0.into() // black
                 };
 
                 self.char_walk_x += 1;

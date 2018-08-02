@@ -16,6 +16,12 @@ pub struct SimPixelColor(pub bool);
 
 impl PixelColor for SimPixelColor {}
 
+impl From<u8> for SimPixelColor {
+    fn from(other: u8) -> Self {
+        SimPixelColor(other != 0)
+    }
+}
+
 const DISPLAY_SIZE: usize = 128;
 
 pub struct Display {
