@@ -52,8 +52,6 @@ pub mod prelude;
 pub mod transform;
 pub mod unsignedcoord;
 
-use drawable::Color;
-
 /// The main trait of this crate. All graphics objects must implement it.
 pub trait Drawing {
     /// Data type to store color
@@ -61,5 +59,5 @@ pub trait Drawing {
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel<Color<Self::C>>>;
+        T: Iterator<Item = drawable::Pixel<Self::C>>;
 }
