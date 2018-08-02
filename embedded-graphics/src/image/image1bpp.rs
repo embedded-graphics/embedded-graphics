@@ -12,6 +12,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 /// 1 bit per pixel image
 #[derive(Debug)]
@@ -41,7 +42,7 @@ impl<'a> Image<'a> for Image1BPP<'a> {
 }
 
 impl<'a> IntoIterator for &'a Image1BPP<'a> {
-    type Item = Pixel;
+    type Item = Pixel<u8>;
     type IntoIter = Image1BPPIterator<'a>;
 
     // NOTE: `self` is a reference already, no copies here!
@@ -63,7 +64,7 @@ pub struct Image1BPPIterator<'a> {
 
 /// Iterator over every pixel in the source image
 impl<'a> Iterator for Image1BPPIterator<'a> {
-    type Item = Pixel;
+    type Item = Pixel<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // If we're outside the upper left screen bounds, bail
@@ -106,7 +107,7 @@ impl<'a> Iterator for Image1BPPIterator<'a> {
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break (current_pixel.to_unsigned(), bit_value);
+                break (current_pixel.to_unsigned(), Color::new(bit_value));
             }
         };
 

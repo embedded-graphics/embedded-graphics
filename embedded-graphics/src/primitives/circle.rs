@@ -3,11 +3,14 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
 #[derive(Debug, Copy, Clone)]
-pub struct Circle {
+pub struct Circle<C>
+    where C: Clone + Copy + PartialEq
+{
     /// Center point of circle
     pub center: Coord,
 
@@ -15,12 +18,14 @@ pub struct Circle {
     pub radius: u32,
 
     /// Line colour of circle
-    pub color: Color,
+    pub color: Color<C>,
 }
 
-impl Circle {
+impl<C> Circle<C>
+    where C: Clone + Copy + PartialEq 
+{
     /// Create a new circle with center point, radius and border color
-    pub fn new(center: Coord, radius: u32, color: u8) -> Self {
+    pub fn new(center: Coord, radius: u32, color: Color<C>) -> Self {
         Circle {
             center,
             radius,
@@ -29,9 +34,11 @@ impl Circle {
     }
 }
 
-impl<'a> IntoIterator for &'a Circle {
-    type Item = Pixel;
-    type IntoIter = CircleIterator;
+impl<'a, C> IntoIterator for &'a Circle<C> 
+    where C: Clone + Copy + PartialEq
+{
+    type Item = Pixel<C>;
+    type IntoIter = CircleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         CircleIterator {
@@ -50,10 +57,12 @@ impl<'a> IntoIterator for &'a Circle {
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
-pub struct CircleIterator {
+pub struct CircleIterator<C> 
+    where C: Clone + Copy + PartialEq
+{
     center: Coord,
     radius: u32,
-    color: Color,
+    color: Color<C>,
 
     octant: u32,
     idx: u32,
@@ -62,8 +71,10 @@ pub struct CircleIterator {
     d: i32,
 }
 
-impl Iterator for CircleIterator {
-    type Item = Pixel;
+impl<C> Iterator for CircleIterator<C> 
+    where C: Clone + Copy + PartialEq
+{
+    type Item = Pixel<C>;
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
     fn next(&mut self) -> Option<Self::Item> {
@@ -113,9 +124,9 @@ impl Iterator for CircleIterator {
     }
 }
 
-impl Drawable for Circle {}
+impl<C> Drawable for Circle<C> where C: Clone + Copy + PartialEq {}
 
-impl Transform for Circle {
+impl<C> Transform for Circle<C> where C: Clone + Copy + PartialEq {
     /// Translate the circle center from its current position to a new position by (x, y) pixels,
     /// returning a new `Circle`. For a mutating transform, see `translate_mut`.
     ///
@@ -123,8 +134,9 @@ impl Transform for Circle {
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let circle = Circle::new(Coord::new(5, 10), 10, Color::new(1));
     /// let moved = circle.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
@@ -142,8 +154,9 @@ impl Transform for Circle {
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let mut circle = Circle::new(Coord::new(5, 10), 10, Color::new(1));
     /// circle.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(circle.center, Coord::new(15, 20));
@@ -161,14 +174,14 @@ mod tests {
 
     #[test]
     fn it_handles_offscreen_coords() {
-        let mut circ = Circle::new(Coord::new(-10, -10), 5, 1).into_iter();
+        let mut circ = Circle::new(Coord::new(-10, -10), 5, Color::new(1)).into_iter();
 
         assert_eq!(circ.next(), None);
     }
 
     #[test]
     fn it_handles_partially_on_screen_coords() {
-        let mut circ = Circle::new(Coord::new(-5, -5), 30, 1).into_iter();
+        let mut circ = Circle::new(Coord::new(-5, -5), 30, Color::new(1)).into_iter();
 
         assert!(circ.next().is_some());
     }

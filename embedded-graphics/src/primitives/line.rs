@@ -3,11 +3,13 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
 #[derive(Debug, Copy, Clone)]
-pub struct Line {
+pub struct Line<C> 
+    where C: Clone + Copy + PartialEq {
     /// Start point
     pub start: Coord,
 
@@ -15,19 +17,23 @@ pub struct Line {
     pub end: Coord,
 
     /// Line color
-    pub color: Color,
+    pub color: Color<C>,
 }
 
-impl Line {
+impl<C> Line<C> 
+    where C: Clone + Copy + PartialEq
+{
     /// Create a new line
-    pub fn new(start: Coord, end: Coord, color: u8) -> Self {
+    pub fn new(start: Coord, end: Coord, color: Color<C>) -> Self {
         Line { start, end, color }
     }
 }
 
-impl<'a> IntoIterator for &'a Line {
-    type Item = Pixel;
-    type IntoIter = LineIterator<'a>;
+impl<'a, C> IntoIterator for &'a Line<C> 
+    where C: Clone + Copy + PartialEq
+{
+    type Item = Pixel<C>;
+    type IntoIter = LineIterator<'a, C>;
 
     fn into_iter(self) -> Self::IntoIter {
         let x0 = self.start[0].max(0);
@@ -93,8 +99,10 @@ impl<'a> IntoIterator for &'a Line {
 
 /// Pixel iterator for each pixel in the line
 #[derive(Debug)]
-pub struct LineIterator<'a> {
-    line: &'a Line,
+pub struct LineIterator<'a, C: 'a> 
+    where C: Clone + Copy + PartialEq
+{
+    line: &'a Line<C>,
 
     dquick: i32,
     dslow: i32,
@@ -108,8 +116,10 @@ pub struct LineIterator<'a> {
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<'a> Iterator for LineIterator<'a> {
-    type Item = Pixel;
+impl<'a, C> Iterator for LineIterator<'a, C> 
+    where C: Clone + Copy + PartialEq
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.quick > self.end {
@@ -139,9 +149,9 @@ impl<'a> Iterator for LineIterator<'a> {
     }
 }
 
-impl Drawable for Line {}
+impl<C> Drawable for Line<C> where C: Clone + Copy + PartialEq {}
 
-impl Transform for Line {
+impl<C> Transform for Line<C> where C: Clone + Copy + PartialEq {
     /// Translate the line from its current position to a new position by (x, y) pixels, returning
     /// a new `Line`. For a mutating transform, see `translate_mut`.
     ///
@@ -149,8 +159,9 @@ impl Transform for Line {
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -170,8 +181,9 @@ impl Transform for Line {
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));
@@ -191,7 +203,7 @@ mod tests {
     use unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end, 1);
+        let line = Line::new(start, end, Color::new(1));
         for (idx, (coord, _)) in line.into_iter().enumerate() {
             assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }

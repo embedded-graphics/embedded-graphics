@@ -3,11 +3,14 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
 #[derive(Debug, Clone, Copy)]
-pub struct Rect {
+pub struct Rect<C> 
+    where C: Clone + Copy + PartialEq
+{
     /// Top left point of the rect
     pub top_left: Coord,
 
@@ -15,13 +18,15 @@ pub struct Rect {
     pub bottom_right: Coord,
 
     /// Border color
-    pub color: Color,
+    pub color: Color<C>,
 }
 
-impl Rect {
+impl<C> Rect<C> 
+    where C: Clone + Copy + PartialEq
+{
     /// Create a new rectangle from the top left point to the bottom right point with a given border
     /// color
-    pub fn new(top_left: Coord, bottom_right: Coord, color: u8) -> Self {
+    pub fn new(top_left: Coord, bottom_right: Coord, color: Color<C>) -> Self {
         Rect {
             top_left,
             bottom_right,
@@ -30,9 +35,11 @@ impl Rect {
     }
 }
 
-impl<'a> IntoIterator for &'a Rect {
-    type Item = Pixel;
-    type IntoIter = RectIterator;
+impl<'a, C> IntoIterator for &'a Rect<C> 
+    where C: Clone + Copy + PartialEq
+{
+    type Item = Pixel<C>;
+    type IntoIter = RectIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         RectIterator {
@@ -48,17 +55,21 @@ impl<'a> IntoIterator for &'a Rect {
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Clone, Copy)]
-pub struct RectIterator {
+pub struct RectIterator<C> 
+    where C: Clone + Copy + PartialEq
+{
     top_left: Coord,
     bottom_right: Coord,
-    color: Color,
+    color: Color<C>,
     x: i32,
     y: i32,
     screen_size: Coord,
 }
 
-impl Iterator for RectIterator {
-    type Item = Pixel;
+impl<C> Iterator for RectIterator<C> 
+    where C: Clone + Copy + PartialEq
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // Entire object is off the top left of the screen, so render nothing
@@ -100,9 +111,9 @@ impl Iterator for RectIterator {
     }
 }
 
-impl Drawable for Rect {}
+impl<C> Drawable for Rect<C> where C: Clone + Copy + PartialEq{}
 
-impl Transform for Rect {
+impl<C> Transform for Rect<C> where C: Clone + Copy + PartialEq{
     /// Translate the rect from its current position to a new position by (x, y) pixels, returning
     /// a new `Rect`. For a mutating transform, see `translate_mut`.
     ///
@@ -110,8 +121,9 @@ impl Transform for Rect {
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -131,8 +143,9 @@ impl Transform for Rect {
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// rect.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(rect.top_left, Coord::new(15, 20));
@@ -153,7 +166,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -162,30 +175,28 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), 1).into_iter();
+        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), Color::new(1)).into_iter();
 
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 2), 1)));
-
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 3), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 3), 1)));
-
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 4), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 4), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 4), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 2), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 2), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 3), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 3), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 4), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(3, 4), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(4, 4), Color::new(1))));
     }
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect = Rect::new(Coord::new(-2, -2), Coord::new(2, 2), 1).into_iter();
+        let mut rect = Rect::new(Coord::new(-2, -2), Coord::new(2, 2), Color::new(1)).into_iter();
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 0), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 1), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(0, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(1, 2), 1)));
-        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), 1)));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 0), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 1), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(0, 2), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(1, 2), Color::new(1))));
+        assert_eq!(rect.next(), Some((UnsignedCoord::new(2, 2), Color::new(1))));
     }
 }

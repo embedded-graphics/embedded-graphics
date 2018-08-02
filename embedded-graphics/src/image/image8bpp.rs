@@ -13,6 +13,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 /// 8 bit per pixel image
 #[derive(Debug)]
@@ -44,7 +45,7 @@ impl<'a> Image<'a> for Image8BPP<'a> {
 }
 
 impl<'a> IntoIterator for &'a Image8BPP<'a> {
-    type Item = Pixel;
+    type Item = Pixel<u8>;
     type IntoIter = Image8BPPIterator<'a>;
 
     // NOTE: `self` is a reference already, no copies here!
@@ -65,7 +66,7 @@ pub struct Image8BPPIterator<'a> {
 }
 
 impl<'a> Iterator for Image8BPPIterator<'a> {
-    type Item = Pixel;
+    type Item = Pixel<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let current_pixel = loop {
@@ -94,7 +95,7 @@ impl<'a> Iterator for Image8BPPIterator<'a> {
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break (current_pixel.to_unsigned(), bit_value);
+                break (current_pixel.to_unsigned(), Color::new(bit_value));
             }
         };
 
@@ -161,10 +162,10 @@ mod tests {
         ).translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 0), 0xcc)));
-        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 0), 0x00)));
-        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 1), 0x00)));
-        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 1), 0xaa)));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 0), Color::new(0xcc))));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 0), Color::new(0x00))));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(0, 1), Color::new(0x00))));
+        assert_eq!(it.next(), Some((UnsignedCoord::new(1, 1), Color::new(0xaa))));
 
         assert_eq!(it.next(), None);
     }
