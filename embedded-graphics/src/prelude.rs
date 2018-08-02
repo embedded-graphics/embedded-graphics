@@ -6,4 +6,4 @@ pub use super::fonts::Font;
 pub use super::transform::Transform;
 pub use super::unsignedcoord::UnsignedCoord;
 pub use super::Drawing;
-pub use super::drawable::Color;
+pub use super::color::Color;

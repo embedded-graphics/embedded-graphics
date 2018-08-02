@@ -13,6 +13,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 /// 8 bit per pixel image
 #[derive(Debug)]

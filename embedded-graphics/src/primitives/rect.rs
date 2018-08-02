@@ -3,6 +3,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
@@ -120,8 +121,9 @@ impl<C> Transform for Rect<C> where C: Clone + Copy + PartialEq{
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -141,8 +143,9 @@ impl<C> Transform for Rect<C> where C: Clone + Copy + PartialEq{
     /// # use embedded_graphics::primitives::Rect;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// rect.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(rect.top_left, Coord::new(15, 20));

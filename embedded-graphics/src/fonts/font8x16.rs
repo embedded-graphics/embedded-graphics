@@ -4,6 +4,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font8x16_1bpp.raw");
 const CHAR_HEIGHT: u32 = 16;
@@ -150,9 +151,10 @@ impl<'a, C> Transform for Font8x16<'a, C> where C: Clone + Copy + PartialEq {
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
     /// // 8px x 1px test image
-    /// let text = Font8x16::render_str("Hello world", 1);
+    /// let text = Font8x16::render_str("Hello world", Color::new(1));
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -171,8 +173,9 @@ impl<'a, C> Transform for Font8x16<'a, C> where C: Clone + Copy + PartialEq {
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut text = Font6x8::render_str("Hello world", 1);
+    /// let mut text = Font6x8::render_str("Hello world", Color::new(1));
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));

@@ -3,6 +3,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -133,8 +134,9 @@ impl<C> Transform for Circle<C> where C: Clone + Copy + PartialEq {
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let circle = Circle::new(Coord::new(5, 10), 10, Color::new(1));
     /// let moved = circle.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
@@ -152,8 +154,9 @@ impl<C> Transform for Circle<C> where C: Clone + Copy + PartialEq {
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1);
+    /// let mut circle = Circle::new(Coord::new(5, 10), 10, Color::new(1));
     /// circle.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(circle.center, Coord::new(15, 20));

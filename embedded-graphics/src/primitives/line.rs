@@ -3,6 +3,7 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
+use color::Color;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -158,8 +159,9 @@ impl<C> Transform for Line<C> where C: Clone + Copy + PartialEq {
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -179,8 +181,9 @@ impl<C> Transform for Line<C> where C: Clone + Copy + PartialEq {
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::color::Color;
     ///
-    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1);
+    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), Color::new(1));
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));

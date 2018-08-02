@@ -47,6 +47,7 @@ pub mod coord;
 pub mod drawable;
 pub mod fonts;
 pub mod image;
+pub mod color;
 pub mod prelude;
 pub mod primitives;
 pub mod transform;
