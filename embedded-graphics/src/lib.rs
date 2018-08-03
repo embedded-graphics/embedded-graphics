@@ -4,12 +4,12 @@
 //! following:
 //!
 //! * 1 bit-per-pixel images
-//! * 8 bit-per-pixel images (downsampled to 1BPP currently)
+//! * 8 bit-per-pixel images
 //! * Primitives
 //!     * Lines
 //!     * Rectangles (and squares)
 //!     * Circles
-//! * Text with a 6x8 pixel font
+//! * Text with multiple [fonts](./fonts/index.html)
 //!
 //! A core goal is to do the above without using any buffers; the crate should work without a
 //! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
@@ -20,7 +20,7 @@
 //! To use this crate in a driver, you only need to implement the `Drawing` trait to start drawing
 //! things.
 //!
-//! You can also add your own objects by implementing `IntoIterator<Item = Pixel>` to create an
+//! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
 //!
 //! ## Crate features
