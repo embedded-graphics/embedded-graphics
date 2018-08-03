@@ -15,14 +15,14 @@ fn main() {
     let mut display = Display::new();
 
     // Outline
-    display.draw(Circle::new(Coord::new(64, 64), 63, 1).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 63, 1u8.into()).into_iter());
 
     // Clock hands
-    display.draw(Line::new(Coord::new(64, 64), Coord::new(0, 64), 1).into_iter());
-    display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80), 1).into_iter());
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(0, 64), 1u8.into()).into_iter());
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80), 1u8.into()).into_iter());
 
     display.draw(
-        Font6x8::render_str("Hello World!", 1)
+        Font6x8::render_str("Hello World!", 1u8.into())
             .translate(Coord::new(5, 50))
             .into_iter(),
     );

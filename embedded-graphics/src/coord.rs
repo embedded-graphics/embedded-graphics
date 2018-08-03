@@ -1,4 +1,7 @@
-//! 2D coordinate in screen space
+//! 2D signed coordinate in screen space
+//!
+//! This struct is what you should use when positioning graphics elements as it can handle negative
+//! coordinates. To output pixel coordinates, use [`UnsignedCoord`](../unsignedcoord/index.html).
 
 use super::unsignedcoord::UnsignedCoord;
 

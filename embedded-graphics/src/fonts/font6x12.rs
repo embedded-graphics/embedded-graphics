@@ -4,6 +4,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Font;
 use coord::{Coord, ToUnsigned};
+use pixelcolor::PixelColor;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x12_1bpp.raw");
 const CHAR_HEIGHT: u32 = 12;
@@ -14,7 +15,7 @@ const CHARS_PER_ROW: u32 = FONT_IMAGE_WIDTH / CHAR_WIDTH;
 
 /// Container struct to hold a positioned piece of text
 #[derive(Debug, Clone, Copy)]
-pub struct Font6x12<'a> {
+pub struct Font6x12<'a, C: PixelColor> {
     /// Top left corner of the text
     pub pos: Coord,
 
@@ -22,11 +23,14 @@ pub struct Font6x12<'a> {
     text: &'a str,
 
     /// Fill Color of font
-    color: u8,
+    color: C,
 }
 
-impl<'a> Font<'a> for Font6x12<'a> {
-    fn render_str(text: &'a str, color: u8) -> Font6x12<'a> {
+impl<'a, C> Font<'a, C> for Font6x12<'a, C>
+where
+    C: PixelColor,
+{
+    fn render_str(text: &'a str, color: C) -> Font6x12<'a, C> {
         Self {
             pos: Coord::new(0, 0),
             text,
@@ -36,19 +40,22 @@ impl<'a> Font<'a> for Font6x12<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Font6x12Iterator<'a> {
+pub struct Font6x12Iterator<'a, C> {
     char_walk_x: u32,
     char_walk_y: u32,
     current_char: Option<char>,
     idx: usize,
     pos: Coord,
     text: &'a str,
-    color: u8,
+    color: C,
 }
 
-impl<'a> IntoIterator for &'a Font6x12<'a> {
-    type IntoIter = Font6x12Iterator<'a>;
-    type Item = Pixel;
+impl<'a, C> IntoIterator for &'a Font6x12<'a, C>
+where
+    C: PixelColor,
+{
+    type IntoIter = Font6x12Iterator<'a, C>;
+    type Item = Pixel<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         Font6x12Iterator {
@@ -63,11 +70,14 @@ impl<'a> IntoIterator for &'a Font6x12<'a> {
     }
 }
 
-impl<'a> Iterator for Font6x12Iterator<'a> {
-    type Item = Pixel;
+impl<'a, C> Iterator for Font6x12Iterator<'a, C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pos[0] + ((self.text.len() as i32 * CHAR_WIDTH as i32)) < 0
+        if self.pos[0] + (self.text.len() as i32 * CHAR_WIDTH as i32) < 0
             || self.pos[1] + (CHAR_HEIGHT as i32) < 0
         {
             return None;
@@ -100,7 +110,7 @@ impl<'a> Iterator for Font6x12Iterator<'a> {
                 let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
                     self.color
                 } else {
-                    0 // black
+                    0.into() // black
                 };
 
                 self.char_walk_x += 1;
@@ -122,7 +132,7 @@ impl<'a> Iterator for Font6x12Iterator<'a> {
                 let y = self.pos[1] + self.char_walk_y as i32;
 
                 if x >= 0 && y >= 0 {
-                    break Some((Coord::new(x, y).to_unsigned(), color));
+                    break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
                 }
             };
 
@@ -133,9 +143,16 @@ impl<'a> Iterator for Font6x12Iterator<'a> {
     }
 }
 
-impl<'a> Drawable for Font6x12<'a> {}
+impl<'a, C> Drawable for Font6x12<'a, C>
+where
+    C: PixelColor,
+{
+}
 
-impl<'a> Transform for Font6x12<'a> {
+impl<'a, C> Transform for Font6x12<'a, C>
+where
+    C: PixelColor,
+{
     /// Translate the font origin from its current position to a new position by (x, y) pixels,
     /// returning a new `Font6x8`. For a mutating transform, see `translate_mut`.
     ///
@@ -144,7 +161,7 @@ impl<'a> Transform for Font6x12<'a> {
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
     ///
-    /// let text = Font6x8::render_str("Hello world", 1);
+    /// let text = Font6x8::render_str("Hello world", 1u8);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -153,7 +170,7 @@ impl<'a> Transform for Font6x12<'a> {
     fn translate(&self, by: Coord) -> Self {
         Self {
             pos: self.pos + by,
-            ..*self
+            ..self.clone()
         }
     }
 
@@ -165,7 +182,7 @@ impl<'a> Transform for Font6x12<'a> {
     /// # use embedded_graphics::coord::Coord;
     ///
     /// // 8px x 1px test image
-    /// let mut text = Font6x12::render_str("Hello world", 1);
+    /// let mut text = Font6x12::render_str("Hello world", 1u8);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));
@@ -183,7 +200,7 @@ mod tests {
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text = Font6x12::render_str("Hello World!", 1).translate(Coord::new(5, -20));
+        let text = Font6x12::render_str("Hello World!", 1u8).translate(Coord::new(5, -20));
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);

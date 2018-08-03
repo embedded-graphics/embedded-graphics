@@ -4,12 +4,12 @@
 //! following:
 //!
 //! * 1 bit-per-pixel images
-//! * 8 bit-per-pixel images (downsampled to 1BPP currently)
+//! * 8 bit-per-pixel images
 //! * Primitives
 //!     * Lines
 //!     * Rectangles (and squares)
 //!     * Circles
-//! * Text with a 6x8 pixel font
+//! * Text with multiple [fonts](./fonts/index.html)
 //!
 //! A core goal is to do the above without using any buffers; the crate should work without a
 //! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
@@ -20,7 +20,7 @@
 //! To use this crate in a driver, you only need to implement the `Drawing` trait to start drawing
 //! things.
 //!
-//! You can also add your own objects by implementing `IntoIterator<Item = Pixel>` to create an
+//! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
 //!
 //! ## Crate features
@@ -47,15 +47,21 @@ pub mod coord;
 pub mod drawable;
 pub mod fonts;
 pub mod image;
+pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
 pub mod transform;
 pub mod unsignedcoord;
 
+use pixelcolor::PixelColor;
+
 /// The main trait of this crate. All graphics objects must implement it.
-pub trait Drawing {
+pub trait Drawing<C>
+where
+    C: PixelColor + Clone,
+{
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel>;
+        T: Iterator<Item = drawable::Pixel<C>>;
 }
