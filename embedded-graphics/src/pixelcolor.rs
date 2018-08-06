@@ -2,7 +2,7 @@
 //!
 //! Driver implementers should implement `PixelColor` for the struct used to store pixels for the
 //! target display. An example can be found in
-//! [the simulator](../simulator/struct.SimPixelColor.html). A simpler example looks like this:
+//! [the simulator](../../simulator/struct.SimPixelColor.html). A simpler example looks like this:
 //!
 //! ```rust
 //! use embedded_graphics::drawable::Pixel;
