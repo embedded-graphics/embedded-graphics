@@ -5,6 +5,7 @@ use super::super::transform::*;
 use super::Font;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
 const CHAR_HEIGHT: u32 = 8;
@@ -25,19 +26,19 @@ where
     /// Text to draw
     text: &'a str,
 
-    /// Fill Color of font
-    color: C,
+    /// Font style
+    style: Style<C>,
 }
 
 impl<'a, C> Font<'a, C> for Font6x8<'a, C>
 where
     C: PixelColor,
 {
-    fn render_str(text: &'a str, color: C) -> Font6x8<'a, C> {
+    fn render_str(text: &'a str, style: Style<C>) -> Font6x8<'a, C> {
         Self {
             pos: Coord::new(0, 0),
             text,
-            color,
+            style,
         }
     }
 }
@@ -53,7 +54,7 @@ where
     idx: usize,
     pos: Coord,
     text: &'a str,
-    color: C,
+    style: Style<C>,
 }
 
 impl<'a, C> IntoIterator for &'a Font6x8<'a, C>
@@ -71,7 +72,7 @@ where
             char_walk_x: 0,
             char_walk_y: 0,
             pos: self.pos,
-            color: self.color,
+            style: self.style,
         }
     }
 }
@@ -85,6 +86,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.pos[0] + (self.text.len() as i32 * CHAR_WIDTH as i32) < 0
             || self.pos[1] + (CHAR_HEIGHT as i32) < 0
+            || self.style.stroke_color.is_none()
         {
             return None;
         }
@@ -114,7 +116,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
-                    self.color
+                    self.style
+                        .stroke_color
+                        .expect("Font does not have stroke colour defined")
                 } else {
                     0.into() // black
                 };
@@ -149,11 +153,7 @@ where
     }
 }
 
-impl<'a, C> Drawable for Font6x8<'a, C>
-where
-    C: PixelColor,
-{
-}
+impl<'a, C> Drawable for Font6x8<'a, C> where C: PixelColor {}
 
 impl<'a, C> Transform for Font6x8<'a, C>
 where
@@ -206,7 +206,17 @@ mod tests {
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text = Font6x8::render_str("Hello World!", 1u8).translate(Coord::new(5, -10));
+        let text = Font6x8::render_str("Hello World!", Style::with_stroke(1u8.into()))
+            .translate(Coord::new(5, -10));
+        let mut it = text.into_iter();
+
+        assert_eq!(it.next(), None);
+    }
+
+    #[test]
+    fn unstroked_text_does_not_infinite_loop() {
+        let text =
+            Font6x8::render_str("Hello World!", Style::default()).translate(Coord::new(5, -10));
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);

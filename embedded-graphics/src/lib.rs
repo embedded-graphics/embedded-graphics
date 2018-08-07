@@ -50,6 +50,7 @@ pub mod image;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
+pub mod style;
 pub mod transform;
 pub mod unsignedcoord;
 

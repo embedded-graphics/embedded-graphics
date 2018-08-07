@@ -4,6 +4,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -15,8 +16,8 @@ pub struct Circle<C: PixelColor> {
     /// Radius of the circle
     pub radius: u32,
 
-    /// Line colour of circle
-    pub color: C,
+    /// Style of the circle
+    pub style: Style<C>,
 }
 
 impl<C> Circle<C>
@@ -24,11 +25,11 @@ where
     C: PixelColor,
 {
     /// Create a new circle with center point, radius and border color
-    pub fn new(center: Coord, radius: u32, color: C) -> Self {
+    pub fn new(center: Coord, radius: u32, style: Style<C>) -> Self {
         Circle {
             center,
             radius,
-            color,
+            style,
         }
     }
 }
@@ -44,7 +45,7 @@ where
         CircleIterator {
             center: self.center,
             radius: self.radius,
-            color: self.color,
+            style: self.style,
 
             octant: 0,
             idx: 0,
@@ -57,10 +58,10 @@ where
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
-pub struct CircleIterator<C> {
+pub struct CircleIterator<C: PixelColor> {
     center: Coord,
     radius: u32,
-    color: C,
+    style: Style<C>,
 
     octant: u32,
     idx: u32,
@@ -77,6 +78,11 @@ where
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
     fn next(&mut self) -> Option<Self::Item> {
+        // If border colour is `None`, treat it as transparent and exit early
+        if self.style.stroke_color.is_none() {
+            return None;
+        }
+
         let item = loop {
             if self.x > self.y {
                 break None;
@@ -119,15 +125,16 @@ where
             }
         };
 
-        item.map(|(x, y)| Pixel(Coord::new(x, y).to_unsigned(), self.color))
+        item.map(|(x, y)| {
+            Pixel(
+                Coord::new(x, y).to_unsigned(),
+                self.style.stroke_color.expect("No stroke color given"),
+            )
+        })
     }
 }
 
-impl<C> Drawable for Circle<C>
-where
-    C: PixelColor,
-{
-}
+impl<C> Drawable for Circle<C> where C: PixelColor {}
 
 impl<C> Transform for Circle<C>
 where

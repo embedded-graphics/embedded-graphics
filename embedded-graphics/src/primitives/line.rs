@@ -4,6 +4,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -15,8 +16,8 @@ pub struct Line<C: PixelColor> {
     /// End point
     pub end: Coord,
 
-    /// Line color
-    pub color: C,
+    /// Line style
+    pub style: Style<C>,
 }
 
 impl<C> Line<C>
@@ -24,8 +25,8 @@ where
     C: PixelColor,
 {
     /// Create a new line
-    pub fn new(start: Coord, end: Coord, color: C) -> Self {
-        Line { start, end, color }
+    pub fn new(start: Coord, end: Coord, style: Style<C>) -> Self {
+        Line { start, end, style }
     }
 }
 
@@ -141,16 +142,15 @@ impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
         // Increment fast direction
         self.quick += 1;
 
-        // Return
-        Some(Pixel(coord.to_unsigned(), self.line.color.clone()))
+        // Return if there is a stroke on the line
+        self.line
+            .style
+            .stroke_color
+            .map(|color| Pixel(coord.to_unsigned(), color))
     }
 }
 
-impl<C> Drawable for Line<C>
-where
-    C: PixelColor,
-{
-}
+impl<C> Drawable for Line<C> where C: PixelColor {}
 
 impl<C> Transform for Line<C>
 where
@@ -204,10 +204,11 @@ mod tests {
     use super::*;
     use drawable::Pixel;
     use pixelcolor::PixelColorU8;
+    use style::Style;
     use unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end, PixelColorU8(1));
+        let line = Line::new(start, end, Style::with_stroke(PixelColorU8(1)));
         for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
             assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }

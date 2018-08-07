@@ -10,6 +10,7 @@ pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
 use pixelcolor::PixelColor;
+use style::Style;
 
 /// Common methods for all fonts
 pub trait Font<'a, C>
@@ -42,5 +43,5 @@ where
     ///     disp.draw(text.into_iter());
     /// }
     /// ```
-    fn render_str(chars: &'a str, color: C) -> Self;
+    fn render_str(chars: &'a str, style: Style<C>) -> Self;
 }
