@@ -40,3 +40,12 @@ where
         }
     }
 }
+
+/// Add a style to an object
+pub trait WithStyle<C>
+where
+    C: PixelColor,
+{
+    /// Add a style to the object
+    fn with_style(self, style: Style<C>) -> Self;
+}

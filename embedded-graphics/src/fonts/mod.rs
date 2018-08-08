@@ -10,10 +10,10 @@ pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
 use pixelcolor::PixelColor;
-use style::Style;
+use style::WithStyle;
 
 /// Common methods for all fonts
-pub trait Font<'a, C>
+pub trait Font<'a, C>: WithStyle<C>
 where
     C: PixelColor,
 {
@@ -21,8 +21,7 @@ where
     ///
     /// ```rust
     /// # use embedded_graphics::fonts::{Font, Font6x8};
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::drawable::Pixel;
+    /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::PixelColorU8;
     /// #
     /// # struct Display {}
@@ -38,10 +37,11 @@ where
     /// fn main() {
     ///     let disp: Display = Display {};
     ///     // Render a string with a 8bit color
-    ///     let text = Font6x8::render_str("Hello world", 1u8.into());
+    ///     let text = Font6x8::render_str("Hello world")
+    ///         .with_style(Style::with_stroke(1u8.into()));
     ///
     ///     disp.draw(text.into_iter());
     /// }
     /// ```
-    fn render_str(chars: &'a str, style: Style<C>) -> Self;
+    fn render_str(chars: &'a str) -> Self;
 }

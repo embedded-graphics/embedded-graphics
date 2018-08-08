@@ -5,6 +5,7 @@ use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
 use style::Style;
+use style::WithStyle;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -25,8 +26,12 @@ where
     C: PixelColor,
 {
     /// Create a new line
-    pub fn new(start: Coord, end: Coord, style: Style<C>) -> Self {
-        Line { start, end, style }
+    pub fn new(start: Coord, end: Coord) -> Self {
+        Line {
+            start,
+            end,
+            style: Style::default(),
+        }
     }
 }
 
@@ -161,10 +166,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// #    .with_style(style);
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -182,10 +190,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// #    .with_style(style);
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));
@@ -194,6 +205,17 @@ where
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
         self.start += by;
         self.end += by;
+
+        self
+    }
+}
+
+impl<C> WithStyle<C> for Line<C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
 
         self
     }
@@ -208,7 +230,7 @@ mod tests {
     use unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end, Style::with_stroke(PixelColorU8(1)));
+        let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));
         for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
             assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }

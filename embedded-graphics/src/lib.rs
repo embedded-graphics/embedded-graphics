@@ -44,6 +44,7 @@
 extern crate nalgebra;
 
 pub mod coord;
+pub mod dev;
 pub mod drawable;
 pub mod fonts;
 pub mod image;

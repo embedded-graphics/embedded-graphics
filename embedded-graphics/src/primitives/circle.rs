@@ -5,6 +5,7 @@ use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
 use style::Style;
+use style::WithStyle;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -25,12 +26,23 @@ where
     C: PixelColor,
 {
     /// Create a new circle with center point, radius and border color
-    pub fn new(center: Coord, radius: u32, style: Style<C>) -> Self {
+    pub fn new(center: Coord, radius: u32) -> Self {
         Circle {
             center,
             radius,
-            style,
+            style: Style::default(),
         }
+    }
+}
+
+impl<C> WithStyle<C> for Circle<C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
+
+        self
     }
 }
 
@@ -145,10 +157,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let circle = Circle::new(Coord::new(5, 10), 10, 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let circle = Circle::new(Coord::new(5, 10), 10)
+    /// #    .with_style(style);
     /// let moved = circle.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
@@ -164,10 +179,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut circle = Circle::new(Coord::new(5, 10), 10, 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let mut circle = Circle::new(Coord::new(5, 10), 10)
+    /// #    .with_style(style);
     /// circle.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(circle.center, Coord::new(15, 20));
@@ -182,17 +200,22 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dev::TestPixelColor;
 
     #[test]
     fn it_handles_offscreen_coords() {
-        let mut circ = Circle::new(Coord::new(-10, -10), 5, 1u8).into_iter();
+        let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5)
+            .with_style(Style::with_stroke(1u8.into()))
+            .into_iter();
 
         assert_eq!(circ.next(), None);
     }
 
     #[test]
     fn it_handles_partially_on_screen_coords() {
-        let mut circ = Circle::new(Coord::new(-5, -5), 30, 1u8).into_iter();
+        let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-5, -5), 30)
+            .with_style(Style::with_stroke(1u8.into()))
+            .into_iter();
 
         assert!(circ.next().is_some());
     }

@@ -5,6 +5,8 @@ use super::super::transform::*;
 use super::Font;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
+use style::WithStyle;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font12x16_1bpp.raw");
 const CHAR_HEIGHT: u32 = 16;
@@ -22,32 +24,46 @@ pub struct Font12x16<'a, C: PixelColor> {
     /// Text to draw
     text: &'a str,
 
-    /// Fill Color of font
-    color: C,
+    /// Font style
+    style: Style<C>,
 }
 
 impl<'a, C> Font<'a, C> for Font12x16<'a, C>
 where
     C: PixelColor,
 {
-    fn render_str(text: &'a str, color: C) -> Font12x16<'a, C> {
+    fn render_str(text: &'a str) -> Font12x16<'a, C> {
         Self {
             pos: Coord::new(0, 0),
             text,
-            color,
+            style: Style::default(),
         }
     }
 }
 
+impl<'a, C> WithStyle<C> for Font12x16<'a, C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
+
+        self
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
-pub struct Font12x16Iterator<'a, C> {
+pub struct Font12x16Iterator<'a, C>
+where
+    C: PixelColor,
+{
     char_walk_x: u32,
     char_walk_y: u32,
     current_char: Option<char>,
     idx: usize,
     pos: Coord,
     text: &'a str,
-    color: C,
+    style: Style<C>,
 }
 
 impl<'a, C> IntoIterator for &'a Font12x16<'a, C>
@@ -65,7 +81,7 @@ where
             char_walk_x: 0,
             char_walk_y: 0,
             pos: self.pos,
-            color: self.color,
+            style: self.style,
         }
     }
 }
@@ -79,6 +95,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.pos[0] + (self.text.len() as i32 * CHAR_WIDTH as i32) < 0
             || self.pos[1] + (CHAR_HEIGHT as i32) < 0
+            || self.style.stroke_color.is_none()
         {
             return None;
         }
@@ -108,7 +125,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
-                    self.color
+                    self.style
+                        .stroke_color
+                        .expect("Font does not have stroke colour defined")
                 } else {
                     0.into() // black
                 };
@@ -143,25 +162,25 @@ where
     }
 }
 
-impl<'a, C> Drawable for Font12x16<'a, C>
-where
-    C: PixelColor,
-{
-}
+impl<'a, C> Drawable for Font12x16<'a, C> where C: PixelColor {}
 
 impl<'a, C> Transform for Font12x16<'a, C>
 where
     C: PixelColor,
 {
-    /// Translate the font origin from its current position to a new position by (x, y) pixels,
-    /// returning a new `Font12x16`. For a mutating transform, see `translate_mut`.
+    /// Translate the image from its current position to a new position by (x, y) pixels, returning
+    /// a new `Font12x16`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font12x16 };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let text = Font12x16::render_str("Hello world", 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// // 8px x 1px test image
+    /// let text = Font12x16::render_str("Hello world")
+    /// #    .with_style(style);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -178,10 +197,14 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font12x16 };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut text = Font12x16::render_str("Hello world", 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// // 8px x 1px test image
+    /// let mut text = Font12x16::render_str("Hello world")
+    /// #    .with_style(style);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));
@@ -196,10 +219,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dev::TestPixelColor;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text = Font12x16::render_str("Hello World!", 1u8).translate(Coord::new(5, -20));
+        let text: Font12x16<TestPixelColor> = Font12x16::render_str("Hello World!")
+            .translate(Coord::new(5, -20))
+            .with_style(Style::with_stroke(1u8.into()));
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);
