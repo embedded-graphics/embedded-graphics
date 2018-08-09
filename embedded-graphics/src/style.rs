@@ -46,6 +46,16 @@ pub trait WithStyle<C>
 where
     C: PixelColor,
 {
-    /// Add a style to the object
+    /// Add a complete style to the object
     fn with_style(self, style: Style<C>) -> Self;
+
+    /// Set the stroke property of the object's style
+    ///
+    /// This can be a noop
+    fn with_stroke(self, stroke: Option<C>) -> Self;
+
+    /// Set the fill property of the object's style
+    ///
+    /// This can be a noop
+    fn with_fill(self, stroke: Option<C>) -> Self;
 }

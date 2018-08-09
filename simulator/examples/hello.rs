@@ -17,25 +17,25 @@ fn main() {
     // Outline
     display.draw(
         Circle::new(Coord::new(64, 64), 63)
-            .with_style(Style::with_stroke(1u8.into()))
+            .with_stroke(Some(1u8.into()))
             .into_iter(),
     );
 
     // Clock hands
     display.draw(
         Line::new(Coord::new(64, 64), Coord::new(0, 64))
-            .with_style(Style::with_stroke(1u8.into()))
+            .with_stroke(Some(1u8.into()))
             .into_iter(),
     );
     display.draw(
         Line::new(Coord::new(64, 64), Coord::new(80, 80))
-            .with_style(Style::with_stroke(1u8.into()))
+            .with_stroke(Some(1u8.into()))
             .into_iter(),
     );
 
     display.draw(
         Font6x8::render_str("Hello World!")
-            .with_style(Style::with_stroke(1u8.into()))
+            .with_stroke(Some(1u8.into()))
             .translate(Coord::new(5, 50))
             .into_iter(),
     );

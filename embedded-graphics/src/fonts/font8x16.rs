@@ -50,6 +50,18 @@ where
 
         self
     }
+
+    fn with_stroke(mut self, color: Option<C>) -> Self {
+        self.style.stroke_color = color;
+
+        self
+    }
+
+    fn with_fill(mut self, color: Option<C>) -> Self {
+        self.style.fill_color = color;
+
+        self
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

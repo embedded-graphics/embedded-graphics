@@ -35,6 +35,29 @@ where
     }
 }
 
+impl<C> WithStyle<C> for Line<C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
+
+        self
+    }
+
+    fn with_stroke(mut self, color: Option<C>) -> Self {
+        self.style.stroke_color = color;
+
+        self
+    }
+
+    fn with_fill(mut self, color: Option<C>) -> Self {
+        self.style.fill_color = color;
+
+        self
+    }
+}
+
 impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type Item = Pixel<C>;
     type IntoIter = LineIterator<'a, C>;
@@ -205,17 +228,6 @@ where
     fn translate_mut(&mut self, by: Coord) -> &mut Self {
         self.start += by;
         self.end += by;
-
-        self
-    }
-}
-
-impl<C> WithStyle<C> for Line<C>
-where
-    C: PixelColor,
-{
-    fn with_style(mut self, style: Style<C>) -> Self {
-        self.style = style;
 
         self
     }
