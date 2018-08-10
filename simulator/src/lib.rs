@@ -41,6 +41,7 @@ impl Display {
                 DISPLAY_SIZE as u32,
                 DISPLAY_SIZE as u32,
             ).position_centered()
+            .allow_highdpi()
             .build()
             .unwrap();
 
