@@ -16,7 +16,7 @@ fn main() {
 
     // Outline
     display.draw(
-        Circle::new(Coord::new(64, 64), 63)
+        Circle::new(Coord::new(64, 64), 64)
             .with_stroke(Some(1u8.into()))
             .into_iter(),
     );

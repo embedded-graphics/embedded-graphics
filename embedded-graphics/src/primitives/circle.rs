@@ -73,9 +73,10 @@ where
 
             octant: 0,
             idx: 0,
-            x: 0,
-            y: self.radius,
+            x: -(self.radius as i32),
+            y: -(self.radius as i32),
             d: 1 - self.radius as i32,
+            i: 0,
         }
     }
 }
@@ -89,9 +90,10 @@ pub struct CircleIterator<C: PixelColor> {
 
     octant: u32,
     idx: u32,
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
     d: i32,
+    i: u32,
 }
 
 impl<C> Iterator for CircleIterator<C>
@@ -101,6 +103,7 @@ where
     type Item = Pixel<C>;
 
     // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
+    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles
     fn next(&mut self) -> Option<Self::Item> {
         // If border colour is `None`, treat it as transparent and exit early
         if self.style.stroke_color.is_none() {
@@ -108,39 +111,97 @@ where
         }
 
         let item = loop {
-            if self.x > self.y {
-                break None;
-            }
+            // if self.x > self.y {
+            //     break None;
+            // }
 
-            let mx = self.center[0];
-            let my = self.center[1];
+            // let mx = self.center[0];
+            // let my = self.center[1];
 
-            if self.octant > 7 {
-                self.octant = 0;
+            // if self.octant > 7 {
+            //     self.octant = 0;
 
-                self.x += 1;
+            //     self.x += 1;
 
-                if self.d < 0 {
-                    self.d += 2 * self.x as i32 + 3;
-                } else {
-                    self.d += 2 * (self.x as i32 - self.y as i32) + 5;
-                    self.y -= 1;
+            //     if self.d < 0 {
+            //         self.d += 2 * self.x as i32 + 3;
+            //     } else {
+            //         self.d += 2 * (self.x as i32 - self.y as i32) + 5;
+            //         self.y -= 1;
+            //     }
+            // }
+
+            // let item = match self.octant {
+            //     0 => Some((mx + self.x as i32, my + self.y as i32)),
+            //     1 => Some((mx + self.x as i32, my - self.y as i32)),
+            //     2 => Some((mx - self.x as i32, my + self.y as i32)),
+            //     3 => Some((mx - self.x as i32, my - self.y as i32)),
+            //     4 => Some((mx + self.y as i32, my + self.x as i32)),
+            //     5 => Some((mx + self.y as i32, my - self.x as i32)),
+            //     6 => Some((mx - self.y as i32, my + self.x as i32)),
+            //     7 => Some((mx - self.y as i32, my - self.x as i32)),
+            //     _ => None,
+            // };
+
+            // self.octant += 1;
+
+            // ---
+
+            let cx = self.center[0];
+            let cy = self.center[1];
+
+            // Subtract 1 (the border width) from the radius
+            let radius = self.radius - 1;
+
+            let r2 = radius * radius;
+            let outer_diameter = self.radius * 2;
+            let area = outer_diameter * outer_diameter;
+
+            let tx = (self.i / outer_diameter) as i32 - radius as i32;
+            let ty = (self.i % outer_diameter) as i32 - radius as i32;
+
+            // Unfilled circle
+            // let item = if tx * tx + ty * ty > (r2 as i32 - radius as i32)
+            //     && tx * tx + ty * ty < (r2 as i32 + radius as i32)
+            // {
+            //     Some((cx + tx, cy + ty))
+            // } else {
+            //     None
+            // };
+
+            let item = match self.style.fill_color {
+                // Filled circle
+                Some(_) => {
+                    if tx * tx + ty * ty < (r2 as i32 + radius as i32) {
+                        Some((cx + tx, cy + ty))
+                    } else {
+                        None
+                    }
                 }
-            }
-
-            let item = match self.octant {
-                0 => Some((mx + self.x as i32, my + self.y as i32)),
-                1 => Some((mx + self.x as i32, my - self.y as i32)),
-                2 => Some((mx - self.x as i32, my + self.y as i32)),
-                3 => Some((mx - self.x as i32, my - self.y as i32)),
-                4 => Some((mx + self.y as i32, my + self.x as i32)),
-                5 => Some((mx + self.y as i32, my - self.x as i32)),
-                6 => Some((mx - self.y as i32, my + self.x as i32)),
-                7 => Some((mx - self.y as i32, my - self.x as i32)),
-                _ => None,
+                // Unfilled circle
+                None => {
+                    if tx * tx + ty * ty > (r2 as i32 - radius as i32)
+                        && tx * tx + ty * ty < (r2 as i32 + radius as i32)
+                    {
+                        Some((cx + tx, cy + ty))
+                    } else {
+                        None
+                    }
+                }
             };
 
-            self.octant += 1;
+            // Filled circle
+            // let item =  {
+            //     Some((cx + tx, cy + ty))
+            // } else {
+            //     None
+            // };
+
+            self.i += 1;
+
+            if self.i > area {
+                break None;
+            }
 
             if let Some(i) = item {
                 if i.0 > 0 && i.1 > 0 {
