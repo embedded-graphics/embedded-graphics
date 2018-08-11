@@ -10,53 +10,55 @@ use embedded_graphics::primitives::{Circle, Rect};
 
 use simulator::Display;
 
+static SIZE: i32 = 64;
+
 fn main() {
     let mut display = Display::new();
 
     display.draw(
-        Circle::new(Coord::new(32, 32), 32)
+        Circle::new(Coord::new(SIZE, SIZE), SIZE as u32)
             .with_stroke(Some(1u8.into()))
             .into_iter(),
     );
 
-    display.draw(
-        Circle::new(Coord::new(32, 32), 32)
-            .translate(Coord::new(16, 16))
-            .with_stroke(Some(0u8.into()))
-            .with_fill(Some(1u8.into()))
-            .into_iter(),
-    );
+    // display.draw(
+    //     Circle::new(Coord::new(SIZE, SIZE), SIZE as u32)
+    //         .translate(Coord::new(16, 16))
+    //         .with_stroke(Some(0u8.into()))
+    //         .with_fill(Some(1u8.into()))
+    //         .into_iter(),
+    // );
 
-    display.draw(
-        Circle::new(Coord::new(32, 32), 32)
-            .translate(Coord::new(32, 32))
-            .with_stroke(Some(0u8.into()))
-            .with_fill(Some(0u8.into()))
-            .into_iter(),
-    );
+    // display.draw(
+    //     Circle::new(Coord::new(SIZE, SIZE), SIZE as u32)
+    //         .translate(Coord::new(SIZE, SIZE))
+    //         .with_stroke(Some(0u8.into()))
+    //         .with_fill(Some(0u8.into()))
+    //         .into_iter(),
+    // );
 
-    display.draw(
-        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
-            .translate(Coord::new(96, 0))
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
-    );
+    // display.draw(
+    //     Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+    //         .translate(Coord::new(96, 0))
+    //         .with_stroke(Some(1u8.into()))
+    //         .into_iter(),
+    // );
 
-    display.draw(
-        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
-            .translate(Coord::new(96 + 16, 16))
-            .with_stroke(Some(0u8.into()))
-            .with_fill(Some(1u8.into()))
-            .into_iter(),
-    );
+    // display.draw(
+    //     Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+    //         .translate(Coord::new(96 + 16, 16))
+    //         .with_stroke(Some(0u8.into()))
+    //         .with_fill(Some(1u8.into()))
+    //         .into_iter(),
+    // );
 
-    display.draw(
-        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
-            .translate(Coord::new(96 + 32, 32))
-            .with_stroke(Some(0u8.into()))
-            .with_fill(Some(0u8.into()))
-            .into_iter(),
-    );
+    // display.draw(
+    //     Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+    //         .translate(Coord::new(96 + 32, 32))
+    //         .with_stroke(Some(0u8.into()))
+    //         .with_fill(Some(0u8.into()))
+    //         .into_iter(),
+    // );
 
     loop {
         let end = display.run_once();

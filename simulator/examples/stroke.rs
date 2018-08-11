@@ -32,8 +32,14 @@ fn main() {
     );
 
     display.draw(
-        circ.translate(Coord::new(0, 64 + PADDING))
-            .with_stroke_width(3)
+        circ.translate(Coord::new(1, 64 + PADDING))
+            .with_stroke_width(0)
+            .into_iter(),
+    );
+
+    display.draw(
+        circ.translate(Coord::new(1, 128 + PADDING * 2))
+            .with_stroke_width(10)
             .into_iter(),
     );
 

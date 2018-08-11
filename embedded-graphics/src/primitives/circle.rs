@@ -115,6 +115,10 @@ where
         }
 
         let item = loop {
+            if self.y > self.radius as i32 {
+                break None;
+            }
+
             let cx = self.center[0];
             let cy = self.center[1];
 
@@ -122,19 +126,20 @@ where
             let radius = self.radius as i32 - self.style.stroke_width as i32;
             let outer_radius = self.radius as i32;
 
-            let r2 = radius * radius;
-            let outer_r2 = outer_radius * outer_radius;
-            let outer_diameter = self.radius * 2;
+            let radius_sq = radius * radius;
+            let outer_radius_sq = outer_radius * outer_radius;
+            let outer_diameter = outer_radius * 2;
             let area = (self.radius * 2) * (self.radius * 2);
 
-            let tx = (self.i / outer_diameter) as i32 - radius;
-            let ty = (self.i % outer_diameter) as i32 - radius;
-            let tx_sq = tx * tx;
-            let ty_sq = ty * ty;
+            // let tx = (self.i / outer_diameter as u32) as i32 - outer_radius;
+            // let ty = (self.i % outer_diameter as u32) as i32 - outer_radius;
+            let tx = self.x;
+            let ty = self.y;
+            let len = tx * tx + ty * ty;
 
-            let is_border = tx_sq + ty_sq > r2 - radius && tx_sq + ty_sq < outer_r2 + radius;
+            let is_border = len > radius_sq - radius && len < outer_radius_sq + radius;
 
-            let is_fill = tx_sq + ty_sq < r2 + radius;
+            let is_fill = len <= outer_radius_sq;
 
             let item = if is_border && self.style.stroke_color.is_some() {
                 Some((
@@ -152,10 +157,16 @@ where
                 None
             };
 
-            self.i += 1;
+            // self.i += 1;
+            self.x += 1;
 
-            if self.i > area {
-                break None;
+            // if self.i > area {
+            //     break None;
+            // }
+
+            if self.x > self.radius as i32 {
+                self.x = -(self.radius as i32);
+                self.y += 1;
             }
 
             if let Some(i) = item {
