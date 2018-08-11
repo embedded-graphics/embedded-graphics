@@ -51,6 +51,12 @@ where
         self
     }
 
+    fn with_stroke_width(mut self, width: u8) -> Self {
+        self.style.stroke_width = width;
+
+        self
+    }
+
     fn with_fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
@@ -113,9 +119,11 @@ where
             let cy = self.center[1];
 
             // Subtract 1 (the border width) from the radius
-            let radius = self.radius as i32 - 1;
+            let radius = self.radius as i32 - self.style.stroke_width as i32;
+            let outer_radius = self.radius as i32;
 
             let r2 = radius * radius;
+            let outer_r2 = outer_radius * outer_radius;
             let outer_diameter = self.radius * 2;
             let area = (self.radius * 2) * (self.radius * 2);
 
@@ -124,7 +132,7 @@ where
             let tx_sq = tx * tx;
             let ty_sq = ty * ty;
 
-            let is_border = tx_sq + ty_sq > r2 - radius && tx_sq + ty_sq < r2 + radius;
+            let is_border = tx_sq + ty_sq > r2 - radius && tx_sq + ty_sq < outer_r2 + radius;
 
             let is_fill = tx_sq + ty_sq < r2 + radius;
 

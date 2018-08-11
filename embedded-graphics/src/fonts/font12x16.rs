@@ -57,6 +57,12 @@ where
         self
     }
 
+    fn with_stroke_width(self, _width: u8) -> Self {
+        // Noop
+
+        self
+    }
+
     fn with_fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 

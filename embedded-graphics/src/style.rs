@@ -14,6 +14,11 @@ pub struct Style<P: PixelColor> {
     ///
     /// For fonts, this is the foreground colour of the text
     pub stroke_color: Option<P>,
+
+    /// Stroke width
+    ///
+    /// Set the stroke width for an object. Has no effect on fonts.
+    pub stroke_width: u8,
 }
 
 impl<P> Style<P>
@@ -37,6 +42,7 @@ where
         Self {
             fill_color: None,
             stroke_color: None,
+            stroke_width: 1,
         }
     }
 }
@@ -49,10 +55,15 @@ where
     /// Add a complete style to the object
     fn with_style(self, style: Style<C>) -> Self;
 
-    /// Set the stroke property of the object's style
+    /// Set the stroke colour for the object
     ///
     /// This can be a noop
     fn with_stroke(self, stroke: Option<C>) -> Self;
+
+    /// Set the stroke width for the object
+    ///
+    /// A stroke with a width of zero will not be rendered
+    fn with_stroke_width(self, width: u8) -> Self;
 
     /// Set the fill property of the object's style
     ///

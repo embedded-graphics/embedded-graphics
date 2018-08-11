@@ -51,6 +51,12 @@ where
         self
     }
 
+    fn with_stroke_width(mut self, width: u8) -> Self {
+        self.style.stroke_width = width;
+
+        self
+    }
+
     fn with_fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
