@@ -98,31 +98,42 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // If entire object is off the top left of the screen or has no border colour, don't render
-        // anything
+        // If entire object is off the top left of the screen or has no border or fill colour,
+        // don't render anything
         if (self.top_left[0] < 0 || self.top_left[1] < 0)
             && (self.bottom_right[0] < 0 || self.bottom_right[1] < 0)
-            || self.style.stroke_color.is_none()
+            || (self.style.stroke_color.is_none() && self.style.fill_color.is_none())
         {
             return None;
         }
 
-        let coord = loop {
-            // If we're below the rect, it's completely rendered and we're done
+        let pixel = loop {
+            let mut out = None;
+
+            // Finished, i.e. we're below the rect
             if self.y > self.bottom_right[1] {
-                return None;
+                break None;
             }
 
-            let coord = Coord::new(self.x, self.y);
+            // Border
+            if (self.y == self.top_left[1]
+                || self.y == self.bottom_right[1]
+                || self.x == self.top_left[0]
+                || self.x == self.bottom_right[0])
+                && self.style.stroke_color.is_some()
+            {
+                out = Some((
+                    self.x,
+                    self.y,
+                    self.style.stroke_color.expect("Expected stroke"),
+                ));
+            }
+            // Fill
+            else if let Some(fill) = self.style.fill_color {
+                out = Some((self.x, self.y, fill));
+            }
 
-            // Step across 1 if rendering top/bottom lines
-            if self.y == self.top_left[1] || self.y == self.bottom_right[1] {
-                self.x += 1;
-            }
-            // Skip across rect empty space if rendering left/right lines
-            else {
-                self.x += self.screen_size[0];
-            }
+            self.x += 1;
 
             // Reached end of row? Jump down one line
             if self.x > self.bottom_right[0] {
@@ -130,15 +141,12 @@ where
                 self.y += 1;
             }
 
-            if coord[0] >= 0 && coord[1] >= 0 {
-                break coord;
+            if out.is_some() {
+                break out;
             }
         };
 
-        Some(Pixel(
-            coord.to_unsigned(),
-            self.style.stroke_color.expect("No stroke colour given"),
-        ))
+        pixel.map(|(x, y, c)| Pixel(Coord::new(x, y).to_unsigned(), c))
     }
 }
 

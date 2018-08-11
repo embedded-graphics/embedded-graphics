@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::Circle;
+use embedded_graphics::primitives::{Circle, Rect};
 
 use simulator::Display;
 
@@ -30,6 +30,29 @@ fn main() {
     display.draw(
         Circle::new(Coord::new(32, 32), 32)
             .translate(Coord::new(32, 32))
+            .with_stroke(Some(0u8.into()))
+            .with_fill(Some(0u8.into()))
+            .into_iter(),
+    );
+
+    display.draw(
+        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+            .translate(Coord::new(96, 0))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
+
+    display.draw(
+        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+            .translate(Coord::new(96 + 16, 16))
+            .with_stroke(Some(0u8.into()))
+            .with_fill(Some(1u8.into()))
+            .into_iter(),
+    );
+
+    display.draw(
+        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+            .translate(Coord::new(96 + 32, 32))
             .with_stroke(Some(0u8.into()))
             .with_fill(Some(0u8.into()))
             .into_iter(),
