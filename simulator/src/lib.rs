@@ -22,7 +22,7 @@ impl From<u8> for SimPixelColor {
     }
 }
 
-const DISPLAY_SIZE: usize = 128;
+const DISPLAY_SIZE: usize = 256;
 
 pub struct Display {
     pixels: [[SimPixelColor; DISPLAY_SIZE]; DISPLAY_SIZE],
