@@ -76,12 +76,8 @@ where
             center: self.center,
             radius: self.radius,
             style: self.style,
-
-            octant: 0,
-            idx: 0,
             x: -(self.radius as i32),
             y: -(self.radius as i32),
-            i: 0,
         }
     }
 }
@@ -92,12 +88,8 @@ pub struct CircleIterator<C: PixelColor> {
     center: Coord,
     radius: u32,
     style: Style<C>,
-
-    octant: u32,
-    idx: u32,
     x: i32,
     y: i32,
-    i: u32,
 }
 
 impl<C> Iterator for CircleIterator<C>
@@ -106,39 +98,31 @@ where
 {
     type Item = Pixel<C>;
 
-    // http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf listing 5
     // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles
     fn next(&mut self) -> Option<Self::Item> {
         // If border colour is `None`, treat it as transparent and exit early
+        // TODO: Exit if there's no fill either
         if self.style.stroke_color.is_none() {
             return None;
         }
 
+        let cx = self.center[0];
+        let cy = self.center[1];
+
+        let radius = self.radius as i32 - self.style.stroke_width as i32 + 1;
+        let outer_radius = self.radius as i32;
+
+        let radius_sq = radius * radius;
+        let outer_radius_sq = outer_radius * outer_radius;
+
         let item = loop {
-            if self.y > self.radius as i32 {
-                break None;
-            }
-
-            let cx = self.center[0];
-            let cy = self.center[1];
-
-            // Subtract 1 (the border width) from the radius
-            let radius = self.radius as i32 - self.style.stroke_width as i32;
-            let outer_radius = self.radius as i32;
-
-            let radius_sq = radius * radius;
-            let outer_radius_sq = outer_radius * outer_radius;
-            let outer_diameter = outer_radius * 2;
-            let area = (self.radius * 2) * (self.radius * 2);
-
-            // let tx = (self.i / outer_diameter as u32) as i32 - outer_radius;
-            // let ty = (self.i % outer_diameter as u32) as i32 - outer_radius;
             let tx = self.x;
             let ty = self.y;
             let len = tx * tx + ty * ty;
 
             let is_border = len > radius_sq - radius && len < outer_radius_sq + radius;
 
+            // TODO: Should this be a <= or a <?
             let is_fill = len <= outer_radius_sq;
 
             let item = if is_border && self.style.stroke_color.is_some() {
@@ -157,16 +141,15 @@ where
                 None
             };
 
-            // self.i += 1;
             self.x += 1;
-
-            // if self.i > area {
-            //     break None;
-            // }
 
             if self.x > self.radius as i32 {
                 self.x = -(self.radius as i32);
                 self.y += 1;
+            }
+
+            if self.y > self.radius as i32 {
+                break None;
             }
 
             if let Some(i) = item {
@@ -180,7 +163,11 @@ where
     }
 }
 
-impl<C> Drawable for Circle<C> where C: PixelColor {}
+impl<C> Drawable for Circle<C>
+where
+    C: PixelColor,
+{
+}
 
 impl<C> Transform for Circle<C>
 where
