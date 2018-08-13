@@ -32,15 +32,33 @@ fn main() {
     );
 
     display.draw(
-        circ.translate(Coord::new(1, 64 + PADDING))
-            .with_stroke_width(0)
-            .into_iter(),
+        circ.translate(Coord::new(0, 64 + PADDING))
+            .with_stroke_width(3)
+            .into_iter()
+            .chain(
+                rect.translate(Coord::new(0, 64 + PADDING))
+                    .with_stroke_width(3)
+                    .into_iter(),
+            ).chain(
+                line.translate(Coord::new(0, 64 + PADDING))
+                    .with_stroke_width(3)
+                    .into_iter(),
+            ),
     );
 
     display.draw(
-        circ.translate(Coord::new(1, 128 + PADDING * 2))
+        circ.translate(Coord::new(0, 128 + PADDING * 2))
             .with_stroke_width(10)
-            .into_iter(),
+            .into_iter()
+            .chain(
+                rect.translate(Coord::new(0, 128 + PADDING * 2))
+                    .with_stroke_width(10)
+                    .into_iter(),
+            ).chain(
+                line.translate(Coord::new(0, 128 + PADDING * 2))
+                    .with_stroke_width(10)
+                    .into_iter(),
+            ),
     );
 
     loop {
