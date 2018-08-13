@@ -121,11 +121,21 @@ where
                 break None;
             }
 
+            let border_width = self.style.stroke_width as i32;
+            let tl = self.top_left;
+            let br = self.bottom_right;
+
             // Border
-            if (self.y == self.top_left[1]
-                || self.y == self.bottom_right[1]
-                || self.x == self.top_left[0]
-                || self.x == self.bottom_right[0])
+            if (
+                // Top border
+                (self.y >= tl[1] && self.y < tl[1] + border_width)
+                // Bottom border
+                || (self.y <= br[1] && self.y > br[1] - border_width)
+                // Left border
+                || (self.x >= tl[0] && self.x < tl[0] + border_width)
+                // Right border
+                || (self.x <= br[0] && self.x > br[0] - border_width)
+                )
                 && self.style.stroke_color.is_some()
             {
                 out = Some((
