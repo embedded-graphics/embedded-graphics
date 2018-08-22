@@ -11,6 +11,7 @@ pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
 use pixelcolor::PixelColor;
 use style::WithStyle;
+use unsignedcoord::UnsignedCoord;
 
 /// Common methods for all fonts
 pub trait Font<'a, C>: WithStyle<C>
@@ -44,4 +45,7 @@ where
     /// }
     /// ```
     fn render_str(chars: &'a str) -> Self;
+
+    /// Get the dimensions of a piece of text rendered in a particular font
+    fn dimensions(&self) -> UnsignedCoord;
 }

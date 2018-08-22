@@ -7,6 +7,7 @@ use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
 use style::Style;
 use style::WithStyle;
+use unsignedcoord::UnsignedCoord;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font8x16_1bpp.raw");
 const CHAR_HEIGHT: u32 = 16;
@@ -38,6 +39,13 @@ where
             text,
             style: Style::default(),
         }
+    }
+
+    fn dimensions(&self) -> UnsignedCoord {
+        UnsignedCoord(
+            CHAR_WIDTH * self.text.len() as u32,
+            if self.text.len() > 0 { CHAR_HEIGHT } else { 0 },
+        )
     }
 }
 
@@ -247,5 +255,14 @@ mod tests {
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);
+    }
+
+    #[test]
+    fn text_dimensions() {
+        let hello: Font8x16<TestPixelColor> = Font8x16::render_str("Hello World!");
+        let empty: Font8x16<TestPixelColor> = Font8x16::render_str("");
+
+        assert_eq!(hello.dimensions(), UnsignedCoord(96, 16));
+        assert_eq!(empty.dimensions(), UnsignedCoord(0, 0));
     }
 }
