@@ -31,56 +31,41 @@ things.
 You can also add your own objects by implementing `IntoIterator<Item = Pixel>` to create an
 iterator that `Drawable#draw()` can consume.
 
-It currently only supports monochrome displays. Contributions to support full colour as well are very welcome!
-
-Example usage from the [SSD1306 driver](https://github.com/jamwaffles/ssd1306):
+Example usage can be found [in the simulator](./simulator/examples):
 
 ```rust
-#![no_std]
-
-extern crate cortex_m;
-extern crate embedded_graphics;
-extern crate embedded_hal as hal;
-extern crate panic_abort;
-extern crate ssd1306;
-extern crate stm32f103xx_hal as blue_pill;
-
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
-use blue_pill::prelude::*;
-use embedded_graphics::image::Image1BPP;
+use embedded_graphics::coord::Coord;
+use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::prelude::*;
-use ssd1306::{mode::GraphicsMode, Builder};
+use embedded_graphics::primitives::{Circle, Line};
 
-fn main() {
-    let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
-    let mut flash = dp.FLASH.constrain();
-    let mut rcc = dp.RCC.constrain();
-    let clocks = rcc.cfgr.freeze(&mut flash.acr);
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
-    let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
-    let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
+// Create a display object to draw into
+// This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
+let mut display = Display::new();
 
-    let i2c = I2c::i2c1(
-        dp.I2C1,
-        (scl, sda),
-        &mut afio.mapr,
-        Mode::Fast {
-            frequency: 400_000,
-            duty_cycle: DutyCycle::Ratio1to1,
-        },
-        clocks,
-        &mut rcc.apb1,
-    );
+display.draw(
+    Circle::new(Coord::new(64, 64), 64)
+        .with_stroke(Some(1u8.into()))
+        .into_iter(),
+);
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Coord::new(32, 0));
-    let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+display.draw(
+    Line::new(Coord::new(64, 64), Coord::new(0, 64))
+        .with_stroke(Some(1u8.into()))
+        .into_iter(),
+);
+display.draw(
+    Line::new(Coord::new(64, 64), Coord::new(80, 80))
+        .with_stroke(Some(1u8.into()))
+        .into_iter(),
+);
 
-    disp.init().unwrap();
-    disp.flush().unwrap();
-    disp.draw(im.into_iter());
-    disp.flush().unwrap();
-}
+display.draw(
+    Font6x8::render_str("Hello World!")
+        .with_stroke(Some(1u8.into()))
+        .translate(Coord::new(5, 50))
+        .into_iter(),
+);
 ```
 
 ## Features
@@ -90,7 +75,6 @@ fn main() {
 ## TODO
 
 * [ ] General matrix transforms
-* [ ] Full colour support
 
 ## Attribution
 
