@@ -45,7 +45,7 @@ where
     }
 
     fn dimensions(&self) -> UnsignedCoord {
-        UnsignedCoord(
+        UnsignedCoord::new(
             CHAR_WIDTH * self.text.len() as u32,
             if self.text.len() > 0 { CHAR_HEIGHT } else { 0 },
         )
@@ -275,7 +275,7 @@ mod tests {
         let hello: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!");
         let empty: Font6x8<TestPixelColor> = Font6x8::render_str("");
 
-        assert_eq!(hello.dimensions(), UnsignedCoord(72, 8));
-        assert_eq!(empty.dimensions(), UnsignedCoord(0, 0));
+        assert_eq!(hello.dimensions(), UnsignedCoord::new(72, 8));
+        assert_eq!(empty.dimensions(), UnsignedCoord::new(0, 0));
     }
 }
