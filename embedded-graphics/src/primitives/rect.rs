@@ -4,6 +4,8 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
+use style::WithStyle;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
@@ -15,22 +17,50 @@ pub struct Rect<C: PixelColor> {
     /// Bottom right point of the rect
     pub bottom_right: Coord,
 
-    /// Border color
-    pub color: C,
+    /// Object style
+    pub style: Style<C>,
 }
 
 impl<C> Rect<C>
 where
     C: PixelColor,
 {
-    /// Create a new rectangle from the top left point to the bottom right point with a given border
-    /// color
-    pub fn new(top_left: Coord, bottom_right: Coord, color: C) -> Self {
+    /// Create a new rectangle from the top left point to the bottom right point with a given style
+    pub fn new(top_left: Coord, bottom_right: Coord) -> Self {
         Rect {
             top_left,
             bottom_right,
-            color,
+            style: Style::default(),
         }
+    }
+}
+
+impl<C> WithStyle<C> for Rect<C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
+
+        self
+    }
+
+    fn with_stroke(mut self, color: Option<C>) -> Self {
+        self.style.stroke_color = color;
+
+        self
+    }
+
+    fn with_stroke_width(mut self, width: u8) -> Self {
+        self.style.stroke_width = width;
+
+        self
+    }
+
+    fn with_fill(mut self, color: Option<C>) -> Self {
+        self.style.fill_color = color;
+
+        self
     }
 }
 
@@ -45,10 +75,9 @@ where
         RectIterator {
             top_left: self.top_left,
             bottom_right: self.bottom_right,
-            color: self.color,
+            style: self.style,
             x: self.top_left[0],
             y: self.top_left[1],
-            screen_size: (self.bottom_right - self.top_left).abs(),
         }
     }
 }
@@ -61,10 +90,9 @@ where
 {
     top_left: Coord,
     bottom_right: Coord,
-    color: C,
+    style: Style<C>,
     x: i32,
     y: i32,
-    screen_size: Coord,
 }
 
 impl<C> Iterator for RectIterator<C>
@@ -74,29 +102,53 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Entire object is off the top left of the screen, so render nothing
+        // If entire object is off the top left of the screen or has no border or fill colour,
+        // don't render anything
         if (self.top_left[0] < 0 || self.top_left[1] < 0)
             && (self.bottom_right[0] < 0 || self.bottom_right[1] < 0)
+            || (self.style.stroke_color.is_none() && self.style.fill_color.is_none())
         {
             return None;
         }
 
-        let coord = loop {
-            // If we're below the rect, it's completely rendered and we're done
+        let pixel = loop {
+            let mut out = None;
+
+            // Finished, i.e. we're below the rect
             if self.y > self.bottom_right[1] {
-                return None;
+                break None;
             }
 
-            let coord = Coord::new(self.x, self.y);
+            let border_width = self.style.stroke_width as i32;
+            let tl = self.top_left;
+            let br = self.bottom_right;
 
-            // Step across 1 if rendering top/bottom lines
-            if self.y == self.top_left[1] || self.y == self.bottom_right[1] {
-                self.x += 1;
+            if self.x >= 0 && self.y >= 0 {
+                // Border
+                if (
+                // Top border
+                (self.y >= tl[1] && self.y < tl[1] + border_width)
+                // Bottom border
+                || (self.y <= br[1] && self.y > br[1] - border_width)
+                // Left border
+                || (self.x >= tl[0] && self.x < tl[0] + border_width)
+                // Right border
+                || (self.x <= br[0] && self.x > br[0] - border_width)
+                ) && self.style.stroke_color.is_some()
+                {
+                    out = Some((
+                        self.x,
+                        self.y,
+                        self.style.stroke_color.expect("Expected stroke"),
+                    ));
+                }
+                // Fill
+                else if let Some(fill) = self.style.fill_color {
+                    out = Some((self.x, self.y, fill));
+                }
             }
-            // Skip across rect empty space if rendering left/right lines
-            else {
-                self.x += self.screen_size[0];
-            }
+
+            self.x += 1;
 
             // Reached end of row? Jump down one line
             if self.x > self.bottom_right[0] {
@@ -104,20 +156,16 @@ where
                 self.y += 1;
             }
 
-            if coord[0] >= 0 && coord[1] >= 0 {
-                break coord;
+            if out.is_some() {
+                break out;
             }
         };
 
-        Some(Pixel(coord.to_unsigned(), self.color))
+        pixel.map(|(x, y, c)| Pixel(Coord::new(x, y).to_unsigned(), c))
     }
 }
 
-impl<C> Drawable for Rect<C>
-where
-    C: PixelColor,
-{
-}
+impl<C> Drawable for Rect<C> where C: PixelColor {}
 
 impl<C> Transform for Rect<C>
 where
@@ -128,10 +176,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// #    .with_style(style);
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -149,10 +200,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// #    .with_style(style);
     /// rect.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(rect.top_left, Coord::new(15, 20));
@@ -169,12 +223,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pixelcolor::PixelColorU8;
+    use dev::TestPixelColor;
     use unsignedcoord::UnsignedCoord;
 
     #[test]
     fn it_can_be_translated() {
-        let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20), PixelColorU8(1));
+        let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -183,7 +237,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect = Rect::new(Coord::new(2, 2), Coord::new(4, 4), 1u8).into_iter();
+        let mut rect: RectIterator<TestPixelColor> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
+            .with_style(Style::with_stroke(1u8.into()))
+            .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
@@ -199,7 +255,10 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect = Rect::new(Coord::new(-2, -2), Coord::new(2, 2), 1u8).into_iter();
+        let mut rect: RectIterator<TestPixelColor> =
+            Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
+                .with_style(Style::with_stroke(1u8.into()))
+                .into_iter();
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible

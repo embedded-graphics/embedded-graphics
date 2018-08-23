@@ -8,20 +8,20 @@ use embedded_graphics::Drawing;
 struct FakeDisplay {}
 
 #[derive(Copy, Clone)]
-pub struct FakePixelColor(pub bool);
+pub struct TestPixelColor(pub bool);
 
-impl PixelColor for FakePixelColor {}
+impl PixelColor for TestPixelColor {}
 
-impl From<u8> for FakePixelColor {
+impl From<u8> for TestPixelColor {
     fn from(other: u8) -> Self {
-        FakePixelColor(other != 0)
+        TestPixelColor(other != 0)
     }
 }
 
-impl Drawing<FakePixelColor> for FakeDisplay {
+impl Drawing<TestPixelColor> for FakeDisplay {
     fn draw<T>(&mut self, _item_pixels: T)
     where
-        T: Iterator<Item = Pixel<FakePixelColor>>,
+        T: Iterator<Item = Pixel<TestPixelColor>>,
     {
         // Noop
     }
@@ -31,9 +31,9 @@ impl Drawing<FakePixelColor> for FakeDisplay {
 fn it_supports_chaining() {
     let mut disp = FakeDisplay {};
 
-    let chained = Rect::new(Coord::new(0, 0), Coord::new(1, 1), 1.into())
+    let chained = Rect::new(Coord::new(0, 0), Coord::new(1, 1))
         .into_iter()
-        .chain(Circle::new(Coord::new(2, 2), 1, 1.into()).into_iter());
+        .chain(Circle::new(Coord::new(2, 2), 1).into_iter());
 
     disp.draw(chained);
 }

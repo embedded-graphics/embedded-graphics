@@ -5,6 +5,9 @@ use super::super::transform::*;
 use super::Font;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
+use style::WithStyle;
+use unsignedcoord::UnsignedCoord;
 
 const FONT_IMAGE: &[u8] = include_bytes!("../../data/font6x8_1bpp.raw");
 const CHAR_HEIGHT: u32 = 8;
@@ -25,20 +28,56 @@ where
     /// Text to draw
     text: &'a str,
 
-    /// Fill Color of font
-    color: C,
+    /// Font style
+    style: Style<C>,
 }
 
 impl<'a, C> Font<'a, C> for Font6x8<'a, C>
 where
     C: PixelColor,
 {
-    fn render_str(text: &'a str, color: C) -> Font6x8<'a, C> {
+    fn render_str(text: &'a str) -> Font6x8<'a, C> {
         Self {
             pos: Coord::new(0, 0),
             text,
-            color,
+            style: Style::default(),
         }
+    }
+
+    fn dimensions(&self) -> UnsignedCoord {
+        UnsignedCoord::new(
+            CHAR_WIDTH * self.text.len() as u32,
+            if self.text.len() > 0 { CHAR_HEIGHT } else { 0 },
+        )
+    }
+}
+
+impl<'a, C> WithStyle<C> for Font6x8<'a, C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
+
+        self
+    }
+
+    fn with_stroke(mut self, color: Option<C>) -> Self {
+        self.style.stroke_color = color;
+
+        self
+    }
+
+    fn with_stroke_width(self, _width: u8) -> Self {
+        // Noop
+
+        self
+    }
+
+    fn with_fill(mut self, color: Option<C>) -> Self {
+        self.style.fill_color = color;
+
+        self
     }
 }
 
@@ -53,7 +92,7 @@ where
     idx: usize,
     pos: Coord,
     text: &'a str,
-    color: C,
+    style: Style<C>,
 }
 
 impl<'a, C> IntoIterator for &'a Font6x8<'a, C>
@@ -71,7 +110,7 @@ where
             char_walk_x: 0,
             char_walk_y: 0,
             pos: self.pos,
-            color: self.color,
+            style: self.style,
         }
     }
 }
@@ -85,6 +124,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.pos[0] + (self.text.len() as i32 * CHAR_WIDTH as i32) < 0
             || self.pos[1] + (CHAR_HEIGHT as i32) < 0
+            || self.style.stroke_color.is_none()
         {
             return None;
         }
@@ -114,7 +154,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if (FONT_IMAGE[bitmap_byte as usize] >> bitmap_bit) & 1 == 1 {
-                    self.color
+                    self.style
+                        .stroke_color
+                        .expect("Font does not have stroke colour defined")
                 } else {
                     0.into() // black
                 };
@@ -149,11 +191,7 @@ where
     }
 }
 
-impl<'a, C> Drawable for Font6x8<'a, C>
-where
-    C: PixelColor,
-{
-}
+impl<'a, C> Drawable for Font6x8<'a, C> where C: PixelColor {}
 
 impl<'a, C> Transform for Font6x8<'a, C>
 where
@@ -164,11 +202,14 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
     /// // 8px x 1px test image
-    /// let text = Font6x8::render_str("Hello world", 1u8);
+    /// let text = Font6x8::render_str("Hello world")
+    /// #    .with_style(style);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -185,10 +226,14 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font6x8 };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut text = Font6x8::render_str("Hello world", 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// // 8px x 1px test image
+    /// let mut text = Font6x8::render_str("Hello world")
+    /// #    .with_style(style);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));
@@ -203,12 +248,34 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dev::TestPixelColor;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text = Font6x8::render_str("Hello World!", 1u8).translate(Coord::new(5, -10));
+        let text: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!")
+            .with_style(Style::with_stroke(1u8.into()))
+            .translate(Coord::new(5, -10));
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);
+    }
+
+    #[test]
+    fn unstroked_text_does_not_infinite_loop() {
+        let text: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!")
+            .with_style(Style::with_stroke(1u8.into()))
+            .translate(Coord::new(5, -10));
+        let mut it = text.into_iter();
+
+        assert_eq!(it.next(), None);
+    }
+
+    #[test]
+    fn text_dimensions() {
+        let hello: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!");
+        let empty: Font6x8<TestPixelColor> = Font6x8::render_str("");
+
+        assert_eq!(hello.dimensions(), UnsignedCoord::new(72, 8));
+        assert_eq!(empty.dimensions(), UnsignedCoord::new(0, 0));
     }
 }

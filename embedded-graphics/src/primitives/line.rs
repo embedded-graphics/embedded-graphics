@@ -4,6 +4,8 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use style::Style;
+use style::WithStyle;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -15,8 +17,8 @@ pub struct Line<C: PixelColor> {
     /// End point
     pub end: Coord,
 
-    /// Line color
-    pub color: C,
+    /// Line style
+    pub style: Style<C>,
 }
 
 impl<C> Line<C>
@@ -24,8 +26,41 @@ where
     C: PixelColor,
 {
     /// Create a new line
-    pub fn new(start: Coord, end: Coord, color: C) -> Self {
-        Line { start, end, color }
+    pub fn new(start: Coord, end: Coord) -> Self {
+        Line {
+            start,
+            end,
+            style: Style::default(),
+        }
+    }
+}
+
+impl<C> WithStyle<C> for Line<C>
+where
+    C: PixelColor,
+{
+    fn with_style(mut self, style: Style<C>) -> Self {
+        self.style = style;
+
+        self
+    }
+
+    fn with_stroke(mut self, color: Option<C>) -> Self {
+        self.style.stroke_color = color;
+
+        self
+    }
+
+    fn with_stroke_width(mut self, width: u8) -> Self {
+        self.style.stroke_width = width;
+
+        self
+    }
+
+    fn with_fill(mut self, color: Option<C>) -> Self {
+        self.style.fill_color = color;
+
+        self
     }
 }
 
@@ -141,16 +176,15 @@ impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
         // Increment fast direction
         self.quick += 1;
 
-        // Return
-        Some(Pixel(coord.to_unsigned(), self.line.color.clone()))
+        // Return if there is a stroke on the line
+        self.line
+            .style
+            .stroke_color
+            .map(|color| Pixel(coord.to_unsigned(), color))
     }
 }
 
-impl<C> Drawable for Line<C>
-where
-    C: PixelColor,
-{
-}
+impl<C> Drawable for Line<C> where C: PixelColor {}
 
 impl<C> Transform for Line<C>
 where
@@ -161,10 +195,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// #    .with_style(style);
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -182,10 +219,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    ///
-    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20), 1u8);
+    /// # use embedded_graphics::dev::TestPixelColor;
+    /// # use embedded_graphics::prelude::*;
+    /// #
+    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// #
+    /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// #    .with_style(style);
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));
@@ -204,10 +244,11 @@ mod tests {
     use super::*;
     use drawable::Pixel;
     use pixelcolor::PixelColorU8;
+    use style::Style;
     use unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end, PixelColorU8(1));
+        let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));
         for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
             assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }
