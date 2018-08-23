@@ -6,7 +6,7 @@ language: rust
 rust:
   - stable
   - nightly
-sudo: required
+sudo: false
 
 matrix:
   # TODO These are all the build jobs. Adjust as necessary. Comment out what you
