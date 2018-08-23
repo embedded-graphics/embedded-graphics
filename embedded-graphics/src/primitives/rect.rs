@@ -78,7 +78,6 @@ where
             style: self.style,
             x: self.top_left[0],
             y: self.top_left[1],
-            screen_size: (self.bottom_right - self.top_left).abs(),
         }
     }
 }
@@ -94,7 +93,6 @@ where
     style: Style<C>,
     x: i32,
     y: i32,
-    screen_size: Coord,
 }
 
 impl<C> Iterator for RectIterator<C>
@@ -125,8 +123,9 @@ where
             let tl = self.top_left;
             let br = self.bottom_right;
 
-            // Border
-            if (
+            if self.x >= 0 && self.y >= 0 {
+                // Border
+                if (
                 // Top border
                 (self.y >= tl[1] && self.y < tl[1] + border_width)
                 // Bottom border
@@ -135,18 +134,18 @@ where
                 || (self.x >= tl[0] && self.x < tl[0] + border_width)
                 // Right border
                 || (self.x <= br[0] && self.x > br[0] - border_width)
-                )
-                && self.style.stroke_color.is_some()
-            {
-                out = Some((
-                    self.x,
-                    self.y,
-                    self.style.stroke_color.expect("Expected stroke"),
-                ));
-            }
-            // Fill
-            else if let Some(fill) = self.style.fill_color {
-                out = Some((self.x, self.y, fill));
+                ) && self.style.stroke_color.is_some()
+                {
+                    out = Some((
+                        self.x,
+                        self.y,
+                        self.style.stroke_color.expect("Expected stroke"),
+                    ));
+                }
+                // Fill
+                else if let Some(fill) = self.style.fill_color {
+                    out = Some((self.x, self.y, fill));
+                }
             }
 
             self.x += 1;
