@@ -10,8 +10,7 @@ use embedded_graphics::primitives::{Circle, Rect};
 
 use simulator::Display;
 
-static SIZE: i32 = 64;
-static CIRCLE_SIZE: i32 = SIZE / 2;
+static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
     let mut display = Display::new();
