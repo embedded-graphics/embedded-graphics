@@ -48,6 +48,8 @@ pub mod dev;
 pub mod drawable;
 pub mod fonts;
 pub mod image;
+#[cfg(test)]
+pub(crate) mod mock_display;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
