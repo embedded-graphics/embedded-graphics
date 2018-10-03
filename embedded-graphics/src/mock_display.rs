@@ -1,5 +1,4 @@
 use drawable::Pixel;
-use unsignedcoord::UnsignedCoord;
 use Drawing;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -16,11 +15,11 @@ impl Drawing<u8> for Display {
     where
         T: Iterator<Item = Pixel<u8>>,
     {
-        for Pixel(UnsignedCoord(x, y), color) in item_pixels {
-            if x >= 24 || y >= 16 {
+        for Pixel(coord, color) in item_pixels {
+            if coord[0] >= 24 || coord[1] >= 16 {
                 continue;
             }
-            self.0[y as usize][x as usize] = color;
+            self.0[coord[1] as usize][coord[0] as usize] = color;
         }
     }
 }

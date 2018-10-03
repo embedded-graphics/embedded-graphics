@@ -93,12 +93,12 @@ impl Drawing<SimPixelColor> for Display {
     where
         T: Iterator<Item = Pixel<SimPixelColor>>,
     {
-        for Pixel(UnsignedCoord(x, y), color) in item_pixels {
-            if x >= DISPLAY_SIZE as u32 || y >= DISPLAY_SIZE as u32 {
+        for Pixel(coord, color) in item_pixels {
+            if coord[0] >= DISPLAY_SIZE as u32 || coord[1] >= DISPLAY_SIZE as u32 {
                 continue;
             }
 
-            self.pixels[y as usize][x as usize] = color;
+            self.pixels[coord[1] as usize][coord[0] as usize] = color;
         }
     }
 }
