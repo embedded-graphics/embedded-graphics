@@ -163,11 +163,7 @@ where
     }
 }
 
-impl<C> Drawable for Circle<C>
-where
-    C: PixelColor,
-{
-}
+impl<C> Drawable for Circle<C> where C: PixelColor {}
 
 impl<C> Transform for Circle<C>
 where
