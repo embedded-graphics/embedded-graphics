@@ -189,7 +189,7 @@ where
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
                     self.style
                         .stroke_color
-                        .expect("Font does not have stroke colour defined")
+                        .unwrap_or(1.into()) // white
                 } else {
                     self.style
                         .fill_color
