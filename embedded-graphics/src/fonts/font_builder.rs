@@ -191,7 +191,9 @@ where
                         .stroke_color
                         .expect("Font does not have stroke colour defined")
                 } else {
-                    0.into() // black
+                    self.style
+                        .fill_color
+                        .expect("font does not have fill color defined")
                 };
 
                 self.char_walk_x += 1;
