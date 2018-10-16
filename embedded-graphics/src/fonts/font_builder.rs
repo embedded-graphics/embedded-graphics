@@ -193,7 +193,7 @@ where
                 } else {
                     self.style
                         .fill_color
-                        .expect("font does not have fill color defined")
+                        .unwrap_or(0.into()) // black
                 };
 
                 self.char_walk_x += 1;
