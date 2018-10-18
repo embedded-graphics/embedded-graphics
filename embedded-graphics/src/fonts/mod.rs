@@ -20,6 +20,8 @@ where
     C: PixelColor,
 {
     /// Render a string in the implementing font's typeface.
+    /// 
+    /// Defaults to 1u8 for stroke_color and 0u8 for fill_color
     ///
     /// ```rust
     /// # use embedded_graphics::fonts::{Font, Font6x8};
@@ -45,8 +47,6 @@ where
     ///     disp.draw(text.into_iter());
     /// }
     /// ```
-    /// 
-    /// Defaults to 1u8 for stroke_color and 0u8 for fill_color
     fn render_str(chars: &'a str) -> Self;
 
     /// Get the dimensions of a piece of text rendered in a particular font
