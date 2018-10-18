@@ -156,7 +156,6 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.pos[0] + (self.text.len() as i32 * Conf::CHAR_WIDTH as i32) < 0
             || self.pos[1] + (Conf::CHAR_HEIGHT as i32) < 0
-            || self.style.stroke_color.is_none()
         {
             return None;
         }
@@ -189,9 +188,11 @@ where
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
                     self.style
                         .stroke_color
-                        .expect("Font does not have stroke colour defined")
+                        .unwrap_or(1.into()) // white
                 } else {
-                    0.into() // black
+                    self.style
+                        .fill_color
+                        .unwrap_or(0.into()) // black
                 };
 
                 let x = self.pos[0]

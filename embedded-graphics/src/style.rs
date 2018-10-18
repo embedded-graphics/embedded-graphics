@@ -6,8 +6,8 @@ use pixelcolor::PixelColor;
 #[derive(Debug, Copy, Clone)]
 pub struct Style<P: PixelColor> {
     /// Fill colour of the object
-    ///
-    /// Has no effect for fonts
+    /// 
+    /// For fonts, this is the background colour of the text
     pub fill_color: Option<P>,
 
     /// Stroke (border/line) color of the object
