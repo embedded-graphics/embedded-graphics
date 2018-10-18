@@ -5,10 +5,13 @@ dist: trusty
 language: rust
 rust:
   - stable
+  - beta
   - nightly
 sudo: false
 
 matrix:
+  allow_failures:
+    - rust: nightly
   # TODO These are all the build jobs. Adjust as necessary. Comment out what you
   # don't need
   include:
