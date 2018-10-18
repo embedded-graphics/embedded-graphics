@@ -195,6 +195,11 @@ where
                         .unwrap_or(0.into()) // black
                 };
 
+                let x = self.pos[0]
+                    + (Conf::CHAR_WIDTH * self.idx as u32) as i32
+                    + self.char_walk_x as i32;
+                let y = self.pos[1] + self.char_walk_y as i32;
+
                 self.char_walk_x += 1;
 
                 if self.char_walk_x >= Conf::CHAR_WIDTH {
@@ -208,11 +213,6 @@ where
                         self.current_char = self.text.chars().skip(self.idx).next();
                     }
                 }
-
-                let x = self.pos[0]
-                    + (Conf::CHAR_WIDTH * self.idx as u32) as i32
-                    + self.char_walk_x as i32;
-                let y = self.pos[1] + self.char_walk_y as i32;
 
                 if x >= 0 && y >= 0 {
                     break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
