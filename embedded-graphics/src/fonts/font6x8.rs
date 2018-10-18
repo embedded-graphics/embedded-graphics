@@ -68,6 +68,42 @@ mod tests {
         assert_eq!(hello.dimensions(), UnsignedCoord::new(72, 8));
         assert_eq!(empty.dimensions(), UnsignedCoord::new(0, 0));
     }
+
+    #[test]
+    fn default_style() {
+        let mut display_default = Display::default();
+        display_default.draw(
+            Font6x8::render_str("Mm")
+                .into_iter(),
+        );
+
+        let mut display_full_style = Display::default();
+        display_full_style.draw(
+            Font6x8::render_str("Mm")
+                .with_stroke(Some(1u8.into()))
+                .with_fill(Some(0u8.into()))
+                .into_iter(),
+        );
+
+        let mut display_stroke = Display::default();
+        display_stroke.draw(
+            Font6x8::render_str("Mm")
+                .with_stroke(Some(1u8.into()))
+                .into_iter(),
+        );
+
+        let mut display_fill = Display::default();
+        display_fill.draw(
+            Font6x8::render_str("Mm")
+                .with_fill(Some(0u8.into()))
+                .into_iter(),
+        );
+
+        assert_eq!(display_default, display_full_style);
+        assert_eq!(display_default, display_stroke);
+        assert_eq!(display_default, display_fill);
+    }
+
     #[test]
     fn correct_m() {
         let mut display = Display::default();
@@ -88,6 +124,40 @@ mod tests {
                 [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                //
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ])
+        );
+    }
+
+    #[test]
+    fn correct_inverse_coloured_m() {
+        let mut display = Display::default();
+        display.draw(
+            Font6x8::render_str("Mm")
+                .with_stroke(Some(0u8.into()))
+                .with_fill(Some(1u8.into()))
+                .into_iter(),
+        );
+
+        assert_eq!(
+            display,
+            Display([
+                [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 //
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
