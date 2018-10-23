@@ -72,10 +72,7 @@ mod tests {
     #[test]
     fn default_style() {
         let mut display_default = Display::default();
-        display_default.draw(
-            Font6x8::render_str("Mm")
-                .into_iter(),
-        );
+        display_default.draw(Font6x8::render_str("Mm").into_iter());
 
         let mut display_full_style = Display::default();
         display_full_style.draw(
@@ -190,11 +187,14 @@ mod tests {
                 .into_iter(),
         );
 
-        for (x, y) in display_inverse.0[0..8].iter().zip(display_normal.0[0..8].iter()) {
+        for (x, y) in display_inverse.0[0..8]
+            .iter()
+            .zip(display_normal.0[0..8].iter())
+        {
             for (x2, y2) in x[0..12].iter().zip(y[0..12].iter()) {
                 assert_ne!(x2, y2);
             }
-        }        
+        }
     }
 
     #[test]

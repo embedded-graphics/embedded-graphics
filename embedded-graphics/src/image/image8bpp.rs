@@ -181,7 +181,8 @@ mod tests {
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
-        ).translate(Coord::new(-1, -1));
+        )
+        .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
         assert_eq!(

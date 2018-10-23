@@ -40,7 +40,8 @@ impl Display {
                 "graphics-emulator",
                 DISPLAY_SIZE as u32,
                 DISPLAY_SIZE as u32,
-            ).position_centered()
+            )
+            .position_centered()
             .build()
             .unwrap();
 
