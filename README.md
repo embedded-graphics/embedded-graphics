@@ -13,6 +13,7 @@ following:
 
 * 1 bit-per-pixel images
 * 8 bit-per-pixel images
+* 16 bit-per-pixel images
 * Primitives
     * Lines
     * Rectangles (and squares)
