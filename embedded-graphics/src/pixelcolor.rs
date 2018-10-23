@@ -112,6 +112,12 @@ impl From<u8> for PixelColorU32 {
     }
 }
 
+impl From<u16> for PixelColorU32 {
+    fn from(other: u16) -> Self {
+        PixelColorU32(other as u32)
+    }
+}
+
 impl From<u32> for PixelColorU32 {
     fn from(other: u32) -> Self {
         PixelColorU32(other)

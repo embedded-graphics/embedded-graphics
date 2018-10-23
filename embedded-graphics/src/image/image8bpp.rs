@@ -187,19 +187,19 @@ mod tests {
 
         assert_eq!(
             it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc.into()))
+            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_u8.into()))
         );
         assert_eq!(
             it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 0), 0x00.into()))
+            Some(Pixel(UnsignedCoord::new(1, 0), 0x00_u8.into()))
         );
         assert_eq!(
             it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 1), 0x00.into()))
+            Some(Pixel(UnsignedCoord::new(0, 1), 0x00_u8.into()))
         );
         assert_eq!(
             it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa.into()))
+            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_u8.into()))
         );
 
         assert_eq!(it.next(), None);
