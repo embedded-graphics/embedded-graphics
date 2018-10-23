@@ -1,19 +1,19 @@
 //! 16 bits per pixel images. Every two bytes define the color for each pixel.
-//! 
+//!
 //! You can convert an image to 16BPP for inclusion with `include_bytes!()` doing the following
-//! 
+//!
 //! ```bash
 //! convert image.png -alpha off -depth 16 gray:"image.raw"
 //! ```
-//! 
+//!
 //! OR with GIMP:
-//! 
-//! Converting the Image to 16bit BMP, then running 
+//!
+//! Converting the Image to 16bit BMP, then running
 //! ```bash
 //! tail -c $bytes image.bmp > image.raw
 //! ```
 //! where $bytes is `w * h * 2`
-//! 
+//!
 //! This will remove the BMP header leaving the raw pixel data
 //! E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
 
@@ -104,8 +104,9 @@ where
             }
 
             let offset = ((y * w) + x) * 2; // * 2 as two bytes per pixel
-            // merge two bytes into a u16
-            let bit_value = (self.im.imagedata[(offset + 1) as usize] as u16) << 8 | self.im.imagedata[offset as usize] as u16;
+                                            // merge two bytes into a u16
+            let bit_value = (self.im.imagedata[(offset + 1) as usize] as u16) << 8
+                | self.im.imagedata[offset as usize] as u16;
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
 
@@ -186,10 +187,14 @@ mod tests {
     #[test]
     fn it_can_have_negative_offsets() {
         let image: Image16BPP<PixelColorU16> = Image16BPP::new(
-            &[0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, 0xee, 0x00, 0x00, 0x00, 0xaa, 0x00],
+            &[
+                0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, 0xee, 0x00,
+                0x00, 0x00, 0xaa, 0x00,
+            ],
             3,
             3,
-        ).translate(Coord::new(-1, -1));
+        )
+        .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
         assert_eq!(

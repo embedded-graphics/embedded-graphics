@@ -39,7 +39,8 @@ fn main() {
                 rect.translate(Coord::new(0, 64 + PADDING))
                     .with_stroke_width(3)
                     .into_iter(),
-            ).chain(
+            )
+            .chain(
                 line.translate(Coord::new(0, 64 + PADDING))
                     .with_stroke_width(3)
                     .into_iter(),
@@ -54,7 +55,8 @@ fn main() {
                 rect.translate(Coord::new(0, 128 + PADDING * 2))
                     .with_stroke_width(10)
                     .into_iter(),
-            ).chain(
+            )
+            .chain(
                 line.translate(Coord::new(0, 128 + PADDING * 2))
                     .with_stroke_width(10)
                     .into_iter(),
