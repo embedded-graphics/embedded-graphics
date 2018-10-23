@@ -83,8 +83,11 @@ matrix:
 
 before_install:
   - rustup self update
+  - rustup toolchain add nightly || true
+  - rustup component add rustfmt-preview --toolchain nightly
 
 script:
+  - cargo +nightly fmt --all -- --check
   - cargo build --release -p embedded-graphics
   - cargo test --release -p embedded-graphics
   - cargo test --release --all-features -p embedded-graphics
