@@ -2,6 +2,7 @@
 
 mod image1bpp;
 mod image8bpp;
+mod image16bpp;
 
 /// Image trait
 pub trait Image<'a> {
@@ -11,3 +12,4 @@ pub trait Image<'a> {
 
 pub use self::image1bpp::Image1BPP;
 pub use self::image8bpp::Image8BPP;
+pub use self::image16bpp::Image16BPP;
