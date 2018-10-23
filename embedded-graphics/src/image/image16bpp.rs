@@ -2,12 +2,19 @@
 //! 
 //! You can convert an image to 16BPP for inclusion with `include_bytes!()` doing the following
 //! 
-//! Converting the Image to 16bit BMP (GIMP can do this), then running 
+//! ```bash
+//! convert image.png -alpha off -depth 16 gray:"image.raw"
+//! ```
+//! 
+//! OR with GIMP:
+//! 
+//! Converting the Image to 16bit BMP, then running 
 //! ```bash
 //! tail -c $bytes image.bmp > image.raw
 //! ```
-//! where $bytes is `w * h * 2` will remove the BMP header leaving the raw data
+//! where $bytes is `w * h * 2`
 //! 
+//! This will remove the BMP header leaving the raw pixel data
 //! E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
 
 use super::super::drawable::*;
@@ -40,7 +47,7 @@ where
     C: PixelColor,
 {
     /// Create a new 16BPP image with given data, width and height. Data length *must* equal
-    /// `width * height`
+    /// `width * height * 2`
     fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
         Self {
             width,
@@ -59,7 +66,6 @@ where
     type Item = Pixel<C>;
     type IntoIter = Image16BPPIterator<'a, C>;
 
-    // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
         Image16BPPIterator {
             im: self,
@@ -180,7 +186,7 @@ mod tests {
     #[test]
     fn it_can_have_negative_offsets() {
         let image: Image16BPP<PixelColorU16> = Image16BPP::new(
-            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
+            &[0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, 0xee, 0x00, 0x00, 0x00, 0xaa, 0x00],
             3,
             3,
         ).translate(Coord::new(-1, -1));
