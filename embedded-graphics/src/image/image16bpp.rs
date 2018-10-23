@@ -1,23 +1,25 @@
-//! 16 bit per pixel image. Each byte of input data defines the on/off state for each pixel. This
-//! currently only supports monochrome displays, so if the pixel value is 0, it's off, anything
-//! above 0 is on.
-//!
-//! You can convert an image to 16BPP for inclusion with `include_bytes!()` using the following
-//! Imagemagick command:
-//!
+//! 16 bits per pixel images. Every two bytes define the color for each pixel.
+//! 
+//! You can convert an image to 16BPP for inclusion with `include_bytes!()` doing the following
+//! 
+//! Converting the Image to 16bit BMP (GIMP can do this), then running 
 //! ```bash
-//! convert image.png -depth 16 gray:"image.raw"
+//! tail -c $bytes image.bmp > image.raw
 //! ```
+//! where $bytes is `w * h * 2` will remove the BMP header leaving the raw data
+//! 
+//! E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
 
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 use coord::{Coord, ToUnsigned};
-use pixelcolor::PixelColorU16;
+use core::marker::PhantomData;
+use pixelcolor::PixelColor;
 
-/// 16 bit per pixel image
+/// 8 bit per pixel image
 #[derive(Debug)]
-pub struct Image16BPP<'a> {
+pub struct Image16BPP<'a, C: PixelColor> {
     /// Image width
     width: u32,
 
@@ -30,10 +32,13 @@ pub struct Image16BPP<'a> {
     /// Top left corner offset from display origin (0,0)
     pub offset: Coord,
 
-    pixel_type: PixelColorU16,
+    pixel_type: PhantomData<C>,
 }
 
-impl<'a> Image<'a> for Image16BPP<'a>{
+impl<'a, C> Image<'a> for Image16BPP<'a, C>
+where
+    C: PixelColor,
+{
     /// Create a new 16BPP image with given data, width and height. Data length *must* equal
     /// `width * height`
     fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
@@ -42,14 +47,17 @@ impl<'a> Image<'a> for Image16BPP<'a>{
             height,
             imagedata,
             offset: Coord::new(0, 0),
-            pixel_type: PixelColorU16(0u16),
+            pixel_type: PhantomData,
         }
     }
 }
 
-impl<'a> IntoIterator for &'a Image16BPP<'a>{
-    type Item = Pixel<PixelColorU16>;
-    type IntoIter = Image16BPPIterator<'a>;
+impl<'a, C> IntoIterator for &'a Image16BPP<'a, C>
+where
+    C: PixelColor + From<u16>,
+{
+    type Item = Pixel<C>;
+    type IntoIter = Image16BPPIterator<'a, C>;
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
@@ -62,14 +70,20 @@ impl<'a> IntoIterator for &'a Image16BPP<'a>{
 }
 
 #[derive(Debug)]
-pub struct Image16BPPIterator<'a>{
+pub struct Image16BPPIterator<'a, C: 'a>
+where
+    C: PixelColor,
+{
     x: u32,
     y: u32,
-    im: &'a Image16BPP<'a>,
+    im: &'a Image16BPP<'a, C>,
 }
 
-impl<'a> Iterator for Image16BPPIterator<'a>{
-    type Item = Pixel<PixelColorU16>;
+impl<'a, C> Iterator for Image16BPPIterator<'a, C>
+where
+    C: PixelColor + From<u16>,
+{
+    type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let current_pixel = loop {
@@ -83,11 +97,8 @@ impl<'a> Iterator for Image16BPPIterator<'a>{
                 return None;
             }
 
-            // let offset = (y * w) + x;
-            // let bit_value = self.im.imagedata[offset as usize];
-
             let offset = ((y * w) + x) * 2; // * 2 as two bytes per pixel
-            // let bit_value = self.im.imagedata[offset as usize];
+            // merge two bytes into a u16
             let bit_value = (self.im.imagedata[(offset + 1) as usize] as u16) << 8 | self.im.imagedata[offset as usize] as u16;
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
@@ -102,7 +113,7 @@ impl<'a> Iterator for Image16BPPIterator<'a>{
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), bit_value.into()); // something like this? PixelColorU16(bit_value)
+                break Pixel(current_pixel.to_unsigned(), bit_value.into());
             }
         };
 
@@ -110,9 +121,12 @@ impl<'a> Iterator for Image16BPPIterator<'a>{
     }
 }
 
-impl<'a> Drawable for Image16BPP<'a> {}
+impl<'a, C> Drawable for Image16BPP<'a, C> where C: PixelColor {}
 
-impl<'a> Transform for Image16BPP<'a>{
+impl<'a, C> Transform for Image16BPP<'a, C>
+where
+    C: PixelColor,
+{
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
     /// a new `Image16BPP`. For a mutating transform, see `translate_mut`.
     ///
@@ -120,10 +134,10 @@ impl<'a> Transform for Image16BPP<'a>{
     /// # use embedded_graphics::image::{ Image, Image16BPP };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
-    /// # use embedded_graphics::pixelcolor::PixelColorU16;
+    /// # use embedded_graphics::pixelcolor::PixelColorU8;
     ///
     /// // 1px x 1px test image
-    /// let image: Image16BPP<PixelColorU16> = Image16BPP::new(&[ 0xff ], 1, 1);
+    /// let image: Image16BPP<PixelColorU8> = Image16BPP::new(&[ 0xff ], 1, 1);
     /// let moved = image.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(image.offset, Coord::new(0, 0));
@@ -142,10 +156,10 @@ impl<'a> Transform for Image16BPP<'a>{
     /// # use embedded_graphics::image::{ Image, Image16BPP };
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::coord::Coord;
-    /// # use embedded_graphics::pixelcolor::PixelColorU16;
+    /// # use embedded_graphics::pixelcolor::PixelColorU8;
     ///
     /// // 1px x 1px test image
-    /// let mut image: Image16BPP<PixelColorU16> = Image16BPP::new(&[ 0xff ], 1, 1);
+    /// let mut image: Image16BPP<PixelColorU8> = Image16BPP::new(&[ 0xff ], 1, 1);
     /// image.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(image.offset, Coord::new(25, 30));
@@ -160,11 +174,12 @@ impl<'a> Transform for Image16BPP<'a>{
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pixelcolor::PixelColorU16;
     use unsignedcoord::UnsignedCoord;
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image16BPP = Image16BPP::new(
+        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
