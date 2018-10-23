@@ -126,8 +126,8 @@ where
             if self.x >= 0 && self.y >= 0 {
                 // Border
                 if (
-                // Top border
-                (self.y >= tl[1] && self.y < tl[1] + border_width)
+                    // Top border
+                    (self.y >= tl[1] && self.y < tl[1] + border_width)
                 // Bottom border
                 || (self.y <= br[1] && self.y > br[1] - border_width)
                 // Left border

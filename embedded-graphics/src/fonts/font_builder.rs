@@ -186,13 +186,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    self.style
-                        .stroke_color
-                        .unwrap_or(1.into()) // white
+                    self.style.stroke_color.unwrap_or(1.into()) // white
                 } else {
-                    self.style
-                        .fill_color
-                        .unwrap_or(0.into()) // black
+                    self.style.fill_color.unwrap_or(0.into()) // black
                 };
 
                 let x = self.pos[0]
