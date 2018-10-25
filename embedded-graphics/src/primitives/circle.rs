@@ -4,8 +4,10 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use primitives::Primitive;
 use style::Style;
 use style::WithStyle;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -32,6 +34,27 @@ where
             radius,
             style: Style::default(),
         }
+    }
+}
+
+impl<C> Primitive for Circle<C> where C: PixelColor {}
+
+impl<C> Dimensions for Circle<C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        let radius_coord = Coord(self.radius as i32, self.radius as i32);
+
+        self.center - radius_coord
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        UnsignedCoord(self.radius * 2, self.radius * 2)
     }
 }
 

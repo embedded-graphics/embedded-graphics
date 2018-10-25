@@ -4,8 +4,10 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use primitives::Primitive;
 use style::Style;
 use style::WithStyle;
+use unsignedcoord::UnsignedCoord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
@@ -19,6 +21,25 @@ pub struct Rect<C: PixelColor> {
 
     /// Object style
     pub style: Style<C>,
+}
+
+impl<C> Primitive for Rect<C> where C: PixelColor {}
+
+impl<C> Dimensions for Rect<C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        self.top_left
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.bottom_right
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        (self.bottom_right - self.top_left).abs().to_unsigned()
+    }
 }
 
 impl<C> Rect<C>

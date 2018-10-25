@@ -4,8 +4,10 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use primitives::Primitive;
 use style::Style;
 use style::WithStyle;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -19,6 +21,25 @@ pub struct Line<C: PixelColor> {
 
     /// Line style
     pub style: Style<C>,
+}
+
+impl<C> Primitive for Line<C> where C: PixelColor {}
+
+impl<C> Dimensions for Line<C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        Coord(self.start.0.min(self.end.0), self.start.1.max(self.end.1))
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        (self.end - self.start).abs().to_unsigned()
+    }
 }
 
 impl<C> Line<C>
