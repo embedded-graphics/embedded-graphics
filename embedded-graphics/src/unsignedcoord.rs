@@ -4,6 +4,8 @@
 //! use with [`Drawable`](../drawable/trait.Drawable.html) iterators to output valid _display pixel_
 //! coordinates, i.e. coordinates that are always positive.
 
+use coord::Coord;
+
 type UnsignedCoordPart = u32;
 
 #[cfg(not(feature = "nalgebra_support"))]
@@ -74,6 +76,21 @@ use nalgebra;
 #[cfg(feature = "nalgebra_support")]
 /// 2D coordinate type with Nalgebra support
 pub type UnsignedCoord = nalgebra::Vector2<UnsignedCoordPart>;
+
+/// Convert an unsigned coordinate to a signed representation
+///
+/// The coordinate is guaranteed to be positive. This trait is provided as a convenience method for
+/// converting between signed/unsigned coords.
+pub trait ToSigned {
+    /// Convert self into a signed `Coord`
+    fn to_signed(self) -> Coord;
+}
+
+impl ToSigned for UnsignedCoord {
+    fn to_signed(self) -> Coord {
+        Coord(self[0] as i32, self[1] as i32)
+    }
+}
 
 #[cfg(test)]
 mod tests {
