@@ -44,7 +44,7 @@ where
     C: PixelColor,
 {
     fn top_left(&self) -> Coord {
-        let radius_coord = Coord(self.radius as i32, self.radius as i32);
+        let radius_coord = Coord::new(self.radius as i32, self.radius as i32);
 
         self.center - radius_coord
     }
@@ -54,7 +54,7 @@ where
     }
 
     fn size(&self) -> UnsignedCoord {
-        UnsignedCoord(self.radius * 2, self.radius * 2)
+        UnsignedCoord::new(self.radius * 2, self.radius * 2)
     }
 }
 
@@ -247,27 +247,27 @@ mod tests {
     fn negative_dimensions() {
         let circ: Circle<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5);
 
-        assert_eq!(circ.top_left(), Coord(-15, -15));
-        assert_eq!(circ.bottom_right(), Coord(-5, -5));
-        assert_eq!(circ.size(), UnsignedCoord(10, 10));
+        assert_eq!(circ.top_left(), Coord::new(-15, -15));
+        assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
+        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
     }
 
     #[test]
     fn dimensions() {
         let circ: Circle<TestPixelColor> = Circle::new(Coord::new(10, 20), 5);
 
-        assert_eq!(circ.top_left(), Coord(5, 15));
-        assert_eq!(circ.bottom_right(), Coord(15, 25));
-        assert_eq!(circ.size(), UnsignedCoord(10, 10));
+        assert_eq!(circ.top_left(), Coord::new(5, 15));
+        assert_eq!(circ.bottom_right(), Coord::new(15, 25));
+        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
     }
 
     #[test]
     fn large_radius() {
         let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10);
 
-        assert_eq!(circ.top_left(), Coord(-5, -5));
-        assert_eq!(circ.bottom_right(), Coord(15, 15));
-        assert_eq!(circ.size(), UnsignedCoord(20, 20));
+        assert_eq!(circ.top_left(), Coord::new(-5, -5));
+        assert_eq!(circ.bottom_right(), Coord::new(15, 15));
+        assert_eq!(circ.size(), UnsignedCoord::new(20, 20));
     }
 
     #[test]

@@ -252,13 +252,13 @@ mod tests {
         let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(-10, -10));
 
-        assert_eq!(rect.top_left(), Coord(5, 10));
-        assert_eq!(rect.bottom_right(), Coord(15, 20));
-        assert_eq!(rect.size(), UnsignedCoord(10, 10));
+        assert_eq!(rect.top_left(), Coord::new(5, 10));
+        assert_eq!(rect.bottom_right(), Coord::new(15, 20));
+        assert_eq!(rect.size(), UnsignedCoord::new(10, 10));
 
-        assert_eq!(moved.top_left(), Coord(-5, 0));
-        assert_eq!(moved.bottom_right(), Coord(5, 10));
-        assert_eq!(moved.size(), UnsignedCoord(10, 10));
+        assert_eq!(moved.top_left(), Coord::new(-5, 0));
+        assert_eq!(moved.bottom_right(), Coord::new(5, 10));
+        assert_eq!(moved.size(), UnsignedCoord::new(10, 10));
     }
 
     #[test]

@@ -88,7 +88,7 @@ pub trait ToSigned {
 
 impl ToSigned for UnsignedCoord {
     fn to_signed(self) -> Coord {
-        Coord(self[0] as i32, self[1] as i32)
+        Coord::new(self[0] as i32, self[1] as i32)
     }
 }
 

@@ -50,7 +50,7 @@ where
         let height = self.height;
         let width = self.width;
 
-        UnsignedCoord(width, height)
+        UnsignedCoord::new(width, height)
     }
 }
 
@@ -206,9 +206,9 @@ mod tests {
         let image: Image1BPP<PixelColorU16> =
             Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
 
-        assert_eq!(image.top_left(), Coord(-1, -1));
-        assert_eq!(image.bottom_right(), Coord(3, 3));
-        assert_eq!(image.size(), UnsignedCoord(4, 4));
+        assert_eq!(image.top_left(), Coord::new(-1, -1));
+        assert_eq!(image.bottom_right(), Coord::new(3, 3));
+        assert_eq!(image.size(), UnsignedCoord::new(4, 4));
     }
 
     #[test]
@@ -216,8 +216,8 @@ mod tests {
         let image: Image1BPP<PixelColorU16> =
             Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
 
-        assert_eq!(image.top_left(), Coord(100, 200));
-        assert_eq!(image.bottom_right(), Coord(104, 204));
-        assert_eq!(image.size(), UnsignedCoord(4, 4));
+        assert_eq!(image.top_left(), Coord::new(100, 200));
+        assert_eq!(image.bottom_right(), Coord::new(104, 204));
+        assert_eq!(image.size(), UnsignedCoord::new(4, 4));
     }
 }

@@ -59,7 +59,7 @@ where
         let height = self.height;
         let width = self.width;
 
-        UnsignedCoord(width, height)
+        UnsignedCoord::new(width, height)
     }
 }
 
@@ -217,9 +217,9 @@ mod tests {
         )
         .translate(Coord::new(-1, -1));
 
-        assert_eq!(image.top_left(), Coord(-1, -1));
-        assert_eq!(image.bottom_right(), Coord(2, 2));
-        assert_eq!(image.size(), UnsignedCoord(3, 3));
+        assert_eq!(image.top_left(), Coord::new(-1, -1));
+        assert_eq!(image.bottom_right(), Coord::new(2, 2));
+        assert_eq!(image.size(), UnsignedCoord::new(3, 3));
     }
 
     #[test]
@@ -234,9 +234,9 @@ mod tests {
         )
         .translate(Coord::new(100, 200));
 
-        assert_eq!(image.top_left(), Coord(100, 200));
-        assert_eq!(image.bottom_right(), Coord(103, 203));
-        assert_eq!(image.size(), UnsignedCoord(3, 3));
+        assert_eq!(image.top_left(), Coord::new(100, 200));
+        assert_eq!(image.bottom_right(), Coord::new(103, 203));
+        assert_eq!(image.size(), UnsignedCoord::new(3, 3));
     }
 
     #[test]

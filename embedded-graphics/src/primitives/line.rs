@@ -30,7 +30,10 @@ where
     C: PixelColor,
 {
     fn top_left(&self) -> Coord {
-        Coord(self.start.0.min(self.end.0), self.start.1.min(self.end.1))
+        Coord::new(
+            self.start[1].min(self.end[0]),
+            self.start[1].min(self.end[1]),
+        )
     }
 
     fn bottom_right(&self) -> Coord {
@@ -278,19 +281,19 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let start = Coord(10, 10);
-        let end = Coord(20, 20);
+        let start = Coord::new(10, 10);
+        let end = Coord::new(20, 20);
 
         let line: Line<TestPixelColor> = Line::new(start, end);
         let backwards_line: Line<TestPixelColor> = Line::new(end, start);
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);
-        assert_eq!(line.size(), UnsignedCoord(10, 10));
+        assert_eq!(line.size(), UnsignedCoord::new(10, 10));
 
         assert_eq!(backwards_line.top_left(), start);
         assert_eq!(backwards_line.bottom_right(), end);
-        assert_eq!(backwards_line.size(), UnsignedCoord(10, 10));
+        assert_eq!(backwards_line.size(), UnsignedCoord::new(10, 10));
     }
 
     #[test]

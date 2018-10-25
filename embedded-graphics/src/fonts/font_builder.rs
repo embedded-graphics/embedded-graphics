@@ -77,7 +77,7 @@ where
         let width = Conf::CHAR_WIDTH * self.text.len() as u32;
         let height = if width > 0 { Conf::CHAR_HEIGHT } else { 0 };
 
-        UnsignedCoord(width, height)
+        UnsignedCoord::new(width, height)
     }
 }
 
