@@ -15,6 +15,7 @@ use super::Image;
 use coord::{Coord, ToUnsigned};
 use core::marker::PhantomData;
 use pixelcolor::PixelColor;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// 8 bit per pixel image
 #[derive(Debug)]
@@ -32,6 +33,26 @@ pub struct Image8BPP<'a, C: PixelColor> {
     pub offset: Coord,
 
     pixel_type: PhantomData<C>,
+}
+
+impl<'a, C> Dimensions for Image8BPP<'a, C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        self.offset
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        let height = self.height;
+        let width = self.width;
+
+        UnsignedCoord(width, height)
+    }
 }
 
 impl<'a, C> Image<'a> for Image8BPP<'a, C>
