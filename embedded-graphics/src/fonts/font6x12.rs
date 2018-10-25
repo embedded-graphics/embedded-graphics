@@ -29,6 +29,7 @@ mod tests {
     use super::*;
     use coord::Coord;
     use dev::TestPixelColor;
+    use drawable::Dimensions;
     use fonts::Font;
     use mock_display::Display;
     use style::Style;
@@ -52,8 +53,8 @@ mod tests {
         let hello: Font6x12<TestPixelColor> = Font6x12::render_str("Hello World!");
         let empty: Font6x12<TestPixelColor> = Font6x12::render_str("");
 
-        assert_eq!(hello.dimensions(), UnsignedCoord::new(72, 12));
-        assert_eq!(empty.dimensions(), UnsignedCoord::new(0, 0));
+        assert_eq!(hello.size(), UnsignedCoord::new(72, 12));
+        assert_eq!(empty.size(), UnsignedCoord::new(0, 0));
     }
 
     #[test]

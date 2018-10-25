@@ -51,5 +51,6 @@ where
     fn render_str(chars: &'a str) -> Self;
 
     /// Get the dimensions of a piece of text rendered in a particular font
+    #[deprecated(since = "0.4.5", note = "use `.size()` instead")]
     fn dimensions(&self) -> UnsignedCoord;
 }
