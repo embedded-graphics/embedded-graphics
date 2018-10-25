@@ -68,10 +68,14 @@ where
         self.top_left() + self.size().to_signed()
     }
 
+    /// Get the bounding box of a piece of text
+    ///
+    /// Currently does not handle newlines (but neither does the rasteriser). It will give `(0, 0)`
+    /// if the string to render is empty.
     fn size(&self) -> UnsignedCoord {
         // TODO: Handle height of text with newlines in it
-        let height = Conf::CHAR_HEIGHT;
         let width = Conf::CHAR_WIDTH * self.text.len() as u32;
+        let height = if width > 0 { Conf::CHAR_HEIGHT } else { 0 };
 
         UnsignedCoord(width, height)
     }
