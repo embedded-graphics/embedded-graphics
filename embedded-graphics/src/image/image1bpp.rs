@@ -194,3 +194,30 @@ impl<'a, C> Transform for Image1BPP<'a, C> {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pixelcolor::PixelColorU16;
+    use unsignedcoord::UnsignedCoord;
+
+    #[test]
+    fn negative_top_left() {
+        let image: Image1BPP<PixelColorU16> =
+            Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
+
+        assert_eq!(image.top_left(), Coord(-1, -1));
+        assert_eq!(image.bottom_right(), Coord(3, 3));
+        assert_eq!(image.size(), UnsignedCoord(4, 4));
+    }
+
+    #[test]
+    fn dimensions() {
+        let image: Image1BPP<PixelColorU16> =
+            Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
+
+        assert_eq!(image.top_left(), Coord(100, 200));
+        assert_eq!(image.bottom_right(), Coord(104, 204));
+        assert_eq!(image.size(), UnsignedCoord(4, 4));
+    }
+}

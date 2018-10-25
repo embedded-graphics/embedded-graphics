@@ -248,6 +248,20 @@ mod tests {
     use unsignedcoord::UnsignedCoord;
 
     #[test]
+    fn dimensions() {
+        let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let moved = rect.translate(Coord::new(-10, -10));
+
+        assert_eq!(rect.top_left(), Coord(5, 10));
+        assert_eq!(rect.bottom_right(), Coord(15, 20));
+        assert_eq!(rect.size(), UnsignedCoord(10, 10));
+
+        assert_eq!(moved.top_left(), Coord(-5, 0));
+        assert_eq!(moved.bottom_right(), Coord(5, 10));
+        assert_eq!(moved.size(), UnsignedCoord(10, 10));
+    }
+
+    #[test]
     fn it_can_be_translated() {
         let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(10, 10));

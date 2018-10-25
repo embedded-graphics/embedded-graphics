@@ -241,6 +241,34 @@ where
 mod tests {
     use super::*;
     use dev::TestPixelColor;
+    use drawable::Dimensions;
+
+    #[test]
+    fn negative_dimensions() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5);
+
+        assert_eq!(circ.top_left(), Coord(-15, -15));
+        assert_eq!(circ.bottom_right(), Coord(-5, -5));
+        assert_eq!(circ.size(), UnsignedCoord(10, 10));
+    }
+
+    #[test]
+    fn dimensions() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(10, 20), 5);
+
+        assert_eq!(circ.top_left(), Coord(5, 15));
+        assert_eq!(circ.bottom_right(), Coord(15, 25));
+        assert_eq!(circ.size(), UnsignedCoord(10, 10));
+    }
+
+    #[test]
+    fn large_radius() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10);
+
+        assert_eq!(circ.top_left(), Coord(-5, -5));
+        assert_eq!(circ.bottom_right(), Coord(15, 15));
+        assert_eq!(circ.size(), UnsignedCoord(20, 20));
+    }
 
     #[test]
     fn it_handles_offscreen_coords() {

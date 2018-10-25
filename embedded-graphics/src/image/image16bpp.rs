@@ -206,6 +206,40 @@ mod tests {
     use unsignedcoord::UnsignedCoord;
 
     #[test]
+    fn negative_top_left() {
+        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+            &[
+                0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, 0xee, 0x00,
+                0x00, 0x00, 0xaa, 0x00,
+            ],
+            3,
+            3,
+        )
+        .translate(Coord::new(-1, -1));
+
+        assert_eq!(image.top_left(), Coord(-1, -1));
+        assert_eq!(image.bottom_right(), Coord(2, 2));
+        assert_eq!(image.size(), UnsignedCoord(3, 3));
+    }
+
+    #[test]
+    fn dimensions() {
+        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+            &[
+                0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, 0xee, 0x00,
+                0x00, 0x00, 0xaa, 0x00,
+            ],
+            3,
+            3,
+        )
+        .translate(Coord::new(100, 200));
+
+        assert_eq!(image.top_left(), Coord(100, 200));
+        assert_eq!(image.bottom_right(), Coord(103, 203));
+        assert_eq!(image.size(), UnsignedCoord(3, 3));
+    }
+
+    #[test]
     fn it_can_have_negative_offsets() {
         let image: Image16BPP<PixelColorU16> = Image16BPP::new(
             &[

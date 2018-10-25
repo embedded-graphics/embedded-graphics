@@ -58,6 +58,19 @@ mod tests {
     }
 
     #[test]
+    fn text_corners() {
+        let hello: Font6x12<TestPixelColor> =
+            Font6x12::render_str("Hello World!").translate(Coord::new(5, -20));
+        let empty: Font6x12<TestPixelColor> =
+            Font6x12::render_str("").translate(Coord::new(10, 20));
+
+        assert_eq!(hello.top_left(), Coord::new(5, -20));
+        assert_eq!(hello.bottom_right(), Coord::new(72 + 5, 12 - 20));
+        assert_eq!(empty.top_left(), Coord::new(10, 20));
+        assert_eq!(empty.bottom_right(), Coord::new(10, 20));
+    }
+
+    #[test]
     fn correct_m() {
         let mut display = Display::default();
         display.draw(
