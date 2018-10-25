@@ -7,7 +7,6 @@ use std::time::Duration;
 use embedded_graphics::coord::Coord;
 use embedded_graphics::fonts::{Font12x16, Font6x12, Font6x8, Font8x16};
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line};
 
 use simulator::Display;
 
