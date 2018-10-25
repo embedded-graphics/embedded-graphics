@@ -14,6 +14,7 @@ use super::Image;
 use coord::{Coord, ToUnsigned};
 use core::marker::PhantomData;
 use pixelcolor::PixelColor;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// 1 bit per pixel image
 #[derive(Debug)]
@@ -31,6 +32,26 @@ pub struct Image1BPP<'a, C> {
     pub offset: Coord,
 
     pixel_type: PhantomData<C>,
+}
+
+impl<'a, C> Dimensions for Image1BPP<'a, C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        self.offset
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        let height = self.height;
+        let width = self.width;
+
+        UnsignedCoord::new(width, height)
+    }
 }
 
 impl<'a, C> Image<'a> for Image1BPP<'a, C>
@@ -171,5 +192,32 @@ impl<'a, C> Transform for Image1BPP<'a, C> {
         self.offset += by;
 
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pixelcolor::PixelColorU16;
+    use unsignedcoord::UnsignedCoord;
+
+    #[test]
+    fn negative_top_left() {
+        let image: Image1BPP<PixelColorU16> =
+            Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
+
+        assert_eq!(image.top_left(), Coord::new(-1, -1));
+        assert_eq!(image.bottom_right(), Coord::new(3, 3));
+        assert_eq!(image.size(), UnsignedCoord::new(4, 4));
+    }
+
+    #[test]
+    fn dimensions() {
+        let image: Image1BPP<PixelColorU16> =
+            Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
+
+        assert_eq!(image.top_left(), Coord::new(100, 200));
+        assert_eq!(image.bottom_right(), Coord::new(104, 204));
+        assert_eq!(image.size(), UnsignedCoord::new(4, 4));
     }
 }

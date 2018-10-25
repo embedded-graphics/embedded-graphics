@@ -4,8 +4,10 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use primitives::Primitive;
 use style::Style;
 use style::WithStyle;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -19,6 +21,28 @@ pub struct Line<C: PixelColor> {
 
     /// Line style
     pub style: Style<C>,
+}
+
+impl<C> Primitive for Line<C> where C: PixelColor {}
+
+impl<C> Dimensions for Line<C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        Coord::new(
+            self.start[1].min(self.end[0]),
+            self.start[1].min(self.end[1]),
+        )
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        (self.end - self.start).abs().to_unsigned()
+    }
 }
 
 impl<C> Line<C>
@@ -242,6 +266,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dev::TestPixelColor;
     use drawable::Pixel;
     use pixelcolor::PixelColorU8;
     use style::Style;
@@ -252,6 +277,23 @@ mod tests {
         for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
             assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
         }
+    }
+
+    #[test]
+    fn bounding_box() {
+        let start = Coord::new(10, 10);
+        let end = Coord::new(20, 20);
+
+        let line: Line<TestPixelColor> = Line::new(start, end);
+        let backwards_line: Line<TestPixelColor> = Line::new(end, start);
+
+        assert_eq!(line.top_left(), start);
+        assert_eq!(line.bottom_right(), end);
+        assert_eq!(line.size(), UnsignedCoord::new(10, 10));
+
+        assert_eq!(backwards_line.top_left(), start);
+        assert_eq!(backwards_line.bottom_right(), end);
+        assert_eq!(backwards_line.size(), UnsignedCoord::new(10, 10));
     }
 
     #[test]

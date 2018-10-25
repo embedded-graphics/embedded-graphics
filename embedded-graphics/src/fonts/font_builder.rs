@@ -3,6 +3,7 @@
 use coord::Coord;
 use coord::ToUnsigned;
 use core::marker::PhantomData;
+use drawable::Dimensions;
 use drawable::Drawable;
 use drawable::Pixel;
 use fonts::Font;
@@ -10,7 +11,7 @@ use pixelcolor::PixelColor;
 use style::Style;
 use style::WithStyle;
 use transform::Transform;
-use unsignedcoord::UnsignedCoord;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// The configuration of the font
 pub trait FontBuilderConf {
@@ -41,6 +42,7 @@ pub struct FontBuilder<'a, C: PixelColor, Conf> {
 
     _conf: PhantomData<Conf>,
 }
+
 impl<'a, C: PixelColor + Copy, Conf> Copy for FontBuilder<'a, C, Conf> {}
 impl<'a, C: PixelColor + Clone, Conf> Clone for FontBuilder<'a, C, Conf> {
     fn clone(&self) -> Self {
@@ -50,6 +52,32 @@ impl<'a, C: PixelColor + Clone, Conf> Clone for FontBuilder<'a, C, Conf> {
             style: self.style.clone(),
             _conf: Default::default(),
         }
+    }
+}
+
+impl<'a, C, Conf> Dimensions for FontBuilder<'a, C, Conf>
+where
+    C: PixelColor,
+    Conf: FontBuilderConf,
+{
+    fn top_left(&self) -> Coord {
+        self.pos
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    /// Get the bounding box of a piece of text
+    ///
+    /// Currently does not handle newlines (but neither does the rasteriser). It will give `(0, 0)`
+    /// if the string to render is empty.
+    fn size(&self) -> UnsignedCoord {
+        // TODO: Handle height of text with newlines in it
+        let width = Conf::CHAR_WIDTH * self.text.len() as u32;
+        let height = if width > 0 { Conf::CHAR_HEIGHT } else { 0 };
+
+        UnsignedCoord::new(width, height)
     }
 }
 

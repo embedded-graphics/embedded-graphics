@@ -15,6 +15,7 @@ use super::Image;
 use coord::{Coord, ToUnsigned};
 use core::marker::PhantomData;
 use pixelcolor::PixelColor;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// 8 bit per pixel image
 #[derive(Debug)]
@@ -32,6 +33,26 @@ pub struct Image8BPP<'a, C: PixelColor> {
     pub offset: Coord,
 
     pixel_type: PhantomData<C>,
+}
+
+impl<'a, C> Dimensions for Image8BPP<'a, C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        self.offset
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        let height = self.height;
+        let width = self.width;
+
+        UnsignedCoord::new(width, height)
+    }
 }
 
 impl<'a, C> Image<'a> for Image8BPP<'a, C>
@@ -174,6 +195,34 @@ mod tests {
     use super::*;
     use pixelcolor::PixelColorU8;
     use unsignedcoord::UnsignedCoord;
+
+    #[test]
+    fn negative_top_left() {
+        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
+            3,
+            3,
+        )
+        .translate(Coord::new(-1, -1));
+
+        assert_eq!(image.top_left(), Coord::new(-1, -1));
+        assert_eq!(image.bottom_right(), Coord::new(2, 2));
+        assert_eq!(image.size(), UnsignedCoord::new(3, 3));
+    }
+
+    #[test]
+    fn dimensions() {
+        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
+            3,
+            3,
+        )
+        .translate(Coord::new(100, 200));
+
+        assert_eq!(image.top_left(), Coord::new(100, 200));
+        assert_eq!(image.bottom_right(), Coord::new(103, 203));
+        assert_eq!(image.size(), UnsignedCoord::new(3, 3));
+    }
 
     #[test]
     fn it_can_have_negative_offsets() {

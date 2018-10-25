@@ -24,7 +24,7 @@ mod internal_coord {
 
         /// Clamp coordinate components to positive integer range
         pub fn clamp_positive(&self) -> Self {
-            Coord(self.0.max(0), self.1.max(0))
+            Coord::new(self.0.max(0), self.1.max(0))
         }
 
         /// Remove the sign from a coordinate
@@ -38,7 +38,7 @@ mod internal_coord {
         /// assert_eq!(coord.abs(), Coord::new(5, 10));
         /// ```
         pub fn abs(&self) -> Self {
-            Coord(self.0.abs(), self.1.abs())
+            Coord::new(self.0.abs(), self.1.abs())
         }
     }
 

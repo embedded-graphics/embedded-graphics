@@ -4,8 +4,10 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use coord::{Coord, ToUnsigned};
 use pixelcolor::PixelColor;
+use primitives::Primitive;
 use style::Style;
 use style::WithStyle;
+use unsignedcoord::{ToSigned, UnsignedCoord};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -32,6 +34,27 @@ where
             radius,
             style: Style::default(),
         }
+    }
+}
+
+impl<C> Primitive for Circle<C> where C: PixelColor {}
+
+impl<C> Dimensions for Circle<C>
+where
+    C: PixelColor,
+{
+    fn top_left(&self) -> Coord {
+        let radius_coord = Coord::new(self.radius as i32, self.radius as i32);
+
+        self.center - radius_coord
+    }
+
+    fn bottom_right(&self) -> Coord {
+        self.top_left() + self.size().to_signed()
+    }
+
+    fn size(&self) -> UnsignedCoord {
+        UnsignedCoord::new(self.radius * 2, self.radius * 2)
     }
 }
 
@@ -218,6 +241,34 @@ where
 mod tests {
     use super::*;
     use dev::TestPixelColor;
+    use drawable::Dimensions;
+
+    #[test]
+    fn negative_dimensions() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5);
+
+        assert_eq!(circ.top_left(), Coord::new(-15, -15));
+        assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
+        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
+    }
+
+    #[test]
+    fn dimensions() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(10, 20), 5);
+
+        assert_eq!(circ.top_left(), Coord::new(5, 15));
+        assert_eq!(circ.bottom_right(), Coord::new(15, 25));
+        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
+    }
+
+    #[test]
+    fn large_radius() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10);
+
+        assert_eq!(circ.top_left(), Coord::new(-5, -5));
+        assert_eq!(circ.bottom_right(), Coord::new(15, 15));
+        assert_eq!(circ.size(), UnsignedCoord::new(20, 20));
+    }
 
     #[test]
     fn it_handles_offscreen_coords() {
