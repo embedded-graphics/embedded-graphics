@@ -12,7 +12,14 @@ mod internal_coord {
     use super::*;
     use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 
-    /// 2D coordinate type
+    /// 2D signed integer coordinate type
+    ///
+    /// This coordinate should be used to define graphics object coordinates. For example, a
+    /// [`Rect`] may be defined that has its top left at `(-1,-2)`. To specify positive-only screen
+    /// coordinates and the like, see [`UnsignedCoord`]
+    ///
+    /// [`UnsignedCoord`]: ../unsignedcoord/struct.UnsignedCoord.html
+    /// [`Rect`]: ../primitives/rect/struct.Rect.html
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct Coord(pub CoordPart, pub CoordPart);
 

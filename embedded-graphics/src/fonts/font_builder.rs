@@ -1,4 +1,4 @@
-//! Boilerplate to construct fonts
+//! Common code used to define available monospace pixel fonts
 
 use coord::Coord;
 use coord::ToUnsigned;

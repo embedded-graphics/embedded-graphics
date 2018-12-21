@@ -1,5 +1,3 @@
-//! 6x8 pixel font. Covers the printable latin1 characters. Image data taken from the [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps)
-
 use fonts::font_builder::{FontBuilder, FontBuilderConf};
 
 #[derive(Debug, Copy, Clone)]
@@ -24,7 +22,7 @@ impl FontBuilderConf for Font6x8Conf {
     }
 }
 
-/// A 6x8 font.
+/// 6x8 pixel monospace font
 pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 
 #[cfg(test)]

@@ -1,14 +1,3 @@
-//! 8 bit per pixel image. Each byte of input data defines the on/off state for each pixel. This
-//! currently only supports monochrome displays, so if the pixel value is 0, it's off, anything
-//! above 0 is on.
-//!
-//! You can convert an image to 8BPP for inclusion with `include_bytes!()` using the following
-//! Imagemagick command:
-//!
-//! ```bash
-//! convert image.png -depth 8 gray:"image.raw"
-//! ```
-
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
@@ -17,7 +6,17 @@ use core::marker::PhantomData;
 use pixelcolor::PixelColor;
 use unsignedcoord::{ToSigned, UnsignedCoord};
 
-/// 8 bit per pixel image
+/// # 8 bits per pixel image
+///
+/// Each byte of input data defines the on/off state for each pixel. This currently only supports
+/// monochrome displays, so if the pixel value is 0, it's off, anything above 0 is on.
+///
+/// You can convert an image to 8BPP for inclusion with `include_bytes!()` using the following
+/// Imagemagick command:
+///
+/// ```bash
+/// convert image.png -depth 8 gray:"image.raw"
+/// ```
 #[derive(Debug)]
 pub struct Image8BPP<'a, C: PixelColor> {
     /// Image width
