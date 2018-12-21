@@ -1,13 +1,3 @@
-//! 1 bit per pixel image. Each byte of input data defines the on/off state of 8 horizontal pixels
-//! to be displayed on the screen.
-//!
-//! You can convert an image to 1BPP for inclusion with `include_bytes!()` using the following
-//! Imagemagick command:
-//!
-//! ```bash
-//! convert image.png -depth 1 gray:"image.raw"
-//! ```
-
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
@@ -16,7 +6,17 @@ use core::marker::PhantomData;
 use pixelcolor::PixelColor;
 use unsignedcoord::{ToSigned, UnsignedCoord};
 
-/// 1 bit per pixel image
+/// # 1 bit per pixel image
+///
+/// Each byte of input data defines the on/off state of 8 horizontal pixels to be displayed on the
+/// screen.
+///
+/// You can convert an image to 1BPP for inclusion with `include_bytes!()` using the following
+/// Imagemagick command:
+///
+/// ```bash
+/// convert image.png -depth 1 gray:"image.raw"
+/// ```
 #[derive(Debug)]
 pub struct Image1BPP<'a, C> {
     /// Image width in pixels
