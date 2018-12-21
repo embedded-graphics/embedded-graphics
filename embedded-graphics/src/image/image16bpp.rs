@@ -12,7 +12,6 @@
 //! This will remove the BMP header leaving the raw pixel data
 //! E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
 
-
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
