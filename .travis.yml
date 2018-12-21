@@ -26,11 +26,16 @@ matrix:
 
 before_install:
   - rustup component add rustfmt
+  - pip install linkchecker --user
 
 script:
   - cargo fmt --all -- --check
   - cargo test --release -p embedded-graphics
   - cargo test --release --all-features -p embedded-graphics
+
+after_success:
+  - cargo doc
+  - linkchecker target/doc/embedded_graphics
 
 cache: cargo
 before_cache:
