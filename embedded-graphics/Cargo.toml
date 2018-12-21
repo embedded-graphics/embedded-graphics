@@ -2,7 +2,7 @@
 name = "embedded-graphics"
 description = "Embedded graphics library for small hardware displays"
 version = "0.4.4"
-authors = ["James Waples <jamwaffles@gmail.com>"]
+authors = ["James Waples <james@wapl.es>"]
 repository = "https://github.com/jamwaffles/embedded-graphics"
 documentation = "https://docs.rs/embedded-graphics"
 categories = ["embedded", "no-std"]
