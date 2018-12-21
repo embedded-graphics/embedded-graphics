@@ -1,8 +1,4 @@
-//! 2D unsigned coordinate in screen space
-//!
-//! As opposed to [`Coord`](../coord/index.html), this coordinate is unsigned. It is intended for
-//! use with [`Drawable`](../drawable/trait.Drawable.html) iterators to output valid _display pixel_
-//! coordinates, i.e. coordinates that are always positive.
+//! 2D unsigned coordinate
 
 use coord::Coord;
 
@@ -13,7 +9,11 @@ mod internal_unsigned_coord {
     use super::UnsignedCoordPart;
     use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 
-    /// 2D coordinate type
+    /// 2D unsigned coordinate in screen space
+    ///
+    /// As opposed to [`Coord`](../coord/index.html), this coordinate is unsigned. It is intended for
+    /// use with [`Drawable`](../drawable/trait.Drawable.html) iterators to output valid _display pixel_
+    /// coordinates, i.e. coordinates that are always positive.
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct UnsignedCoord(pub UnsignedCoordPart, pub UnsignedCoordPart);
 
