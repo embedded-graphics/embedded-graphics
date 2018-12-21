@@ -3,17 +3,12 @@
 //! You can convert an image to 16BPP for inclusion with `include_bytes!()` doing the following
 //!
 //! ```bash
-//! convert image.png -alpha off -depth 16 gray:"image.raw"
+//! convert image.png -flip -flop -type truecolor -define bmp:subtype=RGB565 -resize '64x64!' -depth 16 -strip image.bmp
 //! ```
-//!
-//! OR with GIMP:
-//!
-//! Converting the Image to 16bit BMP, then running
+//! then
 //! ```bash
-//! tail -c $bytes image.bmp > image.raw
+//! tail -c $bytes image.bmp > image.raw // where $bytes is w * h * 2
 //! ```
-//! where $bytes is `w * h * 2`
-//!
 //! This will remove the BMP header leaving the raw pixel data
 //! E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
 
@@ -25,7 +20,7 @@ use core::marker::PhantomData;
 use pixelcolor::PixelColor;
 use unsignedcoord::{ToSigned, UnsignedCoord};
 
-/// 8 bit per pixel image
+/// 16 bit per pixel image
 #[derive(Debug)]
 pub struct Image16BPP<'a, C: PixelColor> {
     /// Image width
