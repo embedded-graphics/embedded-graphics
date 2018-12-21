@@ -1,5 +1,3 @@
-//! 8x16 pixel font. Image data taken from the [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps)
-
 use fonts::font_builder::{FontBuilder, FontBuilderConf};
 
 #[derive(Debug, Copy, Clone)]
@@ -24,7 +22,7 @@ impl FontBuilderConf for Font8x16Conf {
     }
 }
 
-/// A 8x16 font.
+/// 8x16 pixel monospace font
 pub type Font8x16<'a, C> = FontBuilder<'a, C, Font8x16Conf>;
 
 #[cfg(test)]

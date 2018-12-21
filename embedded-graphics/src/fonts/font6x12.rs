@@ -1,5 +1,3 @@
-//! 6x12 pixel font. Covers the printable ASCII characters. Image data taken from the [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps)
-
 use fonts::font_builder::{FontBuilder, FontBuilderConf};
 
 #[derive(Debug, Copy, Clone)]
@@ -21,7 +19,7 @@ impl FontBuilderConf for Font6x12Conf {
     }
 }
 
-/// A 6x12 font.
+/// 6x12 pixel monospace font
 pub type Font6x12<'a, C> = FontBuilder<'a, C, Font6x12Conf>;
 
 #[cfg(test)]
