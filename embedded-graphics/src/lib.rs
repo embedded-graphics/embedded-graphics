@@ -3,13 +3,14 @@
 //! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
 //! following:
 //!
-//! * 1 bit-per-pixel images
-//! * 8 bit-per-pixel images
-//! * Primitives
+//! * [1 bit-per-pixel images](./image/struct.Image1BPP.html)
+//! * [8 bits-per-pixel images](./image/struct.Image8BPP.html)
+//! * [16 bits-per-pixel images](./image/struct.Image16BPP.html)
+//! * [Primitives](./primitives/index.html)
 //!     * Lines
 //!     * Rectangles (and squares)
 //!     * Circles
-//! * Text with multiple [fonts](./fonts/index.html)
+//! * [Text with multiple fonts](./fonts/index.html#types)
 //!
 //! A core goal is to do the above without using any buffers; the crate should work without a
 //! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
