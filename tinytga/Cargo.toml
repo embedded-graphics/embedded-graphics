@@ -1,0 +1,11 @@
+[package]
+name = "tinytga"
+version = "0.1.0"
+authors = ["James Waples <james@wapl.es>"]
+edition = "2018"
+
+[dependencies]
+
+[dependencies.nom]
+version = "4.2.0"
+default-features = false
