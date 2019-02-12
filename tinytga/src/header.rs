@@ -59,48 +59,48 @@ pub enum ImageType {
 #[derive(Debug, Copy, Clone)]
 pub struct TgaHeader {
     /// Image ID field length
-    id_len: u8,
+    pub id_len: u8,
 
     /// Whether a color map is included in the image data
-    has_color_map: bool,
+    pub has_color_map: bool,
 
     /// Image type
-    image_type: ImageType,
+    pub image_type: ImageType,
 
     /// Color map origin
-    color_map_start: u16,
+    pub color_map_start: u16,
 
     /// Length of color map
-    color_map_len: u16,
+    pub color_map_len: u16,
 
     /// Number of bits in each color pallette entry, typically 15, 16, 24, or 32 bits
-    color_map_depth: u8,
+    pub color_map_depth: u8,
 
     /// Image origin (X)
-    x_origin: u16,
+    pub x_origin: u16,
 
     /// Image origin (Y)
-    y_origin: u16,
+    pub y_origin: u16,
 
     /// Image width in pixels
-    width: u16,
+    pub width: u16,
 
     /// Image heigh in pixels
-    height: u16,
+    pub height: u16,
 
-    /// Pixel bit depth
-    pixel_depth: u8,
+    /// Pixel bit depth (8, 16, 24, 32 bits)
+    pub pixel_depth: u8,
 
     /// Image descriptor (unused)
     ///
-    /// Bits 0:3: Alpha channel information
+    /// Bits 0:3: Number of bits per pixel designated to alpha channel
     /// Bits 4:5: Image origin:
     ///
     /// * `00` = bottom left
     /// * `01` = bottom right
     /// * `10` = top left
     /// * `11` = top right
-    image_descriptor: u8,
+    pub image_descriptor: u8,
 }
 
 named!(has_color_map<&[u8], bool>,
