@@ -24,7 +24,13 @@ pub struct Tga {
 impl Tga {
     /// Parse a TGA image from a byte slice
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, ParseError> {
-        let (_remaining, header) = header(bytes).map_err(|_| ParseError::Other)?;
+        let (remaining, header) = header(bytes).map_err(|_| ParseError::Other)?;
+
+        let header_len = bytes.len() - remaining.len();
+
+        // TODO: Support color maps with by color map size with
+        // (header.color_map_len * header.color_map_entry_size)
+        let _image_data_start = header_len as u16 + header.id_len as u16;
 
         // if remaining.len() > 0 {
         //     Err(ParseError::Incomplete(remaining.len()))
