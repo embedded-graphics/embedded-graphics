@@ -12,8 +12,10 @@
 #![deny(unused_qualifications)]
 
 mod header;
+mod rle_packet;
 
 use crate::header::*;
+use crate::rle_packet::rle_packet;
 
 /// TGA image
 #[derive(Debug, Copy, Clone)]
