@@ -12,9 +12,11 @@
 #![deny(unused_qualifications)]
 
 mod header;
+mod raw_packet;
 mod rle_packet;
 
 use crate::header::*;
+use crate::raw_packet::raw_packet;
 use crate::rle_packet::rle_packet;
 
 /// TGA image
