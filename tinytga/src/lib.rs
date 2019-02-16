@@ -13,11 +13,13 @@
 
 mod footer;
 mod header;
+mod parse_error;
 mod raw_packet;
 mod rle_packet;
 
 use crate::footer::*;
 use crate::header::*;
+use crate::parse_error::ParseError;
 use crate::raw_packet::raw_packet;
 use crate::rle_packet::rle_packet;
 
@@ -37,11 +39,11 @@ pub struct Tga<'a> {
 impl<'a> Tga<'a> {
     /// Parse a TGA image from a byte slice
     pub fn from_bytes(bytes: &'a [u8]) -> Result<Self, ParseError> {
-        let (after_header, header) = header(bytes).map_err(|_| ParseError::Other)?;
+        let (after_header, header) = header(bytes).map_err(|_| ParseError::Header)?;
 
         // Read last 26 bytes as TGA footer
         let (_remaining, footer) =
-            footer(&bytes[(bytes.len() - FOOTER_LEN)..]).map_err(|_| ParseError::Other)?;
+            footer(&bytes[(bytes.len() - FOOTER_LEN)..]).map_err(|_| ParseError::Footer)?;
 
         let header_len = bytes.len() - after_header.len();
 
