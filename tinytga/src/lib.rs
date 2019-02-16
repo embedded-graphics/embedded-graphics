@@ -11,37 +11,58 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+mod footer;
 mod header;
 mod raw_packet;
 mod rle_packet;
 
+use crate::footer::*;
 use crate::header::*;
 use crate::raw_packet::raw_packet;
 use crate::rle_packet::rle_packet;
 
 /// TGA image
 #[derive(Debug, Copy, Clone)]
-pub struct Tga {
-    header: TgaHeader,
+pub struct Tga<'a> {
+    /// TGA header
+    pub header: TgaHeader,
+
+    /// TGA footer (last 26 bytes of file)
+    pub footer: TgaFooter,
+
+    /// Image pixel data
+    pub pixel_data: &'a [u8],
 }
 
-impl Tga {
+impl<'a> Tga<'a> {
     /// Parse a TGA image from a byte slice
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, ParseError> {
-        let (remaining, header) = header(bytes).map_err(|_| ParseError::Other)?;
+    pub fn from_bytes(bytes: &'a [u8]) -> Result<Self, ParseError> {
+        let (after_header, header) = header(bytes).map_err(|_| ParseError::Other)?;
 
-        let header_len = bytes.len() - remaining.len();
+        // Read last 26 bytes as TGA footer
+        let (_remaining, footer) =
+            footer(&bytes[(bytes.len() - FOOTER_LEN)..]).map_err(|_| ParseError::Other)?;
+
+        let header_len = bytes.len() - after_header.len();
 
         // TODO: Support color maps with by color map size with
         // (header.color_map_len * header.color_map_entry_size)
-        let _image_data_start = header_len as u16 + header.id_len as u16;
+        let image_data_start = header_len + header.id_len as usize;
 
-        // if remaining.len() > 0 {
-        //     Err(ParseError::Incomplete(remaining.len()))
-        // } else {
-        //     Ok(Self { header })
-        // }
+        let image_data_end = match footer
+            .extension_area_offset
+            .min(footer.developer_directory_offset) as usize
+        {
+            0 => bytes.len() - FOOTER_LEN,
+            non_empty => non_empty,
+        };
 
-        Ok(Self { header })
+        let pixel_data = &bytes[image_data_start..image_data_end];
+
+        Ok(Self {
+            header,
+            footer,
+            pixel_data,
+        })
     }
 }
