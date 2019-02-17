@@ -4,7 +4,7 @@ use nom::*;
 pub const FOOTER_LEN: usize = 26;
 
 /// TGA footer structure, referenced from <http://tfc.duke.free.fr/coding/tga_specs.pdf>
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct TgaFooter {
     /// Extension area byte offset from beginning of file
     pub extension_area_offset: u32,

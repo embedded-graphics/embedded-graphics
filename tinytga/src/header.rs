@@ -1,7 +1,7 @@
 use nom::*;
 
 /// Image type
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ImageType {
     /// Image contains no pixel data
     Empty = 0,
@@ -25,21 +25,8 @@ pub enum ImageType {
     RleMonochrome = 11,
 }
 
-// /// Color map type
-// #[derive(Debug, Copy, Clone)]
-// pub enum ColorMapType {
-//     /// Each pixel is represented by an index into a color pallette
-//     Pseudocolor,
-
-//     /// Similar to pseudocolor, but each RGB component has its own index into a color pallette
-//     Directcolor,
-
-//     /// Store pixel information in the image, no pallette is used
-//     Truecolor,
-// }
-
 /// TGA header structure, referenced from <https://www.fileformat.info/format/tga/egff.htm>
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct TgaHeader {
     /// Image ID field length
     pub id_len: u8,

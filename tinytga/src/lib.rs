@@ -23,6 +23,9 @@ use crate::parse_error::ParseError;
 use crate::raw_packet::raw_packet;
 use crate::rle_packet::rle_packet;
 
+pub use crate::footer::TgaFooter;
+pub use crate::header::{ImageType, TgaHeader};
+
 /// TGA image
 #[derive(Debug, Copy, Clone)]
 pub struct Tga<'a> {
