@@ -8,9 +8,12 @@ fn chequerboard_uncompressed_topleft() {
 
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);
-    println!("{:#?}", img.pixel_data.len());
+    println!("Pixel data len {:#?}", img.pixel_data.len());
+
+    let image_data_len =
+        img.header.width * img.header.height * (img.header.pixel_depth as u16 / 8u16);
 
     // Source image is 8x8px, uncompressed, 8BPP color
     assert_eq!(img.header.pixel_depth, 8);
-    assert_eq!(img.pixel_data.len(), 64);
+    assert_eq!(img.pixel_data.len(), image_data_len as usize);
 }
