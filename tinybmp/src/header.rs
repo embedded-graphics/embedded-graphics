@@ -29,6 +29,15 @@ pub struct Header {
 
     /// Byte offset from beginning of file at which pixel data begins
     pub image_data_start: usize,
+
+    /// Image width in pixels
+    pub image_width: u32,
+
+    /// Image height in pixels
+    pub image_height: u32,
+
+    /// Number of bits per pixel
+    pub bpp: u16,
 }
 
 named!(pub(crate) parse_header<&[u8], Header>,
@@ -38,12 +47,23 @@ named!(pub(crate) parse_header<&[u8], Header>,
         reserved_1: le_u16 >>
         reserved_2: le_u16 >>
         image_data_start: le_u32 >>
+        // Remaining header length in bytes
+        le_u32 >>
+        image_width: le_u32 >>
+        image_height: le_u32 >>
+        // Number of color planes
+        le_u16 >>
+        bpp: le_u16 >>
+        // Omitted: extraneous, unused fields
         (Header{
             file_type: FileType::BM,
             file_size,
             reserved_1,
             reserved_2,
-            image_data_start: image_data_start as usize
+            image_data_start: image_data_start as usize,
+            image_width,
+            image_height,
+            bpp
         })
     )
 );

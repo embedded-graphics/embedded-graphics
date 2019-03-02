@@ -13,6 +13,9 @@ fn chessboard_8px_24bit() {
             reserved_1: 0,
             reserved_2: 0,
             image_data_start: 122,
+            bpp: 24,
+            image_width: 8,
+            image_height: 8,
         }
     );
 }
