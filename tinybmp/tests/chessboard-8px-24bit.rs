@@ -1,0 +1,18 @@
+use tinybmp::{Bmp, FileType, Header};
+
+#[test]
+fn chessboard_8px_24bit() {
+    let bmp =
+        Bmp::from_bytes(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
+
+    assert_eq!(
+        bmp.header,
+        Header {
+            file_type: FileType::BM,
+            file_size: 314,
+            reserved_1: 0,
+            reserved_2: 0,
+            image_data_start: 122,
+        }
+    );
+}
