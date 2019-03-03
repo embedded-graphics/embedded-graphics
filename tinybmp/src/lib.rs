@@ -51,4 +51,10 @@ impl<'a> Bmp<'a> {
     pub fn dimensions(&self) -> (u32, u32) {
         (self.header.image_width, self.header.image_height)
     }
+
+    /// Get the BPP (bits per pixel) for this image
+    // TODO: Should this return an enum?
+    pub fn bpp(&self) -> u32 {
+        self.header.bpp as u32
+    }
 }
