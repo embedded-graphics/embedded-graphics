@@ -24,7 +24,7 @@ impl<'a> Bmp<'a> {
     ///
     /// This method keeps a slice of the original input and does not dynamically allocate memory.
     /// The input data must live for as long as this BMP instance does.
-    pub fn from_bytes(bytes: &'a [u8]) -> Result<Self, ()> {
+    pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ()> {
         let (_remaining, header) = parse_header(bytes).map_err(|_| ())?;
 
         let image_data = &bytes[header.image_data_start..];

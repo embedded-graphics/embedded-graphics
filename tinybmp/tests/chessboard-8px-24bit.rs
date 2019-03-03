@@ -3,7 +3,7 @@ use tinybmp::{Bmp, FileType, Header};
 #[test]
 fn chessboard_8px_24bit() {
     let bmp =
-        Bmp::from_bytes(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
+        Bmp::from_slice(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
 
     assert_eq!(
         bmp.header,
