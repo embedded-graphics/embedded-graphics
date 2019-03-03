@@ -3,6 +3,7 @@
 
 #![no_std]
 #![deny(missing_docs)]
+#![deny(missing_debug_implementations)]
 
 mod header;
 
@@ -10,6 +11,7 @@ use header::parse_header;
 pub use header::{FileType, Header};
 
 /// A BMP-format bitmap
+#[derive(Debug, PartialEq)]
 pub struct Bmp<'a> {
     /// Image header
     pub header: Header,
