@@ -1,10 +1,10 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
-use coord::{Coord, ToUnsigned};
+use crate::coord::{Coord, ToUnsigned};
 use core::marker::PhantomData;
-use pixelcolor::PixelColor;
-use unsignedcoord::{ToSigned, UnsignedCoord};
+use crate::pixelcolor::PixelColor;
+use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// # 8 bits per pixel image
 ///
@@ -192,8 +192,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pixelcolor::PixelColorU8;
-    use unsignedcoord::UnsignedCoord;
+    use crate::pixelcolor::PixelColorU8;
+    use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {

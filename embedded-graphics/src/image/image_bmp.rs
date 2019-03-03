@@ -1,11 +1,11 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::ImageFile;
-use coord::{Coord, ToUnsigned};
+use crate::coord::{Coord, ToUnsigned};
 use core::marker::PhantomData;
-use pixelcolor::PixelColor;
+use crate::pixelcolor::PixelColor;
 use tinybmp::Bmp;
-use unsignedcoord::{ToSigned, UnsignedCoord};
+use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// BMP format image
 #[derive(Debug, Clone)]
@@ -165,8 +165,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pixelcolor::PixelColorU16;
-    use unsignedcoord::UnsignedCoord;
+    use crate::pixelcolor::PixelColorU16;
+    use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {

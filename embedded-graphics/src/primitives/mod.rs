@@ -1,6 +1,6 @@
 //! Graphics primitives
 
-use drawable::Dimensions;
+use crate::drawable::Dimensions;
 
 pub mod circle;
 pub mod line;

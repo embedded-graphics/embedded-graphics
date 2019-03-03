@@ -14,6 +14,7 @@ exclude = [
 	".gitignore",
 	"convert_1bpp.sh",
 ]
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }

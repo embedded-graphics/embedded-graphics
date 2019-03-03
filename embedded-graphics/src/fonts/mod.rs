@@ -10,10 +10,10 @@ pub use self::font12x16::Font12x16;
 pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
-use drawable::Dimensions;
-use pixelcolor::PixelColor;
-use style::WithStyle;
-use unsignedcoord::UnsignedCoord;
+use crate::drawable::Dimensions;
+use crate::pixelcolor::PixelColor;
+use crate::style::WithStyle;
+use crate::unsignedcoord::UnsignedCoord;
 
 /// Common methods for all fonts
 pub trait Font<'a, C>: WithStyle<C> + Dimensions

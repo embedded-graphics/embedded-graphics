@@ -2,12 +2,12 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use coord::{Coord, ToUnsigned};
-use pixelcolor::PixelColor;
-use primitives::Primitive;
-use style::Style;
-use style::WithStyle;
-use unsignedcoord::{ToSigned, UnsignedCoord};
+use crate::coord::{Coord, ToUnsigned};
+use crate::pixelcolor::PixelColor;
+use crate::primitives::Primitive;
+use crate::style::Style;
+use crate::style::WithStyle;
+use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
@@ -240,8 +240,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dev::TestPixelColor;
-    use drawable::Dimensions;
+    use crate::dev::TestPixelColor;
+    use crate::drawable::Dimensions;
 
     #[test]
     fn negative_dimensions() {

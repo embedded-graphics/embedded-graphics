@@ -1,5 +1,5 @@
-use drawable::Pixel;
-use Drawing;
+use crate::drawable::Pixel;
+use crate::Drawing;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Display(pub [[u8; 24]; 16]);
