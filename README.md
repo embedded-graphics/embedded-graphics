@@ -14,6 +14,7 @@ following:
 * 1 bit-per-pixel images
 * 8 bit-per-pixel images
 * 16 bit-per-pixel images
+* [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP
 * Primitives
     * Lines
     * Rectangles (and squares)

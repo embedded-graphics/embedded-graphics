@@ -43,6 +43,7 @@
 
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
+extern crate tinybmp;
 
 pub mod coord;
 pub mod dev;

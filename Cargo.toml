@@ -3,4 +3,5 @@
 members = [
     "embedded-graphics",
     "simulator",
+    "tinybmp",
 ]
