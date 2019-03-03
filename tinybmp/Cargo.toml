@@ -1,8 +1,19 @@
 [package]
 name = "tinybmp"
+description = "No-std, low memory footprint BMP image loader"
 version = "0.1.0"
 authors = ["James Waples <james@wapl.es>"]
 edition = "2018"
+repository = "https://github.com/jamwaffles/embedded-graphics/tinybmp"
+documentation = "https://docs.rs/tinybmp"
+categories = ["embedded", "no-std"]
+keywords = ["rtfm", "graphics", "embedded", "bmp", "bitmap", "image"]
+readme = "./README.md"
+license = "MIT OR Apache-2.0"
+exclude = [
+    ".travis.yml",
+    ".gitignore",
+]
 
 [dependencies.nom]
 version = "4.2.1"
