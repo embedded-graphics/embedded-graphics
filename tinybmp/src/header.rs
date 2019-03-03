@@ -38,6 +38,9 @@ pub struct Header {
 
     /// Number of bits per pixel
     pub bpp: u16,
+
+    /// Length in bytes of the image data
+    pub image_data_len: u32,
 }
 
 named!(pub(crate) parse_header<&[u8], Header>,
@@ -54,6 +57,9 @@ named!(pub(crate) parse_header<&[u8], Header>,
         // Number of color planes
         le_u16 >>
         bpp: le_u16 >>
+        // Compression method used
+        le_u32 >>
+        image_data_len: le_u32 >>
         // Omitted: extraneous, unused fields
         (Header{
             file_type: FileType::BM,
@@ -63,6 +69,7 @@ named!(pub(crate) parse_header<&[u8], Header>,
             image_data_start: image_data_start as usize,
             image_width,
             image_height,
+            image_data_len,
             bpp
         })
     )

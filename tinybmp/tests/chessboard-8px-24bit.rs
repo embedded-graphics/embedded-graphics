@@ -16,6 +16,7 @@ fn chessboard_8px_24bit() {
             bpp: 24,
             image_width: 8,
             image_height: 8,
+            image_data_len: 192
         }
     );
 
