@@ -36,4 +36,19 @@ impl<'a> Bmp<'a> {
     pub fn image_data(&'a self) -> &'a [u8] {
         self.image_data
     }
+
+    /// Get the image width in pixels
+    pub fn width(&self) -> u32 {
+        self.header.image_width
+    }
+
+    /// Get the image height in pixels
+    pub fn height(&self) -> u32 {
+        self.header.image_height
+    }
+
+    /// Get image dimensions as `(width, height)` in pixels
+    pub fn dimensions(&self) -> (u32, u32) {
+        (self.header.image_width, self.header.image_height)
+    }
 }
