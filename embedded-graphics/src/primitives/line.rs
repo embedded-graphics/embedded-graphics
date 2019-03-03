@@ -2,12 +2,12 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use coord::{Coord, ToUnsigned};
-use pixelcolor::PixelColor;
-use primitives::Primitive;
-use style::Style;
-use style::WithStyle;
-use unsignedcoord::{ToSigned, UnsignedCoord};
+use crate::coord::{Coord, ToUnsigned};
+use crate::pixelcolor::PixelColor;
+use crate::primitives::Primitive;
+use crate::style::Style;
+use crate::style::WithStyle;
+use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Line primitive
@@ -266,11 +266,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dev::TestPixelColor;
-    use drawable::Pixel;
-    use pixelcolor::PixelColorU8;
-    use style::Style;
-    use unsignedcoord::UnsignedCoord;
+    use crate::dev::TestPixelColor;
+    use crate::drawable::Pixel;
+    use crate::pixelcolor::PixelColorU8;
+    use crate::style::Style;
+    use crate::unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
         let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));

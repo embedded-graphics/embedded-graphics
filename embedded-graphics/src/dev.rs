@@ -1,6 +1,6 @@
 //! Devlopment/test helpers
 
-use pixelcolor::PixelColor;
+use crate::pixelcolor::PixelColor;
 
 /// Fake pixel colour useful for testing
 #[derive(Copy, Clone, PartialEq, Debug)]

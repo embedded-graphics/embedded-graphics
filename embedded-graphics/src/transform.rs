@@ -1,6 +1,6 @@
 //! Transformations for graphics objects
 
-use coord::Coord;
+use crate::coord::Coord;
 
 /// Transform operations
 pub trait Transform {

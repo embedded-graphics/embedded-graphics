@@ -1,4 +1,4 @@
-use fonts::font_builder::{FontBuilder, FontBuilderConf};
+use crate::fonts::font_builder::{FontBuilder, FontBuilderConf};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Font12x16Conf {}
@@ -25,16 +25,16 @@ pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use coord::Coord;
-    use dev::TestPixelColor;
-    use drawable::Dimensions;
-    use fonts::Font;
-    use mock_display::Display;
-    use style::Style;
-    use style::WithStyle;
-    use transform::Transform;
-    use unsignedcoord::UnsignedCoord;
-    use Drawing;
+    use crate::coord::Coord;
+    use crate::dev::TestPixelColor;
+    use crate::drawable::Dimensions;
+    use crate::fonts::Font;
+    use crate::mock_display::Display;
+    use crate::style::Style;
+    use crate::style::WithStyle;
+    use crate::transform::Transform;
+    use crate::unsignedcoord::UnsignedCoord;
+    use crate::Drawing;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {

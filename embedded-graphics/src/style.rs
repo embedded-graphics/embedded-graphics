@@ -1,6 +1,6 @@
 //! Styling struct to customise the look of objects.
 
-use pixelcolor::PixelColor;
+use crate::pixelcolor::PixelColor;
 
 /// Style properties for an object
 #[derive(Debug, Copy, Clone)]

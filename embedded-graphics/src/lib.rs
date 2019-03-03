@@ -59,7 +59,7 @@ pub mod style;
 pub mod transform;
 pub mod unsignedcoord;
 
-use pixelcolor::PixelColor;
+use crate::pixelcolor::PixelColor;
 
 /// The main trait of this crate. All graphics objects must implement it.
 pub trait Drawing<C>

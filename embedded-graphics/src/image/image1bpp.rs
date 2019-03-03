@@ -1,10 +1,10 @@
 use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
-use coord::{Coord, ToUnsigned};
+use crate::coord::{Coord, ToUnsigned};
+use crate::pixelcolor::PixelColor;
+use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
-use pixelcolor::PixelColor;
-use unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// # 1 bit per pixel image
 ///
@@ -198,8 +198,8 @@ impl<'a, C> Transform for Image1BPP<'a, C> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pixelcolor::PixelColorU16;
-    use unsignedcoord::UnsignedCoord;
+    use crate::pixelcolor::PixelColorU16;
+    use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {

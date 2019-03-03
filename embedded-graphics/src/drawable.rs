@@ -1,8 +1,8 @@
 //! `Drawable` trait and helpers
 
-use coord::Coord;
-use pixelcolor::PixelColor;
-use unsignedcoord::UnsignedCoord;
+use crate::coord::Coord;
+use crate::pixelcolor::PixelColor;
+use crate::unsignedcoord::UnsignedCoord;
 
 /// A single pixel
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

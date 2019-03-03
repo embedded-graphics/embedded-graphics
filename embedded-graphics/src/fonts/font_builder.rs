@@ -1,17 +1,17 @@
 //! Common code used to define available monospace pixel fonts
 
-use coord::Coord;
-use coord::ToUnsigned;
+use crate::coord::Coord;
+use crate::coord::ToUnsigned;
+use crate::drawable::Dimensions;
+use crate::drawable::Drawable;
+use crate::drawable::Pixel;
+use crate::fonts::Font;
+use crate::pixelcolor::PixelColor;
+use crate::style::Style;
+use crate::style::WithStyle;
+use crate::transform::Transform;
+use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
-use drawable::Dimensions;
-use drawable::Drawable;
-use drawable::Pixel;
-use fonts::Font;
-use pixelcolor::PixelColor;
-use style::Style;
-use style::WithStyle;
-use transform::Transform;
-use unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// The configuration of the font
 pub trait FontBuilderConf {
@@ -25,7 +25,7 @@ pub trait FontBuilderConf {
     /// Font image width, must be divisible by `8` and `CHAR_WIDTH`.
     const FONT_IMAGE_WIDTH: u32 = 240;
     /// Returns the index in the font of the correponding `char`
-    fn char_offset(char) -> u32;
+    fn char_offset(_: char) -> u32;
 }
 
 /// The font builder

@@ -1,6 +1,6 @@
 //! 2D unsigned coordinate
 
-use coord::Coord;
+use crate::coord::Coord;
 
 type UnsignedCoordPart = u32;
 

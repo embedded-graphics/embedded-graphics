@@ -2,12 +2,12 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use coord::{Coord, ToUnsigned};
-use pixelcolor::PixelColor;
-use primitives::Primitive;
-use style::Style;
-use style::WithStyle;
-use unsignedcoord::UnsignedCoord;
+use crate::coord::{Coord, ToUnsigned};
+use crate::pixelcolor::PixelColor;
+use crate::primitives::Primitive;
+use crate::style::Style;
+use crate::style::WithStyle;
+use crate::unsignedcoord::UnsignedCoord;
 
 // TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
@@ -244,8 +244,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dev::TestPixelColor;
-    use unsignedcoord::UnsignedCoord;
+    use crate::dev::TestPixelColor;
+    use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {

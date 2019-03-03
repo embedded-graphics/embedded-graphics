@@ -1,6 +1,6 @@
 //! Image object
 
-use drawable::Dimensions;
+use crate::drawable::Dimensions;
 
 mod image16bpp;
 mod image1bpp;
