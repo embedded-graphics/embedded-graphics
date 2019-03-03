@@ -1,6 +1,7 @@
 //! Small BMP format image parser supporting no-std environments. Specifically designed to work with
 //! [embedded-graphics](https://crates.io/crates/embedded-graphics)
 
+#![no_std]
 #![deny(missing_docs)]
 
 mod header;
