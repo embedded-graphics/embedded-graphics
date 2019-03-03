@@ -2,6 +2,7 @@
 authors = ["Byron Wasti <byron.wasti@gmail.com>"]
 name = "simulator"
 version = "0.1.0"
+publish = false
 
 [dependencies]
 sdl2 = "0.31.0"
