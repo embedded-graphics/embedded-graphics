@@ -28,4 +28,9 @@ impl<'a> Bmp<'a> {
 
         Ok(Bmp { header, image_data })
     }
+
+    /// Get a reference to the range of bytes that represents the pixel data in the image
+    pub fn image_data(&'a self) -> &'a [u8] {
+        self.image_data
+    }
 }

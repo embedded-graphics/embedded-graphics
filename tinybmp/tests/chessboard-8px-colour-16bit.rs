@@ -18,4 +18,6 @@ fn chessboard_8px_colour_16bit() {
             image_height: 8,
         }
     );
+
+    assert_eq!(bmp.image_data().len(), 266 - 138);
 }
