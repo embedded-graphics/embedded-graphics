@@ -31,11 +31,14 @@ before_install:
 script:
   - cargo fmt --all -- --check
   - cargo test --release -p embedded-graphics
+  - cargo test --release -p tinybmp
   - cargo test --release --all-features -p embedded-graphics
+  - cargo test --release --all-features -p tinybmp
 
 after_success:
   - cargo doc
   - linkchecker target/doc/embedded_graphics
+  - linkchecker target/doc/tinybmp
 
 cache: cargo
 before_cache:
