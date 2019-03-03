@@ -11,7 +11,7 @@ use header::parse_header;
 pub use header::{FileType, Header};
 
 /// A BMP-format bitmap
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Bmp<'a> {
     /// Image header
     pub header: Header,
