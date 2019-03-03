@@ -2,9 +2,9 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::Image;
 use crate::coord::{Coord, ToUnsigned};
-use core::marker::PhantomData;
 use crate::pixelcolor::PixelColor;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
+use core::marker::PhantomData;
 
 /// # 1 bit per pixel image
 ///

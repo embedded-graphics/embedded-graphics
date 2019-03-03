@@ -2,7 +2,6 @@
 
 use crate::coord::Coord;
 use crate::coord::ToUnsigned;
-use core::marker::PhantomData;
 use crate::drawable::Dimensions;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
@@ -12,6 +11,7 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::transform::Transform;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
+use core::marker::PhantomData;
 
 /// The configuration of the font
 pub trait FontBuilderConf {

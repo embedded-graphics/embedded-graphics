@@ -2,10 +2,10 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::ImageFile;
 use crate::coord::{Coord, ToUnsigned};
-use core::marker::PhantomData;
 use crate::pixelcolor::PixelColor;
-use tinybmp::Bmp;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
+use core::marker::PhantomData;
+use tinybmp::Bmp;
 
 /// BMP format image
 #[derive(Debug, Clone)]
