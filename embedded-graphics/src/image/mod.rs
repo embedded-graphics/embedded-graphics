@@ -5,6 +5,7 @@ use drawable::Dimensions;
 mod image16bpp;
 mod image1bpp;
 mod image8bpp;
+mod image_bmp;
 
 /// Raw image trait
 pub trait Image<'a>: Dimensions {
@@ -31,3 +32,4 @@ pub trait ImageFile<'a>: Dimensions + Sized {
 pub use self::image16bpp::Image16BPP;
 pub use self::image1bpp::Image1BPP;
 pub use self::image8bpp::Image8BPP;
+pub use self::image_bmp::ImageBmp;
