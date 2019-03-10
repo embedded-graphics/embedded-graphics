@@ -7,8 +7,8 @@
 
 mod header;
 
-use header::parse_header;
-pub use header::{FileType, Header};
+use crate::header::parse_header;
+pub use crate::header::{FileType, Header};
 
 /// A BMP-format bitmap
 #[derive(Debug, Clone, PartialEq)]
