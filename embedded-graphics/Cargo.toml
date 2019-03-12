@@ -18,6 +18,12 @@ edition = "2018"
 [[bench]]
 harness = false
 name = "primitives"
+[[bench]]
+harness = false
+name = "fonts"
+[[bench]]
+harness = false
+name = "image"
 
 [badges]
 travis-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
