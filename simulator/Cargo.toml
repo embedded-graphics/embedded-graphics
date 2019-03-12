@@ -6,7 +6,7 @@ publish = false
 edition = "2018"
 
 [dependencies]
-sdl2 = "0.31.0"
+sdl2 = "0.32.1"
 
 [dependencies.embedded-graphics]
 path = "../embedded-graphics"
