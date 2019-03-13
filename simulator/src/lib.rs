@@ -26,40 +26,14 @@ pub struct Display {
     width: usize,
     height: usize,
     scale: usize,
+    background_color: Color,
+    pixel_color: Color,
     pixels: Box<[SimPixelColor]>,
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
 }
 
 impl Display {
-    fn new(width: usize, height: usize, scale: usize) -> Self {
-        let sdl_context = sdl2::init().unwrap();
-        let video_subsystem = sdl_context.video().unwrap();
-
-        let window = video_subsystem
-            .window(
-                "graphics-emulator",
-                (width * scale) as u32,
-                (height * scale) as u32,
-            )
-            .position_centered()
-            .build()
-            .unwrap();
-
-        let pixels = vec![SimPixelColor(false); width * height].into_boxed_slice();
-        let canvas = window.into_canvas().build().unwrap();
-        let event_pump = sdl_context.event_pump().unwrap();
-
-        Self {
-            width,
-            height,
-            scale,
-            pixels,
-            canvas,
-            event_pump,
-        }
-    }
-
     pub fn run_once(&mut self) -> bool {
         // Handle events
         for event in self.event_pump.poll_iter() {
@@ -75,10 +49,10 @@ impl Display {
             }
         }
 
-        self.canvas.set_draw_color(Color::RGB(255, 255, 255));
+        self.canvas.set_draw_color(self.background_color);
         self.canvas.clear();
 
-        self.canvas.set_draw_color(Color::RGB(0, 0, 0));
+        self.canvas.set_draw_color(self.pixel_color);
         for (index, value) in self.pixels.iter().enumerate() {
             if *value == SimPixelColor(true) {
                 let x = (index % self.width * self.scale) as i32;
@@ -111,10 +85,20 @@ impl Drawing<SimPixelColor> for Display {
     }
 }
 
+pub enum DisplayTheme {
+    LcdWhite,
+    LcdGreen,
+    LcdBlue,
+    OledWhite,
+    OledBlue,
+}
+
 pub struct DisplayBuilder {
     width: usize,
     height: usize,
     scale: usize,
+    background_color: Color,
+    pixel_color: Color,
 }
 
 impl DisplayBuilder {
@@ -123,6 +107,8 @@ impl DisplayBuilder {
             width: 256,
             height: 256,
             scale: 1,
+            background_color: Color::RGB(255, 255, 255),
+            pixel_color: Color::RGB(0, 0, 0),
         }
     }
 
@@ -147,7 +133,72 @@ impl DisplayBuilder {
         self
     }
 
+    pub fn background_color(&mut self, r: u8, g: u8, b: u8) -> &mut Self {
+        self.background_color = Color::RGB(r, g, b);
+
+        self
+    }
+
+    pub fn pixel_color(&mut self, r: u8, g: u8, b: u8) -> &mut Self {
+        self.pixel_color = Color::RGB(r, g, b);
+
+        self
+    }
+
+    pub fn theme(&mut self, theme: DisplayTheme) -> &mut Self {
+        match theme {
+            DisplayTheme::LcdWhite => {
+                self.background_color(245, 245, 245);
+                self.pixel_color(32, 32, 32);
+            },
+            DisplayTheme::LcdGreen => {
+                self.background_color(120, 185, 50);
+                self.pixel_color(32, 32, 32);
+            }
+            DisplayTheme::LcdBlue => {
+                self.background_color(70, 80, 230);
+                self.pixel_color(230, 230, 255);
+            }
+            DisplayTheme::OledBlue => {
+                self.background_color(0, 20, 40);
+                self.pixel_color(0, 210, 255);
+            }
+            DisplayTheme::OledWhite => {
+                self.background_color(20, 20, 20);
+                self.pixel_color(255, 255, 255);
+            }
+        }
+
+        self
+    }
+
     pub fn build(&self) -> Display {
-        Display::new(self.width, self.height, self.scale)
+        let sdl_context = sdl2::init().unwrap();
+        let video_subsystem = sdl_context.video().unwrap();
+
+        let window = video_subsystem
+            .window(
+                "graphics-emulator",
+                (self.width * self.scale) as u32,
+                (self.height * self.scale) as u32,
+            )
+            .position_centered()
+            .build()
+            .unwrap();
+
+        let pixels = vec![SimPixelColor(false); self.width * self.height];
+        let canvas = window.into_canvas().build().unwrap();
+        let event_pump = sdl_context.event_pump().unwrap();
+
+        Display {
+            width: self.width,
+            height: self.height,
+            scale: self.scale,
+            background_color: self.background_color,
+            pixel_color: self.pixel_color,
+            pixels: pixels.into_boxed_slice(),
+            canvas,
+            event_pump,
+        }
     }
 }
