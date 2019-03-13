@@ -13,7 +13,7 @@ use simulator::{Display, SimPixelColor};
 const PADDING: i32 = 16;
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = Display::new(256, 256);
 
     let circ = Circle::new(Coord::new(32, 32), 32).with_stroke(Some(SimPixelColor(true)));
 

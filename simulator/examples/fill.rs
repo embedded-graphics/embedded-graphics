@@ -13,7 +13,7 @@ use simulator::Display;
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = Display::new(256, 128);
 
     display.draw(
         Circle::new(Coord::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)

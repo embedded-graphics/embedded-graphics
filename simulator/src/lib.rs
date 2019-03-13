@@ -22,34 +22,37 @@ impl From<u8> for SimPixelColor {
     }
 }
 
-const DISPLAY_SIZE: usize = 256;
-
 pub struct Display {
-    pixels: [[SimPixelColor; DISPLAY_SIZE]; DISPLAY_SIZE],
+    width: usize,
+    height: usize,
+    pixels: Box<[SimPixelColor]>,
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
 }
 
 impl Display {
-    pub fn new() -> Self {
+    pub fn new(width: usize, height: usize) -> Self {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
         let window = video_subsystem
             .window(
                 "graphics-emulator",
-                DISPLAY_SIZE as u32,
-                DISPLAY_SIZE as u32,
+                width as u32,
+                height as u32,
             )
             .position_centered()
             .build()
             .unwrap();
 
+        let pixels = vec![SimPixelColor(false); width * height].into_boxed_slice();
         let canvas = window.into_canvas().build().unwrap();
         let event_pump = sdl_context.event_pump().unwrap();
 
         Self {
-            pixels: [[SimPixelColor(false); DISPLAY_SIZE]; DISPLAY_SIZE],
+            width,
+            height,
+            pixels,
             canvas,
             event_pump,
         }
@@ -74,13 +77,11 @@ impl Display {
         self.canvas.clear();
 
         self.canvas.set_draw_color(Color::RGB(0, 0, 0));
-        for (y, line) in self.pixels.iter().enumerate() {
-            for (x, value) in line.iter().enumerate() {
-                if *value == SimPixelColor(true) {
-                    let x = x as i32;
-                    let y = y as i32;
-                    self.canvas.fill_rect(Rect::new(x, y, 1, 1)).unwrap();
-                }
+        for (index, value) in self.pixels.iter().enumerate() {
+            if *value == SimPixelColor(true) {
+                let x = (index % self.width) as i32;
+                let y = (index / self.width) as i32;
+                self.canvas.fill_rect(Rect::new(x, y, 1, 1)).unwrap();
             }
         }
 
@@ -95,11 +96,14 @@ impl Drawing<SimPixelColor> for Display {
         T: Iterator<Item = Pixel<SimPixelColor>>,
     {
         for Pixel(coord, color) in item_pixels {
-            if coord[0] >= DISPLAY_SIZE as u32 || coord[1] >= DISPLAY_SIZE as u32 {
+            let x = coord[0] as usize;
+            let y = coord[1] as usize;
+
+            if x >= self.width || y >= self.height {
                 continue;
             }
 
-            self.pixels[coord[1] as usize][coord[0] as usize] = color;
+            self.pixels[y * self.width + x] = color;
         }
     }
 }

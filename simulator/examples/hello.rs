@@ -12,7 +12,7 @@ use embedded_graphics::primitives::{Circle, Line};
 use simulator::Display;
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = Display::new(256, 256);
 
     // Outline
     display.draw(

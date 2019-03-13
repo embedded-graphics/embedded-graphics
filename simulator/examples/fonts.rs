@@ -11,7 +11,7 @@ use embedded_graphics::prelude::*;
 use simulator::Display;
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = Display::new(256, 128);
 
     // Show smallest font with black font on white background (default value for fonts)
     display.draw(

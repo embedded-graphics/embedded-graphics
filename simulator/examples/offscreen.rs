@@ -11,7 +11,7 @@ use embedded_graphics::primitives::Rect;
 use simulator::Display;
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = Display::new(32, 32);
 
     // Outline
     display.draw(
