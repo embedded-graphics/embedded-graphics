@@ -154,7 +154,7 @@ impl DisplayBuilder {
             DisplayTheme::LcdWhite => {
                 self.background_color(245, 245, 245);
                 self.pixel_color(32, 32, 32);
-            },
+            }
             DisplayTheme::LcdGreen => {
                 self.background_color(120, 185, 50);
                 self.pixel_color(32, 32, 32);
@@ -190,7 +190,7 @@ impl DisplayBuilder {
         let video_subsystem = sdl_context.video().unwrap();
 
         let window_width = self.width * self.scale + (self.width - 1) * self.pixel_spacing;
-        let window_height = self.height * self.scale + (self.height - 1 ) * self.pixel_spacing;
+        let window_height = self.height * self.scale + (self.height - 1) * self.pixel_spacing;
 
         let window = video_subsystem
             .window(
