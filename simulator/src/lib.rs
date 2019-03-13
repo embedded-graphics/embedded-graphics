@@ -26,6 +26,7 @@ pub struct Display {
     width: usize,
     height: usize,
     scale: usize,
+    pixel_spacing: usize,
     background_color: Color,
     pixel_color: Color,
     pixels: Box<[SimPixelColor]>,
@@ -53,10 +54,11 @@ impl Display {
         self.canvas.clear();
 
         self.canvas.set_draw_color(self.pixel_color);
+        let pitch = self.scale + self.pixel_spacing;
         for (index, value) in self.pixels.iter().enumerate() {
             if *value == SimPixelColor(true) {
-                let x = (index % self.width * self.scale) as i32;
-                let y = (index / self.width * self.scale) as i32;
+                let x = (index % self.width * pitch) as i32;
+                let y = (index / self.width * pitch) as i32;
                 let r = Rect::new(x, y, self.scale as u32, self.scale as u32);
                 self.canvas.fill_rect(r).unwrap();
             }
@@ -97,6 +99,7 @@ pub struct DisplayBuilder {
     width: usize,
     height: usize,
     scale: usize,
+    pixel_spacing: usize,
     background_color: Color,
     pixel_color: Color,
 }
@@ -107,6 +110,7 @@ impl DisplayBuilder {
             width: 256,
             height: 256,
             scale: 1,
+            pixel_spacing: 0,
             background_color: Color::RGB(255, 255, 255),
             pixel_color: Color::RGB(0, 0, 0),
         }
@@ -169,6 +173,15 @@ impl DisplayBuilder {
             }
         }
 
+        self.scale(3);
+        self.pixel_spacing(1);
+
+        self
+    }
+
+    pub fn pixel_spacing(&mut self, pixel_spacing: usize) -> &mut Self {
+        self.pixel_spacing = pixel_spacing;
+
         self
     }
 
@@ -176,11 +189,14 @@ impl DisplayBuilder {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
+        let window_width = self.width * self.scale + (self.width - 1) * self.pixel_spacing;
+        let window_height = self.height * self.scale + (self.height - 1 ) * self.pixel_spacing;
+
         let window = video_subsystem
             .window(
                 "graphics-emulator",
-                (self.width * self.scale) as u32,
-                (self.height * self.scale) as u32,
+                window_width as u32,
+                window_height as u32,
             )
             .position_centered()
             .build()
@@ -194,6 +210,7 @@ impl DisplayBuilder {
             width: self.width,
             height: self.height,
             scale: self.scale,
+            pixel_spacing: self.pixel_spacing,
             background_color: self.background_color,
             pixel_color: self.pixel_color,
             pixels: pixels.into_boxed_slice(),
