@@ -8,10 +8,10 @@ use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rect;
 
-use simulator::Display;
+use simulator::DisplayBuilder;
 
 fn main() {
-    let mut display = Display::new(32, 32);
+    let mut display = DisplayBuilder::new().size(32, 32).scale(4).build();
 
     // Outline
     display.draw(

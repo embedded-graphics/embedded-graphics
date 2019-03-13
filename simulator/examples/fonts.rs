@@ -8,10 +8,10 @@ use embedded_graphics::coord::Coord;
 use embedded_graphics::fonts::{Font12x16, Font6x12, Font6x8, Font8x16};
 use embedded_graphics::prelude::*;
 
-use simulator::Display;
+use simulator::DisplayBuilder;
 
 fn main() {
-    let mut display = Display::new(256, 128);
+    let mut display = DisplayBuilder::new().size(256, 128).build();
 
     // Show smallest font with black font on white background (default value for fonts)
     display.draw(

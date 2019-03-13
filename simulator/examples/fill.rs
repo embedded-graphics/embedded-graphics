@@ -8,12 +8,12 @@ use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Rect};
 
-use simulator::Display;
+use simulator::DisplayBuilder;
 
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
-    let mut display = Display::new(256, 128);
+    let mut display = DisplayBuilder::new().size(256, 128).scale(2).build();
 
     display.draw(
         Circle::new(Coord::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)

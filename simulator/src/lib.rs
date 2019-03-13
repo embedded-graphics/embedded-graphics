@@ -25,21 +25,22 @@ impl From<u8> for SimPixelColor {
 pub struct Display {
     width: usize,
     height: usize,
+    scale: usize,
     pixels: Box<[SimPixelColor]>,
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
 }
 
 impl Display {
-    pub fn new(width: usize, height: usize) -> Self {
+    fn new(width: usize, height: usize, scale: usize) -> Self {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
         let window = video_subsystem
             .window(
                 "graphics-emulator",
-                width as u32,
-                height as u32,
+                (width * scale) as u32,
+                (height * scale) as u32,
             )
             .position_centered()
             .build()
@@ -52,6 +53,7 @@ impl Display {
         Self {
             width,
             height,
+            scale,
             pixels,
             canvas,
             event_pump,
@@ -79,9 +81,10 @@ impl Display {
         self.canvas.set_draw_color(Color::RGB(0, 0, 0));
         for (index, value) in self.pixels.iter().enumerate() {
             if *value == SimPixelColor(true) {
-                let x = (index % self.width) as i32;
-                let y = (index / self.width) as i32;
-                self.canvas.fill_rect(Rect::new(x, y, 1, 1)).unwrap();
+                let x = (index % self.width * self.scale) as i32;
+                let y = (index / self.width * self.scale) as i32;
+                let r = Rect::new(x, y, self.scale as u32, self.scale as u32);
+                self.canvas.fill_rect(r).unwrap();
             }
         }
 
@@ -105,5 +108,46 @@ impl Drawing<SimPixelColor> for Display {
 
             self.pixels[y * self.width + x] = color;
         }
+    }
+}
+
+pub struct DisplayBuilder {
+    width: usize,
+    height: usize,
+    scale: usize,
+}
+
+impl DisplayBuilder {
+    pub fn new() -> Self {
+        Self {
+            width: 256,
+            height: 256,
+            scale: 1,
+        }
+    }
+
+    pub fn size(&mut self, width: usize, height: usize) -> &mut Self {
+        if width == 0 || height == 0 {
+            panic!("with and height must be >= 0");
+        }
+
+        self.width = width;
+        self.height = height;
+
+        self
+    }
+
+    pub fn scale(&mut self, scale: usize) -> &mut Self {
+        if scale == 0 {
+            panic!("scale must be >= 0");
+        }
+
+        self.scale = scale;
+
+        self
+    }
+
+    pub fn build(&self) -> Display {
+        Display::new(self.width, self.height, self.scale)
     }
 }
