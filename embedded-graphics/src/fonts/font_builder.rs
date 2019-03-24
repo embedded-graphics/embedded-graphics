@@ -182,8 +182,8 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pos[0] + (self.text.len() as i32 * Conf::CHAR_WIDTH as i32) < 0
-            || self.pos[1] + (Conf::CHAR_HEIGHT as i32) < 0
+        if self.pos[0] + (self.text.len() as i32 * Conf::CHAR_WIDTH as i32) <= 0
+            || self.pos[1] + (Conf::CHAR_HEIGHT as i32) <= 0
         {
             return None;
         }
