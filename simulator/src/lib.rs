@@ -22,39 +22,19 @@ impl From<u8> for SimPixelColor {
     }
 }
 
-const DISPLAY_SIZE: usize = 256;
-
 pub struct Display {
-    pixels: [[SimPixelColor; DISPLAY_SIZE]; DISPLAY_SIZE],
+    width: usize,
+    height: usize,
+    scale: usize,
+    pixel_spacing: usize,
+    background_color: Color,
+    pixel_color: Color,
+    pixels: Box<[SimPixelColor]>,
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
 }
 
 impl Display {
-    pub fn new() -> Self {
-        let sdl_context = sdl2::init().unwrap();
-        let video_subsystem = sdl_context.video().unwrap();
-
-        let window = video_subsystem
-            .window(
-                "graphics-emulator",
-                DISPLAY_SIZE as u32,
-                DISPLAY_SIZE as u32,
-            )
-            .position_centered()
-            .build()
-            .unwrap();
-
-        let canvas = window.into_canvas().build().unwrap();
-        let event_pump = sdl_context.event_pump().unwrap();
-
-        Self {
-            pixels: [[SimPixelColor(false); DISPLAY_SIZE]; DISPLAY_SIZE],
-            canvas,
-            event_pump,
-        }
-    }
-
     pub fn run_once(&mut self) -> bool {
         // Handle events
         for event in self.event_pump.poll_iter() {
@@ -70,17 +50,17 @@ impl Display {
             }
         }
 
-        self.canvas.set_draw_color(Color::RGB(255, 255, 255));
+        self.canvas.set_draw_color(self.background_color);
         self.canvas.clear();
 
-        self.canvas.set_draw_color(Color::RGB(0, 0, 0));
-        for (y, line) in self.pixels.iter().enumerate() {
-            for (x, value) in line.iter().enumerate() {
-                if *value == SimPixelColor(true) {
-                    let x = x as i32;
-                    let y = y as i32;
-                    self.canvas.fill_rect(Rect::new(x, y, 1, 1)).unwrap();
-                }
+        self.canvas.set_draw_color(self.pixel_color);
+        let pitch = self.scale + self.pixel_spacing;
+        for (index, value) in self.pixels.iter().enumerate() {
+            if *value == SimPixelColor(true) {
+                let x = (index % self.width * pitch) as i32;
+                let y = (index / self.width * pitch) as i32;
+                let r = Rect::new(x, y, self.scale as u32, self.scale as u32);
+                self.canvas.fill_rect(r).unwrap();
             }
         }
 
@@ -95,11 +75,147 @@ impl Drawing<SimPixelColor> for Display {
         T: Iterator<Item = Pixel<SimPixelColor>>,
     {
         for Pixel(coord, color) in item_pixels {
-            if coord[0] >= DISPLAY_SIZE as u32 || coord[1] >= DISPLAY_SIZE as u32 {
+            let x = coord[0] as usize;
+            let y = coord[1] as usize;
+
+            if x >= self.width || y >= self.height {
                 continue;
             }
 
-            self.pixels[coord[1] as usize][coord[0] as usize] = color;
+            self.pixels[y * self.width + x] = color;
+        }
+    }
+}
+
+pub enum DisplayTheme {
+    LcdWhite,
+    LcdGreen,
+    LcdBlue,
+    OledWhite,
+    OledBlue,
+}
+
+pub struct DisplayBuilder {
+    width: usize,
+    height: usize,
+    scale: usize,
+    pixel_spacing: usize,
+    background_color: Color,
+    pixel_color: Color,
+}
+
+impl DisplayBuilder {
+    pub fn new() -> Self {
+        Self {
+            width: 256,
+            height: 256,
+            scale: 1,
+            pixel_spacing: 0,
+            background_color: Color::RGB(255, 255, 255),
+            pixel_color: Color::RGB(0, 0, 0),
+        }
+    }
+
+    pub fn size(&mut self, width: usize, height: usize) -> &mut Self {
+        if width == 0 || height == 0 {
+            panic!("with and height must be >= 0");
+        }
+
+        self.width = width;
+        self.height = height;
+
+        self
+    }
+
+    pub fn scale(&mut self, scale: usize) -> &mut Self {
+        if scale == 0 {
+            panic!("scale must be >= 0");
+        }
+
+        self.scale = scale;
+
+        self
+    }
+
+    pub fn background_color(&mut self, r: u8, g: u8, b: u8) -> &mut Self {
+        self.background_color = Color::RGB(r, g, b);
+
+        self
+    }
+
+    pub fn pixel_color(&mut self, r: u8, g: u8, b: u8) -> &mut Self {
+        self.pixel_color = Color::RGB(r, g, b);
+
+        self
+    }
+
+    pub fn theme(&mut self, theme: DisplayTheme) -> &mut Self {
+        match theme {
+            DisplayTheme::LcdWhite => {
+                self.background_color(245, 245, 245);
+                self.pixel_color(32, 32, 32);
+            }
+            DisplayTheme::LcdGreen => {
+                self.background_color(120, 185, 50);
+                self.pixel_color(32, 32, 32);
+            }
+            DisplayTheme::LcdBlue => {
+                self.background_color(70, 80, 230);
+                self.pixel_color(230, 230, 255);
+            }
+            DisplayTheme::OledBlue => {
+                self.background_color(0, 20, 40);
+                self.pixel_color(0, 210, 255);
+            }
+            DisplayTheme::OledWhite => {
+                self.background_color(20, 20, 20);
+                self.pixel_color(255, 255, 255);
+            }
+        }
+
+        self.scale(3);
+        self.pixel_spacing(1);
+
+        self
+    }
+
+    pub fn pixel_spacing(&mut self, pixel_spacing: usize) -> &mut Self {
+        self.pixel_spacing = pixel_spacing;
+
+        self
+    }
+
+    pub fn build(&self) -> Display {
+        let sdl_context = sdl2::init().unwrap();
+        let video_subsystem = sdl_context.video().unwrap();
+
+        let window_width = self.width * self.scale + (self.width - 1) * self.pixel_spacing;
+        let window_height = self.height * self.scale + (self.height - 1) * self.pixel_spacing;
+
+        let window = video_subsystem
+            .window(
+                "graphics-emulator",
+                window_width as u32,
+                window_height as u32,
+            )
+            .position_centered()
+            .build()
+            .unwrap();
+
+        let pixels = vec![SimPixelColor(false); self.width * self.height];
+        let canvas = window.into_canvas().build().unwrap();
+        let event_pump = sdl_context.event_pump().unwrap();
+
+        Display {
+            width: self.width,
+            height: self.height,
+            scale: self.scale,
+            pixel_spacing: self.pixel_spacing,
+            background_color: self.background_color,
+            pixel_color: self.pixel_color,
+            pixels: pixels.into_boxed_slice(),
+            canvas,
+            event_pump,
         }
     }
 }

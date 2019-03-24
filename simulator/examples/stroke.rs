@@ -8,12 +8,12 @@ use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
 
-use simulator::{Display, SimPixelColor};
+use simulator::{DisplayBuilder, SimPixelColor};
 
 const PADDING: i32 = 16;
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = DisplayBuilder::new().build();
 
     let circ = Circle::new(Coord::new(32, 32), 32).with_stroke(Some(SimPixelColor(true)));
 

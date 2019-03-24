@@ -9,10 +9,10 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
 
-use simulator::Display;
+use simulator::{DisplayBuilder, DisplayTheme};
 
 fn main() {
-    let mut display = Display::new();
+    let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();
 
     // Outline
     display.draw(
