@@ -30,6 +30,7 @@ mod tests {
     use crate::drawable::Dimensions;
     use crate::fonts::Font;
     use crate::mock_display::Display;
+    use crate::pixelcolor::PixelColorU16;
     use crate::style::Style;
     use crate::style::WithStyle;
     use crate::transform::Transform;
@@ -223,5 +224,29 @@ mod tests {
                 .into_iter(),
         );
         assert_eq!(display, two_question_marks);
+    }
+
+    #[test]
+    fn negative_y_no_infinite_loop() {
+        let text: Font6x12<PixelColorU16> = Font6x12::render_str("Testing string")
+            .with_stroke(Some(0xF1FA_u16.into()))
+            .translate(Coord::new(0, -12));
+
+        let mut it = text.into_iter();
+
+        // Font is completely off the top edge of the screen; no pixels should be rendered
+        assert_eq!(it.next(), None);
+    }
+
+    #[test]
+    fn negative_x_no_infinite_loop() {
+        let text: Font6x12<PixelColorU16> = Font6x12::render_str("A")
+            .with_stroke(Some(0xF1FA_u16.into()))
+            .translate(Coord::new(-6, 0));
+
+        let mut it = text.into_iter();
+
+        // Font is completely off the left edge of the screen; no pixels should be rendered
+        assert_eq!(it.next(), None);
     }
 }
