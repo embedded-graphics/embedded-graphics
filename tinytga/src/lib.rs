@@ -70,4 +70,26 @@ impl<'a> Tga<'a> {
             pixel_data,
         })
     }
+
+    /// Get the bit depth (BPP) of this image
+    pub fn bpp(&self) -> u8 {
+        self.header.pixel_depth
+    }
+
+    /// Get the image width in pixels
+    pub fn width(&self) -> u16 {
+        self.header.width
+    }
+
+    /// Get the image height in pixels
+    pub fn height(&self) -> u16 {
+        self.header.height
+    }
+
+    /// Get the raw image data contained in this image
+    ///
+    /// TGA images are encoded as packets, either [`RawPacket`]s or [`RlePacket`]s
+    pub fn image_data(&self) -> &[u8] {
+        self.pixel_data
+    }
 }
