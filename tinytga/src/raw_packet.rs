@@ -10,7 +10,7 @@ named!(pub raw_packet<&[u8], RawPacket>,
     do_parse!(
         len: bits!(
             preceded!(
-                // 0x00 = raw piacket, 0x01 = RLE packet
+                // 0x00 = raw packet, 0x01 = RLE packet
                 tag_bits!(u8, 1, 0x00),
                 // Run length is encoded as 0 = 1 pixel, 1 = 2 pixels, etc, hence this offset
                 map!(take_bits!(u8, 7), |len| len + 1)
