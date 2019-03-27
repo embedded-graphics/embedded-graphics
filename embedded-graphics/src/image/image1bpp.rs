@@ -1,5 +1,5 @@
 use super::super::drawable::*;
-use super::Image;
+use super::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
 
@@ -20,37 +20,23 @@ pub type Image1BPP<'a, C> = Image<'a, C, ImageType1BPP>;
 #[derive(Debug, Copy, Clone)]
 pub enum ImageType1BPP {}
 
-impl super::ImageType for ImageType1BPP {}
+impl ImageType for ImageType1BPP {}
 
 impl<'a, C> IntoIterator for &'a Image1BPP<'a, C>
 where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = Image1BPPIterator<'a, C>;
+    type IntoIter = ImageIterator<'a, C, ImageType1BPP>;
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
-        Image1BPPIterator {
-            im: self,
-            x: 0,
-            y: 0,
-        }
+        ImageIterator::new(self)
     }
 }
 
-#[derive(Debug)]
-pub struct Image1BPPIterator<'a, C: 'a>
-where
-    C: PixelColor,
-{
-    x: u32,
-    y: u32,
-    im: &'a Image<'a, C, ImageType1BPP>,
-}
-
 /// Iterator over every pixel in the source image
-impl<'a, C> Iterator for Image1BPPIterator<'a, C>
+impl<'a, C> Iterator for ImageIterator<'a, C, ImageType1BPP>
 where
     C: PixelColor,
 {

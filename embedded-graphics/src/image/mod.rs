@@ -133,6 +133,33 @@ where
     }
 }
 
+/// Iterator over every pixel in the source image
+#[derive(Debug)]
+pub struct ImageIterator<'a, C: 'a, T>
+where
+    C: PixelColor,
+    T: ImageType,
+{
+    x: u32,
+    y: u32,
+    im: &'a Image<'a, C, T>,
+}
+
+impl<'a, C, T> ImageIterator<'a, C, T>
+where
+    C: PixelColor,
+    T: ImageType,
+{
+    /// Create a new image iterator
+    pub fn new(image: &'a Image<'a, C, T>) -> Self {
+        ImageIterator {
+            im: image,
+            x: 0,
+            y: 0,
+        }
+    }
+}
+
 /// Image trait
 pub trait ImageFile<'a>: Dimensions + Sized {
     /// Create a new image with given input file
