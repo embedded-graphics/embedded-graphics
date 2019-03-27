@@ -1,10 +1,7 @@
 use super::super::drawable::*;
-use super::super::transform::*;
 use super::Image;
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
-use crate::unsignedcoord::{ToSigned, UnsignedCoord};
-use core::marker::PhantomData;
 
 /// # 1 bit per pixel image
 ///
@@ -17,57 +14,13 @@ use core::marker::PhantomData;
 /// ```bash
 /// convert image.png -depth 1 gray:"image.raw"
 /// ```
-#[derive(Debug)]
-pub struct Image1BPP<'a, C> {
-    /// Image width in pixels
-    width: u32,
+pub type Image1BPP<'a, C> = Image<'a, C, ImageType1BPP>;
 
-    /// Image height in pixels
-    height: u32,
+/// 1 bit per pixel image type
+#[derive(Debug, Copy, Clone)]
+pub enum ImageType1BPP {}
 
-    /// Image data, 1 bit per byte, 1 byte per 8 horizontal pixels
-    imagedata: &'a [u8],
-
-    /// Image offset in pixels from screen origin (0,0)
-    pub offset: Coord,
-
-    pixel_type: PhantomData<C>,
-}
-
-impl<'a, C> Dimensions for Image1BPP<'a, C>
-where
-    C: PixelColor,
-{
-    fn top_left(&self) -> Coord {
-        self.offset
-    }
-
-    fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
-    }
-
-    fn size(&self) -> UnsignedCoord {
-        let height = self.height;
-        let width = self.width;
-
-        UnsignedCoord::new(width, height)
-    }
-}
-
-impl<'a, C> Image<'a> for Image1BPP<'a, C>
-where
-    C: PixelColor,
-{
-    fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
-        Self {
-            width,
-            height,
-            imagedata,
-            offset: Coord::new(0, 0),
-            pixel_type: PhantomData,
-        }
-    }
-}
+impl super::ImageType for ImageType1BPP {}
 
 impl<'a, C> IntoIterator for &'a Image1BPP<'a, C>
 where
@@ -87,10 +40,13 @@ where
 }
 
 #[derive(Debug)]
-pub struct Image1BPPIterator<'a, C: 'a> {
+pub struct Image1BPPIterator<'a, C: 'a>
+where
+    C: PixelColor,
+{
     x: u32,
     y: u32,
-    im: &'a Image1BPP<'a, C>,
+    im: &'a Image<'a, C, ImageType1BPP>,
 }
 
 /// Iterator over every pixel in the source image
@@ -149,56 +105,11 @@ where
     }
 }
 
-impl<'a, C> Drawable for Image1BPP<'a, C> {}
-
-impl<'a, C> Transform for Image1BPP<'a, C> {
-    /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `Image1BPP`. For a mutating transform, see `translate_mut`.
-    ///
-    /// ```
-    /// # use embedded_graphics::image::{ Image, Image1BPP };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    /// # use embedded_graphics::pixelcolor::PixelColorU8;
-    /// #
-    /// // 8px x 1px test image
-    /// let image: Image1BPP<PixelColorU8> = Image1BPP::new(&[ 0xff ], 8, 1);
-    /// let moved = image.translate(Coord::new(25, 30));
-    ///
-    /// assert_eq!(image.offset, Coord::new(0, 0));
-    /// assert_eq!(moved.offset, Coord::new(25, 30));
-    /// ```
-    fn translate(&self, by: Coord) -> Self {
-        Self {
-            offset: self.offset + by,
-            ..*self.clone()
-        }
-    }
-
-    /// Translate the image from its current position to a new position by (x, y) pixels.
-    ///
-    /// ```
-    /// # use embedded_graphics::image::{ Image, Image1BPP };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    /// # use embedded_graphics::pixelcolor::PixelColorU8;
-    /// #
-    /// let mut image: Image1BPP<PixelColorU8> = Image1BPP::new(&[ 0xff ], 8, 1);
-    /// image.translate_mut(Coord::new(25, 30));
-    ///
-    /// assert_eq!(image.offset, Coord::new(25, 30));
-    /// ```
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.offset += by;
-
-        self
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::pixelcolor::PixelColorU16;
+    use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]

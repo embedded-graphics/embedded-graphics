@@ -1,10 +1,7 @@
 use super::super::drawable::*;
-use super::super::transform::*;
 use super::Image;
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
-use crate::unsignedcoord::{ToSigned, UnsignedCoord};
-use core::marker::PhantomData;
 
 /// # 16 bits per pixel images
 ///
@@ -21,59 +18,13 @@ use core::marker::PhantomData;
 /// ```
 /// This will remove the BMP header leaving the raw pixel data
 /// E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
-#[derive(Debug)]
-pub struct Image16BPP<'a, C: PixelColor> {
-    /// Image width
-    width: u32,
+pub type Image16BPP<'a, C> = Image<'a, C, ImageType16BPP>;
 
-    /// Image height
-    height: u32,
+/// 16 bits per pixel image type
+#[derive(Debug, Copy, Clone)]
+pub enum ImageType16BPP {}
 
-    /// Image data, 1 byte per pixel
-    imagedata: &'a [u8],
-
-    /// Top left corner offset from display origin (0,0)
-    pub offset: Coord,
-
-    pixel_type: PhantomData<C>,
-}
-
-impl<'a, C> Dimensions for Image16BPP<'a, C>
-where
-    C: PixelColor,
-{
-    fn top_left(&self) -> Coord {
-        self.offset
-    }
-
-    fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
-    }
-
-    fn size(&self) -> UnsignedCoord {
-        let height = self.height;
-        let width = self.width;
-
-        UnsignedCoord::new(width, height)
-    }
-}
-
-impl<'a, C> Image<'a> for Image16BPP<'a, C>
-where
-    C: PixelColor,
-{
-    /// Create a new 16BPP image with given data, width and height. Data length *must* equal
-    /// `width * height * 2`
-    fn new(imagedata: &'a [u8], width: u32, height: u32) -> Self {
-        Self {
-            width,
-            height,
-            imagedata,
-            offset: Coord::new(0, 0),
-            pixel_type: PhantomData,
-        }
-    }
-}
+impl super::ImageType for ImageType16BPP {}
 
 impl<'a, C> IntoIterator for &'a Image16BPP<'a, C>
 where
@@ -144,60 +95,11 @@ where
     }
 }
 
-impl<'a, C> Drawable for Image16BPP<'a, C> where C: PixelColor {}
-
-impl<'a, C> Transform for Image16BPP<'a, C>
-where
-    C: PixelColor,
-{
-    /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `Image16BPP`. For a mutating transform, see `translate_mut`.
-    ///
-    /// ```
-    /// # use embedded_graphics::image::{ Image, Image16BPP };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    /// # use embedded_graphics::pixelcolor::PixelColorU8;
-    ///
-    /// // 1px x 1px test image
-    /// let image: Image16BPP<PixelColorU8> = Image16BPP::new(&[ 0xff ], 1, 1);
-    /// let moved = image.translate(Coord::new(25, 30));
-    ///
-    /// assert_eq!(image.offset, Coord::new(0, 0));
-    /// assert_eq!(moved.offset, Coord::new(25, 30));
-    /// ```
-    fn translate(&self, by: Coord) -> Self {
-        Self {
-            offset: self.offset + by,
-            ..*self.clone()
-        }
-    }
-
-    /// Translate the image from its current position to a new position by (x, y) pixels.
-    ///
-    /// ```
-    /// # use embedded_graphics::image::{ Image, Image16BPP };
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
-    /// # use embedded_graphics::pixelcolor::PixelColorU8;
-    ///
-    /// // 1px x 1px test image
-    /// let mut image: Image16BPP<PixelColorU8> = Image16BPP::new(&[ 0xff ], 1, 1);
-    /// image.translate_mut(Coord::new(25, 30));
-    ///
-    /// assert_eq!(image.offset, Coord::new(25, 30));
-    /// ```
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
-        self.offset += by;
-
-        self
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::pixelcolor::PixelColorU16;
+    use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
