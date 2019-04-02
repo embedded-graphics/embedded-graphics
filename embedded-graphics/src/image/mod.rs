@@ -13,10 +13,10 @@ mod image1bpp;
 mod image8bpp;
 mod image_bmp;
 
-/// Raw image type
+/// Trait implemented by all concrete image types
 pub trait ImageType {}
 
-/// Raw image
+/// An image constructed from a slice
 #[derive(Debug)]
 pub struct Image<'a, C, T>
 where
@@ -29,7 +29,7 @@ where
     /// Image height in pixels
     height: u32,
 
-    /// Image data, 1 bit per byte, 1 byte per 8 horizontal pixels
+    /// Image data, packed as dictated by image type `T` (`Image1BPP` uses 8 bits per pixel, etc)
     imagedata: &'a [u8],
 
     /// Image offset in pixels from screen origin (0,0)
