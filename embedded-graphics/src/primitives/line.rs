@@ -90,7 +90,7 @@ where
 
 impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type Item = Pixel<C>;
-    type IntoIter = LineIterator<'a, C>;
+    type IntoIter = LineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         let x0 = self.start[0].max(0);
@@ -139,7 +139,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
         let (quick, slow, end) = if is_steep { (y0, x0, y1) } else { (x0, y0, x1) };
 
         LineIterator {
-            line: self,
+            style: self.style,
 
             is_steep,
             dquick,
@@ -155,12 +155,12 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 }
 
 /// Pixel iterator for each pixel in the line
-#[derive(Debug)]
-pub struct LineIterator<'a, C: 'a>
+#[derive(Debug, Clone, Copy)]
+pub struct LineIterator<C>
 where
     C: PixelColor,
 {
-    line: &'a Line<C>,
+    style: Style<C>,
 
     dquick: i32,
     dslow: i32,
@@ -174,7 +174,7 @@ where
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
+impl<C: PixelColor> Iterator for LineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -201,8 +201,7 @@ impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
         self.quick += 1;
 
         // Return if there is a stroke on the line
-        self.line
-            .style
+        self.style
             .stroke_color
             .map(|color| Pixel(coord.to_unsigned(), color))
     }
