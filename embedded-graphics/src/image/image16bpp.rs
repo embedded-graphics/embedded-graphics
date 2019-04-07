@@ -1,5 +1,5 @@
 use super::super::drawable::*;
-use super::{Image, ImageIterator, ImageType};
+use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
 
