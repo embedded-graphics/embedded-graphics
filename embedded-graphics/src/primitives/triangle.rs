@@ -8,7 +8,7 @@ use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
-use crate::unsignedcoord::UnsignedCoord;
+use crate::unsignedcoord::{UnsignedCoord, ToSigned};
 
 // TODO: Impl Default so people can leave the color bit out
 /// Triangle primitive
@@ -116,18 +116,18 @@ where
     }
 }
 
-fn sort_two(p1: Coord, p2: Coord) -> (Coord, Coord) {
+fn sort_two_yx(p1: Coord, p2: Coord) -> (Coord, Coord) {
     if p1[1] < p2[1] || (p1[1] == p2[1] && p1[0] < p2[0]) {
         (p1, p2)
     } else {
-        (p1, p2)
+        (p2, p1)
     }
 }
 
-fn sort_y(p1: Coord, p2: Coord, p3: Coord) -> (Coord, Coord, Coord) {
-    let (y1, y2) = sort_two(p1, p2);
-    let (y1, y3) = sort_two(p3, y1);
-    let (y2, y3) = sort_two(y3, y2);
+fn sort_yx(p1: Coord, p2: Coord, p3: Coord) -> (Coord, Coord, Coord) {
+    let (y1, y2) = sort_two_yx(p1, p2);
+    let (y1, y3) = sort_two_yx(p3, y1);
+    let (y2, y3) = sort_two_yx(y3, y2);
 
     (y1, y2, y3)
 }
@@ -140,19 +140,36 @@ where
     type IntoIter = TriangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let (v1, v2, v3) = sort_y(self.p1, self.p2, self.p3);
+        let (v1, v2, v3) = sort_yx(self.p1, self.p2, self.p3);
+
+        let line_a = Line::new(v1, v2)
+                        .with_style(self.style)
+                        .into_iter();
+        let line_b = Line::new(v1, v3)
+                        .with_style(self.style)
+                        .into_iter();
+        let line_c = Line::new(v2, v3)
+                        .with_style(self.style)
+                        .into_iter();
 
         TriangleIterator {
-            line_a: Line::new(v1, v2).into_iter(),
-            line_b: Line::new(v1, v3).into_iter(),
-            line_c: Line::new(v2, v3).into_iter(),
-            y: v1[1],
-            x: v1[0],
-            xmin: v1[0],
-            xmax: v1[0],
+            line_a,
+            line_b,
+            line_c,
+            cur_ac: None,
+            cur_b: None,
+            x: 0,
+            min_y: v1[1],
+            max_y: v3[1],
             style: self.style,
         }
     }
+}
+
+enum IterState {
+    Border(Coord),
+    LeftRight(Coord, Coord),
+    None,
 }
 
 /// Pixel iterator for each pixel in the triangle border
@@ -164,12 +181,53 @@ where
     line_a: LineIterator<C>,
     line_b: LineIterator<C>,
     line_c: LineIterator<C>,
-    y: i32,
+    cur_ac: Option<Coord>,
+    cur_b: Option<Coord>,
     x: i32,
-    xmin: i32,
-    xmax: i32,
+    max_y: i32,
+    min_y: i32,
     style: Style<C>,
 
+}
+
+impl<C> TriangleIterator<C> 
+where
+    C: PixelColor,
+{
+    fn next_ac(&mut self) -> Option<Coord> {
+        self.line_a.next().or_else(|| self.line_c.next()).map(|p| p.0.to_signed())
+    }
+
+    fn next_b(&mut self) -> Option<Coord> {
+        self.line_b.next().map(|p| p.0.to_signed())
+    }
+
+    fn points(&mut self) -> IterState {
+        match (self.cur_ac, self.cur_b) {
+            (None, _) => {
+                if let Some(ac) = self.next_ac() {
+                    self.cur_ac = Some(ac);
+                    self.x = 0;
+                    IterState::Border(ac)
+                } else {
+                    IterState::None
+                }
+            },
+            (_, None) => {
+                if let Some(b) = self.next_b() {
+                    self.cur_b = Some(b);
+                    self.x = 0;
+                    IterState::Border(b)
+                } else {
+                    IterState::None
+                }
+            },
+            (Some(ac), Some(b)) => {
+                let (l, r) = sort_two_yx(ac, b);
+                IterState::LeftRight(l, r)
+            }
+        }
+    }
 }
 
 impl<C> Iterator for TriangleIterator<C>
@@ -182,15 +240,31 @@ where
         if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
             return None;
         }
-        let border_width = self.style.stroke_width as i32;
-
-        if self.xmin <= self.x && self.xmin + border_width >= self.x 
-        && self.x <= self.xmax && self.x <= self.xmax - border_width
-        && self.style.stroke_color.is_some() {
-            Some(Pixel(Coord::new(self.x as i32, self.y as i32), 
-                       self.style.stroke_color.expect("Expected color")))
-        } else {
-            None
+        loop {
+            match self.points() {
+                IterState::Border(coord) => {
+                    if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
+                        if coord[0] >= 0 && coord[1] >= 0 {
+                            return Some(Pixel(coord.to_unsigned(), color));
+                        }
+                    }
+                },
+                IterState::LeftRight(l, r) => {
+                    if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
+                        if l[0] >= 0 && l[1] >= 0 && r[0] >= 0 && r[1] >= 0
+                        && l[0] + self.x < r[0] {
+                            let coord = UnsignedCoord::new((l[0] + self.x) as u32, 
+                                                            l[1] as u32);
+                            self.x += 1;
+                            return Some(Pixel(coord, color));
+                        } else if l[0] + self.x >= r[0] {
+                            self.cur_ac = None;
+                            self.cur_b = None;
+                        }
+                    }
+                },
+                IterState::None => return None,
+            }
         }
     }
 }
@@ -224,7 +298,7 @@ where
             p1: self.p1 + by,
             p2: self.p2 + by,
             p3: self.p3 + by,
-            ..self.clone()
+            ..*self
         }
     }
 
@@ -287,21 +361,25 @@ mod tests {
     }
 
     #[test]
-    fn it_draws_unfilled_tri() {
-        let mut tri: TriangleIterator<TestPixelColor> = Triangle::new(Coord::new(2, 2), Coord::new(4, 4), Coord::new(2, 4))
+    fn it_draws_unfilled_tri_line_y() {
+        let mut tri: TriangleIterator<TestPixelColor> = Triangle::new(Coord::new(2, 2), Coord::new(2, 4), Coord::new(2, 4))
+            .with_style(Style::with_stroke(1u8.into()))
+            .into_iter();
+
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
+    }
+
+    #[test]
+    fn it_draws_unfilled_tri_line_x() {
+        let mut tri: TriangleIterator<TestPixelColor> = Triangle::new(Coord::new(2, 2), Coord::new(4, 2), Coord::new(4, 2))
             .with_style(Style::with_stroke(1u8.into()))
             .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
-
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 3), 1.into())));
-
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 4), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 4), 1.into())));
     }
 
     #[test]
