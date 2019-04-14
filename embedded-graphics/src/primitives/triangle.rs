@@ -2,10 +2,10 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use super::line::{LineIterator, Line};
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
+use crate::primitives::line::{LineIterator, Line};
 use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{UnsignedCoord, ToSigned};
@@ -142,15 +142,17 @@ where
     fn into_iter(self) -> Self::IntoIter {
         let (v1, v2, v3) = sort_yx(self.p1, self.p2, self.p3);
 
-        let line_a = Line::new(v1, v2)
+        let mut line_a = Line::new(v1, v2)
                         .with_style(self.style)
                         .into_iter();
-        let line_b = Line::new(v1, v3)
+        let mut line_b = Line::new(v1, v3)
                         .with_style(self.style)
                         .into_iter();
-        let line_c = Line::new(v2, v3)
+        let mut line_c = Line::new(v2, v3)
                         .with_style(self.style)
                         .into_iter();
+        let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0.to_signed());
+        let next_b = line_b.next().map(|p| p.0.to_signed());
 
         TriangleIterator {
             line_a,
@@ -158,6 +160,8 @@ where
             line_c,
             cur_ac: None,
             cur_b: None,
+            next_ac,
+            next_b,
             x: 0,
             min_y: v1[1],
             max_y: v3[1],
@@ -183,6 +187,8 @@ where
     line_c: LineIterator<C>,
     cur_ac: Option<Coord>,
     cur_b: Option<Coord>,
+    next_ac: Option<Coord>,
+    next_b: Option<Coord>,
     x: i32,
     max_y: i32,
     min_y: i32,
@@ -194,38 +200,53 @@ impl<C> TriangleIterator<C>
 where
     C: PixelColor,
 {
-    fn next_ac(&mut self) -> Option<Coord> {
-        self.line_a.next().or_else(|| self.line_c.next()).map(|p| p.0.to_signed())
+    fn update_ac(&mut self) -> IterState {
+        if let Some(ac) = self.next_ac {
+            self.cur_ac = Some(ac);
+            self.next_ac = self.line_a.next().or_else(|| self.line_c.next())
+                                      .map(|p| p.0.to_signed());
+            self.x = 0;
+            IterState::Border(ac)
+        } else {
+            IterState::None
+        }
     }
 
-    fn next_b(&mut self) -> Option<Coord> {
-        self.line_b.next().map(|p| p.0.to_signed())
+    fn update_b(&mut self) -> IterState {
+        if let Some(b) = self.next_b {
+            self.cur_b = Some(b);
+            self.next_b = self.line_b.next().map(|p| p.0.to_signed());
+            self.x = 0;
+            IterState::Border(b)
+        } else {
+            IterState::None
+        }
     }
 
     fn points(&mut self) -> IterState {
         match (self.cur_ac, self.cur_b) {
-            (None, _) => {
-                if let Some(ac) = self.next_ac() {
-                    self.cur_ac = Some(ac);
-                    self.x = 0;
-                    IterState::Border(ac)
-                } else {
-                    IterState::None
-                }
-            },
-            (_, None) => {
-                if let Some(b) = self.next_b() {
-                    self.cur_b = Some(b);
-                    self.x = 0;
-                    IterState::Border(b)
-                } else {
-                    IterState::None
-                }
-            },
+            (None, _) => self.update_ac(),
+            (_, None) => self.update_b(),
             (Some(ac), Some(b)) => {
-                let (l, r) = sort_two_yx(ac, b);
-                IterState::LeftRight(l, r)
-            }
+                match (self.next_ac, self.next_b) {
+                    (Some(n_ac), Some(n_b)) => {
+                        if n_ac[1] < n_b[1] {
+                            self.update_ac()
+                        } else if n_ac[1] > n_b[1] {
+                            self.update_b()
+                        } else {
+                            let (l, r) = sort_two_yx(ac, b);
+                            IterState::LeftRight(l, r)
+                        }
+                    },
+                    (None, Some(_)) => {self.update_b()},
+                    (Some(_), None) => {self.update_ac()},
+                    (None, None) => {
+                        let (l, r) = sort_two_yx(ac, b);
+                        IterState::LeftRight(l, r)
+                    },
+                }
+            },
         }
     }
 }
@@ -250,7 +271,7 @@ where
                     }
                 },
                 IterState::LeftRight(l, r) => {
-                    if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
+                    if let Some(color) = self.style.fill_color {
                         if l[0] >= 0 && l[1] >= 0 && r[0] >= 0 && r[1] >= 0
                         && l[0] + self.x < r[0] {
                             let coord = UnsignedCoord::new((l[0] + self.x) as u32, 
@@ -261,6 +282,9 @@ where
                             self.cur_ac = None;
                             self.cur_b = None;
                         }
+                    } else {
+                            self.cur_ac = None;
+                            self.cur_b = None;
                     }
                 },
                 IterState::None => return None,
