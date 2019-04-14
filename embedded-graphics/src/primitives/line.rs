@@ -284,7 +284,7 @@ mod tests {
     fn draws_octant_4_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(5, 13);
-        let expected = [(5, 13), (6, 12), (7, 12), (8, 11), (9, 11), (10, 10)];
+        let expected = [(10, 10), (9, 11), (8, 11), (7, 12), (6, 12), (5, 13)];
         test_expected_line(start, end, &expected);
     }
 
@@ -292,7 +292,7 @@ mod tests {
     fn draws_octant_5_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(5, 7);
-        let expected = [(5, 7), (6, 8), (7, 8), (8, 9), (9, 9), (10, 10)];
+        let expected = [(10, 10), (9, 9), (8, 9), (7, 8), (6, 8), (5, 7)];
         test_expected_line(start, end, &expected);
     }
 
@@ -300,7 +300,7 @@ mod tests {
     fn draws_octant_6_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(7, 5);
-        let expected = [(7, 5), (8, 6), (8, 7), (9, 8), (9, 9), (10, 10)];
+        let expected = [(10, 10), (9, 9), (9, 8), (8, 7), (8, 6), (7, 5)];
         test_expected_line(start, end, &expected);
     }
 
@@ -308,7 +308,7 @@ mod tests {
     fn draws_octant_7_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(13, 5);
-        let expected = [(13, 5), (12, 6), (12, 7), (11, 8), (11, 9), (10, 10)];
+        let expected = [(10, 10), (11, 9), (11, 8), (12, 7), (12, 6), (13, 5)];
         test_expected_line(start, end, &expected);
     }
 
@@ -316,14 +316,7 @@ mod tests {
     fn draws_octant_8_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(15, 7);
-        let expected = [
-            (10, 10).into(),
-            (11, 9).into(),
-            (12, 9).into(),
-            (13, 8).into(),
-            (14, 8).into(),
-            (15, 7).into(),
-        ];
+        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7),];
         test_expected_line(start, end, &expected);
     }
 
@@ -331,7 +324,7 @@ mod tests {
     fn it_truncates_lines_out_of_bounds() {
         let start = Coord::new(-2, -2);
         let end = Coord::new(2, 2);
-        let expected = [(0, 0).into(), (1, 1).into(), (2, 2).into()];
+        let expected = [(0, 0), (1, 1), (2, 2)];
         test_expected_line(start, end, &expected);
     }
 }
