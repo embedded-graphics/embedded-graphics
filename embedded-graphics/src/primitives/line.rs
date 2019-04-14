@@ -93,63 +93,31 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type IntoIter = LineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let x0 = self.start[0].max(0);
-        let y0 = self.start[1].max(0);
-        let x1 = self.end[0].max(0);
-        let y1 = self.end[1].max(0);
+        let mut d = self.end - self.start;
+        if d[0] < 0 {
+            d = Coord::new(-d[0], d[1]);
+        }
+        if d[1] > 0 {
+            d = Coord::new(d[0], -d[1]);
+        }
 
-        // Find out if our line is steep or shallow
-        let is_steep = (y1 - y0).abs() > (x1 - x0).abs();
-
-        // Determine if endpoints should be switched
-        // based on the "quick" direction
-        let (x0, y0, x1, y1) = if is_steep {
-            if y0 > y1 {
-                (x1, y1, x0, y0)
-            } else {
-                (x0, y0, x1, y1)
-            }
-        } else {
-            if x0 > x1 {
-                (x1, y1, x0, y0)
-            } else {
-                (x0, y0, x1, y1)
-            }
+        let s = match (self.start[0] >= self.end[0], 
+                       self.start[1] >= self.end[1]) {
+            (false, false) => Coord::new(1, 1),
+            (false, true) => Coord::new(1, -1),
+            (true, false) => Coord::new(-1, 1),
+            (true, true) => Coord::new(-1, -1),
         };
-
-        // Setup our pre-calculated values
-        let (dquick, mut dslow) = if is_steep {
-            (y1 - y0, x1 - x0)
-        } else {
-            (x1 - x0, y1 - y0)
-        };
-
-        // Determine how we should increment the slow direction
-        let increment = if dslow < 0 {
-            dslow = -dslow;
-            -1
-        } else {
-            1
-        };
-
-        // Compute the default error
-        let error = 2 * dslow - dquick;
-
-        // Set our inital quick & slow
-        let (quick, slow, end) = if is_steep { (y0, x0, y1) } else { (x0, y0, x1) };
 
         LineIterator {
             style: self.style,
-
-            is_steep,
-            dquick,
-            dslow,
-            increment,
-            error,
-
-            quick,
-            slow,
-            end,
+            
+            start: self.start,
+            end: self.end,
+            d,
+            s,
+            err: d[0] + d[1],
+            e2: 0,
         }
     }
 }
@@ -162,15 +130,12 @@ where
 {
     style: Style<C>,
 
-    dquick: i32,
-    dslow: i32,
-    increment: i32,
-    error: i32,
-    is_steep: bool,
-
-    quick: i32,
-    slow: i32,
-    end: i32,
+    start: Coord,
+    end: Coord,
+    d: Coord,
+    s: Coord,
+    err: i32,
+    e2: i32,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -178,32 +143,28 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.quick > self.end {
-            return None;
+        self.style.stroke_color?;
+
+        loop {
+            let p_coord = self.start;
+
+            if self.start == self.end {
+                return None;
+            }
+            self.e2 = 2 * self.err;
+            if self.e2 > self.d[1] {
+                self.err += self.d[1];
+                self.start += Coord::new(self.s[0], 0);
+            }
+            if self.e2 < self.d[0] {
+                self.err += self.d[0];
+                self.start += Coord::new(0, self.s[1]);
+            }
+            if p_coord[0] >= 0 && p_coord[1] >= 0 {
+                return Some(Pixel(p_coord.to_unsigned(), 
+                                  self.style.stroke_color.unwrap()));
+            }
         }
-
-        // Get the next point
-        // let &Line { ref color, .. } = self.line;
-        let coord = if self.is_steep {
-            Coord::new(self.slow, self.quick)
-        } else {
-            Coord::new(self.quick, self.slow)
-        };
-
-        // Update error and increment slow direction
-        if self.error > 0 {
-            self.slow = self.slow + self.increment;
-            self.error -= 2 * self.dquick;
-        }
-        self.error += 2 * self.dslow;
-
-        // Increment fast direction
-        self.quick += 1;
-
-        // Return if there is a stroke on the line
-        self.style
-            .stroke_color
-            .map(|color| Pixel(coord.to_unsigned(), color))
     }
 }
 
