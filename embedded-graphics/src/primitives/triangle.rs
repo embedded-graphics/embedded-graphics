@@ -143,13 +143,16 @@ where
         let (v1, v2, v3) = sort_yx(self.p1, self.p2, self.p3);
 
         let mut line_a = Line::new(v1, v2)
-                        .with_style(self.style)
+                        .with_stroke(self.style.stroke_color
+                                         .or(self.style.fill_color))
                         .into_iter();
         let mut line_b = Line::new(v1, v3)
-                        .with_style(self.style)
+                        .with_stroke(self.style.stroke_color
+                                         .or(self.style.fill_color))
                         .into_iter();
         let mut line_c = Line::new(v2, v3)
-                        .with_style(self.style)
+                        .with_stroke(self.style.stroke_color
+                                         .or(self.style.fill_color))
                         .into_iter();
         let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0.to_signed());
         let next_b = line_b.next().map(|p| p.0.to_signed());
@@ -370,7 +373,7 @@ mod tests {
 
         assert_eq!(moved.p1, Coord::new(-5, 0));
         assert_eq!(moved.p2, Coord::new(5, 10));
-        assert_eq!(moved.p3, Coord::new(5, 10));
+        assert_eq!(moved.p3, Coord::new(-5, 10));
         assert_eq!(moved.size(), UnsignedCoord::new(10, 10));
     }
 
@@ -390,9 +393,14 @@ mod tests {
             .with_style(Style::with_stroke(1u8.into()))
             .into_iter();
 
+        // Nodes are returned twice. first line a and b yield the same point.
+        // After that line a ends where line c starts.
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
+        assert_eq!(tri.next(), None);
     }
 
     #[test]
@@ -402,23 +410,25 @@ mod tests {
             .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
+        assert_eq!(tri.next(), None);
     }
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect: TriangleIterator<TestPixelColor> =
-            Triangle::new(Coord::new(-2, -2), Coord::new(2, 2), Coord::new(-2, 2))
+        let mut tri: TriangleIterator<TestPixelColor> =
+            Triangle::new(Coord::new(-2, -2), Coord::new(2, 0), Coord::new(-2, 0))
                 .with_style(Style::with_stroke(1u8.into()))
                 .into_iter();
 
         // TODO: Macro
-        // Only the bottom right corner of the rect should be visible
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 1), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(0, 2), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(1, 2), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
+        // Only the bottom of the triangle should be visible
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(0, 0), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(1, 0), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
+        assert_eq!(tri.next(), None);
     }
 }
