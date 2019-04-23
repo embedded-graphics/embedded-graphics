@@ -400,6 +400,8 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
         assert_eq!(tri.next(), None);
     }
 
@@ -414,6 +416,8 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
         assert_eq!(tri.next(), None);
     }
 
@@ -427,6 +431,7 @@ mod tests {
         // TODO: Macro
         // Only the bottom of the triangle should be visible
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(0, 0), 1.into())));
+        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(1, 0), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
         assert_eq!(tri.next(), None);
