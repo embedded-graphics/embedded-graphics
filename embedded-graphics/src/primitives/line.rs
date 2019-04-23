@@ -118,6 +118,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             s,
             err: d[0] + d[1],
             e2: 0,
+            stop: false,
         }
     }
 }
@@ -136,6 +137,7 @@ where
     s: Coord,
     err: i32,
     e2: i32,
+    stop: bool,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -145,11 +147,11 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     fn next(&mut self) -> Option<Self::Item> {
         self.style.stroke_color?;
 
-        loop {
+        while !self.stop {
             let p_coord = self.start;
 
             if self.start == self.end {
-                return None;
+                self.stop = true;
             }
             self.e2 = 2 * self.err;
             if self.e2 > self.d[1] {
@@ -165,6 +167,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                                   self.style.stroke_color.unwrap()));
             }
         }
+        None
     }
 }
 
@@ -254,6 +257,22 @@ mod tests {
         assert_eq!(backwards_line.top_left(), start);
         assert_eq!(backwards_line.bottom_right(), end);
         assert_eq!(backwards_line.size(), UnsignedCoord::new(10, 10));
+    }
+
+    #[test]
+    fn draws_dot_correctly() {
+        let start = Coord::new(10, 10);
+        let end = Coord::new(10, 10);
+        let expected = [(10, 10)];
+        test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn draws_short_correctly() {
+        let start = Coord::new(2, 3);
+        let end = Coord::new(3, 2);
+        let expected = [(2, 3), (3, 2)];
+        test_expected_line(start, end, &expected);
     }
 
     #[test]
