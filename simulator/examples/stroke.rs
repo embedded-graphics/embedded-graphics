@@ -53,7 +53,8 @@ fn main() {
                     .into_iter(),
             )
             .chain(
-                triangle.translate(Coord::new(0, 64 + PADDING))
+                triangle
+                    .translate(Coord::new(0, 64 + PADDING))
                     .with_stroke_width(3)
                     .into_iter(),
             ),
@@ -74,7 +75,8 @@ fn main() {
                     .into_iter(),
             )
             .chain(
-                triangle.translate(Coord::new(0, 128 + PADDING * 2))
+                triangle
+                    .translate(Coord::new(0, 128 + PADDING * 2))
                     .with_stroke_width(10)
                     .into_iter(),
             ),

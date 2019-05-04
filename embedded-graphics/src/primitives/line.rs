@@ -101,8 +101,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             d = Coord::new(d[0], -d[1]);
         }
 
-        let s = match (self.start[0] >= self.end[0], 
-                       self.start[1] >= self.end[1]) {
+        let s = match (self.start[0] >= self.end[0], self.start[1] >= self.end[1]) {
             (false, false) => Coord::new(1, 1),
             (false, true) => Coord::new(1, -1),
             (true, false) => Coord::new(-1, 1),
@@ -111,7 +110,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         LineIterator {
             style: self.style,
-            
+
             start: self.start,
             end: self.end,
             d,
@@ -163,8 +162,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 self.start += Coord::new(0, self.s[1]);
             }
             if p_coord[0] >= 0 && p_coord[1] >= 0 {
-                return Some(Pixel(p_coord.to_unsigned(), 
-                                  self.style.stroke_color.unwrap()));
+                return Some(Pixel(
+                    p_coord.to_unsigned(),
+                    self.style.stroke_color.unwrap(),
+                ));
             }
         }
         None
@@ -335,7 +336,7 @@ mod tests {
     fn draws_octant_8_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(15, 7);
-        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7),];
+        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
         test_expected_line(start, end, &expected);
     }
 
