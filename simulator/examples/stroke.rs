@@ -13,7 +13,7 @@ use simulator::{DisplayBuilder, SimPixelColor};
 const PADDING: i32 = 16;
 
 fn main() {
-    let mut display = DisplayBuilder::new().build();
+    let mut display = DisplayBuilder::new().size(320, 256).build();
 
     let triangle = Triangle::new(Coord::new(0, 64), Coord::new(64, 0), Coord::new(64, 64))
         .translate(Coord::new(0, 0))

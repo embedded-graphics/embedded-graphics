@@ -107,7 +107,7 @@ pub struct DisplayBuilder {
 impl DisplayBuilder {
     pub fn new() -> Self {
         Self {
-            width: 320,
+            width: 256,
             height: 256,
             scale: 1,
             pixel_spacing: 0,
