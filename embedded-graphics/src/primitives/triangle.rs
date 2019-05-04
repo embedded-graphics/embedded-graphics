@@ -228,11 +228,15 @@ where
 
     fn points(&mut self) -> IterState {
         match (self.cur_ac, self.cur_b) {
+            // point of ac line or b line is missing
             (None, _) => self.update_ac(),
             (_, None) => self.update_b(),
+            // both points are present
             (Some(ac), Some(b)) => {
                 match (self.next_ac, self.next_b) {
                     (Some(n_ac), Some(n_b)) => {
+                        // if y component differs, take new points from edge until 
+                        // both side have the same y
                         if n_ac[1] < n_b[1] {
                             self.update_ac()
                         } else if n_ac[1] > n_b[1] {
@@ -267,6 +271,7 @@ where
         loop {
             match self.points() {
                 IterState::Border(coord) => {
+                    // draw edges of the triangle
                     if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
                         if coord[0] >= 0 && coord[1] >= 0 {
                             return Some(Pixel(coord.to_unsigned(), color));
@@ -274,6 +279,7 @@ where
                     }
                 },
                 IterState::LeftRight(l, r) => {
+                    // fill the space between the left and right points
                     if let Some(color) = self.style.fill_color {
                         if l[0] >= 0 && l[1] >= 0 && r[0] >= 0 && r[1] >= 0
                         && l[0] + self.x < r[0] {
@@ -282,12 +288,14 @@ where
                             self.x += 1;
                             return Some(Pixel(coord, color));
                         } else if l[0] + self.x >= r[0] {
+                            // we reached the right edge, move on to next row
                             self.cur_ac = None;
                             self.cur_b = None;
                         }
                     } else {
-                            self.cur_ac = None;
-                            self.cur_b = None;
+                        // we don't want to fill the triangle
+                        self.cur_ac = None;
+                        self.cur_b = None;
                     }
                 },
                 IterState::None => return None,
