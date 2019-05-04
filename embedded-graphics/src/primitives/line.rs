@@ -93,15 +93,15 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type IntoIter = LineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let mut d = self.end - self.start;
-        if d[0] < 0 {
-            d = Coord::new(-d[0], d[1]);
+        let mut delta = self.end - self.start;
+        if delta[0] < 0 {
+            delta = Coord::new(-delta[0], delta[1]);
         }
-        if d[1] > 0 {
-            d = Coord::new(d[0], -d[1]);
+        if delta[1] > 0 {
+            delta = Coord::new(delta[0], -delta[1]);
         }
 
-        let s = match (self.start[0] >= self.end[0], self.start[1] >= self.end[1]) {
+        let direction = match (self.start[0] >= self.end[0], self.start[1] >= self.end[1]) {
             (false, false) => Coord::new(1, 1),
             (false, true) => Coord::new(1, -1),
             (true, false) => Coord::new(-1, 1),
@@ -113,10 +113,9 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
             start: self.start,
             end: self.end,
-            d,
-            s,
-            err: d[0] + d[1],
-            e2: 0,
+            delta,
+            direction,
+            err: delta[0] + delta[1],
             stop: false,
         }
     }
@@ -132,10 +131,10 @@ where
 
     start: Coord,
     end: Coord,
-    d: Coord,
-    s: Coord,
+    delta: Coord,
+    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
+    direction: Coord,
     err: i32,
-    e2: i32,
     stop: bool,
 }
 
@@ -144,6 +143,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // return none of stroke color is none
         self.style.stroke_color?;
 
         while !self.stop {
@@ -152,14 +152,14 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             if self.start == self.end {
                 self.stop = true;
             }
-            self.e2 = 2 * self.err;
-            if self.e2 > self.d[1] {
-                self.err += self.d[1];
-                self.start += Coord::new(self.s[0], 0);
+            let err_double = 2 * self.err;
+            if err_double > self.delta[1] {
+                self.err += self.delta[1];
+                self.start += Coord::new(self.direction[0], 0);
             }
-            if self.e2 < self.d[0] {
-                self.err += self.d[0];
-                self.start += Coord::new(0, self.s[1]);
+            if err_double < self.delta[0] {
+                self.err += self.delta[0];
+                self.start += Coord::new(0, self.direction[1]);
             }
             if p_coord[0] >= 0 && p_coord[1] >= 0 {
                 return Some(Pixel(
