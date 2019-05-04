@@ -198,7 +198,7 @@ where
         Self {
             start: self.start + by,
             end: self.end + by,
-            ..self.clone()
+            ..*self
         }
     }
 

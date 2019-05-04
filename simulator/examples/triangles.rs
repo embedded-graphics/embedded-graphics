@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Triangle, Line};
+use embedded_graphics::primitives::Triangle;
 
 use simulator::DisplayBuilder;
 
