@@ -90,121 +90,85 @@ where
 
 impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type Item = Pixel<C>;
-    type IntoIter = LineIterator<'a, C>;
+    type IntoIter = LineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let x0 = self.start[0].max(0);
-        let y0 = self.start[1].max(0);
-        let x1 = self.end[0].max(0);
-        let y1 = self.end[1].max(0);
+        let mut delta = self.end - self.start;
+        if delta[0] < 0 {
+            delta = Coord::new(-delta[0], delta[1]);
+        }
+        if delta[1] > 0 {
+            delta = Coord::new(delta[0], -delta[1]);
+        }
 
-        // Find out if our line is steep or shallow
-        let is_steep = (y1 - y0).abs() > (x1 - x0).abs();
-
-        // Determine if endpoints should be switched
-        // based on the "quick" direction
-        let (x0, y0, x1, y1) = if is_steep {
-            if y0 > y1 {
-                (x1, y1, x0, y0)
-            } else {
-                (x0, y0, x1, y1)
-            }
-        } else {
-            if x0 > x1 {
-                (x1, y1, x0, y0)
-            } else {
-                (x0, y0, x1, y1)
-            }
+        let direction = match (self.start[0] >= self.end[0], self.start[1] >= self.end[1]) {
+            (false, false) => Coord::new(1, 1),
+            (false, true) => Coord::new(1, -1),
+            (true, false) => Coord::new(-1, 1),
+            (true, true) => Coord::new(-1, -1),
         };
-
-        // Setup our pre-calculated values
-        let (dquick, mut dslow) = if is_steep {
-            (y1 - y0, x1 - x0)
-        } else {
-            (x1 - x0, y1 - y0)
-        };
-
-        // Determine how we should increment the slow direction
-        let increment = if dslow < 0 {
-            dslow = -dslow;
-            -1
-        } else {
-            1
-        };
-
-        // Compute the default error
-        let error = 2 * dslow - dquick;
-
-        // Set our inital quick & slow
-        let (quick, slow, end) = if is_steep { (y0, x0, y1) } else { (x0, y0, x1) };
 
         LineIterator {
-            line: self,
+            style: self.style,
 
-            is_steep,
-            dquick,
-            dslow,
-            increment,
-            error,
-
-            quick,
-            slow,
-            end,
+            start: self.start,
+            end: self.end,
+            delta,
+            direction,
+            err: delta[0] + delta[1],
+            stop: self.start == self.end, // if line length is zero, draw nothing
         }
     }
 }
 
 /// Pixel iterator for each pixel in the line
-#[derive(Debug)]
-pub struct LineIterator<'a, C: 'a>
+#[derive(Debug, Clone, Copy)]
+pub struct LineIterator<C>
 where
     C: PixelColor,
 {
-    line: &'a Line<C>,
+    style: Style<C>,
 
-    dquick: i32,
-    dslow: i32,
-    increment: i32,
-    error: i32,
-    is_steep: bool,
-
-    quick: i32,
-    slow: i32,
-    end: i32,
+    start: Coord,
+    end: Coord,
+    delta: Coord,
+    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
+    direction: Coord,
+    err: i32,
+    stop: bool,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<'a, C: PixelColor> Iterator for LineIterator<'a, C> {
+impl<C: PixelColor> Iterator for LineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.quick > self.end {
-            return None;
+        // return none if stroke color is none
+        self.style.stroke_color?;
+
+        while !self.stop {
+            let p_coord = self.start;
+
+            if self.start == self.end {
+                self.stop = true;
+            }
+            let err_double = 2 * self.err;
+            if err_double > self.delta[1] {
+                self.err += self.delta[1];
+                self.start += Coord::new(self.direction[0], 0);
+            }
+            if err_double < self.delta[0] {
+                self.err += self.delta[0];
+                self.start += Coord::new(0, self.direction[1]);
+            }
+            if p_coord[0] >= 0 && p_coord[1] >= 0 {
+                return Some(Pixel(
+                    p_coord.to_unsigned(),
+                    self.style.stroke_color.unwrap(),
+                ));
+            }
         }
-
-        // Get the next point
-        // let &Line { ref color, .. } = self.line;
-        let coord = if self.is_steep {
-            Coord::new(self.slow, self.quick)
-        } else {
-            Coord::new(self.quick, self.slow)
-        };
-
-        // Update error and increment slow direction
-        if self.error > 0 {
-            self.slow = self.slow + self.increment;
-            self.error -= 2 * self.dquick;
-        }
-        self.error += 2 * self.dslow;
-
-        // Increment fast direction
-        self.quick += 1;
-
-        // Return if there is a stroke on the line
-        self.line
-            .style
-            .stroke_color
-            .map(|color| Pixel(coord.to_unsigned(), color))
+        None
     }
 }
 
@@ -235,7 +199,7 @@ where
         Self {
             start: self.start + by,
             end: self.end + by,
-            ..self.clone()
+            ..*self
         }
     }
 
@@ -274,9 +238,16 @@ mod tests {
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
         let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));
-        for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
-            assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
+        let mut expected_iter = expected.iter();
+        for Pixel(coord, _) in line.into_iter() {
+            match expected_iter.next() {
+                Some(point) => assert_eq!(coord, UnsignedCoord::new(point.0, point.1)),
+                // expected runs out of points before line does
+                None => unreachable!(),
+            }
         }
+        // check that expected has no points left
+        assert!(expected_iter.next().is_none())
     }
 
     #[test]
@@ -294,6 +265,22 @@ mod tests {
         assert_eq!(backwards_line.top_left(), start);
         assert_eq!(backwards_line.bottom_right(), end);
         assert_eq!(backwards_line.size(), UnsignedCoord::new(10, 10));
+    }
+
+    #[test]
+    fn draws_no_dot() {
+        let start = Coord::new(10, 10);
+        let end = Coord::new(10, 10);
+        let expected = [];
+        test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn draws_short_correctly() {
+        let start = Coord::new(2, 3);
+        let end = Coord::new(3, 2);
+        let expected = [(2, 3), (3, 2)];
+        test_expected_line(start, end, &expected);
     }
 
     #[test]
@@ -324,7 +311,7 @@ mod tests {
     fn draws_octant_4_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(5, 13);
-        let expected = [(5, 13), (6, 12), (7, 12), (8, 11), (9, 11), (10, 10)];
+        let expected = [(10, 10), (9, 11), (8, 11), (7, 12), (6, 12), (5, 13)];
         test_expected_line(start, end, &expected);
     }
 
@@ -332,7 +319,7 @@ mod tests {
     fn draws_octant_5_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(5, 7);
-        let expected = [(5, 7), (6, 8), (7, 8), (8, 9), (9, 9), (10, 10)];
+        let expected = [(10, 10), (9, 9), (8, 9), (7, 8), (6, 8), (5, 7)];
         test_expected_line(start, end, &expected);
     }
 
@@ -340,7 +327,7 @@ mod tests {
     fn draws_octant_6_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(7, 5);
-        let expected = [(7, 5), (8, 6), (8, 7), (9, 8), (9, 9), (10, 10)];
+        let expected = [(10, 10), (9, 9), (9, 8), (8, 7), (8, 6), (7, 5)];
         test_expected_line(start, end, &expected);
     }
 
@@ -348,7 +335,7 @@ mod tests {
     fn draws_octant_7_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(13, 5);
-        let expected = [(13, 5), (12, 6), (12, 7), (11, 8), (11, 9), (10, 10)];
+        let expected = [(10, 10), (11, 9), (11, 8), (12, 7), (12, 6), (13, 5)];
         test_expected_line(start, end, &expected);
     }
 
@@ -356,14 +343,7 @@ mod tests {
     fn draws_octant_8_correctly() {
         let start = Coord::new(10, 10);
         let end = Coord::new(15, 7);
-        let expected = [
-            (10, 10).into(),
-            (11, 9).into(),
-            (12, 9).into(),
-            (13, 8).into(),
-            (14, 8).into(),
-            (15, 7).into(),
-        ];
+        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
         test_expected_line(start, end, &expected);
     }
 
@@ -371,7 +351,7 @@ mod tests {
     fn it_truncates_lines_out_of_bounds() {
         let start = Coord::new(-2, -2);
         let end = Coord::new(2, 2);
-        let expected = [(0, 0).into(), (1, 1).into(), (2, 2).into()];
+        let expected = [(0, 0), (1, 1), (2, 2)];
         test_expected_line(start, end, &expected);
     }
 }

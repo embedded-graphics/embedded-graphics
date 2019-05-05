@@ -19,6 +19,7 @@ following:
     * Lines
     * Rectangles (and squares)
     * Circles
+    * Triangles
 * Text with [multiple bitmap fonts](src/fonts)
 
 A core goal is to do the above without using any buffers; the crate should work without a
