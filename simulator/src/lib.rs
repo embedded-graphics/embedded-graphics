@@ -22,6 +22,12 @@ impl From<u8> for SimPixelColor {
     }
 }
 
+impl From<u16> for SimPixelColor {
+    fn from(other: u16) -> Self {
+        SimPixelColor(other != 0)
+    }
+}
+
 pub struct Display {
     width: usize,
     height: usize,
