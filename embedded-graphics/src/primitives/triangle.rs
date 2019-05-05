@@ -413,7 +413,6 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
         assert_eq!(tri.next(), None);
     }
 
@@ -428,7 +427,6 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
         assert_eq!(tri.next(), None);

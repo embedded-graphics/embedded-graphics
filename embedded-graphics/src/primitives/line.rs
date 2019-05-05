@@ -116,7 +116,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             delta,
             direction,
             err: delta[0] + delta[1],
-            stop: false,
+            stop: self.start == self.end, // if line length is zero, draw nothing
         }
     }
 }
@@ -143,7 +143,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // return none of stroke color is none
+        // return none if stroke color is none
         self.style.stroke_color?;
 
         while !self.stop {
@@ -238,9 +238,16 @@ mod tests {
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
         let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));
-        for (idx, Pixel(coord, _)) in line.into_iter().enumerate() {
-            assert_eq!(coord, UnsignedCoord::new(expected[idx].0, expected[idx].1));
+        let mut expected_iter = expected.iter();
+        for Pixel(coord, _) in line.into_iter() {
+            match expected_iter.next() {
+                Some(point) => assert_eq!(coord, UnsignedCoord::new(point.0, point.1)),
+                // expected runs out of points before line does
+                None => unreachable!(),
+            }
         }
+        // check that expected has no points left 
+        assert!(expected_iter.next().is_none())
     }
 
     #[test]
@@ -261,10 +268,10 @@ mod tests {
     }
 
     #[test]
-    fn draws_dot_correctly() {
+    fn draws_no_dot() {
         let start = Coord::new(10, 10);
         let end = Coord::new(10, 10);
-        let expected = [(10, 10)];
+        let expected = [];
         test_expected_line(start, end, &expected);
     }
 
