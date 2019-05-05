@@ -246,7 +246,7 @@ mod tests {
                 None => unreachable!(),
             }
         }
-        // check that expected has no points left 
+        // check that expected has no points left
         assert!(expected_iter.next().is_none())
     }
 
