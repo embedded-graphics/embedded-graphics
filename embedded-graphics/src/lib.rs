@@ -10,6 +10,7 @@
 //!     * Lines
 //!     * Rectangles (and squares)
 //!     * Circles
+//!     * Triangles
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
 //! A core goal is to do the above without using any buffers; the crate should work without a
