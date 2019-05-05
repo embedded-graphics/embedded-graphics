@@ -21,7 +21,7 @@ impl From<u8> for TestPixelColor {
 impl Drawing<TestPixelColor> for FakeDisplay {
     fn draw<T>(&mut self, _item_pixels: T)
     where
-        T: Iterator<Item = Pixel<TestPixelColor>>,
+        T: IntoIterator<Item = Pixel<TestPixelColor>>,
     {
         // Noop
     }
