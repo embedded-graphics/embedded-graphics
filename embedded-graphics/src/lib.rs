@@ -3,9 +3,9 @@
 //! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
 //! following:
 //!
-//! * [1 bit-per-pixel images](./image/struct.Image1BPP.html)
-//! * [8 bits-per-pixel images](./image/struct.Image8BPP.html)
-//! * [16 bits-per-pixel images](./image/struct.Image16BPP.html)
+//! * [1 bit-per-pixel images](./image/type.Image1BPP.html)
+//! * [8 bits-per-pixel images](./image/type.Image8BPP.html)
+//! * [16 bits-per-pixel images](./image/type.Image16BPP.html)
 //! * [Primitives](./primitives/index.html)
 //!     * Lines
 //!     * Rectangles (and squares)
