@@ -9,7 +9,7 @@ pub struct RlePacket<'a> {
     pub pixel_data: &'a [u8],
 }
 
-named!(pub rle_packet<&[u8], RlePacket>,
+named_args!(pub rle_packet(bytes_per_pixel: u8)<&[u8], RlePacket>,
     do_parse!(
         run_length: bits!(
             preceded!(
@@ -19,8 +19,7 @@ named!(pub rle_packet<&[u8], RlePacket>,
                 map!(take_bits!(u8, 7), |len| len + 1)
             )
         ) >>
-        // TODO: Use pixel depth field (5.5 in doc). Currently hard coded to 32 bits
-        pixel_data: take!(4) >>
+        pixel_data: take!(bytes_per_pixel) >>
         (
             RlePacket {
                 // Run length is encoded as 0 = 1 pixel, 1 = 2 pixels, etc, hence this offset
@@ -47,7 +46,7 @@ mod tests {
             0xDD,
         ];
 
-        let (remaining, packet) = rle_packet(&input).unwrap();
+        let (remaining, packet) = rle_packet(&input, 4).unwrap();
 
         assert_eq!(remaining, &[]);
         assert_eq!(
@@ -71,7 +70,7 @@ mod tests {
             0xDD,
         ];
 
-        let result = rle_packet(&input);
+        let result = rle_packet(&input, 4);
 
         assert!(result.is_err());
     }
@@ -93,7 +92,7 @@ mod tests {
             0x44,
         ];
 
-        let (remaining, packet) = rle_packet(&input).unwrap();
+        let (remaining, packet) = rle_packet(&input, 4).unwrap();
 
         assert_eq!(remaining, &[0x11, 0x22, 0x33, 0x44]);
         assert_eq!(

@@ -6,7 +6,7 @@ pub struct RawPacket<'a> {
     pixel_data: &'a [u8],
 }
 
-named!(pub raw_packet<&[u8], RawPacket>,
+named_args!(pub raw_packet(bytes_per_pixel: u8)<&[u8], RawPacket>,
     do_parse!(
         len: bits!(
             preceded!(
@@ -16,8 +16,7 @@ named!(pub raw_packet<&[u8], RawPacket>,
                 map!(take_bits!(u8, 7), |len| len + 1)
             )
         ) >>
-        // TODO: Use pixel depth field (5.5 in doc). Currently hard coded to 32 bits (4 bytes)
-        pixel_data: take!(len * 4) >>
+        pixel_data: take!(len * bytes_per_pixel) >>
         (
             RawPacket {
 
@@ -49,7 +48,7 @@ mod tests {
             0x44,
         ];
 
-        let (remaining, packet) = raw_packet(&input).unwrap();
+        let (remaining, packet) = raw_packet(&input, 4).unwrap();
 
         assert_eq!(remaining, &[]);
         assert_eq!(
@@ -76,7 +75,7 @@ mod tests {
             0xDD,
         ];
 
-        let result = raw_packet(&input);
+        let result = raw_packet(&input, 4);
 
         assert!(result.is_err());
     }
@@ -103,7 +102,7 @@ mod tests {
             0x88,
         ];
 
-        let (remaining, packet) = raw_packet(&input).unwrap();
+        let (remaining, packet) = raw_packet(&input, 4).unwrap();
 
         assert_eq!(remaining, &[0x55, 0x66, 0x77, 0x88]);
         assert_eq!(

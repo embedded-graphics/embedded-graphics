@@ -13,15 +13,13 @@
 
 mod footer;
 mod header;
+mod packet;
 mod parse_error;
-mod raw_packet;
-mod rle_packet;
 
 use crate::footer::*;
 use crate::header::*;
+use crate::packet::{any_packet, Packet, RawPacket, RlePacket};
 use crate::parse_error::ParseError;
-use crate::raw_packet::raw_packet;
-use crate::rle_packet::rle_packet;
 
 pub use crate::footer::TgaFooter;
 pub use crate::header::{ImageType, TgaHeader};
@@ -99,22 +97,40 @@ impl<'a> IntoIterator for &'a Tga<'a> {
     type IntoIter = TgaIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
+        let (bytes_to_consume, current_packet) = any_packet(self.image_data(), self.bpp() / 8)
+            .expect("Failed to parse first image data packet");
+
         TgaIterator {
             x: 0,
             y: 0,
             tga: self,
-            byte_position: 0,
+            bytes_to_consume,
+            current_packet,
+            current_packet_position: 0,
         }
     }
 }
 
-/// TODO: Docs
+/// Iterator over individual TGA pixels
 #[derive(Debug)]
 pub struct TgaIterator<'a> {
+    /// Current pixel X coordinate
     x: u32,
+
+    /// Current pixel Y coordinate
     y: u32,
+
+    /// Reference to original TGA image
     tga: &'a Tga<'a>,
-    byte_position: usize,
+
+    /// Remaining bytes (after current packet) to consume
+    bytes_to_consume: &'a [u8],
+
+    /// Reference to current packet definition (either RLE or raw)
+    current_packet: Packet<'a>,
+
+    /// Current position within the current packet's pixel run
+    current_packet_position: u8,
 }
 
 impl<'a> Iterator for TgaIterator<'a> {
