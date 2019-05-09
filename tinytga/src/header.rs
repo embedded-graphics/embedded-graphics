@@ -18,7 +18,7 @@ pub enum ImageType {
     /// Run length encoded color mapped image
     RleColorMapped = 9,
 
-    /// Run length encoded truecolor image
+    /// Run length encoded RGB image
     RleTruecolor = 10,
 
     /// Run length encoded monochrome (greyscale) image

@@ -93,3 +93,34 @@ impl<'a> Tga<'a> {
         self.pixel_data
     }
 }
+
+impl<'a> IntoIterator for &'a Tga<'a> {
+    type Item = u32;
+    type IntoIter = TgaIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        TgaIterator {
+            x: 0,
+            y: 0,
+            tga: self,
+            byte_position: 0,
+        }
+    }
+}
+
+/// TODO: Docs
+#[derive(Debug)]
+pub struct TgaIterator<'a> {
+    x: u32,
+    y: u32,
+    tga: &'a Tga<'a>,
+    byte_position: usize,
+}
+
+impl<'a> Iterator for TgaIterator<'a> {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        None
+    }
+}
