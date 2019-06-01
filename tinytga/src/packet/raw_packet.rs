@@ -29,7 +29,6 @@ named_args!(pub raw_packet(bytes_per_pixel: u8)<&[u8], RawPacket>,
         pixel_data: take!(len * bytes_per_pixel) >>
         (
             RawPacket {
-
                 len,
                 pixel_data
             }

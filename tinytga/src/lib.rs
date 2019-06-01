@@ -1,6 +1,6 @@
 //! No-std compatible TGA parser designed for embedded systems, but usable anywhere
 
-#![no_std]
+// #![no_std]
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_copy_implementations)]
@@ -103,16 +103,19 @@ impl<'a> IntoIterator for &'a Tga<'a> {
         // Explicit match to prevent integer division rounding errors
         let stride = match self.bpp() {
             8 => 1,
+            16 => 2,
+            24 => 3,
+            32 => 4,
             depth => panic!("Bit depth {} not supported", depth),
         };
 
-        TgaIterator {
+        dbg!(TgaIterator {
             tga: self,
             bytes_to_consume,
             current_packet,
             current_packet_position: 0,
             stride,
-        }
+        })
     }
 }
 
@@ -141,6 +144,27 @@ impl<'a> Iterator for TgaIterator<'a> {
     type Item = u32;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.current_packet_position >= self.current_packet.len() {
+            // If we're past the end of the current packet and there are no more packets to
+            // consume, the iterator is done. If there is more pixel data available, parse the next
+            // packet out of the data and assign that as the current packet.
+            if self.bytes_to_consume.len() == 0 {
+                return None;
+            } else {
+                // Reset position to start of next packet
+                self.current_packet_position = 0;
+
+                // Parse next packet from remaining bytes
+                let (bytes_to_consume, current_packet) =
+                    next_packet(self.bytes_to_consume, self.stride as u8)
+                        .expect("Failed to parse image data packet");
+
+                // Remove parsed packet from remaining bytes to consume
+                self.bytes_to_consume = bytes_to_consume;
+                self.current_packet = current_packet;
+            }
+        }
+
         let pixel_value = match self.current_packet {
             // TODO: Dedupe these two branches
             Packet::RlePacket(ref p) => {
@@ -158,7 +182,7 @@ impl<'a> Iterator for TgaIterator<'a> {
             }
             Packet::RawPacket(ref p) => {
                 let px = p.pixel_data;
-                let start = self.current_packet_position;
+                let start = self.current_packet_position * self.stride;
 
                 // Raw packets need to look within the byte array to find the correct bytes to
                 // convert to a pixel value, hence the calculation of `start = position * stride`
@@ -174,32 +198,37 @@ impl<'a> Iterator for TgaIterator<'a> {
             }
         };
 
+        // dbg!(&self.current_packet);
+        // dbg!(self.current_packet_position);
+
         // Point to next pixel
         self.current_packet_position += 1;
 
-        if self.current_packet_position > self.current_packet.len() {
-            // If we're past the end of the current packet and there are no more packets to
-            // consume, the iterator is done. If there is more pixel data available, parse the next
-            // packet out of the data and assign that as the current packet.
-            if self.bytes_to_consume.len() == 0 {
-                None
-            } else {
-                // Reset position to start of next packet
-                self.current_packet_position = 0;
+        Some(pixel_value)
 
-                // Parse next packet from remaining bytes
-                let (bytes_to_consume, current_packet) =
-                    next_packet(self.bytes_to_consume, self.stride as u8)
-                        .expect("Failed to parse image data packet");
+        // if self.current_packet_position >= self.current_packet.len() {
+        //     // If we're past the end of the current packet and there are no more packets to
+        //     // consume, the iterator is done. If there is more pixel data available, parse the next
+        //     // packet out of the data and assign that as the current packet.
+        //     if self.bytes_to_consume.len() == 0 {
+        //         None
+        //     } else {
+        //         // Reset position to start of next packet
+        //         self.current_packet_position = 0;
 
-                // Remove parsed packet from remaining bytes to consume
-                self.bytes_to_consume = bytes_to_consume;
-                self.current_packet = current_packet;
+        //         // Parse next packet from remaining bytes
+        //         let (bytes_to_consume, current_packet) =
+        //             next_packet(self.bytes_to_consume, self.stride as u8)
+        //                 .expect("Failed to parse image data packet");
 
-                Some(pixel_value)
-            }
-        } else {
-            Some(pixel_value)
-        }
+        //         // Remove parsed packet from remaining bytes to consume
+        //         self.bytes_to_consume = bytes_to_consume;
+        //         self.current_packet = current_packet;
+
+        //         Some(pixel_value)
+        //     }
+        // } else {
+        //     Some(pixel_value)
+        // }
     }
 }
