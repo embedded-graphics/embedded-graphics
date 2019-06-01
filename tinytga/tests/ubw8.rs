@@ -5,7 +5,7 @@ use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
 fn ubw8() {
     let data = include_bytes!("./ubw8.tga");
 
-    let img = Tga::from_bytes(data).unwrap();
+    let img = Tga::from_slice(data).unwrap();
 
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);

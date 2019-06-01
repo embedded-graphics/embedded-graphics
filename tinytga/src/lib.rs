@@ -39,7 +39,7 @@ pub struct Tga<'a> {
 
 impl<'a> Tga<'a> {
     /// Parse a TGA image from a byte slice
-    pub fn from_bytes(bytes: &'a [u8]) -> Result<Self, ParseError> {
+    pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ParseError> {
         let (_remaining, header) = header(bytes).map_err(|_| ParseError::Header)?;
 
         // Read last 26 bytes as TGA footer

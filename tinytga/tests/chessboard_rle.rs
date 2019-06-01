@@ -4,7 +4,7 @@ use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
 fn chessboard_rle() {
     let data = include_bytes!("./chessboard_rle.tga");
 
-    let img = Tga::from_bytes(data).unwrap();
+    let img = Tga::from_slice(data).unwrap();
 
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);

@@ -4,7 +4,7 @@ use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
 fn chequerboard_uncompressed_topleft() {
     let data = include_bytes!("./chequerboard-uncompressed-topleft.tga");
 
-    let img = Tga::from_bytes(data).unwrap();
+    let img = Tga::from_slice(data).unwrap();
 
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);

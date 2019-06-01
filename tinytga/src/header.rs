@@ -47,7 +47,7 @@ pub struct TgaHeader {
     /// Length of color map
     pub color_map_len: u16,
 
-    /// Number of bits in each color pallette entry, typically 15, 16, 24, or 32 bits
+    /// Number of bits in each color palette entry, typically 15, 16, 24, or 32 bits
     pub color_map_depth: u8,
 
     /// Image origin (X)
@@ -59,7 +59,7 @@ pub struct TgaHeader {
     /// Image width in pixels
     pub width: u16,
 
-    /// Image heigh in pixels
+    /// Image height in pixels
     pub height: u16,
 
     /// Pixel bit depth (8, 16, 24, 32 bits)

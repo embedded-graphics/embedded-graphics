@@ -7,7 +7,7 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
 use tinytga::Tga;
 
-/// BMP format image
+/// TGA format image
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C: PixelColor> {
     tga: Tga<'a>,
@@ -64,11 +64,11 @@ where
     C: PixelColor + From<u8> + From<u16>,
 {
     type Item = Pixel<C>;
-    type IntoIter = ImageBmpIterator<'a, C>;
+    type IntoIter = ImageTgaIterator<'a, C>;
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
-        ImageBmpIterator {
+        ImageTgaIterator {
             im: self,
             image_data: self.tga.image_data(),
             x: 0,
@@ -78,7 +78,7 @@ where
 }
 
 #[derive(Debug)]
-pub struct ImageBmpIterator<'a, C: 'a>
+pub struct ImageTgaIterator<'a, C: 'a>
 where
     C: PixelColor,
 {
@@ -88,7 +88,7 @@ where
     image_data: &'a [u8],
 }
 
-impl<'a, C> Iterator for ImageBmpIterator<'a, C>
+impl<'a, C> Iterator for ImageTgaIterator<'a, C>
 where
     C: PixelColor + From<u8> + From<u16>,
 {
