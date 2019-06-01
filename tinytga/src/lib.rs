@@ -1,6 +1,6 @@
 //! No-std compatible TGA parser designed for embedded systems, but usable anywhere
 
-// #![no_std]
+#![no_std]
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_copy_implementations)]
@@ -18,7 +18,7 @@ mod parse_error;
 
 use crate::footer::*;
 use crate::header::*;
-use crate::packet::{next_packet, Packet};
+use crate::packet::{next_rle_packet, Packet};
 use crate::parse_error::ParseError;
 
 pub use crate::footer::TgaFooter;
@@ -40,25 +40,26 @@ pub struct Tga<'a> {
 impl<'a> Tga<'a> {
     /// Parse a TGA image from a byte slice
     pub fn from_bytes(bytes: &'a [u8]) -> Result<Self, ParseError> {
-        let (after_header, header) = header(bytes).map_err(|_| ParseError::Header)?;
+        let (_remaining, header) = header(bytes).map_err(|_| ParseError::Header)?;
 
         // Read last 26 bytes as TGA footer
         let (_remaining, footer) =
-            footer(&bytes[(bytes.len() - FOOTER_LEN)..]).map_err(|_| ParseError::Footer)?;
+            footer(&bytes[bytes.len() - FOOTER_LEN..]).map_err(|_| ParseError::Footer)?;
 
-        let header_len = bytes.len() - after_header.len();
+        let header_len = HEADER_LEN + header.id_len as usize;
 
         // TODO: Support color maps with by color map size with
         // (header.color_map_len * header.color_map_entry_size)
-        let image_data_start = header_len + header.id_len as usize;
+        let image_data_start = header_len;
 
-        let image_data_end = match footer
-            .extension_area_offset
-            .min(footer.developer_directory_offset) as usize
-        {
-            0 => bytes.len() - FOOTER_LEN,
-            non_empty => non_empty,
-        };
+        let image_data_end = [
+            footer.extension_area_offset as usize,
+            footer.developer_directory_offset as usize,
+        ]
+        .iter()
+        .filter_map(|v| if *v > 0 { Some(*v) } else { None })
+        .min()
+        .unwrap_or(bytes.len() - FOOTER_LEN);
 
         let pixel_data = &bytes[image_data_start..image_data_end];
 
@@ -97,8 +98,19 @@ impl<'a> IntoIterator for &'a Tga<'a> {
     type IntoIter = TgaIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let (bytes_to_consume, current_packet) = next_packet(self.image_data(), self.bpp() / 8)
-            .expect("Failed to parse first image data packet");
+        let (bytes_to_consume, current_packet) = match self.header.image_type {
+            ImageType::Monochrome | ImageType::Truecolor => {
+                let data = Packet::from_slice(self.image_data());
+
+                (None, data)
+            }
+            ImageType::RleMonochrome | ImageType::RleTruecolor => {
+                next_rle_packet(self.image_data(), self.bpp() / 8)
+                    .map(|(remaining, packet)| (Some(remaining), packet))
+                    .expect("Failed to parse first image RLE data packet")
+            }
+            image_type => panic!("Image type {:?} not supported", image_type),
+        };
 
         // Explicit match to prevent integer division rounding errors
         let stride = match self.bpp() {
@@ -109,13 +121,13 @@ impl<'a> IntoIterator for &'a Tga<'a> {
             depth => panic!("Bit depth {} not supported", depth),
         };
 
-        dbg!(TgaIterator {
+        TgaIterator {
             tga: self,
             bytes_to_consume,
             current_packet,
             current_packet_position: 0,
             stride,
-        })
+        }
     }
 }
 
@@ -128,7 +140,7 @@ pub struct TgaIterator<'a> {
     tga: &'a Tga<'a>,
 
     /// Remaining bytes (after current packet) to consume
-    bytes_to_consume: &'a [u8],
+    bytes_to_consume: Option<&'a [u8]>,
 
     /// Reference to current packet definition (either RLE or raw)
     current_packet: Packet<'a>,
@@ -145,48 +157,66 @@ impl<'a> Iterator for TgaIterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current_packet_position >= self.current_packet.len() {
-            // If we're past the end of the current packet and there are no more packets to
-            // consume, the iterator is done. If there is more pixel data available, parse the next
-            // packet out of the data and assign that as the current packet.
-            if self.bytes_to_consume.len() == 0 {
+            if self.bytes_to_consume.is_none() {
                 return None;
             } else {
                 // Reset position to start of next packet
                 self.current_packet_position = 0;
 
                 // Parse next packet from remaining bytes
-                let (bytes_to_consume, current_packet) =
-                    next_packet(self.bytes_to_consume, self.stride as u8)
-                        .expect("Failed to parse image data packet");
+                match self.tga.header.image_type {
+                    ImageType::Monochrome | ImageType::Truecolor => {
+                        // Noop
+                    }
+                    ImageType::RleMonochrome | ImageType::RleTruecolor => {
+                        let (bytes_to_consume, current_packet) =
+                            next_rle_packet(self.bytes_to_consume.unwrap(), self.tga.bpp() / 8)
+                                .map(|(remaining, packet)| {
+                                    (
+                                        if remaining.len() > 0 {
+                                            Some(remaining)
+                                        } else {
+                                            None
+                                        },
+                                        packet,
+                                    )
+                                })
+                                .expect("Failed to parse first image RLE data packet");
 
-                // Remove parsed packet from remaining bytes to consume
-                self.bytes_to_consume = bytes_to_consume;
-                self.current_packet = current_packet;
+                        self.bytes_to_consume = bytes_to_consume;
+                        self.current_packet = current_packet;
+                    }
+                    image_type => panic!("Image type {:?} not supported", image_type),
+                };
             }
         }
 
         let pixel_value = match self.current_packet {
-            // TODO: Dedupe these two branches
+            // TODO: Dedupe these branches
             Packet::RlePacket(ref p) => {
                 let px = p.pixel_data;
 
                 // RLE packets use the same 4 bytes for the colour of every pixel in the packet, so
                 // there is no start offet like `RawPacket`s have
-                match self.stride {
+                let out = match self.stride {
                     1 => px[0] as u32,
                     2 => u32::from_le_bytes([px[0], px[1], 0, 0]),
                     3 => u32::from_le_bytes([px[0], px[1], px[2], 0]),
                     4 => u32::from_le_bytes([px[0], px[1], px[2], px[3]]),
                     depth => unreachable!("Depth {} is not supported", depth),
-                }
+                };
+
+                self.current_packet_position += 1;
+
+                out
             }
             Packet::RawPacket(ref p) => {
                 let px = p.pixel_data;
-                let start = self.current_packet_position * self.stride;
+                let start = self.current_packet_position;
 
                 // Raw packets need to look within the byte array to find the correct bytes to
                 // convert to a pixel value, hence the calculation of `start = position * stride`
-                match self.stride {
+                let out = match self.stride {
                     1 => px[start] as u32,
                     2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
                     3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
@@ -194,41 +224,31 @@ impl<'a> Iterator for TgaIterator<'a> {
                         u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]])
                     }
                     depth => unreachable!("Depth {} is not supported", depth),
-                }
+                };
+
+                self.current_packet_position += self.stride;
+
+                out
+            }
+            Packet::FullContents(ref px) => {
+                let start = self.current_packet_position;
+
+                let out = match self.stride {
+                    1 => px[start] as u32,
+                    2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
+                    3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
+                    4 => {
+                        u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]])
+                    }
+                    depth => unreachable!("Depth {} is not supported", depth),
+                };
+
+                self.current_packet_position += self.stride;
+
+                out
             }
         };
 
-        // dbg!(&self.current_packet);
-        // dbg!(self.current_packet_position);
-
-        // Point to next pixel
-        self.current_packet_position += 1;
-
         Some(pixel_value)
-
-        // if self.current_packet_position >= self.current_packet.len() {
-        //     // If we're past the end of the current packet and there are no more packets to
-        //     // consume, the iterator is done. If there is more pixel data available, parse the next
-        //     // packet out of the data and assign that as the current packet.
-        //     if self.bytes_to_consume.len() == 0 {
-        //         None
-        //     } else {
-        //         // Reset position to start of next packet
-        //         self.current_packet_position = 0;
-
-        //         // Parse next packet from remaining bytes
-        //         let (bytes_to_consume, current_packet) =
-        //             next_packet(self.bytes_to_consume, self.stride as u8)
-        //                 .expect("Failed to parse image data packet");
-
-        //         // Remove parsed packet from remaining bytes to consume
-        //         self.bytes_to_consume = bytes_to_consume;
-        //         self.current_packet = current_packet;
-
-        //         Some(pixel_value)
-        //     }
-        // } else {
-        //     Some(pixel_value)
-        // }
     }
 }
