@@ -1,4 +1,8 @@
+use crate::parse_error::ParseError;
 use nom::*;
+
+/// TGA footer length in bytes
+pub const HEADER_LEN: usize = 18;
 
 /// Image type
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -79,7 +83,7 @@ named!(has_color_map<&[u8], bool>,
         |b| match b {
             0 => Ok(false),
             1 => Ok(true),
-            _other => Err(())
+            other => Err(ParseError::UnknownColorMap(other))
         }
     )
 );
@@ -95,7 +99,7 @@ named!(image_type<&[u8], ImageType>,
             9 => Ok(ImageType::RleColorMapped),
             10 => Ok(ImageType::RleTruecolor),
             11 => Ok(ImageType::RleMonochrome),
-            _other => Err(())
+            other => Err(ParseError::UnknownImageType(other))
         }
     )
 );
@@ -114,6 +118,7 @@ named!(pub header<&[u8], TgaHeader>,
         height: le_u16 >>
         pixel_depth: le_u8 >>
         image_descriptor: le_u8 >>
+        _image_ident: take!(id_len) >>
         ({
             TgaHeader {
                 id_len,

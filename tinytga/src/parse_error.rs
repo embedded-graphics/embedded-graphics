@@ -17,6 +17,12 @@ pub enum ParseError {
     /// An error occurred when parsing the TGA footer
     Footer,
 
+    /// An unknown image type value was encountered
+    UnknownImageType(u8),
+
+    /// An unknown color map value was encountered
+    UnknownColorMap(u8),
+
     /// Any other type of parse error
     Other,
 }
