@@ -148,31 +148,29 @@ impl<'a> Iterator for TgaIterator<'a> {
 
                 // RLE packets use the same 4 bytes for the colour of every pixel in the packet, so
                 // there is no start offet like `RawPacket`s have
-                let bytes: [u8; 4] = match self.stride {
-                    1 => [0, 0, 0, px[0]],
-                    2 => [0, 0, px[1], px[0]],
-                    3 => [0, px[2], px[1], px[0]],
-                    4 => [px[3], px[2], px[1], px[0]],
+                match self.stride {
+                    1 => px[0] as u32,
+                    2 => u32::from_le_bytes([px[0], px[1], 0, 0]),
+                    3 => u32::from_le_bytes([px[0], px[1], px[2], 0]),
+                    4 => u32::from_le_bytes([px[0], px[1], px[2], px[3]]),
                     depth => unreachable!("Depth {} is not supported", depth),
-                };
-
-                u32::from_le_bytes(bytes)
+                }
             }
             Packet::RawPacket(ref p) => {
                 let px = p.pixel_data;
-                let start = self.current_packet_position * self.stride;
+                let start = self.current_packet_position;
 
                 // Raw packets need to look within the byte array to find the correct bytes to
                 // convert to a pixel value, hence the calculation of `start = position * stride`
-                let bytes: [u8; 4] = match self.stride {
-                    1 => [0, 0, 0, px[start + 0]],
-                    2 => [0, 0, px[start + 1], px[start + 0]],
-                    3 => [0, px[start + 2], px[start + 1], px[start + 0]],
-                    4 => [px[start + 3], px[start + 2], px[start + 1], px[start + 0]],
+                match self.stride {
+                    1 => px[start] as u32,
+                    2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
+                    3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
+                    4 => {
+                        u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]])
+                    }
                     depth => unreachable!("Depth {} is not supported", depth),
-                };
-
-                u32::from_le_bytes(bytes)
+                }
             }
         };
 
