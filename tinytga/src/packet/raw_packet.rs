@@ -2,8 +2,18 @@ use nom::*;
 
 #[derive(Debug, PartialEq)]
 pub struct RawPacket<'a> {
-    len: u8,
-    pixel_data: &'a [u8],
+    /// Length in bytes of this packet
+    pub len: u8,
+
+    /// Pixel data in this packet, up to 32 bits (4 bytes) per pixel
+    pub pixel_data: &'a [u8],
+}
+
+impl<'a> RawPacket<'a> {
+    /// Get the number of pixels in this packet
+    pub fn len(&self) -> usize {
+        self.len as usize
+    }
 }
 
 named_args!(pub raw_packet(bytes_per_pixel: u8)<&[u8], RawPacket>,

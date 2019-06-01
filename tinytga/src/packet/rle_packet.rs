@@ -9,6 +9,13 @@ pub struct RlePacket<'a> {
     pub pixel_data: &'a [u8],
 }
 
+impl<'a> RlePacket<'a> {
+    /// Get the number of pixels in this packet
+    pub fn len(&self) -> usize {
+        self.run_length as usize
+    }
+}
+
 named_args!(pub rle_packet(bytes_per_pixel: u8)<&[u8], RlePacket>,
     do_parse!(
         run_length: bits!(
