@@ -1,6 +1,7 @@
 [package]
 name = "tinytga"
 version = "0.1.0"
+description = "No-std, low memory footprint TGA image loader"
 authors = ["James Waples <james@wapl.es>"]
 edition = "2018"
 repository = "https://github.com/jamwaffles/embedded-graphics/tree/master/tinytga"
