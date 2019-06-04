@@ -15,6 +15,7 @@ following:
 * 8 bit-per-pixel images
 * 16 bit-per-pixel images
 * [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP
+* [TGA format (`.tga`)](https://en.wikipedia.org/wiki/Truevision_TGA) images
 * Primitives
     * Lines
     * Rectangles (and squares)
