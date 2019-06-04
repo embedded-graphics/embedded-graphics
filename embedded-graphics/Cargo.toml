@@ -40,4 +40,4 @@ default = []
 nalgebra_support = [ "nalgebra" ]
 
 [dev-dependencies]
-criterion = "0.2.10"
+criterion = "0.2.11"
