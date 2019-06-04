@@ -32,6 +32,9 @@ travis-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 nalgebra = { version = "0.17.2", optional = true, default-features = false }
 tinybmp = "0.1.0"
 
+[dependencies.tinytga]
+path = "../tinytga"
+
 [features]
 default = []
 nalgebra_support = [ "nalgebra" ]
