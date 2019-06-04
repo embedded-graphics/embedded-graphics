@@ -5,7 +5,7 @@ use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
-use tinytga::Tga;
+use tinytga::{Tga, TgaIterator};
 
 /// TGA format image
 #[derive(Debug, Clone)]
@@ -25,7 +25,7 @@ where
     /// Create a new TGA from a byte slice
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
         let im = Self {
-            tga: Tga::from_slice(image_data)?,
+            tga: Tga::from_slice(image_data).map_err(|_| ())?,
             offset: Coord::new(0, 0),
             pixel_type: PhantomData,
         };
@@ -61,7 +61,7 @@ where
 
 impl<'a, C> IntoIterator for &'a ImageTga<'a, C>
 where
-    C: PixelColor + From<u8> + From<u16>,
+    C: PixelColor + From<u8> + From<u16> + From<u32>,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageTgaIterator<'a, C>;
@@ -70,7 +70,7 @@ where
     fn into_iter(self) -> Self::IntoIter {
         ImageTgaIterator {
             im: self,
-            image_data: self.tga.image_data(),
+            image_data: self.tga.into_iter(),
             x: 0,
             y: 0,
         }
@@ -85,57 +85,33 @@ where
     x: u32,
     y: u32,
     im: &'a ImageTga<'a, C>,
-    image_data: &'a [u8],
+    image_data: TgaIterator<'a>,
 }
 
 impl<'a, C> Iterator for ImageTgaIterator<'a, C>
 where
-    C: PixelColor + From<u8> + From<u16>,
+    C: PixelColor + From<u8> + From<u16> + From<u32>,
 {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let current_pixel = loop {
-            let w = self.im.tga.width();
-            let h = self.im.tga.height();
+        self.image_data.next().map(|color| {
             let x = self.x;
             let y = self.y;
 
-            // End iterator if we've run out of stuff
-            if x >= w || y >= h {
-                return None;
-            }
+            let pos = self.im.offset + Coord::new(x as i32, y as i32);
 
-            let offset = ((h - 1 - y) * w) + x;
+            let out = Pixel(pos.to_unsigned(), color.into());
 
-            let bit_value = if self.im.tga.bpp() == 8 {
-                self.image_data[offset as usize] as u16
-            } else if self.im.tga.bpp() == 16 {
-                let offset = offset * 2; // * 2 as two bytes per pixel
-
-                (self.image_data[offset as usize] as u16)
-                    | ((self.image_data[(offset + 1) as usize] as u16) << 8)
-            } else {
-                panic!("Bit depth {} not supported", self.im.tga.bpp());
-            };
-
-            let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
-
-            // Increment stuff
             self.x += 1;
 
-            // Step down a row if we've hit the end of this one
-            if self.x >= w {
-                self.x = 0;
+            if self.x >= self.im.width() {
                 self.y += 1;
+                self.x = 0;
             }
 
-            if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), bit_value.into());
-            }
-        };
-
-        Some(current_pixel)
+            out
+        })
     }
 }
 
@@ -165,6 +141,75 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
+    use crate::pixelcolor::PixelColorU32;
     use crate::unsignedcoord::UnsignedCoord;
+
+    const PIXEL_COLORS: [(u32, u32, u32); 16] = [
+        (0, 0, 0x00ffffffu32),
+        (1, 0, 0x00000000),
+        (2, 0, 0x00ffffff),
+        (3, 0, 0x00000000),
+        (0, 1, 0x00000000),
+        (1, 1, 0x00ff0000),
+        (2, 1, 0x00000000),
+        (3, 1, 0x0000ff00),
+        (0, 2, 0x00ffffff),
+        (1, 2, 0x00000000),
+        (2, 2, 0x000000ff),
+        (3, 2, 0x00000000),
+        (0, 3, 0x00000000),
+        (1, 3, 0x00ffffff),
+        (2, 3, 0x00000000),
+        (3, 3, 0x00ffffff),
+    ];
+
+    #[test]
+    fn chessboard_compressed() -> Result<(), ()> {
+        let im: ImageTga<PixelColorU32> =
+            ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
+
+        let mut pixels = im.into_iter();
+
+        for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
+            assert_eq!(
+                pixels.next(),
+                Some(Pixel(
+                    UnsignedCoord::new(*x, *y),
+                    PixelColorU32::from(*color)
+                )),
+                "Pixel color at index {} does not match",
+                i
+            );
+        }
+
+        // 17th iteration should have no pixels from 4x4px image
+        assert_eq!(pixels.next(), None);
+
+        Ok(())
+    }
+
+    #[test]
+    fn chessboard_uncompressed() -> Result<(), ()> {
+        let im: ImageTga<PixelColorU32> =
+            ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
+
+        let mut pixels = im.into_iter();
+
+        for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
+            assert_eq!(
+                pixels.next(),
+                Some(Pixel(
+                    UnsignedCoord::new(*x, *y),
+                    PixelColorU32::from(*color)
+                )),
+                "Pixel color at index {} does not match",
+                i
+            );
+        }
+
+        // 17th iteration should have no pixels from 4x4px image
+        assert_eq!(pixels.next(), None);
+
+        Ok(())
+    }
 }
