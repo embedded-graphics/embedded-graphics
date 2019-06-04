@@ -3,6 +3,16 @@ name = "tinytga"
 version = "0.1.0"
 authors = ["James Waples <james@wapl.es>"]
 edition = "2018"
+repository = "https://github.com/jamwaffles/embedded-graphics/tree/master/tinytga"
+documentation = "https://docs.rs/tinytga"
+categories = ["embedded", "no-std"]
+keywords = ["graphics", "embedded", "tga", "targa", "image"]
+readme = "./README.md"
+license = "MIT OR Apache-2.0"
+exclude = [
+    ".travis.yml",
+    ".gitignore",
+]
 
 [dependencies]
 
