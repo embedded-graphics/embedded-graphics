@@ -34,6 +34,7 @@ script:
   - cargo test --release -p tinybmp
   - cargo test --release --all-features -p embedded-graphics
   - cargo test --release --all-features -p tinybmp
+  - cargo bench --no-run
 
 after_success:
   - cargo doc
