@@ -19,7 +19,7 @@ pub enum Packet<'a> {
 }
 
 impl<'a> Packet<'a> {
-    /// Get the number of pixels in this packet
+    /// Get the length in bytes of the pixel data in this packet
     pub fn len(&self) -> usize {
         match self {
             Packet::RlePacket(p) => p.len(),

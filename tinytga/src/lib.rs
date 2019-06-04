@@ -102,7 +102,7 @@ impl<'a> IntoIterator for &'a Tga<'a> {
             ImageType::Monochrome | ImageType::Truecolor => {
                 let data = Packet::from_slice(self.image_data());
 
-                (None, data)
+                (Some(self.image_data()), data)
             }
             ImageType::RleMonochrome | ImageType::RleTruecolor => {
                 next_rle_packet(self.image_data(), self.bpp() / 8)
@@ -121,11 +121,14 @@ impl<'a> IntoIterator for &'a Tga<'a> {
             depth => panic!("Bit depth {} not supported", depth),
         };
 
+        let current_packet_len = current_packet.len();
+
         TgaIterator {
             tga: self,
             bytes_to_consume,
             current_packet,
             current_packet_position: 0,
+            current_packet_pixel_length: current_packet_len / stride,
             stride,
         }
     }
@@ -148,6 +151,9 @@ pub struct TgaIterator<'a> {
     /// Current position within the current packet's pixel run
     current_packet_position: usize,
 
+    /// Current packet length in pixels
+    current_packet_pixel_length: usize,
+
     /// Number of bytes contained within each pixel
     stride: usize,
 }
@@ -156,97 +162,74 @@ impl<'a> Iterator for TgaIterator<'a> {
     type Item = u32;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current_packet_position >= self.current_packet.len() {
-            if self.bytes_to_consume.is_none() {
-                return None;
-            } else {
-                // Reset position to start of next packet
-                self.current_packet_position = 0;
-
-                // Parse next packet from remaining bytes
-                match self.tga.header.image_type {
-                    ImageType::Monochrome | ImageType::Truecolor => {
-                        // Noop
+        if self.current_packet_position >= self.current_packet_pixel_length {
+            // Parse next packet from remaining bytes
+            match self.tga.header.image_type {
+                ImageType::Monochrome | ImageType::Truecolor => {
+                    return None;
+                }
+                ImageType::RleMonochrome | ImageType::RleTruecolor => {
+                    if self.bytes_to_consume.is_none() {
+                        return None;
+                    } else {
+                        self.current_packet_position = 0;
                     }
-                    ImageType::RleMonochrome | ImageType::RleTruecolor => {
-                        let (bytes_to_consume, current_packet) =
-                            next_rle_packet(self.bytes_to_consume.unwrap(), self.tga.bpp() / 8)
-                                .map(|(remaining, packet)| {
-                                    (
-                                        if remaining.len() > 0 {
-                                            Some(remaining)
-                                        } else {
-                                            None
-                                        },
-                                        packet,
-                                    )
-                                })
-                                .expect("Failed to parse first image RLE data packet");
 
-                        self.bytes_to_consume = bytes_to_consume;
-                        self.current_packet = current_packet;
-                    }
-                    image_type => panic!("Image type {:?} not supported", image_type),
-                };
-            }
+                    let (bytes_to_consume, current_packet) =
+                        next_rle_packet(self.bytes_to_consume.unwrap(), self.tga.bpp() / 8)
+                            .map(|(remaining, packet)| {
+                                (
+                                    if remaining.len() > 0 {
+                                        Some(remaining)
+                                    } else {
+                                        None
+                                    },
+                                    packet,
+                                )
+                            })
+                            .expect("Failed to parse first image RLE data packet");
+
+                    self.bytes_to_consume = bytes_to_consume;
+                    self.current_packet_pixel_length = current_packet.len() / self.stride;
+                    self.current_packet = current_packet;
+                }
+                image_type => panic!("Image type {:?} not supported", image_type),
+            };
+            // }
         }
 
-        let pixel_value = match self.current_packet {
-            // TODO: Dedupe these branches
-            Packet::RlePacket(ref p) => {
-                let px = p.pixel_data;
-
-                // RLE packets use the same 4 bytes for the colour of every pixel in the packet, so
-                // there is no start offet like `RawPacket`s have
-                let out = match self.stride {
-                    1 => px[0] as u32,
-                    2 => u32::from_le_bytes([px[0], px[1], 0, 0]),
-                    3 => u32::from_le_bytes([px[0], px[1], px[2], 0]),
-                    4 => u32::from_le_bytes([px[0], px[1], px[2], px[3]]),
-                    depth => unreachable!("Depth {} is not supported", depth),
-                };
-
-                self.current_packet_position += 1;
-
-                out
-            }
+        let (start, px): (usize, &[u8]) = match self.current_packet {
+            // RLE packets use the same 4 bytes for the colour of every pixel in the packet, so
+            // there is no start offet like `RawPacket`s have
+            Packet::RlePacket(ref p) => (0, p.pixel_data),
+            // Raw packets need to look within the byte array to find the correct bytes to
+            // convert to a pixel value, hence the calculation of `start = position * stride`
             Packet::RawPacket(ref p) => {
                 let px = p.pixel_data;
-                let start = self.current_packet_position;
+                let start = self.current_packet_position * self.stride;
 
-                // Raw packets need to look within the byte array to find the correct bytes to
-                // convert to a pixel value, hence the calculation of `start = position * stride`
-                let out = match self.stride {
-                    1 => px[start] as u32,
-                    2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
-                    3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
-                    4 => {
-                        u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]])
-                    }
-                    depth => unreachable!("Depth {} is not supported", depth),
-                };
-
-                self.current_packet_position += self.stride;
-
-                out
+                (start, px)
             }
-            Packet::FullContents(ref px) => {
-                let start = self.current_packet_position;
+            // Uncompressed data just walks along the byte array in steps of `self.stride`
+            Packet::FullContents(px) => {
+                let start = self.current_packet_position * self.stride;
 
-                let out = match self.stride {
-                    1 => px[start] as u32,
-                    2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
-                    3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
-                    4 => {
-                        u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]])
-                    }
-                    depth => unreachable!("Depth {} is not supported", depth),
-                };
-
-                self.current_packet_position += self.stride;
-
-                out
+                (start, px)
             }
+        };
+
+        let pixel_value = {
+            let out = match self.stride {
+                1 => px[start] as u32,
+                2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
+                3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
+                4 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]]),
+                depth => unreachable!("Depth {} is not supported", depth),
+            };
+
+            self.current_packet_position += 1;
+
+            out
         };
 
         Some(pixel_value)

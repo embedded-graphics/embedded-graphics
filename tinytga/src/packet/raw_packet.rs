@@ -2,23 +2,23 @@ use nom::*;
 
 #[derive(Debug, PartialEq)]
 pub struct RawPacket<'a> {
-    /// Length in bytes of this packet
-    pub len: u8,
+    /// Number of pixels of this packet
+    pub num_pixels: u8,
 
     /// Pixel data in this packet, up to 32 bits (4 bytes) per pixel
     pub pixel_data: &'a [u8],
 }
 
 impl<'a> RawPacket<'a> {
-    /// Get the number of pixels in this packet
+    /// Get the number of bytes in this packet
     pub fn len(&self) -> usize {
-        self.len as usize
+        self.pixel_data.len()
     }
 }
 
 named_args!(pub raw_packet(bytes_per_pixel: u8)<&[u8], RawPacket>,
     do_parse!(
-        len: bits!(
+        num_pixels: bits!(
             preceded!(
                 // 0x00 = raw packet, 0x01 = RLE packet
                 tag_bits!(u8, 1, 0x00),
@@ -26,10 +26,10 @@ named_args!(pub raw_packet(bytes_per_pixel: u8)<&[u8], RawPacket>,
                 map!(take_bits!(u8, 7), |len| len + 1)
             )
         ) >>
-        pixel_data: take!(len * bytes_per_pixel) >>
+        pixel_data: take!(num_pixels * bytes_per_pixel) >>
         (
             RawPacket {
-                len,
+                num_pixels,
                 pixel_data
             }
         )
@@ -63,7 +63,7 @@ mod tests {
         assert_eq!(
             packet,
             RawPacket {
-                len: 2,
+                num_pixels: 2,
                 pixel_data: &[
                     0xAA, 0xBB, 0xCC, 0xDD, //
                     0x11, 0x22, 0x33, 0x44, //
@@ -117,7 +117,7 @@ mod tests {
         assert_eq!(
             packet,
             RawPacket {
-                len: 2,
+                num_pixels: 2,
                 pixel_data: &[
                     0xAA, 0xBB, 0xCC, 0xDD, //
                     0x11, 0x22, 0x33, 0x44, //

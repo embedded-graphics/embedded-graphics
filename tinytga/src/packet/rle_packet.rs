@@ -12,7 +12,7 @@ pub struct RlePacket<'a> {
 impl<'a> RlePacket<'a> {
     /// Get the number of pixels in this packet
     pub fn len(&self) -> usize {
-        self.run_length as usize
+        self.pixel_data.len() * self.run_length as usize
     }
 }
 
