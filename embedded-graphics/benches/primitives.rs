@@ -2,7 +2,7 @@ use criterion::*;
 use embedded_graphics::{
     pixelcolor::PixelColorU8,
     prelude::*,
-    primitives::{Circle, Line, Rect},
+    primitives::{Circle, Line, Rect, Triangle},
 };
 
 fn filled_circle(c: &mut Criterion) {
@@ -43,5 +43,32 @@ fn line(c: &mut Criterion) {
     });
 }
 
-criterion_group!(primitives, filled_circle, filled_rect, empty_rect, line);
+fn triangle(c: &mut Criterion) {
+    c.bench_function("triangle", |b| {
+        let object: Triangle<PixelColorU8> =
+            Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(5, 20));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<PixelColorU8>>>())
+    });
+}
+
+fn filled_triangle(c: &mut Criterion) {
+    c.bench_function("filled_triangle", |b| {
+        let object: Triangle<PixelColorU8> =
+            Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(5, 20))
+                .with_fill(Some(1u8.into()));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<PixelColorU8>>>())
+    });
+}
+
+criterion_group!(
+    primitives,
+    filled_circle,
+    filled_rect,
+    empty_rect,
+    line,
+    triangle,
+    filled_triangle
+);
 criterion_main!(primitives);
