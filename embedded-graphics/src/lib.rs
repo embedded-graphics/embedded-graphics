@@ -19,8 +19,8 @@
 //! with the minimum of saved state. This allows the consuming application to use far less RAM at
 //! little to no performance penalty.
 //!
-//! To use this crate in a driver, you only need to implement the `Drawing` trait to start drawing
-//! things.
+//! To use this crate in a driver, you only need to implement the [`Drawing`](./trait.Drawing.html)
+//! trait to start drawing things.
 //!
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
