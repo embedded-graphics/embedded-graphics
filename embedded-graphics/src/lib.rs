@@ -70,5 +70,5 @@ where
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel<C>>;
+        T: IntoIterator<Item = drawable::Pixel<C>>;
 }

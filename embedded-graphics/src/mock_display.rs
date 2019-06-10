@@ -13,7 +13,7 @@ impl Default for Display {
 impl Drawing<u8> for Display {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = Pixel<u8>>,
+        T: IntoIterator<Item = Pixel<u8>>,
     {
         for Pixel(coord, color) in item_pixels {
             if coord[0] >= 24 || coord[1] >= 16 {

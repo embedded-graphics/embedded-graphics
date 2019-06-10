@@ -78,7 +78,7 @@ impl Display {
 impl Drawing<SimPixelColor> for Display {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = Pixel<SimPixelColor>>,
+        T: IntoIterator<Item = Pixel<SimPixelColor>>,
     {
         for Pixel(coord, color) in item_pixels {
             let x = coord[0] as usize;
