@@ -63,6 +63,7 @@ pub mod style;
 pub mod transform;
 pub mod unsignedcoord;
 
+use crate::drawable::Dimensions;
 use crate::pixelcolor::PixelColor;
 
 /// The main trait of this crate. All graphics objects must implement it.
@@ -71,7 +72,24 @@ where
     C: PixelColor + Clone,
 {
     /// Draw an object from an iterator over its pixels
-    fn draw<T>(&mut self, item_pixels: T)
+    fn draw<T>(&mut self, item: T)
     where
         T: IntoIterator<Item = drawable::Pixel<C>>;
+}
+
+/// Very similar to the `Drawing` trait, but accepts drawable objects which have a known size
+///
+/// This is useful for displays that implement some kind of partial update functionality, as only a
+/// small square of pixels need to be sent as opposed to an entire framebuffer.
+///
+/// Library authors **should** implement `Drawing` along with `SizedDrawing` for maximum
+/// compatibility, however some devices may only support one or the other.
+pub trait SizedDrawing<C>
+where
+    C: PixelColor + Clone,
+{
+    /// Draw an object from an iterator over its pixels
+    fn draw_sized<T>(&mut self, item: T)
+    where
+        T: IntoIterator<Item = drawable::Pixel<C>> + Dimensions;
 }
