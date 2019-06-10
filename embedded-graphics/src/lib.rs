@@ -30,6 +30,8 @@
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 //! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
 //! objects rendered by embedded_graphics.
+//! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
+//! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 
 #![no_std]
 #![deny(missing_docs)]

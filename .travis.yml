@@ -42,7 +42,7 @@ script:
   - cargo bench --no-run
 
 after_success:
-  - cargo doc
+  - cargo doc --all-features
   - linkchecker target/doc/embedded_graphics
   - linkchecker target/doc/tinybmp
   - linkchecker target/doc/tinytga
