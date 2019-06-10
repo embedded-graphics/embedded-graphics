@@ -6,6 +6,8 @@
 //! * [1 bit-per-pixel images](./image/type.Image1BPP.html)
 //! * [8 bits-per-pixel images](./image/type.Image8BPP.html)
 //! * [16 bits-per-pixel images](./image/type.Image16BPP.html)
+//! * [BMP-format images](./image/struct.ImageBmp.html) (with `bmp` feature enabled)
+//! * [TGA-format images](./image/struct.ImageTga.html) (with `tga` feature enabled)
 //! * [Primitives](./primitives/index.html)
 //!     * Lines
 //!     * Rectangles (and squares)
