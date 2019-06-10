@@ -45,6 +45,7 @@ after_success:
   - cargo doc
   - linkchecker target/doc/embedded_graphics
   - linkchecker target/doc/tinybmp
+  - linkchecker target/doc/tinytga
 
 cache: cargo
 before_cache:
