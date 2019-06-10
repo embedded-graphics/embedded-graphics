@@ -10,4 +10,4 @@ sdl2 = "0.32.2"
 
 [dependencies.embedded-graphics]
 path = "../embedded-graphics"
-features = [ "bmp" ]
+features = [ "bmp", "tga" ]
