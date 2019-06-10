@@ -78,10 +78,6 @@ display.draw(
 * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 
-## TODO
-
-* [ ] General matrix transforms
-
 ## Attribution
 
 All source font PNGs are taken from the excellent [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps).
