@@ -10,7 +10,9 @@ mod image;
 mod image16bpp;
 mod image1bpp;
 mod image8bpp;
+#[cfg(feature = "bmp")]
 mod image_bmp;
+#[cfg(feature = "tga")]
 mod image_tga;
 
 pub use self::image::{Image, ImageFile};
@@ -18,5 +20,7 @@ pub use self::image::{Image, ImageFile};
 pub use self::image16bpp::Image16BPP;
 pub use self::image1bpp::Image1BPP;
 pub use self::image8bpp::Image8BPP;
+#[cfg(feature = "bmp")]
 pub use self::image_bmp::ImageBmp;
+#[cfg(feature = "tga")]
 pub use self::image_tga::ImageTga;

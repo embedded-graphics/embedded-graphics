@@ -6,6 +6,8 @@
 //! * [1 bit-per-pixel images](./image/type.Image1BPP.html)
 //! * [8 bits-per-pixel images](./image/type.Image8BPP.html)
 //! * [16 bits-per-pixel images](./image/type.Image16BPP.html)
+//! * [BMP-format images](./image/struct.ImageBmp.html) (with `bmp` feature enabled)
+//! * [TGA-format images](./image/struct.ImageTga.html) (with `tga` feature enabled)
 //! * [Primitives](./primitives/index.html)
 //!     * Lines
 //!     * Rectangles (and squares)
@@ -19,8 +21,8 @@
 //! with the minimum of saved state. This allows the consuming application to use far less RAM at
 //! little to no performance penalty.
 //!
-//! To use this crate in a driver, you only need to implement the `Drawing` trait to start drawing
-//! things.
+//! To use this crate in a driver, you only need to implement the [`Drawing`](./trait.Drawing.html)
+//! trait to start drawing things.
 //!
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
@@ -30,6 +32,8 @@
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 //! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
 //! objects rendered by embedded_graphics.
+//! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
+//! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 
 #![no_std]
 #![deny(missing_docs)]
@@ -44,7 +48,6 @@
 
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
-extern crate tinybmp;
 
 pub mod coord;
 pub mod dev;

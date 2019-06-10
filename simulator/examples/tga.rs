@@ -3,11 +3,11 @@
 //! This example uses `impl From<u16> for SimPixelColor` from `src/lib` to convert the image into
 //! a black and white pixel iterator. The simulator doesn't currently support drawing with colour.
 //!
-//! Note that this requires the `bmp` feature to be turned on for `embedded-graphics`. Turn it on
+//! Note that this requires the `tga` feature to be turned on for `embedded-graphics`. Turn it on
 //! with the following in `Cargo.toml`:
 //!
 //! [dependencies]
-//! embedded-graphics = { version = "*", features = [ "bmp" ] }
+//! embedded-graphics = { version = "*", features = [ "tga" ] }
 
 extern crate embedded_graphics;
 extern crate simulator;
@@ -15,13 +15,13 @@ extern crate simulator;
 use std::thread;
 use std::time::Duration;
 
-use embedded_graphics::image::ImageBmp;
+use embedded_graphics::image::ImageTga;
 use embedded_graphics::prelude::*;
 
 use simulator::DisplayBuilder;
 
 fn main() {
-    let image = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+    let image = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
 
     let mut display = DisplayBuilder::new().size(304, 128).scale(2).build();
 

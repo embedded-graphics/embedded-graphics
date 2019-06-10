@@ -15,6 +15,10 @@ exclude = [
 	"convert_1bpp.sh",
 ]
 edition = "2018"
+
+[package.metadata.docs.rs]
+all-features = true
+
 [[bench]]
 harness = false
 name = "primitives"
@@ -30,12 +34,14 @@ travis-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
 [dependencies]
 nalgebra = { version = "0.18.0", optional = true, default-features = false }
-tinybmp = "0.1.0"
-tinytga = "0.1.0"
+tinybmp = { version = "0.1.0", optional = true }
+tinytga = { version = "0.1.0", optional = true }
 
 [features]
 default = []
 nalgebra_support = [ "nalgebra" ]
+bmp = [ "tinybmp" ]
+tga = [ "tinytga" ]
 
 [dev-dependencies]
 criterion = "0.2.11"

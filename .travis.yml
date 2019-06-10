@@ -35,16 +35,15 @@ before_install:
 
 script:
   - cargo fmt --all -- --check
-  - cargo test --release -p embedded-graphics
-  - cargo test --release -p tinybmp
-  - cargo test --release --all-features -p embedded-graphics
-  - cargo test --release --all-features -p tinybmp
+  - cargo test --release
+  - cargo test --release --all-features
   - cargo bench --no-run
 
 after_success:
-  - cargo doc
+  - cargo doc --all-features
   - linkchecker target/doc/embedded_graphics
   - linkchecker target/doc/tinybmp
+  - linkchecker target/doc/tinytga
 
 cache: cargo
 before_cache:

@@ -14,8 +14,8 @@ following:
 * 1 bit-per-pixel images
 * 8 bit-per-pixel images
 * 16 bit-per-pixel images
-* [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP
-* [TGA format (`.tga`)](https://en.wikipedia.org/wiki/Truevision_TGA) images
+* [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP (requires `bmp` feature)
+* [TGA format (`.tga`)](https://en.wikipedia.org/wiki/Truevision_TGA) images (requires `tga` feature)
 * Primitives
     * Lines
     * Rectangles (and squares)
@@ -75,10 +75,8 @@ display.draw(
 ## Features
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std` support to use as the `Coord` type. This should allow you to use most Nalgebra methods on objects rendered by embedded_graphics.
-
-## TODO
-
-* [ ] General matrix transforms
+* `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
+* `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 
 ## Attribution
 
