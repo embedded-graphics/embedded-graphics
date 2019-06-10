@@ -2,6 +2,12 @@
 //!
 //! This example uses `impl From<u16> for SimPixelColor` from `src/lib` to convert the image into
 //! a black and white pixel iterator. The simulator doesn't currently support drawing with colour.
+//!
+//! Note that this requires the `bmp` feature to be turned on for `embedded-graphics`. Turn it on
+//! with the following in `Cargo.toml`:
+//!
+//! [dependencies]
+//! embedded-graphics = { version = "*", features = [ "bmp" ] }
 
 extern crate embedded_graphics;
 extern crate simulator;
