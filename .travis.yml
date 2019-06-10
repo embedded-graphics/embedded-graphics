@@ -37,8 +37,10 @@ script:
   - cargo fmt --all -- --check
   - cargo test --release -p embedded-graphics
   - cargo test --release -p tinybmp
+  - cargo test --release -p tinytga
   - cargo test --release --all-features -p embedded-graphics
   - cargo test --release --all-features -p tinybmp
+  - cargo test --release --all-features -p tinytga
   - cargo bench --no-run
 
 after_success:
