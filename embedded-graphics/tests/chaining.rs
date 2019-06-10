@@ -2,7 +2,7 @@ extern crate embedded_graphics;
 
 use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Rect};
+use embedded_graphics::primitives::{Circle, Line, Rect};
 use embedded_graphics::Drawing;
 
 struct FakeDisplay {}
@@ -34,6 +34,27 @@ fn it_supports_chaining() {
     let chained = Rect::new(Coord::new(0, 0), Coord::new(1, 1))
         .into_iter()
         .chain(Circle::new(Coord::new(2, 2), 1).into_iter());
+
+    disp.draw(chained);
+}
+
+fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
+    let line = Line::new(Coord::new(0, 1), Coord::new(2, 3))
+        .with_stroke(Some(1u8.into()))
+        .into_iter();
+
+    let circle = Circle::new(Coord::new(5, 5), 3)
+        .with_stroke(Some(1u8.into()))
+        .into_iter();
+
+    line.chain(circle)
+}
+
+#[test]
+fn return_from_fn() {
+    let mut disp = FakeDisplay {};
+
+    let chained = multi();
 
     disp.draw(chained);
 }
