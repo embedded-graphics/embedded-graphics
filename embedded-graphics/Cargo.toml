@@ -15,6 +15,10 @@ exclude = [
 	"convert_1bpp.sh",
 ]
 edition = "2018"
+
+[package.metadata.docs.rs]
+all-features = true
+
 [[bench]]
 harness = false
 name = "primitives"
