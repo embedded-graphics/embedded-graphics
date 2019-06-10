@@ -8,6 +8,8 @@ use core::marker::PhantomData;
 use tinytga::{Tga, TgaIterator};
 
 /// TGA format image
+///
+/// `ImageTga` is available with the `tga` feature turned on
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C: PixelColor> {
     tga: Tga<'a>,

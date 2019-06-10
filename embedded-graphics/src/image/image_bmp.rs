@@ -8,6 +8,8 @@ use core::marker::PhantomData;
 use tinybmp::Bmp;
 
 /// BMP format image
+///
+/// `ImageBmp` is available with the `bmp` feature turned on
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C: PixelColor> {
     bmp: Bmp<'a>,
