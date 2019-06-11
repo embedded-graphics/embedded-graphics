@@ -172,5 +172,4 @@ mod tests {
         assert_eq!(-Coord::new(10, 20), Coord::new(-10, -20));
         assert_eq!(-Coord::new(-40, -50), Coord::new(40, 50));
     }
-
 }
