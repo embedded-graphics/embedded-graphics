@@ -131,6 +131,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
     fn neg() {
         assert_eq!(-UnsignedCoord::new(10, 20), Coord::new(-10, -20));
     }
