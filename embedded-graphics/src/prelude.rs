@@ -8,4 +8,4 @@ pub use super::pixelcolor::PixelColor;
 pub use super::style::{Style, WithStyle};
 pub use super::transform::Transform;
 pub use super::unsignedcoord::{ToSigned, UnsignedCoord};
-pub use super::Drawing;
+pub use super::{Drawing, SizedDrawing};
