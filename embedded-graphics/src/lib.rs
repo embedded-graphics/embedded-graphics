@@ -84,6 +84,37 @@ where
 ///
 /// Library authors **should** implement `Drawing` along with `SizedDrawing` for maximum
 /// compatibility, however some devices may only support one or the other.
+///
+/// Below is a contrived example that sets the draw area on an imaginary display and writes pixels to
+/// it.
+///
+/// ```rust
+/// # struct Display;
+/// # impl Display {
+/// #     pub fn set_pixel(&self, coord: UnsignedCoord, color: u8) {}
+/// # }
+/// use embedded_graphics::drawable::{Dimensions, Pixel};
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::{Drawing, SizedDrawing};
+///
+/// impl SizedDrawing<u8> for Display where {
+///     fn draw_sized<T>(&mut self, item: T)
+///     where
+///         T: IntoIterator<Item = Pixel<u8>> + Dimensions,
+///     {
+///         // Use `top_left()`, `size()`, etc methods defined on Dimensions to set draw area here
+///
+///         let offs = item.top_left().to_unsigned();
+///
+///         for Pixel(coord, color) in item {
+///             // Undo any translations applied to this object
+///             let coord = coord - offs;
+///
+///             self.set_pixel(coord, color)
+///         }
+///     }
+/// }
+/// ```
 pub trait SizedDrawing<C>
 where
     C: PixelColor + Clone,
