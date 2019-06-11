@@ -86,8 +86,6 @@ impl<'a> Tga<'a> {
     }
 
     /// Get the raw image data contained in this image
-    ///
-    /// TGA images are encoded as packets, either [`RawPacket`]s or [`RlePacket`]s
     pub fn image_data(&self) -> &[u8] {
         self.pixel_data
     }

@@ -7,7 +7,8 @@ type UnsignedCoordPart = u32;
 #[cfg(not(feature = "nalgebra_support"))]
 mod internal_unsigned_coord {
     use super::UnsignedCoordPart;
-    use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
+    use crate::coord::Coord;
+    use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 
     /// 2D unsigned coordinate in screen space
     ///
@@ -65,6 +66,14 @@ mod internal_unsigned_coord {
             }
         }
     }
+
+    impl Neg for UnsignedCoord {
+        type Output = Coord;
+
+        fn neg(self) -> Self::Output {
+            Coord::new(-(self.0 as i32), -(self.1 as i32))
+        }
+    }
 }
 
 #[cfg(not(feature = "nalgebra_support"))]
@@ -119,5 +128,11 @@ mod tests {
         let right = nalgebra::Vector2::new(10, 20);
 
         assert_eq!(left - right, UnsignedCoord::new(20, 20));
+    }
+
+    #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
+    fn neg() {
+        assert_eq!(-UnsignedCoord::new(10, 20), Coord::new(-10, -20));
     }
 }

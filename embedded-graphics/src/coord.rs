@@ -10,7 +10,7 @@ type CoordPart = i32;
 #[cfg(not(feature = "nalgebra_support"))]
 mod internal_coord {
     use super::*;
-    use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
+    use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 
     /// 2D signed integer coordinate type
     ///
@@ -90,6 +90,14 @@ mod internal_coord {
             }
         }
     }
+
+    impl Neg for Coord {
+        type Output = Coord;
+
+        fn neg(self) -> Self::Output {
+            Coord::new(-self.0, -self.1)
+        }
+    }
 }
 
 #[cfg(not(feature = "nalgebra_support"))]
@@ -157,5 +165,11 @@ mod tests {
         let right = nalgebra::Vector2::new(10, 20);
 
         assert_eq!(left - right, Coord::new(20, 20));
+    }
+
+    #[test]
+    fn neg() {
+        assert_eq!(-Coord::new(10, 20), Coord::new(-10, -20));
+        assert_eq!(-Coord::new(-40, -50), Coord::new(40, 50));
     }
 }
