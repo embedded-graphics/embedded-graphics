@@ -24,6 +24,11 @@
 //! To use this crate in a driver, you only need to implement the [`Drawing`](./trait.Drawing.html)
 //! trait to start drawing things.
 //!
+//! If the device used supports partial updates where only a given range of pixels is updated, you
+//! should also implement the [`SizedDrawing`](./trait.SizedDrawing.html) trait. This is similar to
+//! `Drawing`, but has a bound on [`Dimensions`](./drawable/trait.Dimensions.html) which provides
+//! methods for getting the bounding rectangle of the passed item to draw.
+//!
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
 //!
