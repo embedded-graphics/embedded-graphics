@@ -17,13 +17,13 @@ fn main() {
     let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();
 
     let objects = Circle::new(Coord::new(64, 64), 64)
-        .with_stroke(Some(1u8.into()))
+        .stroke(Some(1u8.into()))
         .into_iter()
-        .chain(Line::new(Coord::new(64, 64), Coord::new(0, 64)).with_stroke(Some(1u8.into())))
-        .chain(Line::new(Coord::new(64, 64), Coord::new(80, 80)).with_stroke(Some(1u8.into())))
+        .chain(Line::new(Coord::new(64, 64), Coord::new(0, 64)).stroke(Some(1u8.into())))
+        .chain(Line::new(Coord::new(64, 64), Coord::new(80, 80)).stroke(Some(1u8.into())))
         .chain(
             Font6x8::render_str("Hello World!")
-                .with_stroke(Some(1u8.into()))
+                .stroke(Some(1u8.into()))
                 .translate(Coord::new(5, 50)),
         );
 

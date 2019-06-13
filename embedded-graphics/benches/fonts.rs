@@ -8,7 +8,7 @@ use embedded_graphics::{
 fn font_6x8(c: &mut Criterion) {
     c.bench_function("font 6x8 Hello world!", |b| {
         let object: Font6x8<PixelColorU8> =
-            Font6x8::render_str("Hello world!").with_stroke(Some(10u8.into()));
+            Font6x8::render_str("Hello world!").stroke(Some(10u8.into()));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<PixelColorU8>>>())
     });
@@ -17,7 +17,7 @@ fn font_6x8(c: &mut Criterion) {
 fn font_12x16(c: &mut Criterion) {
     c.bench_function("font 12x16 Hello world!", |b| {
         let object: Font12x16<PixelColorU8> =
-            Font12x16::render_str("Hello world!").with_stroke(Some(10u8.into()));
+            Font12x16::render_str("Hello world!").stroke(Some(10u8.into()));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<PixelColorU8>>>())
     });

@@ -17,19 +17,19 @@ fn main() {
 
     let triangle = Triangle::new(Coord::new(0, 64), Coord::new(64, 0), Coord::new(64, 64))
         .translate(Coord::new(0, 0))
-        .with_stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(true)));
 
     let rect = Rect::new(Coord::new(0, 0), Coord::new(64, 64))
         .translate(Coord::new(64 + PADDING, 0))
-        .with_stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(true)));
 
     let line = Line::new(Coord::new(0, 0), Coord::new(64, 64))
         .translate(Coord::new(128 + PADDING * 2, 0))
-        .with_stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(true)));
 
     let circ = Circle::new(Coord::new(32, 32), 32)
         .translate(Coord::new(192 + PADDING * 3, 0))
-        .with_stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(true)));
 
     display.draw(
         circ.into_iter()
@@ -40,39 +40,33 @@ fn main() {
 
     display.draw(
         circ.translate(Coord::new(0, 64 + PADDING))
-            .with_stroke_width(3)
+            .stroke_width(3)
             .into_iter()
-            .chain(
-                rect.translate(Coord::new(0, 64 + PADDING))
-                    .with_stroke_width(3),
-            )
-            .chain(
-                line.translate(Coord::new(0, 64 + PADDING))
-                    .with_stroke_width(3),
-            )
+            .chain(rect.translate(Coord::new(0, 64 + PADDING)).stroke_width(3))
+            .chain(line.translate(Coord::new(0, 64 + PADDING)).stroke_width(3))
             .chain(
                 triangle
                     .translate(Coord::new(0, 64 + PADDING))
-                    .with_stroke_width(3),
+                    .stroke_width(3),
             ),
     );
 
     display.draw(
         circ.translate(Coord::new(0, 128 + PADDING * 2))
-            .with_stroke_width(10)
+            .stroke_width(10)
             .into_iter()
             .chain(
                 rect.translate(Coord::new(0, 128 + PADDING * 2))
-                    .with_stroke_width(10),
+                    .stroke_width(10),
             )
             .chain(
                 line.translate(Coord::new(0, 128 + PADDING * 2))
-                    .with_stroke_width(10),
+                    .stroke_width(10),
             )
             .chain(
                 triangle
                     .translate(Coord::new(0, 128 + PADDING * 2))
-                    .with_stroke_width(10),
+                    .stroke_width(10),
             ),
     );
 

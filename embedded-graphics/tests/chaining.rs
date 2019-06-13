@@ -40,11 +40,11 @@ fn it_supports_chaining() {
 
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
     let line = Line::new(Coord::new(0, 1), Coord::new(2, 3))
-        .with_stroke(Some(1u8.into()))
+        .stroke(Some(1u8.into()))
         .into_iter();
 
     let circle = Circle::new(Coord::new(5, 5), 3)
-        .with_stroke(Some(1u8.into()))
+        .stroke(Some(1u8.into()))
         .into_iter();
 
     line.chain(circle)
