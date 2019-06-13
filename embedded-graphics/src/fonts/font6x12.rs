@@ -72,11 +72,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str("Mm")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str("Mm").with_stroke(Some(1u8.into())));
 
         assert_eq!(
             display,
@@ -105,11 +101,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str(" ~")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str(" ~").with_stroke(Some(1u8.into())));
 
         assert_eq!(
             display,
@@ -138,11 +130,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str("$y")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str("$y").with_stroke(Some(1u8.into())));
 
         assert_eq!(
             display,
@@ -194,35 +182,19 @@ mod tests {
         );
 
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str("\0\n")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str("\0\n").with_stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str("\x7F\u{A0}")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str("\x7F\u{A0}").with_stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str("¡ÿ")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str("¡ÿ").with_stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(
-            Font6x12::render_str("Ā💣")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font6x12::render_str("Ā💣").with_stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
     }
 

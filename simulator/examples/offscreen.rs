@@ -17,8 +17,7 @@ fn main() {
     display.draw(
         Rect::new(Coord::new(0, 0), Coord::new(16, 16))
             .with_stroke(Some(1u8.into()))
-            .translate(Coord::new(-8, -8))
-            .into_iter(),
+            .translate(Coord::new(-8, -8)),
     );
 
     loop {

@@ -17,24 +17,21 @@ fn main() {
 
     display.draw(
         Circle::new(Coord::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
+            .with_stroke(Some(1u8.into())),
     );
 
     display.draw(
         Circle::new(Coord::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
             .translate(Coord::new(16, 16))
             .with_stroke(Some(0u8.into()))
-            .with_fill(Some(1u8.into()))
-            .into_iter(),
+            .with_fill(Some(1u8.into())),
     );
 
     display.draw(
         Circle::new(Coord::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
             .translate(Coord::new(CIRCLE_SIZE, CIRCLE_SIZE))
             .with_stroke(Some(0u8.into()))
-            .with_fill(Some(0u8.into()))
-            .into_iter(),
+            .with_fill(Some(0u8.into())),
     );
 
     display.draw(
@@ -54,31 +51,27 @@ fn main() {
         Rect::new(Coord::new(0, 0), Coord::new(64, 64))
             .translate(Coord::new(96 + 32, 32))
             .with_stroke(Some(0u8.into()))
-            .with_fill(Some(0u8.into()))
-            .into_iter(),
+            .with_fill(Some(0u8.into())),
     );
 
     display.draw(
         Triangle::new(Coord::new(32, 0), Coord::new(0, 64), Coord::new(64, 64))
             .translate(Coord::new(96 * 2, 0))
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
+            .with_stroke(Some(1u8.into())),
     );
 
     display.draw(
         Triangle::new(Coord::new(32, 0), Coord::new(0, 64), Coord::new(64, 64))
             .translate(Coord::new(96 * 2 + 16, 16))
             .with_stroke(Some(0u8.into()))
-            .with_fill(Some(1u8.into()))
-            .into_iter(),
+            .with_fill(Some(1u8.into())),
     );
 
     display.draw(
         Triangle::new(Coord::new(32, 0), Coord::new(0, 64), Coord::new(64, 64))
             .translate(Coord::new(96 * 2 + 32, 32))
             .with_stroke(Some(0u8.into()))
-            .with_fill(Some(0u8.into()))
-            .into_iter(),
+            .with_fill(Some(0u8.into())),
     );
 
     loop {
