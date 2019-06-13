@@ -85,6 +85,18 @@ where
     }
 }
 
+impl<C> IntoIterator for Rect<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = RectIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
+    }
+}
+
 impl<'a, C> IntoIterator for &'a Rect<C>
 where
     C: PixelColor,

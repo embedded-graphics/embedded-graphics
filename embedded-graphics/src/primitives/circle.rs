@@ -87,6 +87,18 @@ where
     }
 }
 
+impl<C> IntoIterator for Circle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = CircleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
+    }
+}
+
 impl<'a, C> IntoIterator for &'a Circle<C>
 where
     C: PixelColor,

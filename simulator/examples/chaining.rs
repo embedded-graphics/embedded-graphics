@@ -16,26 +16,16 @@ use simulator::{DisplayBuilder, DisplayTheme};
 fn main() {
     let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();
 
-    // FIXME: This has to be a separate variable due to usage of `.translate()` returning a new
-    // instance.
-    let text = Font6x8::render_str("Hello World!")
-        .with_stroke(Some(1u8.into()))
-        .translate(Coord::new(5, 50));
-
     let objects = Circle::new(Coord::new(64, 64), 64)
         .with_stroke(Some(1u8.into()))
         .into_iter()
+        .chain(Line::new(Coord::new(64, 64), Coord::new(0, 64)).with_stroke(Some(1u8.into())))
+        .chain(Line::new(Coord::new(64, 64), Coord::new(80, 80)).with_stroke(Some(1u8.into())))
         .chain(
-            Line::new(Coord::new(64, 64), Coord::new(0, 64))
+            Font6x8::render_str("Hello World!")
                 .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        )
-        .chain(
-            Line::new(Coord::new(64, 64), Coord::new(80, 80))
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        )
-        .chain(text.into_iter());
+                .translate(Coord::new(5, 50)),
+        );
 
     display.draw(objects);
 

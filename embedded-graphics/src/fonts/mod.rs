@@ -25,15 +25,15 @@ where
     /// Defaults to 1u8 for stroke_color and 0u8 for fill_color
     ///
     /// ```rust
-    /// # use embedded_graphics::fonts::{Font, Font6x8};
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::PixelColorU8;
-    /// #
+    /// use embedded_graphics::prelude::*;
+    /// use embedded_graphics::fonts::Font6x8;
+    /// use embedded_graphics::pixelcolor::PixelColorU8;
+    ///
     /// # struct Display {}
     /// # impl Display {
     /// #     pub fn draw<T>(&self, item_pixels: T) -> Result<(), ()>
     /// #     where
-    /// #         T: Iterator<Item = Pixel<PixelColorU8>>,
+    /// #         T: IntoIterator<Item = Pixel<PixelColorU8>>,
     /// #     {
     /// #         Ok(())
     /// #     }
@@ -45,7 +45,7 @@ where
     ///     let text = Font6x8::render_str("Hello world")
     ///         .with_style(Style::with_stroke(1u8.into()));
     ///
-    ///     disp.draw(text.into_iter());
+    ///     disp.draw(text);
     /// }
     /// ```
     fn render_str(chars: &'a str) -> Self;

@@ -15,29 +15,16 @@ fn main() {
     let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();
 
     // Outline
-    display.draw(
-        Circle::new(Coord::new(64, 64), 64)
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
-    );
+    display.draw(Circle::new(Coord::new(64, 64), 64).with_stroke(Some(1u8.into())));
 
     // Clock hands
-    display.draw(
-        Line::new(Coord::new(64, 64), Coord::new(0, 64))
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
-    );
-    display.draw(
-        Line::new(Coord::new(64, 64), Coord::new(80, 80))
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
-    );
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(0, 64)).with_stroke(Some(1u8.into())));
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80)).with_stroke(Some(1u8.into())));
 
     display.draw(
         Font6x8::render_str("Hello World!")
             .with_stroke(Some(1u8.into()))
-            .translate(Coord::new(5, 50))
-            .into_iter(),
+            .translate(Coord::new(5, 50)),
     );
 
     loop {

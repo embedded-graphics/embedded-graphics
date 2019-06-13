@@ -25,7 +25,7 @@ fn main() {
 
     let mut display = DisplayBuilder::new().size(304, 128).scale(2).build();
 
-    display.draw(image.into_iter());
+    display.draw(&image);
 
     loop {
         let end = display.run_once();

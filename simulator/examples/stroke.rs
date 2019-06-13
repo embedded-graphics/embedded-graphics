@@ -44,19 +44,16 @@ fn main() {
             .into_iter()
             .chain(
                 rect.translate(Coord::new(0, 64 + PADDING))
-                    .with_stroke_width(3)
-                    .into_iter(),
+                    .with_stroke_width(3),
             )
             .chain(
                 line.translate(Coord::new(0, 64 + PADDING))
-                    .with_stroke_width(3)
-                    .into_iter(),
+                    .with_stroke_width(3),
             )
             .chain(
                 triangle
                     .translate(Coord::new(0, 64 + PADDING))
-                    .with_stroke_width(3)
-                    .into_iter(),
+                    .with_stroke_width(3),
             ),
     );
 
@@ -66,19 +63,16 @@ fn main() {
             .into_iter()
             .chain(
                 rect.translate(Coord::new(0, 128 + PADDING * 2))
-                    .with_stroke_width(10)
-                    .into_iter(),
+                    .with_stroke_width(10),
             )
             .chain(
                 line.translate(Coord::new(0, 128 + PADDING * 2))
-                    .with_stroke_width(10)
-                    .into_iter(),
+                    .with_stroke_width(10),
             )
             .chain(
                 triangle
                     .translate(Coord::new(0, 128 + PADDING * 2))
-                    .with_stroke_width(10)
-                    .into_iter(),
+                    .with_stroke_width(10),
             ),
     );
 

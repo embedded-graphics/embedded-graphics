@@ -134,6 +134,18 @@ fn sort_yx(p1: Coord, p2: Coord, p3: Coord) -> (Coord, Coord, Coord) {
     (y1, y2, y3)
 }
 
+impl<C> IntoIterator for Triangle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = TriangleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
+    }
+}
+
 impl<'a, C> IntoIterator for &'a Triangle<C>
 where
     C: PixelColor,
