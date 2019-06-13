@@ -152,6 +152,28 @@ where
     _conf: PhantomData<Conf>,
 }
 
+impl<'a, C: 'a, Conf: 'a> IntoIterator for FontBuilder<'a, C, Conf>
+where
+    C: PixelColor,
+    Conf: FontBuilderConf,
+{
+    type Item = Pixel<C>;
+    type IntoIter = FontBuilderIterator<'a, C, Conf>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            current_char: self.text.chars().next(),
+            idx: 0,
+            text: self.text,
+            char_walk_x: 0,
+            char_walk_y: 0,
+            pos: self.pos,
+            style: self.style,
+            _conf: Default::default(),
+        }
+    }
+}
+
 impl<'a, C, Conf> IntoIterator for &'a FontBuilder<'a, C, Conf>
 where
     C: PixelColor,
@@ -250,7 +272,12 @@ where
     }
 }
 
-impl<'a, C, Conf> Drawable for FontBuilder<'a, C, Conf> where C: PixelColor {}
+impl<'a, C: 'a, Conf: 'a> Drawable for FontBuilder<'a, C, Conf>
+where
+    C: PixelColor,
+    Conf: FontBuilderConf,
+{
+}
 
 impl<'a, C, Conf> Transform for FontBuilder<'a, C, Conf>
 where

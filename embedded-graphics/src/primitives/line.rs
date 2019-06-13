@@ -88,6 +88,18 @@ where
     }
 }
 
+impl<C> IntoIterator for Line<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = LineIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
+    }
+}
+
 impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type Item = Pixel<C>;
     type IntoIter = LineIterator<C>;

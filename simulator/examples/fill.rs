@@ -40,16 +40,14 @@ fn main() {
     display.draw(
         Rect::new(Coord::new(0, 0), Coord::new(64, 64))
             .translate(Coord::new(96, 0))
-            .with_stroke(Some(1u8.into()))
-            .into_iter(),
+            .with_stroke(Some(1u8.into())),
     );
 
     display.draw(
-        Rect::new(Coord::new(0, 0), Coord::new(64, 64))
+        &Rect::new(Coord::new(0, 0), Coord::new(64, 64))
             .translate(Coord::new(96 + 16, 16))
             .with_stroke(Some(0u8.into()))
-            .with_fill(Some(1u8.into()))
-            .into_iter(),
+            .with_fill(Some(1u8.into())),
     );
 
     display.draw(

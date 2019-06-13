@@ -9,7 +9,7 @@ use crate::unsignedcoord::UnsignedCoord;
 pub struct Pixel<C: PixelColor>(pub UnsignedCoord, pub C);
 
 /// Marks an object as "drawable". Must be implemented for all graphics objects
-pub trait Drawable {}
+pub trait Drawable: IntoIterator {}
 
 /// Adds the ability to get the dimensions/position of a graphics object
 ///
