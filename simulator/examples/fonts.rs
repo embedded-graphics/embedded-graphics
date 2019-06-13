@@ -21,8 +21,8 @@ fn main() {
     // Show smallest font with white font on black background
     display.draw(
         Font6x8::render_str("Hello World! - inverse 6x8")
-            .with_stroke(Some(0u8.into()))
-            .with_fill(Some(1u8.into()))
+            .stroke(Some(0u8.into()))
+            .fill(Some(1u8.into()))
             .translate(Coord::new(15, 30)),
     );
 

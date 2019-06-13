@@ -62,25 +62,25 @@ impl<C> WithStyle<C> for Circle<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -212,10 +212,10 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// let circle = Circle::new(Coord::new(5, 10), 10)
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = circle.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
@@ -234,10 +234,10 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// let mut circle = Circle::new(Coord::new(5, 10), 10)
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// circle.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(circle.center, Coord::new(15, 20));
@@ -285,7 +285,7 @@ mod tests {
     #[test]
     fn it_handles_offscreen_coords() {
         let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5)
-            .with_style(Style::with_stroke(1u8.into()))
+            .style(Style::stroke(1u8.into()))
             .into_iter();
 
         assert_eq!(circ.next(), None);
@@ -294,7 +294,7 @@ mod tests {
     #[test]
     fn it_handles_partially_on_screen_coords() {
         let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-5, -5), 30)
-            .with_style(Style::with_stroke(1u8.into()))
+            .style(Style::stroke(1u8.into()))
             .into_iter();
 
         assert!(circ.next().is_some());

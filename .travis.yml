@@ -34,16 +34,7 @@ before_install:
   - pip install linkchecker --user
 
 script:
-  - cargo fmt --all -- --check
-  - cargo test --release
-  - cargo test --release --all-features
-  - cargo bench --no-run
-
-after_success:
-  - cargo doc --all-features
-  - linkchecker target/doc/embedded_graphics
-  - linkchecker target/doc/tinybmp
-  - linkchecker target/doc/tinytga
+  - ./build.sh
 
 cache: cargo
 before_cache:

@@ -111,25 +111,25 @@ impl<'a, C, Conf> WithStyle<C> for FontBuilder<'a, C, Conf>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(self, _width: u8) -> Self {
+    fn stroke_width(self, _width: u8) -> Self {
         // Noop
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -291,11 +291,11 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world")
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -315,11 +315,11 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world")
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));

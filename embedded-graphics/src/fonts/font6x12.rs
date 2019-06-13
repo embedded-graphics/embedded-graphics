@@ -40,7 +40,7 @@ mod tests {
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
         let text: Font6x12<TestPixelColor> = Font6x12::render_str("Hello World!")
-            .with_style(Style::with_stroke(1u8.into()))
+            .style(Style::stroke(1u8.into()))
             .translate(Coord::new(5, -20));
         let mut it = text.into_iter();
 
@@ -72,7 +72,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = Display::default();
-        display.draw(Font6x12::render_str("Mm").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str("Mm").stroke(Some(1u8.into())));
 
         assert_eq!(
             display,
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = Display::default();
-        display.draw(Font6x12::render_str(" ~").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str(" ~").stroke(Some(1u8.into())));
 
         assert_eq!(
             display,
@@ -130,7 +130,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = Display::default();
-        display.draw(Font6x12::render_str("$y").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str("$y").stroke(Some(1u8.into())));
 
         assert_eq!(
             display,
@@ -182,26 +182,26 @@ mod tests {
         );
 
         let mut display = Display::default();
-        display.draw(Font6x12::render_str("\0\n").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str("\0\n").stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(Font6x12::render_str("\x7F\u{A0}").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str("\x7F\u{A0}").stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(Font6x12::render_str("¡ÿ").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str("¡ÿ").stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(Font6x12::render_str("Ā💣").with_stroke(Some(1u8.into())));
+        display.draw(Font6x12::render_str("Ā💣").stroke(Some(1u8.into())));
         assert_eq!(display, two_question_marks);
     }
 
     #[test]
     fn negative_y_no_infinite_loop() {
         let text: Font6x12<PixelColorU16> = Font6x12::render_str("Testing string")
-            .with_stroke(Some(0xF1FA_u16.into()))
+            .stroke(Some(0xF1FA_u16.into()))
             .translate(Coord::new(0, -12));
 
         let mut it = text.into_iter();
@@ -213,7 +213,7 @@ mod tests {
     #[test]
     fn negative_x_no_infinite_loop() {
         let text: Font6x12<PixelColorU16> = Font6x12::render_str("A")
-            .with_stroke(Some(0xF1FA_u16.into()))
+            .stroke(Some(0xF1FA_u16.into()))
             .translate(Coord::new(-6, 0));
 
         let mut it = text.into_iter();

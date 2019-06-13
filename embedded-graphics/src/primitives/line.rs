@@ -63,25 +63,25 @@ impl<C> WithStyle<C> for Line<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -198,10 +198,10 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -222,10 +222,10 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));
@@ -249,7 +249,7 @@ mod tests {
     use crate::unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));
+        let line = Line::new(start, end).style(Style::stroke(PixelColorU8(1)));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {

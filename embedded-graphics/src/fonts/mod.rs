@@ -43,7 +43,7 @@ where
     ///     let disp: Display = Display {};
     ///     // Render a string with a 8bit color
     ///     let text = Font6x8::render_str("Hello world")
-    ///         .with_style(Style::with_stroke(1u8.into()));
+    ///         .style(Style::stroke(1u8.into()));
     ///
     ///     disp.draw(text);
     /// }

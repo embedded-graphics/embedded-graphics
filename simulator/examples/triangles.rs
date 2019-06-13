@@ -19,20 +19,20 @@ fn main() {
     display.draw(
         Triangle::new(Coord::new(0, 0), Coord::new(64, 10), Coord::new(15, 64))
             .translate(Coord::new(PAD, 0))
-            .with_stroke(Some(1u8.into())),
+            .stroke(Some(1u8.into())),
     );
 
     // flat top
     display.draw(
         Triangle::new(Coord::new(5, 0), Coord::new(30, 64), Coord::new(64, 0))
-            .with_stroke(Some(1u8.into()))
+            .stroke(Some(1u8.into()))
             .translate(Coord::new(64 + PAD, 0)),
     );
 
     // flat left
     display.draw(
         Triangle::new(Coord::new(0, 0), Coord::new(0, 64), Coord::new(64, 30))
-            .with_stroke(Some(1u8.into()))
+            .stroke(Some(1u8.into()))
             .translate(Coord::new((64 + PAD) * 2, 0)),
     );
 
@@ -40,26 +40,26 @@ fn main() {
     display.draw(
         Triangle::new(Coord::new(22, 0), Coord::new(0, 64), Coord::new(64, 64))
             .translate(Coord::new((64 + PAD) * 3, 0))
-            .with_stroke(Some(1u8.into())),
+            .stroke(Some(1u8.into())),
     );
 
     // flat right
     display.draw(
         Triangle::new(Coord::new(0, 22), Coord::new(64, 0), Coord::new(64, 64))
             .translate(Coord::new((64 + PAD) * 4, 0))
-            .with_stroke(Some(1u8.into())),
+            .stroke(Some(1u8.into())),
     );
 
     // draw filled above stroke, should not be visible
     display.draw(
         Triangle::new(Coord::new(0, 22), Coord::new(64, 0), Coord::new(64, 64))
             .translate(Coord::new((64 + PAD) * 5, 0))
-            .with_stroke(Some(1u8.into())),
+            .stroke(Some(1u8.into())),
     );
     display.draw(
         Triangle::new(Coord::new(0, 22), Coord::new(64, 0), Coord::new(64, 64))
             .translate(Coord::new((64 + PAD) * 5, 0))
-            .with_fill(Some(0u8.into())),
+            .fill(Some(0u8.into())),
     );
 
     loop {

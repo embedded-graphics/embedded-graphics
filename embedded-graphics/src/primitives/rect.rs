@@ -60,25 +60,25 @@ impl<C> WithStyle<C> for Rect<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -212,10 +212,10 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -236,10 +236,10 @@ where
     /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
     /// #
     /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// rect.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(rect.top_left, Coord::new(15, 20));
@@ -285,7 +285,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_rect() {
         let mut rect: RectIterator<TestPixelColor> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
-            .with_style(Style::with_stroke(1u8.into()))
+            .style(Style::stroke(1u8.into()))
             .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
@@ -304,7 +304,7 @@ mod tests {
     fn it_can_be_negative() {
         let mut rect: RectIterator<TestPixelColor> =
             Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
-                .with_style(Style::with_stroke(1u8.into()))
+                .style(Style::stroke(1u8.into()))
                 .into_iter();
 
         // TODO: Macro
