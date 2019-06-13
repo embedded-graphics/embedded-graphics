@@ -15,6 +15,24 @@
 //!     * Triangles
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
+//! To make life even easier, some handy [macros](#macros) are provided for drawing styled primitives
+//! and text. For example:
+//!
+//! ```rust
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::{text_6x8, circle};
+//! use embedded_graphics::primitives::Circle;
+//! use embedded_graphics::fonts::Font6x8;
+//! # use embedded_graphics::mock_display::Display;
+//! # let mut display = Display::default();
+//!
+//! let c: Circle<u8> = circle!((20, 20), 8, fill = Some(1u8));
+//! let t: Font6x8<u8> = text_6x8!("Hello Rust!", fill = Some(20u8)).translate(Coord::new(20, 16));
+//!
+//! display.draw(c);
+//! display.draw(t);
+//! ```
+//!
 //! A core goal is to do the above without using any buffers; the crate should work without a
 //! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
 //! takes an `Iterator` based approach, where pixel values and positions are calculated on the fly,
@@ -59,8 +77,8 @@ pub mod dev;
 pub mod drawable;
 pub mod fonts;
 pub mod image;
-#[cfg(test)]
-pub(crate) mod mock_display;
+#[doc(hidden)]
+pub mod mock_display;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;

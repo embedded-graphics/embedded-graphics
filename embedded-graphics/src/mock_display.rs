@@ -2,7 +2,8 @@ use crate::drawable::{Dimensions, Pixel};
 use crate::prelude::*;
 use crate::{Drawing, SizedDrawing};
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+/// Mock display for use in tests and some doc examples. Do not use directly!
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
 pub struct Display(pub [[u8; 24]; 16]);
 
 impl Default for Display {
