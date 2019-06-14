@@ -34,6 +34,7 @@ before_install:
   - pip install linkchecker --user
 
 script:
+  - cargo update
   - ./build.sh
 
 cache: cargo
