@@ -17,6 +17,18 @@ mod internal_coord {
     /// [`Rect`] may be defined that has its top left at `(-1,-2)`. To specify positive-only screen
     /// coordinates and the like, see [`UnsignedCoord`].
     ///
+    /// ```rust
+    /// use embedded_graphics::{coord::Coord, icoord};
+    ///
+    /// // Create a coord using the `new` constructor method
+    /// let c1 = Coord::new(10, 20);
+    ///
+    /// // Create a coord using the handy `icoord` macro
+    /// let c2 = icoord!(10, 20);
+    ///
+    /// assert_eq!(c1, c2);
+    /// ```
+    ///
     /// Note that enabling the `nalgebra` feature will alias Nalgebra's [`Vector2<i32>`] type to
     /// `Coord` instead of this builtin implementation.
     ///
@@ -167,6 +179,24 @@ impl ToUnsigned for Coord {
     fn to_unsigned(self) -> UnsignedCoord {
         UnsignedCoord::new(self[0].max(0) as u32, self[1].max(0) as u32)
     }
+}
+
+/// Create a [`Coord`] from a pair of integer values
+///
+/// Input values must be `i32`s
+///
+/// ```rust
+/// use embedded_graphics::icoord;
+///
+/// let c = icoord!(20, 30);
+/// ```
+///
+/// [`Coord`]: ./coord/struct.Coord.html
+#[macro_export]
+macro_rules! icoord {
+    ($x:expr, $y:expr) => {
+        $crate::coord::Coord::new($x, $y)
+    };
 }
 
 #[cfg(test)]

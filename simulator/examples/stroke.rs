@@ -4,7 +4,7 @@ extern crate simulator;
 use std::thread;
 use std::time::Duration;
 
-use embedded_graphics::coord::Coord;
+use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect, Triangle};
 
@@ -15,20 +15,20 @@ const PADDING: i32 = 16;
 fn main() {
     let mut display = DisplayBuilder::new().size(320, 256).build();
 
-    let triangle = Triangle::new(Coord::new(0, 64), Coord::new(64, 0), Coord::new(64, 64))
-        .translate(Coord::new(0, 0))
+    let triangle = Triangle::new(icoord!(0, 64), icoord!(64, 0), icoord!(64, 64))
+        .translate(icoord!(0, 0))
         .stroke(Some(SimPixelColor(true)));
 
-    let rect = Rect::new(Coord::new(0, 0), Coord::new(64, 64))
-        .translate(Coord::new(64 + PADDING, 0))
+    let rect = Rect::new(icoord!(0, 0), icoord!(64, 64))
+        .translate(icoord!(64 + PADDING, 0))
         .stroke(Some(SimPixelColor(true)));
 
-    let line = Line::new(Coord::new(0, 0), Coord::new(64, 64))
-        .translate(Coord::new(128 + PADDING * 2, 0))
+    let line = Line::new(icoord!(0, 0), icoord!(64, 64))
+        .translate(icoord!(128 + PADDING * 2, 0))
         .stroke(Some(SimPixelColor(true)));
 
-    let circ = Circle::new(Coord::new(32, 32), 32)
-        .translate(Coord::new(192 + PADDING * 3, 0))
+    let circ = Circle::new(icoord!(32, 32), 32)
+        .translate(icoord!(192 + PADDING * 3, 0))
         .stroke(Some(SimPixelColor(true)));
 
     display.draw(
@@ -39,33 +39,29 @@ fn main() {
     );
 
     display.draw(
-        circ.translate(Coord::new(0, 64 + PADDING))
+        circ.translate(icoord!(0, 64 + PADDING))
             .stroke_width(3)
             .into_iter()
-            .chain(rect.translate(Coord::new(0, 64 + PADDING)).stroke_width(3))
-            .chain(line.translate(Coord::new(0, 64 + PADDING)).stroke_width(3))
-            .chain(
-                triangle
-                    .translate(Coord::new(0, 64 + PADDING))
-                    .stroke_width(3),
-            ),
+            .chain(rect.translate(icoord!(0, 64 + PADDING)).stroke_width(3))
+            .chain(line.translate(icoord!(0, 64 + PADDING)).stroke_width(3))
+            .chain(triangle.translate(icoord!(0, 64 + PADDING)).stroke_width(3)),
     );
 
     display.draw(
-        circ.translate(Coord::new(0, 128 + PADDING * 2))
+        circ.translate(icoord!(0, 128 + PADDING * 2))
             .stroke_width(10)
             .into_iter()
             .chain(
-                rect.translate(Coord::new(0, 128 + PADDING * 2))
+                rect.translate(icoord!(0, 128 + PADDING * 2))
                     .stroke_width(10),
             )
             .chain(
-                line.translate(Coord::new(0, 128 + PADDING * 2))
+                line.translate(icoord!(0, 128 + PADDING * 2))
                     .stroke_width(10),
             )
             .chain(
                 triangle
-                    .translate(Coord::new(0, 128 + PADDING * 2))
+                    .translate(icoord!(0, 128 + PADDING * 2))
                     .stroke_width(10),
             ),
     );

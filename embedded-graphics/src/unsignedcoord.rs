@@ -16,6 +16,18 @@ mod internal_unsigned_coord {
     /// use with [`Drawable`](../drawable/trait.Drawable.html) iterators to output valid _display pixel_
     /// coordinates, i.e. coordinates that are always positive.
     ///
+    /// ```rust
+    /// use embedded_graphics::{unsignedcoord::UnsignedCoord, ucoord};
+    ///
+    /// // Create a coord using the `new` constructor method
+    /// let c1 = UnsignedCoord::new(10, 20);
+    ///
+    /// // Create a coord using the handy `ucoord` macro
+    /// let c2 = ucoord!(10, 20);
+    ///
+    /// assert_eq!(c1, c2);
+    /// ```
+    ///
     /// Note that enabling the `nalgebra` feature will alias Nalgebra's [`Vector2<u32>`] type to
     /// `UnsignedCoord` instead of this builtin implementation.
     ///
@@ -97,6 +109,24 @@ mod internal_unsigned_coord {
             Self(other[0], other[1])
         }
     }
+}
+
+/// Create an [`UnsignedCoord`] from a pair of integer values
+///
+/// Input values must be `u32`s
+///
+/// ```rust
+/// use embedded_graphics::ucoord;
+///
+/// let c = ucoord!(20, 30);
+/// ```
+///
+/// [`UnsignedCoord`]: ./unsignedcoord/struct.UnsignedCoord.html
+#[macro_export]
+macro_rules! ucoord {
+    ($x:expr, $y:expr) => {
+        $crate::unsignedcoord::UnsignedCoord::new($x, $y)
+    };
 }
 
 #[cfg(not(feature = "nalgebra_support"))]
