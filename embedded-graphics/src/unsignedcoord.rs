@@ -15,6 +15,11 @@ mod internal_unsigned_coord {
     /// As opposed to [`Coord`](../coord/index.html), this coordinate is unsigned. It is intended for
     /// use with [`Drawable`](../drawable/trait.Drawable.html) iterators to output valid _display pixel_
     /// coordinates, i.e. coordinates that are always positive.
+    ///
+    /// Note that enabling the `nalgebra` feature will alias Nalgebra's [`Vector2<u32>`] type to
+    /// `UnsignedCoord` instead of this builtin implementation.
+    ///
+    /// [`Vector2<u32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct UnsignedCoord(pub UnsignedCoordPart, pub UnsignedCoordPart);
 
@@ -29,7 +34,7 @@ mod internal_unsigned_coord {
         type Output = UnsignedCoord;
 
         fn add(self, other: UnsignedCoord) -> UnsignedCoord {
-            UnsignedCoord::new(self.0 + other.0, self.1 + other.1)
+            UnsignedCoord(self.0 + other.0, self.1 + other.1)
         }
     }
 
@@ -44,7 +49,7 @@ mod internal_unsigned_coord {
         type Output = UnsignedCoord;
 
         fn sub(self, other: UnsignedCoord) -> UnsignedCoord {
-            UnsignedCoord::new(self.0 - other.0, self.1 - other.1)
+            UnsignedCoord(self.0 - other.0, self.1 - other.1)
         }
     }
 
@@ -72,6 +77,24 @@ mod internal_unsigned_coord {
 
         fn neg(self) -> Self::Output {
             Coord::new(-(self.0 as i32), -(self.1 as i32))
+        }
+    }
+
+    impl From<(u32, u32)> for UnsignedCoord {
+        fn from(other: (u32, u32)) -> Self {
+            Self(other.0, other.1)
+        }
+    }
+
+    impl From<[u32; 2]> for UnsignedCoord {
+        fn from(other: [u32; 2]) -> Self {
+            Self(other[0], other[1])
+        }
+    }
+
+    impl From<&[u32; 2]> for UnsignedCoord {
+        fn from(other: &[u32; 2]) -> Self {
+            Self(other[0], other[1])
         }
     }
 }
@@ -119,6 +142,23 @@ mod tests {
         let right = UnsignedCoord::new(10, 20);
 
         assert_eq!(left - right, UnsignedCoord::new(20, 20));
+    }
+
+    #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
+    fn from_tuple() {
+        assert_eq!(UnsignedCoord::from((20, 30)), UnsignedCoord::new(20, 30));
+    }
+
+    #[test]
+    fn from_array() {
+        assert_eq!(UnsignedCoord::from([20, 30]), UnsignedCoord::new(20, 30));
+    }
+
+    #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
+    fn from_array_ref() {
+        assert_eq!(UnsignedCoord::from(&[20, 30]), UnsignedCoord::new(20, 30));
     }
 
     #[test]

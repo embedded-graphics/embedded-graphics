@@ -1,7 +1,6 @@
 //! 2D signed coordinate in screen space
 //!
-//! This struct is what you should use when positioning graphics elements as it can handle negative
-//! coordinates. To output pixel coordinates, use [`UnsignedCoord`](../unsignedcoord/index.html).
+//! To output (non-negative) pixel coordinates, use [`UnsignedCoord`](../unsignedcoord/index.html).
 
 use super::unsignedcoord::UnsignedCoord;
 
@@ -16,10 +15,14 @@ mod internal_coord {
     ///
     /// This coordinate should be used to define graphics object coordinates. For example, a
     /// [`Rect`] may be defined that has its top left at `(-1,-2)`. To specify positive-only screen
-    /// coordinates and the like, see [`UnsignedCoord`]
+    /// coordinates and the like, see [`UnsignedCoord`].
+    ///
+    /// Note that enabling the `nalgebra` feature will alias Nalgebra's [`Vector2<i32>`] type to
+    /// `Coord` instead of this builtin implementation.
     ///
     /// [`UnsignedCoord`]: ../unsignedcoord/struct.UnsignedCoord.html
     /// [`Rect`]: ../primitives/rect/struct.Rect.html
+    /// [`Vector2<i32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct Coord(pub CoordPart, pub CoordPart);
 
@@ -98,6 +101,42 @@ mod internal_coord {
             Coord::new(-self.0, -self.1)
         }
     }
+
+    impl From<(u32, u32)> for Coord {
+        fn from(other: (u32, u32)) -> Self {
+            Self(other.0 as i32, other.1 as i32)
+        }
+    }
+
+    impl From<[u32; 2]> for Coord {
+        fn from(other: [u32; 2]) -> Self {
+            Self(other[0] as i32, other[1] as i32)
+        }
+    }
+
+    impl From<&[u32; 2]> for Coord {
+        fn from(other: &[u32; 2]) -> Self {
+            Self(other[0] as i32, other[1] as i32)
+        }
+    }
+
+    impl From<(i32, i32)> for Coord {
+        fn from(other: (i32, i32)) -> Self {
+            Self(other.0, other.1)
+        }
+    }
+
+    impl From<[i32; 2]> for Coord {
+        fn from(other: [i32; 2]) -> Self {
+            Self(other[0], other[1])
+        }
+    }
+
+    impl From<&[i32; 2]> for Coord {
+        fn from(other: &[i32; 2]) -> Self {
+            Self(other[0], other[1])
+        }
+    }
 }
 
 #[cfg(not(feature = "nalgebra_support"))]
@@ -156,6 +195,33 @@ mod tests {
         let right = Coord::new(30, 40);
 
         assert_eq!(left - right, Coord::new(-20, -20));
+    }
+
+    #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
+    fn from_tuple() {
+        assert_eq!(Coord::from((20u32, 30u32)), Coord::new(20, 30));
+        assert_eq!(Coord::from((20i32, 30i32)), Coord::new(20, 30));
+    }
+
+    #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
+    fn from_array() {
+        assert_eq!(Coord::from([20u32, 30u32]), Coord::new(20, 30));
+        assert_eq!(Coord::from([20i32, 30i32]), Coord::new(20, 30));
+    }
+
+    #[test]
+    #[cfg(feature = "nalgebra_support")]
+    fn from_array() {
+        assert_eq!(Coord::from([20i32, 30i32]), Coord::new(20, 30));
+    }
+
+    #[test]
+    #[cfg(not(feature = "nalgebra_support"))]
+    fn from_array_ref() {
+        assert_eq!(Coord::from(&[20u32, 30u32]), Coord::new(20, 30));
+        assert_eq!(Coord::from(&[20i32, 30i32]), Coord::new(20, 30));
     }
 
     #[test]
