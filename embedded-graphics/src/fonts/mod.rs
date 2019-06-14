@@ -13,7 +13,6 @@ pub use self::font8x16::Font8x16;
 use crate::drawable::Dimensions;
 use crate::pixelcolor::PixelColor;
 use crate::style::WithStyle;
-use crate::unsignedcoord::UnsignedCoord;
 
 /// Common methods for all fonts
 pub trait Font<'a, C>: WithStyle<C> + Dimensions
@@ -49,10 +48,6 @@ where
     /// }
     /// ```
     fn render_str(chars: &'a str) -> Self;
-
-    /// Get the dimensions of a piece of text rendered in a particular font
-    #[deprecated(since = "0.4.5", note = "use `.size()` instead")]
-    fn dimensions(&self) -> UnsignedCoord;
 }
 
 /// Internal macro used to implement `text_*` on fonts. Do not use directly!

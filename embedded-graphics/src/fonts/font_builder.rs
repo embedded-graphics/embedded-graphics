@@ -94,17 +94,6 @@ where
             _conf: Default::default(),
         }
     }
-
-    fn dimensions(&self) -> UnsignedCoord {
-        UnsignedCoord::new(
-            Conf::CHAR_WIDTH * self.text.len() as u32,
-            if self.text.len() > 0 {
-                Conf::CHAR_HEIGHT
-            } else {
-                0
-            },
-        )
-    }
 }
 
 impl<'a, C, Conf> WithStyle<C> for FontBuilder<'a, C, Conf>
