@@ -200,8 +200,9 @@ where
         }
 
         let char_per_row = Conf::FONT_IMAGE_WIDTH / Conf::CHAR_WIDTH;
-        if let Some(current_char) = self.current_char {
-            let pixel = loop {
+
+        let pixel = loop {
+            if let Some(current_char) = self.current_char {
                 // Char _code_ offset from first char, most often a space
                 // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
                 let char_offset = Conf::char_offset(current_char);
@@ -225,9 +226,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    self.style.stroke_color.unwrap_or(1.into()) // white
+                    Some(self.style.stroke_color.unwrap_or(1.into())) // white
                 } else {
-                    self.style.fill_color.unwrap_or(0.into()) // black
+                    self.style.fill_color
                 };
 
                 let x = self.pos[0]
@@ -249,15 +250,18 @@ where
                     }
                 }
 
-                if x >= 0 && y >= 0 {
-                    break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
+                // Skip to next coord if pixel is transparent
+                if let Some(color) = color {
+                    if x >= 0 && y >= 0 {
+                        break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
+                    }
                 }
-            };
+            } else {
+                break None;
+            }
+        };
 
-            pixel
-        } else {
-            None
-        }
+        pixel
     }
 }
 
