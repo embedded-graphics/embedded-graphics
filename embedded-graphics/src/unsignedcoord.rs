@@ -111,17 +111,15 @@ mod internal_unsigned_coord {
     }
 }
 
-/// Create an [`UnsignedCoord`] from a pair of integer values
+/// Create an `UnsignedCoord` from a pair of integer values
 ///
 /// Input values must be `u32`s
 ///
 /// ```rust
-/// use embedded_graphics::ucoord;
+/// use embedded_graphics::{unsignedcoord::UnsignedCoord, ucoord};
 ///
-/// let c = ucoord!(20, 30);
+/// let c: UnsignedCoord = ucoord!(20, 30);
 /// ```
-///
-/// [`UnsignedCoord`]: ./unsignedcoord/struct.UnsignedCoord.html
 #[macro_export]
 macro_rules! ucoord {
     ($x:expr, $y:expr) => {

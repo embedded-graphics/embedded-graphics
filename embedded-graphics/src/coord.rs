@@ -181,17 +181,15 @@ impl ToUnsigned for Coord {
     }
 }
 
-/// Create a [`Coord`] from a pair of integer values
+/// Create a `Coord` from a pair of integer values
 ///
 /// Input values must be `i32`s
 ///
 /// ```rust
-/// use embedded_graphics::icoord;
+/// use embedded_graphics::{coord::Coord, icoord};
 ///
-/// let c = icoord!(20, 30);
+/// let c: Coord = icoord!(20, 30);
 /// ```
-///
-/// [`Coord`]: ./coord/struct.Coord.html
 #[macro_export]
 macro_rules! icoord {
     ($x:expr, $y:expr) => {
