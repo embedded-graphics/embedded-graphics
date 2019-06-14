@@ -8,6 +8,6 @@ cargo test --release --all-features
 cargo bench --no-run
 
 cargo doc --all-features
-linkchecker target/doc/embedded_graphics
-linkchecker target/doc/tinybmp
-linkchecker target/doc/tinytga
+linkchecker target/doc/embedded_graphics/index.html
+linkchecker target/doc/tinybmp/index.html
+linkchecker target/doc/tinytga/index.html
