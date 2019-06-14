@@ -15,19 +15,42 @@
 //!     * Triangles
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
-//! To make life even easier, some handy [macros](#macros) are provided for drawing styled primitives
-//! and text. For example:
+//! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
+//! iterator that `Drawable#draw()` can consume.
+//!
+//! # Examples
+//!
+//! ## Draw a circle and some text
+//!
+//! This example uses the [`Circle`] primitive and the [`Font6x8`] font to draw a filled circle and  some text over it on the screen.
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{text_6x8, circle};
 //! use embedded_graphics::primitives::Circle;
 //! use embedded_graphics::fonts::Font6x8;
 //! # use embedded_graphics::mock_display::Display;
 //! # let mut display = Display::default();
 //!
-//! let c: Circle<u8> = circle!((20, 20), 8, fill = Some(1u8));
-//! let t: Font6x8<u8> = text_6x8!("Hello Rust!", fill = Some(20u8)).translate(Coord::new(20, 16));
+//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(1u8));
+//! let t = Font6x8::render_str("Hello Rust!").fill(Some(20u8)).translate(Coord::new(20, 16));
+//!
+//! display.draw(c);
+//! display.draw(t);
+//! ```
+//!
+//! ## Draw a circle and some text
+//!
+//! To make life even easier, some handy [macros](#macros) are provided for drawing styled
+//! primitives and text. Converting the example above, we get this:
+//!
+//! ```rust
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::{text_6x8, circle, icoord};
+//! # use embedded_graphics::mock_display::Display;
+//! # let mut display = Display::default();
+//!
+//! let c = circle!((20, 20), 8, fill = Some(1u8));
+//! let t = text_6x8!("Hello Rust!", fill = Some(20u8)).translate(icoord!(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -39,6 +62,8 @@
 //! with the minimum of saved state. This allows the consuming application to use far less RAM at
 //! little to no performance penalty.
 //!
+//! ## Implementing `embedded_graphics` in a driver
+//!
 //! To use this crate in a driver, you only need to implement the [`Drawing`](./trait.Drawing.html)
 //! trait to start drawing things.
 //!
@@ -47,16 +72,19 @@
 //! `Drawing`, but has a bound on [`Dimensions`](./drawable/trait.Dimensions.html) which provides
 //! methods for getting the bounding rectangle of the passed item to draw.
 //!
-//! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
-//! iterator that `Drawable#draw()` can consume.
 //!
 //! ## Crate features
+//!
+//! Add these to your `Cargo.toml` to turn on extra bits of functionality.
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 //! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
 //! objects rendered by embedded_graphics.
 //! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 //! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
+//!
+//! [`Circle`]: ./primitives/circle/struct.Circle.html
+//! [`Font6x8`]: ./fonts/type.Font6x8.html
 
 #![no_std]
 #![deny(missing_docs)]
