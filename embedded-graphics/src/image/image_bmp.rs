@@ -167,12 +167,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: ImageBmp<PixelColorU16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -185,7 +184,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageBmp<PixelColorU16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -198,7 +197,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: ImageBmp<PixelColorU16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -212,7 +211,7 @@ mod tests {
         let black = 0x0000_u16;
         let white = 0xffff_u16;
 
-        let expected: [Pixel<PixelColorU16>; 9] = [
+        let expected: [Pixel<u16>; 9] = [
             Pixel(UnsignedCoord::new(0, 0), red.into()),
             Pixel(UnsignedCoord::new(1, 0), black.into()),
             Pixel(UnsignedCoord::new(2, 0), green.into()),

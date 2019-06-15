@@ -331,10 +331,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Triangle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let tri = Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(8, 15))
     /// #    .style(style);
@@ -357,10 +356,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Triangle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut tri = Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(10, 15))
     /// #    .style(style);
@@ -382,12 +380,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let tri: Triangle<TestPixelColor> =
+        let tri: Triangle<u8> =
             Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(5, 20));
         let moved = tri.translate(Coord::new(-10, -10));
 
@@ -404,7 +401,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let tri: Triangle<TestPixelColor> =
+        let tri: Triangle<u8> =
             Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(10, 15));
         let moved = tri.translate(Coord::new(10, 10));
 
@@ -415,9 +412,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_y() {
-        let mut tri: TriangleIterator<TestPixelColor> =
+        let mut tri: TriangleIterator<u8> =
             Triangle::new(Coord::new(2, 2), Coord::new(2, 4), Coord::new(2, 4))
-                .style(Style::stroke(1u8.into()))
+                .style(Style::stroke(1))
                 .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
@@ -433,9 +430,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_x() {
-        let mut tri: TriangleIterator<TestPixelColor> =
+        let mut tri: TriangleIterator<u8> =
             Triangle::new(Coord::new(2, 2), Coord::new(4, 2), Coord::new(4, 2))
-                .style(Style::stroke(1u8.into()))
+                .style(Style::stroke(1))
                 .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
@@ -449,9 +446,9 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut tri: TriangleIterator<TestPixelColor> =
+        let mut tri: TriangleIterator<u8> =
             Triangle::new(Coord::new(-2, -2), Coord::new(2, 0), Coord::new(-2, 0))
-                .style(Style::stroke(1u8.into()))
+                .style(Style::stroke(1))
                 .into_iter();
 
         // TODO: Macro

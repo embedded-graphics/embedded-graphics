@@ -281,10 +281,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world")
@@ -305,10 +304,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world")

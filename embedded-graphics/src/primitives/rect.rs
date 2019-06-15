@@ -209,10 +209,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -233,10 +232,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -256,12 +254,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rect<u8> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(-10, -10));
 
         assert_eq!(rect.top_left(), Coord::new(5, 10));
@@ -275,7 +272,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rect<u8> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -284,8 +281,8 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect: RectIterator<TestPixelColor> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
-            .style(Style::stroke(1u8.into()))
+        let mut rect: RectIterator<u8> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
+            .style(Style::stroke(1))
             .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
@@ -302,10 +299,9 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect: RectIterator<TestPixelColor> =
-            Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
-                .style(Style::stroke(1u8.into()))
-                .into_iter();
+        let mut rect: RectIterator<u8> = Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
+            .style(Style::stroke(1))
+            .into_iter();
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible
