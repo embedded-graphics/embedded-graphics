@@ -106,6 +106,7 @@ pub mod fonts;
 pub mod image;
 #[doc(hidden)]
 pub mod mock_display;
+pub mod pixel;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
