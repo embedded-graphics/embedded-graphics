@@ -1,4 +1,8 @@
-//! Pixel color trait
+//! Pixel color
+
+mod rgb565;
+
+pub use self::rgb565::Rgb565;
 
 /// Pixel color trait
 ///
