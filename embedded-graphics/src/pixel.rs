@@ -26,13 +26,23 @@ impl PixelColor for Rgb565Pixel {}
 /// more in depth explanation.
 impl From<u8> for Rgb565Pixel {
     fn from(other: u8) -> Self {
+        Self::from((other, other, other))
+    }
+}
+
+/// Take a tuple of 8 bit `(red, green, blue)` color values and convert them to a single 16 bit
+/// color
+///
+/// The 2 or 3 (for the green channel) least significant bits are discarded
+impl From<(u8, u8, u8)> for Rgb565Pixel {
+    fn from((r, g, b): (u8, u8, u8)) -> Self {
         let value =
         // Red
-        (((other as u16) << 8) & RED_MASK)
+        (((r as u16) << 8) & RED_MASK)
         // Green
-        | (((other as u16) << 3) & GREEN_MASK)
+        | (((g as u16) << 3) & GREEN_MASK)
         // Blue
-        | ((other as u16) >> 3 & BLUE_MASK);
+        | ((b as u16) >> 3 & BLUE_MASK);
 
         Self(value)
     }
@@ -53,6 +63,15 @@ mod tests {
         assert_eq!(
             Rgb565Pixel::from(0b1010_1010),
             Rgb565Pixel(0b10101_101010_10101)
+        );
+    }
+
+    #[test]
+    fn from_tuple() {
+        assert_eq!(Rgb565Pixel::from((0xff, 0xff, 0xff)), Rgb565Pixel(0xffff));
+        assert_eq!(
+            Rgb565Pixel::from((0xff, 0x0f, 0b0101_0101)),
+            Rgb565Pixel(0b11111_000011_01010)
         );
     }
 }
