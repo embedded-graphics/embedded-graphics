@@ -94,13 +94,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image1BPP<PixelColorU16> =
+        let image: Image1BPP<u16> =
             Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
 
         assert_eq!(image.top_left(), Coord::new(-1, -1));
@@ -110,7 +109,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image1BPP<PixelColorU16> =
+        let image: Image1BPP<u16> =
             Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
 
         assert_eq!(image.top_left(), Coord::new(100, 200));

@@ -26,13 +26,12 @@ where
     /// ```rust
     /// use embedded_graphics::prelude::*;
     /// use embedded_graphics::fonts::Font6x8;
-    /// use embedded_graphics::pixelcolor::PixelColorU8;
     ///
     /// # struct Display {}
     /// # impl Display {
     /// #     pub fn draw<T>(&self, item_pixels: T) -> Result<(), ()>
     /// #     where
-    /// #         T: IntoIterator<Item = Pixel<PixelColorU8>>,
+    /// #         T: IntoIterator<Item = Pixel<u8>>,
     /// #     {
     /// #         Ok(())
     /// #     }
@@ -42,7 +41,7 @@ where
     ///     let disp: Display = Display {};
     ///     // Render a string with a 8bit color
     ///     let text = Font6x8::render_str("Hello world")
-    ///         .style(Style::stroke(1u8.into()));
+    ///         .style(Style::stroke(1u8));
     ///
     ///     disp.draw(text);
     /// }

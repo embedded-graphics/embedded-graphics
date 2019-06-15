@@ -79,13 +79,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU8;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+        let image: Image8BPP<u8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -99,7 +98,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+        let image: Image8BPP<u8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -113,7 +112,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+        let image: Image8BPP<u8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -121,22 +120,10 @@ mod tests {
         .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_u8.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 0), 0x00_u8.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 1), 0x00_u8.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_u8.into()))
-        );
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_)));
 
         assert_eq!(it.next(), None);
     }

@@ -195,10 +195,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -219,10 +218,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -242,14 +240,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::drawable::Pixel;
-    use crate::pixelcolor::PixelColorU8;
     use crate::style::Style;
     use crate::unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end).style(Style::stroke(PixelColorU8(1)));
+        let line = Line::new(start, end).style(Style::stroke(1u8));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {
@@ -267,8 +263,8 @@ mod tests {
         let start = Coord::new(10, 10);
         let end = Coord::new(20, 20);
 
-        let line: Line<TestPixelColor> = Line::new(start, end);
-        let backwards_line: Line<TestPixelColor> = Line::new(end, start);
+        let line: Line<u8> = Line::new(start, end);
+        let backwards_line: Line<u8> = Line::new(end, start);
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);

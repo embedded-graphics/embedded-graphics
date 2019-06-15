@@ -208,10 +208,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let circle = Circle::new(Coord::new(5, 10), 10)
     /// #    .style(style);
@@ -230,10 +229,9 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut circle = Circle::new(Coord::new(5, 10), 10)
     /// #    .style(style);
@@ -251,12 +249,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::drawable::Dimensions;
 
     #[test]
     fn negative_dimensions() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5);
+        let circ: Circle<u8> = Circle::new(Coord::new(-10, -10), 5);
 
         assert_eq!(circ.top_left(), Coord::new(-15, -15));
         assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
@@ -265,7 +262,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(10, 20), 5);
+        let circ: Circle<u8> = Circle::new(Coord::new(10, 20), 5);
 
         assert_eq!(circ.top_left(), Coord::new(5, 15));
         assert_eq!(circ.bottom_right(), Coord::new(15, 25));
@@ -274,7 +271,7 @@ mod tests {
 
     #[test]
     fn large_radius() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10);
+        let circ: Circle<u8> = Circle::new(Coord::new(5, 5), 10);
 
         assert_eq!(circ.top_left(), Coord::new(-5, -5));
         assert_eq!(circ.bottom_right(), Coord::new(15, 15));
@@ -283,17 +280,15 @@ mod tests {
 
     #[test]
     fn transparent_border() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10)
-            .stroke(None)
-            .fill(Some(1u8.into()));
+        let circ: Circle<u8> = Circle::new(Coord::new(5, 5), 10).stroke(None).fill(Some(1));
 
         assert!(circ.into_iter().count() > 0);
     }
 
     #[test]
     fn it_handles_offscreen_coords() {
-        let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5)
-            .style(Style::stroke(1u8.into()))
+        let mut circ: CircleIterator<u8> = Circle::new(Coord::new(-10, -10), 5)
+            .style(Style::stroke(1))
             .into_iter();
 
         assert_eq!(circ.next(), None);
@@ -301,8 +296,8 @@ mod tests {
 
     #[test]
     fn it_handles_partially_on_screen_coords() {
-        let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-5, -5), 30)
-            .style(Style::stroke(1u8.into()))
+        let mut circ: CircleIterator<u8> = Circle::new(Coord::new(-5, -5), 30)
+            .style(Style::stroke(1))
             .into_iter();
 
         assert!(circ.next().is_some());

@@ -29,7 +29,6 @@ pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 mod tests {
     use super::*;
     use crate::coord::Coord;
-    use crate::dev::TestPixelColor;
     use crate::drawable::Dimensions;
     use crate::fonts::Font;
     use crate::mock_display::Display;
@@ -41,8 +40,8 @@ mod tests {
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!")
-            .style(Style::stroke(1u8.into()))
+        let text: Font6x8<u8> = Font6x8::render_str("Hello World!")
+            .style(Style::stroke(1))
             .translate(Coord::new(5, -10));
         let mut it = text.into_iter();
 
@@ -51,8 +50,8 @@ mod tests {
 
     #[test]
     fn unstroked_text_does_not_infinite_loop() {
-        let text: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!")
-            .style(Style::stroke(1u8.into()))
+        let text: Font6x8<u8> = Font6x8::render_str("Hello World!")
+            .style(Style::stroke(1))
             .translate(Coord::new(5, -10));
         let mut it = text.into_iter();
 
@@ -61,8 +60,8 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let hello: Font6x8<TestPixelColor> = Font6x8::render_str("Hello World!");
-        let empty: Font6x8<TestPixelColor> = Font6x8::render_str("");
+        let hello: Font6x8<u8> = Font6x8::render_str("Hello World!");
+        let empty: Font6x8<u8> = Font6x8::render_str("");
 
         assert_eq!(hello.size(), UnsignedCoord::new(72, 8));
         assert_eq!(empty.size(), UnsignedCoord::new(0, 0));
@@ -70,9 +69,8 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let hello: Font6x8<TestPixelColor> =
-            Font6x8::render_str("Hello World!").translate(Coord::new(5, -20));
-        let empty: Font6x8<TestPixelColor> = Font6x8::render_str("").translate(Coord::new(10, 20));
+        let hello: Font6x8<u8> = Font6x8::render_str("Hello World!").translate(Coord::new(5, -20));
+        let empty: Font6x8<u8> = Font6x8::render_str("").translate(Coord::new(10, 20));
 
         assert_eq!(hello.top_left(), Coord::new(5, -20));
         assert_eq!(hello.bottom_right(), Coord::new(72 + 5, 8 - 20));
@@ -86,17 +84,13 @@ mod tests {
         display_default.draw(Font6x8::render_str("Mm"));
 
         let mut display_full_style = Display::default();
-        display_full_style.draw(
-            Font6x8::render_str("Mm")
-                .stroke(Some(1u8.into()))
-                .fill(Some(0u8.into())),
-        );
+        display_full_style.draw(Font6x8::render_str("Mm").stroke(Some(1)).fill(Some(0)));
 
         let mut display_stroke = Display::default();
-        display_stroke.draw(Font6x8::render_str("Mm").stroke(Some(1u8.into())));
+        display_stroke.draw(Font6x8::render_str("Mm").stroke(Some(1)));
 
         let mut display_fill = Display::default();
-        display_fill.draw(Font6x8::render_str("Mm").fill(Some(0u8.into())));
+        display_fill.draw(Font6x8::render_str("Mm").fill(Some(0)));
 
         assert_eq!(display_default, display_full_style);
         assert_eq!(display_default, display_stroke);
@@ -106,7 +100,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = Display::default();
-        display.draw(Font6x8::render_str("Mm").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str("Mm").stroke(Some(1)));
 
         assert_eq!(
             display,
@@ -135,11 +129,7 @@ mod tests {
     #[test]
     fn correct_inverse_coloured_m() {
         let mut display = Display::default();
-        display.draw(
-            Font6x8::render_str("Mm")
-                .stroke(Some(0u8.into()))
-                .fill(Some(1u8.into())),
-        );
+        display.draw(Font6x8::render_str("Mm").stroke(Some(0)).fill(Some(1)));
 
         assert_eq!(
             display,
@@ -169,18 +159,10 @@ mod tests {
     #[test]
     fn compare_inverse_coloured_m() {
         let mut display_inverse = Display::default();
-        display_inverse.draw(
-            Font6x8::render_str("Mm")
-                .stroke(Some(0u8.into()))
-                .fill(Some(1u8.into())),
-        );
+        display_inverse.draw(Font6x8::render_str("Mm").stroke(Some(0)).fill(Some(1)));
 
         let mut display_normal = Display::default();
-        display_normal.draw(
-            Font6x8::render_str("Mm")
-                .stroke(Some(1u8.into()))
-                .fill(Some(0u8.into())),
-        );
+        display_normal.draw(Font6x8::render_str("Mm").stroke(Some(1)).fill(Some(0)));
 
         for (x, y) in display_inverse.0[0..8]
             .iter()
@@ -195,7 +177,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = Display::default();
-        display.draw(Font6x8::render_str(" ~").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str(" ~").stroke(Some(1)));
 
         assert_eq!(
             display,
@@ -224,7 +206,7 @@ mod tests {
     #[test]
     fn no_fill_doesnt_hang() {
         let mut display = Display::default();
-        display.draw(Font6x8::render_str(" ").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str(" ").stroke(Some(1)));
 
         assert_eq!(
             display,
@@ -253,7 +235,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = Display::default();
-        display.draw(Font6x8::render_str("$y").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str("$y").stroke(Some(1)));
 
         assert_eq!(
             display,
@@ -282,7 +264,7 @@ mod tests {
     #[test]
     fn correct_latin1() {
         let mut display = Display::default();
-        display.draw(Font6x8::render_str("¡ÿ").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str("¡ÿ").stroke(Some(1)));
 
         assert_eq!(
             display,
@@ -334,15 +316,15 @@ mod tests {
         );
 
         let mut display = Display::default();
-        display.draw(Font6x8::render_str("\0\n").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str("\0\n").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(Font6x8::render_str("\x7F\u{A0}").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str("\x7F\u{A0}").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(Font6x8::render_str("Ā💣").stroke(Some(1u8.into())));
+        display.draw(Font6x8::render_str("Ā💣").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
     }
 }

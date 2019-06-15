@@ -143,7 +143,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU32;
     use crate::unsignedcoord::UnsignedCoord;
 
     const PIXEL_COLORS: [(u32, u32, u32); 16] = [
@@ -167,18 +166,14 @@ mod tests {
 
     #[test]
     fn chessboard_compressed() -> Result<(), ()> {
-        let im: ImageTga<PixelColorU32> =
-            ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
+        let im: ImageTga<u32> = ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
 
         let mut pixels = im.into_iter();
 
         for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
             assert_eq!(
                 pixels.next(),
-                Some(Pixel(
-                    UnsignedCoord::new(*x, *y),
-                    PixelColorU32::from(*color)
-                )),
+                Some(Pixel(UnsignedCoord::new(*x, *y), u32::from(*color))),
                 "Pixel color at index {} does not match",
                 i
             );
@@ -192,18 +187,14 @@ mod tests {
 
     #[test]
     fn chessboard_uncompressed() -> Result<(), ()> {
-        let im: ImageTga<PixelColorU32> =
-            ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
+        let im: ImageTga<u32> = ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
 
         let mut pixels = im.into_iter();
 
         for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
             assert_eq!(
                 pixels.next(),
-                Some(Pixel(
-                    UnsignedCoord::new(*x, *y),
-                    PixelColorU32::from(*color)
-                )),
+                Some(Pixel(UnsignedCoord::new(*x, *y), u32::from(*color))),
                 "Pixel color at index {} does not match",
                 i
             );

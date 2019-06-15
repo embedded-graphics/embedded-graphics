@@ -84,13 +84,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
+
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+        let image: Image16BPP<u16> = Image16BPP::new(
             &[
                 0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, //
                 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, //
@@ -108,7 +108,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+        let image: Image16BPP<u16> = Image16BPP::new(
             &[
                 0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, //
                 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, //
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+        let image: Image16BPP<u16> = Image16BPP::new(
             &[
                 0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, //
                 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, //
@@ -138,22 +138,10 @@ mod tests {
         .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_u16.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 0), 0x00_u16.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 1), 0x00_u16.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_u16.into()))
-        );
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_)));
 
         assert_eq!(it.next(), None);
     }
