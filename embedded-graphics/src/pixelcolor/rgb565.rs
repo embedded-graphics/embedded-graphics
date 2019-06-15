@@ -1,4 +1,4 @@
-//! A module containing predefined pixel types
+//! RGB565 pixel type
 
 use crate::pixelcolor::PixelColor;
 
@@ -55,13 +55,13 @@ mod tests {
     #[test]
     fn from_u8() {
         assert_eq!(Rgb565Pixel::from(0u8), Rgb565Pixel(0));
-        assert_eq!(Rgb565Pixel::from(0xff), Rgb565Pixel(0xffff));
+        assert_eq!(Rgb565Pixel::from(0xffu8), Rgb565Pixel(0xffff));
         assert_eq!(
-            Rgb565Pixel::from(0b0000_1111),
+            Rgb565Pixel::from(0b0000_1111u8),
             Rgb565Pixel(0b00001_000011_00001)
         );
         assert_eq!(
-            Rgb565Pixel::from(0b1010_1010),
+            Rgb565Pixel::from(0b1010_1010u8),
             Rgb565Pixel(0b10101_101010_10101)
         );
     }
