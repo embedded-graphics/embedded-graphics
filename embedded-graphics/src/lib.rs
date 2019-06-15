@@ -18,6 +18,16 @@
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
 //!
+//! # Crate features
+//!
+//! Add these to your `Cargo.toml` to turn on extra bits of functionality.
+//!
+//! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
+//! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
+//! objects rendered by embedded_graphics.
+//! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
+//! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
+//!
 //! # Examples
 //!
 //! ## Draw a circle and some text
@@ -62,7 +72,7 @@
 //! with the minimum of saved state. This allows the consuming application to use far less RAM at
 //! little to no performance penalty.
 //!
-//! ## Implementing `embedded_graphics` in a driver
+//! # Implementing `embedded_graphics` in a driver
 //!
 //! To use this crate in a driver, you only need to implement the [`Drawing`](./trait.Drawing.html)
 //! trait to start drawing things.
@@ -71,17 +81,6 @@
 //! should also implement the [`SizedDrawing`](./trait.SizedDrawing.html) trait. This is similar to
 //! `Drawing`, but has a bound on [`Dimensions`](./drawable/trait.Dimensions.html) which provides
 //! methods for getting the bounding rectangle of the passed item to draw.
-//!
-//!
-//! ## Crate features
-//!
-//! Add these to your `Cargo.toml` to turn on extra bits of functionality.
-//!
-//! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-//! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
-//! objects rendered by embedded_graphics.
-//! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
-//! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
