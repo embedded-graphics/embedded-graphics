@@ -135,9 +135,8 @@ where
 
     // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles
     fn next(&mut self) -> Option<Self::Item> {
-        // If border colour is `None`, treat it as transparent and exit early
-        // TODO: Exit if there's no fill either
-        if self.style.stroke_color.is_none() {
+        // If border or stroke colour is `None`, treat entire object as transparent and exit early
+        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
             return None;
         }
 
@@ -280,6 +279,15 @@ mod tests {
         assert_eq!(circ.top_left(), Coord::new(-5, -5));
         assert_eq!(circ.bottom_right(), Coord::new(15, 15));
         assert_eq!(circ.size(), UnsignedCoord::new(20, 20));
+    }
+
+    #[test]
+    fn transparent_border() {
+        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10)
+            .stroke(None)
+            .fill(Some(1u8.into()));
+
+        assert!(circ.into_iter().count() > 0);
     }
 
     #[test]
