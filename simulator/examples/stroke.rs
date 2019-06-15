@@ -17,19 +17,19 @@ fn main() {
 
     let triangle = Triangle::new(icoord!(0, 64), icoord!(64, 0), icoord!(64, 64))
         .translate(icoord!(0, 0))
-        .stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(1, 1, 1)));
 
     let rect = Rect::new(icoord!(0, 0), icoord!(64, 64))
         .translate(icoord!(64 + PADDING, 0))
-        .stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(1, 1, 1)));
 
     let line = Line::new(icoord!(0, 0), icoord!(64, 64))
         .translate(icoord!(128 + PADDING * 2, 0))
-        .stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(1, 1, 1)));
 
     let circ = Circle::new(icoord!(32, 32), 32)
         .translate(icoord!(192 + PADDING * 3, 0))
-        .stroke(Some(SimPixelColor(true)));
+        .stroke(Some(SimPixelColor(1, 1, 1)));
 
     display.draw(
         circ.into_iter()

@@ -2,6 +2,7 @@ extern crate embedded_graphics;
 extern crate sdl2;
 
 use embedded_graphics::drawable::Pixel;
+use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::Drawing;
 
@@ -12,25 +13,33 @@ use sdl2::rect::Rect;
 use sdl2::render;
 
 #[derive(Clone, Copy, PartialEq)]
-pub struct SimPixelColor(pub bool);
+pub struct SimPixelColor(pub u8, pub u8, pub u8);
 
 impl PixelColor for SimPixelColor {}
 
 impl From<u8> for SimPixelColor {
     fn from(other: u8) -> Self {
-        SimPixelColor(other != 0)
+        SimPixelColor(other, other, other)
     }
 }
 
+// Danger: Chops off upper bits
 impl From<u16> for SimPixelColor {
     fn from(other: u16) -> Self {
-        SimPixelColor(other != 0)
+        SimPixelColor(other as u8, other as u8, other as u8)
     }
 }
 
+// Danger: Chops off upper bits
 impl From<u32> for SimPixelColor {
     fn from(other: u32) -> Self {
-        SimPixelColor(other != 0)
+        SimPixelColor(other as u8, other as u8, other as u8)
+    }
+}
+
+impl From<Rgb565> for SimPixelColor {
+    fn from(other: Rgb565) -> Self {
+        SimPixelColor(other.r(), other.g(), other.b())
     }
 }
 
@@ -39,8 +48,7 @@ pub struct Display {
     height: usize,
     scale: usize,
     pixel_spacing: usize,
-    background_color: Color,
-    pixel_color: Color,
+    theme: DisplayTheme,
     pixels: Box<[SimPixelColor]>,
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
@@ -62,13 +70,14 @@ impl Display {
             }
         }
 
-        self.canvas.set_draw_color(self.background_color);
+        self.canvas.set_draw_color(self.theme.background_color());
         self.canvas.clear();
 
-        self.canvas.set_draw_color(self.pixel_color);
         let pitch = self.scale + self.pixel_spacing;
         for (index, value) in self.pixels.iter().enumerate() {
-            if *value == SimPixelColor(true) {
+            if let Some(c) = self.theme.pixel_color(value) {
+                self.canvas.set_draw_color(c);
+
                 let x = (index % self.width * pitch) as i32;
                 let y = (index / self.width * pitch) as i32;
                 let r = Rect::new(x, y, self.scale as u32, self.scale as u32);
@@ -99,12 +108,49 @@ impl Drawing<SimPixelColor> for Display {
     }
 }
 
+#[derive(Clone)]
 pub enum DisplayTheme {
+    Default,
     LcdWhite,
     LcdGreen,
     LcdBlue,
     OledWhite,
     OledBlue,
+    ColorOled,
+}
+
+impl DisplayTheme {
+    pub fn pixel_color(&self, pixel: &SimPixelColor) -> Option<Color> {
+        match self {
+            DisplayTheme::ColorOled => Some(Color::RGB(pixel.0, pixel.1, pixel.2)),
+            theme => {
+                if *pixel != SimPixelColor(0, 0, 0) {
+                    match theme {
+                        DisplayTheme::Default => Some(Color::RGB(0, 0, 0)),
+                        DisplayTheme::LcdWhite => Some(Color::RGB(32, 32, 32)),
+                        DisplayTheme::LcdGreen => Some(Color::RGB(32, 32, 32)),
+                        DisplayTheme::LcdBlue => Some(Color::RGB(230, 230, 255)),
+                        DisplayTheme::OledBlue => Some(Color::RGB(0, 210, 255)),
+                        DisplayTheme::OledWhite => Some(Color::RGB(255, 255, 255)),
+                        _ => unreachable!(),
+                    }
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
+    pub fn background_color(&self) -> Color {
+        match self {
+            DisplayTheme::Default => Color::RGB(255, 255, 255),
+            DisplayTheme::LcdWhite => Color::RGB(245, 245, 245),
+            DisplayTheme::LcdGreen => Color::RGB(120, 185, 50),
+            DisplayTheme::LcdBlue => Color::RGB(70, 80, 230),
+            DisplayTheme::OledBlue => Color::RGB(0, 20, 40),
+            DisplayTheme::OledWhite | DisplayTheme::ColorOled => Color::RGB(20, 20, 20),
+        }
+    }
 }
 
 pub struct DisplayBuilder {
@@ -112,8 +158,7 @@ pub struct DisplayBuilder {
     height: usize,
     scale: usize,
     pixel_spacing: usize,
-    background_color: Color,
-    pixel_color: Color,
+    theme: DisplayTheme,
 }
 
 impl DisplayBuilder {
@@ -123,8 +168,7 @@ impl DisplayBuilder {
             height: 256,
             scale: 1,
             pixel_spacing: 0,
-            background_color: Color::RGB(255, 255, 255),
-            pixel_color: Color::RGB(0, 0, 0),
+            theme: DisplayTheme::Default,
         }
     }
 
@@ -149,41 +193,8 @@ impl DisplayBuilder {
         self
     }
 
-    pub fn background_color(&mut self, r: u8, g: u8, b: u8) -> &mut Self {
-        self.background_color = Color::RGB(r, g, b);
-
-        self
-    }
-
-    pub fn pixel_color(&mut self, r: u8, g: u8, b: u8) -> &mut Self {
-        self.pixel_color = Color::RGB(r, g, b);
-
-        self
-    }
-
     pub fn theme(&mut self, theme: DisplayTheme) -> &mut Self {
-        match theme {
-            DisplayTheme::LcdWhite => {
-                self.background_color(245, 245, 245);
-                self.pixel_color(32, 32, 32);
-            }
-            DisplayTheme::LcdGreen => {
-                self.background_color(120, 185, 50);
-                self.pixel_color(32, 32, 32);
-            }
-            DisplayTheme::LcdBlue => {
-                self.background_color(70, 80, 230);
-                self.pixel_color(230, 230, 255);
-            }
-            DisplayTheme::OledBlue => {
-                self.background_color(0, 20, 40);
-                self.pixel_color(0, 210, 255);
-            }
-            DisplayTheme::OledWhite => {
-                self.background_color(20, 20, 20);
-                self.pixel_color(255, 255, 255);
-            }
-        }
+        self.theme = theme;
 
         self.scale(3);
         self.pixel_spacing(1);
@@ -214,7 +225,7 @@ impl DisplayBuilder {
             .build()
             .unwrap();
 
-        let pixels = vec![SimPixelColor(false); self.width * self.height];
+        let pixels = vec![SimPixelColor(0, 0, 0); self.width * self.height];
         let canvas = window.into_canvas().build().unwrap();
         let event_pump = sdl_context.event_pump().unwrap();
 
@@ -223,8 +234,7 @@ impl DisplayBuilder {
             height: self.height,
             scale: self.scale,
             pixel_spacing: self.pixel_spacing,
-            background_color: self.background_color,
-            pixel_color: self.pixel_color,
+            theme: self.theme.clone(),
             pixels: pixels.into_boxed_slice(),
             canvas,
             event_pump,
