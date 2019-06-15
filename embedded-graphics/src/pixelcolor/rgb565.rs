@@ -30,6 +30,12 @@ impl From<u8> for Rgb565Pixel {
     }
 }
 
+impl From<u16> for Rgb565Pixel {
+    fn from(other: u16) -> Self {
+        Self(other)
+    }
+}
+
 /// Take a tuple of 8 bit `(red, green, blue)` color values and convert them to a single 16 bit
 /// color
 ///
@@ -64,6 +70,13 @@ mod tests {
             Rgb565Pixel::from(0b1010_1010u8),
             Rgb565Pixel(0b10101_101010_10101)
         );
+    }
+
+    #[test]
+    fn from_u16() {
+        assert_eq!(Rgb565Pixel::from(0xffu16), Rgb565Pixel(0x00ff));
+        assert_eq!(Rgb565Pixel::from(0xffffu16), Rgb565Pixel(0xffff));
+        assert_eq!(Rgb565Pixel::from(0xababu16), Rgb565Pixel(0xabab));
     }
 
     #[test]
