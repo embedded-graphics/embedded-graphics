@@ -9,8 +9,35 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
-// TODO: Impl Default so people can leave the color bit out
 /// Line primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.line.html) make for more concise code.
+///
+/// ## Create some lines with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Line;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default line from (10, 20) to (30, 40)
+/// let l1 = Line::new(Coord::new(10, 20), Coord::new(30, 40));
+///
+/// // Line with styled stroke from (50, 20) to (60, 35)
+/// let l2 = Line::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .stroke(Some(5u8));
+///
+/// // Line with translation applied
+/// let l3 = Line::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(l1);
+/// display.draw(l2);
+/// display.draw(l3);
+/// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Line<C: PixelColor> {
     /// Start point
@@ -63,28 +90,40 @@ impl<C> WithStyle<C> for Line<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
+    }
+}
+
+impl<C> IntoIterator for Line<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = LineIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
     }
 }
 
@@ -183,13 +222,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = line.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.start, Coord::new(15, 20));
@@ -207,13 +245,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// line.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(line.start, Coord::new(15, 20));
@@ -230,14 +267,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::drawable::Pixel;
-    use crate::pixelcolor::PixelColorU8;
     use crate::style::Style;
     use crate::unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end).with_style(Style::with_stroke(PixelColorU8(1)));
+        let line = Line::new(start, end).style(Style::stroke(1u8));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {
@@ -255,8 +290,8 @@ mod tests {
         let start = Coord::new(10, 10);
         let end = Coord::new(20, 20);
 
-        let line: Line<TestPixelColor> = Line::new(start, end);
-        let backwards_line: Line<TestPixelColor> = Line::new(end, start);
+        let line: Line<u8> = Line::new(start, end);
+        let backwards_line: Line<u8> = Line::new(end, start);
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);

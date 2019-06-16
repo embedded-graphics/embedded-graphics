@@ -8,6 +8,29 @@ use core::marker::PhantomData;
 use tinybmp::Bmp;
 
 /// BMP format image
+///
+/// `ImageBmp` is available with the `bmp` feature turned on
+///
+/// # Examples
+///
+/// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::ImageBmp;
+/// # use embedded_graphics::mock_display::Display16Bpp;
+/// # let mut display = Display16Bpp::default();
+///
+/// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
+/// let image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C: PixelColor> {
     bmp: Bmp<'a>,
@@ -165,12 +188,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: ImageBmp<PixelColorU16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -183,7 +205,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageBmp<PixelColorU16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -196,7 +218,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: ImageBmp<PixelColorU16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -210,7 +232,7 @@ mod tests {
         let black = 0x0000_u16;
         let white = 0xffff_u16;
 
-        let expected: [Pixel<PixelColorU16>; 9] = [
+        let expected: [Pixel<u16>; 9] = [
             Pixel(UnsignedCoord::new(0, 0), red.into()),
             Pixel(UnsignedCoord::new(1, 0), black.into()),
             Pixel(UnsignedCoord::new(2, 0), green.into()),

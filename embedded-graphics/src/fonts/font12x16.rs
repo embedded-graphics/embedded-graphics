@@ -20,13 +20,74 @@ impl FontBuilderConf for Font12x16Conf {
 }
 
 /// 12x16 pixel monospace font
+///
+/// There is also the [`text_12x16`] macro to provide an easier to use interface.
+///
+/// # Examples
+///
+/// ## Write some text to the screen at the default `(0, 0)` position
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::fonts::Font12x16;
+/// use embedded_graphics::text_12x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Use struct methods directly
+/// display.draw(Font12x16::render_str("Hello Rust!"));
+///
+/// // Use a macro instead
+/// display.draw(text_12x16!("Hello Rust!"));
+/// ```
+///
+/// ## Translate text by (20px, 30px)
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::fonts::Font12x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// display.draw(
+///     Font12x16::render_str("Hello Rust!").translate(Coord::new(20, 30))
+/// );
+/// ```
+///
+/// ## Add some styling to the text
+///
+/// Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
+/// Properties like `fill` or `stroke` passed to the `text_12x16` macro are converted into method
+/// calls verbatim.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::text_12x16;
+/// use embedded_graphics::fonts::Font12x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// display.draw(text_12x16!(
+///     "Hello Rust!",
+///     fill = Some(1u8),
+///     stroke = Some(0u8)
+/// ));
+///
+/// display.draw(
+///     Font12x16::render_str("Hello Rust!")
+///         .translate(Coord::new(20, 30))
+///         .fill(Some(1u8))
+///         .stroke(Some(0u8)),
+/// );
+/// ```
+///
+/// [`text_12x16`]: ../macro.text_12x16.html
 pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::coord::Coord;
-    use crate::dev::TestPixelColor;
     use crate::drawable::Dimensions;
     use crate::fonts::Font;
     use crate::mock_display::Display;
@@ -38,9 +99,9 @@ mod tests {
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text: Font12x16<TestPixelColor> = Font12x16::render_str("Hello World!")
+        let text: Font12x16<u8> = Font12x16::render_str("Hello World!")
             .translate(Coord::new(5, -20))
-            .with_style(Style::with_stroke(1u8.into()));
+            .style(Style::stroke(1));
         let mut it = text.into_iter();
 
         assert_eq!(it.next(), None);
@@ -48,8 +109,8 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let hello: Font12x16<TestPixelColor> = Font12x16::render_str("Hello World!");
-        let empty: Font12x16<TestPixelColor> = Font12x16::render_str("");
+        let hello: Font12x16<u8> = Font12x16::render_str("Hello World!");
+        let empty: Font12x16<u8> = Font12x16::render_str("");
 
         assert_eq!(hello.size(), UnsignedCoord::new(144, 16));
         assert_eq!(empty.size(), UnsignedCoord::new(0, 0));
@@ -57,10 +118,9 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let hello: Font12x16<TestPixelColor> =
+        let hello: Font12x16<u8> =
             Font12x16::render_str("Hello World!").translate(Coord::new(5, -20));
-        let empty: Font12x16<TestPixelColor> =
-            Font12x16::render_str("").translate(Coord::new(10, 20));
+        let empty: Font12x16<u8> = Font12x16::render_str("").translate(Coord::new(10, 20));
 
         assert_eq!(hello.top_left(), Coord::new(5, -20));
         assert_eq!(hello.bottom_right(), Coord::new(144 + 5, 16 - 20));
@@ -71,15 +131,11 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str("Mm")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str("Mm").stroke(Some(1)));
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -103,15 +159,11 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str(" ~")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str(" ~").stroke(Some(1)));
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
@@ -135,15 +187,11 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str("$y")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str("$y").stroke(Some(1)));
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -167,7 +215,7 @@ mod tests {
     #[test]
     fn dont_panic() {
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let two_question_marks = Display(
+        let two_question_marks = Display::new(
             [
                 [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
                 [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -189,35 +237,19 @@ mod tests {
         );
 
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str("\0\n")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str("\0\n").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str("\x7F\u{A0}")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str("\x7F\u{A0}").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str("¡ÿ")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str("¡ÿ").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
 
         let mut display = Display::default();
-        display.draw(
-            Font12x16::render_str("Ā💣")
-                .with_stroke(Some(1u8.into()))
-                .into_iter(),
-        );
+        display.draw(Font12x16::render_str("Ā💣").stroke(Some(1)));
         assert_eq!(display, two_question_marks);
     }
 }

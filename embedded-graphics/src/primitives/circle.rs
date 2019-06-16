@@ -9,8 +9,39 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
-// TODO: Impl Default so people can leave the color bit out
 /// Circle primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.circle.html) make for more concise code.
+///
+/// ## Create some circles with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Circle;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default circle with only a stroke centered around (10, 20) with a radius of 30
+/// let c1 = Circle::new(Coord::new(10, 20), 30);
+///
+/// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
+/// let c2 = Circle::new(Coord::new(50, 20), 30)
+///     .stroke(Some(5u8))
+///     .stroke_width(3)
+///     .fill(Some(10u8));
+///
+/// // Circle with no stroke and a translation applied
+/// let c3 = Circle::new(Coord::new(10, 20), 30)
+///     .stroke(None)
+///     .fill(Some(10u8))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(c1);
+/// display.draw(c2);
+/// display.draw(c3);
+/// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Circle<C: PixelColor> {
     /// Center point of circle
@@ -27,7 +58,7 @@ impl<C> Circle<C>
 where
     C: PixelColor,
 {
-    /// Create a new circle with center point, radius and border color
+    /// Create a new circle centered around a given point with a specific radius
     pub fn new(center: Coord, radius: u32) -> Self {
         Circle {
             center,
@@ -62,28 +93,40 @@ impl<C> WithStyle<C> for Circle<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
+    }
+}
+
+impl<C> IntoIterator for Circle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = CircleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
     }
 }
 
@@ -123,9 +166,8 @@ where
 
     // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles
     fn next(&mut self) -> Option<Self::Item> {
-        // If border colour is `None`, treat it as transparent and exit early
-        // TODO: Exit if there's no fill either
-        if self.style.stroke_color.is_none() {
+        // If border or stroke colour is `None`, treat entire object as transparent and exit early
+        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
             return None;
         }
 
@@ -197,13 +239,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let circle = Circle::new(Coord::new(5, 10), 10)
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = circle.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.center, Coord::new(15, 20));
@@ -219,13 +260,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut circle = Circle::new(Coord::new(5, 10), 10)
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// circle.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(circle.center, Coord::new(15, 20));
@@ -240,12 +280,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::drawable::Dimensions;
 
     #[test]
     fn negative_dimensions() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5);
+        let circ: Circle<u8> = Circle::new(Coord::new(-10, -10), 5);
 
         assert_eq!(circ.top_left(), Coord::new(-15, -15));
         assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
@@ -254,7 +293,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(10, 20), 5);
+        let circ: Circle<u8> = Circle::new(Coord::new(10, 20), 5);
 
         assert_eq!(circ.top_left(), Coord::new(5, 15));
         assert_eq!(circ.bottom_right(), Coord::new(15, 25));
@@ -263,7 +302,7 @@ mod tests {
 
     #[test]
     fn large_radius() {
-        let circ: Circle<TestPixelColor> = Circle::new(Coord::new(5, 5), 10);
+        let circ: Circle<u8> = Circle::new(Coord::new(5, 5), 10);
 
         assert_eq!(circ.top_left(), Coord::new(-5, -5));
         assert_eq!(circ.bottom_right(), Coord::new(15, 15));
@@ -271,9 +310,16 @@ mod tests {
     }
 
     #[test]
+    fn transparent_border() {
+        let circ: Circle<u8> = Circle::new(Coord::new(5, 5), 10).stroke(None).fill(Some(1));
+
+        assert!(circ.into_iter().count() > 0);
+    }
+
+    #[test]
     fn it_handles_offscreen_coords() {
-        let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-10, -10), 5)
-            .with_style(Style::with_stroke(1u8.into()))
+        let mut circ: CircleIterator<u8> = Circle::new(Coord::new(-10, -10), 5)
+            .style(Style::stroke(1))
             .into_iter();
 
         assert_eq!(circ.next(), None);
@@ -281,8 +327,8 @@ mod tests {
 
     #[test]
     fn it_handles_partially_on_screen_coords() {
-        let mut circ: CircleIterator<TestPixelColor> = Circle::new(Coord::new(-5, -5), 30)
-            .with_style(Style::with_stroke(1u8.into()))
+        let mut circ: CircleIterator<u8> = Circle::new(Coord::new(-5, -5), 30)
+            .style(Style::stroke(1))
             .into_iter();
 
         assert!(circ.next().is_some());

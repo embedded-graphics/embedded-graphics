@@ -9,8 +9,37 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::UnsignedCoord;
 
-// TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.rect.html) make for more concise code.
+///
+/// ## Create some rectangles with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Rect;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default rect from (10, 20) to (30, 40)
+/// let r1 = Rect::new(Coord::new(10, 20), Coord::new(30, 40));
+///
+/// // Rect with styled stroke and fill from (50, 20) to (60, 35)
+/// let r2 = Rect::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .stroke(Some(5u8))
+///     .stroke_width(3)
+///     .fill(Some(10u8));
+///
+/// // Rect with translation applied
+/// let r3 = Rect::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(r1);
+/// display.draw(r2);
+/// display.draw(r3);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Rect<C: PixelColor> {
     /// Top left point of the rect
@@ -60,28 +89,40 @@ impl<C> WithStyle<C> for Rect<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
+    }
+}
+
+impl<C> IntoIterator for Rect<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = RectIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
     }
 }
 
@@ -197,13 +238,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -221,13 +261,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Rect;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// rect.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(rect.top_left, Coord::new(15, 20));
@@ -244,12 +283,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rect<u8> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(-10, -10));
 
         assert_eq!(rect.top_left(), Coord::new(5, 10));
@@ -263,7 +301,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let rect: Rect<TestPixelColor> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rect<u8> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -272,8 +310,8 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect: RectIterator<TestPixelColor> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
-            .with_style(Style::with_stroke(1u8.into()))
+        let mut rect: RectIterator<u8> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
+            .style(Style::stroke(1))
             .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
@@ -290,10 +328,9 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect: RectIterator<TestPixelColor> =
-            Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
-                .with_style(Style::with_stroke(1u8.into()))
-                .into_iter();
+        let mut rect: RectIterator<u8> = Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
+            .style(Style::stroke(1))
+            .into_iter();
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible

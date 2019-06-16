@@ -10,8 +10,35 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
-// TODO: Impl Default so people can leave the color bit out
 /// Triangle primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.triangle.html) make for more concise code.
+///
+/// ## Create some triangles with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Triangle;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default triangle with no styling
+/// let t1 = Triangle::new(Coord::new(10, 20), Coord::new(30, 40), Coord::new(50, 60));
+///
+/// // Triangle with styled stroke from (50, 20) to (60, 35)
+/// let t2 = Triangle::new(Coord::new(50, 20), Coord::new(60, 35), Coord::new(70, 80))
+///     .stroke(Some(5u8));
+///
+/// // Triangle with translation applied
+/// let t3 = Triangle::new(Coord::new(50, 20), Coord::new(60, 35), Coord::new(70, 80))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(t1);
+/// display.draw(t2);
+/// display.draw(t3);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle<C: PixelColor> {
     /// First point of the triangle
@@ -93,25 +120,25 @@ impl<C> WithStyle<C> for Triangle<C>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u8) -> Self {
         self.style.stroke_width = width;
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -134,6 +161,18 @@ fn sort_yx(p1: Coord, p2: Coord, p3: Coord) -> (Coord, Coord, Coord) {
     (y1, y2, y3)
 }
 
+impl<C> IntoIterator for Triangle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = TriangleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self).into_iter()
+    }
+}
+
 impl<'a, C> IntoIterator for &'a Triangle<C>
 where
     C: PixelColor,
@@ -145,13 +184,13 @@ where
         let (v1, v2, v3) = sort_yx(self.p1, self.p2, self.p3);
 
         let mut line_a = Line::new(v1, v2)
-            .with_stroke(self.style.stroke_color.or(self.style.fill_color))
+            .stroke(self.style.stroke_color.or(self.style.fill_color))
             .into_iter();
         let mut line_b = Line::new(v1, v3)
-            .with_stroke(self.style.stroke_color.or(self.style.fill_color))
+            .stroke(self.style.stroke_color.or(self.style.fill_color))
             .into_iter();
         let mut line_c = Line::new(v2, v3)
-            .with_stroke(self.style.stroke_color.or(self.style.fill_color))
+            .stroke(self.style.stroke_color.or(self.style.fill_color))
             .into_iter();
         let next_ac = line_a
             .next()
@@ -319,13 +358,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Triangle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let tri = Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(8, 15))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = tri.translate(Coord::new(10, 10));
     ///
     /// assert_eq!(moved.p1, Coord::new(15, 20));
@@ -345,13 +383,12 @@ where
     ///
     /// ```
     /// # use embedded_graphics::primitives::Triangle;
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// let mut tri = Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(10, 15))
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// tri.translate_mut(Coord::new(10, 10));
     ///
     /// assert_eq!(tri.p1, Coord::new(15, 20));
@@ -370,12 +407,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dev::TestPixelColor;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let tri: Triangle<TestPixelColor> =
+        let tri: Triangle<u8> =
             Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(5, 20));
         let moved = tri.translate(Coord::new(-10, -10));
 
@@ -392,7 +428,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let tri: Triangle<TestPixelColor> =
+        let tri: Triangle<u8> =
             Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(10, 15));
         let moved = tri.translate(Coord::new(10, 10));
 
@@ -403,9 +439,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_y() {
-        let mut tri: TriangleIterator<TestPixelColor> =
+        let mut tri: TriangleIterator<u8> =
             Triangle::new(Coord::new(2, 2), Coord::new(2, 4), Coord::new(2, 4))
-                .with_style(Style::with_stroke(1u8.into()))
+                .style(Style::stroke(1))
                 .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
@@ -421,9 +457,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_x() {
-        let mut tri: TriangleIterator<TestPixelColor> =
+        let mut tri: TriangleIterator<u8> =
             Triangle::new(Coord::new(2, 2), Coord::new(4, 2), Coord::new(4, 2))
-                .with_style(Style::with_stroke(1u8.into()))
+                .style(Style::stroke(1))
                 .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
@@ -437,12 +473,11 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut tri: TriangleIterator<TestPixelColor> =
+        let mut tri: TriangleIterator<u8> =
             Triangle::new(Coord::new(-2, -2), Coord::new(2, 0), Coord::new(-2, 0))
-                .with_style(Style::with_stroke(1u8.into()))
+                .style(Style::stroke(1))
                 .into_iter();
 
-        // TODO: Macro
         // Only the bottom of the triangle should be visible
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(0, 0), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));

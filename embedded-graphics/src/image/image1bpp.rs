@@ -14,6 +14,27 @@ use crate::pixelcolor::PixelColor;
 /// ```bash
 /// convert image.png -depth 1 gray:"image.raw"
 /// ```
+///
+/// # Examples
+///
+/// ## Load a 1 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image1BPP;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Load `patch_1bpp.raw`, a 1BPP 4x4px image
+/// let image = Image1BPP::new(include_bytes!("../../../assets/patch_1bpp.raw"), 4, 4);
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 pub type Image1BPP<'a, C> = Image<'a, C, ImageType1BPP>;
 
 /// 1 bit per pixel image type
@@ -94,13 +115,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image1BPP<PixelColorU16> =
+        let image: Image1BPP<u16> =
             Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
 
         assert_eq!(image.top_left(), Coord::new(-1, -1));
@@ -110,7 +130,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image1BPP<PixelColorU16> =
+        let image: Image1BPP<u16> =
             Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
 
         assert_eq!(image.top_left(), Coord::new(100, 200));

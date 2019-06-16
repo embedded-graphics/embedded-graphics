@@ -14,6 +14,27 @@ use crate::pixelcolor::PixelColor;
 /// ```bash
 /// convert image.png -depth 8 gray:"image.raw"
 /// ```
+///
+/// # Examples
+///
+/// ## Load an 8 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image8BPP;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Load `patch_8bpp.raw`, an 8BPP 4x4px image
+/// let image = Image8BPP::new(include_bytes!("../../../assets/patch_8bpp.raw"), 4, 4);
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 pub type Image8BPP<'a, C> = Image<'a, C, ImageType8BPP>;
 
 /// 8 bits per pixel image type
@@ -79,13 +100,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU8;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+        let image: Image8BPP<u8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -99,7 +119,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+        let image: Image8BPP<u8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -113,7 +133,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image8BPP<PixelColorU8> = Image8BPP::new(
+        let image: Image8BPP<u8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -121,22 +141,10 @@ mod tests {
         .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_u8.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 0), 0x00_u8.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 1), 0x00_u8.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_u8.into()))
-        );
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_)));
 
         assert_eq!(it.next(), None);
     }

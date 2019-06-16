@@ -1,3 +1,5 @@
+//! Demonstrate the chaining abilities of embedded graphics iterators
+
 extern crate embedded_graphics;
 extern crate simulator;
 
@@ -14,18 +16,18 @@ use simulator::{DisplayBuilder, DisplayTheme};
 fn main() {
     let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();
 
-    // Outline
-    display.draw(Circle::new(icoord!(64, 64), 64).stroke(Some(1u8.into())));
+    let objects = Circle::new(icoord!(64, 64), 64)
+        .stroke(Some(1u8.into()))
+        .into_iter()
+        .chain(Line::new(icoord!(64, 64), icoord!(0, 64)).stroke(Some(1u8.into())))
+        .chain(Line::new(icoord!(64, 64), icoord!(80, 80)).stroke(Some(1u8.into())))
+        .chain(
+            Font6x8::render_str("Hello World!")
+                .stroke(Some(1u8.into()))
+                .translate(icoord!(5, 50)),
+        );
 
-    // Clock hands
-    display.draw(Line::new(icoord!(64, 64), icoord!(0, 64)).stroke(Some(1u8.into())));
-    display.draw(Line::new(icoord!(64, 64), icoord!(80, 80)).stroke(Some(1u8.into())));
-
-    display.draw(
-        Font6x8::render_str("Hello World!")
-            .stroke(Some(1u8.into()))
-            .translate(icoord!(5, 50)),
-    );
+    display.draw(objects);
 
     loop {
         let end = display.run_once();

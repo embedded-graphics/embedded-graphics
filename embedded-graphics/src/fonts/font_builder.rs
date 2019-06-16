@@ -1,4 +1,6 @@
-//! Common code used to define available monospace pixel fonts
+//! Common code used to define available monospace pixel fonts.
+//!
+//! See the [module level type definitions](../index.html#types) for a list of usable fonts.
 
 use crate::coord::Coord;
 use crate::coord::ToUnsigned;
@@ -29,6 +31,9 @@ pub trait FontBuilderConf {
 }
 
 /// The font builder
+///
+/// This is a helper struct to reduce code duplication when implementing fonts. View the [module
+/// level type definitions](../index.html#types) for a list of usable fonts.
 #[derive(Debug)]
 pub struct FontBuilder<'a, C: PixelColor, Conf> {
     /// Top left corner of the text
@@ -94,42 +99,31 @@ where
             _conf: Default::default(),
         }
     }
-
-    fn dimensions(&self) -> UnsignedCoord {
-        UnsignedCoord::new(
-            Conf::CHAR_WIDTH * self.text.len() as u32,
-            if self.text.len() > 0 {
-                Conf::CHAR_HEIGHT
-            } else {
-                0
-            },
-        )
-    }
 }
 
 impl<'a, C, Conf> WithStyle<C> for FontBuilder<'a, C, Conf>
 where
     C: PixelColor,
 {
-    fn with_style(mut self, style: Style<C>) -> Self {
+    fn style(mut self, style: Style<C>) -> Self {
         self.style = style;
 
         self
     }
 
-    fn with_stroke(mut self, color: Option<C>) -> Self {
+    fn stroke(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
     }
 
-    fn with_stroke_width(self, _width: u8) -> Self {
+    fn stroke_width(self, _width: u8) -> Self {
         // Noop
 
         self
     }
 
-    fn with_fill(mut self, color: Option<C>) -> Self {
+    fn fill(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -150,6 +144,28 @@ where
     text: &'a str,
     style: Style<C>,
     _conf: PhantomData<Conf>,
+}
+
+impl<'a, C: 'a, Conf: 'a> IntoIterator for FontBuilder<'a, C, Conf>
+where
+    C: PixelColor,
+    Conf: FontBuilderConf,
+{
+    type Item = Pixel<C>;
+    type IntoIter = FontBuilderIterator<'a, C, Conf>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            current_char: self.text.chars().next(),
+            idx: 0,
+            text: self.text,
+            char_walk_x: 0,
+            char_walk_y: 0,
+            pos: self.pos,
+            style: self.style,
+            _conf: Default::default(),
+        }
+    }
 }
 
 impl<'a, C, Conf> IntoIterator for &'a FontBuilder<'a, C, Conf>
@@ -189,8 +205,9 @@ where
         }
 
         let char_per_row = Conf::FONT_IMAGE_WIDTH / Conf::CHAR_WIDTH;
-        if let Some(current_char) = self.current_char {
-            let pixel = loop {
+
+        let pixel = loop {
+            if let Some(current_char) = self.current_char {
                 // Char _code_ offset from first char, most often a space
                 // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
                 let char_offset = Conf::char_offset(current_char);
@@ -214,9 +231,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    self.style.stroke_color.unwrap_or(1.into()) // white
+                    Some(self.style.stroke_color.unwrap_or(1.into())) // white
                 } else {
-                    self.style.fill_color.unwrap_or(0.into()) // black
+                    self.style.fill_color
                 };
 
                 let x = self.pos[0]
@@ -238,19 +255,27 @@ where
                     }
                 }
 
-                if x >= 0 && y >= 0 {
-                    break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
+                // Skip to next coord if pixel is transparent
+                if let Some(color) = color {
+                    if x >= 0 && y >= 0 {
+                        break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
+                    }
                 }
-            };
+            } else {
+                break None;
+            }
+        };
 
-            pixel
-        } else {
-            None
-        }
+        pixel
     }
 }
 
-impl<'a, C, Conf> Drawable for FontBuilder<'a, C, Conf> where C: PixelColor {}
+impl<'a, C: 'a, Conf: 'a> Drawable for FontBuilder<'a, C, Conf>
+where
+    C: PixelColor,
+    Conf: FontBuilderConf,
+{
+}
 
 impl<'a, C, Conf> Transform for FontBuilder<'a, C, Conf>
 where
@@ -261,14 +286,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world")
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// let moved = text.translate(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(0, 0));
@@ -285,14 +309,13 @@ where
     ///
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
-    /// # use embedded_graphics::dev::TestPixelColor;
     /// # use embedded_graphics::prelude::*;
     /// #
-    /// # let style: Style<TestPixelColor> = Style::with_stroke(TestPixelColor(1));
+    /// # let style = Style::stroke(1u8);
     /// #
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world")
-    /// #    .with_style(style);
+    /// #    .style(style);
     /// text.translate_mut(Coord::new(25, 30));
     ///
     /// assert_eq!(text.pos, Coord::new(25, 30));

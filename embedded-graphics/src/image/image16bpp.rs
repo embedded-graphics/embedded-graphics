@@ -3,7 +3,7 @@ use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
 
-/// # 16 bits per pixel images
+/// # 16 bits per pixel image
 ///
 /// Every two bytes define the color for each pixel.
 ///
@@ -18,6 +18,27 @@ use crate::pixelcolor::PixelColor;
 /// ```
 /// This will remove the BMP header leaving the raw pixel data
 /// E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
+///
+/// # Examples
+///
+/// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image16BPP;
+/// # use embedded_graphics::mock_display::Display16Bpp;
+/// # let mut display = Display16Bpp::default();
+///
+/// // Load `patch_16bpp.raw`, a 16BPP 4x4px image
+/// let image = Image16BPP::new(include_bytes!("../../../assets/patch_16bpp.raw"), 4, 4);
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 pub type Image16BPP<'a, C> = Image<'a, C, ImageType16BPP>;
 
 /// 16 bits per pixel image type
@@ -84,13 +105,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorU16;
+
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+        let image: Image16BPP<u16> = Image16BPP::new(
             &[
                 0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, //
                 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, //
@@ -108,7 +129,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+        let image: Image16BPP<u16> = Image16BPP::new(
             &[
                 0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, //
                 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, //
@@ -126,7 +147,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image16BPP<PixelColorU16> = Image16BPP::new(
+        let image: Image16BPP<u16> = Image16BPP::new(
             &[
                 0xff, 0x00, 0x00, 0x00, 0xbb, 0x00, //
                 0x00, 0x00, 0xcc, 0x00, 0x00, 0x00, //
@@ -138,22 +159,10 @@ mod tests {
         .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_u16.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 0), 0x00_u16.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 1), 0x00_u16.into()))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_u16.into()))
-        );
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), 0x00_)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_)));
 
         assert_eq!(it.next(), None);
     }

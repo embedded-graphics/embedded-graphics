@@ -14,8 +14,8 @@ following:
 * 1 bit-per-pixel images
 * 8 bit-per-pixel images
 * 16 bit-per-pixel images
-* [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP
-* [TGA format (`.tga`)](https://en.wikipedia.org/wiki/Truevision_TGA) images
+* [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP (requires `bmp` feature)
+* [TGA format (`.tga`)](https://en.wikipedia.org/wiki/Truevision_TGA) images (requires `tga` feature)
 * Primitives
     * Lines
     * Rectangles (and squares)
@@ -29,11 +29,7 @@ takes an `Iterator` based approach, where pixel values and positions are calcula
 with the minimum of saved state. This allows the consuming application to use far less RAM at
 little to no performance penalty.
 
-To use this crate in a driver, you only need to implement the `Drawing` trait to start drawing
-things.
-
-You can also add your own objects by implementing `IntoIterator<Item = Pixel>` to create an
-iterator that `Drawable#draw()` can consume.
+More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
 
 Example usage can be found [in the simulator](./simulator/examples):
 
@@ -43,42 +39,47 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
 
-// Create a display object to draw into
-// This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
-let mut display = Display::new();
+fn main() {
+    // Create a display object to draw into
+    // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
+    let mut display = Display::new();
 
-display.draw(
-    Circle::new(Coord::new(64, 64), 64)
-        .with_stroke(Some(1u8.into()))
-        .into_iter(),
-);
+    display.draw(Circle::new(Coord::new(64, 64), 64).with_stroke(Some(1u8)));
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(0, 64)).with_stroke(Some(1u8)));
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80)).with_stroke(Some(1u8)));
 
-display.draw(
-    Line::new(Coord::new(64, 64), Coord::new(0, 64))
-        .with_stroke(Some(1u8.into()))
-        .into_iter(),
-);
-display.draw(
-    Line::new(Coord::new(64, 64), Coord::new(80, 80))
-        .with_stroke(Some(1u8.into()))
-        .into_iter(),
-);
-
-display.draw(
-    Font6x8::render_str("Hello World!")
-        .with_stroke(Some(1u8.into()))
-        .translate(Coord::new(5, 50))
-        .into_iter(),
-);
+    display.draw(
+        Font6x8::render_str("Hello World!")
+            .with_stroke(Some(1u8))
+            .translate(Coord::new(5, 50)),
+    );
+}
 ```
 
-## Features
+Macros are also supported for text and primitives:
+
+```rust
+use embedded_graphics::prelude::*;
+use embedded_graphics::{circle, icoord, line, rect, text_6x8, triangle};
+
+fn main() {
+    // Create a display object to draw into
+    // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
+    let mut display = Display::new();
+
+    display.draw(circle!((64, 64), 64, stroke = Some(1u8)));
+    display.draw(line!((64, 64), (0, 64), stroke = Some(1u8)));
+    display.draw(line!((64, 64), (80, 80), stroke = Some(1u8)));
+    display.draw(rect!((64, 64), (80, 80), stroke = None, fill = Some(2u8)));
+    display.draw(text_6x8!("Hello world!", stroke = Some(1u8)).translate(icoord!(5, 50)));
+}
+```
+
+## Cargo Features
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std` support to use as the `Coord` type. This should allow you to use most Nalgebra methods on objects rendered by embedded_graphics.
-
-## TODO
-
-* [ ] General matrix transforms
+* `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
+* `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 
 ## Attribution
 
