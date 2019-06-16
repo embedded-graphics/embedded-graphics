@@ -197,7 +197,7 @@ use crate::pixelcolor::PixelColor;
 ///     {
 ///         for Pixel(coord, color) in item {
 ///             // Place an (x, y) pixel at the right index in the framebuffer
-///             let index = coord.0 + (coord.1 * 64);
+///             let index = coord[0] + (coord[1] * 64);
 ///
 ///             self.framebuffer[index as usize] = color;
 ///         }
@@ -264,7 +264,7 @@ where
 ///
 /// impl ExampleBufferlessDisplay {
 ///     /// Set draw area
-///     pub fn set_draw_area(&self, (x1, y1): (u32, u32), (x2, y2): (u32, u32)) -> Result<(), ()> {
+///     pub fn set_draw_area(&self, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<(), ()> {
 ///         // Some magic incantation to set a sub-area of the display to update
 ///         self.iface
 ///             .send_command(&[0xff, x1 as u8, y1 as u8, x2 as u8, y2 as u8])
@@ -277,11 +277,11 @@ where
 ///         T: IntoIterator<Item = Pixel<u8>> + Dimensions,
 ///     {
 ///         // Get bounding box `Coord`s as `(u32, u32)`
-///         let (x1, y1) = item.top_left().clamp_positive().to_unsigned().into();
-///         let (x2, y2) = item.bottom_right().clamp_positive().to_unsigned().into();
+///         let tl = item.top_left();
+///         let br = item.bottom_right();
 ///
 ///         // Set a sub-area of the display to update
-///         self.set_draw_area((x1, y1), (x2, y2));
+///         self.set_draw_area(tl[0], tl[1], br[0], br[1]);
 ///
 ///         // Send updated pixel one at a time. Could use a chunked buffer to make this more efficient.
 ///         // `coord` isn't used as the update area is the same as the item's bounding box which
