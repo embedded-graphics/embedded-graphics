@@ -45,6 +45,14 @@ mod internal_coord {
         }
 
         /// Clamp coordinate components to positive integer range
+        ///
+        /// ```
+        /// # use embedded_graphics::coord::Coord;
+        /// #
+        /// let coord = Coord::new(-5, 10);
+        ///
+        /// assert_eq!(coord.clamp_positive(), Coord::new(0, 10));
+        /// ```
         pub fn clamp_positive(&self) -> Self {
             Coord::new(self.0.max(0), self.1.max(0))
         }
