@@ -20,7 +20,11 @@
 //!
 //! # Simulator
 //!
-//! Embedded graphics comes with a [simulator]! Take a look at the [simulator examples] to see what
+//! Embedded graphics comes with a [simulator]!
+//!
+//! ![Example screenshots of the simulator](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/assets/simulator-demo.png)
+//!
+//! Take a look at the [simulator examples] to see what
 //! embedded_graphics can do, and how it might look on a display. You can run the examples like
 //! this:
 //!
