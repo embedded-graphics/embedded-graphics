@@ -79,27 +79,46 @@ jobs:
 
 workflows:
   version: 2
-  precheck:
+  build_all:
     jobs:
-      - precheck-nightly
-      - precheck-beta
-      - precheck-stable
-  all:
-    requires:
-      - precheck
-    jobs:
-      # Raspberry Pi 1
-      - target-arm-unknown-linux-eabi
+        - precheck-stable
+        - precheck-beta
+        - precheck-nightly
 
-      # Raspberry Pi 2, 3, etc
-      - target-armv7-unknown-linux-gnueabihf
+        - precheck-all:
+            requires:
+              - precheck-stable
+              - precheck-beta
+              - precheck-nightly
 
-      # Linux
-      - target-x86_64-unknown-linux-gnu
-      - target-x86_64-unknown-linux-musl
+        # Raspberry Pi 1
+        - target-arm-unknown-linux-eabi:
+            requires:
+              - precheck-all
 
-      # Bare metal
-      - target-thumbv6m-none-eabi
-      - target-thumbv7em-none-eabi
-      - target-thumbv7em-none-eabihf
-      - target-thumbv7m-none-eabi
+        # Raspberry Pi 2, 3, etc
+        - target-armv7-unknown-linux-gnueabihf:
+            requires:
+              - precheck-all
+
+        # Linux
+        - target-x86_64-unknown-linux-gnu:
+            requires:
+              - precheck-all
+        - target-x86_64-unknown-linux-musl:
+            requires:
+              - precheck-all
+
+        # Bare metal
+        - target-thumbv6m-none-eabi:
+            requires:
+              - precheck-all
+        - target-thumbv7em-none-eabi:
+            requires:
+              - precheck-all
+        - target-thumbv7em-none-eabihf:
+            requires:
+              - precheck-all
+        - target-thumbv7m-none-eabi:
+            requires:
+              - precheck-all
