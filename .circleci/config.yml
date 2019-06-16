@@ -4,9 +4,16 @@ precheck_steps: &precheck_steps
     - image: circleci/rust:latest
   steps:
     - checkout
+    - restore_cache:
+        key: v1-embedded-graphics-{{ checksum "Cargo.lock" }}
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: ./build.sh
+    - save_cache:
+        key: v1-embedded-graphics-{{ checksum "Cargo.lock" }}
+        paths:
+          - ./target
+          - /home/ubuntu/.cargo
 
 # Build crates for embedded target
 target_steps: &target_steps
@@ -14,6 +21,10 @@ target_steps: &target_steps
     - image: circleci/rust:latest
   steps:
     - checkout
+    - restore_cache:
+        keys:
+          - v1-embedded-graphics-{{ checksum "Cargo.lock" }}
+          - v1-embedded-graphics-{{ checksum "Cargo.lock" }}-{{ .Environment.TARGET }}
     - run: |
         SYSROOT=$(rustc --print sysroot)
 
@@ -24,6 +35,10 @@ target_steps: &target_steps
         fi
     - run: ./build_target.sh
     - run: ./build_target.sh --release
+    - save_cache:
+        keys:
+          - v1-embedded-graphics-{{ checksum "Cargo.lock" }}
+          - v1-embedded-graphics-{{ checksum "Cargo.lock" }}-{{ .Environment.TARGET }}
 
 version: 2
 jobs:
