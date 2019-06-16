@@ -10,6 +10,36 @@ use crate::style::WithStyle;
 use crate::unsignedcoord::UnsignedCoord;
 
 /// Rectangle primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.rect.html) make for more concise code.
+///
+/// ## Create some rectangles with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Rect;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default rect from (10, 20) to (30, 40)
+/// let r1 = Rect::new(Coord::new(10, 20), Coord::new(30, 40));
+///
+/// // Rect with styled stroke and fill from (50, 20) to (60, 35)
+/// let r2 = Rect::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .stroke(Some(5u8))
+///     .stroke_width(3)
+///     .fill(Some(10u8));
+///
+/// // Rect with translation applied
+/// let r3 = Rect::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(r1);
+/// display.draw(r2);
+/// display.draw(r3);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Rect<C: PixelColor> {
     /// Top left point of the rect

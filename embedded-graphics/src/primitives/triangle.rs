@@ -11,6 +11,34 @@ use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// Triangle primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.triangle.html) make for more concise code.
+///
+/// ## Create some triangles with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Triangle;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default triangle with no styling
+/// let t1 = Triangle::new(Coord::new(10, 20), Coord::new(30, 40), Coord::new(50, 60));
+///
+/// // Triangle with styled stroke from (50, 20) to (60, 35)
+/// let t2 = Triangle::new(Coord::new(50, 20), Coord::new(60, 35), Coord::new(70, 80))
+///     .stroke(Some(5u8));
+///
+/// // Triangle with translation applied
+/// let t3 = Triangle::new(Coord::new(50, 20), Coord::new(60, 35), Coord::new(70, 80))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(t1);
+/// display.draw(t2);
+/// display.draw(t3);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle<C: PixelColor> {
     /// First point of the triangle

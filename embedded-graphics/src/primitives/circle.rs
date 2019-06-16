@@ -10,6 +10,38 @@ use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// Circle primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.circle.html) make for more concise code.
+///
+/// ## Create some circles with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Circle;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default circle with only a stroke centered around (10, 20) with a radius of 30
+/// let c1 = Circle::new(Coord::new(10, 20), 30);
+///
+/// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
+/// let c2 = Circle::new(Coord::new(50, 20), 30)
+///     .stroke(Some(5u8))
+///     .stroke_width(3)
+///     .fill(Some(10u8));
+///
+/// // Circle with no stroke and a translation applied
+/// let c3 = Circle::new(Coord::new(10, 20), 30)
+///     .stroke(None)
+///     .fill(Some(10u8))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(c1);
+/// display.draw(c2);
+/// display.draw(c3);
+/// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Circle<C: PixelColor> {
     /// Center point of circle
@@ -26,7 +58,7 @@ impl<C> Circle<C>
 where
     C: PixelColor,
 {
-    /// Create a new circle with center point, radius and border color
+    /// Create a new circle centered around a given point with a specific radius
     pub fn new(center: Coord, radius: u32) -> Self {
         Circle {
             center,
