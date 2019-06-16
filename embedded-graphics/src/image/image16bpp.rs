@@ -3,7 +3,7 @@ use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
 use crate::pixelcolor::PixelColor;
 
-/// # 16 bits per pixel images
+/// # 16 bits per pixel image
 ///
 /// Every two bytes define the color for each pixel.
 ///
@@ -18,6 +18,27 @@ use crate::pixelcolor::PixelColor;
 /// ```
 /// This will remove the BMP header leaving the raw pixel data
 /// E.g 64x64 image will have `64 * 64 * 2` bytes of raw data.
+///
+/// # Examples
+///
+/// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image16BPP;
+/// # use embedded_graphics::mock_display::Display16Bpp;
+/// # let mut display = Display16Bpp::default();
+///
+/// // Load `patch_16bpp.raw`, a 16BPP 4x4px image
+/// let image = Image16BPP::new(include_bytes!("../../../assets/patch_16bpp.raw"), 4, 4);
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 pub type Image16BPP<'a, C> = Image<'a, C, ImageType16BPP>;
 
 /// 16 bits per pixel image type

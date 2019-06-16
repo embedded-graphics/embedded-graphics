@@ -14,6 +14,27 @@ use crate::pixelcolor::PixelColor;
 /// ```bash
 /// convert image.png -depth 1 gray:"image.raw"
 /// ```
+///
+/// # Examples
+///
+/// ## Load a 1 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image1BPP;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Load `patch_1bpp.raw`, a 1BPP 4x4px image
+/// let image = Image1BPP::new(include_bytes!("../../../assets/patch_1bpp.raw"), 4, 4);
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 pub type Image1BPP<'a, C> = Image<'a, C, ImageType1BPP>;
 
 /// 1 bit per pixel image type

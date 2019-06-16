@@ -14,6 +14,27 @@ use crate::pixelcolor::PixelColor;
 /// ```bash
 /// convert image.png -depth 8 gray:"image.raw"
 /// ```
+///
+/// # Examples
+///
+/// ## Load an 8 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image8BPP;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Load `patch_8bpp.raw`, an 8BPP 4x4px image
+/// let image = Image8BPP::new(include_bytes!("../../../assets/patch_8bpp.raw"), 4, 4);
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 pub type Image8BPP<'a, C> = Image<'a, C, ImageType8BPP>;
 
 /// 8 bits per pixel image type
