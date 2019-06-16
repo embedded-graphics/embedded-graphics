@@ -10,6 +10,27 @@ use tinybmp::Bmp;
 /// BMP format image
 ///
 /// `ImageBmp` is available with the `bmp` feature turned on
+///
+/// # Examples
+///
+/// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::ImageBmp;
+/// # use embedded_graphics::mock_display::Display16Bpp;
+/// # let mut display = Display16Bpp::default();
+///
+/// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
+/// let image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C: PixelColor> {
     bmp: Bmp<'a>,

@@ -18,6 +18,12 @@ impl MockDisplay<u16> {
     }
 }
 
+impl MockDisplay<u32> {
+    pub fn new(bytes: [[u32; 24]; 16]) -> Self {
+        Self(bytes)
+    }
+}
+
 impl Default for MockDisplay<u8> {
     fn default() -> Self {
         MockDisplay::<u8>::new([[0; 24]; 16])
@@ -27,6 +33,12 @@ impl Default for MockDisplay<u8> {
 impl Default for MockDisplay<u16> {
     fn default() -> Self {
         MockDisplay::<u16>::new([[0u16; 24]; 16])
+    }
+}
+
+impl Default for MockDisplay<u32> {
+    fn default() -> Self {
+        MockDisplay::<u32>::new([[0u32; 24]; 16])
     }
 }
 
@@ -70,3 +82,4 @@ where
 
 pub type Display = MockDisplay<u8>;
 pub type Display16Bpp = MockDisplay<u16>;
+pub type Display32Bpp = MockDisplay<u32>;
