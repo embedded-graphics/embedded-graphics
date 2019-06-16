@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  stable:
+    docker:
+      - image: circleci/rust:latest
+    steps:
+      - checkout
+      - run: rustc --version
+  beta:
+    docker:
+      - image: circleci/rust:latest
+    steps:
+      - checkout
+      - run: rustup default beta
+      - run: rustc --version
+  nightly:
+    docker:
+      - image: circleci/rust:latest
+    steps:
+      - checkout
+      - run: rustup default nightly
+      - run: rustc --version
+
+workflows:
+  version: 2
+  all:
+    jobs:
+      - stable
+      - beta
+      - nightly
