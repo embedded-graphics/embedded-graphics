@@ -45,7 +45,7 @@
 //!
 //! Embedded graphics comes with a [simulator]!
 //!
-//! ![Example screenshots of the simulator](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
+//! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 //!
 //! Take a look at the [simulator examples] to see what
 //! embedded_graphics can do, and how it might look on a display. You can run the examples like
