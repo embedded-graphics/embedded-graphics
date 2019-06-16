@@ -58,7 +58,7 @@ jobs:
 
   target-arm-unknown-linux-eabi:
     environment:
-      - TARGET: 'arm-unknown-linux-eabi'
+      - TARGET: 'arm-unknown-linux-gnueabi'
     <<: *target_steps
 
   target-armv7-unknown-linux-gnueabihf:
