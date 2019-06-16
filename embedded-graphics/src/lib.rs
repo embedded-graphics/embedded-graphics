@@ -18,6 +18,22 @@
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
 //! iterator that `Drawable#draw()` can consume.
 //!
+//! # Simulator
+//!
+//! Embedded graphics comes with a [simulator]! Take a look at the [simulator examples] to see what
+//! embedded_graphics can do, and how it might look on a display. You can run the examples like
+//! this:
+//!
+//! ```bash
+//! git clone https://github.com/jamwaffles/embedded-graphics.git
+//! cd embedded-graphics
+//!
+//! cargo run -p simulator --example hello
+//! ```
+//!
+//! [simulator]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator
+//! [simulator examples]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator/examples
+//!
 //! # Crate features
 //!
 //! Add these to your `Cargo.toml` to turn on extra bits of functionality.
