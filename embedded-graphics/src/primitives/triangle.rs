@@ -10,7 +10,6 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
-// TODO: Impl Default so people can leave the color bit out
 /// Triangle primitive
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle<C: PixelColor> {
@@ -451,7 +450,6 @@ mod tests {
                 .style(Style::stroke(1))
                 .into_iter();
 
-        // TODO: Macro
         // Only the bottom of the triangle should be visible
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(0, 0), 1.into())));
         assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));

@@ -9,7 +9,6 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::UnsignedCoord;
 
-// TODO: Impl Default so people can leave the color bit out
 /// Rectangle primitive
 #[derive(Debug, Clone, Copy)]
 pub struct Rect<C: PixelColor> {

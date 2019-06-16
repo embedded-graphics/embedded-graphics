@@ -9,7 +9,6 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
-// TODO: Impl Default so people can leave the color bit out
 /// Line primitive
 #[derive(Debug, Copy, Clone)]
 pub struct Line<C: PixelColor> {
