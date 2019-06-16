@@ -94,48 +94,40 @@ jobs:
       - TARGET: 'thumbv7m-none-eabi'
     <<: *target_steps
 
+precheck_job: &precheck_job
+  requires:
+    - precheck-stable
+    - precheck-beta
+    - precheck-nightly
+
 workflows:
   version: 2
   build_all:
     jobs:
-        - precheck-stable
-        - precheck-beta
-        - precheck-nightly
+      - precheck-stable
+      - precheck-beta
+      - precheck-nightly
 
-        - precheck-all:
-            requires:
-              - precheck-stable
-              - precheck-beta
-              - precheck-nightly
+      # Raspberry Pi 1
+      - target-arm-unknown-linux-eabi:
+          <<: *precheck_job
 
-        # Raspberry Pi 1
-        - target-arm-unknown-linux-eabi:
-            requires:
-              - precheck-all
+      # Raspberry Pi 2, 3, etc
+      - target-armv7-unknown-linux-gnueabihf:
+          <<: *precheck_job
 
-        # Raspberry Pi 2, 3, etc
-        - target-armv7-unknown-linux-gnueabihf:
-            requires:
-              - precheck-all
+      # Linux
+      - target-x86_64-unknown-linux-gnu:
+          <<: *precheck_job
+      - target-x86_64-unknown-linux-musl:
+          <<: *precheck_job
 
-        # Linux
-        - target-x86_64-unknown-linux-gnu:
-            requires:
-              - precheck-all
-        - target-x86_64-unknown-linux-musl:
-            requires:
-              - precheck-all
-
-        # Bare metal
-        - target-thumbv6m-none-eabi:
-            requires:
-              - precheck-all
-        - target-thumbv7em-none-eabi:
-            requires:
-              - precheck-all
-        - target-thumbv7em-none-eabihf:
-            requires:
-              - precheck-all
-        - target-thumbv7m-none-eabi:
-            requires:
-              - precheck-all
+      # Bare metal
+      - target-thumbv6m-none-eabi:
+          <<: *precheck_job
+      - target-thumbv7em-none-eabi:
+          <<: *precheck_job
+      - target-thumbv7em-none-eabihf:
+          <<: *precheck_job
+      - target-thumbv7m-none-eabi:
+          <<: *precheck_job
