@@ -6,7 +6,8 @@ precheck_steps: &precheck_steps
     - checkout
     - restore_cache:
         key: v1-embedded-graphics-{{ checksum "Cargo.lock" }}
-    - run: sudo apt install -qq libsdl2-dev
+    - run: sudo apt install -qq libsdl2-dev python-pip
+    - run: sudo pip install linkchecker
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: ./build.sh
