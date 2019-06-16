@@ -24,6 +24,23 @@
 //! with the minimum of saved state. This allows the consuming application to use far less RAM at
 //! little to no performance penalty.
 //!
+//! # Supported displays
+//!
+//! These are just some of the displays the community has added embedded_graphics support to. This
+//! list is taken from the [dependent crates
+//! list](https://crates.io/crates/embedded-graphics/reverse_dependencies) on crates.io so might be
+//! missing some unpublished entries. Please [open an
+//! issue](https://github.com/jamwaffles/embedded-graphics/issues/new) if there's a display driver
+//! that should be added to this list.
+//!
+//! * [ILI9341](https://crates.io/crates/ili9341)
+//! * [SH1106](https://crates.io/crates/sh1106)
+//! * [SSD1306](https://crates.io/crates/ssd1306)
+//! * [SSD1331](https://crates.io/crates/ssd1331)
+//! * [SSD1351](https://crates.io/crates/ssd1351)
+//! * [SSD1675](https://crates.io/crates/ssd1675)
+//! * [ST7735](https://crates.io/crates/st7735-lcd)
+//!
 //! # Simulator
 //!
 //! Embedded graphics comes with a [simulator]!
