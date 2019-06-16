@@ -75,12 +75,137 @@
 //! # Implementing `embedded_graphics` in a driver
 //!
 //! To use this crate in a driver, you only need to implement the [`Drawing`](./trait.Drawing.html)
-//! trait to start drawing things.
+//! trait to start drawing things. What follows is an example for an imaginary display that has a
+//! 64x64px framebuffer of 8 bit values that communicates over a (simplified) SPI interface:
+//!
+//! ```rust
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::Drawing;
+//! use embedded_graphics::circle;
+//!
+//! # struct SPI1;
+//! #
+//! # impl SPI1 {
+//! #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
+//! #         Ok(())
+//! #     }
+//! # }
+//! #
+//! /// A fake display 64px x 64px where each pixel is stored as a single `u8`
+//! struct ExampleDisplay {
+//!     framebuffer: [u8; 64 * 64],
+//!     iface: SPI1,
+//! }
+//!
+//! impl ExampleDisplay {
+//!     /// Send buffer to the display
+//!     pub fn flush(&self) -> Result<(), ()> {
+//!         self.iface.send_bytes(&self.framebuffer)
+//!     }
+//! }
+//!
+//! impl Drawing<u8> for ExampleDisplay {
+//!     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `u8`
+//!     fn draw<T>(&mut self, item: T)
+//!     where
+//!         T: IntoIterator<Item = Pixel<u8>>,
+//!     {
+//!         for Pixel(coord, color) in item {
+//!             // Place an (x, y) pixel at the right index in the framebuffer
+//!             let index = coord.0 + (coord.1 * 64);
+//!
+//!             self.framebuffer[index as usize] = color;
+//!         }
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let mut display = ExampleDisplay {
+//!         framebuffer: [0; 4096],
+//!         iface: SPI1
+//!     };
+//!
+//!     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
+//!     display.draw(circle!((32, 32), 10, stroke = Some(1u8)));
+//!
+//!     // Update the display
+//!     display.flush().expect("Failed to send data to display");
+//! }
+//! ```
 //!
 //! If the device used supports partial updates where only a given range of pixels is updated, you
 //! should also implement the [`SizedDrawing`](./trait.SizedDrawing.html) trait. This is similar to
 //! `Drawing`, but has a bound on [`Dimensions`](./drawable/trait.Dimensions.html) which provides
-//! methods for getting the bounding rectangle of the passed item to draw.
+//! methods for getting the bounding box of the passed item to draw.
+//!
+//! The example below shows a
+//! contrived implementation for a display that doesn't require a framebuffer. It sends pixels one
+//! by one to over the SPI bus which isn't very efficient, but that could be fixed by using a fixed
+//! length chunked buffering scheme.
+//!
+//! ```rust
+//! use embedded_graphics::circle;
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::SizedDrawing;
+//!
+//! # struct SPI1;
+//! #
+//! # impl SPI1 {
+//! #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
+//! #         Ok(())
+//! #     }
+//! #
+//! #     pub fn send_command(&self, cmd: &[u8]) -> Result<(), ()> {
+//! #         Ok(())
+//! #     }
+//! # }
+//! #
+//! /// A fake display 64px x 64px where each pixel is stored as a single `u8`
+//! struct ExampleBufferlessDisplay {
+//!     iface: SPI1,
+//! }
+//!
+//! impl ExampleBufferlessDisplay {
+//!     /// Set draw area
+//!     pub fn set_draw_area(&self, (x1, y1): (u32, u32), (x2, y2): (u32, u32)) -> Result<(), ()> {
+//!         // Some magic incantation to set a sub-area of the display to update
+//!         self.iface
+//!             .send_command(&[0xff, x1 as u8, y1 as u8, x2 as u8, y2 as u8])
+//!     }
+//! }
+//!
+//! impl SizedDrawing<u8> for ExampleBufferlessDisplay {
+//!     fn draw_sized<T>(&mut self, item: T)
+//!     where
+//!         T: IntoIterator<Item = Pixel<u8>> + Dimensions,
+//!     {
+//!         // Get bounding box `Coord`s as `(u32, u32)`
+//!         let (x1, y1) = item.top_left().clamp_positive().to_unsigned().into();
+//!         let (x2, y2) = item.bottom_right().clamp_positive().to_unsigned().into();
+//!
+//!         // Set a sub-area of the display to update
+//!         self.set_draw_area((x1, y1), (x2, y2));
+//!
+//!         // Send updated pixel one at a time. Could use a chunked buffer to make this more efficient.
+//!         // `coord` isn't used as the update area is the same as the item's bounding box which
+//!         // wraps the bytes automatically
+//!         for Pixel(_coord, color) in item {
+//!             self.iface.send_bytes(&[color]);
+//!         }
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let mut display = ExampleBufferlessDisplay {
+//!         iface: SPI1
+//!     };
+//!
+//!     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
+//!     display.draw_sized(circle!((32, 32), 10, stroke = Some(1u8)));
+//!
+//!     // No `flush()` is required as `draw_sized()` sends the bytes directly
+//! }
+//! ```
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
