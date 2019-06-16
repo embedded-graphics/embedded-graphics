@@ -1,25 +1,23 @@
+build_env: &build_env
+  docker:
+    - image: circleci/rust:latest
+  steps:
+    - checkout
+    - run: rustup default ${RUST_VERSION:-stable}
+    - run: rustc --version
+
 version: 2
 jobs:
   stable:
-    docker:
-      - image: circleci/rust:latest
-    steps:
-      - checkout
-      - run: rustc --version
+    <<: *build_env
   beta:
-    docker:
-      - image: circleci/rust:latest
-    steps:
-      - checkout
-      - run: rustup default beta
-      - run: rustc --version
+    environment:
+      - RUST_VERSION: 'beta'
+    <<: *build_env
   nightly:
-    docker:
-      - image: circleci/rust:latest
-    steps:
-      - checkout
-      - run: rustup default nightly
-      - run: rustc --version
+    environment:
+      - RUST_VERSION: 'nightly'
+    <<: *build_env
 
 workflows:
   version: 2
