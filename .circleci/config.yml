@@ -5,6 +5,7 @@ precheck_steps: &precheck_steps
   steps:
     - checkout
     - run: rustup default ${RUST_VERSION:-stable}
+    - run: rustup component add rustfmt
     - run: ./build.sh
 
 # Build crates for embedded target
