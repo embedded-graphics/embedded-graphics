@@ -10,7 +10,7 @@ const BLUE_MASK: u16 = 0b00000_000000_11111;
 ///
 /// Pixel values are stored in a single `u16` segmented as follows:
 ///
-/// ```ignore
+/// ```text
 /// 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 ///  r  r  r  r  r  g  g  g  g  g  g  b  b  b  b  b
 /// ```
