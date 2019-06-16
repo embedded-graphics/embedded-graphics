@@ -1,6 +1,6 @@
 # TinyBMP
 
-[![Build Status](https://travis-ci.org/jamwaffles/embedded-graphics.svg?branch=master)](https://travis-ci.org/jamwaffles/embedded-graphics)
+[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=svg)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/tinybmp.svg)](https://crates.io/crates/tinybmp)
 [![Docs.rs](https://docs.rs/tinybmp/badge.svg)](https://docs.rs/tinybmp)
 
