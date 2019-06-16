@@ -4,18 +4,39 @@ use crate::{Drawing, SizedDrawing};
 
 /// Mock display for use in tests and some doc examples. Do not use directly!
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
-pub struct Display(pub [[u8; 24]; 16]);
+pub struct MockDisplay<P>(pub [[P; 24]; 16]);
 
-impl Default for Display {
-    fn default() -> Self {
-        Display([[0; 24]; 16])
+impl MockDisplay<u8> {
+    pub fn new(bytes: [[u8; 24]; 16]) -> Self {
+        Self(bytes)
     }
 }
 
-impl Drawing<u8> for Display {
+impl MockDisplay<u16> {
+    pub fn new(bytes: [[u16; 24]; 16]) -> Self {
+        Self(bytes)
+    }
+}
+
+impl Default for MockDisplay<u8> {
+    fn default() -> Self {
+        MockDisplay::<u8>::new([[0; 24]; 16])
+    }
+}
+
+impl Default for MockDisplay<u16> {
+    fn default() -> Self {
+        MockDisplay::<u16>::new([[0u16; 24]; 16])
+    }
+}
+
+impl<P> Drawing<P> for MockDisplay<P>
+where
+    P: PixelColor,
+{
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: IntoIterator<Item = Pixel<u8>>,
+        T: IntoIterator<Item = Pixel<P>>,
     {
         for Pixel(coord, color) in item_pixels {
             if coord[0] >= 24 || coord[1] >= 16 {
@@ -26,10 +47,13 @@ impl Drawing<u8> for Display {
     }
 }
 
-impl SizedDrawing<u8> for Display where {
+impl<P> SizedDrawing<P> for MockDisplay<P>
+where
+    P: PixelColor,
+{
     fn draw_sized<T>(&mut self, item: T)
     where
-        T: IntoIterator<Item = Pixel<u8>> + Dimensions,
+        T: IntoIterator<Item = Pixel<P>> + Dimensions,
     {
         // Use `top_left()`, `size()`, etc methods defined on Dimensions to set draw area here
 
@@ -43,3 +67,6 @@ impl SizedDrawing<u8> for Display where {
         }
     }
 }
+
+pub type Display = MockDisplay<u8>;
+pub type Display16Bpp = MockDisplay<u16>;
