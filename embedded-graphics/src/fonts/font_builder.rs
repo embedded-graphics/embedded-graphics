@@ -1,4 +1,6 @@
-//! Common code used to define available monospace pixel fonts
+//! Common code used to define available monospace pixel fonts.
+//!
+//! See the [module level type definitions](../index.html#types) for a list of usable fonts.
 
 use crate::coord::Coord;
 use crate::coord::ToUnsigned;
@@ -29,6 +31,9 @@ pub trait FontBuilderConf {
 }
 
 /// The font builder
+///
+/// This is a helper struct to reduce code duplication when implementing fonts. View the [module
+/// level type definitions](../index.html#types) for a list of usable fonts.
 #[derive(Debug)]
 pub struct FontBuilder<'a, C: PixelColor, Conf> {
     /// Top left corner of the text

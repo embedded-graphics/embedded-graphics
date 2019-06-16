@@ -20,6 +20,68 @@ impl FontBuilderConf for Font12x16Conf {
 }
 
 /// 12x16 pixel monospace font
+///
+/// There is also the [`text_12x16`] macro to provide an easier to use interface.
+///
+/// # Examples
+///
+/// ## Write some text to the screen at the default `(0, 0)` position
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::fonts::Font12x16;
+/// use embedded_graphics::text_12x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Use struct methods directly
+/// display.draw(Font12x16::render_str("Hello Rust!"));
+///
+/// // Use a macro instead
+/// display.draw(text_12x16!("Hello Rust!"));
+/// ```
+///
+/// ## Translate text by (20px, 30px)
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::fonts::Font12x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// display.draw(
+///     Font12x16::render_str("Hello Rust!").translate(Coord::new(20, 30))
+/// );
+/// ```
+///
+/// ## Add some styling to the text
+///
+/// Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
+/// Properties like `fill` or `stroke` passed to the `text_12x16` macro are converted into method
+/// calls verbatim.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::text_12x16;
+/// use embedded_graphics::fonts::Font12x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// display.draw(text_12x16!(
+///     "Hello Rust!",
+///     fill = Some(1u8),
+///     stroke = Some(0u8)
+/// ));
+///
+/// display.draw(
+///     Font12x16::render_str("Hello Rust!")
+///         .translate(Coord::new(20, 30))
+///         .fill(Some(1u8))
+///         .stroke(Some(0u8)),
+/// );
+/// ```
+///
+/// [`text_12x16`]: ../macro.text_12x16.html
 pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;
 
 #[cfg(test)]
