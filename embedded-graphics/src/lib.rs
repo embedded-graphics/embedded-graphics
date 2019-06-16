@@ -9,10 +9,10 @@
 //! * [BMP-format images](./image/struct.ImageBmp.html) (with `bmp` feature enabled)
 //! * [TGA-format images](./image/struct.ImageTga.html) (with `tga` feature enabled)
 //! * [Primitives](./primitives/index.html)
-//!     * Lines
-//!     * Rectangles (and squares)
-//!     * Circles
-//!     * Triangles
+//!     * [Lines](./primitives/line/struct.Line.html)
+//!     * [Rectangles (and squares)](./primitives/rect/struct.Rect.html)
+//!     * [Circles](./primitives/circle/struct.Circle.html)
+//!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
