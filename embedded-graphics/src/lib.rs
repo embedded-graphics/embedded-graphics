@@ -86,6 +86,25 @@
 //! display.draw(t);
 //! ```
 //!
+//! ## Chaining
+//!
+//! Items can be chained to build more complex graphics objects.
+//!
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::{text_6x8, circle, icoord, rect};
+//! # use embedded_graphics::mock_display::Display;
+//!
+//! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<u8>> {
+//!     rect!((0, 0), (40, 40)).into_iter()
+//!         .chain(circle!((20, 20), 8, fill = Some(1u8)))
+//!         .chain(text_6x8!(text, fill = Some(20u8)).translate(icoord!(20, 16)))
+//! }
+//!
+//! fn main() {
+//!     //! # let mut display = Display::default();
+//!     display.draw(build_thing("Hello Rust!"));
+//! }
+//!
 //! A core goal is to do the above without using any buffers; the crate should work without a
 //! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
 //! takes an `Iterator` based approach, where pixel values and positions are calculated on the fly,
