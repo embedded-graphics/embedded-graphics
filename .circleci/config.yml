@@ -1,28 +1,105 @@
-build_env: &build_env
+# Check that everything (tests, benches, etc) builds in std environments
+precheck_steps: &precheck_steps
   docker:
     - image: circleci/rust:latest
   steps:
     - checkout
     - run: rustup default ${RUST_VERSION:-stable}
-    - run: rustc --version
+    - run: ./build.sh
+
+# Build crates for embedded target
+target_steps: &target_steps
+  docker:
+    - image: circleci/rust:latest
+  steps:
+    - checkout
+    - run: |
+        SYSROOT=$(rustc --print sysroot)
+
+        if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
+          rustup target add $TARGET
+        else
+          echo "Target $TARGET is already installed"
+        fi
+    - run: ./build_target.sh
+    - run: ./build_target.sh --release
 
 version: 2
 jobs:
-  stable:
-    <<: *build_env
-  beta:
+  precheck-stable:
+    <<: *precheck_steps
+  precheck-beta:
     environment:
       - RUST_VERSION: 'beta'
-    <<: *build_env
-  nightly:
+    <<: *precheck_steps
+  precheck-nightly:
     environment:
       - RUST_VERSION: 'nightly'
-    <<: *build_env
+    <<: *precheck_steps
+
+  target-arm-unknown-linux-eabi:
+    environment:
+      - TARGET: 'arm-unknown-linux-eabi'
+    <<: *target_steps
+
+  target-armv7-unknown-linux-gnueabihf:
+    environment:
+      - TARGET: 'armv7-unknown-linux-gnueabihf'
+    <<: *target_steps
+
+  target-x86_64-unknown-linux-gnu:
+    environment:
+      - TARGET: 'x86_64-unknown-linux-gnu'
+    <<: *target_steps
+
+  target-x86_64-unknown-linux-musl:
+    environment:
+      - TARGET: 'x86_64-unknown-linux-musl'
+    <<: *target_steps
+
+  target-thumbv6m-none-eabi:
+    environment:
+      - TARGET: 'thumbv6m-none-eabi'
+    <<: *target_steps
+
+  target-thumbv7em-none-eabi:
+    environment:
+      - TARGET: 'thumbv7em-none-eabi'
+    <<: *target_steps
+
+  target-thumbv7em-none-eabihf:
+    environment:
+      - TARGET: 'thumbv7em-none-eabihf'
+    <<: *target_steps
+
+  target-thumbv7m-none-eabi:
+    environment:
+      - TARGET: 'thumbv7m-none-eabi'
+    <<: *target_steps
 
 workflows:
   version: 2
-  all:
+  precheck:
     jobs:
-      - stable
-      - beta
-      - nightly
+      - precheck-nightly
+      - precheck-beta
+      - precheck-stable
+  all:
+    requires:
+      - precheck
+    jobs:
+      # Raspberry Pi 1
+      - target-arm-unknown-linux-eabi
+
+      # Raspberry Pi 2, 3, etc
+      - target-armv7-unknown-linux-gnueabihf
+
+      # Linux
+      - target-x86_64-unknown-linux-gnu
+      - target-x86_64-unknown-linux-musl
+
+      # Bare metal
+      - target-thumbv6m-none-eabi
+      - target-thumbv7em-none-eabi
+      - target-thumbv7em-none-eabihf
+      - target-thumbv7m-none-eabi
