@@ -16,7 +16,13 @@
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
 //! You can also add your own objects by implementing `IntoIterator<Item = Pixel<C>>` to create an
-//! iterator that `Drawable#draw()` can consume.
+//! iterator that [`Drawing#draw()`][`Drawing`] can consume.
+//!
+//! A core goal is to do the above without using any buffers; the crate should work without a
+//! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
+//! takes an `Iterator` based approach, where pixel values and positions are calculated on the fly,
+//! with the minimum of saved state. This allows the consuming application to use far less RAM at
+//! little to no performance penalty.
 //!
 //! # Simulator
 //!
@@ -106,12 +112,6 @@
 //!     display.draw(build_thing("Hello Rust!"));
 //! }
 //! ```
-//!
-//! A core goal is to do the above without using any buffers; the crate should work without a
-//! dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
-//! takes an `Iterator` based approach, where pixel values and positions are calculated on the fly,
-//! with the minimum of saved state. This allows the consuming application to use far less RAM at
-//! little to no performance penalty.
 //!
 //! # Implementing `embedded_graphics` in a driver
 //!
