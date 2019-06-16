@@ -58,3 +58,14 @@ fn return_from_fn() {
 
     disp.draw(chained);
 }
+
+#[test]
+fn implicit_into_iter() {
+    let mut disp = FakeDisplay {};
+
+    let chained = Rect::new(Coord::new(0, 0), Coord::new(1, 1))
+        .into_iter()
+        .chain(Circle::new(Coord::new(2, 2), 1));
+
+    disp.draw(chained);
+}

@@ -9,8 +9,35 @@ use crate::style::Style;
 use crate::style::WithStyle;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
-// TODO: Impl Default so people can leave the color bit out
 /// Line primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.line.html) make for more concise code.
+///
+/// ## Create some lines with different styles
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitives::Line;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Default line from (10, 20) to (30, 40)
+/// let l1 = Line::new(Coord::new(10, 20), Coord::new(30, 40));
+///
+/// // Line with styled stroke from (50, 20) to (60, 35)
+/// let l2 = Line::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .stroke(Some(5u8));
+///
+/// // Line with translation applied
+/// let l3 = Line::new(Coord::new(50, 20), Coord::new(60, 35))
+///     .translate(Coord::new(65, 35));
+///
+/// display.draw(l1);
+/// display.draw(l2);
+/// display.draw(l3);
+/// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Line<C: PixelColor> {
     /// Start point

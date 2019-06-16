@@ -10,6 +10,27 @@ use tinytga::{Tga, TgaIterator};
 /// TGA format image
 ///
 /// `ImageTga` is available with the `tga` feature turned on
+///
+/// # Examples
+///
+/// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
+///
+/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
+/// `.into_iter()` on them, unlike other embedded_graphics objects.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::ImageTga;
+/// # use embedded_graphics::mock_display::Display32Bpp;
+/// # let mut display = Display32Bpp::default();
+///
+/// // Load `patch.tga`, a 32BPP 4x4px image
+/// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
+///
+/// // Equivalent behaviour
+/// display.draw(&image);
+/// display.draw(image.into_iter());
+/// ```
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C: PixelColor> {
     tga: Tga<'a>,

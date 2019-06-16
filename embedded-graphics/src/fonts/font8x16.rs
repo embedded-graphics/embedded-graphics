@@ -23,6 +23,68 @@ impl FontBuilderConf for Font8x16Conf {
 }
 
 /// 8x16 pixel monospace font
+///
+/// There is also the [`text_8x16`] macro to provide an easier to use interface.
+///
+/// # Examples
+///
+/// ## Write some text to the screen at the default `(0, 0)` position
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::fonts::Font8x16;
+/// use embedded_graphics::text_8x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// // Use struct methods directly
+/// display.draw(Font8x16::render_str("Hello Rust!"));
+///
+/// // Use a macro instead
+/// display.draw(text_8x16!("Hello Rust!"));
+/// ```
+///
+/// ## Translate text by (20px, 30px)
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::fonts::Font8x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// display.draw(
+///     Font8x16::render_str("Hello Rust!").translate(Coord::new(20, 30))
+/// );
+/// ```
+///
+/// ## Add some styling to the text
+///
+/// Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
+/// Properties like `fill` or `stroke` passed to the `text_8x16` macro are converted into method
+/// calls verbatim.
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::text_8x16;
+/// use embedded_graphics::fonts::Font8x16;
+/// # use embedded_graphics::mock_display::Display;
+/// # let mut display = Display::default();
+///
+/// display.draw(text_8x16!(
+///     "Hello Rust!",
+///     fill = Some(1u8),
+///     stroke = Some(0u8)
+/// ));
+///
+/// display.draw(
+///     Font8x16::render_str("Hello Rust!")
+///         .translate(Coord::new(20, 30))
+///         .fill(Some(1u8))
+///         .stroke(Some(0u8)),
+/// );
+/// ```
+///
+/// [`text_8x16`]: ../macro.text_8x16.html
 pub type Font8x16<'a, C> = FontBuilder<'a, C, Font8x16Conf>;
 
 #[cfg(test)]
@@ -76,7 +138,7 @@ mod tests {
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -104,7 +166,7 @@ mod tests {
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -132,7 +194,7 @@ mod tests {
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -160,7 +222,7 @@ mod tests {
 
         assert_eq!(
             display,
-            Display([
+            Display::new([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -184,7 +246,7 @@ mod tests {
     #[test]
     fn dont_panic() {
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let two_question_marks = Display(
+        let two_question_marks = Display::new(
             [
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

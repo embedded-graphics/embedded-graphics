@@ -45,6 +45,14 @@ mod internal_coord {
         }
 
         /// Clamp coordinate components to positive integer range
+        ///
+        /// ```
+        /// # use embedded_graphics::coord::Coord;
+        /// #
+        /// let coord = Coord::new(-5, 10);
+        ///
+        /// assert_eq!(coord.clamp_positive(), Coord::new(0, 10));
+        /// ```
         pub fn clamp_positive(&self) -> Self {
             Coord::new(self.0.max(0), self.1.max(0))
         }
@@ -147,6 +155,18 @@ mod internal_coord {
     impl From<&[i32; 2]> for Coord {
         fn from(other: &[i32; 2]) -> Self {
             Self(other[0], other[1])
+        }
+    }
+
+    impl From<Coord> for (i32, i32) {
+        fn from(other: Coord) -> (i32, i32) {
+            (other.0, other.1)
+        }
+    }
+
+    impl From<&Coord> for (i32, i32) {
+        fn from(other: &Coord) -> (i32, i32) {
+            (other.0, other.1)
         }
     }
 }

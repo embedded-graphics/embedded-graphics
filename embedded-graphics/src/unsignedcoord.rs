@@ -109,6 +109,18 @@ mod internal_unsigned_coord {
             Self(other[0], other[1])
         }
     }
+
+    impl From<UnsignedCoord> for (u32, u32) {
+        fn from(other: UnsignedCoord) -> (u32, u32) {
+            (other.0, other.1)
+        }
+    }
+
+    impl From<&UnsignedCoord> for (u32, u32) {
+        fn from(other: &UnsignedCoord) -> (u32, u32) {
+            (other.0, other.1)
+        }
+    }
 }
 
 /// Create an `UnsignedCoord` from a pair of integer values
