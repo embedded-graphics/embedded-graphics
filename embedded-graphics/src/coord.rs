@@ -149,6 +149,18 @@ mod internal_coord {
             Self(other[0], other[1])
         }
     }
+
+    impl From<Coord> for (i32, i32) {
+        fn from(other: Coord) -> (i32, i32) {
+            (other.0, other.1)
+        }
+    }
+
+    impl From<&Coord> for (i32, i32) {
+        fn from(other: &Coord) -> (i32, i32) {
+            (other.0, other.1)
+        }
+    }
 }
 
 #[cfg(not(feature = "nalgebra_support"))]
