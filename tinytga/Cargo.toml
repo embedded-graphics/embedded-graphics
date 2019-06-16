@@ -15,7 +15,8 @@ exclude = [
     ".gitignore",
 ]
 
-[dependencies]
+[badges]
+circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
 [dependencies.nom]
 version = "4.2.3"
