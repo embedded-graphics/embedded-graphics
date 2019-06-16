@@ -102,34 +102,49 @@ precheck_job: &precheck_job
     - precheck-beta
     - precheck-nightly
 
+build_jobs: &build_jobs
+  jobs:
+    - precheck-stable
+    - precheck-beta
+    - precheck-nightly
+
+    # Raspberry Pi 1
+    - target-arm-unknown-linux-eabi:
+        <<: *precheck_job
+
+    # Raspberry Pi 2, 3, etc
+    - target-armv7-unknown-linux-gnueabihf:
+        <<: *precheck_job
+
+    # Linux
+    - target-x86_64-unknown-linux-gnu:
+        <<: *precheck_job
+    - target-x86_64-unknown-linux-musl:
+        <<: *precheck_job
+
+    # Bare metal
+    - target-thumbv6m-none-eabi:
+        <<: *precheck_job
+    - target-thumbv7em-none-eabi:
+        <<: *precheck_job
+    - target-thumbv7em-none-eabihf:
+        <<: *precheck_job
+    - target-thumbv7m-none-eabi:
+        <<: *precheck_job
+
 workflows:
   version: 2
   build_all:
-    jobs:
-      - precheck-stable
-      - precheck-beta
-      - precheck-nightly
+    <<: *build_jobs
 
-      # Raspberry Pi 1
-      - target-arm-unknown-linux-eabi:
-          <<: *precheck_job
+  # Build every day
+  nightly:
+    <<: *build_jobs
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
 
-      # Raspberry Pi 2, 3, etc
-      - target-armv7-unknown-linux-gnueabihf:
-          <<: *precheck_job
-
-      # Linux
-      - target-x86_64-unknown-linux-gnu:
-          <<: *precheck_job
-      - target-x86_64-unknown-linux-musl:
-          <<: *precheck_job
-
-      # Bare metal
-      - target-thumbv6m-none-eabi:
-          <<: *precheck_job
-      - target-thumbv7em-none-eabi:
-          <<: *precheck_job
-      - target-thumbv7em-none-eabihf:
-          <<: *precheck_job
-      - target-thumbv7m-none-eabi:
-          <<: *precheck_job
