@@ -1,0 +1,150 @@
+# Check that everything (tests, benches, etc) builds in std environments
+precheck_steps: &precheck_steps
+  docker:
+    - image: circleci/rust:latest
+  steps:
+    - checkout
+    - restore_cache:
+        key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+    - run: sudo apt install -qq libsdl2-dev python-pip
+    - run: sudo pip install linkchecker
+    - run: rustup default ${RUST_VERSION:-stable}
+    - run: rustup component add rustfmt
+    - run: ./build.sh
+    - save_cache:
+        key: v1-embedded-graphics-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        paths:
+          - ./target
+          - /home/ubuntu/.cargo
+
+# Build crates for embedded target
+target_steps: &target_steps
+  docker:
+    - image: circleci/rust:latest
+  steps:
+    - checkout
+    - restore_cache:
+        keys:
+          - v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+          - v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}-{{ .Environment.TARGET }}
+    - run: |
+        SYSROOT=$(rustc --print sysroot)
+
+        if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
+          rustup target add $TARGET
+        else
+          echo "Target $TARGET is already installed"
+        fi
+    - run: ./build_target.sh
+    - run: ./build_target.sh --release
+    - save_cache:
+        key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}-{{ .Environment.TARGET }}
+        paths:
+          - ./target
+          - /home/ubuntu/.cargo
+
+version: 2
+jobs:
+  precheck-stable:
+    <<: *precheck_steps
+  precheck-beta:
+    environment:
+      - RUST_VERSION: 'beta'
+    <<: *precheck_steps
+  precheck-nightly:
+    environment:
+      - RUST_VERSION: 'nightly'
+    <<: *precheck_steps
+
+  target-arm-unknown-linux-eabi:
+    environment:
+      - TARGET: 'arm-unknown-linux-gnueabi'
+    <<: *target_steps
+
+  target-armv7-unknown-linux-gnueabihf:
+    environment:
+      - TARGET: 'armv7-unknown-linux-gnueabihf'
+    <<: *target_steps
+
+  target-x86_64-unknown-linux-gnu:
+    environment:
+      - TARGET: 'x86_64-unknown-linux-gnu'
+    <<: *target_steps
+
+  target-x86_64-unknown-linux-musl:
+    environment:
+      - TARGET: 'x86_64-unknown-linux-musl'
+    <<: *target_steps
+
+  target-thumbv6m-none-eabi:
+    environment:
+      - TARGET: 'thumbv6m-none-eabi'
+    <<: *target_steps
+
+  target-thumbv7em-none-eabi:
+    environment:
+      - TARGET: 'thumbv7em-none-eabi'
+    <<: *target_steps
+
+  target-thumbv7em-none-eabihf:
+    environment:
+      - TARGET: 'thumbv7em-none-eabihf'
+    <<: *target_steps
+
+  target-thumbv7m-none-eabi:
+    environment:
+      - TARGET: 'thumbv7m-none-eabi'
+    <<: *target_steps
+
+precheck_job: &precheck_job
+  requires:
+    - precheck-stable
+    - precheck-beta
+    - precheck-nightly
+
+build_jobs: &build_jobs
+  jobs:
+    - precheck-stable
+    - precheck-beta
+    - precheck-nightly
+
+    # Raspberry Pi 1
+    - target-arm-unknown-linux-eabi:
+        <<: *precheck_job
+
+    # Raspberry Pi 2, 3, etc
+    - target-armv7-unknown-linux-gnueabihf:
+        <<: *precheck_job
+
+    # Linux
+    - target-x86_64-unknown-linux-gnu:
+        <<: *precheck_job
+    - target-x86_64-unknown-linux-musl:
+        <<: *precheck_job
+
+    # Bare metal
+    - target-thumbv6m-none-eabi:
+        <<: *precheck_job
+    - target-thumbv7em-none-eabi:
+        <<: *precheck_job
+    - target-thumbv7em-none-eabihf:
+        <<: *precheck_job
+    - target-thumbv7m-none-eabi:
+        <<: *precheck_job
+
+workflows:
+  version: 2
+  build_all:
+    <<: *build_jobs
+
+  # Build every day
+  nightly:
+    <<: *build_jobs
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+
