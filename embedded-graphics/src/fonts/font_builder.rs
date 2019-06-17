@@ -231,7 +231,7 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    Some(self.style.stroke_color.unwrap_or(1.into())) // white
+                    Some(self.style.stroke_color.unwrap_or(C::DEFAULT_FG))
                 } else {
                     self.style.fill_color
                 };
@@ -287,8 +287,9 @@ where
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(BinaryColor::On);
     /// #
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world")
@@ -310,8 +311,9 @@ where
     /// ```
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(BinaryColor::On);
     /// #
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world")

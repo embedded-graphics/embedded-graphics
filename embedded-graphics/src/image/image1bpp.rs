@@ -1,7 +1,7 @@
 use super::super::drawable::*;
 use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::PixelColor;
+use crate::pixelcolor::BinaryColor;
 
 /// # 1 bit per pixel image
 ///
@@ -25,8 +25,8 @@ use crate::pixelcolor::PixelColor;
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::Image1BPP;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
 ///
 /// // Load `patch_1bpp.raw`, a 1BPP 4x4px image
 /// let image = Image1BPP::new(include_bytes!("../../../assets/patch_1bpp.raw"), 4, 4);
@@ -35,7 +35,7 @@ use crate::pixelcolor::PixelColor;
 /// display.draw(&image);
 /// display.draw(image.into_iter());
 /// ```
-pub type Image1BPP<'a, C> = Image<'a, C, ImageType1BPP>;
+pub type Image1BPP<'a> = Image<'a, BinaryColor, ImageType1BPP>;
 
 /// 1 bit per pixel image type
 #[derive(Debug, Copy, Clone)]
@@ -43,12 +43,9 @@ pub enum ImageType1BPP {}
 
 impl ImageType for ImageType1BPP {}
 
-impl<'a, C> IntoIterator for &'a Image1BPP<'a, C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = ImageIterator<'a, C, ImageType1BPP>;
+impl<'a> IntoIterator for &'a Image1BPP<'a> {
+    type Item = Pixel<BinaryColor>;
+    type IntoIter = ImageIterator<'a, BinaryColor, ImageType1BPP>;
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
@@ -57,11 +54,8 @@ where
 }
 
 /// Iterator over every pixel in the source image
-impl<'a, C> Iterator for ImageIterator<'a, C, ImageType1BPP>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
+impl<'a> Iterator for ImageIterator<'a, BinaryColor, ImageType1BPP> {
+    type Item = Pixel<BinaryColor>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // If we're outside the upper left screen bounds, bail
@@ -104,7 +98,12 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), bit_value.into());
+                let color = if bit_value != 0 {
+                    BinaryColor::On
+                } else {
+                    BinaryColor::Off
+                };
+                break Pixel(current_pixel.to_unsigned(), color);
             }
         };
 
@@ -120,8 +119,7 @@ mod tests {
 
     #[test]
     fn negative_top_left() {
-        let image: Image1BPP<u16> =
-            Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
+        let image: Image1BPP = Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
 
         assert_eq!(image.top_left(), Coord::new(-1, -1));
         assert_eq!(image.bottom_right(), Coord::new(3, 3));
@@ -130,8 +128,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image1BPP<u16> =
-            Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
+        let image: Image1BPP = Image1BPP::new(&[0xff, 0x00], 4, 4).translate(Coord::new(100, 200));
 
         assert_eq!(image.top_left(), Coord::new(100, 200));
         assert_eq!(image.bottom_right(), Coord::new(104, 204));

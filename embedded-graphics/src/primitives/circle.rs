@@ -20,22 +20,23 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Circle;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// use embedded_graphics::pixelcolor::Rgb565;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
 ///
 /// // Default circle with only a stroke centered around (10, 20) with a radius of 30
 /// let c1 = Circle::new(Coord::new(10, 20), 30);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
 /// let c2 = Circle::new(Coord::new(50, 20), 30)
-///     .stroke(Some(5u8))
+///     .stroke(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill(Some(10u8));
+///     .fill(Some(Rgb565::GREEN));
 ///
 /// // Circle with no stroke and a translation applied
 /// let c3 = Circle::new(Coord::new(10, 20), 30)
 ///     .stroke(None)
-///     .fill(Some(10u8))
+///     .fill(Some(Rgb565::BLUE))
 ///     .translate(Coord::new(65, 35));
 ///
 /// display.draw(c1);
@@ -240,8 +241,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(Rgb565::RED);
     /// #
     /// let circle = Circle::new(Coord::new(5, 10), 10)
     /// #    .style(style);
@@ -261,8 +263,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Circle;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(Rgb565::RED);
     /// #
     /// let mut circle = Circle::new(Coord::new(5, 10), 10)
     /// #    .style(style);
@@ -281,10 +284,11 @@ where
 mod tests {
     use super::*;
     use crate::drawable::Dimensions;
+    use crate::pixelcolor::BinaryColor;
 
     #[test]
     fn negative_dimensions() {
-        let circ: Circle<u8> = Circle::new(Coord::new(-10, -10), 5);
+        let circ: Circle<BinaryColor> = Circle::new(Coord::new(-10, -10), 5);
 
         assert_eq!(circ.top_left(), Coord::new(-15, -15));
         assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
@@ -293,7 +297,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let circ: Circle<u8> = Circle::new(Coord::new(10, 20), 5);
+        let circ: Circle<BinaryColor> = Circle::new(Coord::new(10, 20), 5);
 
         assert_eq!(circ.top_left(), Coord::new(5, 15));
         assert_eq!(circ.bottom_right(), Coord::new(15, 25));
@@ -302,7 +306,7 @@ mod tests {
 
     #[test]
     fn large_radius() {
-        let circ: Circle<u8> = Circle::new(Coord::new(5, 5), 10);
+        let circ: Circle<BinaryColor> = Circle::new(Coord::new(5, 5), 10);
 
         assert_eq!(circ.top_left(), Coord::new(-5, -5));
         assert_eq!(circ.bottom_right(), Coord::new(15, 15));
@@ -311,15 +315,17 @@ mod tests {
 
     #[test]
     fn transparent_border() {
-        let circ: Circle<u8> = Circle::new(Coord::new(5, 5), 10).stroke(None).fill(Some(1));
+        let circ: Circle<BinaryColor> = Circle::new(Coord::new(5, 5), 10)
+            .stroke(None)
+            .fill(Some(BinaryColor::On));
 
         assert!(circ.into_iter().count() > 0);
     }
 
     #[test]
     fn it_handles_offscreen_coords() {
-        let mut circ: CircleIterator<u8> = Circle::new(Coord::new(-10, -10), 5)
-            .style(Style::stroke(1))
+        let mut circ: CircleIterator<BinaryColor> = Circle::new(Coord::new(-10, -10), 5)
+            .style(Style::stroke(BinaryColor::On))
             .into_iter();
 
         assert_eq!(circ.next(), None);
@@ -327,8 +333,8 @@ mod tests {
 
     #[test]
     fn it_handles_partially_on_screen_coords() {
-        let mut circ: CircleIterator<u8> = Circle::new(Coord::new(-5, -5), 30)
-            .style(Style::stroke(1))
+        let mut circ: CircleIterator<BinaryColor> = Circle::new(Coord::new(-5, -5), 30)
+            .style(Style::stroke(BinaryColor::On))
             .into_iter();
 
         assert!(circ.next().is_some());

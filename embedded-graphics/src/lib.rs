@@ -83,11 +83,12 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::primitives::Circle;
 //! use embedded_graphics::fonts::Font6x8;
-//! # use embedded_graphics::mock_display::Display;
-//! # let mut display = Display::default();
+//! use embedded_graphics::pixelcolor::Rgb565;
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(1u8));
-//! let t = Font6x8::render_str("Hello Rust!").fill(Some(20u8)).translate(Coord::new(20, 16));
+//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!").fill(Some(Rgb565::GREEN)).translate(Coord::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -100,12 +101,13 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
+//! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::{text_6x8, egcircle, icoord};
-//! # use embedded_graphics::mock_display::Display;
-//! # let mut display = Display::default();
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display = MockDisplay::default();
 //!
-//! let c = egcircle!((20, 20), 8, fill = Some(1u8));
-//! let t = text_6x8!("Hello Rust!", fill = Some(20u8)).translate(icoord!(20, 16));
+//! let c = egcircle!((20, 20), 8, fill = Some(Rgb565::RED));
+//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -117,17 +119,18 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
+//! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::{text_6x8, egcircle, icoord, egrectangle};
-//! # use embedded_graphics::mock_display::Display;
+//! # use embedded_graphics::mock_display::MockDisplay;
 //!
-//! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<u8>> {
+//! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
-//!         .chain(egcircle!((20, 20), 8, fill = Some(1u8)))
-//!         .chain(text_6x8!(text, fill = Some(20u8)).translate(icoord!(20, 16)))
+//!         .chain(egcircle!((20, 20), 8, fill = Some(Rgb565::RED)))
+//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16)))
 //! }
 //!
 //! fn main() {
-//!     # let mut display = Display::default();
+//!     # let mut display = MockDisplay::default();
 //!     display.draw(build_thing("Hello Rust!"));
 //! }
 //! ```
@@ -185,7 +188,7 @@ use crate::pixelcolor::PixelColor;
 /// Here's an example for an imaginary display that has a 64x64px framebuffer of 8 bit values that
 /// communicates over a (simplified) SPI interface:
 ///
-/// ```rust
+/// ```ignore
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::Drawing;
 /// use embedded_graphics::egcircle;
@@ -262,7 +265,7 @@ where
 /// framebuffer. It sends pixels one by one to over the SPI bus which isn't very efficient, but that
 /// could be fixed by using a fixed length chunked buffering scheme.
 ///
-/// ```rust
+/// ```ignore
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::SizedDrawing;
@@ -328,7 +331,6 @@ where
 ///
 /// [`Drawing`]: ./trait.Drawing.html
 /// [`SizedDrawing`]: ./trait.SizedDrawing.html
-/// ```
 pub trait SizedDrawing<C>
 where
     C: PixelColor + Clone,

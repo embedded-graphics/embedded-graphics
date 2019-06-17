@@ -1,5 +1,7 @@
 use embedded_graphics::fonts::{Font6x12, Font6x8, Font8x16};
 use embedded_graphics::icoord;
+use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
+use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{text_12x16, text_6x8};
 use embedded_graphics_simulator::DisplayBuilder;
@@ -16,8 +18,8 @@ fn main() {
     // Show smallest font with white font on black background
     display.draw(
         Font6x8::render_str("Hello World! - inverse 6x8")
-            .stroke(Some(0u8.into()))
-            .fill(Some(1u8.into()))
+            .stroke(Some(C0))
+            .fill(Some(C1))
             .translate(icoord!(15, 30)),
     );
 
@@ -25,8 +27,8 @@ fn main() {
     display.draw(
         text_6x8!(
             "Hello world! - inverse 6x8 with macro",
-            stroke = Some(0u8.into()),
-            fill = Some(1u8.into())
+            stroke = Some(C0),
+            fill = Some(C1)
         )
         .translate(icoord!(15, 40)),
     );

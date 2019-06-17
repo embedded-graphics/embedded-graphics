@@ -19,11 +19,13 @@ pub use self::triangle::Triangle;
 /// convenient macro.
 ///
 /// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::pixelcolor::Rgb565;
 /// use embedded_graphics::{egcircle, style::Style, primitives::Circle};
 ///
-/// let line_circle: Circle<u8> = egcircle!((10, 20), 30);
-/// let filled_circle: Circle<u8> = egcircle!((10, 20), 30, stroke = Some(5u8), fill = Some(10u8));
-/// let default_style: Circle<u8> = egcircle!((10, 20), 30, style = Style::default());
+/// let line_circle: Circle<Rgb565> = egcircle!((10, 20), 30);
+/// let filled_circle: Circle<Rgb565> = egcircle!((10, 20), 30, stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let default_style: Circle<Rgb565> = egcircle!((10, 20), 30, style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -32,10 +34,10 @@ pub use self::triangle::Triangle;
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egcircle, style::Style, primitives::Circle};
+/// use embedded_graphics::{egcircle, style::Style, primitives::Circle, pixelcolor::Rgb565};
 ///
-/// let circle: Circle<u8> = egcircle!((10, 20), 30, stroke = Some(5u8), fill = Some(10u8));
-/// let circle: Circle<u8> = Circle::new(Coord::new(10, 20), 30).stroke(Some(5u8)).fill(Some(10u8));
+/// let circle: Circle<Rgb565> = egcircle!((10, 20), 30, stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let circle: Circle<Rgb565> = Circle::new(Coord::new(10, 20), 30).stroke(Some(Rgb565::RED)).fill(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egcircle {
@@ -53,10 +55,11 @@ macro_rules! egcircle {
 /// Note that only the `stroke` property has any effect on lines currently.
 ///
 /// ```rust
-/// use embedded_graphics::{egline, style::Style, primitives::Line};
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::{egline, style::Style, primitives::Line, pixelcolor::Rgb565};
 ///
-/// let line: Line<u8> = egline!((10, 20), (30, 40));
-/// let stroke_line: Line<u8> = egline!((10, 20), (30, 40), stroke = Some(5u8));
+/// let line: Line<Rgb565> = egline!((10, 20), (30, 40));
+/// let stroke_line: Line<Rgb565> = egline!((10, 20), (30, 40), stroke = Some(Rgb565::BLUE));
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -65,12 +68,12 @@ macro_rules! egcircle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egline, style::Style, primitives::Line};
+/// use embedded_graphics::{egline, style::Style, primitives::Line, pixelcolor::Rgb565};
 ///
-/// let Line: Line<u8> = egline!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
-/// let Line: Line<u8> = Line::new(Coord::new(10, 20), Coord::new(30, 40))
-///     .stroke(Some(5u8))
-///     .fill(Some(10u8));
+/// let Line: Line<Rgb565> = egline!((10, 20), (30, 40), stroke = Some(Rgb565::BLUE), fill = Some(Rgb565::YELLOW));
+/// let Line: Line<Rgb565> = Line::new(Coord::new(10, 20), Coord::new(30, 40))
+///     .stroke(Some(Rgb565::BLUE))
+///     .fill(Some(Rgb565::YELLOW));
 /// ```
 #[macro_export]
 macro_rules! egline {
@@ -86,11 +89,12 @@ macro_rules! egline {
 /// convenient macro.
 ///
 /// ```rust
-/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle};
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle, pixelcolor::Rgb565};
 ///
-/// let empty_rect: Rectangle<u8> = egrectangle!((10, 20), (30, 40));
-/// let filled_rect: Rectangle<u8> = egrectangle!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
-/// let rect_default_style: Rectangle<u8> = egrectangle!((10, 20), (30, 40), style = Style::default());
+/// let empty_rect: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40));
+/// let filled_rect: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let rect_default_style: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -99,12 +103,12 @@ macro_rules! egline {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle};
+/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle, pixelcolor::Rgb565};
 ///
-/// let Rectangle: Rectangle<u8> = egrectangle!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
-/// let Rectangle: Rectangle<u8> = Rectangle::new(Coord::new(10, 20), Coord::new(30, 40))
-///     .stroke(Some(5u8))
-///     .fill(Some(10u8));
+/// let Rectangle: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let Rectangle: Rectangle<Rgb565> = Rectangle::new(Coord::new(10, 20), Coord::new(30, 40))
+///     .stroke(Some(Rgb565::RED))
+///     .fill(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
@@ -120,11 +124,12 @@ macro_rules! egrectangle {
 /// convenient macro.
 ///
 /// ```rust
-/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle};
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle, pixelcolor::Rgb565};
 ///
-/// let empty_triangle: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60));
-/// let filled_triangle: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(5u8), fill = Some(10u8));
-/// let triangle_default_style: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
+/// let empty_triangle: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60));
+/// let filled_triangle: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let triangle_default_style: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -133,12 +138,12 @@ macro_rules! egrectangle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle};
+/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle, pixelcolor::Rgb565};
 ///
-/// let Triangle: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(5u8), fill = Some(10u8));
-/// let Triangle: Triangle<u8> = Triangle::new(Coord::new(10, 20), Coord::new(30, 40), Coord::new(50, 60))
-///     .stroke(Some(5u8))
-///     .fill(Some(10u8));
+/// let Triangle: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let Triangle: Triangle<Rgb565> = Triangle::new(Coord::new(10, 20), Coord::new(30, 40), Coord::new(50, 60))
+///     .stroke(Some(Rgb565::RED))
+///     .fill(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
@@ -153,40 +158,56 @@ macro_rules! egtriangle {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::{Rgb565, RgbColor};
     use crate::style::Style;
 
     #[test]
     fn circle() {
-        let _c: Circle<u8> = egcircle!((10, 20), 30);
-        let _c: Circle<u8> = egcircle!((10, 20), 30, stroke = Some(1u8), fill = Some(10u8));
-        let _c: Circle<u8> = egcircle!((10, 20), 30, style = Style::default());
+        let _c: Circle<Rgb565> = egcircle!((10, 20), 30);
+        let _c: Circle<Rgb565> = egcircle!(
+            (10, 20),
+            30,
+            stroke = Some(Rgb565::RED),
+            fill = Some(Rgb565::GREEN)
+        );
+        let _c: Circle<Rgb565> = egcircle!((10, 20), 30, style = Style::default());
     }
 
     #[test]
     fn line() {
-        let _l: Line<u8> = egline!((10, 20), (30, 40));
-        let _l: Line<u8> = egline!((10, 20), (30, 40), stroke = Some(1u8), fill = Some(10u8));
-        let _l: Line<u8> = egline!((10, 20), (30, 40), style = Style::default());
+        let _l: Line<Rgb565> = egline!((10, 20), (30, 40));
+        let _l: Line<Rgb565> = egline!(
+            (10, 20),
+            (30, 40),
+            stroke = Some(Rgb565::RED),
+            fill = Some(Rgb565::GREEN)
+        );
+        let _l: Line<Rgb565> = egline!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
-    fn rect() {
-        let _r: Rectangle<u8> = egrectangle!((10, 20), (30, 40));
-        let _r: Rectangle<u8> =
-            egrectangle!((10, 20), (30, 40), stroke = Some(1u8), fill = Some(10u8));
-        let _r: Rectangle<u8> = egrectangle!((10, 20), (30, 40), style = Style::default());
+    fn rectangle() {
+        let _r: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40));
+        let _r: Rectangle<Rgb565> = egrectangle!(
+            (10, 20),
+            (30, 40),
+            stroke = Some(Rgb565::RED),
+            fill = Some(Rgb565::GREEN)
+        );
+        let _r: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
     fn triangle() {
-        let _t: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60));
-        let _t: Triangle<u8> = egtriangle!(
+        let _t: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60));
+        let _t: Triangle<Rgb565> = egtriangle!(
             (10, 20),
             (30, 40),
             (50, 60),
-            stroke = Some(1u8),
-            fill = Some(10u8)
+            stroke = Some(Rgb565::RED),
+            fill = Some(Rgb565::GREEN)
         );
-        let _t: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
+        let _t: Triangle<Rgb565> =
+            egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
     }
 }

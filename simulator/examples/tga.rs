@@ -10,15 +10,16 @@
 //! embedded-graphics = { version = "*", features = [ "tga" ] }
 
 use embedded_graphics::image::ImageTga;
+use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
-use embedded_graphics_simulator::DisplayBuilder;
+use embedded_graphics_simulator::{Display, DisplayBuilder};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
     let image = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
 
-    let mut display = DisplayBuilder::new().size(304, 128).scale(2).build();
+    let mut display: Display<Rgb888> = DisplayBuilder::new().size(304, 128).scale(2).build();
 
     display.draw(&image);
 

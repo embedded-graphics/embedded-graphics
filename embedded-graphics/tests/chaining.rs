@@ -7,10 +7,13 @@ use embedded_graphics::Drawing;
 
 struct FakeDisplay {}
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TestPixelColor(pub bool);
 
-impl PixelColor for TestPixelColor {}
+impl PixelColor for TestPixelColor {
+    const DEFAULT_FG: Self = TestPixelColor(true);
+    const DEFAULT_BG: Self = TestPixelColor(false);
+}
 
 impl From<u8> for TestPixelColor {
     fn from(other: u8) -> Self {

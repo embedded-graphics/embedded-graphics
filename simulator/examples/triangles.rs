@@ -1,4 +1,6 @@
 use embedded_graphics::icoord;
+use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
+use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Triangle;
 use embedded_graphics_simulator::DisplayBuilder;
@@ -14,20 +16,20 @@ fn main() {
     display.draw(
         Triangle::new(icoord!(0, 0), icoord!(64, 10), icoord!(15, 64))
             .translate(icoord!(PAD, 0))
-            .stroke(Some(1u8.into())),
+            .stroke(Some(C1)),
     );
 
     // flat top
     display.draw(
         Triangle::new(icoord!(5, 0), icoord!(30, 64), icoord!(64, 0))
-            .stroke(Some(1u8.into()))
+            .stroke(Some(C1))
             .translate(icoord!(64 + PAD, 0)),
     );
 
     // flat left
     display.draw(
         Triangle::new(icoord!(0, 0), icoord!(0, 64), icoord!(64, 30))
-            .stroke(Some(1u8.into()))
+            .stroke(Some(C1))
             .translate(icoord!((64 + PAD) * 2, 0)),
     );
 
@@ -35,26 +37,26 @@ fn main() {
     display.draw(
         Triangle::new(icoord!(22, 0), icoord!(0, 64), icoord!(64, 64))
             .translate(icoord!((64 + PAD) * 3, 0))
-            .stroke(Some(1u8.into())),
+            .stroke(Some(C1)),
     );
 
     // flat right
     display.draw(
         Triangle::new(icoord!(0, 22), icoord!(64, 0), icoord!(64, 64))
             .translate(icoord!((64 + PAD) * 4, 0))
-            .stroke(Some(1u8.into())),
+            .stroke(Some(C1)),
     );
 
     // draw filled above stroke, should not be visible
     display.draw(
         Triangle::new(icoord!(0, 22), icoord!(64, 0), icoord!(64, 64))
             .translate(icoord!((64 + PAD) * 5, 0))
-            .stroke(Some(1u8.into())),
+            .stroke(Some(C1)),
     );
     display.draw(
         Triangle::new(icoord!(0, 22), icoord!(64, 0), icoord!(64, 64))
             .translate(icoord!((64 + PAD) * 5, 0))
-            .fill(Some(0u8.into())),
+            .fill(Some(C0)),
     );
 
     loop {

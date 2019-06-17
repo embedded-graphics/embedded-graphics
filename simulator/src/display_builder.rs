@@ -1,6 +1,6 @@
-use crate::display_theme::DisplayTheme;
-use crate::sim_pixel_color::SimPixelColor;
+use crate::display_theme::BinaryColorTheme;
 use crate::Display;
+use embedded_graphics::pixelcolor::PixelColor;
 
 /// Create a simulator display using the builder pattern
 pub struct DisplayBuilder {
@@ -8,7 +8,7 @@ pub struct DisplayBuilder {
     height: usize,
     scale: usize,
     pixel_spacing: usize,
-    theme: DisplayTheme,
+    theme: BinaryColorTheme,
 }
 
 impl DisplayBuilder {
@@ -19,7 +19,7 @@ impl DisplayBuilder {
             height: 256,
             scale: 1,
             pixel_spacing: 0,
-            theme: DisplayTheme::Default,
+            theme: BinaryColorTheme::Default,
         }
     }
 
@@ -48,8 +48,8 @@ impl DisplayBuilder {
         self
     }
 
-    /// Set the theme for the display to use
-    pub fn theme(&mut self, theme: DisplayTheme) -> &mut Self {
+    /// Set the binary color theme for the display to use
+    pub fn theme(&mut self, theme: BinaryColorTheme) -> &mut Self {
         self.theme = theme;
 
         self.scale(3);
@@ -66,7 +66,10 @@ impl DisplayBuilder {
     }
 
     /// Finish building the simulated display and open an SDL window to render it into
-    pub fn build(&self) -> Display {
+    pub fn build<C>(&self) -> Display<C>
+    where
+        C: PixelColor,
+    {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
@@ -83,7 +86,7 @@ impl DisplayBuilder {
             .build()
             .unwrap();
 
-        let pixels = vec![SimPixelColor(0, 0, 0); self.width * self.height];
+        let pixels = vec![C::DEFAULT_BG; self.width * self.height];
         let canvas = window.into_canvas().build().unwrap();
         let event_pump = sdl_context.event_pump().unwrap();
 

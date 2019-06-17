@@ -1,7 +1,7 @@
 use super::super::drawable::*;
 use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::PixelColor;
+use crate::pixelcolor::{FromSlice, PixelColor};
 
 /// # 8 bits per pixel image
 ///
@@ -25,8 +25,9 @@ use crate::pixelcolor::PixelColor;
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::Image8BPP;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # use embedded_graphics::pixelcolor::Y8;
+/// # let mut display: MockDisplay<Y8> = MockDisplay::default();
 ///
 /// // Load `patch_8bpp.raw`, an 8BPP 4x4px image
 /// let image = Image8BPP::new(include_bytes!("../../../assets/patch_8bpp.raw"), 4, 4);
@@ -45,7 +46,7 @@ impl ImageType for ImageType8BPP {}
 
 impl<'a, C> IntoIterator for &'a Image8BPP<'a, C>
 where
-    C: PixelColor,
+    C: PixelColor + FromSlice,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageIterator<'a, C, ImageType8BPP>;
@@ -58,7 +59,7 @@ where
 
 impl<'a, C> Iterator for ImageIterator<'a, C, ImageType8BPP>
 where
-    C: PixelColor,
+    C: PixelColor + FromSlice,
 {
     type Item = Pixel<C>;
 
@@ -75,7 +76,7 @@ where
             }
 
             let offset = (y * w) + x;
-            let bit_value = self.im.imagedata[offset as usize];
+            let data = &self.im.imagedata[offset as usize..];
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
 
@@ -89,7 +90,7 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), bit_value.into());
+                break Pixel(current_pixel.to_unsigned(), C::from_le_slice(&data));
             }
         };
 
@@ -100,12 +101,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::Y8;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image8BPP<u8> = Image8BPP::new(
+        let image: Image8BPP<Y8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -119,7 +121,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image8BPP<u8> = Image8BPP::new(
+        let image: Image8BPP<Y8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -133,7 +135,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image8BPP<u8> = Image8BPP::new(
+        let image: Image8BPP<Y8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -141,10 +143,16 @@ mod tests {
         .translate(Coord::new(-1, -1));
         let mut it = image.into_iter();
 
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 0), 0xcc_)));
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), 0x00_)));
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), 0x00_)));
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 1), 0xaa_)));
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(0, 0), Y8::new(0xcc)))
+        );
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), Y8::BLACK)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), Y8::BLACK)));
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(1, 1), Y8::new(0xaa)))
+        );
 
         assert_eq!(it.next(), None);
     }
