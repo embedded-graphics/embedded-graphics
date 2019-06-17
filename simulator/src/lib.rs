@@ -30,10 +30,12 @@ impl From<u16> for SimPixelColor {
     }
 }
 
-// Danger: Chops off upper bits
+// Danger: Chops off upper byte
 impl From<u32> for SimPixelColor {
     fn from(other: u32) -> Self {
-        SimPixelColor(other as u8, other as u8, other as u8)
+        let [_, r, g, b] = other.to_be_bytes();
+
+        SimPixelColor(r, g, b)
     }
 }
 
