@@ -49,8 +49,10 @@
 //!
 //!     display.draw(circle!((96, 32), 31, stroke = Some(1u8.into())));
 //!
-//!     display.draw(line!((32, 32), (1, 32), stroke = Some(1u8.into())).translate(icoord!(64, 0)));
-//!     display.draw(line!((32, 32), (40, 40), stroke = Some(1u8.into())).translate(icoord!(64, 0)));
+//!     display.draw(line!((32, 32), (1, 32), stroke = Some(1u8.into()))
+//!         .translate(icoord!(64, 0)));
+//!     display.draw(line!((32, 32), (40, 40), stroke = Some(1u8.into()))
+//!         .translate(icoord!(64, 0)));
 //!
 //!     loop {
 //!         let end = display.run_once();
