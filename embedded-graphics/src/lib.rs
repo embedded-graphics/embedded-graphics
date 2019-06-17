@@ -55,7 +55,7 @@
 //! git clone https://github.com/jamwaffles/embedded-graphics.git
 //! cd embedded-graphics
 //!
-//! cargo run -p simulator --example hello
+//! cargo run -p embedded-graphics-simulator --example hello
 //! ```
 //!
 //! [simulator]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator
