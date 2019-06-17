@@ -8,7 +8,7 @@
 //!
 //! ## Simulate a 128x64 SSD1306 OLED
 //!
-//! ```rust
+//! ```rust,no_run
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::{icoord, circle, line, text_6x8};
 //! use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
