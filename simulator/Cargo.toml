@@ -17,6 +17,9 @@ exclude = [
     "convert_1bpp.sh",
 ]
 
+[badges]
+circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
+
 [dependencies]
 sdl2 = "0.32.2"
 
