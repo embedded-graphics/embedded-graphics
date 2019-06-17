@@ -29,6 +29,7 @@ name = "fonts"
 [[bench]]
 harness = false
 name = "image"
+required-features = ["bmp"]
 
 [badges]
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
