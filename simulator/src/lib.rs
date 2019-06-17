@@ -2,7 +2,31 @@
 //!
 //! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 //!
-//! The simulator can be used to test and debug [embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce snazzy examples for people to try drivers out without needing physical hardware to run on.
+//! The simulator can be used to test and debug
+//! [embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce snazzy examples
+//! for people to try drivers out without needing physical hardware to run on.
+//!
+//! # Setup
+//!
+//! The simulator uses SDL and its development libraries which must be installed to build and run
+//! it.
+//!
+//! ## Linux (`apt`)
+//!
+//! ```bash
+//! sudo apt install libsdl2-dev
+//! ```
+//!
+//! ## macOS (`brew`)
+//!
+//! ```bash
+//! brew install sdl2
+//! ```
+//!
+//! ## Windows
+//!
+//! The Windows install process is a bit more involved, but it _does_ work. See [the SDL2
+//! wiki](https://wiki.libsdl.org/Installation#WinRT.2FWindows_8.2FWinPhone) for instructions.
 //!
 //! # Examples
 //!
