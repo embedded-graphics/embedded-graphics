@@ -1,13 +1,25 @@
 [package]
-authors = ["Byron Wasti <byron.wasti@gmail.com>"]
-name = "simulator"
 version = "0.1.0"
-publish = false
+name = "embedded-graphics-simulator"
+description = "Embedded graphics simulator"
+authors = ["Byron Wasti <byron.wasti@gmail.com>", "James Waples <james@wapl.es>"]
+repository = "https://github.com/jamwaffles/embedded-graphics/tree/master/simulator"
+documentation = "https://docs.rs/embedded-graphics-simulator"
+categories = ["embedded", "no-std"]
+keywords = ["simulator", "graphics", "embedded"]
+readme = "./README.md"
+license = "MIT OR Apache-2.0"
 edition = "2018"
+exclude = [
+    ".circleci",
+    ".travis.yml",
+    ".gitignore",
+    "convert_1bpp.sh",
+]
 
 [dependencies]
 sdl2 = "0.32.2"
 
 [dependencies.embedded-graphics]
-path = "../embedded-graphics"
+version = "0.5.0"
 features = [ "bmp", "tga" ]
