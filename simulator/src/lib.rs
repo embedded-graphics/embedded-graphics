@@ -1,5 +1,8 @@
-extern crate embedded_graphics;
-extern crate sdl2;
+//! # Embedded graphics simulator
+//!
+//! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
+
+#![deny(missing_docs)]
 
 mod display_builder;
 mod display_theme;
@@ -15,6 +18,11 @@ use sdl2::keyboard::Keycode;
 use sdl2::rect::Rect;
 use sdl2::render;
 
+/// Create a new window with a simulated display to draw into
+///
+/// You should use [`DisplayBuilder`] to create an instance of `Display`
+///
+/// [`DisplayBuilder`]: ./display_builder/struct.DisplayBuilder.html
 pub struct Display {
     width: usize,
     height: usize,
@@ -27,6 +35,7 @@ pub struct Display {
 }
 
 impl Display {
+    /// Update the display to show drawn pixels
     pub fn run_once(&mut self) -> bool {
         // Handle events
         for event in self.event_pump.poll_iter() {

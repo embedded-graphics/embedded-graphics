@@ -1,6 +1,7 @@
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 
+/// 24 bit RGB pixel type used by the simulator display
 #[derive(Clone, Copy, PartialEq)]
 pub struct SimPixelColor(pub u8, pub u8, pub u8);
 

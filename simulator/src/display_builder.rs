@@ -2,6 +2,7 @@ use crate::display_theme::DisplayTheme;
 use crate::sim_pixel_color::SimPixelColor;
 use crate::Display;
 
+/// Create a simulator display using the builder pattern
 pub struct DisplayBuilder {
     width: usize,
     height: usize,
@@ -11,6 +12,7 @@ pub struct DisplayBuilder {
 }
 
 impl DisplayBuilder {
+    /// Create a new display with default settings
     pub fn new() -> Self {
         Self {
             width: 256,
@@ -21,6 +23,7 @@ impl DisplayBuilder {
         }
     }
 
+    /// Set the width/height of the display in pixels
     pub fn size(&mut self, width: usize, height: usize) -> &mut Self {
         if width == 0 || height == 0 {
             panic!("with and height must be >= 0");
@@ -32,6 +35,9 @@ impl DisplayBuilder {
         self
     }
 
+    /// Set the pixel scale
+    ///
+    /// A scale of `2` or higher is useful for viewing the simulator on high DPI displays
     pub fn scale(&mut self, scale: usize) -> &mut Self {
         if scale == 0 {
             panic!("scale must be >= 0");
@@ -42,6 +48,7 @@ impl DisplayBuilder {
         self
     }
 
+    /// Set the theme for the display to use
     pub fn theme(&mut self, theme: DisplayTheme) -> &mut Self {
         self.theme = theme;
 
@@ -51,12 +58,14 @@ impl DisplayBuilder {
         self
     }
 
+    /// Add a gap between pixels, simulating the same effect of a physical display
     pub fn pixel_spacing(&mut self, pixel_spacing: usize) -> &mut Self {
         self.pixel_spacing = pixel_spacing;
 
         self
     }
 
+    /// Finish building the simulated display and open an SDL window to render it into
     pub fn build(&self) -> Display {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
