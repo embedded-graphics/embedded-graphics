@@ -9,17 +9,12 @@
 //! [dependencies]
 //! embedded-graphics = { version = "*", features = [ "bmp" ] }
 
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::image::ImageBmp;
 use embedded_graphics::pixelcolor;
 use embedded_graphics::prelude::*;
-
-use simulator::{DisplayBuilder, DisplayTheme};
+use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     let image: ImageBmp<pixelcolor::Rgb565> =
