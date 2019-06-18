@@ -33,13 +33,15 @@
 //! issue](https://github.com/jamwaffles/embedded-graphics/issues/new) if there's a display driver
 //! that should be added to this list.
 //!
-//! * [ILI9341](https://crates.io/crates/ili9341)
-//! * [SH1106](https://crates.io/crates/sh1106)
-//! * [SSD1306](https://crates.io/crates/ssd1306)
-//! * [SSD1331](https://crates.io/crates/ssd1331)
-//! * [SSD1351](https://crates.io/crates/ssd1351)
-//! * [SSD1675](https://crates.io/crates/ssd1675)
-//! * [ST7735](https://crates.io/crates/st7735-lcd)
+//! * [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
+//! * [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
+//! * [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
+//! * [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
+//! * [ssd1322](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
+//! * [ssd1331](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
+//! * [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
+//! * [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
+//! * [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
 //!
 //! # Simulator
 //!
