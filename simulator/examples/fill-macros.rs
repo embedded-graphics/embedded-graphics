@@ -1,17 +1,11 @@
 //! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
 
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-
 use embedded_graphics::{circle, line, rect, triangle};
-
-use simulator::DisplayBuilder;
+use embedded_graphics_simulator::DisplayBuilder;
+use std::thread;
+use std::time::Duration;
 
 static CIRCLE_SIZE: i32 = 32;
 

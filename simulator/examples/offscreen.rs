@@ -1,14 +1,9 @@
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rect;
-
-use simulator::DisplayBuilder;
+use embedded_graphics_simulator::DisplayBuilder;
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     let mut display = DisplayBuilder::new().size(32, 32).scale(4).build();

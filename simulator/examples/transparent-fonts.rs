@@ -1,14 +1,9 @@
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::prelude::*;
 use embedded_graphics::text_6x8;
 use embedded_graphics::{circle, icoord, rect};
-
-use simulator::{DisplayBuilder, DisplayTheme};
+use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();

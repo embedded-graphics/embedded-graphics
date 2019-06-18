@@ -1,15 +1,10 @@
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::fonts::{Font6x12, Font6x8, Font8x16};
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{text_12x16, text_6x8};
-
-use simulator::DisplayBuilder;
+use embedded_graphics_simulator::DisplayBuilder;
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     let mut display = DisplayBuilder::new().size(256, 128).build();

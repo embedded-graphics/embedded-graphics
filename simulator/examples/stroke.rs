@@ -1,14 +1,9 @@
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect, Triangle};
-
-use simulator::{DisplayBuilder, SimPixelColor};
+use embedded_graphics_simulator::{DisplayBuilder, SimPixelColor};
+use std::thread;
+use std::time::Duration;
 
 const PADDING: i32 = 16;
 

@@ -1,14 +1,9 @@
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Triangle;
-
-use simulator::DisplayBuilder;
+use embedded_graphics_simulator::DisplayBuilder;
+use std::thread;
+use std::time::Duration;
 
 const PAD: i32 = 10;
 

@@ -9,16 +9,11 @@
 //! [dependencies]
 //! embedded-graphics = { version = "*", features = [ "tga" ] }
 
-extern crate embedded_graphics;
-extern crate simulator;
-
-use std::thread;
-use std::time::Duration;
-
 use embedded_graphics::image::ImageTga;
 use embedded_graphics::prelude::*;
-
-use simulator::DisplayBuilder;
+use embedded_graphics_simulator::DisplayBuilder;
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     let image = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
