@@ -98,11 +98,11 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{text_6x8, circle, icoord};
+//! use embedded_graphics::{text_6x8, gcircle, icoord};
 //! # use embedded_graphics::mock_display::Display;
 //! # let mut display = Display::default();
 //!
-//! let c = circle!((20, 20), 8, fill = Some(1u8));
+//! let c = gcircle!((20, 20), 8, fill = Some(1u8));
 //! let t = text_6x8!("Hello Rust!", fill = Some(20u8)).translate(icoord!(20, 16));
 //!
 //! display.draw(c);
@@ -115,12 +115,12 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{text_6x8, circle, icoord, rect};
+//! use embedded_graphics::{text_6x8, gcircle, icoord, grect};
 //! # use embedded_graphics::mock_display::Display;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<u8>> {
-//!     rect!((0, 0), (40, 40)).into_iter()
-//!         .chain(circle!((20, 20), 8, fill = Some(1u8)))
+//!     grect!((0, 0), (40, 40)).into_iter()
+//!         .chain(gcircle!((20, 20), 8, fill = Some(1u8)))
 //!         .chain(text_6x8!(text, fill = Some(20u8)).translate(icoord!(20, 16)))
 //! }
 //!
@@ -183,7 +183,7 @@ use crate::pixelcolor::PixelColor;
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::Drawing;
-/// use embedded_graphics::circle;
+/// use embedded_graphics::gcircle;
 ///
 /// # struct SPI1;
 /// #
@@ -228,7 +228,7 @@ use crate::pixelcolor::PixelColor;
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
-///     display.draw(circle!((32, 32), 10, stroke = Some(1u8)));
+///     display.draw(gcircle!((32, 32), 10, stroke = Some(1u8)));
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
@@ -258,7 +258,7 @@ where
 /// could be fixed by using a fixed length chunked buffering scheme.
 ///
 /// ```rust
-/// use embedded_graphics::circle;
+/// use embedded_graphics::gcircle;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::SizedDrawing;
 ///
@@ -315,7 +315,7 @@ where
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
-///     display.draw_sized(circle!((32, 32), 10, stroke = Some(1u8)));
+///     display.draw_sized(gcircle!((32, 32), 10, stroke = Some(1u8)));
 ///
 ///     // No `flush()` is required as `draw_sized()` sends the bytes directly
 /// }

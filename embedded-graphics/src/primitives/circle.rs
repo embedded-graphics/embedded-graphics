@@ -13,7 +13,7 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.circle.html) make for more concise code.
+/// The [macro examples](../../macro.gcircle.html) make for more concise code.
 ///
 /// ## Create some circles with different styles
 ///

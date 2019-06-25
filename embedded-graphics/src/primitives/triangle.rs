@@ -14,7 +14,7 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.triangle.html) make for more concise code.
+/// The [macro examples](../../macro.gtriangle.html) make for more concise code.
 ///
 /// ## Create some triangles with different styles
 ///

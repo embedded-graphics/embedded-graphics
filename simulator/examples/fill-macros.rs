@@ -2,7 +2,7 @@
 
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{circle, line, rect, triangle};
+use embedded_graphics::{gcircle, gline, grect, gtriangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -12,14 +12,14 @@ static CIRCLE_SIZE: i32 = 32;
 fn main() {
     let mut display = DisplayBuilder::new().size(384, 128).scale(2).build();
 
-    display.draw(circle!(
+    display.draw(gcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
         stroke = Some(1u8.into())
     ));
 
     display.draw(
-        circle!(
+        gcircle!(
             (CIRCLE_SIZE, CIRCLE_SIZE),
             CIRCLE_SIZE as u32,
             stroke = Some(0u8.into()),
@@ -29,7 +29,7 @@ fn main() {
     );
 
     display.draw(
-        circle!(
+        gcircle!(
             (CIRCLE_SIZE, CIRCLE_SIZE),
             CIRCLE_SIZE as u32,
             stroke = Some(0u8.into()),
@@ -38,10 +38,10 @@ fn main() {
         .translate(icoord!(CIRCLE_SIZE, CIRCLE_SIZE)),
     );
 
-    display.draw(rect!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
+    display.draw(grect!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
 
     display.draw(
-        &rect!(
+        &grect!(
             (0, 0),
             (64, 64),
             stroke = Some(0u8.into()),
@@ -51,7 +51,7 @@ fn main() {
     );
 
     display.draw(
-        rect!(
+        grect!(
             (0, 0),
             (64, 64),
             stroke = Some(0u8.into()),
@@ -61,12 +61,12 @@ fn main() {
     );
 
     display.draw(
-        triangle!((32, 0), (0, 64), (64, 64), stroke = Some(1u8.into()))
+        gtriangle!((32, 0), (0, 64), (64, 64), stroke = Some(1u8.into()))
             .translate(icoord!(96 * 2, 0)),
     );
 
     display.draw(
-        triangle!(
+        gtriangle!(
             (32, 0),
             (0, 64),
             (64, 64),
@@ -77,7 +77,7 @@ fn main() {
     );
 
     display.draw(
-        triangle!(
+        gtriangle!(
             (32, 0),
             (0, 64),
             (64, 64),
@@ -88,7 +88,7 @@ fn main() {
     );
 
     display
-        .draw(line!((0, 0), (64, 64), stroke = Some(1u8.into()),).translate(icoord!(256 + 32, 0)));
+        .draw(gline!((0, 0), (64, 64), stroke = Some(1u8.into()),).translate(icoord!(256 + 32, 0)));
 
     loop {
         let end = display.run_once();

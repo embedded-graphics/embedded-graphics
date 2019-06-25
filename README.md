@@ -67,10 +67,10 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    display.draw(circle!((64, 64), 64, stroke = Some(1u8)));
-    display.draw(line!((64, 64), (0, 64), stroke = Some(1u8)));
-    display.draw(line!((64, 64), (80, 80), stroke = Some(1u8)));
-    display.draw(rect!((64, 64), (80, 80), stroke = None, fill = Some(2u8)));
+    display.draw(gcircle!((64, 64), 64, stroke = Some(1u8)));
+    display.draw(gline!((64, 64), (0, 64), stroke = Some(1u8)));
+    display.draw(gline!((64, 64), (80, 80), stroke = Some(1u8)));
+    display.draw(grect!((64, 64), (80, 80), stroke = None, fill = Some(2u8)));
     display.draw(text_6x8!("Hello world!", stroke = Some(1u8)).translate(icoord!(5, 50)));
 }
 ```
