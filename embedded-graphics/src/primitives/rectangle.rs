@@ -13,7 +13,7 @@ use crate::unsignedcoord::UnsignedCoord;
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.grectangle.html) make for more concise code.
+/// The [macro examples](../../macro.egrectangle.html) make for more concise code.
 ///
 /// ## Create some rectangles with different styles
 ///

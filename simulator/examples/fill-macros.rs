@@ -2,7 +2,7 @@
 
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{gcircle, gline, grectangle, gtriangle};
+use embedded_graphics::{egcircle, egline, egrectangle, egtriangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -12,14 +12,14 @@ static CIRCLE_SIZE: i32 = 32;
 fn main() {
     let mut display = DisplayBuilder::new().size(384, 128).scale(2).build();
 
-    display.draw(gcircle!(
+    display.draw(egcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
         stroke = Some(1u8.into())
     ));
 
     display.draw(
-        gcircle!(
+        egcircle!(
             (CIRCLE_SIZE, CIRCLE_SIZE),
             CIRCLE_SIZE as u32,
             stroke = Some(0u8.into()),
@@ -29,7 +29,7 @@ fn main() {
     );
 
     display.draw(
-        gcircle!(
+        egcircle!(
             (CIRCLE_SIZE, CIRCLE_SIZE),
             CIRCLE_SIZE as u32,
             stroke = Some(0u8.into()),
@@ -39,10 +39,10 @@ fn main() {
     );
 
     display
-        .draw(grectangle!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
+        .draw(egrectangle!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
 
     display.draw(
-        &grectangle!(
+        &egrectangle!(
             (0, 0),
             (64, 64),
             stroke = Some(0u8.into()),
@@ -52,7 +52,7 @@ fn main() {
     );
 
     display.draw(
-        grectangle!(
+        egrectangle!(
             (0, 0),
             (64, 64),
             stroke = Some(0u8.into()),
@@ -62,12 +62,12 @@ fn main() {
     );
 
     display.draw(
-        gtriangle!((32, 0), (0, 64), (64, 64), stroke = Some(1u8.into()))
+        egtriangle!((32, 0), (0, 64), (64, 64), stroke = Some(1u8.into()))
             .translate(icoord!(96 * 2, 0)),
     );
 
     display.draw(
-        gtriangle!(
+        egtriangle!(
             (32, 0),
             (0, 64),
             (64, 64),
@@ -78,7 +78,7 @@ fn main() {
     );
 
     display.draw(
-        gtriangle!(
+        egtriangle!(
             (32, 0),
             (0, 64),
             (64, 64),
@@ -88,8 +88,9 @@ fn main() {
         .translate(icoord!(96 * 2 + 32, 32)),
     );
 
-    display
-        .draw(gline!((0, 0), (64, 64), stroke = Some(1u8.into()),).translate(icoord!(256 + 32, 0)));
+    display.draw(
+        egline!((0, 0), (64, 64), stroke = Some(1u8.into()),).translate(icoord!(256 + 32, 0)),
+    );
 
     loop {
         let end = display.run_once();

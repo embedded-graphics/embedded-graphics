@@ -19,11 +19,11 @@ pub use self::triangle::Triangle;
 /// convenient macro.
 ///
 /// ```rust
-/// use embedded_graphics::{gcircle, style::Style, primitives::Circle};
+/// use embedded_graphics::{egcircle, style::Style, primitives::Circle};
 ///
-/// let line_circle: Circle<u8> = gcircle!((10, 20), 30);
-/// let filled_circle: Circle<u8> = gcircle!((10, 20), 30, stroke = Some(5u8), fill = Some(10u8));
-/// let default_style: Circle<u8> = gcircle!((10, 20), 30, style = Style::default());
+/// let line_circle: Circle<u8> = egcircle!((10, 20), 30);
+/// let filled_circle: Circle<u8> = egcircle!((10, 20), 30, stroke = Some(5u8), fill = Some(10u8));
+/// let default_style: Circle<u8> = egcircle!((10, 20), 30, style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -32,13 +32,13 @@ pub use self::triangle::Triangle;
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{gcircle, style::Style, primitives::Circle};
+/// use embedded_graphics::{egcircle, style::Style, primitives::Circle};
 ///
-/// let circle: Circle<u8> = gcircle!((10, 20), 30, stroke = Some(5u8), fill = Some(10u8));
+/// let circle: Circle<u8> = egcircle!((10, 20), 30, stroke = Some(5u8), fill = Some(10u8));
 /// let circle: Circle<u8> = Circle::new(Coord::new(10, 20), 30).stroke(Some(5u8)).fill(Some(10u8));
 /// ```
 #[macro_export]
-macro_rules! gcircle {
+macro_rules! egcircle {
     (($cx:expr, $cy:expr), $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
@@ -53,10 +53,10 @@ macro_rules! gcircle {
 /// Note that only the `stroke` property has any effect on lines currently.
 ///
 /// ```rust
-/// use embedded_graphics::{gline, style::Style, primitives::Line};
+/// use embedded_graphics::{egline, style::Style, primitives::Line};
 ///
-/// let line: Line<u8> = gline!((10, 20), (30, 40));
-/// let stroke_line: Line<u8> = gline!((10, 20), (30, 40), stroke = Some(5u8));
+/// let line: Line<u8> = egline!((10, 20), (30, 40));
+/// let stroke_line: Line<u8> = egline!((10, 20), (30, 40), stroke = Some(5u8));
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -65,15 +65,15 @@ macro_rules! gcircle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{gline, style::Style, primitives::Line};
+/// use embedded_graphics::{egline, style::Style, primitives::Line};
 ///
-/// let Line: Line<u8> = gline!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
+/// let Line: Line<u8> = egline!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
 /// let Line: Line<u8> = Line::new(Coord::new(10, 20), Coord::new(30, 40))
 ///     .stroke(Some(5u8))
 ///     .fill(Some(10u8));
 /// ```
 #[macro_export]
-macro_rules! gline {
+macro_rules! egline {
     (($x1:expr, $y1:expr), ($x2:expr, $y2:expr) $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
@@ -86,11 +86,11 @@ macro_rules! gline {
 /// convenient macro.
 ///
 /// ```rust
-/// use embedded_graphics::{grectangle, style::Style, primitives::Rectangle};
+/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle};
 ///
-/// let empty_rect: Rectangle<u8> = grectangle!((10, 20), (30, 40));
-/// let filled_rect: Rectangle<u8> = grectangle!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
-/// let rect_default_style: Rectangle<u8> = grectangle!((10, 20), (30, 40), style = Style::default());
+/// let empty_rect: Rectangle<u8> = egrectangle!((10, 20), (30, 40));
+/// let filled_rect: Rectangle<u8> = egrectangle!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
+/// let rect_default_style: Rectangle<u8> = egrectangle!((10, 20), (30, 40), style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -99,15 +99,15 @@ macro_rules! gline {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{grectangle, style::Style, primitives::Rectangle};
+/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle};
 ///
-/// let Rectangle: Rectangle<u8> = grectangle!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
+/// let Rectangle: Rectangle<u8> = egrectangle!((10, 20), (30, 40), stroke = Some(5u8), fill = Some(10u8));
 /// let Rectangle: Rectangle<u8> = Rectangle::new(Coord::new(10, 20), Coord::new(30, 40))
 ///     .stroke(Some(5u8))
 ///     .fill(Some(10u8));
 /// ```
 #[macro_export]
-macro_rules! grectangle {
+macro_rules! egrectangle {
     (($x1:expr, $y1:expr), ($x2:expr, $y2:expr) $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
@@ -120,11 +120,11 @@ macro_rules! grectangle {
 /// convenient macro.
 ///
 /// ```rust
-/// use embedded_graphics::{gtriangle, style::Style, primitives::Triangle};
+/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle};
 ///
-/// let empty_triangle: Triangle<u8> = gtriangle!((10, 20), (30, 40), (50, 60));
-/// let filled_triangle: Triangle<u8> = gtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(5u8), fill = Some(10u8));
-/// let triangle_default_style: Triangle<u8> = gtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
+/// let empty_triangle: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60));
+/// let filled_triangle: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(5u8), fill = Some(10u8));
+/// let triangle_default_style: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -133,15 +133,15 @@ macro_rules! grectangle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{gtriangle, style::Style, primitives::Triangle};
+/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle};
 ///
-/// let Triangle: Triangle<u8> = gtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(5u8), fill = Some(10u8));
+/// let Triangle: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(5u8), fill = Some(10u8));
 /// let Triangle: Triangle<u8> = Triangle::new(Coord::new(10, 20), Coord::new(30, 40), Coord::new(50, 60))
 ///     .stroke(Some(5u8))
 ///     .fill(Some(10u8));
 /// ```
 #[macro_export]
-macro_rules! gtriangle {
+macro_rules! egtriangle {
     (($x1:expr, $y1:expr), ($x2:expr, $y2:expr), ($x3:expr, $y3:expr) $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
@@ -157,36 +157,36 @@ mod tests {
 
     #[test]
     fn circle() {
-        let _c: Circle<u8> = gcircle!((10, 20), 30);
-        let _c: Circle<u8> = gcircle!((10, 20), 30, stroke = Some(1u8), fill = Some(10u8));
-        let _c: Circle<u8> = gcircle!((10, 20), 30, style = Style::default());
+        let _c: Circle<u8> = egcircle!((10, 20), 30);
+        let _c: Circle<u8> = egcircle!((10, 20), 30, stroke = Some(1u8), fill = Some(10u8));
+        let _c: Circle<u8> = egcircle!((10, 20), 30, style = Style::default());
     }
 
     #[test]
     fn line() {
-        let _l: Line<u8> = gline!((10, 20), (30, 40));
-        let _l: Line<u8> = gline!((10, 20), (30, 40), stroke = Some(1u8), fill = Some(10u8));
-        let _l: Line<u8> = gline!((10, 20), (30, 40), style = Style::default());
+        let _l: Line<u8> = egline!((10, 20), (30, 40));
+        let _l: Line<u8> = egline!((10, 20), (30, 40), stroke = Some(1u8), fill = Some(10u8));
+        let _l: Line<u8> = egline!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
     fn rect() {
-        let _r: Rectangle<u8> = grectangle!((10, 20), (30, 40));
+        let _r: Rectangle<u8> = egrectangle!((10, 20), (30, 40));
         let _r: Rectangle<u8> =
-            grectangle!((10, 20), (30, 40), stroke = Some(1u8), fill = Some(10u8));
-        let _r: Rectangle<u8> = grectangle!((10, 20), (30, 40), style = Style::default());
+            egrectangle!((10, 20), (30, 40), stroke = Some(1u8), fill = Some(10u8));
+        let _r: Rectangle<u8> = egrectangle!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
     fn triangle() {
-        let _t: Triangle<u8> = gtriangle!((10, 20), (30, 40), (50, 60));
-        let _t: Triangle<u8> = gtriangle!(
+        let _t: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60));
+        let _t: Triangle<u8> = egtriangle!(
             (10, 20),
             (30, 40),
             (50, 60),
             stroke = Some(1u8),
             fill = Some(10u8)
         );
-        let _t: Triangle<u8> = gtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
+        let _t: Triangle<u8> = egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
     }
 }

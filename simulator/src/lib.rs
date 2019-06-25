@@ -34,7 +34,7 @@
 //!
 //! ```rust,no_run
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{icoord, gcircle, gline, text_6x8};
+//! use embedded_graphics::{icoord, egcircle, egline, text_6x8};
 //! use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
 //! use std::thread;
 //! use std::time::Duration;
@@ -47,11 +47,11 @@
 //!
 //!     display.draw(text_6x8!("Hello World!"));
 //!
-//!     display.draw(gcircle!((96, 32), 31, stroke = Some(1u8.into())));
+//!     display.draw(egcircle!((96, 32), 31, stroke = Some(1u8.into())));
 //!
-//!     display.draw(gline!((32, 32), (1, 32), stroke = Some(1u8.into()))
+//!     display.draw(egline!((32, 32), (1, 32), stroke = Some(1u8.into()))
 //!         .translate(icoord!(64, 0)));
-//!     display.draw(gline!((32, 32), (40, 40), stroke = Some(1u8.into()))
+//!     display.draw(egline!((32, 32), (40, 40), stroke = Some(1u8.into()))
 //!         .translate(icoord!(64, 0)));
 //!
 //!     loop {
