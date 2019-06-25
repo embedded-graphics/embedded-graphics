@@ -2,7 +2,7 @@
 
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{gcircle, gline, grect, gtriangle};
+use embedded_graphics::{gcircle, gline, grectangle, gtriangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -38,10 +38,11 @@ fn main() {
         .translate(icoord!(CIRCLE_SIZE, CIRCLE_SIZE)),
     );
 
-    display.draw(grect!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
+    display
+        .draw(grectangle!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
 
     display.draw(
-        &grect!(
+        &grectangle!(
             (0, 0),
             (64, 64),
             stroke = Some(0u8.into()),
@@ -51,7 +52,7 @@ fn main() {
     );
 
     display.draw(
-        grect!(
+        grectangle!(
             (0, 0),
             (64, 64),
             stroke = Some(0u8.into()),

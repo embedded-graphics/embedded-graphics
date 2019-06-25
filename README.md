@@ -70,7 +70,7 @@ fn main() {
     display.draw(gcircle!((64, 64), 64, stroke = Some(1u8)));
     display.draw(gline!((64, 64), (0, 64), stroke = Some(1u8)));
     display.draw(gline!((64, 64), (80, 80), stroke = Some(1u8)));
-    display.draw(grect!((64, 64), (80, 80), stroke = None, fill = Some(2u8)));
+    display.draw(grectangle!((64, 64), (80, 80), stroke = None, fill = Some(2u8)));
     display.draw(text_6x8!("Hello world!", stroke = Some(1u8)).translate(icoord!(5, 50)));
 }
 ```

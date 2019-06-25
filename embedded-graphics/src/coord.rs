@@ -33,7 +33,7 @@ mod internal_coord {
     /// `Coord` instead of this builtin implementation.
     ///
     /// [`UnsignedCoord`]: ../unsignedcoord/struct.UnsignedCoord.html
-    /// [`Rect`]: ../primitives/rect/struct.Rect.html
+    /// [`Rect`]: ../primitives/rectangle/struct.Rectangle.html
     /// [`Vector2<i32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct Coord(pub CoordPart, pub CoordPart);

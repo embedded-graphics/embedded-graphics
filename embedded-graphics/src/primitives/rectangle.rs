@@ -13,27 +13,27 @@ use crate::unsignedcoord::UnsignedCoord;
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.grect.html) make for more concise code.
+/// The [macro examples](../../macro.grectangle.html) make for more concise code.
 ///
 /// ## Create some rectangles with different styles
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::primitives::Rect;
+/// use embedded_graphics::primitives::Rectangle;
 /// # use embedded_graphics::mock_display::Display;
 /// # let mut display = Display::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
-/// let r1 = Rect::new(Coord::new(10, 20), Coord::new(30, 40));
+/// let r1 = Rectangle::new(Coord::new(10, 20), Coord::new(30, 40));
 ///
-/// // Rect with styled stroke and fill from (50, 20) to (60, 35)
-/// let r2 = Rect::new(Coord::new(50, 20), Coord::new(60, 35))
+/// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
+/// let r2 = Rectangle::new(Coord::new(50, 20), Coord::new(60, 35))
 ///     .stroke(Some(5u8))
 ///     .stroke_width(3)
 ///     .fill(Some(10u8));
 ///
-/// // Rect with translation applied
-/// let r3 = Rect::new(Coord::new(50, 20), Coord::new(60, 35))
+/// // Rectangle with translation applied
+/// let r3 = Rectangle::new(Coord::new(50, 20), Coord::new(60, 35))
 ///     .translate(Coord::new(65, 35));
 ///
 /// display.draw(r1);
@@ -41,7 +41,7 @@ use crate::unsignedcoord::UnsignedCoord;
 /// display.draw(r3);
 /// ```
 #[derive(Debug, Clone, Copy)]
-pub struct Rect<C: PixelColor> {
+pub struct Rectangle<C: PixelColor> {
     /// Top left point of the rect
     pub top_left: Coord,
 
@@ -52,9 +52,9 @@ pub struct Rect<C: PixelColor> {
     pub style: Style<C>,
 }
 
-impl<C> Primitive for Rect<C> where C: PixelColor {}
+impl<C> Primitive for Rectangle<C> where C: PixelColor {}
 
-impl<C> Dimensions for Rect<C>
+impl<C> Dimensions for Rectangle<C>
 where
     C: PixelColor,
 {
@@ -71,13 +71,13 @@ where
     }
 }
 
-impl<C> Rect<C>
+impl<C> Rectangle<C>
 where
     C: PixelColor,
 {
     /// Create a new rectangle from the top left point to the bottom right point with a given style
     pub fn new(top_left: Coord, bottom_right: Coord) -> Self {
-        Rect {
+        Rectangle {
             top_left,
             bottom_right,
             style: Style::default(),
@@ -85,7 +85,7 @@ where
     }
 }
 
-impl<C> WithStyle<C> for Rect<C>
+impl<C> WithStyle<C> for Rectangle<C>
 where
     C: PixelColor,
 {
@@ -114,27 +114,27 @@ where
     }
 }
 
-impl<C> IntoIterator for Rect<C>
+impl<C> IntoIterator for Rectangle<C>
 where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = RectIterator<C>;
+    type IntoIter = RectangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
         (&self).into_iter()
     }
 }
 
-impl<'a, C> IntoIterator for &'a Rect<C>
+impl<'a, C> IntoIterator for &'a Rectangle<C>
 where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = RectIterator<C>;
+    type IntoIter = RectangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        RectIterator {
+        RectangleIterator {
             top_left: self.top_left,
             bottom_right: self.bottom_right,
             style: self.style,
@@ -146,7 +146,7 @@ where
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Clone, Copy)]
-pub struct RectIterator<C: PixelColor>
+pub struct RectangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
@@ -157,7 +157,7 @@ where
     y: i32,
 }
 
-impl<C> Iterator for RectIterator<C>
+impl<C> Iterator for RectangleIterator<C>
 where
     C: PixelColor,
 {
@@ -227,22 +227,22 @@ where
     }
 }
 
-impl<C> Drawable for Rect<C> where C: PixelColor {}
+impl<C> Drawable for Rectangle<C> where C: PixelColor {}
 
-impl<C> Transform for Rect<C>
+impl<C> Transform for Rectangle<C>
 where
     C: PixelColor,
 {
     /// Translate the rect from its current position to a new position by (x, y) pixels, returning
-    /// a new `Rect`. For a mutating transform, see `translate_mut`.
+    /// a new `Rectangle`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
-    /// # use embedded_graphics::primitives::Rect;
+    /// # use embedded_graphics::primitives::Rectangle;
     /// # use embedded_graphics::prelude::*;
     /// #
     /// # let style = Style::stroke(1u8);
     /// #
-    /// let rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// let rect = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
     /// let moved = rect.translate(Coord::new(10, 10));
     ///
@@ -260,12 +260,12 @@ where
     /// Translate the rect from its current position to a new position by (x, y) pixels.
     ///
     /// ```
-    /// # use embedded_graphics::primitives::Rect;
+    /// # use embedded_graphics::primitives::Rectangle;
     /// # use embedded_graphics::prelude::*;
     /// #
     /// # let style = Style::stroke(1u8);
     /// #
-    /// let mut rect = Rect::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// let mut rect = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
     /// rect.translate_mut(Coord::new(10, 10));
     ///
@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let rect: Rect<u8> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rectangle<u8> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(-10, -10));
 
         assert_eq!(rect.top_left(), Coord::new(5, 10));
@@ -301,7 +301,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let rect: Rect<u8> = Rect::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rectangle<u8> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -310,7 +310,7 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect: RectIterator<u8> = Rect::new(Coord::new(2, 2), Coord::new(4, 4))
+        let mut rect: RectangleIterator<u8> = Rectangle::new(Coord::new(2, 2), Coord::new(4, 4))
             .style(Style::stroke(1))
             .into_iter();
 
@@ -328,7 +328,7 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect: RectIterator<u8> = Rect::new(Coord::new(-2, -2), Coord::new(2, 2))
+        let mut rect: RectangleIterator<u8> = Rectangle::new(Coord::new(-2, -2), Coord::new(2, 2))
             .style(Style::stroke(1))
             .into_iter();
 

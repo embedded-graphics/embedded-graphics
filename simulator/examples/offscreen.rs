@@ -1,6 +1,6 @@
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::Rect;
+use embedded_graphics::primitives::Rectangle;
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -10,7 +10,7 @@ fn main() {
 
     // Outline
     display.draw(
-        Rect::new(icoord!(0, 0), icoord!(16, 16))
+        Rectangle::new(icoord!(0, 0), icoord!(16, 16))
             .stroke(Some(1u8.into()))
             .translate(icoord!(-8, -8)),
     );

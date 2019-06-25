@@ -10,7 +10,7 @@
 //! * [TGA-format images](./image/struct.ImageTga.html) (with `tga` feature enabled)
 //! * [Primitives](./primitives/index.html)
 //!     * [Lines](./primitives/line/struct.Line.html)
-//!     * [Rectangles (and squares)](./primitives/rect/struct.Rect.html)
+//!     * [Rectangles (and squares)](./primitives/rectangle/struct.Rectangle.html)
 //!     * [Circles](./primitives/circle/struct.Circle.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
@@ -115,11 +115,11 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{text_6x8, gcircle, icoord, grect};
+//! use embedded_graphics::{text_6x8, gcircle, icoord, grectangle};
 //! # use embedded_graphics::mock_display::Display;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<u8>> {
-//!     grect!((0, 0), (40, 40)).into_iter()
+//!     grectangle!((0, 0), (40, 40)).into_iter()
 //!         .chain(gcircle!((20, 20), 8, fill = Some(1u8)))
 //!         .chain(text_6x8!(text, fill = Some(20u8)).translate(icoord!(20, 16)))
 //! }

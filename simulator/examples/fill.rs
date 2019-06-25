@@ -1,6 +1,6 @@
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Rect, Triangle};
+use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -29,20 +29,20 @@ fn main() {
     );
 
     display.draw(
-        Rect::new(icoord!(0, 0), icoord!(64, 64))
+        Rectangle::new(icoord!(0, 0), icoord!(64, 64))
             .translate(icoord!(96, 0))
             .stroke(Some(1u8.into())),
     );
 
     display.draw(
-        &Rect::new(icoord!(0, 0), icoord!(64, 64))
+        &Rectangle::new(icoord!(0, 0), icoord!(64, 64))
             .translate(icoord!(96 + 16, 16))
             .stroke(Some(0u8.into()))
             .fill(Some(1u8.into())),
     );
 
     display.draw(
-        Rect::new(icoord!(0, 0), icoord!(64, 64))
+        Rectangle::new(icoord!(0, 0), icoord!(64, 64))
             .translate(icoord!(96 + 32, 32))
             .stroke(Some(0u8.into()))
             .fill(Some(0u8.into())),
