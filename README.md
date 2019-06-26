@@ -1,6 +1,6 @@
 # Embedded graphics
 
-[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=svg)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
+[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/embedded-graphics.svg)](https://crates.io/crates/embedded-graphics)
 [![Docs.rs](https://docs.rs/embedded-graphics/badge.svg)](https://docs.rs/embedded-graphics)
 

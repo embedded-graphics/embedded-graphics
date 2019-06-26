@@ -1,6 +1,6 @@
 # TinyTGA
 
-[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=svg)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
+[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/tinytga.svg)](https://crates.io/crates/tinytga)
 [![Docs.rs](https://docs.rs/tinytga/badge.svg)](https://docs.rs/tinytga)
 
