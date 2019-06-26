@@ -19,6 +19,10 @@ A couple of breaking changes around naming, mostly polish around public APIs
   * `circle` -> `egcircle`
 * **(breaking)** The `Rect` primitive is now renamed to `Rectangle` to fit with the other non-truncated primitive names.
 
+### Fixed
+
+* The TGA example in the simulator now draws the image correctly
+
 ## 0.5.0
 
 A big release, focussed on ergonomics. There are new macros to make drawing and positioning primitives and text much less noisy, as well as changes to the `Drawing` trait to remove the explicit `.into_iter()` call when passing objects to it.
