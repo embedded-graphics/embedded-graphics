@@ -1,5 +1,6 @@
 //! Pixel color
 
+use byteorder::{ByteOrder, BigEndian, LittleEndian};
 use core::fmt;
 
 /// Pixel color trait
@@ -146,17 +147,11 @@ macro_rules! from_slice_u16 {
     ($type: ident) => {
         impl FromSlice for $type {
             fn from_le_slice(data: &[u8]) -> Self {
-                let mut value = data[0] as u16;
-                value += (data[1] as u16) << 8;
-
-                Self(value)
+                Self(LittleEndian::read_u16(data))
             }
 
             fn from_be_slice(data: &[u8]) -> Self {
-                let mut value = data[1] as u16;
-                value += (data[0] as u16) << 8;
-
-                Self(value)
+                Self(BigEndian::read_u16(data))
             }
         }
     };
@@ -166,40 +161,18 @@ macro_rules! from_slice_u32 {
     ($type: ident) => {
         impl FromSlice for $type {
             fn from_le_slice(data: &[u8]) -> Self {
-                if data.len() >= 4 {
-                    let mut value = data[0] as u32;
-                    value += (data[1] as u32) << 8;
-                    value += (data[2] as u32) << 16;
-                    value += (data[3] as u32) << 24;
-
-                    Self(value & 0xFFFFFF)
-                } else if data.len() == 3 {
-                    let mut value = data[0] as u32;
-                    value += (data[1] as u32) << 8;
-                    value += (data[2] as u32) << 16;
-
-                    Self(value)
+                if data.len() == 3 {
+                    Self(LittleEndian::read_u24(data))
                 } else {
-                    panic!("slice to short")
+                    Self(LittleEndian::read_u32(data) & 0xFFFFFF)
                 }
             }
 
             fn from_be_slice(data: &[u8]) -> Self {
-                if data.len() >= 4 {
-                    let mut value = data[3] as u32;
-                    value += (data[2] as u32) << 8;
-                    value += (data[1] as u32) << 16;
-                    value += (data[0] as u32) << 24;
-
-                    Self(value & 0xFFFFFF)
-                } else if data.len() == 3 {
-                    let mut value = data[2] as u32;
-                    value += (data[1] as u32) << 8;
-                    value += (data[0] as u32) << 16;
-
-                    Self(value)
+                if data.len() == 3 {
+                    Self(BigEndian::read_u24(data))
                 } else {
-                    panic!("slice to short")
+                    Self(BigEndian::read_u32(data) & 0xFFFFFF)
                 }
             }
         }
