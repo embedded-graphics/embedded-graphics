@@ -4,7 +4,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## 0.5.1
 
-Some smaller breaking changes, mostly polish around public APIs
+A couple of breaking changes around naming, mostly polish around public APIs
 
 ### Added
 
@@ -17,6 +17,7 @@ Some smaller breaking changes, mostly polish around public APIs
   * `triangle` -> `egtriangle`
   * `rect` -> `egrectangle`
   * `circle` -> `egcircle`
+* **(breaking)** The `Rect` primitive is now renamed to `Rectangle` to fit with the other non-truncated primitive names.
 
 ## 0.5.0
 
