@@ -2,7 +2,7 @@ extern crate embedded_graphics;
 
 use embedded_graphics::coord::Coord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rect};
+use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics::Drawing;
 
 struct FakeDisplay {}
@@ -31,7 +31,7 @@ impl Drawing<TestPixelColor> for FakeDisplay {
 fn it_supports_chaining() {
     let mut disp = FakeDisplay {};
 
-    let chained = Rect::new(Coord::new(0, 0), Coord::new(1, 1))
+    let chained = Rectangle::new(Coord::new(0, 0), Coord::new(1, 1))
         .into_iter()
         .chain(Circle::new(Coord::new(2, 2), 1).into_iter());
 
@@ -63,7 +63,7 @@ fn return_from_fn() {
 fn implicit_into_iter() {
     let mut disp = FakeDisplay {};
 
-    let chained = Rect::new(Coord::new(0, 0), Coord::new(1, 1))
+    let chained = Rectangle::new(Coord::new(0, 0), Coord::new(1, 1))
         .into_iter()
         .chain(Circle::new(Coord::new(2, 2), 1));
 

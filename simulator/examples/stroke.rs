@@ -1,6 +1,6 @@
 use embedded_graphics::icoord;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rect, Triangle};
+use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
 use embedded_graphics_simulator::{DisplayBuilder, SimPixelColor};
 use std::thread;
 use std::time::Duration;
@@ -14,7 +14,7 @@ fn main() {
         .translate(icoord!(0, 0))
         .stroke(Some(SimPixelColor(1, 1, 1)));
 
-    let rect = Rect::new(icoord!(0, 0), icoord!(64, 64))
+    let rect = Rectangle::new(icoord!(0, 0), icoord!(64, 64))
         .translate(icoord!(64 + PADDING, 0))
         .stroke(Some(SimPixelColor(1, 1, 1)));
 

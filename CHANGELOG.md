@@ -2,6 +2,27 @@
 
 Embedded Graphics is a `no_std` library for adding graphics features to display drivers. It aims to use the minimum amount of memory for builtin graphics objects by leveraging Rust's iterators to avoid large allocations. It targets embedded environments, but can run anywhere like a Raspberry Pi up to full desktop machines.
 
+## 0.5.1
+
+A couple of breaking changes around naming, mostly polish around public APIs
+
+### Added
+
+* The simulator is now [available on crates.io](https://crates.io/crates/embedded-graphics-simulator) as a standalone crate. You can now create simulated displays for testing out embedded_graphics code or showing off cool examples.
+
+### Changed
+
+* **(breaking)** Primitives macros have been renamed. This is primarily to fix conflicts with `std`'s `line!()` macro, but I thought I'd take the opportunity to make the names a bit better/more consistent at the same time:
+  * `line` -> `egline`
+  * `triangle` -> `egtriangle`
+  * `rect` -> `egrectangle`
+  * `circle` -> `egcircle`
+* **(breaking)** The `Rect` primitive is now renamed to `Rectangle` to fit with the other non-truncated primitive names.
+
+### Fixed
+
+* The TGA example in the simulator now draws the image correctly
+
 ## 0.5.0
 
 A big release, focussed on ergonomics. There are new macros to make drawing and positioning primitives and text much less noisy, as well as changes to the `Drawing` trait to remove the explicit `.into_iter()` call when passing objects to it.
