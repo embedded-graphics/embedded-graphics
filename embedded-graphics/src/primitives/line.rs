@@ -13,7 +13,7 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.line.html) make for more concise code.
+/// The [macro examples](../../macro.egline.html) make for more concise code.
 ///
 /// ## Create some lines with different styles
 ///

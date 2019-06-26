@@ -1,7 +1,7 @@
 use criterion::*;
 use embedded_graphics::{
     prelude::*,
-    primitives::{Circle, Line, Rect, Triangle},
+    primitives::{Circle, Line, Rectangle, Triangle},
 };
 
 fn filled_circle(c: &mut Criterion) {
@@ -16,7 +16,7 @@ fn filled_circle(c: &mut Criterion) {
 
 fn filled_rect(c: &mut Criterion) {
     c.bench_function("filled rectangle", |b| {
-        let object: Rect<u8> = Rect::new(Coord::new(100, 100), Coord::new(200, 200))
+        let object: Rectangle<u8> = Rectangle::new(Coord::new(100, 100), Coord::new(200, 200))
             .fill(Some(1u8.into()))
             .stroke(Some(10u8.into()));
 
@@ -26,8 +26,8 @@ fn filled_rect(c: &mut Criterion) {
 
 fn empty_rect(c: &mut Criterion) {
     c.bench_function("unfilled rectangle", |b| {
-        let object: Rect<u8> =
-            Rect::new(Coord::new(100, 100), Coord::new(200, 200)).stroke(Some(10u8.into()));
+        let object: Rectangle<u8> =
+            Rectangle::new(Coord::new(100, 100), Coord::new(200, 200)).stroke(Some(10u8.into()));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<u8>>>())
     });
