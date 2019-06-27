@@ -1,5 +1,4 @@
-use embedded_graphics::pixelcolor::BinaryColor;
-use sdl2::pixels::Color;
+use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
 
 /// Color theme for binary displays
 #[derive(Clone)]
@@ -25,24 +24,22 @@ pub enum BinaryColorTheme {
 
 impl BinaryColorTheme {
     /// Get the theme's pixel color for a given pixel state
-    pub fn convert(&self, color: BinaryColor) -> Color {
-        match color {
-            BinaryColor::Off => match self {
-                BinaryColorTheme::Default => Color::RGB(255, 255, 255),
-                BinaryColorTheme::LcdWhite => Color::RGB(245, 245, 245),
-                BinaryColorTheme::LcdGreen => Color::RGB(120, 185, 50),
-                BinaryColorTheme::LcdBlue => Color::RGB(70, 80, 230),
-                BinaryColorTheme::OledBlue => Color::RGB(0, 20, 40),
-                BinaryColorTheme::OledWhite => Color::RGB(20, 20, 20),
-            },
-            BinaryColor::On => match self {
-                BinaryColorTheme::Default => Color::RGB(0, 0, 0),
-                BinaryColorTheme::LcdWhite => Color::RGB(32, 32, 32),
-                BinaryColorTheme::LcdGreen => Color::RGB(32, 32, 32),
-                BinaryColorTheme::LcdBlue => Color::RGB(230, 230, 255),
-                BinaryColorTheme::OledBlue => Color::RGB(0, 210, 255),
-                BinaryColorTheme::OledWhite => Color::RGB(255, 255, 255),
-            },
+    pub fn convert(&self, color: BinaryColor) -> Rgb888 {
+        match self {
+            BinaryColorTheme::Default => color.map_color(Rgb888::WHITE, Rgb888::BLACK),
+            BinaryColorTheme::LcdWhite => {
+                color.map_color(Rgb888::new(245, 245, 245), Rgb888::new(32, 32, 32))
+            }
+            BinaryColorTheme::LcdGreen => {
+                color.map_color(Rgb888::new(120, 185, 50), Rgb888::new(32, 32, 32))
+            }
+            BinaryColorTheme::LcdBlue => {
+                color.map_color(Rgb888::new(70, 80, 230), Rgb888::new(230, 230, 255))
+            }
+            BinaryColorTheme::OledBlue => {
+                color.map_color(Rgb888::new(0, 20, 40), Rgb888::new(0, 210, 255))
+            }
+            BinaryColorTheme::OledWhite => color.map_color(Rgb888::new(20, 20, 20), Rgb888::WHITE),
         }
     }
 }

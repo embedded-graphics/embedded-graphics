@@ -10,7 +10,11 @@ use std::time::Duration;
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(304, 128).scale(2).build();
+    let mut display = DisplayBuilder::new()
+        .title("Filled primitives")
+        .size(304, 128)
+        .scale(2)
+        .build_binary();
 
     display
         .draw(Circle::new(icoord!(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32).stroke(Some(C1)));

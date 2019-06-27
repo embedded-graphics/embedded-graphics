@@ -22,7 +22,7 @@ pub trait FromSlice {
 }
 
 /// RGB color
-pub trait RgbColor {
+pub trait RgbColor: PixelColor {
     /// red channel value
     fn r(&self) -> u8;
 

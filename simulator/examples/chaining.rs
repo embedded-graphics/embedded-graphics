@@ -11,8 +11,9 @@ use std::time::Duration;
 
 fn main() {
     let mut display = DisplayBuilder::new()
+        .title("Chained drawing")
         .theme(BinaryColorTheme::OledBlue)
-        .build();
+        .build_binary();
 
     let objects = Circle::new(icoord!(64, 64), 64)
         .stroke(Some(C1))

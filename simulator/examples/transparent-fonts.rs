@@ -1,12 +1,15 @@
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egrectangle, icoord, text_6x8};
-use embedded_graphics_simulator::{Display, DisplayBuilder};
+use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display: Display<Rgb565> = DisplayBuilder::new().scale(3).build();
+    let mut display = DisplayBuilder::new()
+        .title("Fonts with transparent background")
+        .scale(3)
+        .build_rgb();
 
     display.draw(
         egcircle!(
@@ -19,7 +22,10 @@ fn main() {
         .chain(egrectangle!((20, 20), (100, 80), fill = Some(Rgb565::RED))),
     );
 
-    display.draw(text_6x8!("Hello world! - no background").translate(icoord!(15, 15)));
+    display.draw(
+        text_6x8!("Hello world! - no background", stroke = Some(Rgb565::WHITE))
+            .translate(icoord!(15, 15)),
+    );
 
     display.draw(
         text_6x8!(

@@ -7,7 +7,11 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(32, 32).scale(4).build();
+    let mut display = DisplayBuilder::new()
+        .title("Offscreen")
+        .size(32, 32)
+        .scale(4)
+        .build_binary();
 
     // Outline
     display.draw(

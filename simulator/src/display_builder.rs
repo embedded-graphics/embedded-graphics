@@ -1,6 +1,6 @@
 use crate::display_theme::BinaryColorTheme;
-use crate::Display;
-use embedded_graphics::pixelcolor::PixelColor;
+use crate::window::Window;
+use crate::{BinaryDisplay, PixelData, RgbDisplay};
 
 /// Create a simulator display using the builder pattern
 pub struct DisplayBuilder {
@@ -9,6 +9,7 @@ pub struct DisplayBuilder {
     scale: usize,
     pixel_spacing: usize,
     theme: BinaryColorTheme,
+    title: String,
 }
 
 impl DisplayBuilder {
@@ -20,6 +21,7 @@ impl DisplayBuilder {
             scale: 1,
             pixel_spacing: 0,
             theme: BinaryColorTheme::Default,
+            title: String::from("embedded-graphics-simulator"),
         }
     }
 
@@ -65,40 +67,40 @@ impl DisplayBuilder {
         self
     }
 
-    /// Finish building the simulated display and open an SDL window to render it into
-    pub fn build<C>(&self) -> Display<C>
-    where
-        C: PixelColor,
-    {
-        let sdl_context = sdl2::init().unwrap();
-        let video_subsystem = sdl_context.video().unwrap();
+    /// Set the window title
+    pub fn title(&mut self, title: &str) -> &mut Self {
+        self.title = title.to_owned();
 
-        let window_width = self.width * self.scale + (self.width - 1) * self.pixel_spacing;
-        let window_height = self.height * self.scale + (self.height - 1) * self.pixel_spacing;
+        self
+    }
 
-        let window = video_subsystem
-            .window(
-                "graphics-emulator",
-                window_width as u32,
-                window_height as u32,
-            )
-            .position_centered()
-            .build()
-            .unwrap();
+    fn build_window(&self) -> Window {
+        Window::new(
+            self.width,
+            self.height,
+            self.scale,
+            self.pixel_spacing,
+            &self.title,
+        )
+    }
 
-        let pixels = vec![C::DEFAULT_BG; self.width * self.height];
-        let canvas = window.into_canvas().build().unwrap();
-        let event_pump = sdl_context.event_pump().unwrap();
+    /// Finish building the simulated binary display and open an SDL window to render it into
+    pub fn build_binary(&self) -> BinaryDisplay {
+        let window = self.build_window();
+        let pixels = PixelData::new(self.width, self.height);
 
-        Display {
-            width: self.width,
-            height: self.height,
-            scale: self.scale,
-            pixel_spacing: self.pixel_spacing,
+        BinaryDisplay {
             theme: self.theme.clone(),
-            pixels: pixels.into_boxed_slice(),
-            canvas,
-            event_pump,
+            pixels,
+            window,
         }
+    }
+
+    /// Finish building the simulated RGB display and open an SDL window to render it into
+    pub fn build_rgb(&self) -> RgbDisplay {
+        let window = self.build_window();
+        let pixels = PixelData::new(self.width, self.height);
+
+        RgbDisplay { pixels, window }
     }
 }

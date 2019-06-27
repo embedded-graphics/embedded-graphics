@@ -9,7 +9,10 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(256, 128).build();
+    let mut display = DisplayBuilder::new()
+        .title("Fonts")
+        .size(256, 128)
+        .build_binary();
 
     // Show smallest font with black font on white background (default value for fonts)
     display

@@ -12,7 +12,11 @@ use std::time::Duration;
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(384, 128).scale(2).build();
+    let mut display = DisplayBuilder::new()
+        .title("Filled primitives using macros")
+        .size(384, 128)
+        .scale(2)
+        .build_binary();
 
     display.draw(egcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),

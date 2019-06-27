@@ -9,8 +9,9 @@ use std::time::Duration;
 
 fn main() {
     let mut display = DisplayBuilder::new()
+        .title("Hello World")
         .theme(BinaryColorTheme::OledBlue)
-        .build();
+        .build_binary();
 
     // Outline
     display.draw(Circle::new(icoord!(64, 64), 64).stroke(Some(C1)));

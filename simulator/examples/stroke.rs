@@ -9,7 +9,10 @@ use std::time::Duration;
 const PADDING: i32 = 16;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(320, 256).build();
+    let mut display = DisplayBuilder::new()
+        .title("Strokes")
+        .size(320, 256)
+        .build_binary();
 
     let triangle = Triangle::new(icoord!(0, 64), icoord!(64, 0), icoord!(64, 64))
         .translate(icoord!(0, 0))
