@@ -12,63 +12,66 @@ pub trait PixelColor: Clone + Copy + PartialEq + fmt::Debug {
     const DEFAULT_FG: Self;
 }
 
-/// from slice trait
+/// Convert raw data to color structs.
 pub trait FromSlice {
-    /// create color from big endian data
+    /// Convert big endian data to color.
     fn from_be_slice(data: &[u8]) -> Self;
 
-    /// create color from little endian data
+    /// Convert little endian data to color.
     fn from_le_slice(data: &[u8]) -> Self;
 }
 
 /// RGB color
 pub trait RgbColor: PixelColor {
-    /// red channel value
+    /// Returns the red channel value.
     fn r(&self) -> u8;
 
-    /// green channel value
+    /// Returns the green channel value.
     fn g(&self) -> u8;
 
-    /// blue channel value
+    /// Returns the blue channel value.
     fn b(&self) -> u8;
 
-    /// maximum value in red channel
+    /// The maximum value in the red channel.
     const MAX_R: u8;
 
-    /// maximum value in green channel
+    /// The maximum value in the green channel.
     const MAX_G: u8;
 
-    /// maximum value in blue channel
+    /// The maximum value in the blue channel.
     const MAX_B: u8;
 
-    /// black
+    /// Black color (R: 0%, G: 0%, B: 0%)
     const BLACK: Self;
 
-    /// red
+    /// Red color (R: 100%, G: 0%, B: 0%)
     const RED: Self;
 
-    /// green
+    /// Green color (R: 0%, G: 100%, B: 0%)
     const GREEN: Self;
 
-    /// blue
+    /// Blue color (R: 0%, G: 0%, B: 100%)
     const BLUE: Self;
 
-    /// yellow
+    /// Yellow color (R: 100%, G: 100%, B: 0%)
     const YELLOW: Self;
 
-    /// magenta
+    /// Magenta color (R: 100%, G: 0%, B: 100%)
     const MAGENTA: Self;
 
-    /// cyan
+    /// Cyan color (R: 0%, G: 100%, B: 100%)
     const CYAN: Self;
 
-    /// white
+    /// White color (R: 100%, G: 100%, B: 100%)
     const WHITE: Self;
 }
 
 macro_rules! impl_rgb_color {
-    ($type: ident, $base_type: ident, ($r_bits: expr, $g_bits: expr, $b_bits: expr), ($r_pos: expr, $g_pos: expr, $b_pos: expr)) => {
-        /// Color
+    ($type: ident, $type_string: expr, $base_type: ident, $base_type_string: expr, ($r_bits: expr, $g_bits: expr, $b_bits: expr), ($r_pos: expr, $g_pos: expr, $b_pos: expr)) => {
+        #[doc=$type_string]
+        #[doc = " color stored in a `"]
+        #[doc=$base_type_string]
+        #[doc = "`"]
         #[derive(Clone, Copy, PartialEq)]
         pub struct $type($base_type);
 
@@ -144,6 +147,17 @@ macro_rules! impl_rgb_color {
                 color.0
             }
         }
+    };
+
+    ($type: ident, $base_type: ident, ($r_bits: expr, $g_bits: expr, $b_bits: expr), ($r_pos: expr, $g_pos: expr, $b_pos: expr)) => {
+        impl_rgb_color!(
+            $type,
+            stringify!($type),
+            $base_type,
+            stringify!($base_type),
+            ($r_bits, $g_bits, $b_bits),
+            ($r_pos, $g_pos, $b_pos)
+        );
     };
 }
 
@@ -265,28 +279,28 @@ impl_rgb_conversion!(Bgr565, (Rgb555, Bgr555, Rgb888, Bgr888));
 impl_rgb_conversion!(Rgb888, (Rgb555, Bgr555, Rgb565, Bgr565));
 impl_rgb_conversion!(Bgr888, (Rgb555, Bgr555, Rgb565, Bgr565));
 
-/// 8bit luma
+/// 8 bit luminance color stored in a `u8`
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Y8(u8);
 
 impl Y8 {
-    /// new
-    pub const fn new(value: u8) -> Self {
-        Self(value)
+    /// Creates a new color.
+    pub const fn new(y: u8) -> Self {
+        Self(y)
     }
 
-    /// luminance
+    /// Returns the luminance channel value.
     pub fn y(&self) -> u8 {
         self.0
     }
 
-    /// maximum value in luminance channel
+    /// The maximum value in luminance channel.
     pub const MAX_Y: u8 = 255;
 
-    /// black
+    /// Black color (Y = 0%)
     pub const BLACK: Y8 = Self::new(0);
 
-    /// white
+    /// White color (Y = 100%)
     pub const WHITE: Y8 = Self::new(255);
 }
 
@@ -306,17 +320,21 @@ impl FromSlice for Y8 {
 }
 
 /// Binary color
+///
+/// `BinaryColor` is used for displays and images with two possible states.
+/// The interpretation of active and inactive states can vary for different uses and isn't specified.
+/// `BinaryColor::On` might represent a black pixel on a LCD panel and a white pixel on an OLED display.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BinaryColor {
-    /// inactive pixel
+    /// An inactive pixel.
     Off,
 
-    /// active pixel
+    /// An active pixel.
     On,
 }
 
 impl BinaryColor {
-    /// invert color
+    /// Inverts the color.
     pub fn invert(&self) -> Self {
         match self {
             BinaryColor::On => BinaryColor::Off,
@@ -324,7 +342,15 @@ impl BinaryColor {
         }
     }
 
-    /// map colors
+    /// Maps active and inactive colors to a different `PixelColor` type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use embedded_graphics::pixelcolor::{BinaryColor, RgbColor, Rgb565};
+    /// let color = BinaryColor::On;
+    /// assert_eq!(color.map_color(Rgb565::RED, Rgb565::GREEN), Rgb565::GREEN)
+    /// ```
     pub fn map_color<T: PixelColor>(&self, color_off: T, color_on: T) -> T {
         match self {
             BinaryColor::On => color_on,

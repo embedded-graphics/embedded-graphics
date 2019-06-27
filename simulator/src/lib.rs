@@ -76,7 +76,7 @@ mod window;
 
 pub use crate::display_builder::DisplayBuilder;
 pub use crate::display_theme::BinaryColorTheme;
-pub use crate::window::Window;
+use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
 use embedded_graphics::prelude::*;

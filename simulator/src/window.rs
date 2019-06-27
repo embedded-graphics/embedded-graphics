@@ -7,8 +7,6 @@ use sdl2::render;
 
 /// Simulator window
 pub struct Window {
-    width: usize,
-    height: usize,
     scale: usize,
     pixel_spacing: usize,
 
@@ -41,23 +39,11 @@ impl Window {
         let event_pump = sdl_context.event_pump().unwrap();
 
         Self {
-            width,
-            height,
             scale,
             pixel_spacing,
             canvas,
             event_pump,
         }
-    }
-
-    /// window width in pixels
-    pub fn width(&self) -> usize {
-        self.width
-    }
-
-    /// window height in pixels
-    pub fn height(&self) -> usize {
-        self.height
     }
 
     fn set_color(&mut self, color: Rgb888) {
