@@ -132,16 +132,12 @@ where
 
             let offset = (((h - 1 - y) * w) + x) as usize;
 
-            let data = if self.im.bmp.bpp() == 8 {
-                &self.image_data[offset..]
-            } else if self.im.bmp.bpp() == 16 {
-                &self.image_data[offset * 2..] // * 2 as two bytes per pixel
-            } else if self.im.bmp.bpp() == 24 {
-                &self.image_data[offset * 3..] // * 3 as two bytes per pixel
-            } else if self.im.bmp.bpp() == 32 {
-                &self.image_data[offset * 4..] // * 4 as two bytes per pixel
-            } else {
-                panic!("Bit depth {} not supported", self.im.bmp.bpp());
+            let data = match self.im.bmp.bpp() {
+                8 => &self.image_data[offset..],
+                16 => &self.image_data[offset * 2..], // * 2 as two bytes per pixel
+                24 => &self.image_data[offset * 3..], // * 3 as two bytes per pixel
+                32 => &self.image_data[offset * 4..], // * 4 as two bytes per pixel
+                _ => panic!("Bit depth {} not supported", self.im.bmp.bpp()),
             };
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
