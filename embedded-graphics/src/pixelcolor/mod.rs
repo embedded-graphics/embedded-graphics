@@ -353,7 +353,8 @@ impl BinaryColor {
     /// # Examples
     ///
     /// ```
-    /// # use embedded_graphics::pixelcolor::{BinaryColor, RgbColor, Rgb565};
+    /// use embedded_graphics::prelude::*;
+    /// use embedded_graphics::pixelcolor::{BinaryColor, Rgb565};
     /// let color = BinaryColor::On;
     /// assert_eq!(color.map_color(Rgb565::RED, Rgb565::GREEN), Rgb565::GREEN)
     /// ```
