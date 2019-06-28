@@ -319,6 +319,12 @@ impl FromSlice for Y8 {
     }
 }
 
+impl From<Y8> for u8 {
+    fn from(color: Y8) -> Self {
+        color.0
+    }
+}
+
 /// Binary color
 ///
 /// `BinaryColor` is used for displays and images with two possible states.

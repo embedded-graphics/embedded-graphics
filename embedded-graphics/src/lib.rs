@@ -188,10 +188,11 @@ use crate::pixelcolor::PixelColor;
 /// Here's an example for an imaginary display that has a 64x64px framebuffer of 8 bit values that
 /// communicates over a (simplified) SPI interface:
 ///
-/// ```ignore
+/// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::Drawing;
 /// use embedded_graphics::egcircle;
+/// use embedded_graphics::pixelcolor::Y8;
 ///
 /// # struct SPI1;
 /// #
@@ -214,29 +215,29 @@ use crate::pixelcolor::PixelColor;
 ///     }
 /// }
 ///
-/// impl Drawing<u8> for ExampleDisplay {
-///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `u8`
+/// impl Drawing<Y8> for ExampleDisplay {
+///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `Y8`
 ///     fn draw<T>(&mut self, item: T)
 ///     where
-///         T: IntoIterator<Item = Pixel<u8>>,
+///         T: IntoIterator<Item = Pixel<Y8>>,
 ///     {
 ///         for Pixel(coord, color) in item {
 ///             // Place an (x, y) pixel at the right index in the framebuffer
 ///             let index = coord[0] + (coord[1] * 64);
 ///
-///             self.framebuffer[index as usize] = color;
+///             self.framebuffer[index as usize] = color.into();
 ///         }
 ///     }
 /// }
 ///
 /// fn main() {
 ///     let mut display = ExampleDisplay {
-///         framebuffer: [0; 4096],
+///         framebuffer: [Y8::BLACK.into(); 4096],
 ///         iface: SPI1
 ///     };
 ///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
-///     display.draw(egcircle!((32, 32), 10, stroke = Some(1u8)));
+///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
+///     display.draw(egcircle!((32, 32), 10, stroke = Some(Y8::WHITE)));
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
@@ -265,10 +266,11 @@ where
 /// framebuffer. It sends pixels one by one to over the SPI bus which isn't very efficient, but that
 /// could be fixed by using a fixed length chunked buffering scheme.
 ///
-/// ```ignore
+/// ```rust
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::SizedDrawing;
+/// use embedded_graphics::pixelcolor::Y8;
 ///
 /// # struct SPI1;
 /// #
@@ -296,10 +298,10 @@ where
 ///     }
 /// }
 ///
-/// impl SizedDrawing<u8> for ExampleBufferlessDisplay {
+/// impl SizedDrawing<Y8> for ExampleBufferlessDisplay {
 ///     fn draw_sized<T>(&mut self, item: T)
 ///     where
-///         T: IntoIterator<Item = Pixel<u8>> + Dimensions,
+///         T: IntoIterator<Item = Pixel<Y8>> + Dimensions,
 ///     {
 ///         // Get bounding box `Coord`s as `(u32, u32)`
 ///         let tl = item.top_left();
@@ -312,7 +314,7 @@ where
 ///         // `coord` isn't used as the update area is the same as the item's bounding box which
 ///         // wraps the bytes automatically
 ///         for Pixel(_coord, color) in item {
-///             self.iface.send_bytes(&[color]);
+///             self.iface.send_bytes(&[color.into()]);
 ///         }
 ///     }
 /// }
@@ -322,8 +324,8 @@ where
 ///         iface: SPI1
 ///     };
 ///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
-///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(1u8)));
+///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
+///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(Y8::WHITE)));
 ///
 ///     // No `flush()` is required as `draw_sized()` sends the bytes directly
 /// }
