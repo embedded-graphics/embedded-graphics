@@ -1,6 +1,7 @@
 //! Pixel color
 
 mod binary_color;
+mod conversion;
 mod luma_color;
 mod rgb_color;
 
@@ -20,10 +21,11 @@ pub trait PixelColor: Clone + Copy + PartialEq + fmt::Debug {
 }
 
 /// Convert raw data to color structs.
-pub trait FromSlice {
-    /// Convert big endian data to color.
-    fn from_be_slice(data: &[u8]) -> Self;
-
-    /// Convert little endian data to color.
-    fn from_le_slice(data: &[u8]) -> Self;
+///
+/// This trait is used to generically convert raw color data with different
+/// bitdepth to specific color types. If the number of bits required to build
+/// the color is less than 32 the upper bits are ignored.
+pub trait FromRawData {
+    /// Convert raw data to color.
+    fn from_raw_data(data: u32) -> Self;
 }

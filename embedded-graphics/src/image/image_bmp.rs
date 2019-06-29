@@ -2,8 +2,9 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::ImageFile;
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::{FromSlice, PixelColor};
+use crate::pixelcolor::{FromRawData, PixelColor};
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
+use byteorder::{ByteOrder, LittleEndian};
 use core::marker::PhantomData;
 use tinybmp::Bmp;
 
@@ -44,7 +45,7 @@ pub struct ImageBmp<'a, C: PixelColor> {
 
 impl<'a, C> ImageFile<'a> for ImageBmp<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     /// Create a new BMP from a byte slice
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
@@ -68,7 +69,7 @@ where
 
 impl<'a, C> Dimensions for ImageBmp<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     fn top_left(&self) -> Coord {
         self.offset
@@ -85,7 +86,7 @@ where
 
 impl<'a, C> IntoIterator for &'a ImageBmp<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageBmpIterator<'a, C>;
@@ -104,7 +105,7 @@ where
 #[derive(Debug)]
 pub struct ImageBmpIterator<'a, C: 'a>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     x: u32,
     y: u32,
@@ -114,7 +115,7 @@ where
 
 impl<'a, C> Iterator for ImageBmpIterator<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
 
@@ -133,10 +134,10 @@ where
             let offset = (((h - 1 - y) * w) + x) as usize;
 
             let data = match self.im.bmp.bpp() {
-                8 => &self.image_data[offset..],
-                16 => &self.image_data[offset * 2..], // * 2 as two bytes per pixel
-                24 => &self.image_data[offset * 3..], // * 3 as two bytes per pixel
-                32 => &self.image_data[offset * 4..], // * 4 as two bytes per pixel
+                8 => self.image_data[offset] as u32,
+                16 => LittleEndian::read_u16(&self.image_data[offset * 2..]) as u32, // * 2 as two bytes per pixel
+                24 => LittleEndian::read_u24(&self.image_data[offset * 3..]), // * 3 as three bytes per pixel
+                32 => LittleEndian::read_u32(&self.image_data[offset * 4..]), // * 4 as four bytes per pixel
                 _ => panic!("Bit depth {} not supported", self.im.bmp.bpp()),
             };
 
@@ -152,7 +153,7 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), C::from_le_slice(data));
+                break Pixel(current_pixel.to_unsigned(), C::from_raw_data(data));
             }
         };
 
@@ -257,7 +258,7 @@ mod tests {
 
     fn test_pattern<C>(image_data: &[u8])
     where
-        C: PixelColor + RgbColor + FromSlice,
+        C: PixelColor + RgbColor + FromRawData,
     {
         let image: ImageBmp<C> = ImageBmp::new(image_data).unwrap();
 

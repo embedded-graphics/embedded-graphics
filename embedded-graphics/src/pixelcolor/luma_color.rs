@@ -1,4 +1,4 @@
-use crate::pixelcolor::{FromSlice, PixelColor};
+use crate::pixelcolor::{FromRawData, PixelColor};
 
 /// 8 bit luminance color stored in a `u8`
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -30,20 +30,34 @@ impl PixelColor for Y8 {
     const DEFAULT_FG: Self = Y8::WHITE;
 }
 
-impl FromSlice for Y8 {
-    fn from_be_slice(data: &[u8]) -> Self {
-        Self(data[0])
-    }
-
-    fn from_le_slice(data: &[u8]) -> Self {
-        Self(data[0])
-    }
-}
-
 impl From<Y8> for u8 {
     fn from(color: Y8) -> Self {
         color.0
     }
 }
 
-//TODO: tests
+impl From<u8> for Y8 {
+    fn from(value: u8) -> Self {
+        Y8::new(value)
+    }
+}
+
+impl FromRawData for Y8 {
+    fn from_raw_data(value: u32) -> Self {
+        Y8::new(value as u8)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn luma() {
+        assert_eq!(Y8::from(0u8), Y8::BLACK);
+        assert_eq!(Y8::from(255u8), Y8::WHITE);
+
+        assert_eq!(u8::from(Y8::BLACK), 0);
+        assert_eq!(u8::from(Y8::WHITE), 255);
+    }
+}

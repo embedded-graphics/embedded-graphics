@@ -1,7 +1,7 @@
 use super::super::drawable::*;
 use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::{FromSlice, PixelColor};
+use crate::pixelcolor::{FromRawData, PixelColor};
 
 /// # 8 bits per pixel image
 ///
@@ -46,7 +46,7 @@ impl ImageType for ImageType8BPP {}
 
 impl<'a, C> IntoIterator for &'a Image8BPP<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageIterator<'a, C, ImageType8BPP>;
@@ -59,7 +59,7 @@ where
 
 impl<'a, C> Iterator for ImageIterator<'a, C, ImageType8BPP>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
 
@@ -76,7 +76,7 @@ where
             }
 
             let offset = (y * w) + x;
-            let data = &self.im.imagedata[offset as usize..];
+            let data = self.im.imagedata[offset as usize] as u32;
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
 
@@ -90,7 +90,7 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), C::from_le_slice(&data));
+                break Pixel(current_pixel.to_unsigned(), C::from_raw_data(data));
             }
         };
 

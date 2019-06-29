@@ -2,7 +2,7 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::ImageFile;
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::{FromSlice, PixelColor};
+use crate::pixelcolor::{FromRawData, PixelColor};
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
 use tinytga::{Tga, TgaIterator};
@@ -35,7 +35,7 @@ use tinytga::{Tga, TgaIterator};
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     tga: Tga<'a>,
 
@@ -47,7 +47,7 @@ where
 
 impl<'a, C> ImageFile<'a> for ImageTga<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     /// Create a new TGA from a byte slice
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
@@ -71,7 +71,7 @@ where
 
 impl<'a, C> Dimensions for ImageTga<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     fn top_left(&self) -> Coord {
         self.offset
@@ -88,7 +88,7 @@ where
 
 impl<'a, C> IntoIterator for &'a ImageTga<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageTgaIterator<'a, C>;
@@ -107,7 +107,7 @@ where
 #[derive(Debug)]
 pub struct ImageTgaIterator<'a, C: 'a>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     x: u32,
     y: u32,
@@ -117,7 +117,7 @@ where
 
 impl<'a, C> Iterator for ImageTgaIterator<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
 
@@ -128,8 +128,7 @@ where
 
             let pos = self.im.offset + Coord::new(x as i32, y as i32);
 
-            let data = color.to_be_bytes();
-            let out = Pixel(pos.to_unsigned(), C::from_be_slice(&data));
+            let out = Pixel(pos.to_unsigned(), C::from_raw_data(color));
 
             self.x += 1;
 
@@ -143,11 +142,11 @@ where
     }
 }
 
-impl<'a, C> Drawable for ImageTga<'a, C> where C: PixelColor + FromSlice {}
+impl<'a, C> Drawable for ImageTga<'a, C> where C: PixelColor + FromRawData {}
 
 impl<'a, C> Transform for ImageTga<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
     /// a new `ImageTga`. For a mutating transform, see `translate_mut`.

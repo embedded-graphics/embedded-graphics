@@ -1,7 +1,8 @@
 use super::super::drawable::*;
 use super::image::{Image, ImageIterator, ImageType};
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::{FromSlice, PixelColor};
+use crate::pixelcolor::{FromRawData, PixelColor};
+use byteorder::{ByteOrder, LittleEndian};
 
 /// # 16 bits per pixel image
 ///
@@ -50,7 +51,7 @@ impl ImageType for ImageType16BPP {}
 
 impl<'a, C> IntoIterator for &'a Image16BPP<'a, C>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageIterator<'a, C, ImageType16BPP>;
@@ -62,7 +63,7 @@ where
 
 impl<'a, C> Iterator for ImageIterator<'a, C, ImageType16BPP>
 where
-    C: PixelColor + FromSlice,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
 
@@ -80,7 +81,7 @@ where
 
             let offset = ((y * w) + x) * 2; // * 2 as two bytes per pixel
                                             // merge two bytes into a u16
-            let data = &self.im.imagedata[offset as usize..];
+            let data = LittleEndian::read_u16(&self.im.imagedata[offset as usize..]) as u32;
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
 
@@ -94,7 +95,7 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), C::from_le_slice(data));
+                break Pixel(current_pixel.to_unsigned(), C::from_raw_data(data));
             }
         };
 
@@ -162,10 +163,7 @@ mod tests {
 
         assert_eq!(
             it.next(),
-            Some(Pixel(
-                UnsignedCoord::new(0, 0),
-                Rgb565::from_le_slice(&[0xcc, 0x00])
-            ))
+            Some(Pixel(UnsignedCoord::new(0, 0), Rgb565::from_raw_data(0xcc)))
         );
         assert_eq!(
             it.next(),
@@ -177,10 +175,7 @@ mod tests {
         );
         assert_eq!(
             it.next(),
-            Some(Pixel(
-                UnsignedCoord::new(1, 1),
-                Rgb565::from_le_slice(&[0xaa, 0x00])
-            ))
+            Some(Pixel(UnsignedCoord::new(1, 1), Rgb565::from_raw_data(0xaa)))
         );
 
         assert_eq!(it.next(), None);
