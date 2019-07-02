@@ -1,4 +1,4 @@
-use crate::pixelcolor::{FromRawData, PixelColor};
+use crate::pixelcolor::{BinaryColor, FromRawData, PixelColor};
 use core::fmt;
 
 /// RGB color
@@ -151,6 +151,12 @@ macro_rules! impl_rgb_color {
                 (value as $base_type).into()
             }
         }
+
+        impl From<BinaryColor> for $type {
+            fn from(color: BinaryColor) -> Self {
+                color.map_color(Self::BLACK, Self::WHITE)
+            }
+        }
     };
 
     // Recursive macro to build the documentation string.
@@ -273,5 +279,23 @@ mod tests {
 
         assert_eq!(c1, c2);
         assert_eq!(c1, Rgb888::BLACK);
+    }
+
+    fn test_binary_conversion<C>()
+    where
+        C: RgbColor + From<BinaryColor>,
+    {
+        assert_eq!(C::from(BinaryColor::Off), C::BLACK);
+        assert_eq!(C::from(BinaryColor::On), C::WHITE);
+    }
+
+    #[test]
+    pub fn conversion_from_binary_color() {
+        test_binary_conversion::<Rgb555>();
+        test_binary_conversion::<Bgr555>();
+        test_binary_conversion::<Rgb565>();
+        test_binary_conversion::<Bgr565>();
+        test_binary_conversion::<Rgb888>();
+        test_binary_conversion::<Bgr888>();
     }
 }

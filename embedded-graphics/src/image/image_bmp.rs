@@ -187,7 +187,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{Rgb555, Rgb565, Rgb888, RgbColor, Gray8};
+    use crate::pixelcolor::{Gray8, Rgb555, Rgb565, Rgb888, RgbColor};
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]

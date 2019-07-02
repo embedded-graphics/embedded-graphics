@@ -147,8 +147,14 @@ mod tests {
             it.next(),
             Some(Pixel(UnsignedCoord::new(0, 0), Gray8::new(0xcc)))
         );
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), Gray8::BLACK)));
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), Gray8::BLACK)));
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(1, 0), Gray8::BLACK))
+        );
+        assert_eq!(
+            it.next(),
+            Some(Pixel(UnsignedCoord::new(0, 1), Gray8::BLACK))
+        );
         assert_eq!(
             it.next(),
             Some(Pixel(UnsignedCoord::new(1, 1), Gray8::new(0xaa)))

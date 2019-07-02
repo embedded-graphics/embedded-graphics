@@ -1,4 +1,4 @@
-use crate::pixelcolor::{FromRawData, PixelColor};
+use crate::pixelcolor::{BinaryColor, FromRawData, PixelColor};
 
 /// 8 bit grayscale color stored in a `u8`
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -48,6 +48,12 @@ impl FromRawData for Gray8 {
     }
 }
 
+impl From<BinaryColor> for Gray8 {
+    fn from(color: BinaryColor) -> Self {
+        color.map_color(Self::BLACK, Self::WHITE)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,5 +65,11 @@ mod tests {
 
         assert_eq!(u8::from(Gray8::BLACK), 0);
         assert_eq!(u8::from(Gray8::WHITE), 255);
+    }
+
+    #[test]
+    pub fn conversion_from_binary_color() {
+        assert_eq!(Gray8::from(BinaryColor::Off), Gray8::BLACK);
+        assert_eq!(Gray8::from(BinaryColor::On), Gray8::WHITE);
     }
 }
