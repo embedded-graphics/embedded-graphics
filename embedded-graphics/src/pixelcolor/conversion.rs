@@ -30,7 +30,7 @@ impl_rgb_conversion!(Bgr565, (Rgb555, Bgr555, Rgb565, Rgb888, Bgr888));
 impl_rgb_conversion!(Rgb888, (Rgb555, Bgr555, Rgb565, Bgr565, Bgr888));
 impl_rgb_conversion!(Bgr888, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888));
 
-/// Macro to implement conversion from `Gray8` to RGB color types.
+/// Macro to implement conversions between `Gray8` and RGB color types.
 macro_rules! impl_gray8_conversion {
     ($type:ident) => {
         impl From<Gray8> for $type {
@@ -40,6 +40,15 @@ macro_rules! impl_gray8_conversion {
                     convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_G),
                     convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_B),
                 )
+            }
+        }
+
+        // Convert RGB colors to grayscale by calculating the HSI intensity.
+        impl From<$type> for Gray8 {
+            fn from(other: $type) -> Self {
+                let other: Rgb888 = other.into();
+                let sum: u16 = other.r() as u16 + other.g() as u16 + other.b() as u16;
+                Gray8::new((sum / 3) as u8)
             }
         }
     };
@@ -87,13 +96,20 @@ mod tests {
 
     macro_rules! test_grayscale_conversions {
         ($type:ident) => {
+            // convert Gray8 to RGB
             assert_eq!($type::from(Gray8::BLACK), $type::BLACK);
             assert_eq!($type::from(Gray8::WHITE), $type::WHITE);
+
+            // convert RGB to Gray8
+            assert_eq!(Gray8::from($type::BLACK), Gray8::BLACK);
+            assert_eq!(Gray8::from($type::WHITE), Gray8::WHITE);
+            assert_eq!(Gray8::from($type::RED), Gray8::new(255 / 3));
+            assert_eq!(Gray8::from($type::YELLOW), Gray8::new(255 / 3 * 2));
         };
     }
 
     #[test]
-    fn grayscale_black_and_white_conversions() {
+    fn grayscale_conversions() {
         test_grayscale_conversions!(Rgb555);
         test_grayscale_conversions!(Bgr555);
         test_grayscale_conversions!(Rgb565);
