@@ -12,13 +12,7 @@ pub use rgb_color::*;
 use core::fmt;
 
 /// Pixel color trait
-pub trait PixelColor: Clone + Copy + PartialEq + fmt::Debug {
-    /// Default background color
-    const DEFAULT_BG: Self;
-
-    /// Default foreground color
-    const DEFAULT_FG: Self;
-}
+pub trait PixelColor: Clone + Copy + PartialEq + fmt::Debug {}
 
 /// Convert raw data to color structs.
 ///

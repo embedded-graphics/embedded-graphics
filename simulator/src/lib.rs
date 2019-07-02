@@ -90,10 +90,10 @@ struct PixelData<C> {
 
 impl<C> PixelData<C>
 where
-    C: PixelColor,
+    C: PixelColor + From<BinaryColor>,
 {
     fn new(width: usize, height: usize) -> Self {
-        let data = vec![C::DEFAULT_BG; width * height];
+        let data = vec![BinaryColor::Off.into(); width * height];
 
         Self {
             width,

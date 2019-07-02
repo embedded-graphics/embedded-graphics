@@ -8,7 +8,7 @@ use crate::drawable::Dimensions;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::fonts::Font;
-use crate::pixelcolor::PixelColor;
+use crate::pixelcolor::{BinaryColor, PixelColor};
 use crate::style::Style;
 use crate::style::WithStyle;
 use crate::transform::Transform;
@@ -148,7 +148,7 @@ where
 
 impl<'a, C: 'a, Conf: 'a> IntoIterator for FontBuilder<'a, C, Conf>
 where
-    C: PixelColor,
+    C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
 {
     type Item = Pixel<C>;
@@ -170,7 +170,7 @@ where
 
 impl<'a, C, Conf> IntoIterator for &'a FontBuilder<'a, C, Conf>
 where
-    C: PixelColor,
+    C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
 {
     type IntoIter = FontBuilderIterator<'a, C, Conf>;
@@ -192,7 +192,7 @@ where
 
 impl<'a, C, Conf> Iterator for FontBuilderIterator<'a, C, Conf>
 where
-    C: PixelColor,
+    C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
 {
     type Item = Pixel<C>;
@@ -231,7 +231,7 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    Some(self.style.stroke_color.unwrap_or(C::DEFAULT_FG))
+                    Some(self.style.stroke_color.unwrap_or(BinaryColor::On.into()))
                 } else {
                     self.style.fill_color
                 };

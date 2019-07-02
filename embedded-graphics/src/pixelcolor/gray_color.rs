@@ -25,10 +25,7 @@ impl Gray8 {
     pub const WHITE: Self = Self::new(255);
 }
 
-impl PixelColor for Gray8 {
-    const DEFAULT_BG: Self = Self::BLACK;
-    const DEFAULT_FG: Self = Self::WHITE;
-}
+impl PixelColor for Gray8 {}
 
 impl From<Gray8> for u8 {
     fn from(color: Gray8) -> Self {

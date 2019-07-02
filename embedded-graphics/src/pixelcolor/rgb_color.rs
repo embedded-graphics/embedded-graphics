@@ -46,13 +46,7 @@ pub trait RgbColor: PixelColor {
     const WHITE: Self;
 }
 
-impl<C> PixelColor for C
-where
-    C: RgbColor,
-{
-    const DEFAULT_BG: Self = Self::BLACK;
-    const DEFAULT_FG: Self = Self::WHITE;
-}
+impl<C> PixelColor for C where C: RgbColor {}
 
 /// Macro to implement a RgbColor type with the given channel bit positions.
 macro_rules! impl_rgb_color {

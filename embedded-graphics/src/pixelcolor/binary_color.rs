@@ -41,10 +41,7 @@ impl BinaryColor {
     }
 }
 
-impl PixelColor for BinaryColor {
-    const DEFAULT_BG: BinaryColor = BinaryColor::Off;
-    const DEFAULT_FG: BinaryColor = BinaryColor::On;
-}
+impl PixelColor for BinaryColor {}
 
 #[cfg(test)]
 mod tests {

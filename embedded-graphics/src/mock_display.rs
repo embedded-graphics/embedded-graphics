@@ -1,4 +1,5 @@
 use crate::drawable::{Dimensions, Pixel};
+use crate::pixelcolor::BinaryColor;
 use crate::prelude::*;
 use crate::{Drawing, SizedDrawing};
 
@@ -14,10 +15,10 @@ impl<C> MockDisplay<C> {
 
 impl<C> Default for MockDisplay<C>
 where
-    C: PixelColor,
+    C: PixelColor + From<BinaryColor>,
 {
     fn default() -> Self {
-        MockDisplay::new([[C::DEFAULT_BG; 24]; 16])
+        MockDisplay::new([[BinaryColor::Off.into(); 24]; 16])
     }
 }
 
