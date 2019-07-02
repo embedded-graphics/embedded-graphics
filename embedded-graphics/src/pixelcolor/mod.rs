@@ -2,11 +2,11 @@
 
 mod binary_color;
 mod conversion;
-mod luma_color;
+mod gray_color;
 mod rgb_color;
 
 pub use binary_color::*;
-pub use luma_color::*;
+pub use gray_color::*;
 pub use rgb_color::*;
 
 use core::fmt;

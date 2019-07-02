@@ -26,8 +26,8 @@ use crate::pixelcolor::{FromRawData, PixelColor};
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::Image8BPP;
 /// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::Y8;
-/// # let mut display: MockDisplay<Y8> = MockDisplay::default();
+/// # use embedded_graphics::pixelcolor::Gray8;
+/// # let mut display: MockDisplay<Gray8> = MockDisplay::default();
 ///
 /// // Load `patch_8bpp.raw`, an 8BPP 4x4px image
 /// let image = Image8BPP::new(include_bytes!("../../../assets/patch_8bpp.raw"), 4, 4);
@@ -101,13 +101,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::Y8;
+    use crate::pixelcolor::Gray8;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: Image8BPP<Y8> = Image8BPP::new(
+        let image: Image8BPP<Gray8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -121,7 +121,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: Image8BPP<Y8> = Image8BPP::new(
+        let image: Image8BPP<Gray8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -135,7 +135,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: Image8BPP<Y8> = Image8BPP::new(
+        let image: Image8BPP<Gray8> = Image8BPP::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -145,13 +145,13 @@ mod tests {
 
         assert_eq!(
             it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), Y8::new(0xcc)))
+            Some(Pixel(UnsignedCoord::new(0, 0), Gray8::new(0xcc)))
         );
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), Y8::BLACK)));
-        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), Y8::BLACK)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(1, 0), Gray8::BLACK)));
+        assert_eq!(it.next(), Some(Pixel(UnsignedCoord::new(0, 1), Gray8::BLACK)));
         assert_eq!(
             it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), Y8::new(0xaa)))
+            Some(Pixel(UnsignedCoord::new(1, 1), Gray8::new(0xaa)))
         );
 
         assert_eq!(it.next(), None);

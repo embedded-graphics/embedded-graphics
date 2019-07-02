@@ -192,7 +192,7 @@ use crate::pixelcolor::PixelColor;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::Drawing;
 /// use embedded_graphics::egcircle;
-/// use embedded_graphics::pixelcolor::Y8;
+/// use embedded_graphics::pixelcolor::Gray8;
 ///
 /// # struct SPI1;
 /// #
@@ -215,11 +215,11 @@ use crate::pixelcolor::PixelColor;
 ///     }
 /// }
 ///
-/// impl Drawing<Y8> for ExampleDisplay {
-///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `Y8`
+/// impl Drawing<Gray8> for ExampleDisplay {
+///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `Gray8`
 ///     fn draw<T>(&mut self, item: T)
 ///     where
-///         T: IntoIterator<Item = Pixel<Y8>>,
+///         T: IntoIterator<Item = Pixel<Gray8>>,
 ///     {
 ///         for Pixel(coord, color) in item {
 ///             // Place an (x, y) pixel at the right index in the framebuffer
@@ -232,12 +232,12 @@ use crate::pixelcolor::PixelColor;
 ///
 /// fn main() {
 ///     let mut display = ExampleDisplay {
-///         framebuffer: [Y8::BLACK.into(); 4096],
+///         framebuffer: [Gray8::BLACK.into(); 4096],
 ///         iface: SPI1
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw(egcircle!((32, 32), 10, stroke = Some(Y8::WHITE)));
+///     display.draw(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
@@ -270,7 +270,7 @@ where
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::SizedDrawing;
-/// use embedded_graphics::pixelcolor::Y8;
+/// use embedded_graphics::pixelcolor::Gray8;
 ///
 /// # struct SPI1;
 /// #
@@ -298,10 +298,10 @@ where
 ///     }
 /// }
 ///
-/// impl SizedDrawing<Y8> for ExampleBufferlessDisplay {
+/// impl SizedDrawing<Gray8> for ExampleBufferlessDisplay {
 ///     fn draw_sized<T>(&mut self, item: T)
 ///     where
-///         T: IntoIterator<Item = Pixel<Y8>> + Dimensions,
+///         T: IntoIterator<Item = Pixel<Gray8>> + Dimensions,
 ///     {
 ///         // Get bounding box `Coord`s as `(u32, u32)`
 ///         let tl = item.top_left();
@@ -325,7 +325,7 @@ where
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(Y8::WHITE)));
+///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
 ///
 ///     // No `flush()` is required as `draw_sized()` sends the bytes directly
 /// }

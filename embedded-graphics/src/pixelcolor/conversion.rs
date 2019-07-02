@@ -1,4 +1,4 @@
-use super::luma_color::*;
+use super::gray_color::*;
 use super::rgb_color::*;
 
 /// Convert color channel values from one bitdepth to another.
@@ -30,27 +30,27 @@ impl_rgb_conversion!(Bgr565, (Rgb555, Bgr555, Rgb565, Rgb888, Bgr888));
 impl_rgb_conversion!(Rgb888, (Rgb555, Bgr555, Rgb565, Bgr565, Bgr888));
 impl_rgb_conversion!(Bgr888, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888));
 
-/// Macro to implement conversion from `Y8` to RGB color types.
-macro_rules! impl_y8_conversion {
+/// Macro to implement conversion from `Gray8` to RGB color types.
+macro_rules! impl_gray8_conversion {
     ($type:ident) => {
-        impl From<Y8> for $type {
-            fn from(other: Y8) -> Self {
+        impl From<Gray8> for $type {
+            fn from(other: Gray8) -> Self {
                 Self::new(
-                    convert_channel(other.y(), Y8::MAX_Y, $type::MAX_R),
-                    convert_channel(other.y(), Y8::MAX_Y, $type::MAX_G),
-                    convert_channel(other.y(), Y8::MAX_Y, $type::MAX_B),
+                    convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_R),
+                    convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_G),
+                    convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_B),
                 )
             }
         }
     };
 }
 
-impl_y8_conversion!(Rgb555);
-impl_y8_conversion!(Bgr555);
-impl_y8_conversion!(Rgb565);
-impl_y8_conversion!(Bgr565);
-impl_y8_conversion!(Rgb888);
-impl_y8_conversion!(Bgr888);
+impl_gray8_conversion!(Rgb555);
+impl_gray8_conversion!(Bgr555);
+impl_gray8_conversion!(Rgb565);
+impl_gray8_conversion!(Bgr565);
+impl_gray8_conversion!(Rgb888);
+impl_gray8_conversion!(Bgr888);
 
 #[cfg(test)]
 mod tests {
@@ -85,21 +85,21 @@ mod tests {
         test_rgb_conversions!(Bgr888);
     }
 
-    macro_rules! test_luma_conversions {
+    macro_rules! test_grayscale_conversions {
         ($type:ident) => {
-            assert_eq!($type::from(Y8::BLACK), $type::BLACK);
-            assert_eq!($type::from(Y8::WHITE), $type::WHITE);
+            assert_eq!($type::from(Gray8::BLACK), $type::BLACK);
+            assert_eq!($type::from(Gray8::WHITE), $type::WHITE);
         };
     }
 
     #[test]
-    fn luma_constant_conversions() {
-        test_luma_conversions!(Rgb555);
-        test_luma_conversions!(Bgr555);
-        test_luma_conversions!(Rgb565);
-        test_luma_conversions!(Bgr565);
-        test_luma_conversions!(Rgb888);
-        test_luma_conversions!(Bgr888);
+    fn grayscale_black_and_white_conversions() {
+        test_grayscale_conversions!(Rgb555);
+        test_grayscale_conversions!(Bgr555);
+        test_grayscale_conversions!(Rgb565);
+        test_grayscale_conversions!(Bgr565);
+        test_grayscale_conversions!(Rgb888);
+        test_grayscale_conversions!(Bgr888);
     }
 
     #[test]

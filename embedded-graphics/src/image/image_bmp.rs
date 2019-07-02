@@ -187,7 +187,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{Rgb555, Rgb565, Rgb888, RgbColor, Y8};
+    use crate::pixelcolor::{Rgb555, Rgb565, Rgb888, RgbColor, Gray8};
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
@@ -301,9 +301,9 @@ mod tests {
     }
 
     #[test]
-    fn colors_y8() {
-        let image: ImageBmp<Y8> =
-            ImageBmp::new(include_bytes!("../../tests/colors_y8.bmp")).unwrap();
+    fn colors_grey8() {
+        let image: ImageBmp<Gray8> =
+            ImageBmp::new(include_bytes!("../../tests/colors_grey8.bmp")).unwrap();
 
         assert_eq!(image.size(), UnsignedCoord::new(3, 1));
 
@@ -311,15 +311,15 @@ mod tests {
 
         let p = iter.next().unwrap();
         assert_eq!(p.0, UnsignedCoord::new(0, 0));
-        assert_eq!(p.1, Y8::BLACK);
+        assert_eq!(p.1, Gray8::BLACK);
 
         let p = iter.next().unwrap();
         assert_eq!(p.0, UnsignedCoord::new(1, 0));
-        assert_eq!(p.1, Y8::new(128));
+        assert_eq!(p.1, Gray8::new(128));
 
         let p = iter.next().unwrap();
         assert_eq!(p.0, UnsignedCoord::new(2, 0));
-        assert_eq!(p.1, Y8::WHITE);
+        assert_eq!(p.1, Gray8::WHITE);
 
         assert!(iter.next().is_none());
     }
