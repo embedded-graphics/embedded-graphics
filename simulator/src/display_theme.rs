@@ -3,7 +3,7 @@ use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
 /// Color theme for binary displays
 #[derive(Clone)]
 pub enum BinaryColorTheme {
-    /// A simple on/off, non-styled display with white background and black pixels
+    /// A simple on/off, non-styled display with black background and white pixels
     Default,
 
     /// An on/off classic LCD-like display with white background
@@ -26,7 +26,7 @@ impl BinaryColorTheme {
     /// Get the theme's pixel color for a given pixel state
     pub fn convert(&self, color: BinaryColor) -> Rgb888 {
         match self {
-            BinaryColorTheme::Default => color.map_color(Rgb888::WHITE, Rgb888::BLACK),
+            BinaryColorTheme::Default => color.into(),
             BinaryColorTheme::LcdWhite => {
                 color.map_color(Rgb888::new(245, 245, 245), Rgb888::new(32, 32, 32))
             }
