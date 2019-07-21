@@ -191,7 +191,7 @@ impl ToUnsigned for Coord {
     /// Convert to a positive-only coordinate, clamping negative values to zero
     ///
     /// ```rust
-    /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::coord::{ToUnsigned, Coord};
     /// # use embedded_graphics::unsignedcoord::UnsignedCoord;
     /// #
     /// let coord = Coord::new(-5, 10);
