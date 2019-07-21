@@ -6,22 +6,22 @@ pub struct Gray8(u8);
 
 impl Gray8 {
     /// Creates a new color.
-    pub const fn new(y: u8) -> Self {
-        Self(y)
+    pub const fn new(luma: u8) -> Self {
+        Self(luma)
     }
 
-    /// Returns the luminance channel value.
-    pub fn y(&self) -> u8 {
+    /// Returns the luma channel value.
+    pub fn luma(&self) -> u8 {
         self.0
     }
 
-    /// The maximum value in luminance channel.
-    pub const MAX_Y: u8 = 255;
+    /// The maximum value in luma channel.
+    pub const MAX_LUMA: u8 = 255;
 
-    /// Black color (Y = 0%)
+    /// Black color (LUMA = 0%)
     pub const BLACK: Self = Self::new(0);
 
-    /// White color (Y = 100%)
+    /// White color (LUMA = 100%)
     pub const WHITE: Self = Self::new(255);
 }
 

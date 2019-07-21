@@ -49,9 +49,9 @@ macro_rules! impl_grayscale_conversions {
         impl From<Gray8> for $type {
             fn from(other: Gray8) -> Self {
                 Self::new(
-                    convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_R),
-                    convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_G),
-                    convert_channel(other.y(), Gray8::MAX_Y, $type::MAX_B),
+                    convert_channel(other.luma(), Gray8::MAX_LUMA, $type::MAX_R),
+                    convert_channel(other.luma(), Gray8::MAX_LUMA, $type::MAX_G),
+                    convert_channel(other.luma(), Gray8::MAX_LUMA, $type::MAX_B),
                 )
             }
         }
