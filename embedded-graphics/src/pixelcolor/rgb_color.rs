@@ -169,7 +169,7 @@ macro_rules! impl_rgb_color {
     };
 }
 
-/// Helper macro to calculate bit posisions for RGB and BGR colors
+/// Helper macro to calculate bit positions for RGB and BGR colors
 macro_rules! rgb_color {
     (
         $type:ident : $base_type:ident,
