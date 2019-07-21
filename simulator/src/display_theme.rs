@@ -22,24 +22,31 @@ pub enum BinaryColorTheme {
     OledBlue,
 }
 
+pub fn map_color(color: BinaryColor, color_off: Rgb888, color_on: Rgb888) -> Rgb888 {
+    match color {
+        BinaryColor::On => color_on,
+        BinaryColor::Off => color_off,
+    }
+}
+
 impl BinaryColorTheme {
     /// Get the theme's pixel color for a given pixel state
     pub fn convert(&self, color: BinaryColor) -> Rgb888 {
         match self {
             BinaryColorTheme::Default => color.into(),
             BinaryColorTheme::LcdWhite => {
-                color.map_color(Rgb888::new(245, 245, 245), Rgb888::new(32, 32, 32))
+                map_color(color, Rgb888::new(245, 245, 245), Rgb888::new(32, 32, 32))
             }
             BinaryColorTheme::LcdGreen => {
-                color.map_color(Rgb888::new(120, 185, 50), Rgb888::new(32, 32, 32))
+                map_color(color, Rgb888::new(120, 185, 50), Rgb888::new(32, 32, 32))
             }
             BinaryColorTheme::LcdBlue => {
-                color.map_color(Rgb888::new(70, 80, 230), Rgb888::new(230, 230, 255))
+                map_color(color, Rgb888::new(70, 80, 230), Rgb888::new(230, 230, 255))
             }
             BinaryColorTheme::OledBlue => {
-                color.map_color(Rgb888::new(0, 20, 40), Rgb888::new(0, 210, 255))
+                map_color(color, Rgb888::new(0, 20, 40), Rgb888::new(0, 210, 255))
             }
-            BinaryColorTheme::OledWhite => color.map_color(Rgb888::new(20, 20, 20), Rgb888::WHITE),
+            BinaryColorTheme::OledWhite => map_color(color, Rgb888::new(20, 20, 20), Rgb888::WHITE),
         }
     }
 }

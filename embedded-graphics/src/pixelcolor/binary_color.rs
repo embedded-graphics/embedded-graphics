@@ -27,13 +27,13 @@ impl BinaryColor {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// use embedded_graphics::prelude::*;
     /// use embedded_graphics::pixelcolor::{BinaryColor, Rgb565};
     /// let color = BinaryColor::On;
     /// assert_eq!(color.map_color(Rgb565::RED, Rgb565::GREEN), Rgb565::GREEN)
     /// ```
-    pub fn map_color<T: PixelColor>(&self, color_off: T, color_on: T) -> T {
+    pub(crate) fn map_color<T: PixelColor>(&self, color_off: T, color_on: T) -> T {
         match self {
             BinaryColor::On => color_on,
             BinaryColor::Off => color_off,
