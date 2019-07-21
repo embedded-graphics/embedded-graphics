@@ -144,6 +144,9 @@
 //! [`Drawing`]: ./trait.Drawing.html
 //! [`SizedDrawing`]: ./trait.SizedDrawing.html
 
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/01d2ea6e7053f9f79cab19d0c193a00dbdaea321/assets/logo.png"
+)]
 #![no_std]
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
