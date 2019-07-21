@@ -190,12 +190,14 @@ pub trait ToUnsigned {
 impl ToUnsigned for Coord {
     /// Convert to a positive-only coordinate, clamping negative values to zero
     ///
+    /// ```rust
     /// # use embedded_graphics::coord::Coord;
     /// # use embedded_graphics::unsignedcoord::UnsignedCoord;
     /// #
     /// let coord = Coord::new(-5, 10);
     ///
     /// assert_eq!(coord.to_unsigned(), UnsignedCoord::new(0, 10));
+    /// ```
     fn to_unsigned(self) -> UnsignedCoord {
         UnsignedCoord::new(self[0].max(0) as u32, self[1].max(0) as u32)
     }
