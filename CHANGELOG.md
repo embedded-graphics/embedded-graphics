@@ -2,6 +2,18 @@
 
 Embedded Graphics is a `no_std` library for adding graphics features to display drivers. It aims to use the minimum amount of memory for builtin graphics objects by leveraging Rust's iterators to avoid large allocations. It targets embedded environments, but can run anywhere like a Raspberry Pi up to full desktop machines.
 
+## 0.5.2
+
+Small doc fixes and other minor changes.
+
+### Added
+
+* Added low-effort Embedded Graphics logo for <https://docs.rs/embedded-graphics>
+
+### Fixed
+
+* Wrap `Coord` code example in backticks so it's rendered as code by Rustdoc
+
 ## 0.5.1
 
 A couple of breaking changes around naming, mostly polish around public APIs
