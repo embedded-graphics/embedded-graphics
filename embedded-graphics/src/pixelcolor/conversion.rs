@@ -9,7 +9,7 @@ const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {
 
 /// Macro to implement conversion between RGB color types.
 macro_rules! impl_rgb_conversion {
-    ($type: ident, ($($other_type: ident),+)) => {
+    ($type:ident, ($($other_type:ident),+)) => {
         $(
             impl From<$other_type> for $type {
                 fn from(other: $other_type) -> Self {
@@ -31,20 +31,8 @@ impl_rgb_conversion!(Bgr565, (Rgb555, Bgr555, Rgb565, Rgb888, Bgr888));
 impl_rgb_conversion!(Rgb888, (Rgb555, Bgr555, Rgb565, Bgr565, Bgr888));
 impl_rgb_conversion!(Bgr888, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888));
 
-// Calculate HSI intensity by converting to 8bpp and averaging the color channels
-fn intensity<C>(color: C) -> u8
-where
-    C: Into<Rgb888>,
-{
-    let c: Rgb888 = color.into();
-
-    let sum: u16 = c.r() as u16 + c.g() as u16 + c.b() as u16;
-
-    (sum / 3) as u8
-}
-
-/// Macro to implement conversions between `Gray8`, `BinaryColor` and RGB color types.
-macro_rules! impl_grayscale_conversions {
+/// Macro to implement conversions from `Gray8` to RGB color types.
+macro_rules! impl_from_gray8 {
     ($type:ident) => {
         impl From<Gray8> for $type {
             fn from(other: Gray8) -> Self {
@@ -55,97 +43,39 @@ macro_rules! impl_grayscale_conversions {
                 )
             }
         }
+    };
+}
 
-        // Convert RGB color to grayscale by calculating the HSI intensity.
-        impl From<$type> for Gray8 {
-            fn from(other: $type) -> Self {
-                Gray8::new(intensity(other))
-            }
-        }
+impl_from_gray8!(Rgb555);
+impl_from_gray8!(Bgr555);
+impl_from_gray8!(Rgb565);
+impl_from_gray8!(Bgr565);
+impl_from_gray8!(Rgb888);
+impl_from_gray8!(Bgr888);
 
+/// Macro to implement conversion from `BinaryColor` to RGB and grayscale types.
+macro_rules! impl_from_binary {
+    ($type:ident) => {
         // Convert BinaryColor::Off to black and BinaryColor::On to white
         impl From<BinaryColor> for $type {
             fn from(color: BinaryColor) -> Self {
                 color.map_color(Self::BLACK, Self::WHITE)
             }
         }
-
-        // Convert RGB color to binary color by applying a threshold to the color intensity.
-        impl From<$type> for BinaryColor {
-            fn from(other: $type) -> Self {
-                if intensity(other) >= 128 {
-                    BinaryColor::On
-                } else {
-                    BinaryColor::Off
-                }
-            }
-        }
     };
 }
 
-impl_grayscale_conversions!(Rgb555);
-impl_grayscale_conversions!(Bgr555);
-impl_grayscale_conversions!(Rgb565);
-impl_grayscale_conversions!(Bgr565);
-impl_grayscale_conversions!(Rgb888);
-impl_grayscale_conversions!(Bgr888);
+impl_from_binary!(Rgb555);
+impl_from_binary!(Bgr555);
+impl_from_binary!(Rgb565);
+impl_from_binary!(Bgr565);
+impl_from_binary!(Rgb888);
+impl_from_binary!(Bgr888);
+impl_from_binary!(Gray8);
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    macro_rules! test_rgb_conversions {
-        ($from_type: ident, ($($to_type: ident),+)) => {
-            $(
-                assert_eq!($to_type::from($from_type::BLACK), $to_type::BLACK);
-                assert_eq!($to_type::from($from_type::RED), $to_type::RED);
-                assert_eq!($to_type::from($from_type::GREEN), $to_type::GREEN);
-                assert_eq!($to_type::from($from_type::BLUE), $to_type::BLUE);
-                assert_eq!($to_type::from($from_type::YELLOW), $to_type::YELLOW);
-                assert_eq!($to_type::from($from_type::MAGENTA), $to_type::MAGENTA);
-                assert_eq!($to_type::from($from_type::CYAN), $to_type::CYAN);
-                assert_eq!($to_type::from($from_type::WHITE), $to_type::WHITE);
-            )*
-        };
-
-        ($from_type: ident) => {
-            test_rgb_conversions!($from_type, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888));
-        };
-    }
-
-    #[test]
-    fn rgb_color_constant_conversions() {
-        test_rgb_conversions!(Rgb555);
-        test_rgb_conversions!(Bgr555);
-        test_rgb_conversions!(Rgb565);
-        test_rgb_conversions!(Bgr565);
-        test_rgb_conversions!(Rgb888);
-        test_rgb_conversions!(Bgr888);
-    }
-
-    macro_rules! test_grayscale_conversions {
-        ($type:ident) => {
-            // convert Gray8 to RGB
-            assert_eq!($type::from(Gray8::BLACK), $type::BLACK);
-            assert_eq!($type::from(Gray8::WHITE), $type::WHITE);
-
-            // convert RGB to Gray8
-            assert_eq!(Gray8::from($type::BLACK), Gray8::BLACK);
-            assert_eq!(Gray8::from($type::WHITE), Gray8::WHITE);
-            assert_eq!(Gray8::from($type::RED), Gray8::new(255 / 3));
-            assert_eq!(Gray8::from($type::YELLOW), Gray8::new(255 / 3 * 2));
-        };
-    }
-
-    #[test]
-    fn grayscale_conversions() {
-        test_grayscale_conversions!(Rgb555);
-        test_grayscale_conversions!(Bgr555);
-        test_grayscale_conversions!(Rgb565);
-        test_grayscale_conversions!(Bgr565);
-        test_grayscale_conversions!(Rgb888);
-        test_grayscale_conversions!(Bgr888);
-    }
 
     #[test]
     fn convert_rgb565_to_rgb888_and_back() {
@@ -174,28 +104,67 @@ mod tests {
         }
     }
 
-    fn test_binary_conversion<C>()
-    where
-        C: RgbColor + From<BinaryColor> + Into<BinaryColor>,
-    {
-        // convert from BinaryColor to RGB
-        assert_eq!(C::from(BinaryColor::Off), C::BLACK);
-        assert_eq!(C::from(BinaryColor::On), C::WHITE);
+    macro_rules! test_rgb_conversions {
+        ($from_type:ident, ($($to_type:ident),+)) => {
+            $(
+                assert_eq!($to_type::from($from_type::BLACK), $to_type::BLACK);
+                assert_eq!($to_type::from($from_type::RED), $to_type::RED);
+                assert_eq!($to_type::from($from_type::GREEN), $to_type::GREEN);
+                assert_eq!($to_type::from($from_type::BLUE), $to_type::BLUE);
+                assert_eq!($to_type::from($from_type::YELLOW), $to_type::YELLOW);
+                assert_eq!($to_type::from($from_type::MAGENTA), $to_type::MAGENTA);
+                assert_eq!($to_type::from($from_type::CYAN), $to_type::CYAN);
+                assert_eq!($to_type::from($from_type::WHITE), $to_type::WHITE);
+            )*
+        };
 
-        // convert from RGB to BinaryColor
-        assert_eq!(C::BLACK.into(), BinaryColor::Off);
-        assert_eq!(C::WHITE.into(), BinaryColor::On);
-        assert_eq!(C::RED.into(), BinaryColor::Off);
-        assert_eq!(C::YELLOW.into(), BinaryColor::On);
+        ($from_type:ident) => {
+            test_rgb_conversions!($from_type, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888));
+        };
+    }
+
+    #[test]
+    fn rgb_color_conversions() {
+        test_rgb_conversions!(Rgb555);
+        test_rgb_conversions!(Bgr555);
+        test_rgb_conversions!(Rgb565);
+        test_rgb_conversions!(Bgr565);
+        test_rgb_conversions!(Rgb888);
+        test_rgb_conversions!(Bgr888);
+    }
+
+    macro_rules! test_from_gray8 {
+        ($type:ident) => {
+            assert_eq!($type::from(Gray8::BLACK), $type::BLACK);
+            assert_eq!($type::from(Gray8::WHITE), $type::WHITE);
+        };
+    }
+
+    #[test]
+    fn grayscale_from_gray8() {
+        test_from_gray8!(Rgb555);
+        test_from_gray8!(Bgr555);
+        test_from_gray8!(Rgb565);
+        test_from_gray8!(Bgr565);
+        test_from_gray8!(Rgb888);
+        test_from_gray8!(Bgr888);
+    }
+
+    macro_rules! test_from_binary {
+        ($type:ident) => {
+            assert_eq!($type::from(BinaryColor::Off), $type::BLACK);
+            assert_eq!($type::from(BinaryColor::On), $type::WHITE);
+        };
     }
 
     #[test]
     pub fn conversion_from_binary_color() {
-        test_binary_conversion::<Rgb555>();
-        test_binary_conversion::<Bgr555>();
-        test_binary_conversion::<Rgb565>();
-        test_binary_conversion::<Bgr565>();
-        test_binary_conversion::<Rgb888>();
-        test_binary_conversion::<Bgr888>();
+        test_from_binary!(Rgb555);
+        test_from_binary!(Bgr555);
+        test_from_binary!(Rgb565);
+        test_from_binary!(Bgr565);
+        test_from_binary!(Rgb888);
+        test_from_binary!(Bgr888);
+        test_from_binary!(Gray8);
     }
 }
