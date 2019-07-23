@@ -24,6 +24,5 @@ circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 sdl2 = "0.32.2"
 
 [dependencies.embedded-graphics]
-version = "0.6.0-alpha.0"
-path = "../embedded-graphics"
+version = "0.6.0-alpha.1"
 features = [ "bmp", "tga" ]
