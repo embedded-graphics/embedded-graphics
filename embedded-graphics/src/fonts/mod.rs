@@ -26,22 +26,14 @@ where
     /// ```rust
     /// use embedded_graphics::prelude::*;
     /// use embedded_graphics::fonts::Font6x8;
+    /// use embedded_graphics::pixelcolor::Rgb565;
+    /// # use embedded_graphics::mock_display::MockDisplay as Display;
     ///
-    /// # struct Display {}
-    /// # impl Display {
-    /// #     pub fn draw<T>(&self, item_pixels: T) -> Result<(), ()>
-    /// #     where
-    /// #         T: IntoIterator<Item = Pixel<u8>>,
-    /// #     {
-    /// #         Ok(())
-    /// #     }
-    /// # }
-    /// #
     /// fn main() {
-    ///     let disp: Display = Display {};
-    ///     // Render a string with a 8bit color
+    ///     let mut disp = Display::default();
+    ///     // Render a string with a red stroke
     ///     let text = Font6x8::render_str("Hello world")
-    ///         .style(Style::stroke(1u8));
+    ///         .style(Style::stroke(Rgb565::RED));
     ///
     ///     disp.draw(text);
     /// }
@@ -64,13 +56,13 @@ macro_rules! impl_text {
 /// Render text using the [`Font6x8`](./fonts/type.Font6x8.html) font
 ///
 /// ```rust
-/// use embedded_graphics::{text_6x8, prelude::*, fonts::Font6x8};
+/// use embedded_graphics::{text_6x8, prelude::*, fonts::Font6x8, pixelcolor::Rgb565};
 ///
-/// let text: Font6x8<u8> = text_6x8!("Hello world!");
-/// let styled_text: Font6x8<u8> = text_6x8!(
+/// let text: Font6x8<Rgb565> = text_6x8!("Hello world!");
+/// let styled_text: Font6x8<Rgb565> = text_6x8!(
 ///     "Hello world!",
-///     stroke = Some(10u8),
-///     fill = Some(20u8)
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -86,13 +78,13 @@ macro_rules! text_6x8 {
 /// Render text using the [`Font6x12`](./fonts/type.Font6x12.html) font
 ///
 /// ```rust
-/// use embedded_graphics::{text_6x12, prelude::*, fonts::Font6x12};
+/// use embedded_graphics::{text_6x12, prelude::*, fonts::Font6x12, pixelcolor::Rgb565};
 ///
-/// let text: Font6x12<u8> = text_6x12!("Hello world!");
-/// let styled_text: Font6x12<u8> = text_6x12!(
+/// let text: Font6x12<Rgb565> = text_6x12!("Hello world!");
+/// let styled_text: Font6x12<Rgb565> = text_6x12!(
 ///     "Hello world!",
-///     stroke = Some(10u8),
-///     fill = Some(20u8)
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -108,13 +100,13 @@ macro_rules! text_6x12 {
 /// Render text using the [`Font8x16`](./fonts/type.Font8x16.html) font
 ///
 /// ```rust
-/// use embedded_graphics::{text_8x16, prelude::*, fonts::Font8x16};
+/// use embedded_graphics::{text_8x16, prelude::*, fonts::Font8x16, pixelcolor::Rgb565};
 ///
-/// let text: Font8x16<u8> = text_8x16!("Hello world!");
-/// let styled_text: Font8x16<u8> = text_8x16!(
+/// let text: Font8x16<Rgb565> = text_8x16!("Hello world!");
+/// let styled_text: Font8x16<Rgb565> = text_8x16!(
 ///     "Hello world!",
-///     stroke = Some(10u8),
-///     fill = Some(20u8)
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -130,13 +122,13 @@ macro_rules! text_8x16 {
 /// Render text using the [`Font12x16`](./fonts/type.Font12x16.html) font
 ///
 /// ```rust
-/// use embedded_graphics::{text_12x16, prelude::*, fonts::Font12x16};
+/// use embedded_graphics::{text_12x16, prelude::*, fonts::Font12x16, pixelcolor::Rgb565};
 ///
-/// let text: Font12x16<u8> = text_12x16!("Hello world!");
-/// let styled_text: Font12x16<u8> = text_12x16!(
+/// let text: Font12x16<Rgb565> = text_12x16!("Hello world!");
+/// let styled_text: Font12x16<Rgb565> = text_12x16!(
 ///     "Hello world!",
-///     stroke = Some(10u8),
-///     fill = Some(20u8)
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -152,20 +144,21 @@ macro_rules! text_12x16 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::{BinaryColor, Rgb565, RgbColor};
 
     #[test]
     fn font_macros() {
-        let _text: Font6x8<u8> = text_6x8!("Hello!");
-        let _text: Font6x12<u8> = text_6x12!("Hello!");
-        let _text: Font8x16<u8> = text_8x16!("Hello!");
-        let _text: Font12x16<u8> = text_12x16!("Hello!");
+        let _text: Font6x8<BinaryColor> = text_6x8!("Hello!");
+        let _text: Font6x12<BinaryColor> = text_6x12!("Hello!");
+        let _text: Font8x16<BinaryColor> = text_8x16!("Hello!");
+        let _text: Font12x16<BinaryColor> = text_12x16!("Hello!");
     }
 
     #[test]
     fn styled_text() {
-        let _text: Font6x8<u8> = text_6x8!("Hello!", stroke = Some(10u8));
-        let _text: Font6x12<u8> = text_6x12!("Hello!", stroke = Some(10u8));
-        let _text: Font8x16<u8> = text_8x16!("Hello!", stroke = Some(10u8));
-        let _text: Font12x16<u8> = text_12x16!("Hello!", stroke = Some(10u8));
+        let _text: Font6x8<Rgb565> = text_6x8!("Hello!", stroke = Some(Rgb565::RED));
+        let _text: Font6x12<Rgb565> = text_6x12!("Hello!", stroke = Some(Rgb565::GREEN));
+        let _text: Font8x16<Rgb565> = text_8x16!("Hello!", stroke = Some(Rgb565::BLUE));
+        let _text: Font12x16<Rgb565> = text_12x16!("Hello!", stroke = Some(Rgb565::YELLOW));
     }
 }

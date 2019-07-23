@@ -1,30 +1,37 @@
+use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egrectangle, icoord, text_6x8};
-use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
+use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display = DisplayBuilder::new().theme(DisplayTheme::OledBlue).build();
+    let mut display = DisplayBuilder::new()
+        .title("Fonts with transparent background")
+        .scale(3)
+        .build_rgb();
 
     display.draw(
         egcircle!(
             (20, 20),
             20 as u32,
-            stroke = Some(1u8.into()),
-            fill = Some(1u8.into())
+            stroke = Some(Rgb565::RED),
+            fill = Some(Rgb565::RED)
         )
         .into_iter()
-        .chain(egrectangle!((20, 20), (100, 80), fill = Some(1u8.into()))),
+        .chain(egrectangle!((20, 20), (100, 80), fill = Some(Rgb565::RED))),
     );
 
-    display.draw(text_6x8!("Hello world! - no background").translate(icoord!(15, 15)));
+    display.draw(
+        text_6x8!("Hello world! - no background", stroke = Some(Rgb565::WHITE))
+            .translate(icoord!(15, 15)),
+    );
 
     display.draw(
         text_6x8!(
             "Hello world! - filled background",
-            stroke = Some(1u8.into()),
-            fill = Some(0u8.into())
+            stroke = Some(Rgb565::YELLOW),
+            fill = Some(Rgb565::BLUE)
         )
         .translate(icoord!(15, 30)),
     );
@@ -32,8 +39,8 @@ fn main() {
     display.draw(
         text_6x8!(
             "Hello world! - inverse background",
-            stroke = Some(0u8.into()),
-            fill = Some(1u8.into())
+            stroke = Some(Rgb565::BLUE),
+            fill = Some(Rgb565::YELLOW)
         )
         .translate(icoord!(15, 45)),
     );

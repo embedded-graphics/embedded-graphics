@@ -31,8 +31,9 @@ impl FontBuilderConf for Font6x12Conf {
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::fonts::Font6x12;
 /// use embedded_graphics::text_6x12;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # use embedded_graphics::pixelcolor::BinaryColor;
+/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 ///
 /// // Use struct methods directly
 /// display.draw(Font6x12::render_str("Hello Rust!"));
@@ -46,8 +47,9 @@ impl FontBuilderConf for Font6x12Conf {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::fonts::Font6x12;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # use embedded_graphics::pixelcolor::BinaryColor;
+/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 ///
 /// display.draw(
 ///     Font6x12::render_str("Hello Rust!").translate(Coord::new(20, 30))
@@ -64,20 +66,21 @@ impl FontBuilderConf for Font6x12Conf {
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::text_6x12;
 /// use embedded_graphics::fonts::Font6x12;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// use embedded_graphics::pixelcolor::Rgb565;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
 ///
 /// display.draw(text_6x12!(
 ///     "Hello Rust!",
-///     fill = Some(1u8),
-///     stroke = Some(0u8)
+///     fill = Some(Rgb565::BLUE),
+///     stroke = Some(Rgb565::YELLOW)
 /// ));
 ///
 /// display.draw(
 ///     Font6x12::render_str("Hello Rust!")
 ///         .translate(Coord::new(20, 30))
-///         .fill(Some(1u8))
-///         .stroke(Some(0u8)),
+///         .fill(Some(Rgb565::BLUE))
+///         .stroke(Some(Rgb565::YELLOW)),
 /// );
 /// ```
 ///
@@ -90,17 +93,20 @@ mod tests {
     use crate::coord::Coord;
     use crate::drawable::Dimensions;
     use crate::fonts::Font;
-    use crate::mock_display::Display;
+    use crate::mock_display::MockDisplay;
+    use crate::pixelcolor::BinaryColor;
     use crate::style::Style;
     use crate::style::WithStyle;
     use crate::transform::Transform;
     use crate::unsignedcoord::UnsignedCoord;
     use crate::Drawing;
+    use BinaryColor::Off as C0;
+    use BinaryColor::On as C1;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
-        let text: Font6x12<u8> = Font6x12::render_str("Hello World!")
-            .style(Style::stroke(1))
+        let text: Font6x12<BinaryColor> = Font6x12::render_str("Hello World!")
+            .style(Style::stroke(C1))
             .translate(Coord::new(5, -20));
         let mut it = text.into_iter();
 
@@ -109,8 +115,8 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let hello: Font6x12<u8> = Font6x12::render_str("Hello World!");
-        let empty: Font6x12<u8> = Font6x12::render_str("");
+        let hello: Font6x12<BinaryColor> = Font6x12::render_str("Hello World!");
+        let empty: Font6x12<BinaryColor> = Font6x12::render_str("");
 
         assert_eq!(hello.size(), UnsignedCoord::new(72, 12));
         assert_eq!(empty.size(), UnsignedCoord::new(0, 0));
@@ -118,9 +124,9 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let hello: Font6x12<u8> =
+        let hello: Font6x12<BinaryColor> =
             Font6x12::render_str("Hello World!").translate(Coord::new(5, -20));
-        let empty: Font6x12<u8> = Font6x12::render_str("").translate(Coord::new(10, 20));
+        let empty: Font6x12<BinaryColor> = Font6x12::render_str("").translate(Coord::new(10, 20));
 
         assert_eq!(hello.top_left(), Coord::new(5, -20));
         assert_eq!(hello.bottom_right(), Coord::new(72 + 5, 12 - 20));
@@ -130,87 +136,90 @@ mod tests {
 
     #[test]
     fn correct_m() {
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str("Mm").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str("Mm").stroke(Some(C1)));
 
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         assert_eq!(
             display,
-            Display::new([
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            MockDisplay::new([
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C1, C0, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C1, C0, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C1, C0, C1, C0, C1, C1, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C1, C0, C1, C0, C1, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C0, C0, C1, C0, C1, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C0, C0, C1, C0, C1, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C0, C0, C1, C0, C1, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C0, C0, C1, C0, C1, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
                 //
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
             ])
         );
     }
 
     #[test]
     fn correct_ascii_borders() {
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str(" ~").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str(" ~").stroke(Some(C1)));
 
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         assert_eq!(
             display,
-            Display::new([
-                [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            MockDisplay::new([
+                [C0, C0, C0, C0, C0, C0, C0, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C1, C1, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
                 //
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
             ])
         );
     }
 
     #[test]
     fn correct_dollar_y() {
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str("$y").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str("$y").stroke(Some(C1)));
 
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         assert_eq!(
             display,
-            Display::new([
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            MockDisplay::new([
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C1, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C1, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C1, C0, C0, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C1, C1, C1, C0, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C1, C0, C1, C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C1, C1, C1, C0, C0, C0, C0, C1, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
                 //
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
             ])
         );
     }
@@ -218,49 +227,49 @@ mod tests {
     #[test]
     fn dont_panic() {
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let two_question_marks = Display::new(
+        let two_question_marks = MockDisplay::new(
             [
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C1, C0, C0, C0, C0, C1, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C1, C0, C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C1, C0, C0, C0, C0, C0, C1, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
                 //
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
+                [C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0, C0],
             ]
         );
 
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str("\0\n").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str("\0\n").stroke(Some(C1)));
         assert_eq!(display, two_question_marks);
 
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str("\x7F\u{A0}").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str("\x7F\u{A0}").stroke(Some(C1)));
         assert_eq!(display, two_question_marks);
 
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str("¡ÿ").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str("¡ÿ").stroke(Some(C1)));
         assert_eq!(display, two_question_marks);
 
-        let mut display = Display::default();
-        display.draw(Font6x12::render_str("Ā💣").stroke(Some(1)));
+        let mut display = MockDisplay::default();
+        display.draw(Font6x12::render_str("Ā💣").stroke(Some(C1)));
         assert_eq!(display, two_question_marks);
     }
 
     #[test]
     fn negative_y_no_infinite_loop() {
-        let text: Font6x12<u16> = Font6x12::render_str("Testing string")
-            .stroke(Some(0xF1FA_))
+        let text: Font6x12<BinaryColor> = Font6x12::render_str("Testing string")
+            .stroke(Some(C1))
             .translate(Coord::new(0, -12));
 
         let mut it = text.into_iter();
@@ -271,8 +280,8 @@ mod tests {
 
     #[test]
     fn negative_x_no_infinite_loop() {
-        let text: Font6x12<u16> = Font6x12::render_str("A")
-            .stroke(Some(0xF1FA_))
+        let text: Font6x12<BinaryColor> = Font6x12::render_str("A")
+            .stroke(Some(C1))
             .translate(Coord::new(-6, 0));
 
         let mut it = text.into_iter();

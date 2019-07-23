@@ -2,8 +2,9 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::ImageFile;
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::PixelColor;
+use crate::pixelcolor::{FromRawData, PixelColor};
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
+use byteorder::{ByteOrder, LittleEndian};
 use core::marker::PhantomData;
 use tinybmp::Bmp;
 
@@ -21,8 +22,9 @@ use tinybmp::Bmp;
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::ImageBmp;
-/// # use embedded_graphics::mock_display::Display16Bpp;
-/// # let mut display = Display16Bpp::default();
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # use embedded_graphics::pixelcolor::Rgb565;
+/// # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 ///
 /// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
 /// let image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
@@ -43,7 +45,7 @@ pub struct ImageBmp<'a, C: PixelColor> {
 
 impl<'a, C> ImageFile<'a> for ImageBmp<'a, C>
 where
-    C: PixelColor,
+    C: PixelColor + FromRawData,
 {
     /// Create a new BMP from a byte slice
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
@@ -67,7 +69,7 @@ where
 
 impl<'a, C> Dimensions for ImageBmp<'a, C>
 where
-    C: PixelColor,
+    C: PixelColor + FromRawData,
 {
     fn top_left(&self) -> Coord {
         self.offset
@@ -84,7 +86,7 @@ where
 
 impl<'a, C> IntoIterator for &'a ImageBmp<'a, C>
 where
-    C: PixelColor + From<u8> + From<u16>,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageBmpIterator<'a, C>;
@@ -103,7 +105,7 @@ where
 #[derive(Debug)]
 pub struct ImageBmpIterator<'a, C: 'a>
 where
-    C: PixelColor,
+    C: PixelColor + FromRawData,
 {
     x: u32,
     y: u32,
@@ -113,7 +115,7 @@ where
 
 impl<'a, C> Iterator for ImageBmpIterator<'a, C>
 where
-    C: PixelColor + From<u8> + From<u16>,
+    C: PixelColor + FromRawData,
 {
     type Item = Pixel<C>;
 
@@ -129,17 +131,14 @@ where
                 return None;
             }
 
-            let offset = ((h - 1 - y) * w) + x;
+            let offset = (((h - 1 - y) * w) + x) as usize;
 
-            let bit_value = if self.im.bmp.bpp() == 8 {
-                self.image_data[offset as usize] as u16
-            } else if self.im.bmp.bpp() == 16 {
-                let offset = offset * 2; // * 2 as two bytes per pixel
-
-                (self.image_data[offset as usize] as u16)
-                    | ((self.image_data[(offset + 1) as usize] as u16) << 8)
-            } else {
-                panic!("Bit depth {} not supported", self.im.bmp.bpp());
+            let data = match self.im.bmp.bpp() {
+                8 => self.image_data[offset] as u32,
+                16 => LittleEndian::read_u16(&self.image_data[offset * 2..]) as u32, // * 2 as two bytes per pixel
+                24 => LittleEndian::read_u24(&self.image_data[offset * 3..]), // * 3 as three bytes per pixel
+                32 => LittleEndian::read_u32(&self.image_data[offset * 4..]), // * 4 as four bytes per pixel
+                _ => panic!("Bit depth {} not supported", self.im.bmp.bpp()),
             };
 
             let current_pixel = self.im.offset + Coord::new(x as i32, y as i32);
@@ -154,7 +153,7 @@ where
             }
 
             if current_pixel[0] >= 0 && current_pixel[1] >= 0 {
-                break Pixel(current_pixel.to_unsigned(), bit_value.into());
+                break Pixel(current_pixel.to_unsigned(), C::from_raw_data(data));
             }
         };
 
@@ -188,11 +187,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::{Gray8, Rgb555, Rgb565, Rgb888, RgbColor};
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn negative_top_left() {
-        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -205,7 +205,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
@@ -218,32 +218,25 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let image: ImageBmp<u16> = ImageBmp::new(include_bytes!(
+        let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!(
             "../../tests/chessboard-4px-colour-16bit.bmp"
         ))
         .unwrap()
         .translate(Coord::new(-1, -1));
         let it = image.into_iter();
 
-        // Image is RGB565 encoded in BPP
-        let red = 0b11111_000000_00000_u16;
-        let green = 0b00000_111111_00000_u16;
-        let blue = 0b00000_000000_11111_u16;
-        let black = 0x0000_u16;
-        let white = 0xffff_u16;
-
-        let expected: [Pixel<u16>; 9] = [
-            Pixel(UnsignedCoord::new(0, 0), red.into()),
-            Pixel(UnsignedCoord::new(1, 0), black.into()),
-            Pixel(UnsignedCoord::new(2, 0), green.into()),
+        let expected: [Pixel<Rgb565>; 9] = [
+            Pixel(UnsignedCoord::new(0, 0), Rgb565::RED),
+            Pixel(UnsignedCoord::new(1, 0), Rgb565::BLACK),
+            Pixel(UnsignedCoord::new(2, 0), Rgb565::GREEN),
             //
-            Pixel(UnsignedCoord::new(0, 1), black.into()),
-            Pixel(UnsignedCoord::new(1, 1), blue.into()),
-            Pixel(UnsignedCoord::new(2, 1), black.into()),
+            Pixel(UnsignedCoord::new(0, 1), Rgb565::BLACK),
+            Pixel(UnsignedCoord::new(1, 1), Rgb565::BLUE),
+            Pixel(UnsignedCoord::new(2, 1), Rgb565::BLACK),
             //
-            Pixel(UnsignedCoord::new(0, 2), white.into()),
-            Pixel(UnsignedCoord::new(1, 2), black.into()),
-            Pixel(UnsignedCoord::new(2, 2), white.into()),
+            Pixel(UnsignedCoord::new(0, 2), Rgb565::WHITE),
+            Pixel(UnsignedCoord::new(1, 2), Rgb565::BLACK),
+            Pixel(UnsignedCoord::new(2, 2), Rgb565::WHITE),
         ];
 
         assert_eq!(image.into_iter().count(), 9);
@@ -251,5 +244,83 @@ mod tests {
         for (idx, pixel) in it.enumerate() {
             assert_eq!(pixel, expected[idx]);
         }
+    }
+
+    fn create_color_pattern<C>() -> [[C; 4]; 2]
+    where
+        C: RgbColor,
+    {
+        [
+            [C::BLACK, C::RED, C::GREEN, C::YELLOW],
+            [C::BLUE, C::MAGENTA, C::CYAN, C::WHITE],
+        ]
+    }
+
+    fn test_pattern<C>(image_data: &[u8])
+    where
+        C: PixelColor + RgbColor + FromRawData,
+    {
+        let image: ImageBmp<C> = ImageBmp::new(image_data).unwrap();
+
+        let pattern = create_color_pattern();
+
+        assert_eq!(image.size(), UnsignedCoord::new(4, 2));
+
+        let mut iter = image.into_iter();
+        for (y, row) in pattern.iter().enumerate() {
+            for (x, exepcted_color) in row.iter().enumerate() {
+                let pos = UnsignedCoord::new(x as u32, y as u32);
+                let pixel = iter.next().unwrap();
+
+                assert_eq!(pixel.0, pos);
+                assert_eq!(pixel.1, *exepcted_color);
+            }
+        }
+
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn colors_rgb555() {
+        test_pattern::<Rgb555>(include_bytes!("../../tests/colors_rgb555.bmp"));
+    }
+
+    #[test]
+    fn colors_rgb565() {
+        test_pattern::<Rgb565>(include_bytes!("../../tests/colors_rgb565.bmp"));
+    }
+
+    #[test]
+    fn colors_rgb888_24bit() {
+        test_pattern::<Rgb888>(include_bytes!("../../tests/colors_rgb888_24bit.bmp"));
+    }
+
+    #[test]
+    fn colors_rgb888_32bit() {
+        test_pattern::<Rgb888>(include_bytes!("../../tests/colors_rgb888_32bit.bmp"));
+    }
+
+    #[test]
+    fn colors_grey8() {
+        let image: ImageBmp<Gray8> =
+            ImageBmp::new(include_bytes!("../../tests/colors_grey8.bmp")).unwrap();
+
+        assert_eq!(image.size(), UnsignedCoord::new(3, 1));
+
+        let mut iter = image.into_iter();
+
+        let p = iter.next().unwrap();
+        assert_eq!(p.0, UnsignedCoord::new(0, 0));
+        assert_eq!(p.1, Gray8::BLACK);
+
+        let p = iter.next().unwrap();
+        assert_eq!(p.0, UnsignedCoord::new(1, 0));
+        assert_eq!(p.1, Gray8::new(128));
+
+        let p = iter.next().unwrap();
+        assert_eq!(p.0, UnsignedCoord::new(2, 0));
+        assert_eq!(p.1, Gray8::WHITE);
+
+        assert!(iter.next().is_none());
     }
 }

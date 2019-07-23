@@ -21,15 +21,16 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Triangle;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// use embedded_graphics::pixelcolor::Rgb565;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
 ///
 /// // Default triangle with no styling
 /// let t1 = Triangle::new(Coord::new(10, 20), Coord::new(30, 40), Coord::new(50, 60));
 ///
 /// // Triangle with styled stroke from (50, 20) to (60, 35)
 /// let t2 = Triangle::new(Coord::new(50, 20), Coord::new(60, 35), Coord::new(70, 80))
-///     .stroke(Some(5u8));
+///     .stroke(Some(Rgb565::RED));
 ///
 /// // Triangle with translation applied
 /// let t3 = Triangle::new(Coord::new(50, 20), Coord::new(60, 35), Coord::new(70, 80))
@@ -359,8 +360,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Triangle;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(BinaryColor::On);
     /// #
     /// let tri = Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(8, 15))
     /// #    .style(style);
@@ -384,8 +386,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Triangle;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(BinaryColor::On);
     /// #
     /// let mut tri = Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(10, 15))
     /// #    .style(style);
@@ -407,11 +410,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::BinaryColor;
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let tri: Triangle<u8> =
+        let tri: Triangle<BinaryColor> =
             Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(5, 20));
         let moved = tri.translate(Coord::new(-10, -10));
 
@@ -428,7 +432,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let tri: Triangle<u8> =
+        let tri: Triangle<BinaryColor> =
             Triangle::new(Coord::new(5, 10), Coord::new(15, 20), Coord::new(10, 15));
         let moved = tri.translate(Coord::new(10, 10));
 
@@ -439,50 +443,98 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_y() {
-        let mut tri: TriangleIterator<u8> =
+        let mut tri: TriangleIterator<BinaryColor> =
             Triangle::new(Coord::new(2, 2), Coord::new(2, 4), Coord::new(2, 4))
-                .style(Style::stroke(1))
+                .style(Style::stroke(BinaryColor::On))
                 .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
         // After that line a ends where line c starts.
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 3), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 3), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 4), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 4), BinaryColor::On))
+        );
         assert_eq!(tri.next(), None);
     }
 
     #[test]
     fn it_draws_unfilled_tri_line_x() {
-        let mut tri: TriangleIterator<u8> =
+        let mut tri: TriangleIterator<BinaryColor> =
             Triangle::new(Coord::new(2, 2), Coord::new(4, 2), Coord::new(4, 2))
-                .style(Style::stroke(1))
+                .style(Style::stroke(BinaryColor::On))
                 .into_iter();
 
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(3, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(3, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(4, 2), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(4, 2), BinaryColor::On))
+        );
         assert_eq!(tri.next(), None);
     }
 
     #[test]
     fn it_can_be_negative() {
-        let mut tri: TriangleIterator<u8> =
+        let mut tri: TriangleIterator<BinaryColor> =
             Triangle::new(Coord::new(-2, -2), Coord::new(2, 0), Coord::new(-2, 0))
-                .style(Style::stroke(1))
+                .style(Style::stroke(BinaryColor::On))
                 .into_iter();
 
         // Only the bottom of the triangle should be visible
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(0, 0), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(1, 0), 1.into())));
-        assert_eq!(tri.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(0, 0), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 0), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(1, 0), BinaryColor::On))
+        );
+        assert_eq!(
+            tri.next(),
+            Some(Pixel(UnsignedCoord::new(2, 0), BinaryColor::On))
+        );
         assert_eq!(tri.next(), None);
     }
 }

@@ -7,7 +7,7 @@ use embedded_graphics::Drawing;
 
 struct FakeDisplay {}
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TestPixelColor(pub bool);
 
 impl PixelColor for TestPixelColor {}

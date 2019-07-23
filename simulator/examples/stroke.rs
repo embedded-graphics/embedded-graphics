@@ -1,30 +1,34 @@
 use embedded_graphics::icoord;
+use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
-use embedded_graphics_simulator::{DisplayBuilder, SimPixelColor};
+use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
 const PADDING: i32 = 16;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(320, 256).build();
+    let mut display = DisplayBuilder::new()
+        .title("Strokes")
+        .size(320, 256)
+        .build_binary();
 
     let triangle = Triangle::new(icoord!(0, 64), icoord!(64, 0), icoord!(64, 64))
         .translate(icoord!(0, 0))
-        .stroke(Some(SimPixelColor(1, 1, 1)));
+        .stroke(Some(C1));
 
     let rect = Rectangle::new(icoord!(0, 0), icoord!(64, 64))
         .translate(icoord!(64 + PADDING, 0))
-        .stroke(Some(SimPixelColor(1, 1, 1)));
+        .stroke(Some(C1));
 
     let line = Line::new(icoord!(0, 0), icoord!(64, 64))
         .translate(icoord!(128 + PADDING * 2, 0))
-        .stroke(Some(SimPixelColor(1, 1, 1)));
+        .stroke(Some(C1));
 
     let circ = Circle::new(icoord!(32, 32), 32)
         .translate(icoord!(192 + PADDING * 3, 0))
-        .stroke(Some(SimPixelColor(1, 1, 1)));
+        .stroke(Some(C1));
 
     display.draw(
         circ.into_iter()

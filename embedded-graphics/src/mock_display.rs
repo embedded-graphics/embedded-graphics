@@ -1,54 +1,34 @@
 use crate::drawable::{Dimensions, Pixel};
+use crate::pixelcolor::BinaryColor;
 use crate::prelude::*;
 use crate::{Drawing, SizedDrawing};
 
 /// Mock display for use in tests and some doc examples. Do not use directly!
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
-pub struct MockDisplay<P>(pub [[P; 24]; 16]);
+pub struct MockDisplay<C>(pub [[C; 24]; 16]);
 
-impl MockDisplay<u8> {
-    pub fn new(bytes: [[u8; 24]; 16]) -> Self {
+impl<C> MockDisplay<C> {
+    pub fn new(bytes: [[C; 24]; 16]) -> Self {
         Self(bytes)
     }
 }
 
-impl MockDisplay<u16> {
-    pub fn new(bytes: [[u16; 24]; 16]) -> Self {
-        Self(bytes)
-    }
-}
-
-impl MockDisplay<u32> {
-    pub fn new(bytes: [[u32; 24]; 16]) -> Self {
-        Self(bytes)
-    }
-}
-
-impl Default for MockDisplay<u8> {
-    fn default() -> Self {
-        MockDisplay::<u8>::new([[0; 24]; 16])
-    }
-}
-
-impl Default for MockDisplay<u16> {
-    fn default() -> Self {
-        MockDisplay::<u16>::new([[0u16; 24]; 16])
-    }
-}
-
-impl Default for MockDisplay<u32> {
-    fn default() -> Self {
-        MockDisplay::<u32>::new([[0u32; 24]; 16])
-    }
-}
-
-impl<P> Drawing<P> for MockDisplay<P>
+impl<C> Default for MockDisplay<C>
 where
-    P: PixelColor,
+    C: PixelColor + From<BinaryColor>,
+{
+    fn default() -> Self {
+        MockDisplay::new([[BinaryColor::Off.into(); 24]; 16])
+    }
+}
+
+impl<C> Drawing<C> for MockDisplay<C>
+where
+    C: PixelColor,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: IntoIterator<Item = Pixel<P>>,
+        T: IntoIterator<Item = Pixel<C>>,
     {
         for Pixel(coord, color) in item_pixels {
             if coord[0] >= 24 || coord[1] >= 16 {
@@ -59,13 +39,13 @@ where
     }
 }
 
-impl<P> SizedDrawing<P> for MockDisplay<P>
+impl<C> SizedDrawing<C> for MockDisplay<C>
 where
-    P: PixelColor,
+    C: PixelColor,
 {
     fn draw_sized<T>(&mut self, item: T)
     where
-        T: IntoIterator<Item = Pixel<P>> + Dimensions,
+        T: IntoIterator<Item = Pixel<C>> + Dimensions,
     {
         // Use `top_left()`, `size()`, etc methods defined on Dimensions to set draw area here
 
@@ -79,7 +59,3 @@ where
         }
     }
 }
-
-pub type Display = MockDisplay<u8>;
-pub type Display16Bpp = MockDisplay<u16>;
-pub type Display32Bpp = MockDisplay<u32>;
