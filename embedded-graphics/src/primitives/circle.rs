@@ -82,11 +82,11 @@ where
     }
 
     fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed() - Coord::new(1,1)
+        self.top_left() + self.size().to_signed() - Coord::new(1, 1)
     }
 
     fn size(&self) -> UnsignedCoord {
-        UnsignedCoord::new(self.radius * 2, self.radius * 2) + UnsignedCoord::new(1,1)
+        UnsignedCoord::new(self.radius * 2, self.radius * 2) + UnsignedCoord::new(1, 1)
     }
 }
 

@@ -98,7 +98,7 @@ where
     }
 
     fn size(&self) -> UnsignedCoord {
-        (self.bottom_right() - self.top_left()).abs().to_unsigned() + UnsignedCoord::new(1,1)
+        (self.bottom_right() - self.top_left()).abs().to_unsigned() + UnsignedCoord::new(1, 1)
     }
 }
 
