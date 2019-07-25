@@ -11,31 +11,15 @@ const PADDING: i32 = 16;
 
 fn main() {
     let mut display = DisplayBuilder::new()
-        .title("Strokes")
+        .title("Dimension Sizes")
         .size(60, 60)
         .scale(10)
         .build_binary();
 
-    let rectangle = egrectangle!((5, 5), (7, 7), stroke = Some(BinaryColor::On));
-    display.draw(&rectangle);
-    println!("rectangle: {:?}", rectangle.size());
-
-    let line = egline!((5,10), (10,10), stroke = Some(BinaryColor::On));
-    display.draw(&line);
-    println!("line: {:?}", line.size());
-
-    let line = egline!((5,12), (7,12), stroke = Some(BinaryColor::On));
-    display.draw(&line);
-    println!("line: {:?}", line.size());
-
-    let line = egline!((5,14), (6,14), stroke = Some(BinaryColor::On));
-    display.draw(&line);
-    println!("line: {:?}", line.size());
-
-    let line = egline!((5,16), (5,16), stroke = Some(BinaryColor::On));
-    display.draw(&line);
-    println!("line: {:?}", line.size());
-
+    
+    /*
+     *  CIRCLES
+     */
     let circle = egcircle!((12, 6), 0, stroke = Some(BinaryColor::On));
     display.draw(&circle);
     println!("circle: {:?}", circle.size());
@@ -52,13 +36,30 @@ fn main() {
     display.draw(&circle);
     println!("circle: {:?}", circle.size());
 
+    /*
+     *  LINES
+     */    
+    let line = egline!((5,10), (10,10), stroke = Some(BinaryColor::On));
+    display.draw(&line);
+    println!("line: {:?}", line.size());
+
+    let line = egline!((5,12), (7,12), stroke = Some(BinaryColor::On));
+    display.draw(&line);
+    println!("line: {:?}", line.size());
+
+    let line = egline!((5,14), (6,14), stroke = Some(BinaryColor::On));
+    display.draw(&line);
+    println!("line: {:?}", line.size());
+
+    let line = egline!((5,16), (5,16), stroke = Some(BinaryColor::On));
+    display.draw(&line);
+    println!("line: {:?}", line.size());
+
+    /*
+     *  TRIANGLES
+     */
     let triangle = egtriangle!((5, 20), (10,20), (10,25), stroke = Some(BinaryColor::On));
     display.draw(&triangle);
-    println!("triangle bot right: {:?}", triangle.bottom_right());
-    println!("triangle top left: {:?}", triangle.top_left());
-    println!("triangle: {:?}", (triangle.bottom_right() - triangle.top_left()).abs());
-    println!("triangle: {:?}", (triangle.bottom_right() - triangle.top_left()).abs().to_unsigned());  
-    println!("triangle size manually calculated with same code as in triangle lib: {:?}", (triangle.bottom_right() - triangle.top_left()).abs().to_unsigned() + UnsignedCoord::new(1,1));      
     println!("triangle size from triangle lib: {:?}", triangle.size());
 
     let triangle = egtriangle!((12, 20), (13,20), (13,21), stroke = Some(BinaryColor::On));
@@ -68,6 +69,21 @@ fn main() {
     let triangle = egtriangle!((15, 20), (15,20), (15,20), stroke = Some(BinaryColor::On));
     display.draw(&triangle);
     println!("triangle: {:?}", triangle.size());
+
+    /*
+     *  RECTANGLES
+     */
+    let rectangle = egrectangle!((5,30), (5, 30), stroke = Some(BinaryColor::On));
+    display.draw(&rectangle);
+    println!("rectangle: {:?}", rectangle.size());
+
+    let rectangle = egrectangle!((7,30), (8, 31), stroke = Some(BinaryColor::On));
+    display.draw(&rectangle);
+    println!("rectangle: {:?}", rectangle.size());
+    
+    let rectangle = egrectangle!((10,30), (12, 32), stroke = Some(BinaryColor::On));
+    display.draw(&rectangle);
+    println!("rectangle: {:?}", rectangle.size()); 
 
     
 
