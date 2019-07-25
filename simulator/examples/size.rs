@@ -1,13 +1,10 @@
-use embedded_graphics::icoord;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::*;
-use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
-const PADDING: i32 = 16;
 
 fn main() {
     let mut display = DisplayBuilder::new()
