@@ -65,11 +65,11 @@ where
     }
 
     fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
+        self.top_left() + self.size().to_signed() - Coord::new(1,1)
     }
 
     fn size(&self) -> UnsignedCoord {
-        (self.end - self.start).abs().to_unsigned()
+        (self.end - self.start).abs().to_unsigned() + UnsignedCoord::new(1,1)
     }
 }
 
@@ -299,11 +299,27 @@ mod tests {
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);
-        assert_eq!(line.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(line.size(), UnsignedCoord::new(11, 11));
 
         assert_eq!(backwards_line.top_left(), start);
         assert_eq!(backwards_line.bottom_right(), end);
-        assert_eq!(backwards_line.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(backwards_line.size(), UnsignedCoord::new(11, 11));
+    }
+
+    #[test]
+    fn dimension_size() {
+        let line: Line<BinaryColor> = Line::new(Coord::new(10,10), Coord::new(15,10));
+        assert_eq!(line.size(), UnsignedCoord::new(6,1));
+
+        let line: Line<BinaryColor> = Line::new(Coord::new(10,10), Coord::new(12,10));
+        assert_eq!(line.size(), UnsignedCoord::new(3,1));
+
+        let line: Line<BinaryColor> = Line::new(Coord::new(10,10), Coord::new(11,10));
+        assert_eq!(line.size(), UnsignedCoord::new(2,1));
+
+        //TODO: Why is a 1-Length Line not drawn?
+        let line: Line<BinaryColor> = Line::new(Coord::new(10,10), Coord::new(10,10));
+        assert_eq!(line.size(), UnsignedCoord::new(1,1));
     }
 
     #[test]

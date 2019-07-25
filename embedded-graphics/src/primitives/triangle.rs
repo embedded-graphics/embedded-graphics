@@ -98,7 +98,7 @@ where
     }
 
     fn size(&self) -> UnsignedCoord {
-        (self.bottom_right() - self.top_left()).abs().to_unsigned()
+        (self.bottom_right() - self.top_left()).abs().to_unsigned() + UnsignedCoord::new(1,1)
     }
 }
 
@@ -422,12 +422,12 @@ mod tests {
         assert_eq!(tri.p1, Coord::new(5, 10));
         assert_eq!(tri.p2, Coord::new(15, 20));
         assert_eq!(tri.p3, Coord::new(5, 20));
-        assert_eq!(tri.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(tri.size(), UnsignedCoord::new(11, 11));
 
         assert_eq!(moved.p1, Coord::new(-5, 0));
         assert_eq!(moved.p2, Coord::new(5, 10));
         assert_eq!(moved.p3, Coord::new(-5, 10));
-        assert_eq!(moved.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(moved.size(), UnsignedCoord::new(11, 11));
     }
 
     #[test]

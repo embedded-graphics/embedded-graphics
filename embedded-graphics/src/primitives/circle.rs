@@ -82,11 +82,11 @@ where
     }
 
     fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
+        self.top_left() + self.size().to_signed() - Coord::new(1,1)
     }
 
     fn size(&self) -> UnsignedCoord {
-        UnsignedCoord::new(self.radius * 2, self.radius * 2)
+        UnsignedCoord::new(self.radius * 2, self.radius * 2) + UnsignedCoord::new(1,1)
     }
 }
 
@@ -292,7 +292,7 @@ mod tests {
 
         assert_eq!(circ.top_left(), Coord::new(-15, -15));
         assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
-        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(circ.size(), UnsignedCoord::new(11, 11));
     }
 
     #[test]
@@ -301,7 +301,7 @@ mod tests {
 
         assert_eq!(circ.top_left(), Coord::new(5, 15));
         assert_eq!(circ.bottom_right(), Coord::new(15, 25));
-        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(circ.size(), UnsignedCoord::new(11, 11));
     }
 
     #[test]
@@ -310,7 +310,7 @@ mod tests {
 
         assert_eq!(circ.top_left(), Coord::new(-5, -5));
         assert_eq!(circ.bottom_right(), Coord::new(15, 15));
-        assert_eq!(circ.size(), UnsignedCoord::new(20, 20));
+        assert_eq!(circ.size(), UnsignedCoord::new(21, 21));
     }
 
     #[test]
