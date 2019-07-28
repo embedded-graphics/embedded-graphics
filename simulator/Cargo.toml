@@ -25,4 +25,5 @@ sdl2 = "0.32.2"
 
 [dependencies.embedded-graphics]
 version = "0.6.0-alpha.1"
+path = "../embedded-graphics"
 features = [ "bmp", "tga" ]
