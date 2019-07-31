@@ -131,7 +131,10 @@ where
     where
         T: IntoIterator<Item = Pixel<C>>,
     {
-        for Pixel(UnsignedCoord(x, y), color) in item_pixels {
+        for Pixel(c, color) in item_pixels {
+            let x = c[0];
+            let y = c[1];
+
             if x >= SIZE as u32 || y >= SIZE as u32 {
                 continue;
             }
