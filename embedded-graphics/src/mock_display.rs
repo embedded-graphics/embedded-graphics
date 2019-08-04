@@ -1,3 +1,24 @@
+//! Mock display for use in tests.
+//!
+//! [`MockDisplay`] can be used to replace a real display in tests. The internal
+//! framebuffer wraps the color values in `Option` to be able to test which
+//! pixels were modified by drawing operations.
+//!
+//! The [`from_pattern`] method provides a convenient way of creating expected
+//! test results. The same patterns are used by the implementation of `Debug`
+//! and will be shown in failing tests.
+//!
+//! [`MockDisplay`]: struct.MockDisplay.html
+//! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
+//!
+//! # Characters used in `BinaryColor` patterns
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
+//! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
+
 use crate::drawable::Pixel;
 use crate::pixelcolor::BinaryColor;
 use crate::prelude::*;
@@ -58,12 +79,15 @@ where
 {
     /// Creates a new mock display from a character pattern.
     ///
-    /// The color pattern is specified by a slice of string slices. Each string slice represents
-    /// a row of pixels and every character a single pixel.
+    /// The color pattern is specified by a slice of string slices. Each string
+    /// slice represents a row of pixels and every character a single pixel.
     ///
-    /// A space character in the pattern represents a pixel which wasn't modified by any
-    /// drawing routine and is left in the default state. All other characters are converted
-    /// by implementations of the `ColorMapping` trait.
+    /// A space character in the pattern represents a pixel which wasn't
+    /// modified by any drawing routine and is left in the default state.
+    /// All other characters are converted by implementations of the
+    /// [`ColorMapping`] trait.
+    ///
+    /// [`ColorMapping`]: trait.ColorMapping.html
     pub fn from_pattern(pattern: &[&str]) -> MockDisplay<C> {
         // Check pattern dimensions.
         let pattern_width = pattern.first().map_or(0, |row| row.len());
@@ -167,6 +191,10 @@ where
 }
 
 /// Mapping between `char`s and colors.
+///
+/// See the [module-level documentation] for a table of implemented mappings.
+///
+/// [module-level documentation]: index.html
 pub trait ColorMapping<C> {
     /// Converts a char into a color of type `C`.
     fn char_to_color(c: char) -> C;
