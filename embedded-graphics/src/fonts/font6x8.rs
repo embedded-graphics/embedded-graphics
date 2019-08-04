@@ -206,9 +206,16 @@ mod tests {
                 .fill(Some(BinaryColor::Off)),
         );
 
-        let inverted_display_normal = display_normal.pixels().map(|p| p.map(|c| c.invert()));
+        for y in 0..display_inverse.height() {
+            for x in 0..display_inverse.width() {
+                let p = UnsignedCoord::new(x as u32, y as u32);
 
-        assert!(inverted_display_normal.eq(display_inverse.pixels()));
+                let inverse_color = display_inverse.get_pixel(p);
+                let normal_color = display_normal.get_pixel(p);
+
+                assert_eq!(inverse_color, normal_color.map(|c| c.invert()));
+            }
+        }
     }
 
     #[test]

@@ -25,9 +25,30 @@ where
         Self::default()
     }
 
-    /// Returns a iterator over all pixels on the display.
-    pub fn pixels<'a>(&'a self) -> impl Iterator<Item = Option<C>> + 'a {
-        self.0.into_iter().copied()
+    /// Returns the width of the display.
+    pub fn width(&self) -> usize {
+        SIZE
+    }
+
+    /// Returns the height of the display.
+    pub fn height(&self) -> usize {
+        SIZE
+    }
+
+    /// Returns the color of a pixel.
+    pub fn get_pixel(&self, p: UnsignedCoord) -> Option<C> {
+        let x = p[0] as usize;
+        let y = p[1] as usize;
+
+        self.0[x + y * SIZE]
+    }
+
+    /// Changes the color of a pixel.
+    pub fn set_pixel(&mut self, p: UnsignedCoord, color: Option<C>) {
+        let x = p[0] as usize;
+        let y = p[1] as usize;
+
+        self.0[x + y * SIZE] = color;
     }
 }
 
@@ -132,14 +153,14 @@ where
         T: IntoIterator<Item = Pixel<C>>,
     {
         for Pixel(c, color) in item_pixels {
-            let x = c[0];
-            let y = c[1];
+            let x = c[0] as usize;
+            let y = c[1] as usize;
 
-            if x >= SIZE as u32 || y >= SIZE as u32 {
+            if x >= SIZE || y >= SIZE {
                 continue;
             }
 
-            let i = x as usize + y as usize * SIZE;
+            let i = x + y * SIZE;
             self.0[i] = Some(color);
         }
     }
