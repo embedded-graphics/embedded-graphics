@@ -3,9 +3,7 @@
 //! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
 //! following:
 //!
-//! * [1 bit-per-pixel images](./image/type.Image1BPP.html)
-//! * [8 bits-per-pixel images](./image/type.Image8BPP.html)
-//! * [16 bits-per-pixel images](./image/type.Image16BPP.html)
+//! * [raw data images](./image/struct.Image.html)
 //! * [BMP-format images](./image/struct.ImageBmp.html) (with `bmp` feature enabled)
 //! * [TGA-format images](./image/struct.ImageTga.html) (with `tga` feature enabled)
 //! * [Primitives](./primitives/index.html)
@@ -192,7 +190,7 @@ use crate::pixelcolor::PixelColor;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::Drawing;
 /// use embedded_graphics::egcircle;
-/// use embedded_graphics::pixelcolor::Gray8;
+/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 ///
 /// # struct SPI1;
 /// #
@@ -225,14 +223,14 @@ use crate::pixelcolor::PixelColor;
 ///             // Place an (x, y) pixel at the right index in the framebuffer
 ///             let index = coord[0] + (coord[1] * 64);
 ///
-///             self.framebuffer[index as usize] = color.into();
+///             self.framebuffer[index as usize] = color.luma();
 ///         }
 ///     }
 /// }
 ///
 /// fn main() {
 ///     let mut display = ExampleDisplay {
-///         framebuffer: [Gray8::BLACK.into(); 4096],
+///         framebuffer: [0; 4096],
 ///         iface: SPI1
 ///     };
 ///
@@ -247,7 +245,7 @@ use crate::pixelcolor::PixelColor;
 /// [`SizedDrawing`]: ./trait.SizedDrawing.html
 pub trait Drawing<C>
 where
-    C: PixelColor + Clone,
+    C: PixelColor,
 {
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item: T)
@@ -270,7 +268,7 @@ where
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::SizedDrawing;
-/// use embedded_graphics::pixelcolor::Gray8;
+/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 ///
 /// # struct SPI1;
 /// #
@@ -314,7 +312,7 @@ where
 ///         // `coord` isn't used as the update area is the same as the item's bounding box which
 ///         // wraps the bytes automatically
 ///         for Pixel(_coord, color) in item {
-///             self.iface.send_bytes(&[color.into()]);
+///             self.iface.send_bytes(&[color.luma()]);
 ///         }
 ///     }
 /// }

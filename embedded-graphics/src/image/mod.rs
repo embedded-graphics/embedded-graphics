@@ -1,26 +1,33 @@
-//! Image object
+//! Image drawables.
 //!
-//! If the source image data is in BMP format, use [`ImageBMP`](struct.ImageBmp.html).
-//!
-//! If the source image data is a slice of raw bytes that represents a 1, 8 or 16 bits-per-pixel
-//! (BPP) image, use [`Image1BPP`](type.Image1BPP.html), [`Image8BPP`](type.Image8BPP.html),
-//! or [`Image16BPP`](type.Image16BPP.html) respectively.
+//! Image drawables can be created for raw bitmap data and images in BMP and TGA
+//! format.
 
 mod image;
-mod image16bpp;
-mod image1bpp;
-mod image8bpp;
 #[cfg(feature = "bmp")]
 mod image_bmp;
 #[cfg(feature = "tga")]
 mod image_tga;
 
-pub use self::image::{Image, ImageFile};
+pub use self::image::{Image, ImageBE, ImageLE};
 
-pub use self::image16bpp::Image16BPP;
-pub use self::image1bpp::Image1BPP;
-pub use self::image8bpp::Image8BPP;
 #[cfg(feature = "bmp")]
 pub use self::image_bmp::ImageBmp;
 #[cfg(feature = "tga")]
 pub use self::image_tga::ImageTga;
+
+/// Image file trait.
+pub trait ImageFile<'a>: crate::Dimensions + Sized {
+    /// Create a new image with given input file
+    ///
+    /// The input file is expected to be of a particular format (BMP, TGA, etc) and contain file
+    /// metadata like width/height and pixel data. Because parsing may fail, this returns a
+    /// `Result<Self, ()>`.
+    fn new(filedata: &'a [u8]) -> Result<Self, ()>;
+
+    /// Get the width in pixels of an image
+    fn width(&self) -> u32;
+
+    /// Get the height in pixels of an image
+    fn height(&self) -> u32;
+}
