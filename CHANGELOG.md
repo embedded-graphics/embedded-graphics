@@ -2,6 +2,12 @@
 
 Embedded Graphics is a `no_std` library for adding graphics features to display drivers. It aims to use the minimum amount of memory for builtin graphics objects by leveraging Rust's iterators to avoid large allocations. It targets embedded environments, but can run anywhere like a Raspberry Pi up to full desktop machines.
 
+## Unreleased
+
+- **(breaking)** Integration with Nalgebra through the `nalgebra_support` feature is now achieved by converting Nalgebra types into `Coord` or `UnsignedCoord` instead of Embedded Graphics aliasing `Coord` and `UnsignedCoord` to `nalgebra::Vector2<i32>` and `nalgebra::Vector2<u32>` respectively. Integration now requires calling `Coord::from(my_nalgebra_var)` or `my_nalgebra_var.into()`.
+
+  The benefit of this change is to allow more integer primitive types in `Vector2`. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
+
 ## 0.6.0-alpha.1
 
 Major breaking changes ahead! @rfuest has been hard at work making the colours story in Embedded Graphics much richer and easier to use.
