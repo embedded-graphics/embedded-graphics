@@ -200,8 +200,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor};
+    use crate::mock_display::MockDisplay;
+    use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor};
     use crate::unsignedcoord::UnsignedCoord;
+    use crate::Drawing;
 
     #[test]
     fn negative_top_left() {
@@ -341,4 +343,35 @@ mod tests {
 
         assert!(iter.next().is_none());
     }
+
+    /// Test for issue #136
+    #[test]
+    fn row_size_is_multiple_of_4_bytes() {
+        let image: ImageBmp<Rgb565> =
+            ImageBmp::new(include_bytes!("../../tests/issue_136.bmp")).unwrap();
+
+        let mut display = MockDisplay::new();
+        display.draw(image.into_iter().map(|Pixel(p, c)| {
+            Pixel(
+                p,
+                match c {
+                    Rgb565::BLACK => BinaryColor::Off,
+                    Rgb565::WHITE => BinaryColor::On,
+                    _ => panic!("Unexpected color in image"),
+                },
+            )
+        }));
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "####.####",
+                "#....#...",
+                "####.#.##",
+                "#....#..#",
+                "####.####",
+            ])
+        );
+    }
+
 }
