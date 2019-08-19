@@ -2,8 +2,6 @@
 
 use crate::coord::Coord;
 
-type UnsignedCoordPart = u32;
-
 use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 
 /// 2D unsigned coordinate in screen space
@@ -68,11 +66,11 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct UnsignedCoord(pub UnsignedCoordPart, pub UnsignedCoordPart);
+pub struct UnsignedCoord(pub u32, pub u32);
 
 impl UnsignedCoord {
     /// Create a new coordinate with X and Y values
-    pub fn new(x: UnsignedCoordPart, y: UnsignedCoordPart) -> Self {
+    pub fn new(x: u32, y: u32) -> Self {
         UnsignedCoord(x, y)
     }
 }
@@ -108,9 +106,9 @@ impl SubAssign for UnsignedCoord {
 }
 
 impl Index<usize> for UnsignedCoord {
-    type Output = UnsignedCoordPart;
+    type Output = u32;
 
-    fn index(&self, idx: usize) -> &UnsignedCoordPart {
+    fn index(&self, idx: usize) -> &u32 {
         match idx {
             0 => &self.0,
             1 => &self.1,
@@ -179,7 +177,7 @@ use nalgebra::{base::Scalar, Vector2};
 #[cfg(feature = "nalgebra_support")]
 impl<N> From<Vector2<N>> for UnsignedCoord
 where
-    N: Into<UnsignedCoordPart> + Scalar,
+    N: Into<u32> + Scalar,
 {
     fn from(other: Vector2<N>) -> Self {
         Self::new(other[0].into(), other[1].into())
@@ -189,7 +187,7 @@ where
 #[cfg(feature = "nalgebra_support")]
 impl<N> From<&Vector2<N>> for UnsignedCoord
 where
-    N: Into<UnsignedCoordPart> + Scalar,
+    N: Into<u32> + Scalar,
 {
     fn from(other: &Vector2<N>) -> Self {
         Self::new(other[0].into(), other[1].into())

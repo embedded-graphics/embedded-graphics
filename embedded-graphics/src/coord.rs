@@ -5,8 +5,6 @@
 use crate::unsignedcoord::UnsignedCoord;
 use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 
-type CoordPart = i32;
-
 /// 2D signed integer coordinate type
 ///
 /// This coordinate should be used to define graphics object coordinates. For example, a
@@ -72,11 +70,11 @@ type CoordPart = i32;
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Coord(pub CoordPart, pub CoordPart);
+pub struct Coord(pub i32, pub i32);
 
 impl Coord {
     /// Create a new coordinate with X and Y values
-    pub fn new(x: CoordPart, y: CoordPart) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Coord(x, y)
     }
 
@@ -139,9 +137,9 @@ impl SubAssign for Coord {
 }
 
 impl Index<usize> for Coord {
-    type Output = CoordPart;
+    type Output = i32;
 
-    fn index(&self, idx: usize) -> &CoordPart {
+    fn index(&self, idx: usize) -> &i32 {
         match idx {
             0 => &self.0,
             1 => &self.1,
@@ -212,7 +210,7 @@ use nalgebra::{base::Scalar, Vector2};
 #[cfg(feature = "nalgebra_support")]
 impl<N> From<Vector2<N>> for Coord
 where
-    N: Into<CoordPart> + Scalar,
+    N: Into<i32> + Scalar,
 {
     fn from(other: Vector2<N>) -> Self {
         Self::new(other[0].into(), other[1].into())
@@ -222,7 +220,7 @@ where
 #[cfg(feature = "nalgebra_support")]
 impl<N> From<&Vector2<N>> for Coord
 where
-    N: Into<CoordPart> + Scalar,
+    N: Into<i32> + Scalar,
 {
     fn from(other: &Vector2<N>) -> Self {
         Self::new(other[0].into(), other[1].into())
