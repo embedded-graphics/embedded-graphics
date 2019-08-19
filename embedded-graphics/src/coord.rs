@@ -13,6 +13,15 @@ type CoordPart = i32;
 /// [`Rect`] may be defined that has its top left at `(-1,-2)`. To specify positive-only screen
 /// coordinates and the like, see [`UnsignedCoord`].
 ///
+/// [Nalgebra] support can be enabled with the `nalgebra_support` feature. This implements
+/// `From<Vector2<N>>` and `From<&Vector2<N>>` where `N` is `Scalar + Into<i32>`. This allows use
+/// of Nalgebra's [`Vector2`] with embedded-graphics where `i8`, `i16`, `i32`, `u16` or `u8` is used
+/// for value storage.
+///
+/// # Examples
+///
+/// ## Create a `Coord` from two integers
+///
 /// ```rust
 /// use embedded_graphics::{coord::Coord, icoord};
 ///
@@ -25,12 +34,43 @@ type CoordPart = i32;
 /// assert_eq!(c1, c2);
 /// ```
 ///
-/// Note that enabling the `nalgebra` feature will alias Nalgebra's [`Vector2<i32>`] type to
-/// `Coord` instead of this builtin implementation.
+/// ## Create a `Coord` from a Nalgebra `Vector2`
+///
+/// _Be sure to enable the `nalgebra_support` feature to get [Nalgebra] integration._
+///
+/// ```rust
+/// # #[cfg(feature = "nalgebra_support")] {
+/// use embedded_graphics::{coord::Coord, icoord};
+/// use nalgebra::Vector2;
+///
+/// let n_coord = Vector2::new(10i32, 20);
+///
+/// assert_eq!(Coord::from(n_coord), Coord::new(10, 20));
+/// # }
+/// ```
+///
+/// ## Convert a `Vector2<u8>` into a `Coord`
+///
+/// _Be sure to enable the `nalgebra_support` feature to get [Nalgebra] integration._
+///
+/// Smaller unsigned types that can be converted to `i32` are also supported in conversions.
+///
+/// ```rust
+/// # #[cfg(feature = "nalgebra_support")] {
+/// use embedded_graphics::{coord::Coord, icoord};
+/// use nalgebra::Vector2;
+
+/// let n_coord = Vector2::new(10u8, 20);
+///
+/// assert_eq!(Coord::from(n_coord), Coord::new(10, 20));
+/// # }
+/// ```
 ///
 /// [`UnsignedCoord`]: ../unsignedcoord/struct.UnsignedCoord.html
 /// [`Rect`]: ../primitives/rectangle/struct.Rectangle.html
-/// [`Vector2<i32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+/// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+/// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+/// [Nalgebra]: https://docs.rs/nalgebra
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Coord(pub CoordPart, pub CoordPart);
 

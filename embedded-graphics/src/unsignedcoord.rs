@@ -8,9 +8,19 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 
 /// 2D unsigned coordinate in screen space
 ///
-/// As opposed to [`Coord`](../coord/index.html), this coordinate is unsigned. It is intended for
+/// Unlike [`Coord`](../coord/index.html), this coordinate is unsigned. It is intended for
 /// use with [`Drawable`](../drawable/trait.Drawable.html) iterators to output valid _display pixel_
 /// coordinates, i.e. coordinates that are always positive.
+///
+/// [Nalgebra] support can be enabled with the `nalgebra_support` feature. This implements
+/// `From<Vector2<N>>` and `From<&Vector2<N>>` where `N` is `Scalar + Into<u32>`. This allows use
+/// of Nalgebra's [`Vector2`] with embedded-graphics where `u32`, `u16` or `u8` is used for value
+/// storage.
+///
+/// # Examples
+///
+/// ## Create an `UnsignedCoord` from two integers
+///
 ///
 /// ```rust
 /// use embedded_graphics::{unsignedcoord::UnsignedCoord, ucoord};
@@ -24,10 +34,39 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// assert_eq!(c1, c2);
 /// ```
 ///
-/// Note that enabling the `nalgebra` feature will alias Nalgebra's [`Vector2<u32>`] type to
-/// `UnsignedCoord` instead of this builtin implementation.
+/// ## Create an `UnsignedCoord` from a Nalgebra `Vector2`
 ///
-/// [`Vector2<u32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+/// _Be sure to enable the `nalgebra_support` feature to get [Nalgebra] integration._
+///
+/// Any `Vector2<N>` can be used where `N: Into<u32> + nalgebra::Scalar`. This includes the primitive types `u32`, `u16` and `u8`.
+///
+/// ```rust
+/// # #[cfg(feature = "nalgebra_support")] {
+/// use nalgebra::Vector2;
+/// use embedded_graphics::unsignedcoord::UnsignedCoord;
+///
+/// assert_eq!(UnsignedCoord::from(Vector2::new(10u32, 20)), UnsignedCoord::new(10u32, 20));
+/// assert_eq!(UnsignedCoord::from(Vector2::new(10u16, 20)), UnsignedCoord::new(10u32, 20));
+/// assert_eq!(UnsignedCoord::from(Vector2::new(10u8, 20)), UnsignedCoord::new(10u32, 20));
+/// # }
+/// ```
+///
+/// `.into()` can also be used, but may require more type annotations:
+///
+/// ```rust
+/// # #[cfg(feature = "nalgebra_support")] {
+/// use nalgebra::Vector2;
+/// use embedded_graphics::unsignedcoord::UnsignedCoord;
+///
+/// let c: UnsignedCoord = Vector2::new(10u32, 20).into();
+///
+/// assert_eq!(c, UnsignedCoord::new(10u32, 20));
+/// # }
+/// ```
+///
+/// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+/// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+/// [Nalgebra]: https://docs.rs/nalgebra
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct UnsignedCoord(pub UnsignedCoordPart, pub UnsignedCoordPart);
 
