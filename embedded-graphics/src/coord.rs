@@ -8,7 +8,7 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// 2D signed integer coordinate type
 ///
 /// This coordinate should be used to define graphics object coordinates. For example, a
-/// [`Rect`] may be defined that has its top left at `(-1,-2)`. To specify positive-only screen
+/// [`Rectangle`] may be defined that has its top left at `(-1,-2)`. To specify positive-only screen
 /// coordinates and the like, see [`UnsignedCoord`].
 ///
 /// [Nalgebra] support can be enabled with the `nalgebra_support` feature. This implements
@@ -65,7 +65,7 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// ```
 ///
 /// [`UnsignedCoord`]: ../unsignedcoord/struct.UnsignedCoord.html
-/// [`Rect`]: ../primitives/rectangle/struct.Rectangle.html
+/// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
@@ -74,7 +74,7 @@ pub struct Coord(pub i32, pub i32);
 
 impl Coord {
     /// Create a new coordinate with X and Y values
-    pub fn new(x: i32, y: i32) -> Self {
+    pub const fn new(x: i32, y: i32) -> Self {
         Coord(x, y)
     }
 
@@ -143,7 +143,7 @@ impl Index<usize> for Coord {
         match idx {
             0 => &self.0,
             1 => &self.1,
-            _ => panic!("Unreachable index {}", idx),
+            _ => panic!("index out of bounds: the len is 2 but the index is {}", idx),
         }
     }
 }

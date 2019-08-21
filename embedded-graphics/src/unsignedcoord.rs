@@ -70,7 +70,7 @@ pub struct UnsignedCoord(pub u32, pub u32);
 
 impl UnsignedCoord {
     /// Create a new coordinate with X and Y values
-    pub fn new(x: u32, y: u32) -> Self {
+    pub const fn new(x: u32, y: u32) -> Self {
         UnsignedCoord(x, y)
     }
 }
@@ -112,7 +112,7 @@ impl Index<usize> for UnsignedCoord {
         match idx {
             0 => &self.0,
             1 => &self.1,
-            _ => panic!("Unreachable index {}", idx),
+            _ => panic!("index out of bounds: the len is 2 but the index is {}", idx),
         }
     }
 }
