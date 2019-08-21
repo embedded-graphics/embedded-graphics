@@ -156,24 +156,6 @@ impl Neg for Coord {
     }
 }
 
-impl From<(u32, u32)> for Coord {
-    fn from(other: (u32, u32)) -> Self {
-        Self(other.0 as i32, other.1 as i32)
-    }
-}
-
-impl From<[u32; 2]> for Coord {
-    fn from(other: [u32; 2]) -> Self {
-        Self(other[0] as i32, other[1] as i32)
-    }
-}
-
-impl From<&[u32; 2]> for Coord {
-    fn from(other: &[u32; 2]) -> Self {
-        Self(other[0] as i32, other[1] as i32)
-    }
-}
-
 impl From<(i32, i32)> for Coord {
     fn from(other: (i32, i32)) -> Self {
         Self(other.0, other.1)
@@ -295,19 +277,19 @@ mod tests {
 
     #[test]
     fn from_tuple() {
-        assert_eq!(Coord::from((20u32, 30u32)), Coord::new(20, 30));
+        assert_eq!(Coord::from((20i32, 30i32)), Coord::new(20, 30));
         assert_eq!(Coord::from((20i32, 30i32)), Coord::new(20, 30));
     }
 
     #[test]
     fn from_array() {
-        assert_eq!(Coord::from([20u32, 30u32]), Coord::new(20, 30));
+        assert_eq!(Coord::from([20i32, 30i32]), Coord::new(20, 30));
         assert_eq!(Coord::from([20i32, 30i32]), Coord::new(20, 30));
     }
 
     #[test]
     fn from_array_ref() {
-        assert_eq!(Coord::from(&[20u32, 30u32]), Coord::new(20, 30));
+        assert_eq!(Coord::from(&[20i32, 30i32]), Coord::new(20, 30));
         assert_eq!(Coord::from(&[20i32, 30i32]), Coord::new(20, 30));
     }
 

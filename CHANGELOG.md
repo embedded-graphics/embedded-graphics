@@ -8,6 +8,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
   The benefit of this change is to allow more integer primitive types in `Vector2`. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
 
+- **(breaking)** `Coord`s can no longer be created from `(u32, u32)`, `[u32; 2]` or `&[u32; 2]`; these conversions are dangerous as the full range of `u32` values cannot be represented by the `i32` used for storage inside `Coord`.
+
 ## 0.6.0-alpha.1
 
 Major breaking changes ahead! @rfuest has been hard at work making the colours story in Embedded Graphics much richer and easier to use.
