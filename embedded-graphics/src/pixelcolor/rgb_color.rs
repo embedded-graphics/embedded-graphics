@@ -70,7 +70,7 @@ macro_rules! impl_rgb_color {
         #[doc = "[`RgbColor`]: trait.RgbColor.html"]
         #[doc = "[module-level documentation]: index.html"]
         #[derive(Clone, Copy, PartialEq, Eq)]
-        pub struct $type(<$data_type as RawData>::Base);
+        pub struct $type(<$data_type as RawData>::Storage);
 
         impl fmt::Debug for $type {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -95,12 +95,12 @@ macro_rules! impl_rgb_color {
             #[doc = "Too large channel values will be limited by setting the"]
             #[doc = "unused most significant bits to zero."]
             pub const fn new(r: u8, g: u8, b: u8) -> Self {
-                type Base = <$data_type as RawData>::Base;
+                type Storage = <$data_type as RawData>::Storage;
 
                 Self(
-                    ((r & Self::MAX_R) as Base) << $r_pos
-                        | ((g & Self::MAX_G) as Base) << $g_pos
-                        | ((b & Self::MAX_B) as Base) << $b_pos
+                    ((r & Self::MAX_R) as Storage) << $r_pos
+                        | ((g & Self::MAX_G) as Storage) << $g_pos
+                        | ((b & Self::MAX_B) as Storage) << $b_pos
                 )
             }
         }
@@ -144,14 +144,14 @@ macro_rules! impl_rgb_color {
 
         impl From<$data_type> for $type {
             fn from(data: $data_type) -> Self {
-                type Base = <$data_type as RawData>::Base;
+                type Storage = <$data_type as RawData>::Storage;
 
                 let data = data.into_inner();
 
-                const MASK: Base =
-                    ($type::MAX_R as Base) << $r_pos
-                    | ($type::MAX_G as Base) << $g_pos
-                    | ($type::MAX_B as Base) << $b_pos;
+                const MASK: Storage =
+                    ($type::MAX_R as Storage) << $r_pos
+                    | ($type::MAX_G as Storage) << $g_pos
+                    | ($type::MAX_B as Storage) << $b_pos;
 
                 Self(data & MASK)
             }

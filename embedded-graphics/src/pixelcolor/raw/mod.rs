@@ -94,22 +94,21 @@ pub trait RawData:
     + private::Sealed
     + RawDataIterNext<LittleEndian>
     + RawDataIterNext<BigEndian>
-    + From<<Self as RawData>::Base>
+    + From<<Self as RawData>::Storage>
 {
-    /// Integer base type.
+    /// Storage type.
     ///
-    /// A primitive unsigned integer type that contains at least `BITS_PER_PIXEL`
-    /// bits.
-    type Base;
+    /// A primitive unsigned integer storage type that contains at least `BITS_PER_PIXEL` bits.
+    type Storage;
 
     /// Bits per pixel.
     const BITS_PER_PIXEL: usize;
 
-    /// Converts this raw data into the base type.
+    /// Converts this raw data into the storage type.
     ///
-    /// If the primitive integer types used as the base type contains more bits
+    /// If the primitive integer types used as the storage type contains more bits
     /// than used by this type the unused most significant bits are set to `0`.
-    fn into_inner(self) -> Self::Base;
+    fn into_inner(self) -> Self::Storage;
 
     /// Converts a `u32` into a `RawData` type.
     ///
@@ -125,7 +124,7 @@ pub trait RawData:
 ///
 /// [`PixelColor::Raw`]: ../trait.PixelColor.html#associatedtype.Raw
 impl RawData for () {
-    type Base = ();
+    type Storage = ();
 
     const BITS_PER_PIXEL: usize = 0;
 
@@ -137,7 +136,7 @@ impl RawData for () {
 impl private::Sealed for () {}
 
 macro_rules! impl_raw_data {
-    ($type:ident : $base_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr) => {
+    ($type:ident : $storage_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr) => {
         #[doc = $bpp_str]
         #[doc = "per pixel raw data."]
         #[doc = ""]
@@ -145,34 +144,34 @@ macro_rules! impl_raw_data {
         #[doc = ""]
         #[doc = "[module-level documentation]: index.html"]
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        pub struct $type($base_type);
+        pub struct $type($storage_type);
 
         impl $type {
             /// Creates a new color from the least significant
             #[doc = $bpp_str]
             /// of value.
-            pub const fn new(value: $base_type) -> Self {
+            pub const fn new(value: $storage_type) -> Self {
                 $type(value & $mask)
             }
         }
 
         impl RawData for $type {
-            type Base = $base_type;
+            type Storage = $storage_type;
 
             const BITS_PER_PIXEL: usize = $bpp;
 
-            fn into_inner(self) -> Self::Base {
+            fn into_inner(self) -> Self::Storage {
                 self.0
             }
 
             fn from_u32(value: u32) -> Self {
                 #[allow(trivial_numeric_casts)]
-                Self::new(value as $base_type)
+                Self::new(value as $storage_type)
             }
         }
 
-        impl From<$base_type> for $type {
-            fn from(value: $base_type) -> Self {
+        impl From<$storage_type> for $type {
+            fn from(value: $storage_type) -> Self {
                 Self::new(value)
             }
         }
