@@ -66,8 +66,7 @@
 //! Add these to your `Cargo.toml` to turn on extra bits of functionality.
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-//! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
-//! objects rendered by embedded_graphics.
+//! support to enable conversions from `nalgebra::Vector2` to [`Coord`] and [`UnsignedCoord`].
 //! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 //! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 //!
@@ -141,6 +140,8 @@
 //! implementation details.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
+//! [`Coord`]: ./coord/struct.Coord.html
+//! [`UnsignedCoord`]: ./unsignedcoord/struct.UnsignedCoord.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
 //! [`Drawing`]: ./trait.Drawing.html
 //! [`SizedDrawing`]: ./trait.SizedDrawing.html
