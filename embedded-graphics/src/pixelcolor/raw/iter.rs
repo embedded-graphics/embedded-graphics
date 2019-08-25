@@ -7,12 +7,14 @@ use core::marker::PhantomData;
 /// Iterator over a slice of raw pixel data.
 #[derive(Debug)]
 pub struct RawDataIter<'a, R, BO> {
+    /// Pixel data.
     data: &'a [u8],
 
+    /// Index into `data` for next read.
     byte_position: usize,
 
+    /// Remaining bits in the current byte (only used for bpp < 8).
     bits_left: u8,
-    current_byte: u8,
 
     raw_type: PhantomData<R>,
     byte_order: PhantomData<BO>,
@@ -24,8 +26,7 @@ impl<'a, R, BO> RawDataIter<'a, R, BO> {
         Self {
             data,
             byte_position: 0,
-            bits_left: 0,
-            current_byte: 0,
+            bits_left: 8,
             raw_type: PhantomData,
             byte_order: PhantomData,
         }
@@ -34,34 +35,38 @@ impl<'a, R, BO> RawDataIter<'a, R, BO> {
     /// Sets the read position.
     pub fn set_byte_position(&mut self, position: usize) {
         self.byte_position = position;
-        self.bits_left = 0;
+        self.bits_left = 8;
     }
 
     /// Align the read position to the next whole byte.
     ///
     /// If the read position is already at the beginning of a byte this is a noop.
     pub fn align(&mut self) {
-        self.bits_left = 0;
+        if self.bits_left == 8 {
+            return;
+        }
+
+        self.byte_position = self.data.len().min(self.byte_position + 1);
+        self.bits_left = 8;
     }
 
     /// Returns the next `bit_count` bits.
     fn next_bits(&mut self, bit_count: u8) -> Option<u8> {
+        if self.bits_left == 0 || self.byte_position >= self.data.len() {
+            return None;
+        }
+
+        let current_byte = self.data[self.byte_position];
+        let ret = current_byte >> (self.bits_left - bit_count);
+
+        self.bits_left -= bit_count;
+
         if self.bits_left == 0 && self.byte_position < self.data.len() {
-            self.current_byte = self.data[self.byte_position];
             self.byte_position += 1;
             self.bits_left = 8;
         }
 
-        if self.bits_left > 0 {
-            let ret = self.current_byte >> (8 - bit_count);
-
-            self.bits_left -= bit_count;
-            self.current_byte <<= bit_count;
-
-            Some(ret)
-        } else {
-            None
-        }
+        Some(ret)
     }
 
     /// Returns the a slice of the next `byte_count` bytes.
