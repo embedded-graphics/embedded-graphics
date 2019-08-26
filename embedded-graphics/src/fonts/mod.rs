@@ -100,12 +100,14 @@
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
+mod font24x32;
 mod font12x16;
 mod font6x12;
 mod font6x8;
 mod font8x16;
 pub mod font_builder;
 
+pub use self::font24x32::Font24x32;
 pub use self::font12x16::Font12x16;
 pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
