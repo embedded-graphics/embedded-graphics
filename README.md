@@ -38,19 +38,23 @@ use embedded_graphics::coord::Coord;
 use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
+use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+
+// Only used for examples - this would be replaced by the driver for your chosen display
+use embedded_graphics::mock_display::MockDisplay as Display;
 
 fn main() {
     // Create a display object to draw into
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    display.draw(Circle::new(Coord::new(64, 64), 64).with_stroke(Some(1u8)));
-    display.draw(Line::new(Coord::new(64, 64), Coord::new(0, 64)).with_stroke(Some(1u8)));
-    display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80)).with_stroke(Some(1u8)));
+    display.draw(Circle::new(Coord::new(64, 64), 64).stroke(Some(C1)));
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(0, 64)).stroke(Some(C1)));
+    display.draw(Line::new(Coord::new(64, 64), Coord::new(80, 80)).stroke(Some(C1)));
 
     display.draw(
         Font6x8::render_str("Hello World!")
-            .with_stroke(Some(1u8))
+            .stroke(Some(C1))
             .translate(Coord::new(5, 50)),
     );
 }
@@ -60,18 +64,23 @@ Macros are also supported for text and primitives:
 
 ```rust
 use embedded_graphics::prelude::*;
-use embedded_graphics::{circle, icoord, line, rect, text_6x8, triangle};
+use embedded_graphics::{egcircle, icoord, egline, egrectangle, text_6x8, egtriangle};
+use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
+
+// Only used for examples - this would be replaced by the driver for your chosen display
+use embedded_graphics::mock_display::MockDisplay as Display;
 
 fn main() {
     // Create a display object to draw into
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    display.draw(egcircle!((64, 64), 64, stroke = Some(1u8)));
-    display.draw(egline!((64, 64), (0, 64), stroke = Some(1u8)));
-    display.draw(egline!((64, 64), (80, 80), stroke = Some(1u8)));
-    display.draw(egrectangle!((64, 64), (80, 80), stroke = None, fill = Some(2u8)));
-    display.draw(text_6x8!("Hello world!", stroke = Some(1u8)).translate(icoord!(5, 50)));
+    display.draw(egcircle!((64, 64), 64, stroke = Some(C1)));
+    display.draw(egline!((64, 64), (0, 64), stroke = Some(C1)));
+    display.draw(egline!((64, 64), (80, 80), stroke = Some(C1)));
+    display.draw(egrectangle!((64, 64), (80, 80), stroke = None, fill = Some(C0)));
+    display.draw(text_6x8!("Hello world!", stroke = Some(C1)).translate(icoord!(5, 50)));
 }
 ```
 
