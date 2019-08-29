@@ -105,8 +105,20 @@ impl Add for Point {
 impl Add<Size> for Point {
     type Output = Point;
 
+    /// Offsets a point by adding a size.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
     fn add(self, other: Size) -> Point {
-        Point::new(self.x + other.width as i32, self.y + other.height as i32)
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        Point::new(self.x + width, self.y + height)
     }
 }
 
@@ -118,9 +130,21 @@ impl AddAssign for Point {
 }
 
 impl AddAssign<Size> for Point {
+    /// Offsets a point by adding a size.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
     fn add_assign(&mut self, other: Size) {
-        self.x += other.width as i32;
-        self.y += other.height as i32;
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        self.x += width;
+        self.y += height;
     }
 }
 
@@ -135,8 +159,20 @@ impl Sub for Point {
 impl Sub<Size> for Point {
     type Output = Point;
 
+    /// Offsets a point by subtracting a size.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
     fn sub(self, other: Size) -> Point {
-        Point::new(self.x - other.width as i32, self.y - other.height as i32)
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        Point::new(self.x - width, self.y - height)
     }
 }
 
@@ -148,9 +184,21 @@ impl SubAssign for Point {
 }
 
 impl SubAssign<Size> for Point {
+    /// Offsets a point by subtracting a size.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
     fn sub_assign(&mut self, other: Size) {
-        self.x -= other.width as i32;
-        self.y -= other.height as i32;
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        self.x -= width;
+        self.y -= height;
     }
 }
 
@@ -286,6 +334,70 @@ mod tests {
         let right = Size::new(31, 42);
 
         assert_eq!(left - right, Point::new(-21, -22));
+    }
+
+    #[test]
+    #[should_panic(expected = "width is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_width_can_not_be_added() {
+        let p = Point::zero();
+        let _ = p + Size::new(u32::max_value(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "width is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_width_can_not_be_add_assigned() {
+        let mut p = Point::zero();
+        p += Size::new(u32::max_value(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "height is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_height_can_not_be_added() {
+        let p = Point::zero();
+        let _ = p + Size::new(0, 0x80000000);
+    }
+
+    #[test]
+    #[should_panic(expected = "height is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_height_can_not_be_add_assigned() {
+        let mut p = Point::zero();
+        p += Size::new(0, 0x80000000);
+    }
+
+    #[test]
+    #[should_panic(expected = "width is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_width_can_not_be_subtracted() {
+        let p = Point::zero();
+        let _ = p - Size::new(u32::max_value(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "width is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_width_can_not_be_sub_assigned() {
+        let mut p = Point::zero();
+        p -= Size::new(u32::max_value(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "height is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_height_can_not_be_subtracted() {
+        let p = Point::zero();
+        let _ = p - Size::new(0, 0x80000000);
+    }
+
+    #[test]
+    #[should_panic(expected = "height is too large")]
+    #[cfg(debug_assertions)]
+    fn too_large_height_can_not_be_sub_assigned() {
+        let mut p = Point::zero();
+        p -= Size::new(0, 0x80000000);
     }
 
     #[test]
