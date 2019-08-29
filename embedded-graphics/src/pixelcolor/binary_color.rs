@@ -1,16 +1,25 @@
-use crate::pixelcolor::PixelColor;
+use crate::pixelcolor::{
+    raw::{RawData, RawU1},
+    PixelColor,
+};
 
-/// Binary color
+/// Binary color.
 ///
-/// `BinaryColor` is used for displays and images with two possible states.
-/// The interpretation of active and inactive states can vary for different uses and isn't specified.
-/// `BinaryColor::On` might represent a black pixel on a LCD panel and a white pixel on an OLED display.
+/// `BinaryColor` is used for displays and images with two possible color states.
+///
+/// The interpretation of active and inactive states can be different for
+/// different types of displays. A `BinaryColor::On` might represent a black
+/// pixel on an LCD and a white pixel on an OLED display.
+///
+/// To simplify the conversion from `BinaryColor` to RGB and grayscale color
+/// types the default conversions assume that `BinaryColor::Off` is black and
+/// `BinaryColor::On` is white.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BinaryColor {
-    /// An inactive pixel.
+    /// Inactive pixel.
     Off,
 
-    /// An active pixel.
+    /// Active pixel.
     On,
 }
 
@@ -23,7 +32,7 @@ impl BinaryColor {
         }
     }
 
-    /// Maps active and inactive colors to a different `PixelColor` type.
+    /// Maps active and inactive colors to a different type.
     ///
     /// # Examples
     ///
@@ -33,15 +42,33 @@ impl BinaryColor {
     /// let color = BinaryColor::On;
     /// assert_eq!(color.map_color(Rgb565::RED, Rgb565::GREEN), Rgb565::GREEN)
     /// ```
-    pub(crate) fn map_color<T: PixelColor>(&self, color_off: T, color_on: T) -> T {
+    pub(crate) fn map_color<T>(&self, value_off: T, value_on: T) -> T {
         match self {
-            BinaryColor::On => color_on,
-            BinaryColor::Off => color_off,
+            BinaryColor::On => value_on,
+            BinaryColor::Off => value_off,
         }
     }
 }
 
-impl PixelColor for BinaryColor {}
+impl PixelColor for BinaryColor {
+    type Raw = RawU1;
+}
+
+impl From<RawU1> for BinaryColor {
+    fn from(data: RawU1) -> Self {
+        if data.into_inner() != 0 {
+            BinaryColor::On
+        } else {
+            BinaryColor::Off
+        }
+    }
+}
+
+impl From<BinaryColor> for RawU1 {
+    fn from(color: BinaryColor) -> Self {
+        RawU1::new(color.map_color(0, 1))
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -64,5 +91,17 @@ mod tests {
             BinaryColor::On.map_color(Rgb565::RED, Rgb565::GREEN),
             Rgb565::GREEN
         );
+    }
+
+    #[test]
+    fn from_data() {
+        assert_eq!(BinaryColor::from(RawU1::new(0)), BinaryColor::Off);
+        assert_eq!(BinaryColor::from(RawU1::new(1)), BinaryColor::On);
+    }
+
+    #[test]
+    fn into_data() {
+        assert_eq!(RawU1::from(BinaryColor::Off).into_inner(), 0);
+        assert_eq!(RawU1::from(BinaryColor::On).into_inner(), 1);
     }
 }

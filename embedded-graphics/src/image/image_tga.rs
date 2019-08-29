@@ -2,7 +2,8 @@ use super::super::drawable::*;
 use super::super::transform::*;
 use super::ImageFile;
 use crate::coord::{Coord, ToUnsigned};
-use crate::pixelcolor::{FromRawData, PixelColor};
+use crate::pixelcolor::raw::RawData;
+use crate::pixelcolor::PixelColor;
 use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
 use tinytga::{Tga, TgaIterator};
@@ -28,14 +29,14 @@ use tinytga::{Tga, TgaIterator};
 /// // Load `patch.tga`, a 32BPP 4x4px image
 /// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
 ///
-/// // Equivalent behaviour
+/// // Equivalent behavior
 /// display.draw(&image);
 /// display.draw(image.into_iter());
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     tga: Tga<'a>,
 
@@ -47,7 +48,7 @@ where
 
 impl<'a, C> ImageFile<'a> for ImageTga<'a, C>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     /// Create a new TGA from a byte slice
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
@@ -71,7 +72,7 @@ where
 
 impl<'a, C> Dimensions for ImageTga<'a, C>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn top_left(&self) -> Coord {
         self.offset
@@ -88,7 +89,7 @@ where
 
 impl<'a, C> IntoIterator for &'a ImageTga<'a, C>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
     type IntoIter = ImageTgaIterator<'a, C>;
@@ -107,7 +108,7 @@ where
 #[derive(Debug)]
 pub struct ImageTgaIterator<'a, C: 'a>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     x: u32,
     y: u32,
@@ -117,18 +118,16 @@ where
 
 impl<'a, C> Iterator for ImageTgaIterator<'a, C>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.image_data.next().map(|color| {
-            let x = self.x;
-            let y = self.y;
+            let pos = self.im.offset + Coord::new(self.x as i32, self.y as i32);
 
-            let pos = self.im.offset + Coord::new(x as i32, y as i32);
-
-            let out = Pixel(pos.to_unsigned(), C::from_raw_data(color));
+            let raw = C::Raw::from_u32(color);
+            let out = Pixel(pos.to_unsigned(), raw.into());
 
             self.x += 1;
 
@@ -142,11 +141,11 @@ where
     }
 }
 
-impl<'a, C> Drawable for ImageTga<'a, C> where C: PixelColor + FromRawData {}
+impl<'a, C> Drawable for ImageTga<'a, C> where C: PixelColor + From<<C as PixelColor>::Raw> {}
 
 impl<'a, C> Transform for ImageTga<'a, C>
 where
-    C: PixelColor + FromRawData,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
     /// a new `ImageTga`. For a mutating transform, see `translate_mut`.

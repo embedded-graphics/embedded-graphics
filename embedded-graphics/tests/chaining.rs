@@ -10,7 +10,9 @@ struct FakeDisplay {}
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TestPixelColor(pub bool);
 
-impl PixelColor for TestPixelColor {}
+impl PixelColor for TestPixelColor {
+    type Raw = ();
+}
 
 impl From<u8> for TestPixelColor {
     fn from(other: u8) -> Self {

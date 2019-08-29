@@ -2,7 +2,7 @@ use super::binary_color::*;
 use super::gray_color::*;
 use super::rgb_color::*;
 
-/// Convert color channel values from one bitdepth to another.
+/// Convert color channel values from one bit depth to another.
 const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {
     ((value as u16 * to_max as u16 + from_max as u16 / 2) / from_max as u16) as u8
 }
@@ -31,27 +31,26 @@ impl_rgb_conversion!(Bgr565, (Rgb555, Bgr555, Rgb565, Rgb888, Bgr888));
 impl_rgb_conversion!(Rgb888, (Rgb555, Bgr555, Rgb565, Bgr565, Bgr888));
 impl_rgb_conversion!(Bgr888, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888));
 
-/// Macro to implement conversions from `Gray8` to RGB color types.
-macro_rules! impl_from_gray8 {
-    ($type:ident) => {
-        impl From<Gray8> for $type {
-            fn from(other: Gray8) -> Self {
+/// Macro to implement conversions from `GrayX` to RGB color types.
+macro_rules! impl_from_gray {
+    ($($gray_type:ident),+ => $rgb_type:ident) => {
+        $(impl From<$gray_type> for $rgb_type {
+            fn from(other: $gray_type) -> Self {
                 Self::new(
-                    convert_channel(other.luma(), Gray8::MAX_LUMA, $type::MAX_R),
-                    convert_channel(other.luma(), Gray8::MAX_LUMA, $type::MAX_G),
-                    convert_channel(other.luma(), Gray8::MAX_LUMA, $type::MAX_B),
+                    convert_channel(other.luma(), <$gray_type>::WHITE.luma(), $rgb_type::MAX_R),
+                    convert_channel(other.luma(), <$gray_type>::WHITE.luma(), $rgb_type::MAX_G),
+                    convert_channel(other.luma(), <$gray_type>::WHITE.luma(), $rgb_type::MAX_B),
                 )
             }
-        }
+        })+
     };
+    ($($gray_type:ident),+ => $rgb_type:ident, $($rest:ident),+) => {
+        impl_from_gray!($($gray_type),+ => $rgb_type);
+        impl_from_gray!($($gray_type),+ => $($rest),*);
+    }
 }
 
-impl_from_gray8!(Rgb555);
-impl_from_gray8!(Bgr555);
-impl_from_gray8!(Rgb565);
-impl_from_gray8!(Bgr565);
-impl_from_gray8!(Rgb888);
-impl_from_gray8!(Bgr888);
+impl_from_gray!(Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
 
 /// Macro to implement conversion from `BinaryColor` to RGB and grayscale types.
 macro_rules! impl_from_binary {
@@ -71,6 +70,8 @@ impl_from_binary!(Rgb565);
 impl_from_binary!(Bgr565);
 impl_from_binary!(Rgb888);
 impl_from_binary!(Bgr888);
+impl_from_binary!(Gray2);
+impl_from_binary!(Gray4);
 impl_from_binary!(Gray8);
 
 #[cfg(test)]
@@ -133,21 +134,26 @@ mod tests {
         test_rgb_conversions!(Bgr888);
     }
 
-    macro_rules! test_from_gray8 {
-        ($type:ident) => {
-            assert_eq!($type::from(Gray8::BLACK), $type::BLACK);
-            assert_eq!($type::from(Gray8::WHITE), $type::WHITE);
+    macro_rules! test_rgb_from_gray {
+        ($rgb_type:ident, $($gray_type:ident),+) => {
+            $(
+                assert_eq!($rgb_type::from(<$gray_type>::BLACK), $rgb_type::BLACK);
+                assert_eq!($rgb_type::from(<$gray_type>::WHITE), $rgb_type::WHITE);
+            )+
         };
+        ($rgb_type:ident) => {
+            test_rgb_from_gray!($rgb_type, Gray2, Gray4, Gray8);
+        }
     }
 
     #[test]
-    fn grayscale_from_gray8() {
-        test_from_gray8!(Rgb555);
-        test_from_gray8!(Bgr555);
-        test_from_gray8!(Rgb565);
-        test_from_gray8!(Bgr565);
-        test_from_gray8!(Rgb888);
-        test_from_gray8!(Bgr888);
+    fn rgb_from_gray() {
+        test_rgb_from_gray!(Rgb555);
+        test_rgb_from_gray!(Bgr555);
+        test_rgb_from_gray!(Rgb565);
+        test_rgb_from_gray!(Bgr565);
+        test_rgb_from_gray!(Rgb888);
+        test_rgb_from_gray!(Bgr888);
     }
 
     macro_rules! test_from_binary {
@@ -165,6 +171,8 @@ mod tests {
         test_from_binary!(Bgr565);
         test_from_binary!(Rgb888);
         test_from_binary!(Bgr888);
+        test_from_binary!(Gray2);
+        test_from_binary!(Gray4);
         test_from_binary!(Gray8);
     }
 }

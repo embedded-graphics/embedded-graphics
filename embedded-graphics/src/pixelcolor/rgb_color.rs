@@ -1,7 +1,10 @@
-use crate::pixelcolor::{FromRawData, PixelColor};
+use crate::pixelcolor::{
+    raw::{RawData, RawU16, RawU24},
+    PixelColor,
+};
 use core::fmt;
 
-/// RGB color
+/// RGB color.
 pub trait RgbColor: PixelColor {
     /// Returns the red channel value.
     fn r(&self) -> u8;
@@ -46,20 +49,28 @@ pub trait RgbColor: PixelColor {
     const WHITE: Self;
 }
 
-impl<C> PixelColor for C where C: RgbColor {}
-
 /// Macro to implement a RgbColor type with the given channel bit positions.
 macro_rules! impl_rgb_color {
     (
         $type:ident,
-        $base_type:ident,
+        $data_type:ty,
         ($r_bits:expr, $g_bits:expr, $b_bits:expr),
         ($r_pos:expr, $g_pos:expr, $b_pos:expr),
-        $doc:expr
+        $type_str:expr
     ) => {
-        #[doc = $doc]
-        #[derive(Clone, Copy, PartialEq)]
-        pub struct $type($base_type);
+        #[doc = $type_str]
+        #[doc = "color."]
+        #[doc = ""]
+        #[doc = "Use the methods provided by the [`RgbColor`] trait to access"]
+        #[doc = "individual color channels and predefined color constants."]
+        #[doc = ""]
+        #[doc = "See the [module-level documentation] for more information about"]
+        #[doc = "conversion between this type and raw data."]
+        #[doc = ""]
+        #[doc = "[`RgbColor`]: trait.RgbColor.html"]
+        #[doc = "[module-level documentation]: index.html"]
+        #[derive(Clone, Copy, PartialEq, Eq)]
+        pub struct $type(<$data_type as RawData>::Storage);
 
         impl fmt::Debug for $type {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -78,14 +89,18 @@ macro_rules! impl_rgb_color {
         where
             Self: RgbColor,
         {
-            /// Create new color.
+            #[doc = "Creates a new"]
+            #[doc = $type_str]
+            #[doc = "color.\n"]
+            #[doc = "Too large channel values will be limited by setting the"]
+            #[doc = "unused most significant bits to zero."]
             pub const fn new(r: u8, g: u8, b: u8) -> Self {
-                #![allow(trivial_numeric_casts)]
+                type Storage = <$data_type as RawData>::Storage;
 
                 Self(
-                    ((r & Self::MAX_R) as $base_type) << $r_pos
-                        | ((g & Self::MAX_G) as $base_type) << $g_pos
-                        | ((b & Self::MAX_B) as $base_type) << $b_pos,
+                    ((r & Self::MAX_R) as Storage) << $r_pos
+                        | ((g & Self::MAX_G) as Storage) << $g_pos
+                        | ((b & Self::MAX_B) as Storage) << $b_pos
                 )
             }
         }
@@ -123,48 +138,45 @@ macro_rules! impl_rgb_color {
             const WHITE: Self = Self::new(Self::MAX_R, Self::MAX_G, Self::MAX_B);
         }
 
-        impl From<$type> for $base_type {
+        impl PixelColor for $type {
+            type Raw = $data_type;
+        }
+
+        impl From<$data_type> for $type {
+            fn from(data: $data_type) -> Self {
+                type Storage = <$data_type as RawData>::Storage;
+
+                let data = data.into_inner();
+
+                const MASK: Storage =
+                    ($type::MAX_R as Storage) << $r_pos
+                    | ($type::MAX_G as Storage) << $g_pos
+                    | ($type::MAX_B as Storage) << $b_pos;
+
+                Self(data & MASK)
+            }
+        }
+
+        impl From<$type> for $data_type {
             fn from(color: $type) -> Self {
-                color.0
-            }
-        }
-
-        impl From<$base_type> for $type {
-            fn from(value: $base_type) -> Self {
-                const MASK: $base_type = ($type::MAX_R as $base_type) << $r_pos
-                    | ($type::MAX_G as $base_type) << $g_pos
-                    | ($type::MAX_B as $base_type) << $b_pos;
-
-                Self(value & MASK)
-            }
-        }
-
-        impl FromRawData for $type {
-            fn from_raw_data(value: u32) -> Self {
-                #[allow(trivial_numeric_casts)]
-                (value as $base_type).into()
+                Self::new(color.0)
             }
         }
     };
 
-    // Recursive macro to build the documentation string.
+    // Recursive macro to stringify the type.
     (
         $type:ident,
-        $base_type:ident,
+        $data_type:ty,
         ($r_bits:expr, $g_bits:expr, $b_bits:expr),
         ($r_pos:expr, $g_pos:expr, $b_pos:expr)
     ) => {
         impl_rgb_color!(
             $type,
-            $base_type,
+            $data_type,
             ($r_bits, $g_bits, $b_bits),
             ($r_pos, $g_pos, $b_pos),
-            concat!(
-                stringify!($type),
-                " color stored in a `",
-                stringify!($base_type),
-                "`"
-            )
+            stringify!($type)
         );
     };
 }
@@ -172,100 +184,103 @@ macro_rules! impl_rgb_color {
 /// Helper macro to calculate bit positions for RGB and BGR colors
 macro_rules! rgb_color {
     (
-        $type:ident : $base_type:ident,
+        $type:ident, $data_type:ty,
         Rgb = ($r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_rgb_color!(
             $type,
-            $base_type,
+            $data_type,
             ($r_bits, $g_bits, $b_bits),
             ($g_bits + $b_bits, $b_bits, 0)
         );
     };
 
     (
-        $type:ident : $base_type:ident,
+        $type:ident, $data_type:ty,
         Bgr = ($r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_rgb_color!(
             $type,
-            $base_type,
+            $data_type,
             ($r_bits, $g_bits, $b_bits),
             (0, $r_bits, $r_bits + $g_bits)
         );
     };
 }
 
-rgb_color!(Rgb555: u16, Rgb = (5, 5, 5));
-rgb_color!(Bgr555: u16, Bgr = (5, 5, 5));
-rgb_color!(Rgb565: u16, Rgb = (5, 6, 5));
-rgb_color!(Bgr565: u16, Bgr = (5, 6, 5));
+rgb_color!(Rgb555, RawU16, Rgb = (5, 5, 5));
+rgb_color!(Bgr555, RawU16, Bgr = (5, 5, 5));
+rgb_color!(Rgb565, RawU16, Rgb = (5, 6, 5));
+rgb_color!(Bgr565, RawU16, Bgr = (5, 6, 5));
 
-rgb_color!(Rgb888: u32, Rgb = (8, 8, 8));
-rgb_color!(Bgr888: u32, Bgr = (8, 8, 8));
+rgb_color!(Rgb888, RawU24, Rgb = (8, 8, 8));
+rgb_color!(Bgr888, RawU24, Bgr = (8, 8, 8));
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     /// Convert color to integer and back again to test bit positions
-    fn test_bits<C, T>(color: C, value: T)
+    fn test_bpp16<C>(color: C, value: u16)
     where
-        T: PartialEq + fmt::Debug,
-        C: PixelColor + From<T> + Into<T>,
+        C: RgbColor + From<RawU16> + Into<RawU16> + core::fmt::Debug,
     {
+        let value = RawU16::new(value);
+
+        assert_eq!(color.into(), value);
+        assert_eq!(C::from(value), color);
+    }
+
+    /// Convert color to integer and back again to test bit positions
+    fn test_bpp24<C>(color: C, value: u32)
+    where
+        C: RgbColor + From<RawU24> + Into<RawU24> + core::fmt::Debug,
+    {
+        let value = RawU24::new(value);
+
         assert_eq!(color.into(), value);
         assert_eq!(C::from(value), color);
     }
 
     #[test]
     pub fn bit_positions_rgb555() {
-        test_bits(Rgb555::new(0b10001, 0, 0), 0b10001 << 5 + 5);
-        test_bits(Rgb555::new(0, 0b10001, 0), 0b10001 << 5);
-        test_bits(Rgb555::new(0, 0, 0b10001), 0b10001 << 0);
+        test_bpp16(Rgb555::new(0b10001, 0, 0), 0b10001 << 5 + 5);
+        test_bpp16(Rgb555::new(0, 0b10001, 0), 0b10001 << 5);
+        test_bpp16(Rgb555::new(0, 0, 0b10001), 0b10001 << 0);
     }
 
     #[test]
     pub fn bit_positions_bgr555() {
-        test_bits(Bgr555::new(0b10001, 0, 0), 0b10001 << 0);
-        test_bits(Bgr555::new(0, 0b10001, 0), 0b10001 << 5);
-        test_bits(Bgr555::new(0, 0, 0b10001), 0b10001 << 5 + 5);
+        test_bpp16(Bgr555::new(0b10001, 0, 0), 0b10001 << 0);
+        test_bpp16(Bgr555::new(0, 0b10001, 0), 0b10001 << 5);
+        test_bpp16(Bgr555::new(0, 0, 0b10001), 0b10001 << 5 + 5);
     }
 
     #[test]
     pub fn bit_positions_rgb565() {
-        test_bits(Rgb565::new(0b10001, 0, 0), 0b10001 << 5 + 6);
-        test_bits(Rgb565::new(0, 0b100001, 0), 0b100001 << 5);
-        test_bits(Rgb565::new(0, 0, 0b10001), 0b10001 << 0);
+        test_bpp16(Rgb565::new(0b10001, 0, 0), 0b10001 << 5 + 6);
+        test_bpp16(Rgb565::new(0, 0b100001, 0), 0b100001 << 5);
+        test_bpp16(Rgb565::new(0, 0, 0b10001), 0b10001 << 0);
     }
 
     #[test]
     pub fn bit_positions_bgr565() {
-        test_bits(Bgr565::new(0b10001, 0, 0), 0b10001 << 0);
-        test_bits(Bgr565::new(0, 0b100001, 0), 0b100001 << 5);
-        test_bits(Bgr565::new(0, 0, 0b10001), 0b10001 << 5 + 6);
+        test_bpp16(Bgr565::new(0b10001, 0, 0), 0b10001 << 0);
+        test_bpp16(Bgr565::new(0, 0b100001, 0), 0b100001 << 5);
+        test_bpp16(Bgr565::new(0, 0, 0b10001), 0b10001 << 5 + 6);
     }
 
     #[test]
     pub fn bit_positions_rgb888() {
-        test_bits(Rgb888::new(0b10000001, 0, 0), 0b10000001 << 8 + 8);
-        test_bits(Rgb888::new(0, 0b10000001, 0), 0b10000001 << 8);
-        test_bits(Rgb888::new(0, 0, 0b10000001), 0b10000001 << 0);
+        test_bpp24(Rgb888::new(0b10000001, 0, 0), 0b10000001 << 8 + 8);
+        test_bpp24(Rgb888::new(0, 0b10000001, 0), 0b10000001 << 8);
+        test_bpp24(Rgb888::new(0, 0, 0b10000001), 0b10000001 << 0);
     }
 
     #[test]
     pub fn bit_positions_bgr888() {
-        test_bits(Bgr888::new(0b10000001, 0, 0), 0b10000001 << 0);
-        test_bits(Bgr888::new(0, 0b10000001, 0), 0b10000001 << 8);
-        test_bits(Bgr888::new(0, 0, 0b10000001), 0b10000001 << 8 + 8);
-    }
-
-    #[test]
-    pub fn ignore_unused_bits() {
-        let c1: Rgb888 = 0xFF000000.into();
-        let c2: Rgb888 = 0.into();
-
-        assert_eq!(c1, c2);
-        assert_eq!(c1, Rgb888::BLACK);
+        test_bpp24(Bgr888::new(0b10000001, 0, 0), 0b10000001 << 0);
+        test_bpp24(Bgr888::new(0, 0b10000001, 0), 0b10000001 << 8);
+        test_bpp24(Bgr888::new(0, 0, 0b10000001), 0b10000001 << 8 + 8);
     }
 }

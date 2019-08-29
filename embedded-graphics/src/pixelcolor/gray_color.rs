@@ -1,60 +1,104 @@
-use crate::pixelcolor::{FromRawData, PixelColor};
+use crate::pixelcolor::{
+    raw::{RawData, RawU2, RawU4, RawU8},
+    PixelColor,
+};
 
-/// 8 bit grayscale color stored in a `u8`
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Gray8(u8);
-
-impl Gray8 {
-    /// Creates a new color.
-    pub const fn new(luma: u8) -> Self {
-        Self(luma)
-    }
-
+/// Grayscale color.
+pub trait GrayColor: PixelColor {
     /// Returns the luma channel value.
-    pub fn luma(&self) -> u8 {
-        self.0
-    }
+    fn luma(&self) -> u8;
 
-    /// The maximum value in luma channel.
-    pub const MAX_LUMA: u8 = 255;
+    /// Black color (0% luma)
+    const BLACK: Self;
 
-    /// Black color (LUMA = 0%)
-    pub const BLACK: Self = Self::new(0);
-
-    /// White color (LUMA = 100%)
-    pub const WHITE: Self = Self::new(255);
+    /// White color (100% luma)
+    const WHITE: Self;
 }
 
-impl PixelColor for Gray8 {}
+macro_rules! gray_color {
+    ($type:ident, $raw_type:ident, $bpp_str:expr) => {
+        #[doc = $bpp_str]
+        #[doc = "grayscale color."]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        pub struct $type($raw_type);
 
-impl From<Gray8> for u8 {
-    fn from(color: Gray8) -> Self {
-        color.0
-    }
+        impl $type {
+            /// Creates a new grayscale color.
+            ///
+            /// Too large luma values are masked to the valid range by setting
+            /// the upper bits to `0`.
+            pub const fn new(luma: u8) -> Self {
+                Self($raw_type::new(luma))
+            }
+        }
+
+        impl PixelColor for $type {
+            type Raw = $raw_type;
+        }
+
+        impl GrayColor for $type {
+            fn luma(&self) -> u8 {
+                self.0.into_inner()
+            }
+
+            /// Black color (0% luma)
+            const BLACK: Self = Self::new(0);
+
+            /// White color (100% luma)
+            const WHITE: Self = Self::new(255);
+        }
+
+        impl From<$raw_type> for $type {
+            fn from(data: $raw_type) -> Self {
+                Self(data)
+            }
+        }
+
+        impl From<$type> for $raw_type {
+            fn from(color: $type) -> Self {
+                color.0
+            }
+        }
+    };
 }
 
-impl From<u8> for Gray8 {
-    fn from(value: u8) -> Self {
-        Self::new(value)
-    }
-}
-
-impl FromRawData for Gray8 {
-    fn from_raw_data(value: u32) -> Self {
-        Self::new(value as u8)
-    }
-}
+gray_color!(Gray2, RawU2, "2 bit");
+gray_color!(Gray4, RawU4, "4 bit");
+gray_color!(Gray8, RawU8, "8 bit");
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    pub fn luma() {
-        assert_eq!(Gray8::from(0u8), Gray8::BLACK);
-        assert_eq!(Gray8::from(255u8), Gray8::WHITE);
+    pub fn new_masks_luma() {
+        assert_eq!(Gray2::new(255).luma(), 0x3);
+        assert_eq!(Gray4::new(255).luma(), 0xF);
+        assert_eq!(Gray8::new(255).luma(), 0xFF);
+    }
 
-        assert_eq!(u8::from(Gray8::BLACK), 0);
-        assert_eq!(u8::from(Gray8::WHITE), 255);
+    #[test]
+    pub fn color_constants() {
+        assert_eq!(Gray2::BLACK.luma(), 0);
+        assert_eq!(Gray4::BLACK.luma(), 0);
+        assert_eq!(Gray8::BLACK.luma(), 0);
+
+        assert_eq!(Gray2::WHITE.luma(), 0x3);
+        assert_eq!(Gray4::WHITE.luma(), 0xF);
+        assert_eq!(Gray8::WHITE.luma(), 0xFF);
+    }
+
+    #[test]
+    pub fn from_data() {
+        assert_eq!(Gray2::from(RawU2::new(0x2)), Gray2::new(0x2));
+        assert_eq!(Gray4::from(RawU4::new(0x9)), Gray4::new(0x9));
+        assert_eq!(Gray8::from(RawU8::new(0x81)), Gray8::new(0x81));
+    }
+
+    #[test]
+    pub fn into_data() {
+        assert_eq!(RawU2::from(Gray2::new(0x1)), RawU2::new(0x1));
+        assert_eq!(RawU4::from(Gray4::new(0x6)), RawU4::new(0x6));
+        assert_eq!(RawU8::from(Gray8::new(0x7E)), RawU8::new(0x7E));
     }
 }
