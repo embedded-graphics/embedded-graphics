@@ -1,4 +1,4 @@
-use embedded_graphics::icoord;
+use embedded_graphics::geometry::point;
 use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
 use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
@@ -16,59 +16,58 @@ fn main() {
         .scale(2)
         .build_binary();
 
-    display
-        .draw(Circle::new(icoord!(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32).stroke(Some(C1)));
+    display.draw(Circle::new(point(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32).stroke(Some(C1)));
 
     display.draw(
-        Circle::new(icoord!(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-            .translate(icoord!(16, 16))
+        Circle::new(point(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+            .translate(point(16, 16))
             .stroke(Some(C0))
             .fill(Some(C1)),
     );
 
     display.draw(
-        Circle::new(icoord!(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-            .translate(icoord!(CIRCLE_SIZE, CIRCLE_SIZE))
+        Circle::new(point(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+            .translate(point(CIRCLE_SIZE, CIRCLE_SIZE))
             .stroke(Some(C0))
             .fill(Some(C0)),
     );
 
     display.draw(
-        Rectangle::new(icoord!(0, 0), icoord!(64, 64))
-            .translate(icoord!(96, 0))
+        Rectangle::new(point(0, 0), point(64, 64))
+            .translate(point(96, 0))
             .stroke(Some(C1)),
     );
 
     display.draw(
-        &Rectangle::new(icoord!(0, 0), icoord!(64, 64))
-            .translate(icoord!(96 + 16, 16))
+        &Rectangle::new(point(0, 0), point(64, 64))
+            .translate(point(96 + 16, 16))
             .stroke(Some(C0))
             .fill(Some(C1)),
     );
 
     display.draw(
-        Rectangle::new(icoord!(0, 0), icoord!(64, 64))
-            .translate(icoord!(96 + 32, 32))
+        Rectangle::new(point(0, 0), point(64, 64))
+            .translate(point(96 + 32, 32))
             .stroke(Some(C0))
             .fill(Some(C0)),
     );
 
     display.draw(
-        Triangle::new(icoord!(32, 0), icoord!(0, 64), icoord!(64, 64))
-            .translate(icoord!(96 * 2, 0))
+        Triangle::new(point(32, 0), point(0, 64), point(64, 64))
+            .translate(point(96 * 2, 0))
             .stroke(Some(C1)),
     );
 
     display.draw(
-        Triangle::new(icoord!(32, 0), icoord!(0, 64), icoord!(64, 64))
-            .translate(icoord!(96 * 2 + 16, 16))
+        Triangle::new(point(32, 0), point(0, 64), point(64, 64))
+            .translate(point(96 * 2 + 16, 16))
             .stroke(Some(C0))
             .fill(Some(C1)),
     );
 
     display.draw(
-        Triangle::new(icoord!(32, 0), icoord!(0, 64), icoord!(64, 64))
-            .translate(icoord!(96 * 2 + 32, 32))
+        Triangle::new(point(32, 0), point(0, 64), point(64, 64))
+            .translate(point(96 * 2 + 32, 32))
             .stroke(Some(C0))
             .fill(Some(C0)),
     );

@@ -1,4 +1,4 @@
-use embedded_graphics::icoord;
+use embedded_graphics::geometry::point;
 use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
@@ -15,9 +15,9 @@ fn main() {
 
     // Outline
     display.draw(
-        Rectangle::new(icoord!(0, 0), icoord!(16, 16))
+        Rectangle::new(point(0, 0), point(16, 16))
             .stroke(Some(C1))
-            .translate(icoord!(-8, -8)),
+            .translate(point(-8, -8)),
     );
 
     loop {

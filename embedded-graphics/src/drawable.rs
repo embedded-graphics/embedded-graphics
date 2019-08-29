@@ -1,12 +1,11 @@
 //! `Drawable` trait and helpers
 
-use crate::coord::Coord;
+use crate::geometry::{Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::unsignedcoord::UnsignedCoord;
 
 /// A single pixel
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Pixel<C: PixelColor>(pub UnsignedCoord, pub C);
+pub struct Pixel<C: PixelColor>(pub Point, pub C);
 
 /// Marks an object as "drawable". Must be implemented for all graphics objects
 pub trait Drawable {}
@@ -18,11 +17,11 @@ pub trait Drawable {}
 /// the object _does_ have a known size, this trait **should** be implemented.
 pub trait Dimensions {
     /// Get the top left corner of the bounding box for an object
-    fn top_left(&self) -> Coord;
+    fn top_left(&self) -> Point;
 
     /// Get the bottom right corner of the bounding box for an object
-    fn bottom_right(&self) -> Coord;
+    fn bottom_right(&self) -> Point;
 
     /// Get the width and height for an object
-    fn size(&self) -> UnsignedCoord;
+    fn size(&self) -> Size;
 }

@@ -1,4 +1,4 @@
-use embedded_graphics::icoord;
+use embedded_graphics::geometry::point;
 use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
@@ -14,20 +14,20 @@ fn main() {
         .size(320, 256)
         .build_binary();
 
-    let triangle = Triangle::new(icoord!(0, 64), icoord!(64, 0), icoord!(64, 64))
-        .translate(icoord!(0, 0))
+    let triangle = Triangle::new(point(0, 64), point(64, 0), point(64, 64))
+        .translate(point(0, 0))
         .stroke(Some(C1));
 
-    let rect = Rectangle::new(icoord!(0, 0), icoord!(64, 64))
-        .translate(icoord!(64 + PADDING, 0))
+    let rect = Rectangle::new(point(0, 0), point(64, 64))
+        .translate(point(64 + PADDING, 0))
         .stroke(Some(C1));
 
-    let line = Line::new(icoord!(0, 0), icoord!(64, 64))
-        .translate(icoord!(128 + PADDING * 2, 0))
+    let line = Line::new(point(0, 0), point(64, 64))
+        .translate(point(128 + PADDING * 2, 0))
         .stroke(Some(C1));
 
-    let circ = Circle::new(icoord!(32, 32), 32)
-        .translate(icoord!(192 + PADDING * 3, 0))
+    let circ = Circle::new(point(32, 32), 32)
+        .translate(point(192 + PADDING * 3, 0))
         .stroke(Some(C1));
 
     display.draw(
@@ -38,29 +38,23 @@ fn main() {
     );
 
     display.draw(
-        circ.translate(icoord!(0, 64 + PADDING))
+        circ.translate(point(0, 64 + PADDING))
             .stroke_width(3)
             .into_iter()
-            .chain(rect.translate(icoord!(0, 64 + PADDING)).stroke_width(3))
-            .chain(line.translate(icoord!(0, 64 + PADDING)).stroke_width(3))
-            .chain(triangle.translate(icoord!(0, 64 + PADDING)).stroke_width(3)),
+            .chain(rect.translate(point(0, 64 + PADDING)).stroke_width(3))
+            .chain(line.translate(point(0, 64 + PADDING)).stroke_width(3))
+            .chain(triangle.translate(point(0, 64 + PADDING)).stroke_width(3)),
     );
 
     display.draw(
-        circ.translate(icoord!(0, 128 + PADDING * 2))
+        circ.translate(point(0, 128 + PADDING * 2))
             .stroke_width(10)
             .into_iter()
-            .chain(
-                rect.translate(icoord!(0, 128 + PADDING * 2))
-                    .stroke_width(10),
-            )
-            .chain(
-                line.translate(icoord!(0, 128 + PADDING * 2))
-                    .stroke_width(10),
-            )
+            .chain(rect.translate(point(0, 128 + PADDING * 2)).stroke_width(10))
+            .chain(line.translate(point(0, 128 + PADDING * 2)).stroke_width(10))
             .chain(
                 triangle
-                    .translate(icoord!(0, 128 + PADDING * 2))
+                    .translate(point(0, 128 + PADDING * 2))
                     .stroke_width(10),
             ),
     );

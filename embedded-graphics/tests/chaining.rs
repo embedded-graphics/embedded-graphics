@@ -1,6 +1,6 @@
 extern crate embedded_graphics;
 
-use embedded_graphics::coord::Coord;
+use embedded_graphics::geometry::Point;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics::Drawing;
@@ -33,19 +33,19 @@ impl Drawing<TestPixelColor> for FakeDisplay {
 fn it_supports_chaining() {
     let mut disp = FakeDisplay {};
 
-    let chained = Rectangle::new(Coord::new(0, 0), Coord::new(1, 1))
+    let chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
         .into_iter()
-        .chain(Circle::new(Coord::new(2, 2), 1).into_iter());
+        .chain(Circle::new(Point::new(2, 2), 1).into_iter());
 
     disp.draw(chained);
 }
 
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
-    let line = Line::new(Coord::new(0, 1), Coord::new(2, 3))
+    let line = Line::new(Point::new(0, 1), Point::new(2, 3))
         .stroke(Some(1u8.into()))
         .into_iter();
 
-    let circle = Circle::new(Coord::new(5, 5), 3)
+    let circle = Circle::new(Point::new(5, 5), 3)
         .stroke(Some(1u8.into()))
         .into_iter();
 
@@ -65,9 +65,9 @@ fn return_from_fn() {
 fn implicit_into_iter() {
     let mut disp = FakeDisplay {};
 
-    let chained = Rectangle::new(Coord::new(0, 0), Coord::new(1, 1))
+    let chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
         .into_iter()
-        .chain(Circle::new(Coord::new(2, 2), 1));
+        .chain(Circle::new(Point::new(2, 2), 1));
 
     disp.draw(chained);
 }

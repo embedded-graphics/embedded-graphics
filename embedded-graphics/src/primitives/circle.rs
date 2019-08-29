@@ -2,12 +2,11 @@
 
 use super::super::drawable::*;
 use super::super::transform::*;
-use crate::coord::{Coord, ToUnsigned};
+use crate::geometry::{Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
-use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 
 /// Circle primitive
 ///
@@ -25,19 +24,19 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default circle with only a stroke centered around (10, 20) with a radius of 30
-/// let c1 = Circle::new(Coord::new(10, 20), 30);
+/// let c1 = Circle::new(Point::new(10, 20), 30);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
-/// let c2 = Circle::new(Coord::new(50, 20), 30)
+/// let c2 = Circle::new(Point::new(50, 20), 30)
 ///     .stroke(Some(Rgb565::RED))
 ///     .stroke_width(3)
 ///     .fill(Some(Rgb565::GREEN));
 ///
 /// // Circle with no stroke and a translation applied
-/// let c3 = Circle::new(Coord::new(10, 20), 30)
+/// let c3 = Circle::new(Point::new(10, 20), 30)
 ///     .stroke(None)
 ///     .fill(Some(Rgb565::BLUE))
-///     .translate(Coord::new(65, 35));
+///     .translate(Point::new(65, 35));
 ///
 /// display.draw(c1);
 /// display.draw(c2);
@@ -46,7 +45,7 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 #[derive(Debug, Copy, Clone)]
 pub struct Circle<C: PixelColor> {
     /// Center point of circle
-    pub center: Coord,
+    pub center: Point,
 
     /// Radius of the circle
     pub radius: u32,
@@ -60,7 +59,7 @@ where
     C: PixelColor,
 {
     /// Create a new circle centered around a given point with a specific radius
-    pub fn new(center: Coord, radius: u32) -> Self {
+    pub fn new(center: Point, radius: u32) -> Self {
         Circle {
             center,
             radius,
@@ -75,18 +74,18 @@ impl<C> Dimensions for Circle<C>
 where
     C: PixelColor,
 {
-    fn top_left(&self) -> Coord {
-        let radius_coord = Coord::new(self.radius as i32, self.radius as i32);
+    fn top_left(&self) -> Point {
+        let radius_coord = Point::new(self.radius as i32, self.radius as i32);
 
         self.center - radius_coord
     }
 
-    fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
+    fn bottom_right(&self) -> Point {
+        self.top_left() + self.size()
     }
 
-    fn size(&self) -> UnsignedCoord {
-        UnsignedCoord::new(self.radius * 2, self.radius * 2)
+    fn size(&self) -> Size {
+        Size::new(self.radius * 2, self.radius * 2)
     }
 }
 
@@ -143,8 +142,7 @@ where
             center: self.center,
             radius: self.radius,
             style: self.style,
-            x: -(self.radius as i32),
-            y: -(self.radius as i32),
+            p: Point::new(-(self.radius as i32), -(self.radius as i32)),
         }
     }
 }
@@ -152,11 +150,10 @@ where
 /// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
 pub struct CircleIterator<C: PixelColor> {
-    center: Coord,
+    center: Point,
     radius: u32,
     style: Style<C>,
-    x: i32,
-    y: i32,
+    p: Point,
 }
 
 impl<C> Iterator for CircleIterator<C>
@@ -172,19 +169,15 @@ where
             return None;
         }
 
-        let cx = self.center[0];
-        let cy = self.center[1];
-
         let radius = self.radius as i32 - self.style.stroke_width as i32 + 1;
         let outer_radius = self.radius as i32;
 
         let radius_sq = radius * radius;
         let outer_radius_sq = outer_radius * outer_radius;
 
-        let item = loop {
-            let tx = self.x;
-            let ty = self.y;
-            let len = tx * tx + ty * ty;
+        loop {
+            let t = self.p;
+            let len = t.x * t.x + t.y * t.y;
 
             let is_border = len > radius_sq - radius && len < outer_radius_sq + radius;
 
@@ -192,40 +185,34 @@ where
             let is_fill = len <= outer_radius_sq;
 
             let item = if is_border && self.style.stroke_color.is_some() {
-                Some((
-                    cx + tx,
-                    cy + ty,
+                Some(Pixel(
+                    self.center + t,
                     self.style.stroke_color.expect("Border color not defined"),
                 ))
             } else if is_fill && self.style.fill_color.is_some() {
-                Some((
-                    cx + tx,
-                    cy + ty,
+                Some(Pixel(
+                    self.center + t,
                     self.style.fill_color.expect("Fill color not defined"),
                 ))
             } else {
                 None
             };
 
-            self.x += 1;
+            self.p.x += 1;
 
-            if self.x > self.radius as i32 {
-                self.x = -(self.radius as i32);
-                self.y += 1;
+            if self.p.x > self.radius as i32 {
+                self.p.x = -(self.radius as i32);
+                self.p.y += 1;
             }
 
-            if self.y > self.radius as i32 {
+            if self.p.y > self.radius as i32 {
                 break None;
             }
 
-            if let Some(i) = item {
-                if i.0 >= 0 && i.1 >= 0 {
-                    break item;
-                }
+            if item.is_some() {
+                break item;
             }
-        };
-
-        item.map(|(x, y, c)| Pixel(Coord::new(x, y).to_unsigned(), c))
+        }
     }
 }
 
@@ -245,13 +232,13 @@ where
     /// #
     /// # let style = Style::stroke(Rgb565::RED);
     /// #
-    /// let circle = Circle::new(Coord::new(5, 10), 10)
+    /// let circle = Circle::new(Point::new(5, 10), 10)
     /// #    .style(style);
-    /// let moved = circle.translate(Coord::new(10, 10));
+    /// let moved = circle.translate(Point::new(10, 10));
     ///
-    /// assert_eq!(moved.center, Coord::new(15, 20));
+    /// assert_eq!(moved.center, Point::new(15, 20));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(&self, by: Point) -> Self {
         Self {
             center: self.center + by,
             ..self.clone()
@@ -267,13 +254,13 @@ where
     /// #
     /// # let style = Style::stroke(Rgb565::RED);
     /// #
-    /// let mut circle = Circle::new(Coord::new(5, 10), 10)
+    /// let mut circle = Circle::new(Point::new(5, 10), 10)
     /// #    .style(style);
-    /// circle.translate_mut(Coord::new(10, 10));
+    /// circle.translate_mut(Point::new(10, 10));
     ///
-    /// assert_eq!(circle.center, Coord::new(15, 20));
+    /// assert_eq!(circle.center, Point::new(15, 20));
     /// ```
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.center += by;
 
         self
@@ -288,34 +275,34 @@ mod tests {
 
     #[test]
     fn negative_dimensions() {
-        let circ: Circle<BinaryColor> = Circle::new(Coord::new(-10, -10), 5);
+        let circ: Circle<BinaryColor> = Circle::new(Point::new(-10, -10), 5);
 
-        assert_eq!(circ.top_left(), Coord::new(-15, -15));
-        assert_eq!(circ.bottom_right(), Coord::new(-5, -5));
-        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(circ.top_left(), Point::new(-15, -15));
+        assert_eq!(circ.bottom_right(), Point::new(-5, -5));
+        assert_eq!(circ.size(), Size::new(10, 10));
     }
 
     #[test]
     fn dimensions() {
-        let circ: Circle<BinaryColor> = Circle::new(Coord::new(10, 20), 5);
+        let circ: Circle<BinaryColor> = Circle::new(Point::new(10, 20), 5);
 
-        assert_eq!(circ.top_left(), Coord::new(5, 15));
-        assert_eq!(circ.bottom_right(), Coord::new(15, 25));
-        assert_eq!(circ.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(circ.top_left(), Point::new(5, 15));
+        assert_eq!(circ.bottom_right(), Point::new(15, 25));
+        assert_eq!(circ.size(), Size::new(10, 10));
     }
 
     #[test]
     fn large_radius() {
-        let circ: Circle<BinaryColor> = Circle::new(Coord::new(5, 5), 10);
+        let circ: Circle<BinaryColor> = Circle::new(Point::new(5, 5), 10);
 
-        assert_eq!(circ.top_left(), Coord::new(-5, -5));
-        assert_eq!(circ.bottom_right(), Coord::new(15, 15));
-        assert_eq!(circ.size(), UnsignedCoord::new(20, 20));
+        assert_eq!(circ.top_left(), Point::new(-5, -5));
+        assert_eq!(circ.bottom_right(), Point::new(15, 15));
+        assert_eq!(circ.size(), Size::new(20, 20));
     }
 
     #[test]
     fn transparent_border() {
-        let circ: Circle<BinaryColor> = Circle::new(Coord::new(5, 5), 10)
+        let circ: Circle<BinaryColor> = Circle::new(Point::new(5, 5), 10)
             .stroke(None)
             .fill(Some(BinaryColor::On));
 
@@ -323,20 +310,17 @@ mod tests {
     }
 
     #[test]
-    fn it_handles_offscreen_coords() {
-        let mut circ: CircleIterator<BinaryColor> = Circle::new(Coord::new(-10, -10), 5)
+    fn it_handles_negative_coordinates() {
+        let positive: CircleIterator<BinaryColor> = Circle::new(Point::new(10, 10), 5)
             .style(Style::stroke(BinaryColor::On))
             .into_iter();
 
-        assert_eq!(circ.next(), None);
-    }
-
-    #[test]
-    fn it_handles_partially_on_screen_coords() {
-        let mut circ: CircleIterator<BinaryColor> = Circle::new(Coord::new(-5, -5), 30)
+        let negative: CircleIterator<BinaryColor> = Circle::new(Point::new(-10, -10), 5)
             .style(Style::stroke(BinaryColor::On))
             .into_iter();
 
-        assert!(circ.next().is_some());
+        assert!(negative.into_iter().eq(positive
+            .into_iter()
+            .map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
     }
 }

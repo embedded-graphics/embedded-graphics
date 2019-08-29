@@ -1,6 +1,7 @@
+use embedded_graphics::geometry::point;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egrectangle, icoord, text_6x8};
+use embedded_graphics::{egcircle, egrectangle, text_6x8};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -24,7 +25,7 @@ fn main() {
 
     display.draw(
         text_6x8!("Hello world! - no background", stroke = Some(Rgb565::WHITE))
-            .translate(icoord!(15, 15)),
+            .translate(point(15, 15)),
     );
 
     display.draw(
@@ -33,7 +34,7 @@ fn main() {
             stroke = Some(Rgb565::YELLOW),
             fill = Some(Rgb565::BLUE)
         )
-        .translate(icoord!(15, 30)),
+        .translate(point(15, 30)),
     );
 
     display.draw(
@@ -42,7 +43,7 @@ fn main() {
             stroke = Some(Rgb565::BLUE),
             fill = Some(Rgb565::YELLOW)
         )
-        .translate(icoord!(15, 45)),
+        .translate(point(15, 45)),
     );
 
     loop {
