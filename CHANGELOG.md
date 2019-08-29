@@ -10,6 +10,12 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** `Coord`s can no longer be created from `(u32, u32)`, `[u32; 2]` or `&[u32; 2]`; these conversions are dangerous as the full range of `u32` values cannot be represented by the `i32` used for storage inside `Coord`.
 
+- **(breaking)** `Coord::clamp_positive` is removed.
+
+- **(breaking)** `Coord` and `UnsignedCoord` are replaced by `Point` and `Size`.
+
+- **(breaking)** `Pixel` now uses the signed `Point` type as the first element. Display drivers need to implement an additional check if `x` and `y` are greater or equal to zero.
+
 ## 0.6.0-alpha.1
 
 Major breaking changes ahead! @rfuest has been hard at work making the colours story in Embedded Graphics much richer and easier to use.
