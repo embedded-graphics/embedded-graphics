@@ -53,7 +53,7 @@ where
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
         let im = Self {
             tga: Tga::from_slice(image_data).map_err(|_| ())?,
-            offset: Point::origin(),
+            offset: Point::zero(),
             pixel_type: PhantomData,
         };
 

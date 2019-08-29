@@ -91,7 +91,7 @@ where
 {
     fn render_str(text: &'a str) -> Self {
         Self {
-            pos: Point::origin(),
+            pos: Point::zero(),
             text,
             style: Style::default(),
             _conf: Default::default(),

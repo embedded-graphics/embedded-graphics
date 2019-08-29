@@ -57,7 +57,7 @@ use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Size {
     /// The width.
     pub width: u32,
@@ -67,9 +67,17 @@ pub struct Size {
 }
 
 impl Size {
-    /// Create a new coordinate with X and Y values
+    /// Creates a size from a width and a height.
     pub const fn new(width: u32, height: u32) -> Self {
         Size { width, height }
+    }
+
+    /// Creates a size with width and height equal to zero.
+    pub const fn zero() -> Self {
+        Size {
+            width: 0,
+            height: 0,
+        }
     }
 
     /// Creates a size from two corner points of a bounding box.

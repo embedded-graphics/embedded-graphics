@@ -67,7 +67,7 @@ where
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
         let im = Self {
             bmp: Bmp::from_slice(image_data)?,
-            offset: Point::origin(),
+            offset: Point::zero(),
             pixel_type: PhantomData,
         };
 

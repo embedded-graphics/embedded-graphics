@@ -60,7 +60,7 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Point {
     /// The x coordinate.
     pub x: i32,
@@ -70,13 +70,13 @@ pub struct Point {
 }
 
 impl Point {
-    /// Create a new coordinate with X and Y values
+    /// Creates a point from  X and Y coordinates.
     pub const fn new(x: i32, y: i32) -> Self {
         Point { x, y }
     }
 
     /// Creates a point with X and Y equal to zero.
-    pub const fn origin() -> Self {
+    pub const fn zero() -> Self {
         Point { x: 0, y: 0 }
     }
 
