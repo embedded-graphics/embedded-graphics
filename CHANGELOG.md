@@ -9,13 +9,13 @@ TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` 
 
 ## Changes
 
-- **(breaking)** Integration with Nalgebra through the `nalgebra_support` feature is now achieved by converting Nalgebra types into `Coord` or `UnsignedCoord` instead of Embedded Graphics aliasing `Coord` and `UnsignedCoord` to `nalgebra::Vector2<i32>` and `nalgebra::Vector2<u32>` respectively. Integration now requires calling `Coord::from(my_nalgebra_var)` or `my_nalgebra_var.into()`.
+- **(breaking)** Integration with Nalgebra through the `nalgebra_support` feature is now achieved by converting Nalgebra types into `Coord` or `UnsignedCoord` instead of Embedded Graphics aliasing `Coord` and `UnsignedCoord` to [`nalgebra::Vector2<i32>`] and [`nalgebra::Vector2<u32>`] respectively. Integration now requires calling `Coord::from(my_nalgebra_var)` or `my_nalgebra_var.into()`.
 
-  The benefit of this change is to allow more integer primitive types in `Vector2`. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
+  The benefit of this change is to allow more integer primitive types in [`Vector2`]. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
 
 - **(breaking)** `Coord`s can no longer be created from `(u32, u32)`, `[u32; 2]` or `&[u32; 2]`; these conversions are dangerous as the full range of `u32` values cannot be represented by the `i32` used for storage inside `Coord`.
 
-- **(breaking)** The image module has been rewritten to support big- and little-endian image formats. `Image1BPP`, `Image8BPP` and `Image16BPP` are no longer available, and have been replaced with the single [`Image`] type. To migrate from the previous image types, use [`Image`] with a specified pixel color, like this:
+- **(breaking)** The image module has been rewritten to support big- and little-endian image formats. [`Image1BPP`], [`Image8BPP`] and [`Image16BPP`] are no longer available, and have been replaced with the single [`Image`] type. To migrate from the previous image types, use [`Image`] with a specified pixel color, like this:
 
   ```rust
   use embedded_graphics::{
@@ -38,9 +38,15 @@ TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` 
   If you need to specify an endianness for the image data (like when using multiple bytes per pixel), the [`ImageLE`] and [`ImageBE`] type aliases have been added.
 
 [`pixelcolor`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/pixelcolor/index.html
+[`image1bpp`]: https://docs.rs/embedded-graphics/0.5.1/embedded_graphics/image/type.Image1BPP.html
+[`image8bpp`]: https://docs.rs/embedded-graphics/0.5.1/embedded_graphics/image/type.Image8BPP.html
+[`image16bpp`]: https://docs.rs/embedded-graphics/0.5.1/embedded_graphics/image/type.Image16BPP.html
 [`image`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/image/struct.Image.html
 [`imagele`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/image/type.ImageLE.html
 [`imagebe`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/image/type.ImageBE.html
+[`nalgebra::vector2<i32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+[`nalgebra::vector2<u32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+[`vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 
 ## Fixed
 
