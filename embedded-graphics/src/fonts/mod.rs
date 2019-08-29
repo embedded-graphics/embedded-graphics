@@ -10,7 +10,7 @@ pub use self::font12x16::Font12x16;
 pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
-use crate::drawable::Dimensions;
+use crate::geometry::Dimensions;
 use crate::pixelcolor::PixelColor;
 use crate::style::WithStyle;
 

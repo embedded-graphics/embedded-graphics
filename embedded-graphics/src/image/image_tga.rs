@@ -1,7 +1,7 @@
-use super::super::drawable::*;
-use super::super::transform::*;
+use super::super::drawable::{Drawable, Pixel};
+use super::super::transform::Transform;
 use super::ImageFile;
-use crate::geometry::{Point, Size};
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::RawData;
 use crate::pixelcolor::PixelColor;
 use core::marker::PhantomData;

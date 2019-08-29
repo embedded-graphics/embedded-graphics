@@ -90,9 +90,8 @@ pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::drawable::Dimensions;
     use crate::fonts::Font;
-    use crate::geometry::{Point, Size};
+    use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::WithStyle;

@@ -2,11 +2,10 @@
 //!
 //! See the [module level type definitions](../index.html#types) for a list of usable fonts.
 
-use crate::drawable::Dimensions;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::fonts::Font;
-use crate::geometry::{Point, Size};
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::{BinaryColor, PixelColor};
 use crate::style::Style;
 use crate::style::WithStyle;

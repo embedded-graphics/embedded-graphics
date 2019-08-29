@@ -1,8 +1,8 @@
 //! The triangle primitive.
 
-use super::super::drawable::*;
-use super::super::transform::*;
-use crate::geometry::{Point, Size};
+use super::super::drawable::{Drawable, Pixel};
+use super::super::transform::Transform;
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::line::{Line, LineIterator};
 use crate::primitives::Primitive;

@@ -1,8 +1,8 @@
 //! Prelude
 
-pub use super::drawable::{Dimensions, Pixel};
+pub use super::drawable::Pixel;
 pub use super::fonts::Font;
-pub use super::geometry::{Point, Size};
+pub use super::geometry::{Dimensions, Point, Size};
 pub use super::image::{Image, ImageBE, ImageFile, ImageLE};
 pub use super::pixelcolor::{GrayColor, PixelColor, RgbColor};
 pub use super::style::{Style, WithStyle};

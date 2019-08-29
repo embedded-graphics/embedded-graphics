@@ -1,5 +1,5 @@
-use crate::drawable::{Dimensions, Drawable, Pixel};
-use crate::geometry::{Point, Size};
+use crate::drawable::{Drawable, Pixel};
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter};
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;

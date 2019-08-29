@@ -175,7 +175,7 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-use crate::drawable::Dimensions;
+use crate::geometry::Dimensions;
 use crate::pixelcolor::PixelColor;
 
 /// To use this crate in a driver, `Drawing` must be implemented. This allows display drivers to

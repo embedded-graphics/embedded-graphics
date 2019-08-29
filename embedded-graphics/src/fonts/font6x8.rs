@@ -93,9 +93,8 @@ pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::drawable::Dimensions;
     use crate::fonts::Font;
-    use crate::geometry::{Point, Size};
+    use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::WithStyle;
