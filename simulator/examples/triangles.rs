@@ -1,6 +1,4 @@
-use embedded_graphics::geometry::point;
-use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
-use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Triangle;
 use embedded_graphics_simulator::DisplayBuilder;
@@ -18,49 +16,49 @@ fn main() {
 
     // no straight lines
     display.draw(
-        Triangle::new(point(0, 0), point(64, 10), point(15, 64))
-            .translate(point(PAD, 0))
-            .stroke(Some(C1)),
+        Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64))
+            .translate(Point::new(PAD, 0))
+            .stroke(Some(BinaryColor::On)),
     );
 
     // flat top
     display.draw(
-        Triangle::new(point(5, 0), point(30, 64), point(64, 0))
-            .stroke(Some(C1))
-            .translate(point(64 + PAD, 0)),
+        Triangle::new(Point::new(5, 0), Point::new(30, 64), Point::new(64, 0))
+            .stroke(Some(BinaryColor::On))
+            .translate(Point::new(64 + PAD, 0)),
     );
 
     // flat left
     display.draw(
-        Triangle::new(point(0, 0), point(0, 64), point(64, 30))
-            .stroke(Some(C1))
-            .translate(point((64 + PAD) * 2, 0)),
+        Triangle::new(Point::new(0, 0), Point::new(0, 64), Point::new(64, 30))
+            .stroke(Some(BinaryColor::On))
+            .translate(Point::new((64 + PAD) * 2, 0)),
     );
 
     // flat bottom
     display.draw(
-        Triangle::new(point(22, 0), point(0, 64), point(64, 64))
-            .translate(point((64 + PAD) * 3, 0))
-            .stroke(Some(C1)),
+        Triangle::new(Point::new(22, 0), Point::new(0, 64), Point::new(64, 64))
+            .translate(Point::new((64 + PAD) * 3, 0))
+            .stroke(Some(BinaryColor::On)),
     );
 
     // flat right
     display.draw(
-        Triangle::new(point(0, 22), point(64, 0), point(64, 64))
-            .translate(point((64 + PAD) * 4, 0))
-            .stroke(Some(C1)),
+        Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64))
+            .translate(Point::new((64 + PAD) * 4, 0))
+            .stroke(Some(BinaryColor::On)),
     );
 
     // draw filled above stroke, should not be visible
     display.draw(
-        Triangle::new(point(0, 22), point(64, 0), point(64, 64))
-            .translate(point((64 + PAD) * 5, 0))
-            .stroke(Some(C1)),
+        Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64))
+            .translate(Point::new((64 + PAD) * 5, 0))
+            .stroke(Some(BinaryColor::On)),
     );
     display.draw(
-        Triangle::new(point(0, 22), point(64, 0), point(64, 64))
-            .translate(point((64 + PAD) * 5, 0))
-            .fill(Some(C0)),
+        Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64))
+            .translate(Point::new((64 + PAD) * 5, 0))
+            .fill(Some(BinaryColor::On)),
     );
 
     loop {

@@ -16,15 +16,10 @@ use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 ///
 ///
 /// ```rust
-/// use embedded_graphics::geometry::{size, Size};
+/// use embedded_graphics::geometry::Size;
 ///
 /// // Create a size using the `new` constructor method
-/// let c1 = Size::new(10, 20);
-///
-/// // Create a size using the handy `size` function
-/// let c2 = size(10, 20);
-///
-/// assert_eq!(c1, c2);
+/// let s = Size::new(10, 20);
 /// ```
 ///
 /// ## Create a `Size` from a Nalgebra `Vector2`

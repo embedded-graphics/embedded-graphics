@@ -100,12 +100,11 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::{text_6x8, egcircle};
-//! use embedded_graphics::geometry::point;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!((20, 20), 8, fill = Some(Rgb565::RED));
-//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(point(20, 16));
+//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -119,13 +118,12 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::{text_6x8, egcircle, egrectangle};
-//! use embedded_graphics::geometry::point;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
 //!         .chain(egcircle!((20, 20), 8, fill = Some(Rgb565::RED)))
-//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(point(20, 16)))
+//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {

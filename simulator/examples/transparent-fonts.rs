@@ -1,4 +1,3 @@
-use embedded_graphics::geometry::point;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egrectangle, text_6x8};
@@ -25,7 +24,7 @@ fn main() {
 
     display.draw(
         text_6x8!("Hello world! - no background", stroke = Some(Rgb565::WHITE))
-            .translate(point(15, 15)),
+            .translate(Point::new(15, 15)),
     );
 
     display.draw(
@@ -34,7 +33,7 @@ fn main() {
             stroke = Some(Rgb565::YELLOW),
             fill = Some(Rgb565::BLUE)
         )
-        .translate(point(15, 30)),
+        .translate(Point::new(15, 30)),
     );
 
     display.draw(
@@ -43,7 +42,7 @@ fn main() {
             stroke = Some(Rgb565::BLUE),
             fill = Some(Rgb565::YELLOW)
         )
-        .translate(point(15, 45)),
+        .translate(Point::new(15, 45)),
     );
 
     loop {

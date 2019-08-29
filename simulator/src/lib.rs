@@ -35,9 +35,7 @@
 //! ```rust,no_run
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::{egcircle, egline, text_6x8};
-//! use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
-//! use embedded_graphics::pixelcolor::BinaryColor::On as C1;
-//! use embedded_graphics::geometry::point;
+//! use embedded_graphics::pixelcolor::BinaryColor;
 //! use embedded_graphics_simulator::{DisplayBuilder, BinaryColorTheme};
 //! use std::thread;
 //! use std::time::Duration;
@@ -50,12 +48,12 @@
 //!
 //!     display.draw(text_6x8!("Hello World!"));
 //!
-//!     display.draw(egcircle!((96, 32), 31, stroke = Some(C1)));
+//!     display.draw(egcircle!((96, 32), 31, stroke = Some(BinaryColor::On)));
 //!
-//!     display.draw(egline!((32, 32), (1, 32), stroke = Some(C1))
-//!         .translate(point(64, 0)));
-//!     display.draw(egline!((32, 32), (40, 40), stroke = Some(C1))
-//!         .translate(point(64, 0)));
+//!     display.draw(egline!((32, 32), (1, 32), stroke = Some(BinaryColor::On))
+//!         .translate(Point::new(64, 0)));
+//!     display.draw(egline!((32, 32), (40, 40), stroke = Some(BinaryColor::On))
+//!         .translate(Point::new(64, 0)));
 //!
 //!     loop {
 //!         let end = display.run_once();

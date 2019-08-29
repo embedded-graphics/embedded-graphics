@@ -1,6 +1,5 @@
 use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::geometry::point;
-use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
 use embedded_graphics_simulator::{BinaryColorTheme, DisplayBuilder};
@@ -14,16 +13,16 @@ fn main() {
         .build_binary();
 
     // Outline
-    display.draw(Circle::new(point(64, 64), 64).stroke(Some(C1)));
+    display.draw(Circle::new(Point::new(64, 64), 64).stroke(Some(BinaryColor::On)));
 
     // Clock hands
-    display.draw(Line::new(point(64, 64), point(0, 64)).stroke(Some(C1)));
-    display.draw(Line::new(point(64, 64), point(80, 80)).stroke(Some(C1)));
+    display.draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke(Some(BinaryColor::On)));
+    display.draw(Line::new(Point::new(64, 64), Point::new(80, 80)).stroke(Some(BinaryColor::On)));
 
     display.draw(
         Font6x8::render_str("Hello World!")
-            .stroke(Some(C1))
-            .translate(point(5, 50)),
+            .stroke(Some(BinaryColor::On))
+            .translate(Point::new(5, 50)),
     );
 
     loop {

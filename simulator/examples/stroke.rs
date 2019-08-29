@@ -1,5 +1,4 @@
-use embedded_graphics::geometry::point;
-use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
 use embedded_graphics_simulator::DisplayBuilder;
@@ -14,21 +13,21 @@ fn main() {
         .size(320, 256)
         .build_binary();
 
-    let triangle = Triangle::new(point(0, 64), point(64, 0), point(64, 64))
-        .translate(point(0, 0))
-        .stroke(Some(C1));
+    let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64))
+        .translate(Point::new(0, 0))
+        .stroke(Some(BinaryColor::On));
 
-    let rect = Rectangle::new(point(0, 0), point(64, 64))
-        .translate(point(64 + PADDING, 0))
-        .stroke(Some(C1));
+    let rect = Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .translate(Point::new(64 + PADDING, 0))
+        .stroke(Some(BinaryColor::On));
 
-    let line = Line::new(point(0, 0), point(64, 64))
-        .translate(point(128 + PADDING * 2, 0))
-        .stroke(Some(C1));
+    let line = Line::new(Point::new(0, 0), Point::new(64, 64))
+        .translate(Point::new(128 + PADDING * 2, 0))
+        .stroke(Some(BinaryColor::On));
 
-    let circ = Circle::new(point(32, 32), 32)
-        .translate(point(192 + PADDING * 3, 0))
-        .stroke(Some(C1));
+    let circ = Circle::new(Point::new(32, 32), 32)
+        .translate(Point::new(192 + PADDING * 3, 0))
+        .stroke(Some(BinaryColor::On));
 
     display.draw(
         circ.into_iter()
@@ -38,23 +37,33 @@ fn main() {
     );
 
     display.draw(
-        circ.translate(point(0, 64 + PADDING))
+        circ.translate(Point::new(0, 64 + PADDING))
             .stroke_width(3)
             .into_iter()
-            .chain(rect.translate(point(0, 64 + PADDING)).stroke_width(3))
-            .chain(line.translate(point(0, 64 + PADDING)).stroke_width(3))
-            .chain(triangle.translate(point(0, 64 + PADDING)).stroke_width(3)),
+            .chain(rect.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
+            .chain(line.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
+            .chain(
+                triangle
+                    .translate(Point::new(0, 64 + PADDING))
+                    .stroke_width(3),
+            ),
     );
 
     display.draw(
-        circ.translate(point(0, 128 + PADDING * 2))
+        circ.translate(Point::new(0, 128 + PADDING * 2))
             .stroke_width(10)
             .into_iter()
-            .chain(rect.translate(point(0, 128 + PADDING * 2)).stroke_width(10))
-            .chain(line.translate(point(0, 128 + PADDING * 2)).stroke_width(10))
+            .chain(
+                rect.translate(Point::new(0, 128 + PADDING * 2))
+                    .stroke_width(10),
+            )
+            .chain(
+                line.translate(Point::new(0, 128 + PADDING * 2))
+                    .stroke_width(10),
+            )
             .chain(
                 triangle
-                    .translate(point(0, 128 + PADDING * 2))
+                    .translate(Point::new(0, 128 + PADDING * 2))
                     .stroke_width(10),
             ),
     );

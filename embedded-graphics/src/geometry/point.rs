@@ -17,15 +17,10 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// ## Create a `Point` from two integers
 ///
 /// ```rust
-/// use embedded_graphics::geometry::{point, Point};
+/// use embedded_graphics::geometry::Point;
 ///
 /// // Create a coord using the `new` constructor method
-/// let c1 = Point::new(10, 20);
-///
-/// // Create a coord using the handy `point` function
-/// let c2 = point(10, 20);
-///
-/// assert_eq!(c1, c2);
+/// let p = Point::new(10, 20);
 /// ```
 ///
 /// ## Create a `Point` from a Nalgebra `Vector2`

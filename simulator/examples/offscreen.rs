@@ -1,5 +1,4 @@
-use embedded_graphics::geometry::point;
-use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
 use embedded_graphics_simulator::DisplayBuilder;
@@ -15,9 +14,9 @@ fn main() {
 
     // Outline
     display.draw(
-        Rectangle::new(point(0, 0), point(16, 16))
-            .stroke(Some(C1))
-            .translate(point(-8, -8)),
+        Rectangle::new(Point::new(0, 0), Point::new(16, 16))
+            .stroke(Some(BinaryColor::On))
+            .translate(Point::new(-8, -8)),
     );
 
     loop {
