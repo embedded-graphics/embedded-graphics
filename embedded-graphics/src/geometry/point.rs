@@ -80,19 +80,6 @@ impl Point {
         Point { x: 0, y: 0 }
     }
 
-    /// Clamp coordinate components to positive integer range
-    ///
-    /// ```
-    /// # use embedded_graphics::geometry::Point;
-    /// #
-    /// let point = Point::new(-5, 10);
-    ///
-    /// assert_eq!(point.clamp_positive(), Point::new(0, 10));
-    /// ```
-    pub fn clamp_positive(&self) -> Self {
-        Point::new(self.x.max(0), self.y.max(0))
-    }
-
     /// Remove the sign from a coordinate
     ///
     /// ```
