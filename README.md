@@ -87,7 +87,7 @@ fn main() {
 ## Cargo Features
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-support to enable conversions from `nalgebra::Vector2` to [`Coord`] and [`UnsignedCoord`].
+support to enable conversions from `nalgebra::Vector2` to `Coord` and `UnsignedCoord`.
 * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 
