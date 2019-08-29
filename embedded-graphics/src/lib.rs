@@ -172,6 +172,7 @@ pub mod mock_display;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
+mod readme;
 pub mod style;
 pub mod transform;
 

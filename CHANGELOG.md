@@ -2,11 +2,16 @@
 
 Embedded Graphics is a `no_std` library for adding graphics features to display drivers. It aims to use the minimum amount of memory for builtin graphics objects by leveraging Rust's iterators to avoid large allocations. It targets embedded environments, but can run anywhere like a Raspberry Pi up to full desktop machines.
 
-## Unreleased
+## Unreleased/draft
 
-- **(breaking)** Integration with Nalgebra through the `nalgebra_support` feature is now achieved by converting Nalgebra types into `Coord` or `UnsignedCoord` instead of Embedded Graphics aliasing `Coord` and `UnsignedCoord` to `nalgebra::Vector2<i32>` and `nalgebra::Vector2<u32>` respectively. Integration now requires calling `Coord::from(my_nalgebra_var)` or `my_nalgebra_var.into()`.
+TODO: Add links, move links from alpha.1 to alpha.2 when this changelog section is released
+TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` when #158 is merged
 
-  The benefit of this change is to allow more integer primitive types in `Vector2`. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
+## Changes
+
+- **(breaking)** Integration with Nalgebra through the `nalgebra_support` feature is now achieved by converting Nalgebra types into `Coord` or `UnsignedCoord` instead of Embedded Graphics aliasing `Coord` and `UnsignedCoord` to [`nalgebra::Vector2<i32>`] and [`nalgebra::Vector2<u32>`] respectively. Integration now requires calling `Coord::from(my_nalgebra_var)` or `my_nalgebra_var.into()`.
+
+  The benefit of this change is to allow more integer primitive types in [`Vector2`]. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
 
 - **(breaking)** `Coord`s can no longer be created from `(u32, u32)`, `[u32; 2]` or `&[u32; 2]`; these conversions are dangerous as the full range of `u32` values cannot be represented by the `i32` used for storage inside `Coord`.
 
@@ -15,6 +20,43 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** `Coord` and `UnsignedCoord` are replaced by `Point` and `Size`.
 
 - **(breaking)** `Pixel` now uses the signed `Point` type as the first element. Display drivers need to implement an additional check if `x` and `y` are greater or equal to zero.
+
+- **(breaking)** The image module has been rewritten to support big- and little-endian image formats. [`Image1BPP`], [`Image8BPP`] and [`Image16BPP`] are no longer available, and have been replaced with the single [`Image`] type. To migrate from the previous image types, use [`Image`] with a specified pixel color, like this:
+
+  ```rust
+  use embedded_graphics::{
+    image::Image,
+    pixelcolor::{BinaryColor, Gray8, Rgb565}
+  };
+
+  // Image1BPP
+  let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
+
+  // Image8BPP
+  let image: Image<Gray8> = Image::new(DATA, 12, 5);
+
+  // Image16BPP
+  let image: Image<Rgb565> = Image::new(DATA, 12, 5);
+  ```
+
+  There are other pixel color types available. Take a look at the [`pixelcolor`] module for a full list.
+
+  If you need to specify an endianness for the image data (like when using multiple bytes per pixel), the [`ImageLE`] and [`ImageBE`] type aliases have been added.
+
+[`pixelcolor`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/pixelcolor/index.html
+[`image1bpp`]: https://docs.rs/embedded-graphics/0.5.1/embedded_graphics/image/type.Image1BPP.html
+[`image8bpp`]: https://docs.rs/embedded-graphics/0.5.1/embedded_graphics/image/type.Image8BPP.html
+[`image16bpp`]: https://docs.rs/embedded-graphics/0.5.1/embedded_graphics/image/type.Image16BPP.html
+[`image`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/image/struct.Image.html
+[`imagele`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/image/type.ImageLE.html
+[`imagebe`]: https://docs.rs/embedded-graphics/0.6.0-alpha.2/embedded_graphics/image/type.ImageBE.html
+[`nalgebra::vector2<i32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+[`nalgebra::vector2<u32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+[`vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+
+## Fixed
+
+- The code examples `README.md` are now checked in CI during crate compilation. They were woefully outdated and have now been fixed.
 
 ## 0.6.0-alpha.1
 
