@@ -10,25 +10,22 @@
 //! embedded-graphics = { version = "*", features = [ "bmp" ] }
 
 use embedded_graphics::image::ImageBmp;
-use embedded_graphics::pixelcolor;
+use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
+use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let image: ImageBmp<pixelcolor::Rgb565> =
-        ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+    let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
 
     let mut display = DisplayBuilder::new()
+        .title("BMP image")
         .size(304, 128)
-        .theme(DisplayTheme::ColorOled)
         .scale(2)
-        .build();
+        .build_rgb();
 
-    // Image has a pixel type of `pixelcolor::Rgb565`. This needs to be converted to a
-    // `SimPixelColor` using the `.map()` below.
-    display.draw(image.into_iter().map(|p| Pixel(p.0, p.1.into())));
+    display.draw(&image);
 
     loop {
         let end = display.run_once();

@@ -1,10 +1,9 @@
-use crate::sim_pixel_color::SimPixelColor;
-use sdl2::pixels::Color;
+use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
 
-/// Display theme to use
+/// Color theme for binary displays
 #[derive(Clone)]
-pub enum DisplayTheme {
-    /// A simple on/off, non-styled display with white background and black pixels
+pub enum BinaryColorTheme {
+    /// A simple on/off, non-styled display with black background and white pixels
     Default,
 
     /// An on/off classic LCD-like display with white background
@@ -21,46 +20,33 @@ pub enum DisplayTheme {
 
     /// An on/off OLED-like display with a dark blue background and light blue pixels
     OledBlue,
-
-    /// An OLED-like display that supports 24 bit colour output
-    ColorOled,
 }
 
-impl DisplayTheme {
-    /// Get the theme's pixel colour for a given pixel
-    ///
-    /// For on/off displays, a pixel value of `0, 0, 0` will be off, whilst any other value will be
-    /// interpreted as an "on" pixel.
-    pub fn pixel_color(&self, pixel: &SimPixelColor) -> Option<Color> {
-        match self {
-            DisplayTheme::ColorOled => Some(Color::RGB(pixel.0, pixel.1, pixel.2)),
-            theme => {
-                if *pixel != SimPixelColor(0, 0, 0) {
-                    match theme {
-                        DisplayTheme::Default => Some(Color::RGB(0, 0, 0)),
-                        DisplayTheme::LcdWhite => Some(Color::RGB(32, 32, 32)),
-                        DisplayTheme::LcdGreen => Some(Color::RGB(32, 32, 32)),
-                        DisplayTheme::LcdBlue => Some(Color::RGB(230, 230, 255)),
-                        DisplayTheme::OledBlue => Some(Color::RGB(0, 210, 255)),
-                        DisplayTheme::OledWhite => Some(Color::RGB(255, 255, 255)),
-                        _ => unreachable!(),
-                    }
-                } else {
-                    None
-                }
-            }
-        }
+pub fn map_color(color: BinaryColor, color_off: Rgb888, color_on: Rgb888) -> Rgb888 {
+    match color {
+        BinaryColor::On => color_on,
+        BinaryColor::Off => color_off,
     }
+}
 
-    /// Get the background colour for the current theme
-    pub fn background_color(&self) -> Color {
+impl BinaryColorTheme {
+    /// Get the theme's pixel color for a given pixel state
+    pub fn convert(&self, color: BinaryColor) -> Rgb888 {
         match self {
-            DisplayTheme::Default => Color::RGB(255, 255, 255),
-            DisplayTheme::LcdWhite => Color::RGB(245, 245, 245),
-            DisplayTheme::LcdGreen => Color::RGB(120, 185, 50),
-            DisplayTheme::LcdBlue => Color::RGB(70, 80, 230),
-            DisplayTheme::OledBlue => Color::RGB(0, 20, 40),
-            DisplayTheme::OledWhite | DisplayTheme::ColorOled => Color::RGB(20, 20, 20),
+            BinaryColorTheme::Default => color.into(),
+            BinaryColorTheme::LcdWhite => {
+                map_color(color, Rgb888::new(245, 245, 245), Rgb888::new(32, 32, 32))
+            }
+            BinaryColorTheme::LcdGreen => {
+                map_color(color, Rgb888::new(120, 185, 50), Rgb888::new(32, 32, 32))
+            }
+            BinaryColorTheme::LcdBlue => {
+                map_color(color, Rgb888::new(70, 80, 230), Rgb888::new(230, 230, 255))
+            }
+            BinaryColorTheme::OledBlue => {
+                map_color(color, Rgb888::new(0, 20, 40), Rgb888::new(0, 210, 255))
+            }
+            BinaryColorTheme::OledWhite => map_color(color, Rgb888::new(20, 20, 20), Rgb888::WHITE),
         }
     }
 }

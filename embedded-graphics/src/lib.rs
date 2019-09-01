@@ -3,9 +3,7 @@
 //! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
 //! following:
 //!
-//! * [1 bit-per-pixel images](./image/type.Image1BPP.html)
-//! * [8 bits-per-pixel images](./image/type.Image8BPP.html)
-//! * [16 bits-per-pixel images](./image/type.Image16BPP.html)
+//! * [raw data images](./image/struct.Image.html)
 //! * [BMP-format images](./image/struct.ImageBmp.html) (with `bmp` feature enabled)
 //! * [TGA-format images](./image/struct.ImageTga.html) (with `tga` feature enabled)
 //! * [Primitives](./primitives/index.html)
@@ -68,8 +66,7 @@
 //! Add these to your `Cargo.toml` to turn on extra bits of functionality.
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-//! support to use as the `Coord` type. This should allow you to use most Nalgebra methods on
-//! objects rendered by embedded_graphics.
+//! support to enable conversions from `nalgebra::Vector2` to [`Coord`] and [`UnsignedCoord`].
 //! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 //! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 //!
@@ -83,11 +80,12 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::primitives::Circle;
 //! use embedded_graphics::fonts::Font6x8;
-//! # use embedded_graphics::mock_display::Display;
-//! # let mut display = Display::default();
+//! use embedded_graphics::pixelcolor::Rgb565;
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(1u8));
-//! let t = Font6x8::render_str("Hello Rust!").fill(Some(20u8)).translate(Coord::new(20, 16));
+//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!").fill(Some(Rgb565::GREEN)).translate(Coord::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -100,12 +98,13 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
+//! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::{text_6x8, egcircle, icoord};
-//! # use embedded_graphics::mock_display::Display;
-//! # let mut display = Display::default();
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display = MockDisplay::default();
 //!
-//! let c = egcircle!((20, 20), 8, fill = Some(1u8));
-//! let t = text_6x8!("Hello Rust!", fill = Some(20u8)).translate(icoord!(20, 16));
+//! let c = egcircle!((20, 20), 8, fill = Some(Rgb565::RED));
+//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -117,17 +116,18 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
+//! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::{text_6x8, egcircle, icoord, egrectangle};
-//! # use embedded_graphics::mock_display::Display;
+//! # use embedded_graphics::mock_display::MockDisplay;
 //!
-//! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<u8>> {
+//! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
-//!         .chain(egcircle!((20, 20), 8, fill = Some(1u8)))
-//!         .chain(text_6x8!(text, fill = Some(20u8)).translate(icoord!(20, 16)))
+//!         .chain(egcircle!((20, 20), 8, fill = Some(Rgb565::RED)))
+//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16)))
 //! }
 //!
 //! fn main() {
-//!     # let mut display = Display::default();
+//!     # let mut display = MockDisplay::default();
 //!     display.draw(build_thing("Hello Rust!"));
 //! }
 //! ```
@@ -140,6 +140,8 @@
 //! implementation details.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
+//! [`Coord`]: ./coord/struct.Coord.html
+//! [`UnsignedCoord`]: ./unsignedcoord/struct.UnsignedCoord.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
 //! [`Drawing`]: ./trait.Drawing.html
 //! [`SizedDrawing`]: ./trait.SizedDrawing.html
@@ -161,6 +163,7 @@
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
 
+mod check_readme;
 pub mod coord;
 pub mod drawable;
 pub mod fonts;
@@ -189,6 +192,7 @@ use crate::pixelcolor::PixelColor;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::Drawing;
 /// use embedded_graphics::egcircle;
+/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 ///
 /// # struct SPI1;
 /// #
@@ -211,17 +215,17 @@ use crate::pixelcolor::PixelColor;
 ///     }
 /// }
 ///
-/// impl Drawing<u8> for ExampleDisplay {
-///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `u8`
+/// impl Drawing<Gray8> for ExampleDisplay {
+///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `Gray8`
 ///     fn draw<T>(&mut self, item: T)
 ///     where
-///         T: IntoIterator<Item = Pixel<u8>>,
+///         T: IntoIterator<Item = Pixel<Gray8>>,
 ///     {
 ///         for Pixel(coord, color) in item {
 ///             // Place an (x, y) pixel at the right index in the framebuffer
 ///             let index = coord[0] + (coord[1] * 64);
 ///
-///             self.framebuffer[index as usize] = color;
+///             self.framebuffer[index as usize] = color.luma();
 ///         }
 ///     }
 /// }
@@ -232,8 +236,8 @@ use crate::pixelcolor::PixelColor;
 ///         iface: SPI1
 ///     };
 ///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
-///     display.draw(egcircle!((32, 32), 10, stroke = Some(1u8)));
+///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
+///     display.draw(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
@@ -243,7 +247,7 @@ use crate::pixelcolor::PixelColor;
 /// [`SizedDrawing`]: ./trait.SizedDrawing.html
 pub trait Drawing<C>
 where
-    C: PixelColor + Clone,
+    C: PixelColor,
 {
     /// Draw an object from an iterator over its pixels
     fn draw<T>(&mut self, item: T)
@@ -266,6 +270,7 @@ where
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::SizedDrawing;
+/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 ///
 /// # struct SPI1;
 /// #
@@ -293,10 +298,10 @@ where
 ///     }
 /// }
 ///
-/// impl SizedDrawing<u8> for ExampleBufferlessDisplay {
+/// impl SizedDrawing<Gray8> for ExampleBufferlessDisplay {
 ///     fn draw_sized<T>(&mut self, item: T)
 ///     where
-///         T: IntoIterator<Item = Pixel<u8>> + Dimensions,
+///         T: IntoIterator<Item = Pixel<Gray8>> + Dimensions,
 ///     {
 ///         // Get bounding box `Coord`s as `(u32, u32)`
 ///         let tl = item.top_left();
@@ -309,7 +314,7 @@ where
 ///         // `coord` isn't used as the update area is the same as the item's bounding box which
 ///         // wraps the bytes automatically
 ///         for Pixel(_coord, color) in item {
-///             self.iface.send_bytes(&[color]);
+///             self.iface.send_bytes(&[color.luma()]);
 ///         }
 ///     }
 /// }
@@ -319,8 +324,8 @@ where
 ///         iface: SPI1
 ///     };
 ///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a stroke of `1u8`
-///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(1u8)));
+///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
+///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
 ///
 ///     // No `flush()` is required as `draw_sized()` sends the bytes directly
 /// }
@@ -328,7 +333,6 @@ where
 ///
 /// [`Drawing`]: ./trait.Drawing.html
 /// [`SizedDrawing`]: ./trait.SizedDrawing.html
-/// ```
 pub trait SizedDrawing<C>
 where
     C: PixelColor + Clone,

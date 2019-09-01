@@ -1,5 +1,5 @@
 [package]
-version = "0.1.1-alpha.0"
+version = "0.2.0-alpha.1"
 name = "embedded-graphics-simulator"
 description = "Embedded graphics simulator"
 authors = ["Byron Wasti <byron.wasti@gmail.com>", "James Waples <james@wapl.es>"]
@@ -24,5 +24,5 @@ circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 sdl2 = "0.32.2"
 
 [dependencies.embedded-graphics]
-version = "0.5.0"
+version = "0.6.0-alpha.1"
 features = [ "bmp", "tga" ]

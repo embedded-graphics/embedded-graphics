@@ -20,17 +20,18 @@ use crate::unsignedcoord::UnsignedCoord;
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Rectangle;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// use embedded_graphics::pixelcolor::Rgb565;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
 /// let r1 = Rectangle::new(Coord::new(10, 20), Coord::new(30, 40));
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
 /// let r2 = Rectangle::new(Coord::new(50, 20), Coord::new(60, 35))
-///     .stroke(Some(5u8))
+///     .stroke(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill(Some(10u8));
+///     .fill(Some(Rgb565::GREEN));
 ///
 /// // Rectangle with translation applied
 /// let r3 = Rectangle::new(Coord::new(50, 20), Coord::new(60, 35))
@@ -239,8 +240,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Rectangle;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(Rgb565::RED);
     /// #
     /// let rect = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -262,8 +264,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Rectangle;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(Rgb565::RED);
     /// #
     /// let mut rect = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -283,11 +286,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::BinaryColor;
+    use crate::pixelcolor::{Rgb565, RgbColor};
     use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let rect: Rectangle<u8> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rectangle<BinaryColor> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(-10, -10));
 
         assert_eq!(rect.top_left(), Coord::new(5, 10));
@@ -301,7 +306,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let rect: Rectangle<u8> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
+        let rect: Rectangle<BinaryColor> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
         let moved = rect.translate(Coord::new(10, 10));
 
         assert_eq!(moved.top_left, Coord::new(15, 20));
@@ -310,34 +315,75 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect: RectangleIterator<u8> = Rectangle::new(Coord::new(2, 2), Coord::new(4, 4))
-            .style(Style::stroke(1))
-            .into_iter();
+        let mut rect: RectangleIterator<Rgb565> =
+            Rectangle::new(Coord::new(2, 2), Coord::new(4, 4))
+                .style(Style::stroke(Rgb565::RED))
+                .into_iter();
 
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(3, 2), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(4, 2), 1.into())));
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(2, 2), Rgb565::RED))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(3, 2), Rgb565::RED))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(4, 2), Rgb565::RED))
+        );
 
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 3), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(4, 3), 1.into())));
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(2, 3), Rgb565::RED))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(4, 3), Rgb565::RED))
+        );
 
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 4), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(3, 4), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(4, 4), 1.into())));
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(2, 4), Rgb565::RED))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(3, 4), Rgb565::RED))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(4, 4), Rgb565::RED))
+        );
     }
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect: RectangleIterator<u8> = Rectangle::new(Coord::new(-2, -2), Coord::new(2, 2))
-            .style(Style::stroke(1))
-            .into_iter();
+        let mut rect: RectangleIterator<Rgb565> =
+            Rectangle::new(Coord::new(-2, -2), Coord::new(2, 2))
+                .style(Style::stroke(Rgb565::GREEN))
+                .into_iter();
 
         // TODO: Macro
         // Only the bottom right corner of the rect should be visible
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 0), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 1), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(0, 2), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(1, 2), 1.into())));
-        assert_eq!(rect.next(), Some(Pixel(UnsignedCoord::new(2, 2), 1.into())));
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(2, 0), Rgb565::GREEN))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(2, 1), Rgb565::GREEN))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(0, 2), Rgb565::GREEN))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(1, 2), Rgb565::GREEN))
+        );
+        assert_eq!(
+            rect.next(),
+            Some(Pixel(UnsignedCoord::new(2, 2), Rgb565::GREEN))
+        );
     }
 }

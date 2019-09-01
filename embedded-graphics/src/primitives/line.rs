@@ -20,15 +20,16 @@ use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Line;
-/// # use embedded_graphics::mock_display::Display;
-/// # let mut display = Display::default();
+/// use embedded_graphics::pixelcolor::Rgb565;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
 ///
 /// // Default line from (10, 20) to (30, 40)
 /// let l1 = Line::new(Coord::new(10, 20), Coord::new(30, 40));
 ///
 /// // Line with styled stroke from (50, 20) to (60, 35)
 /// let l2 = Line::new(Coord::new(50, 20), Coord::new(60, 35))
-///     .stroke(Some(5u8));
+///     .stroke(Some(Rgb565::RED));
 ///
 /// // Line with translation applied
 /// let l3 = Line::new(Coord::new(50, 20), Coord::new(60, 35))
@@ -223,8 +224,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(BinaryColor::On);
     /// #
     /// let line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -246,8 +248,9 @@ where
     /// ```
     /// # use embedded_graphics::primitives::Line;
     /// # use embedded_graphics::prelude::*;
+    /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(1u8);
+    /// # let style = Style::stroke(BinaryColor::On);
     /// #
     /// let mut line = Line::new(Coord::new(5, 10), Coord::new(15, 20))
     /// #    .style(style);
@@ -268,11 +271,12 @@ where
 mod tests {
     use super::*;
     use crate::drawable::Pixel;
+    use crate::pixelcolor::BinaryColor;
     use crate::style::Style;
     use crate::unsignedcoord::UnsignedCoord;
 
     fn test_expected_line(start: Coord, end: Coord, expected: &[(u32, u32)]) {
-        let line = Line::new(start, end).style(Style::stroke(1u8));
+        let line = Line::new(start, end).style(Style::stroke(BinaryColor::On));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {
@@ -290,8 +294,8 @@ mod tests {
         let start = Coord::new(10, 10);
         let end = Coord::new(20, 20);
 
-        let line: Line<u8> = Line::new(start, end);
-        let backwards_line: Line<u8> = Line::new(end, start);
+        let line: Line<BinaryColor> = Line::new(start, end);
+        let backwards_line: Line<BinaryColor> = Line::new(end, start);
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);

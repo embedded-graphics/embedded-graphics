@@ -1,6 +1,8 @@
 //! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
 
 use embedded_graphics::icoord;
+use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
+use embedded_graphics::pixelcolor::BinaryColor::On as C1;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egline, egrectangle, egtriangle};
 use embedded_graphics_simulator::DisplayBuilder;
@@ -10,20 +12,24 @@ use std::time::Duration;
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(384, 128).scale(2).build();
+    let mut display = DisplayBuilder::new()
+        .title("Filled primitives using macros")
+        .size(384, 128)
+        .scale(2)
+        .build_binary();
 
     display.draw(egcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
-        stroke = Some(1u8.into())
+        stroke = Some(C1)
     ));
 
     display.draw(
         egcircle!(
             (CIRCLE_SIZE, CIRCLE_SIZE),
             CIRCLE_SIZE as u32,
-            stroke = Some(0u8.into()),
-            fill = Some(1u8.into())
+            stroke = Some(C0),
+            fill = Some(C1)
         )
         .translate(icoord!(16, 16)),
     );
@@ -32,38 +38,26 @@ fn main() {
         egcircle!(
             (CIRCLE_SIZE, CIRCLE_SIZE),
             CIRCLE_SIZE as u32,
-            stroke = Some(0u8.into()),
-            fill = Some(0u8.into())
+            stroke = Some(C0),
+            fill = Some(C0)
         )
         .translate(icoord!(CIRCLE_SIZE, CIRCLE_SIZE)),
     );
 
-    display
-        .draw(egrectangle!((0, 0), (64, 64), stroke = Some(1u8.into())).translate(icoord!(96, 0)));
+    display.draw(egrectangle!((0, 0), (64, 64), stroke = Some(C1)).translate(icoord!(96, 0)));
 
     display.draw(
-        &egrectangle!(
-            (0, 0),
-            (64, 64),
-            stroke = Some(0u8.into()),
-            fill = Some(1u8.into())
-        )
-        .translate(icoord!(96 + 16, 16)),
+        &egrectangle!((0, 0), (64, 64), stroke = Some(C0), fill = Some(C1))
+            .translate(icoord!(96 + 16, 16)),
     );
 
     display.draw(
-        egrectangle!(
-            (0, 0),
-            (64, 64),
-            stroke = Some(0u8.into()),
-            fill = Some(0u8.into())
-        )
-        .translate(icoord!(96 + 32, 32)),
+        egrectangle!((0, 0), (64, 64), stroke = Some(C0), fill = Some(C0))
+            .translate(icoord!(96 + 32, 32)),
     );
 
     display.draw(
-        egtriangle!((32, 0), (0, 64), (64, 64), stroke = Some(1u8.into()))
-            .translate(icoord!(96 * 2, 0)),
+        egtriangle!((32, 0), (0, 64), (64, 64), stroke = Some(C1)).translate(icoord!(96 * 2, 0)),
     );
 
     display.draw(
@@ -71,8 +65,8 @@ fn main() {
             (32, 0),
             (0, 64),
             (64, 64),
-            stroke = Some(0u8.into()),
-            fill = Some(1u8.into())
+            stroke = Some(C0),
+            fill = Some(C1)
         )
         .translate(icoord!(96 * 2 + 16, 16)),
     );
@@ -82,15 +76,13 @@ fn main() {
             (32, 0),
             (0, 64),
             (64, 64),
-            stroke = Some(0u8.into()),
-            fill = Some(0u8.into())
+            stroke = Some(C0),
+            fill = Some(C0)
         )
         .translate(icoord!(96 * 2 + 32, 32)),
     );
 
-    display.draw(
-        egline!((0, 0), (64, 64), stroke = Some(1u8.into()),).translate(icoord!(256 + 32, 0)),
-    );
+    display.draw(egline!((0, 0), (64, 64), stroke = Some(C0),).translate(icoord!(256 + 32, 0)));
 
     loop {
         let end = display.run_once();

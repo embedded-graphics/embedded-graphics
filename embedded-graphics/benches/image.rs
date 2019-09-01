@@ -1,5 +1,5 @@
 use criterion::*;
-use embedded_graphics::{image::ImageBmp, prelude::*};
+use embedded_graphics::{image::ImageBmp, pixelcolor::Rgb565, prelude::*};
 
 fn image_bmp_4x4(c: &mut Criterion) {
     c.bench_function("image BMP 4x4px", |b| {
@@ -9,7 +9,7 @@ fn image_bmp_4x4(c: &mut Criterion) {
             ImageBmp::new(bytes)
                 .unwrap()
                 .into_iter()
-                .collect::<Vec<Pixel<u16>>>()
+                .collect::<Vec<Pixel<Rgb565>>>()
         })
     });
 }
