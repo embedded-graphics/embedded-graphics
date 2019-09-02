@@ -255,24 +255,22 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.y < self.image.size.height {
-                let data = self.data.next()?;
-                let mut point = Point::new(self.x as i32, self.y as i32);
-                point += self.image.offset;
+        if self.y < self.image.size.height {
+            let data = self.data.next()?;
+            let mut point = Point::new(self.x as i32, self.y as i32);
+            point += self.image.offset;
 
-                self.x += 1;
-                if self.x >= self.image.size.width {
-                    self.data.align();
+            self.x += 1;
+            if self.x >= self.image.size.width {
+                self.data.align();
 
-                    self.y += 1;
-                    self.x = 0;
-                }
-
-                break Some(Pixel(point, data.into()));
-            } else {
-                break None;
+                self.y += 1;
+                self.x = 0;
             }
+
+            Some(Pixel(point, data.into()))
+        } else {
+            None
         }
     }
 }
