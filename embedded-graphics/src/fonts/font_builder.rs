@@ -2,17 +2,14 @@
 //!
 //! See the [module level type definitions](../index.html#types) for a list of usable fonts.
 
-use crate::coord::Coord;
-use crate::coord::ToUnsigned;
-use crate::drawable::Dimensions;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::fonts::Font;
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::{BinaryColor, PixelColor};
 use crate::style::Style;
 use crate::style::WithStyle;
 use crate::transform::Transform;
-use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
 
 /// The configuration of the font
@@ -37,7 +34,7 @@ pub trait FontBuilderConf {
 #[derive(Debug)]
 pub struct FontBuilder<'a, C: PixelColor, Conf> {
     /// Top left corner of the text
-    pub pos: Coord,
+    pub pos: Point,
 
     /// Text to draw
     text: &'a str,
@@ -65,24 +62,24 @@ where
     C: PixelColor,
     Conf: FontBuilderConf,
 {
-    fn top_left(&self) -> Coord {
+    fn top_left(&self) -> Point {
         self.pos
     }
 
-    fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
+    fn bottom_right(&self) -> Point {
+        self.top_left() + self.size()
     }
 
     /// Get the bounding box of a piece of text
     ///
     /// Currently does not handle newlines (but neither does the rasteriser). It will give `(0, 0)`
     /// if the string to render is empty.
-    fn size(&self) -> UnsignedCoord {
+    fn size(&self) -> Size {
         // TODO: Handle height of text with newlines in it
         let width = Conf::CHAR_WIDTH * self.text.len() as u32;
         let height = if width > 0 { Conf::CHAR_HEIGHT } else { 0 };
 
-        UnsignedCoord::new(width, height)
+        Size::new(width, height)
     }
 }
 
@@ -93,7 +90,7 @@ where
 {
     fn render_str(text: &'a str) -> Self {
         Self {
-            pos: Coord::new(0, 0),
+            pos: Point::zero(),
             text,
             style: Style::default(),
             _conf: Default::default(),
@@ -140,7 +137,7 @@ where
     char_walk_y: u32,
     current_char: Option<char>,
     idx: usize,
-    pos: Coord,
+    pos: Point,
     text: &'a str,
     style: Style<C>,
     _conf: PhantomData<Conf>,
@@ -198,12 +195,6 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pos[0] + (self.text.len() as i32 * Conf::CHAR_WIDTH as i32) <= 0
-            || self.pos[1] + (Conf::CHAR_HEIGHT as i32) <= 0
-        {
-            return None;
-        }
-
         let char_per_row = Conf::FONT_IMAGE_WIDTH / Conf::CHAR_WIDTH;
 
         let pixel = loop {
@@ -236,10 +227,10 @@ where
                     self.style.fill_color
                 };
 
-                let x = self.pos[0]
+                let x = self.pos.x
                     + (Conf::CHAR_WIDTH * self.idx as u32) as i32
                     + self.char_walk_x as i32;
-                let y = self.pos[1] + self.char_walk_y as i32;
+                let y = self.pos.y + self.char_walk_y as i32;
 
                 self.char_walk_x += 1;
 
@@ -255,11 +246,9 @@ where
                     }
                 }
 
-                // Skip to next coord if pixel is transparent
+                // Skip to next point if pixel is transparent
                 if let Some(color) = color {
-                    if x >= 0 && y >= 0 {
-                        break Some(Pixel(Coord::new(x, y).to_unsigned(), color));
-                    }
+                    break Some(Pixel(Point::new(x, y), color));
                 }
             } else {
                 break None;
@@ -294,12 +283,12 @@ where
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world")
     /// #    .style(style);
-    /// let moved = text.translate(Coord::new(25, 30));
+    /// let moved = text.translate(Point::new(25, 30));
     ///
-    /// assert_eq!(text.pos, Coord::new(0, 0));
-    /// assert_eq!(moved.pos, Coord::new(25, 30));
+    /// assert_eq!(text.pos, Point::new(0, 0));
+    /// assert_eq!(moved.pos, Point::new(25, 30));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(&self, by: Point) -> Self {
         Self {
             pos: self.pos + by,
             ..self.clone()
@@ -318,11 +307,11 @@ where
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world")
     /// #    .style(style);
-    /// text.translate_mut(Coord::new(25, 30));
+    /// text.translate_mut(Point::new(25, 30));
     ///
-    /// assert_eq!(text.pos, Coord::new(25, 30));
+    /// assert_eq!(text.pos, Point::new(25, 30));
     /// ```
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.pos += by;
 
         self

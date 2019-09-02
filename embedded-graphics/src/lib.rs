@@ -66,7 +66,7 @@
 //! Add these to your `Cargo.toml` to turn on extra bits of functionality.
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-//! support to enable conversions from `nalgebra::Vector2` to [`Coord`] and [`UnsignedCoord`].
+//! support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
 //! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 //! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 //!
@@ -84,8 +84,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(Rgb565::RED));
-//! let t = Font6x8::render_str("Hello Rust!").fill(Some(Rgb565::GREEN)).translate(Coord::new(20, 16));
+//! let c = Circle::new(Point::new(20, 20), 8).fill(Some(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!").fill(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -99,12 +99,12 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::{text_6x8, egcircle, icoord};
+//! use embedded_graphics::{text_6x8, egcircle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!((20, 20), 8, fill = Some(Rgb565::RED));
-//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16));
+//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -117,13 +117,13 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::{text_6x8, egcircle, icoord, egrectangle};
+//! use embedded_graphics::{text_6x8, egcircle, egrectangle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
 //!         .chain(egcircle!((20, 20), 8, fill = Some(Rgb565::RED)))
-//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16)))
+//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {
@@ -140,8 +140,8 @@
 //! implementation details.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
-//! [`Coord`]: ./coord/struct.Coord.html
-//! [`UnsignedCoord`]: ./unsignedcoord/struct.UnsignedCoord.html
+//! [`Point`]: ./geometry/struct.Point.html
+//! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
 //! [`Drawing`]: ./trait.Drawing.html
 //! [`SizedDrawing`]: ./trait.SizedDrawing.html
@@ -164,9 +164,9 @@
 extern crate nalgebra;
 
 mod check_readme;
-pub mod coord;
 pub mod drawable;
 pub mod fonts;
+pub mod geometry;
 pub mod image;
 #[doc(hidden)]
 pub mod mock_display;
@@ -175,9 +175,8 @@ pub mod prelude;
 pub mod primitives;
 pub mod style;
 pub mod transform;
-pub mod unsignedcoord;
 
-use crate::drawable::Dimensions;
+use crate::geometry::Dimensions;
 use crate::pixelcolor::PixelColor;
 
 /// To use this crate in a driver, `Drawing` must be implemented. This allows display drivers to
@@ -303,7 +302,7 @@ where
 ///     where
 ///         T: IntoIterator<Item = Pixel<Gray8>> + Dimensions,
 ///     {
-///         // Get bounding box `Coord`s as `(u32, u32)`
+///         // Get bounding box `Point`s as `(u32, u32)`
 ///         let tl = item.top_left();
 ///         let br = item.bottom_right();
 ///

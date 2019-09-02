@@ -20,8 +20,8 @@
 //! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
 
 use crate::drawable::Pixel;
-use crate::pixelcolor::BinaryColor;
-use crate::prelude::*;
+use crate::geometry::Point;
+use crate::pixelcolor::{BinaryColor, PixelColor};
 use crate::Drawing;
 use core::{
     cmp::PartialEq,
@@ -57,19 +57,17 @@ where
     }
 
     /// Returns the color of a pixel.
-    pub fn get_pixel(&self, p: UnsignedCoord) -> Option<C> {
-        let x = p[0] as usize;
-        let y = p[1] as usize;
+    pub fn get_pixel(&self, p: Point) -> Option<C> {
+        let Point { x, y } = p;
 
-        self.0[x + y * SIZE]
+        self.0[x as usize + y as usize * SIZE]
     }
 
     /// Changes the color of a pixel.
-    pub fn set_pixel(&mut self, p: UnsignedCoord, color: Option<C>) {
-        let x = p[0] as usize;
-        let y = p[1] as usize;
+    pub fn set_pixel(&mut self, p: Point, color: Option<C>) {
+        let Point { x, y } = p;
 
-        self.0[x + y * SIZE] = color;
+        self.0[x as usize + y as usize * SIZE] = color;
     }
 }
 
@@ -176,16 +174,13 @@ where
     where
         T: IntoIterator<Item = Pixel<C>>,
     {
-        for Pixel(c, color) in item_pixels {
-            let x = c[0] as usize;
-            let y = c[1] as usize;
-
-            if x >= SIZE || y >= SIZE {
+        for Pixel(Point { x, y }, color) in item_pixels {
+            if x < 0 || y < 0 || x >= SIZE as i32 || y >= SIZE as i32 {
                 continue;
             }
 
-            let i = x + y * SIZE;
-            self.0[i] = Some(color);
+            let i = x + y * SIZE as i32;
+            self.0[i as usize] = Some(color);
         }
     }
 }

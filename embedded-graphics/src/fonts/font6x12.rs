@@ -52,7 +52,7 @@ impl FontBuilderConf for Font6x12Conf {
 /// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 ///
 /// display.draw(
-///     Font6x12::render_str("Hello Rust!").translate(Coord::new(20, 30))
+///     Font6x12::render_str("Hello Rust!").translate(Point::new(20, 30))
 /// );
 /// ```
 ///
@@ -78,7 +78,7 @@ impl FontBuilderConf for Font6x12Conf {
 ///
 /// display.draw(
 ///     Font6x12::render_str("Hello Rust!")
-///         .translate(Coord::new(20, 30))
+///         .translate(Point::new(20, 30))
 ///         .fill(Some(Rgb565::BLUE))
 ///         .stroke(Some(Rgb565::YELLOW)),
 /// );
@@ -90,25 +90,22 @@ pub type Font6x12<'a, C> = FontBuilder<'a, C, Font6x12Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::coord::Coord;
-    use crate::drawable::Dimensions;
     use crate::fonts::Font;
+    use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::Style;
     use crate::style::WithStyle;
     use crate::transform::Transform;
-    use crate::unsignedcoord::UnsignedCoord;
     use crate::Drawing;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
         let text: Font6x12<BinaryColor> = Font6x12::render_str("Hello World!")
-            .style(Style::stroke(BinaryColor::On))
-            .translate(Coord::new(5, -20));
-        let mut it = text.into_iter();
+            .stroke(Some(BinaryColor::On))
+            .fill(Some(BinaryColor::Off))
+            .translate(Point::new(5, -20));
 
-        assert_eq!(it.next(), None);
+        assert_eq!(text.into_iter().count(), 6 * 12 * "Hello World!".len());
     }
 
     #[test]
@@ -116,20 +113,20 @@ mod tests {
         let hello: Font6x12<BinaryColor> = Font6x12::render_str("Hello World!");
         let empty: Font6x12<BinaryColor> = Font6x12::render_str("");
 
-        assert_eq!(hello.size(), UnsignedCoord::new(72, 12));
-        assert_eq!(empty.size(), UnsignedCoord::new(0, 0));
+        assert_eq!(hello.size(), Size::new(72, 12));
+        assert_eq!(empty.size(), Size::new(0, 0));
     }
 
     #[test]
     fn text_corners() {
         let hello: Font6x12<BinaryColor> =
-            Font6x12::render_str("Hello World!").translate(Coord::new(5, -20));
-        let empty: Font6x12<BinaryColor> = Font6x12::render_str("").translate(Coord::new(10, 20));
+            Font6x12::render_str("Hello World!").translate(Point::new(5, -20));
+        let empty: Font6x12<BinaryColor> = Font6x12::render_str("").translate(Point::new(10, 20));
 
-        assert_eq!(hello.top_left(), Coord::new(5, -20));
-        assert_eq!(hello.bottom_right(), Coord::new(72 + 5, 12 - 20));
-        assert_eq!(empty.top_left(), Coord::new(10, 20));
-        assert_eq!(empty.bottom_right(), Coord::new(10, 20));
+        assert_eq!(hello.top_left(), Point::new(5, -20));
+        assert_eq!(hello.bottom_right(), Point::new(72 + 5, 12 - 20));
+        assert_eq!(empty.top_left(), Point::new(10, 20));
+        assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
 
     #[test]
@@ -242,23 +239,19 @@ mod tests {
     fn negative_y_no_infinite_loop() {
         let text: Font6x12<BinaryColor> = Font6x12::render_str("Testing string")
             .stroke(Some(BinaryColor::On))
-            .translate(Coord::new(0, -12));
+            .fill(Some(BinaryColor::Off))
+            .translate(Point::new(0, -12));
 
-        let mut it = text.into_iter();
-
-        // Font is completely off the top edge of the screen; no pixels should be rendered
-        assert_eq!(it.next(), None);
+        assert_eq!(text.into_iter().count(), 6 * 12 * "Testing string".len());
     }
 
     #[test]
     fn negative_x_no_infinite_loop() {
         let text: Font6x12<BinaryColor> = Font6x12::render_str("A")
             .stroke(Some(BinaryColor::On))
-            .translate(Coord::new(-6, 0));
+            .fill(Some(BinaryColor::Off))
+            .translate(Point::new(-6, 0));
 
-        let mut it = text.into_iter();
-
-        // Font is completely off the left edge of the screen; no pixels should be rendered
-        assert_eq!(it.next(), None);
+        assert_eq!(text.into_iter().count(), 6 * 12);
     }
 }

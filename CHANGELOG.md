@@ -15,6 +15,12 @@ TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` 
 
 - **(breaking)** `Coord`s can no longer be created from `(u32, u32)`, `[u32; 2]` or `&[u32; 2]`; these conversions are dangerous as the full range of `u32` values cannot be represented by the `i32` used for storage inside `Coord`.
 
+- **(breaking)** `Coord::clamp_positive` is removed.
+
+- **(breaking)** `Coord` and `UnsignedCoord` are replaced by `Point` and `Size`.
+
+- **(breaking)** `Pixel` now uses the signed `Point` type as the first element. Display drivers need to implement an additional check if `x` and `y` are greater or equal to zero.
+
 - **(breaking)** The image module has been rewritten to support big- and little-endian image formats. [`Image1BPP`], [`Image8BPP`] and [`Image16BPP`] are no longer available, and have been replaced with the single [`Image`] type. To migrate from the previous image types, use [`Image`] with a specified pixel color, like this:
 
   ```rust

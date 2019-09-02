@@ -1,10 +1,9 @@
-use super::super::drawable::*;
-use super::super::transform::*;
+use super::super::drawable::{Drawable, Pixel};
+use super::super::transform::Transform;
 use super::ImageFile;
-use crate::coord::{Coord, ToUnsigned};
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::RawData;
 use crate::pixelcolor::PixelColor;
-use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
 use tinytga::{Tga, TgaIterator};
 
@@ -41,7 +40,7 @@ where
     tga: Tga<'a>,
 
     /// Top left corner offset from display origin (0,0)
-    pub offset: Coord,
+    pub offset: Point,
 
     pixel_type: PhantomData<C>,
 }
@@ -54,7 +53,7 @@ where
     fn new(image_data: &'a [u8]) -> Result<Self, ()> {
         let im = Self {
             tga: Tga::from_slice(image_data).map_err(|_| ())?,
-            offset: Coord::new(0, 0),
+            offset: Point::zero(),
             pixel_type: PhantomData,
         };
 
@@ -74,16 +73,16 @@ impl<'a, C> Dimensions for ImageTga<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn top_left(&self) -> Coord {
+    fn top_left(&self) -> Point {
         self.offset
     }
 
-    fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
+    fn bottom_right(&self) -> Point {
+        self.top_left() + self.size()
     }
 
-    fn size(&self) -> UnsignedCoord {
-        UnsignedCoord::new(self.tga.width() as u32, self.tga.height() as u32)
+    fn size(&self) -> Size {
+        Size::new(self.tga.width() as u32, self.tga.height() as u32)
     }
 }
 
@@ -124,10 +123,10 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         self.image_data.next().map(|color| {
-            let pos = self.im.offset + Coord::new(self.x as i32, self.y as i32);
+            let pos = self.im.offset + Point::new(self.x as i32, self.y as i32);
 
             let raw = C::Raw::from_u32(color);
-            let out = Pixel(pos.to_unsigned(), raw.into());
+            let out = Pixel(pos, raw.into());
 
             self.x += 1;
 
@@ -149,7 +148,7 @@ where
 {
     /// Translate the image from its current position to a new position by (x, y) pixels, returning
     /// a new `ImageTga`. For a mutating transform, see `translate_mut`.
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(&self, by: Point) -> Self {
         Self {
             offset: self.offset + by,
             ..self.clone()
@@ -157,7 +156,7 @@ where
     }
 
     /// Translate the image from its current position to a new position by (x, y) pixels.
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.offset += by;
 
         self
@@ -168,9 +167,8 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::{Rgb888, RgbColor};
-    use crate::unsignedcoord::UnsignedCoord;
 
-    const PIXEL_COLORS: [(u32, u32, Rgb888); 16] = [
+    const PIXEL_COLORS: [(i32, i32, Rgb888); 16] = [
         (0, 0, Rgb888::WHITE),
         (1, 0, Rgb888::BLACK),
         (2, 0, Rgb888::WHITE),
@@ -198,7 +196,7 @@ mod tests {
         for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
             assert_eq!(
                 pixels.next(),
-                Some(Pixel(UnsignedCoord::new(*x, *y), *color)),
+                Some(Pixel(Point::new(*x, *y), *color)),
                 "Pixel color at index {} does not match",
                 i
             );
@@ -219,7 +217,7 @@ mod tests {
         for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
             assert_eq!(
                 pixels.next(),
-                Some(Pixel(UnsignedCoord::new(*x, *y), *color)),
+                Some(Pixel(Point::new(*x, *y), *color)),
                 "Pixel color at index {} does not match",
                 i
             );
