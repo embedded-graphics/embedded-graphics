@@ -175,7 +175,7 @@ where
                 break None;
             }
 
-            let border_width = self.style.stroke_width as i32;
+            let border_width = i32::from(self.style.stroke_width);
             let tl = self.top_left;
             let br = self.bottom_right;
 

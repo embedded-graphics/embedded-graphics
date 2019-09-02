@@ -169,7 +169,7 @@ where
             return None;
         }
 
-        let radius = self.radius as i32 - self.style.stroke_width as i32 + 1;
+        let radius = self.radius as i32 - i32::from(self.style.stroke_width) + 1;
         let outer_radius = self.radius as i32;
 
         let radius_sq = radius * radius;
