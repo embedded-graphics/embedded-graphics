@@ -222,7 +222,11 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    Some(self.style.stroke_color.unwrap_or(BinaryColor::On.into()))
+                    Some(
+                        self.style
+                            .stroke_color
+                            .unwrap_or_else(|| BinaryColor::On.into()),
+                    )
                 } else {
                     self.style.fill_color
                 };
