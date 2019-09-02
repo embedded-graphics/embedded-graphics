@@ -7,6 +7,6 @@ members = [
     "tinytga",
 ]
 
-[patch.crates-io]
-embedded-graphics = { path = "embedded-graphics" }
-embedded-graphics-simulator = { path = "simulator" }
+# [patch.crates-io]
+# embedded-graphics = { path = "embedded-graphics" }
+# embedded-graphics-simulator = { path = "simulator" }
