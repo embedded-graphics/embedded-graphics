@@ -17,6 +17,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
+//! use embedded_graphics::image::Image;
 //! use embedded_graphics::pixelcolor::raw::RawU4;
 //!
 //! /// RGBI color
