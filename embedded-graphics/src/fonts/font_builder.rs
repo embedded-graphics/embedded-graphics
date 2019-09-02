@@ -197,7 +197,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         let char_per_row = Conf::FONT_IMAGE_WIDTH / Conf::CHAR_WIDTH;
 
-        let pixel = loop {
+        loop {
             if let Some(current_char) = self.current_char {
                 // Char _code_ offset from first char, most often a space
                 // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
@@ -253,9 +253,7 @@ where
             } else {
                 break None;
             }
-        };
-
-        pixel
+        }
     }
 }
 
