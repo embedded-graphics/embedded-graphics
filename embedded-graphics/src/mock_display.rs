@@ -98,7 +98,7 @@ where
 
         // Convert pattern to colors and pad pattern with None.
         let pattern_colors = pattern
-            .into_iter()
+            .iter()
             .flat_map(|row| {
                 row.chars()
                     .map(|c| match c {
@@ -138,7 +138,7 @@ where
         let empty_rows = self
             .0
             .rchunks(SIZE)
-            .take_while(|row| row.into_iter().all(Option::is_none))
+            .take_while(|row| row.iter().all(Option::is_none))
             .count();
 
         writeln!(f, "MockDisplay[")?;
@@ -162,7 +162,7 @@ where
     C: PixelColor,
 {
     fn eq(&self, other: &MockDisplay<C>) -> bool {
-        self.0.into_iter().eq(other.0.into_iter())
+        self.0.iter().eq(other.0.iter())
     }
 }
 

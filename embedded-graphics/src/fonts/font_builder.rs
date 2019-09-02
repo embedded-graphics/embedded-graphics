@@ -242,7 +242,7 @@ where
                     if self.char_walk_y >= Conf::CHAR_HEIGHT {
                         self.char_walk_y = 0;
                         self.idx += 1;
-                        self.current_char = self.text.chars().skip(self.idx).next();
+                        self.current_char = self.text.chars().nth(self.idx);
                     }
                 }
 
