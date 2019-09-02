@@ -55,7 +55,7 @@ impl BinaryColor {
     /// assert_eq!(BinaryColor::Off.invert(), BinaryColor::On);
     /// assert_eq!(BinaryColor::On.invert(), BinaryColor::Off);
     /// ```
-    pub fn invert(&self) -> Self {
+    pub fn invert(self) -> Self {
         match self {
             BinaryColor::On => BinaryColor::Off,
             BinaryColor::Off => BinaryColor::On,
@@ -98,7 +98,7 @@ impl BinaryColor {
     /// let color = BinaryColor::On;
     /// assert_eq!(color.map_color(Rgb565::RED, Rgb565::GREEN), Rgb565::GREEN)
     /// ```
-    pub(crate) fn map_color<T>(&self, value_off: T, value_on: T) -> T {
+    pub(crate) fn map_color<T>(self, value_off: T, value_on: T) -> T {
         match self {
             BinaryColor::On => value_on,
             BinaryColor::Off => value_off,
