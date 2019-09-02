@@ -90,7 +90,7 @@ where
     type Item = R;
 
     fn next(&mut self) -> Option<Self::Item> {
-        R::next(self).map(|value| value.into())
+        R::next(self)
     }
 }
 
@@ -101,7 +101,7 @@ where
     type Item = R;
 
     fn next(&mut self) -> Option<Self::Item> {
-        R::next(self).map(|value| value.into())
+        R::next(self)
     }
 }
 
