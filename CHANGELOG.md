@@ -15,8 +15,6 @@ TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` 
 
 - **(breaking)** `Coord`s can no longer be created from `(u32, u32)`, `[u32; 2]` or `&[u32; 2]`; these conversions are dangerous as the full range of `u32` values cannot be represented by the `i32` used for storage inside `Coord`.
 
-- **(breaking)** `Coord::clamp_positive` is removed.
-
 - **(breaking)** `Coord` and `UnsignedCoord` are replaced by `Point` and `Size`.
 
 - **(breaking)** `Pixel` now uses the signed `Point` type as the first element. Display drivers need to implement an additional check if `x` and `y` are greater or equal to zero.
@@ -53,6 +51,12 @@ TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` 
 [`nalgebra::vector2<i32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 [`nalgebra::vector2<u32>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 [`vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
+
+## Removed
+
+- **(breaking)** `Coord::clamp_positive` is removed.
+
+- **(breaking)** \* The `icoord!()` and `ucoord!()` macros are removed. Use `Point::new()` or `Size::new()` respectively instead.
 
 ## Fixed
 
