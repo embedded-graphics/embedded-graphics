@@ -14,6 +14,27 @@ use crate::pixelcolor::{
 /// To simplify the conversion from `BinaryColor` to RGB and grayscale color
 /// types the default conversions assume that `BinaryColor::Off` is black and
 /// `BinaryColor::On` is white.
+///
+/// # Conversion between BinaryColor and bool
+///
+/// ```
+/// use embedded_graphics::pixelcolor::BinaryColor;
+///
+/// // A BinaryColor can be converted to a bool by using the is_on and is_off methods.
+/// let color = BinaryColor::On;
+/// assert!(color.is_on());
+/// assert!(color.invert().is_off());
+///
+/// // BinaryColor implements From<bool>.
+/// let bool_value = true;
+/// let color: BinaryColor = bool_value.into();
+/// assert_eq!(color, BinaryColor::On);
+///
+/// // this is equivalent to:
+/// let bool_value = true;
+/// let color = if bool_value { BinaryColor::On } else { BinaryColor::Off };
+/// assert_eq!(color, BinaryColor::On);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BinaryColor {
     /// Inactive pixel.
@@ -25,11 +46,46 @@ pub enum BinaryColor {
 
 impl BinaryColor {
     /// Inverts the color.
-    pub fn invert(&self) -> Self {
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::pixelcolor::BinaryColor;
+    ///
+    /// assert_eq!(BinaryColor::Off.invert(), BinaryColor::On);
+    /// assert_eq!(BinaryColor::On.invert(), BinaryColor::Off);
+    /// ```
+    pub fn invert(self) -> Self {
         match self {
             BinaryColor::On => BinaryColor::Off,
             BinaryColor::Off => BinaryColor::On,
         }
+    }
+
+    /// Returns `true` if this color is `On`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::pixelcolor::BinaryColor;
+    ///
+    /// assert!(BinaryColor::On.is_on());
+    /// ```
+    pub fn is_on(self) -> bool {
+        self == BinaryColor::On
+    }
+
+    /// Returns `true` if this color is `Off`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::pixelcolor::BinaryColor;
+    ///
+    /// assert!(BinaryColor::Off.is_off());
+    /// ```
+    pub fn is_off(self) -> bool {
+        self == BinaryColor::Off
     }
 
     /// Maps active and inactive colors to a different type.
@@ -42,7 +98,7 @@ impl BinaryColor {
     /// let color = BinaryColor::On;
     /// assert_eq!(color.map_color(Rgb565::RED, Rgb565::GREEN), Rgb565::GREEN)
     /// ```
-    pub(crate) fn map_color<T>(&self, value_off: T, value_on: T) -> T {
+    pub(crate) fn map_color<T>(self, value_off: T, value_on: T) -> T {
         match self {
             BinaryColor::On => value_on,
             BinaryColor::Off => value_off,
@@ -67,6 +123,16 @@ impl From<RawU1> for BinaryColor {
 impl From<BinaryColor> for RawU1 {
     fn from(color: BinaryColor) -> Self {
         RawU1::new(color.map_color(0, 1))
+    }
+}
+
+impl From<bool> for BinaryColor {
+    fn from(value: bool) -> Self {
+        if value {
+            BinaryColor::On
+        } else {
+            BinaryColor::Off
+        }
     }
 }
 
@@ -103,5 +169,20 @@ mod tests {
     fn into_data() {
         assert_eq!(RawU1::from(BinaryColor::Off).into_inner(), 0);
         assert_eq!(RawU1::from(BinaryColor::On).into_inner(), 1);
+    }
+
+    #[test]
+    fn from_bool() {
+        assert_eq!(BinaryColor::from(false), BinaryColor::Off);
+        assert_eq!(BinaryColor::from(true), BinaryColor::On);
+    }
+
+    #[test]
+    fn is_on_off() {
+        assert!(BinaryColor::Off.is_off());
+        assert!(!BinaryColor::On.is_off());
+
+        assert!(!BinaryColor::Off.is_on());
+        assert!(BinaryColor::On.is_on());
     }
 }
