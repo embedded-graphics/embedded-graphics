@@ -51,7 +51,7 @@ impl<'a, C: PixelColor + Clone, Conf> Clone for FontBuilder<'a, C, Conf> {
         Self {
             pos: self.pos,
             text: self.text,
-            style: self.style.clone(),
+            style: self.style,
             _conf: Default::default(),
         }
     }
@@ -291,7 +291,7 @@ where
     fn translate(&self, by: Point) -> Self {
         Self {
             pos: self.pos + by,
-            ..self.clone()
+            ..*self
         }
     }
 

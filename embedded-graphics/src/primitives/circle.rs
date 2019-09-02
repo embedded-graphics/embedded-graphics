@@ -241,7 +241,7 @@ where
     fn translate(&self, by: Point) -> Self {
         Self {
             center: self.center + by,
-            ..self.clone()
+            ..*self
         }
     }
 

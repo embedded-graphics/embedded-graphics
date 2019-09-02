@@ -243,7 +243,7 @@ where
         Self {
             top_left: self.top_left + by,
             bottom_right: self.bottom_right + by,
-            ..self.clone()
+            ..*self
         }
     }
 

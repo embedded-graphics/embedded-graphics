@@ -187,9 +187,9 @@ where
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
-            data: self.data.clone(),
+            data: self.data,
             offset: self.offset + by,
-            ..*self.clone()
+            ..*self
         }
     }
 
