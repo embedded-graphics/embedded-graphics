@@ -8,4 +8,4 @@ macro_rules! doc {
     };
 }
 
-doc!(include_str!("../../README.md"));
+doc!(include_str!("../README.md"));

@@ -258,8 +258,8 @@ where
 ///
 /// If the device used supports partial updates where only a given range of pixels is updated, you
 /// should also implement `SizedDrawing` alongside [`Drawing`]. This trait is similar to `Drawing`,
-/// but has a bound on [`Dimensions`](./drawable/trait.Dimensions.html) which provides methods for
-/// getting the bounding box of the passed item to draw.
+/// but has a bound on [`Dimensions`] which provides methods for getting the bounding box of the
+/// passed item to draw.
 ///
 /// The example below shows a contrived implementation for a display that doesn't require a
 /// framebuffer. It sends pixels one by one to over the SPI bus which isn't very efficient, but that
@@ -331,6 +331,7 @@ where
 /// ```
 ///
 /// [`Drawing`]: ./trait.Drawing.html
+/// [`Dimensions`]: ./geometry/trait.Dimensions.html
 /// [`SizedDrawing`]: ./trait.SizedDrawing.html
 pub trait SizedDrawing<C>
 where
