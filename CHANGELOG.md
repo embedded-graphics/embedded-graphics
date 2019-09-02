@@ -9,6 +9,8 @@ TODO: Rename occurrences of `Coord` and `UnsignedCoord` with `Point` and `Size` 
 
 ## Changes
 
+- **(breaking)** The `Image` struct is removed from the prelude. Import it with `use embedded_graphics::image::Image` instead.
+
 - **(breaking)** Integration with Nalgebra through the `nalgebra_support` feature is now achieved by converting Nalgebra types into `Coord` or `UnsignedCoord` instead of Embedded Graphics aliasing `Coord` and `UnsignedCoord` to [`nalgebra::Vector2<i32>`] and [`nalgebra::Vector2<u32>`] respectively. Integration now requires calling `Coord::from(my_nalgebra_var)` or `my_nalgebra_var.into()`.
 
   The benefit of this change is to allow more integer primitive types in [`Vector2`]. Embedded Graphics should now support `u8`, `u16` and `u32` conversions to `UnsignedCoord`, and `u8`, `u16`, `i8`, `i16` and `i32` conversions to `Coord`. It also reduces coupling between Nalgebra and Embedded Graphics.
