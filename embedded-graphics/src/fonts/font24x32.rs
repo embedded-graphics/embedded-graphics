@@ -90,25 +90,22 @@ pub type Font24x32<'a, C> = FontBuilder<'a, C, Font24x32Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::coord::Coord;
-    use crate::drawable::Dimensions;
     use crate::fonts::Font;
+    use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::Style;
     use crate::style::WithStyle;
     use crate::transform::Transform;
-    use crate::unsignedcoord::UnsignedCoord;
     use crate::Drawing;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
         let text: Font24x32<BinaryColor> = Font24x32::render_str("Hello World!")
-            .translate(Coord::new(5, -32))
-            .style(Style::stroke(BinaryColor::On));
-        let mut it = text.into_iter();
+            .stroke(Some(BinaryColor::On))
+            .fill(Some(BinaryColor::Off))
+            .translate(Point::new(5, -20));
 
-        assert_eq!(it.next(), None);
+        assert_eq!(text.into_iter().count(), 12 * 16 * "Hello World!".len());
     }
 
     #[test]
@@ -116,28 +113,26 @@ mod tests {
         let hello: Font24x32<BinaryColor> = Font24x32::render_str("Hello World!");
         let empty: Font24x32<BinaryColor> = Font24x32::render_str("");
 
-        assert_eq!(hello.size(), UnsignedCoord::new(288, 32));
-        assert_eq!(empty.size(), UnsignedCoord::new(0, 0));
+        assert_eq!(hello.size(), Size::new(144, 16));
+        assert_eq!(empty.size(), Size::new(0, 0));
     }
 
     #[test]
     fn text_corners() {
         let hello: Font24x32<BinaryColor> =
-            Font24x32::render_str("Hello World!").translate(Coord::new(5, -20));
-        let empty: Font24x32<BinaryColor> = Font24x32::render_str("").translate(Coord::new(10, 20));
+            Font24x32::render_str("Hello World!").translate(Point::new(5, -20));
+        let empty: Font24x32<BinaryColor> = Font24x32::render_str("").translate(Point::new(10, 20));
 
-        assert_eq!(hello.top_left(), Coord::new(5, -20));
-        assert_eq!(hello.bottom_right(), Coord::new(288 + 5, 32 - 20));
-        assert_eq!(empty.top_left(), Coord::new(10, 20));
-        assert_eq!(empty.bottom_right(), Coord::new(10, 20));
+        assert_eq!(hello.top_left(), Point::new(5, -20));
+        assert_eq!(hello.bottom_right(), Point::new(144 + 5, 16 - 20));
+        assert_eq!(empty.top_left(), Point::new(10, 20));
+        assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
 
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
         display.draw(Font24x32::render_str("Mm").stroke(Some(BinaryColor::On)));
-
-        // println!(display);
 
         assert_eq!(
             display,
