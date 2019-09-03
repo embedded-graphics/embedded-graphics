@@ -103,9 +103,9 @@ mod tests {
         let text: Font24x32<BinaryColor> = Font24x32::render_str("Hello World!")
             .stroke(Some(BinaryColor::On))
             .fill(Some(BinaryColor::Off))
-            .translate(Point::new(5, -20));
+            .translate(Point::new(5, -32));
 
-        assert_eq!(text.into_iter().count(), 12 * 16 * "Hello World!".len());
+        assert_eq!(text.into_iter().count(), 24 * 32 * "Hello World!".len());
     }
 
     #[test]
@@ -113,7 +113,7 @@ mod tests {
         let hello: Font24x32<BinaryColor> = Font24x32::render_str("Hello World!");
         let empty: Font24x32<BinaryColor> = Font24x32::render_str("");
 
-        assert_eq!(hello.size(), Size::new(144, 16));
+        assert_eq!(hello.size(), Size::new(288, 32));
         assert_eq!(empty.size(), Size::new(0, 0));
     }
 
@@ -124,7 +124,7 @@ mod tests {
         let empty: Font24x32<BinaryColor> = Font24x32::render_str("").translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
-        assert_eq!(hello.bottom_right(), Point::new(144 + 5, 16 - 20));
+        assert_eq!(hello.bottom_right(), Point::new(288 + 5, 32 - 20));
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
