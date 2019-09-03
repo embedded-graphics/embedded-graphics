@@ -30,6 +30,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image;
 /// use embedded_graphics::pixelcolor::BinaryColor;
 /// # use embedded_graphics::mock_display::MockDisplay as Display;
 ///
@@ -61,7 +62,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::image::{ImageLE, ImageBE};
+/// use embedded_graphics::image::{ImageLE, ImageBE, Image};
 /// use embedded_graphics::pixelcolor::{Rgb565, Rgb888};
 /// use embedded_graphics::pixelcolor::raw::{BigEndian, LittleEndian};
 /// # const DATA: &[u8] = &[0x55; 8 * 8 * 3];
