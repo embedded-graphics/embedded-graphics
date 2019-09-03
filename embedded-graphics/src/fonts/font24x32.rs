@@ -52,7 +52,7 @@ impl FontBuilderConf for Font24x32Conf {
 /// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 ///
 /// display.draw(
-///     Font24x32::render_str("Hello Rust!").translate(Coord::new(20, 30))
+///     Font24x32::render_str("Hello Rust!").translate(Point::new(20, 30))
 /// );
 /// ```
 ///
@@ -78,7 +78,7 @@ impl FontBuilderConf for Font24x32Conf {
 ///
 /// display.draw(
 ///     Font24x32::render_str("Hello Rust!")
-///         .translate(Coord::new(20, 30))
+///         .translate(Point::new(20, 30))
 ///         .fill(Some(Rgb565::BLUE))
 ///         .stroke(Some(Rgb565::YELLOW)),
 /// );
