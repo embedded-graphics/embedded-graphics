@@ -19,7 +19,6 @@ impl FontBuilderConf for Font24x32Conf {
     }
 }
 
-
 /// 24x32 pixel monospace font
 ///
 /// There is also the [`text_24x32`] macro to provide an easier to use interface.
