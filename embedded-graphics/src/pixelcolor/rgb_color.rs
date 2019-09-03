@@ -54,6 +54,7 @@ macro_rules! impl_rgb_color {
     (
         $type:ident,
         $data_type:ty,
+        $storage_type:ty,
         ($r_bits:expr, $g_bits:expr, $b_bits:expr),
         ($r_pos:expr, $g_pos:expr, $b_pos:expr),
         $type_str:expr
@@ -70,7 +71,14 @@ macro_rules! impl_rgb_color {
         #[doc = "[`RgbColor`]: trait.RgbColor.html"]
         #[doc = "[module-level documentation]: index.html"]
         #[derive(Clone, Copy, PartialEq, Eq)]
-        pub struct $type(<$data_type as RawData>::Storage);
+        pub struct $type($storage_type);
+
+        impl $type {
+            const R_MASK: $storage_type = ($type::MAX_R as $storage_type) << $r_pos;
+            const G_MASK: $storage_type = ($type::MAX_G as $storage_type) << $g_pos;
+            const B_MASK: $storage_type = ($type::MAX_B as $storage_type) << $b_pos;
+            const RGB_MASK: $storage_type = Self::R_MASK | Self::B_MASK | Self::G_MASK;
+        }
 
         impl fmt::Debug for $type {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -95,13 +103,11 @@ macro_rules! impl_rgb_color {
             #[doc = "Too large channel values will be limited by setting the"]
             #[doc = "unused most significant bits to zero."]
             pub const fn new(r: u8, g: u8, b: u8) -> Self {
-                type Storage = <$data_type as RawData>::Storage;
+                let r_shifted = (r & Self::MAX_R) as $storage_type << $r_pos;
+                let g_shifted = (g & Self::MAX_G) as $storage_type << $g_pos;
+                let b_shifted = (b & Self::MAX_B) as $storage_type << $b_pos;
 
-                Self(
-                    ((r & Self::MAX_R) as Storage) << $r_pos
-                        | ((g & Self::MAX_G) as Storage) << $g_pos
-                        | ((b & Self::MAX_B) as Storage) << $b_pos
-                )
+                Self(r_shifted | g_shifted | b_shifted)
             }
         }
 
@@ -144,16 +150,9 @@ macro_rules! impl_rgb_color {
 
         impl From<$data_type> for $type {
             fn from(data: $data_type) -> Self {
-                type Storage = <$data_type as RawData>::Storage;
-
                 let data = data.into_inner();
 
-                const MASK: Storage =
-                    ($type::MAX_R as Storage) << $r_pos
-                    | ($type::MAX_G as Storage) << $g_pos
-                    | ($type::MAX_B as Storage) << $b_pos;
-
-                Self(data & MASK)
+                Self(data & Self::RGB_MASK)
             }
         }
 
@@ -168,12 +167,14 @@ macro_rules! impl_rgb_color {
     (
         $type:ident,
         $data_type:ty,
+        $storage_type:ty,
         ($r_bits:expr, $g_bits:expr, $b_bits:expr),
         ($r_pos:expr, $g_pos:expr, $b_pos:expr)
     ) => {
         impl_rgb_color!(
             $type,
             $data_type,
+            $storage_type,
             ($r_bits, $g_bits, $b_bits),
             ($r_pos, $g_pos, $b_pos),
             stringify!($type)
@@ -184,37 +185,39 @@ macro_rules! impl_rgb_color {
 /// Helper macro to calculate bit positions for RGB and BGR colors
 macro_rules! rgb_color {
     (
-        $type:ident, $data_type:ty,
+        $type:ident, $data_type:ty, $storage_type:ty,
         Rgb = ($r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_rgb_color!(
             $type,
             $data_type,
+            $storage_type,
             ($r_bits, $g_bits, $b_bits),
             ($g_bits + $b_bits, $b_bits, 0)
         );
     };
 
     (
-        $type:ident, $data_type:ty,
+        $type:ident, $data_type:ty, $storage_type:ty,
         Bgr = ($r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_rgb_color!(
             $type,
             $data_type,
+            $storage_type,
             ($r_bits, $g_bits, $b_bits),
             (0, $r_bits, $r_bits + $g_bits)
         );
     };
 }
 
-rgb_color!(Rgb555, RawU16, Rgb = (5, 5, 5));
-rgb_color!(Bgr555, RawU16, Bgr = (5, 5, 5));
-rgb_color!(Rgb565, RawU16, Rgb = (5, 6, 5));
-rgb_color!(Bgr565, RawU16, Bgr = (5, 6, 5));
+rgb_color!(Rgb555, RawU16, u16, Rgb = (5, 5, 5));
+rgb_color!(Bgr555, RawU16, u16, Bgr = (5, 5, 5));
+rgb_color!(Rgb565, RawU16, u16, Rgb = (5, 6, 5));
+rgb_color!(Bgr565, RawU16, u16, Bgr = (5, 6, 5));
 
-rgb_color!(Rgb888, RawU24, Rgb = (8, 8, 8));
-rgb_color!(Bgr888, RawU24, Bgr = (8, 8, 8));
+rgb_color!(Rgb888, RawU24, u32, Rgb = (8, 8, 8));
+rgb_color!(Bgr888, RawU24, u32, Bgr = (8, 8, 8));
 
 #[cfg(test)]
 mod tests {
@@ -282,5 +285,14 @@ mod tests {
         test_bpp24(Bgr888::new(0b10000001, 0, 0), 0b10000001 << 0);
         test_bpp24(Bgr888::new(0, 0b10000001, 0), 0b10000001 << 8);
         test_bpp24(Bgr888::new(0, 0, 0b10000001), 0b10000001 << 8 + 8);
+    }
+
+    #[test]
+    pub fn unused_bits_are_ignored() {
+        let color: Rgb555 = RawU16::from(0xFFFF).into();
+        assert_eq!(RawU16::from(color).into_inner(), 0x7FFF);
+
+        let color: Bgr555 = RawU16::from(0xFFFF).into();
+        assert_eq!(RawU16::from(color).into_inner(), 0x7FFF);
     }
 }

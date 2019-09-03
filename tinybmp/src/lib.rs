@@ -55,6 +55,6 @@ impl<'a> Bmp<'a> {
     /// Get the BPP (bits per pixel) for this image
     // TODO: Should this return an enum?
     pub fn bpp(&self) -> u32 {
-        self.header.bpp as u32
+        u32::from(self.header.bpp)
     }
 }

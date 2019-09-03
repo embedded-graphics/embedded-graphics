@@ -90,7 +90,7 @@ where
     type Item = R;
 
     fn next(&mut self) -> Option<Self::Item> {
-        R::next(self).map(|value| value.into())
+        R::next(self)
     }
 }
 
@@ -101,7 +101,7 @@ where
     type Item = R;
 
     fn next(&mut self) -> Option<Self::Item> {
-        R::next(self).map(|value| value.into())
+        R::next(self)
     }
 }
 
@@ -115,7 +115,7 @@ macro_rules! impl_next_for_bits {
     ($raw_type:ident, $bit_count:expr) => {
         impl<BO> RawDataIterNext<BO> for $raw_type {
             fn next<'a>(iter: &mut RawDataIter<'a, $raw_type, BO>) -> Option<$raw_type> {
-                iter.next_bits($bit_count).map(|data| $raw_type::new(data))
+                iter.next_bits($bit_count).map($raw_type::new)
             }
         }
     };

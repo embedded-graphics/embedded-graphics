@@ -3,13 +3,13 @@
 //! Image drawables can be created for raw bitmap data and images in BMP and TGA
 //! format.
 
-mod image;
 #[cfg(feature = "bmp")]
 mod image_bmp;
+mod image_raw;
 #[cfg(feature = "tga")]
 mod image_tga;
 
-pub use self::image::{Image, ImageBE, ImageLE};
+pub use self::image_raw::{Image, ImageBE, ImageLE};
 
 #[cfg(feature = "bmp")]
 pub use self::image_bmp::ImageBmp;

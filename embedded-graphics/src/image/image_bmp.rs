@@ -166,28 +166,26 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.y < self.image.bmp.height() {
-                if self.x == 0 {
-                    let row_index = (self.image.height() - 1) - self.y;
-                    let row_start = self.image.bytes_per_row() * row_index as usize;
-                    self.data.set_byte_position(row_start);
-                }
-
-                let data = self.data.next()?;
-                let mut point = Point::new(self.x as i32, self.y as i32);
-                point += self.image.offset;
-
-                self.x += 1;
-                if self.x >= self.image.bmp.width() {
-                    self.y += 1;
-                    self.x = 0;
-                }
-
-                break Some(Pixel(point, data.into()));
-            } else {
-                break None;
+        if self.y < self.image.bmp.height() {
+            if self.x == 0 {
+                let row_index = (self.image.height() - 1) - self.y;
+                let row_start = self.image.bytes_per_row() * row_index as usize;
+                self.data.set_byte_position(row_start);
             }
+
+            let data = self.data.next()?;
+            let mut point = Point::new(self.x as i32, self.y as i32);
+            point += self.image.offset;
+
+            self.x += 1;
+            if self.x >= self.image.bmp.width() {
+                self.y += 1;
+                self.x = 0;
+            }
+
+            Some(Pixel(point, data.into()))
+        } else {
+            None
         }
     }
 }

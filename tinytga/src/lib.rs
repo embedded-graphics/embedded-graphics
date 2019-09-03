@@ -177,7 +177,7 @@ impl<'a> Iterator for TgaIterator<'a> {
                         next_rle_packet(self.bytes_to_consume.unwrap(), self.tga.bpp() / 8)
                             .map(|(remaining, packet)| {
                                 (
-                                    if remaining.len() > 0 {
+                                    if !remaining.is_empty() {
                                         Some(remaining)
                                     } else {
                                         None
@@ -218,7 +218,7 @@ impl<'a> Iterator for TgaIterator<'a> {
 
         let pixel_value = {
             let out = match self.stride {
-                1 => px[start] as u32,
+                1 => u32::from(px[start]),
                 2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
                 3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
                 4 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]]),

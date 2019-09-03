@@ -51,7 +51,7 @@ impl<'a, C: PixelColor + Clone, Conf> Clone for FontBuilder<'a, C, Conf> {
         Self {
             pos: self.pos,
             text: self.text,
-            style: self.style.clone(),
+            style: self.style,
             _conf: Default::default(),
         }
     }
@@ -197,7 +197,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         let char_per_row = Conf::FONT_IMAGE_WIDTH / Conf::CHAR_WIDTH;
 
-        let pixel = loop {
+        loop {
             if let Some(current_char) = self.current_char {
                 // Char _code_ offset from first char, most often a space
                 // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
@@ -222,7 +222,11 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    Some(self.style.stroke_color.unwrap_or(BinaryColor::On.into()))
+                    Some(
+                        self.style
+                            .stroke_color
+                            .unwrap_or_else(|| BinaryColor::On.into()),
+                    )
                 } else {
                     self.style.fill_color
                 };
@@ -242,7 +246,7 @@ where
                     if self.char_walk_y >= Conf::CHAR_HEIGHT {
                         self.char_walk_y = 0;
                         self.idx += 1;
-                        self.current_char = self.text.chars().skip(self.idx).next();
+                        self.current_char = self.text.chars().nth(self.idx);
                     }
                 }
 
@@ -253,9 +257,7 @@ where
             } else {
                 break None;
             }
-        };
-
-        pixel
+        }
     }
 }
 
@@ -291,7 +293,7 @@ where
     fn translate(&self, by: Point) -> Self {
         Self {
             pos: self.pos + by,
-            ..self.clone()
+            ..*self
         }
     }
 

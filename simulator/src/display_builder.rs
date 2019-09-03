@@ -104,3 +104,9 @@ impl DisplayBuilder {
         RgbDisplay { pixels, window }
     }
 }
+
+impl Default for DisplayBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

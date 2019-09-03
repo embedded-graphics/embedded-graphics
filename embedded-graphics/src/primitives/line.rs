@@ -182,7 +182,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
-        while !self.stop {
+        if !self.stop {
             let point = self.start;
 
             if self.start == self.end {
@@ -198,9 +198,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 self.start += Point::new(0, self.direction.y);
             }
 
-            return Some(Pixel(point, self.style.stroke_color.unwrap()));
+            Some(Pixel(point, self.style.stroke_color.unwrap()))
+        } else {
+            None
         }
-        None
     }
 }
 

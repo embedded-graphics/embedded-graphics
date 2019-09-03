@@ -61,11 +61,11 @@ where
     }
 
     fn width(&self) -> u32 {
-        self.tga.width() as u32
+        u32::from(self.tga.width())
     }
 
     fn height(&self) -> u32 {
-        self.tga.height() as u32
+        u32::from(self.tga.height())
     }
 }
 
@@ -82,7 +82,7 @@ where
     }
 
     fn size(&self) -> Size {
-        Size::new(self.tga.width() as u32, self.tga.height() as u32)
+        Size::new(u32::from(self.tga.width()), u32::from(self.tga.height()))
     }
 }
 
