@@ -13,10 +13,10 @@
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
+use embedded_graphics::egcircle;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics::{egcircle, egline};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -95,6 +95,38 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     hand.into_iter().chain(decoration)
 }
 
+/// Draw the hour hand (0-11)
+fn draw_hour_hand(hour: u32) -> Line<BinaryColor> {
+    // Convert hour into a position around the circle in radians
+    let hour_radians = ((hour as f32 / 12.0) * 2.0 * PI) + START;
+
+    let hand_len = CENTER as f32 - 60.0;
+
+    let end = Point::new(
+        CENTER + (hour_radians.cos() * hand_len) as i32,
+        CENTER + (hour_radians.sin() * hand_len) as i32,
+    );
+
+    // Basic line hand
+    Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On))
+}
+
+/// Draw the minute hand (0-59)
+fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
+    // Convert minute into a position around the circle in radians
+    let minute_radians = ((minute as f32 / 60.0) * 2.0 * PI) + START;
+
+    let hand_len = CENTER as f32 - 30.0;
+
+    let end = Point::new(
+        CENTER + (minute_radians.cos() * hand_len) as i32,
+        CENTER + (minute_radians.sin() * hand_len) as i32,
+    );
+
+    // Basic line hand
+    Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On))
+}
+
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Clock")
@@ -109,6 +141,8 @@ fn main() {
 
         let time = Local::now();
 
+        display.draw(draw_hour_hand(time.hour()));
+        display.draw(draw_minute_hand(time.minute()));
         display.draw(draw_seconds_hand(time.second()));
 
         let end = display.run_once();
