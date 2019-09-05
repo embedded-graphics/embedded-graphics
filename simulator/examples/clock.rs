@@ -10,6 +10,12 @@
 //! `[Primitive]::new()` so I can pass in a `Point`
 //! 2. I often want a relative offset from a `Point`. Maybe we implement `Transform` for `Point`? Or
 //! a new trait/set of methods to do relative moves.
+//! 3. The font docs could use screenshots of what the text looks like
+//! 4. Some sort of "layout" thing, like being able to say "position this thing centered in the
+//! display" - see digital clock positioning for example
+//! 5. The font docs should give examples of `write!()`ing into a fixed length buffer using
+//! `arrayvec`. This example uses `format!()` because the simulator is `std`, but this won't work in
+//! `no-std` environments
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
