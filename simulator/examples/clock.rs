@@ -1,10 +1,21 @@
 //! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
+//!
+//! # Development findings
+//!
+//! Some of these should probably be turned into issues and discussed before this example is
+//! released.
+//!
+//! 1. The primitives macros should accept both `()` tuples and variables/expressions for their
+//! coordinate positions. In this code, I often find myself replacing a macro with a call to
+//! `[Primitive]::new()` so I can pass in a `Point`
+//! 2. I often want a relative offset from a `Point`. Maybe we implement `Transform` for `Point`? Or
+//! a new trait/set of methods to do relative moves.
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::Line;
+use embedded_graphics::primitives::{Circle, Line};
 use embedded_graphics::{egcircle, egline};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
@@ -56,10 +67,35 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     face.into_iter().chain(tics.flatten())
 }
 
-fn main() {
-    // Start at top of circle
-    let mut seconds_radians: f32 = START;
+/// Draw the seconds hand given a seconds value (0 - 59)
+fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
+    // Convert seconds into a position around the circle in radians
+    let seconds_radians = ((seconds as f32 / 60.0) * 2.0 * PI) + START;
 
+    let end = Point::new(
+        CENTER + (seconds_radians.cos() * (CENTER as f32)) as i32,
+        CENTER + (seconds_radians.sin() * (CENTER as f32)) as i32,
+    );
+
+    // Basic line hand
+    let hand = Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On));
+
+    // Offset from end of hand
+    let decoration_offset = Point::new(
+        (seconds_radians.cos() * (20.0)) as i32,
+        (seconds_radians.sin() * (20.0)) as i32,
+    );
+
+    // Add a fancy circle near the end of the hand
+    let decoration = Circle::new(end - decoration_offset, 5)
+        .fill(Some(BinaryColor::Off))
+        .stroke(Some(BinaryColor::On))
+        .stroke_width(1);
+
+    hand.into_iter().chain(decoration)
+}
+
+fn main() {
     let mut display = DisplayBuilder::new()
         .title("Clock")
         .size(DISP_SIZE as usize, DISP_SIZE as usize)
@@ -71,18 +107,9 @@ fn main() {
 
         display.draw(draw_face());
 
-        display.draw(egline!(
-            (CENTER, CENTER),
-            (
-                CENTER + (seconds_radians.cos() * (CENTER as f32)) as i32,
-                CENTER + (seconds_radians.sin() * (CENTER as f32)) as i32
-            ),
-            stroke = Some(BinaryColor::On)
-        ));
-
         let time = Local::now();
 
-        seconds_radians = ((time.second() as f32 / 60.0) * 2.0 * PI) + START;
+        display.draw(draw_seconds_hand(time.second()));
 
         let end = display.run_once();
 
