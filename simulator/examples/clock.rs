@@ -17,6 +17,7 @@ use embedded_graphics::egcircle;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
+use embedded_graphics::text_12x16;
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -144,6 +145,25 @@ fn main() {
         display.draw(draw_hour_hand(time.hour()));
         display.draw(draw_minute_hand(time.minute()));
         display.draw(draw_seconds_hand(time.second()));
+
+        // NOTE: In no-std environments, consider using
+        // [arrayvec](https://stackoverflow.com/a/39491059/383609) and a fixed size buffer
+        let clock_text = format!(
+            "{:02}:{:02}:{:02}",
+            time.hour(),
+            time.minute(),
+            time.second()
+        );
+
+        // Draw digital clock just above center
+        display.draw(
+            text_12x16!(
+                &clock_text,
+                fill = Some(BinaryColor::On),
+                stroke = Some(BinaryColor::Off)
+            )
+            .translate((CENTER - 48, CENTER - 48).into()),
+        );
 
         let end = display.run_once();
 
