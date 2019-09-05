@@ -26,3 +26,6 @@ sdl2 = "0.32.2"
 [dependencies.embedded-graphics]
 version = "0.6.0-alpha.2"
 features = [ "bmp", "tga" ]
+
+[dev-dependencies]
+chrono = "0.4.9"

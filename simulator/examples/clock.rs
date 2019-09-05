@@ -1,10 +1,11 @@
 //! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
 
+use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Line;
-use embedded_graphics::{egcircle, egline, egrectangle, egtriangle};
+use embedded_graphics::{egcircle, egline};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -57,7 +58,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
 
 fn main() {
     // Start at top of circle
-    let mut angle: f32 = START;
+    let mut seconds_radians: f32 = START;
 
     let mut display = DisplayBuilder::new()
         .title("Clock")
@@ -73,13 +74,15 @@ fn main() {
         display.draw(egline!(
             (CENTER, CENTER),
             (
-                CENTER + (angle.cos() * (CENTER as f32)) as i32,
-                CENTER + (angle.sin() * (CENTER as f32)) as i32
+                CENTER + (seconds_radians.cos() * (CENTER as f32)) as i32,
+                CENTER + (seconds_radians.sin() * (CENTER as f32)) as i32
             ),
             stroke = Some(BinaryColor::On)
         ));
 
-        angle += 0.1;
+        let time = Local::now();
+
+        seconds_radians = ((time.second() as f32 / 60.0) * 2.0 * PI) + START;
 
         let end = display.run_once();
 
