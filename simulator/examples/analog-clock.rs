@@ -77,11 +77,11 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     // Basic line hand
     let hand = Line::new(CENTER, end).stroke(Some(BinaryColor::On));
 
-    // Offset from end of hand
-    let decoration_offset = polar(seconds_radians, SIZE as f32 - 20.0);
+    // Decoration position
+    let decoration_position = polar(seconds_radians, SIZE as f32 - 20.0);
 
     // Add a fancy circle near the end of the hand
-    let decoration = Circle::new(decoration_offset, 5)
+    let decoration = Circle::new(decoration_position, 5)
         .fill(Some(BinaryColor::Off))
         .stroke(Some(BinaryColor::On));
 
@@ -163,11 +163,7 @@ fn main() {
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
-        display.draw(
-            Circle::new(CENTER, 4)
-                .fill(Some(BinaryColor::On))
-                .stroke(Some(BinaryColor::On)),
-        );
+        display.draw(Circle::new(CENTER, 4).fill(Some(BinaryColor::On)));
 
         let end = display.run_once();
 
