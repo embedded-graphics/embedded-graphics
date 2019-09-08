@@ -6,7 +6,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- Added a more complex `clock` example to the simulator - [check it out](https://github.com/jamwaffles/embedded-graphics/tree/embedded-graphics-v0.6.0-alpha.3/simulator/examples/clock.rs) for some more in-depth usage of Embedded Graphics.
+- Added a more complex `analog-clock` example to the simulator - [check it out](https://github.com/jamwaffles/embedded-graphics/tree/embedded-graphics-v0.6.0-alpha.3/simulator/examples/analog-clock.rs) for some more in-depth usage of Embedded Graphics.
 
 ## 0.2.0-alpha.2
 
