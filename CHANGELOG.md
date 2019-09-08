@@ -4,7 +4,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## 0.2.0-alpha.2
 
-## Changes
+### Changes
 
 - **(breaking)** `Coord` and `UnsignedCoord` are replaced by [`Point`] and [`Size`].
 
@@ -40,13 +40,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
   If you need to specify an endianness for the image data (like when using multiple bytes per pixel), the [`ImageLE`] and [`ImageBE`] type aliases have been added.
 
-## Removed
+### Removed
 
 - **(breaking)** `Coord::clamp_positive` is removed.
 
 - **(breaking)** The `icoord!()` and `ucoord!()` macros are removed. Use [`Point::new()`] or [`Size::new()`] respectively instead.
 
-## Fixed
+### Fixed
 
 - The code examples `README.md` are now checked in CI during crate compilation. They were woefully outdated and have now been fixed.
 
