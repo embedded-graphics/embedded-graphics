@@ -181,6 +181,14 @@ fn main() {
         // Draw digital clock just above center
         display.draw(draw_digital_clock(&clock_text));
 
+        // Draw a small circle over the hands in the center of the clock face. This has to happen
+        // after the hands are drawn so they're covered up
+        display.draw(
+            Circle::new((CENTER, CENTER).into(), 6)
+                .fill(Some(BinaryColor::Off))
+                .stroke(Some(BinaryColor::On)),
+        );
+
         let end = display.run_once();
 
         if end {
