@@ -88,8 +88,7 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     // Add a fancy circle near the end of the hand
     let decoration = Circle::new(end - decoration_offset, 5)
         .fill(Some(BinaryColor::Off))
-        .stroke(Some(BinaryColor::On))
-        .stroke_width(1);
+        .stroke(Some(BinaryColor::On));
 
     hand.into_iter().chain(decoration)
 }
@@ -133,14 +132,13 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
 /// NOTE: The formatted time str must be passed in as references to temporary values in a
 /// function can't be returned.
 fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
-    let text = Font12x16::<BinaryColor>::render_str(&time_str)
+    let text = Font12x16::render_str(&time_str)
         .stroke(Some(BinaryColor::Off))
         .translate(CENTER - Size::new(48, 48));
 
-    // Add some padding on the background around the time digits, here it's 2px in each direction
-    let offset = Size::new(2, 2);
-
-    let background = Rectangle::new(text.top_left() - offset, text.bottom_right() + offset)
+    // Add a background around the time digits. Note that there is no bottom-right padding as this
+    // is added by the font renderer itself
+    let background = Rectangle::new(text.top_left() - Size::new(3, 3), text.bottom_right())
         .fill(Some(BinaryColor::On));
 
     // Draw the white background first, then the black text. Order matters here
@@ -180,8 +178,8 @@ fn main() {
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
         display.draw(
-            Circle::new(CENTER, 6)
-                .fill(Some(BinaryColor::Off))
+            Circle::new(CENTER, 4)
+                .fill(Some(BinaryColor::On))
                 .stroke(Some(BinaryColor::On)),
         );
 
