@@ -273,6 +273,25 @@ mod tests {
     use crate::pixelcolor::BinaryColor;
 
     #[test]
+    fn issue_143_stroke_and_fill() {
+        let circle_no_stroke: Circle<BinaryColor> =
+            Circle::new(Point::new(10, 16), 3).fill(Some(BinaryColor::On));
+        let circle_stroke: Circle<BinaryColor> = Circle::new(Point::new(10, 16), 3)
+            .fill(Some(BinaryColor::On))
+            .stroke(Some(BinaryColor::On));
+
+        assert_eq!(circle_stroke.size(), circle_no_stroke.size());
+        assert_eq!(
+            circle_stroke.into_iter().count(),
+            circle_no_stroke.into_iter().count()
+        );
+
+        for (no_stroke, stroke) in circle_no_stroke.into_iter().zip(circle_stroke.into_iter()) {
+            assert_eq!(no_stroke, stroke);
+        }
+    }
+
+    #[test]
     fn negative_dimensions() {
         let circ: Circle<BinaryColor> = Circle::new(Point::new(-10, -10), 5);
 
