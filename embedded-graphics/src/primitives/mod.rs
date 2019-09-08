@@ -19,13 +19,18 @@ pub use self::triangle::Triangle;
 /// convenient macro.
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
 /// use embedded_graphics::pixelcolor::Rgb565;
-/// use embedded_graphics::{egcircle, style::Style, primitives::Circle};
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::{egcircle, primitives::Circle, style::Style};
 ///
 /// let line_circle: Circle<Rgb565> = egcircle!((10, 20), 30);
 /// let line_circle: Circle<Rgb565> = egcircle!(Point::new(10, 20), 30);
-/// let filled_circle: Circle<Rgb565> = egcircle!((10, 20), 30, stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let filled_circle: Circle<Rgb565> = egcircle!(
+///     (10, 20),
+///     30,
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
 /// let default_style: Circle<Rgb565> = egcircle!((10, 20), 30, style = Style::default());
 /// ```
 ///
@@ -35,11 +40,23 @@ pub use self::triangle::Triangle;
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egcircle, style::Style, primitives::Circle, pixelcolor::Rgb565};
+/// use embedded_graphics::{egcircle, pixelcolor::Rgb565, primitives::Circle, style::Style};
 ///
-/// let circle: Circle<Rgb565> = egcircle!((10, 20), 30, stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
-/// let circle: Circle<Rgb565> = egcircle!(Point::new(10, 20), 30, stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
-/// let circle: Circle<Rgb565> = Circle::new(Point::new(10, 20), 30).stroke(Some(Rgb565::RED)).fill(Some(Rgb565::GREEN));
+/// let circle: Circle<Rgb565> = egcircle!(
+///     (10, 20),
+///     30,
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
+/// let circle: Circle<Rgb565> = egcircle!(
+///     Point::new(10, 20),
+///     30,
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
+/// let circle: Circle<Rgb565> = Circle::new(Point::new(10, 20), 30)
+///     .stroke(Some(Rgb565::RED))
+///     .fill(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egcircle {
@@ -65,7 +82,7 @@ macro_rules! egcircle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egline, style::Style, primitives::Line, pixelcolor::Rgb565};
+/// use embedded_graphics::{egline, pixelcolor::Rgb565, primitives::Line, style::Style};
 ///
 /// let line: Line<Rgb565> = egline!((10, 20), (30, 40));
 /// let line: Line<Rgb565> = egline!(Point::new(10, 20), Point::new(30, 40));
@@ -78,10 +95,20 @@ macro_rules! egcircle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egline, style::Style, primitives::Line, pixelcolor::Rgb565};
+/// use embedded_graphics::{egline, pixelcolor::Rgb565, primitives::Line, style::Style};
 ///
-/// let Line: Line<Rgb565> = egline!(Point::new(10, 20), Point::new(30, 40), stroke = Some(Rgb565::BLUE), fill = Some(Rgb565::YELLOW));
-/// let Line: Line<Rgb565> = egline!((10, 20), (30, 40), stroke = Some(Rgb565::BLUE), fill = Some(Rgb565::YELLOW));
+/// let Line: Line<Rgb565> = egline!(
+///     Point::new(10, 20),
+///     Point::new(30, 40),
+///     stroke = Some(Rgb565::BLUE),
+///     fill = Some(Rgb565::YELLOW)
+/// );
+/// let Line: Line<Rgb565> = egline!(
+///     (10, 20),
+///     (30, 40),
+///     stroke = Some(Rgb565::BLUE),
+///     fill = Some(Rgb565::YELLOW)
+/// );
 /// let Line: Line<Rgb565> = Line::new(Point::new(10, 20), Point::new(30, 40))
 ///     .stroke(Some(Rgb565::BLUE))
 ///     .fill(Some(Rgb565::YELLOW));
@@ -108,12 +135,18 @@ macro_rules! egline {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle, pixelcolor::Rgb565};
+/// use embedded_graphics::{egrectangle, pixelcolor::Rgb565, primitives::Rectangle, style::Style};
 ///
 /// let empty_rect: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40));
 /// let empty_rect: Rectangle<Rgb565> = egrectangle!(Point::new(10, 20), Point::new(30, 40));
-/// let filled_rect: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
-/// let rect_default_style: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), style = Style::default());
+/// let filled_rect: Rectangle<Rgb565> = egrectangle!(
+///     (10, 20),
+///     (30, 40),
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
+/// let rect_default_style: Rectangle<Rgb565> =
+///     egrectangle!((10, 20), (30, 40), style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -122,10 +155,20 @@ macro_rules! egline {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, style::Style, primitives::Rectangle, pixelcolor::Rgb565};
+/// use embedded_graphics::{egrectangle, pixelcolor::Rgb565, primitives::Rectangle, style::Style};
 ///
-/// let Rectangle: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
-/// let Rectangle: Rectangle<Rgb565> = egrectangle!(Point::new(10, 20), Point::new(30, 40), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+/// let Rectangle: Rectangle<Rgb565> = egrectangle!(
+///     (10, 20),
+///     (30, 40),
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
+/// let Rectangle: Rectangle<Rgb565> = egrectangle!(
+///     Point::new(10, 20),
+///     Point::new(30, 40),
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
 /// let Rectangle: Rectangle<Rgb565> = Rectangle::new(Point::new(10, 20), Point::new(30, 40))
 ///     .stroke(Some(Rgb565::RED))
 ///     .fill(Some(Rgb565::GREEN));
@@ -152,12 +195,20 @@ macro_rules! egrectangle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle, pixelcolor::Rgb565};
+/// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle, style::Style};
 ///
 /// let empty_triangle: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60));
-/// let empty_triangle: Triangle<Rgb565> = egtriangle!(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60));
-/// let filled_triangle: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
-/// let triangle_default_style: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
+/// let empty_triangle: Triangle<Rgb565> =
+///     egtriangle!(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60));
+/// let filled_triangle: Triangle<Rgb565> = egtriangle!(
+///     (10, 20),
+///     (30, 40),
+///     (50, 60),
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
+/// let triangle_default_style: Triangle<Rgb565> =
+///     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -166,12 +217,19 @@ macro_rules! egrectangle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egtriangle, style::Style, primitives::Triangle, pixelcolor::Rgb565};
+/// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle, style::Style};
 ///
-/// let Triangle: Triangle<Rgb565> = egtriangle!((10, 20), (30, 40), (50, 60), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
-/// let Triangle: Triangle<Rgb565> = Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
-///     .stroke(Some(Rgb565::RED))
-///     .fill(Some(Rgb565::GREEN));
+/// let Triangle: Triangle<Rgb565> = egtriangle!(
+///     (10, 20),
+///     (30, 40),
+///     (50, 60),
+///     stroke = Some(Rgb565::RED),
+///     fill = Some(Rgb565::GREEN)
+/// );
+/// let Triangle: Triangle<Rgb565> =
+///     Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
+///         .stroke(Some(Rgb565::RED))
+///         .fill(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
