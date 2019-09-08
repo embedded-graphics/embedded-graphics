@@ -24,6 +24,11 @@ const SIZE: i32 = 120;
 /// Start at the top of the circle
 const START: f32 = -FRAC_PI_2;
 
+/// Convert a polar coordinate (angle/distance) into an (X, Y) coordinate centered around `CENTER`
+fn polar(angle: f32, radius: f32) -> Point {
+    CENTER + Point::new((angle.cos() * radius) as i32, (angle.sin() * radius) as i32)
+}
+
 /// Draw a circle and 12 tics as a simple clock face
 fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     let tic_len = 10.0;
@@ -42,18 +47,10 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
         let angle = START + (PI * 2.0 / 12.0) * index as f32;
 
         // Start point on circumference
-        let start = CENTER
-            + Point::new(
-                (angle.cos() * (SIZE as f32)) as i32,
-                (angle.sin() * (SIZE as f32)) as i32,
-            );
+        let start = polar(angle, SIZE as f32);
 
         // End point; start point offset by `tic_len` pixels towards the circle center
-        let end = start
-            - Point::new(
-                (angle.cos() * tic_len) as i32,
-                (angle.sin() * tic_len) as i32,
-            );
+        let end = polar(angle, SIZE as f32 - tic_len);
 
         Line::new(start, end)
             .stroke(Some(BinaryColor::On))
@@ -70,23 +67,16 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     // Convert seconds into a position around the circle in radians
     let seconds_radians = ((seconds as f32 / 60.0) * 2.0 * PI) + START;
 
-    let end = CENTER
-        + Point::new(
-            (seconds_radians.cos() * (SIZE as f32)) as i32,
-            (seconds_radians.sin() * (SIZE as f32)) as i32,
-        );
+    let end = polar(seconds_radians, SIZE as f32);
 
     // Basic line hand
     let hand = Line::new(CENTER, end).stroke(Some(BinaryColor::On));
 
     // Offset from end of hand
-    let decoration_offset = Point::new(
-        (seconds_radians.cos() * (20.0)) as i32,
-        (seconds_radians.sin() * (20.0)) as i32,
-    );
+    let decoration_offset = polar(seconds_radians, SIZE as f32 - 20.0);
 
     // Add a fancy circle near the end of the hand
-    let decoration = Circle::new(end - decoration_offset, 5)
+    let decoration = Circle::new(decoration_offset, 5)
         .fill(Some(BinaryColor::Off))
         .stroke(Some(BinaryColor::On));
 
@@ -100,11 +90,7 @@ fn draw_hour_hand(hour: u32) -> Line<BinaryColor> {
 
     let hand_len = SIZE as f32 - 60.0;
 
-    let end = CENTER
-        + Point::new(
-            (hour_radians.cos() * hand_len) as i32,
-            (hour_radians.sin() * hand_len) as i32,
-        );
+    let end = polar(hour_radians, hand_len);
 
     // Basic line hand
     Line::new(CENTER, end).stroke(Some(BinaryColor::On))
@@ -117,11 +103,7 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
 
     let hand_len = SIZE as f32 - 30.0;
 
-    let end = CENTER
-        + Point::new(
-            (minute_radians.cos() * hand_len) as i32,
-            (minute_radians.sin() * hand_len) as i32,
-        );
+    let end = polar(minute_radians, hand_len);
 
     // Basic line hand
     Line::new(CENTER, end).stroke(Some(BinaryColor::On))
