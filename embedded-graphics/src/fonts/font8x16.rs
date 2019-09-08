@@ -26,7 +26,7 @@ impl FontBuilderConf for Font8x16Conf {
 ///
 /// There is also the [`text_8x16`] macro to provide an easier to use interface.
 ///
-/// ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)
+/// [![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)
 ///
 /// # Examples
 ///
