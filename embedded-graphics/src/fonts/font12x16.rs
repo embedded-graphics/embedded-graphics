@@ -23,6 +23,8 @@ impl FontBuilderConf for Font12x16Conf {
 ///
 /// There is also the [`text_12x16`] macro to provide an easier to use interface.
 ///
+/// ![12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
+///
 /// # Examples
 ///
 /// ## Write some text to the screen at the default `(0, 0)` position
