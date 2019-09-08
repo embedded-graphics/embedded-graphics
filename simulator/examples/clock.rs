@@ -5,9 +5,6 @@
 //! Some of these should probably be turned into issues and discussed before this example is
 //! released.
 //!
-//! 1. The primitives macros should accept both `()` tuples and variables/expressions for their
-//! coordinate positions. In this code, I often find myself replacing a macro with a call to
-//! `[Primitive]::new()` so I can pass in a `Point`
 //! 3. The font docs could use screenshots of what the text looks like
 //! 4. Some sort of "layout" thing, like being able to say "position this thing centered in the
 //! display" - see digital clock positioning for example
