@@ -158,7 +158,7 @@ fn main() {
         .title("Clock")
         .size(DISP_SIZE as usize, DISP_SIZE as usize)
         .scale(2)
-        .build_rgb();
+        .build_binary();
 
     loop {
         display.clear();
