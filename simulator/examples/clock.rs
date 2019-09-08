@@ -17,9 +17,14 @@ use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
+/// The width and height of the simulated display
 const DISP_SIZE: i32 = 256;
+
+/// The center of the clock face
 const CENTER: Point = Point::new(DISP_SIZE / 2, DISP_SIZE / 2);
-const SIZE: i32 = 120;
+
+/// The radius of the clock face
+const SIZE: u32 = 120;
 
 /// Start at the top of the circle
 const START: f32 = -FRAC_PI_2;
@@ -36,7 +41,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     // Use the circle macro to create the outer face
     let face = egcircle!(
         CENTER,
-        SIZE as u32,
+        SIZE,
         stroke = Some(BinaryColor::On),
         stroke_width = 2
     );
@@ -135,27 +140,26 @@ fn main() {
         .build_binary();
 
     loop {
-        display.clear();
-
-        display.draw(draw_face());
-
         let time = Local::now();
-
-        display.draw(draw_hour_hand(time.hour()));
-        display.draw(draw_minute_hand(time.minute()));
-        display.draw(draw_seconds_hand(time.second()));
 
         // NOTE: In no-std environments, consider using
         // [arrayvec](https://stackoverflow.com/a/39491059/383609) and a fixed size buffer
-        let clock_text = format!(
+        let digital_clock_text = format!(
             "{:02}:{:02}:{:02}",
             time.hour(),
             time.minute(),
             time.second()
         );
 
+        display.clear();
+
+        display.draw(draw_face());
+        display.draw(draw_hour_hand(time.hour()));
+        display.draw(draw_minute_hand(time.minute()));
+        display.draw(draw_seconds_hand(time.second()));
+
         // Draw digital clock just above center
-        display.draw(draw_digital_clock(&clock_text));
+        display.draw(draw_digital_clock(&digital_clock_text));
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
