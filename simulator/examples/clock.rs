@@ -11,6 +11,7 @@
 //! 5. The font docs should give examples of `write!()`ing into a fixed length buffer using
 //! `arrayvec`. This example uses `format!()` because the simulator is `std`, but this won't work in
 //! `no-std` environments
+//! 6. Can we allow `Point * Scalar` and `Point / Scalar` (same with `Size`)?
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
@@ -23,11 +24,12 @@ use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
 
-static DISP_SIZE: i32 = 256;
-static CENTER: i32 = 127;
+const DISP_SIZE: i32 = 256;
+const CENTER: Point = Point::new(DISP_SIZE / 2, DISP_SIZE / 2);
+const SIZE: i32 = 120;
 
 /// Start at the top of the circle
-static START: f32 = -FRAC_PI_2;
+const START: f32 = -FRAC_PI_2;
 
 /// Draw a circle and 12 tics as a simple clock face
 fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
@@ -35,8 +37,8 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
 
     // Use the circle macro to create the outer face
     let face = egcircle!(
-        (CENTER, CENTER),
-        CENTER as u32,
+        CENTER,
+        SIZE as u32,
         stroke = Some(BinaryColor::On),
         stroke_width = 2
     );
@@ -47,10 +49,11 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
         let angle = START + (PI * 2.0 / 12.0) * index as f32;
 
         // Start point on circumference
-        let start = Point::new(
-            CENTER + (angle.cos() * (CENTER as f32)) as i32,
-            CENTER + (angle.sin() * (CENTER as f32)) as i32,
-        );
+        let start = CENTER
+            + Point::new(
+                (angle.cos() * (SIZE as f32)) as i32,
+                (angle.sin() * (SIZE as f32)) as i32,
+            );
 
         // End point; start point offset by `tic_len` pixels towards the circle center
         let end = start
@@ -74,13 +77,14 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     // Convert seconds into a position around the circle in radians
     let seconds_radians = ((seconds as f32 / 60.0) * 2.0 * PI) + START;
 
-    let end = Point::new(
-        CENTER + (seconds_radians.cos() * (CENTER as f32)) as i32,
-        CENTER + (seconds_radians.sin() * (CENTER as f32)) as i32,
-    );
+    let end = CENTER
+        + Point::new(
+            (seconds_radians.cos() * (SIZE as f32)) as i32,
+            (seconds_radians.sin() * (SIZE as f32)) as i32,
+        );
 
     // Basic line hand
-    let hand = Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On));
+    let hand = Line::new(CENTER, end).stroke(Some(BinaryColor::On));
 
     // Offset from end of hand
     let decoration_offset = Point::new(
@@ -102,15 +106,16 @@ fn draw_hour_hand(hour: u32) -> Line<BinaryColor> {
     // Convert hour into a position around the circle in radians
     let hour_radians = ((hour as f32 / 12.0) * 2.0 * PI) + START;
 
-    let hand_len = CENTER as f32 - 60.0;
+    let hand_len = SIZE as f32 - 60.0;
 
-    let end = Point::new(
-        CENTER + (hour_radians.cos() * hand_len) as i32,
-        CENTER + (hour_radians.sin() * hand_len) as i32,
-    );
+    let end = CENTER
+        + Point::new(
+            (hour_radians.cos() * hand_len) as i32,
+            (hour_radians.sin() * hand_len) as i32,
+        );
 
     // Basic line hand
-    Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On))
+    Line::new(CENTER, end).stroke(Some(BinaryColor::On))
 }
 
 /// Draw the minute hand (0-59)
@@ -118,15 +123,16 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
     // Convert minute into a position around the circle in radians
     let minute_radians = ((minute as f32 / 60.0) * 2.0 * PI) + START;
 
-    let hand_len = CENTER as f32 - 30.0;
+    let hand_len = SIZE as f32 - 30.0;
 
-    let end = Point::new(
-        CENTER + (minute_radians.cos() * hand_len) as i32,
-        CENTER + (minute_radians.sin() * hand_len) as i32,
-    );
+    let end = CENTER
+        + Point::new(
+            (minute_radians.cos() * hand_len) as i32,
+            (minute_radians.sin() * hand_len) as i32,
+        );
 
     // Basic line hand
-    Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On))
+    Line::new(CENTER, end).stroke(Some(BinaryColor::On))
 }
 
 /// Draw digital clock just above center with black text on a white background
@@ -136,7 +142,7 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
 fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
     let text = Font12x16::<BinaryColor>::render_str(&time_str)
         .stroke(Some(BinaryColor::Off))
-        .translate((CENTER - 48, CENTER - 48).into());
+        .translate(CENTER - Size::new(48, 48));
 
     // Add some padding on the background around the time digits, here it's 2px in each direction
     let offset = Size::new(2, 2);
@@ -181,7 +187,7 @@ fn main() {
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
         display.draw(
-            Circle::new((CENTER, CENTER).into(), 6)
+            Circle::new(CENTER, 6)
                 .fill(Some(BinaryColor::Off))
                 .stroke(Some(BinaryColor::On)),
         );
