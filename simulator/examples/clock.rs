@@ -1,17 +1,10 @@
-//! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
+//! # Example: Clock
 //!
-//! # Development findings
+//! ![Screenshot of clock example]( data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAgMAAACJFjxpAAAACVBMVEUAAAD///8vND9Nm1xmAAAFfUlEQVR42uzbTZLaMBRF4TO5+7uTu8msMhXooKoGEzBSR0/2GfDzkOSvXOUh/PrPcXZ2dnZ2dnb2QbllXmktQFovIRYD5BoABtBzw2qA28UbAEBbhNUASQIt09IDwmoAJQFo+fnviwEeHe9na1YDKDFbgFYTsBjg8cHehC4H2DjVm2sXAyiBlwEoWQyg5O0NSwGU7NiyEEDJrk3LAJTs3LYIQMnujWsAkv10rwBI4ANBfUAidifF1QGKMXszSXGAYj4CkNQGxIB28wHiyoCEjwGK6wIULpl9GQClLiDuASCuCki4JnbUtimuCVDolFITENOruCJAoVtKRUBMv+J6gJiexdUACl1TqgFi+hbXAih0TqkFiOldXAmg0D2lEiCmf3EdgMKAlDqAmBHFVQAKQ1KqAGLGFFcBMCgVAciMKjUAYVhyBYBGAlIBEDOueH6AwsCUAgAzsgKAMDR5doBGAzI7IGZs8eyAMDZNDpAxY8vcgBgxtnhuABCGpqkBMoAZWmYGxF8MJYwqnhnAJWEwg9LEAIUGEYNSJgaYa2OfxokBoQFeUexkyrMCFN8B1B+gZFqA5e8A3BsgMy0gRv4OUG+AIZ4VAF8C0a7svoAAmhSgtFtusLkk9wQIQJkUYGiYIK6pF6A1KSDeWOb+AM8J2Dpc3QGaEqBsrnN3QKYEmLt0e8vbPZVNCYi3b7C7Azwj4MnzIpJcEHCzAPBoEv4JUBkA4pIPAJCf/1Elt6Npnx9Owr8BpA7ga34AQNhIALTj2+WAx5MXAHIdADk8AEMDQNLiflIVILOZBgBIJQBpgG8K2qQ64Pl6DwB4NgDPktvRf4Lb97vJiwDVAqDDA0j+vkAubU4C1APIPw0g5QBvdQLqAcKPA+QTcAJqAS4Z8N1sq1IAmVcSoF4AUhBAAB8agEHHBsiQFQHh1QS4D0AuCcCgYwNk8KEBCHRsAAYfGyCj1QAy7yRwBwApCyDo4ACMDw4Q8rEBBB0cgPHBAbIODkB4IcBv9u7YRnIoBoJoOZ1fO51/Koe9xSag0afIEcuRReABDUimwoWsTwHybIDslwOQ3g7AfjtAgcQvBqAE5BcDiIG8GSAAvRlgALyALwD85FJAfmoEeHyCBYwFPP4qfh7w+Of4aQAB+dUAEvNuALCABSzgGwAyTxQWsIAFLGABC1hAGwDhgeQFLGABC1hAI4BMfWEBC1hAIwChPHkBC1hAK4BMdWEBC2gFIBQnL2AB3QCmtnQDqBzAApoBCKXJC1hAO4BMZWEB7QCEwuQFdASYutIRoFIAHQGhLLUEUAlwT4CpKj0BKgTQExAAcTQBqCmAVOwQQO4KMJjTGdIVIBOOJxO6AhIKUtoCCCXJbQEyFYW+gFCQGgOoAbgzwJwvnQEqAdAYQDie3BtgTpfeABUAaA0gHE7uDjBnS3eAwtEUmgM4DXB7gMzJQn9AOJgGAIg5VzwAcHIDhQEATgI8AiBzqjACQDiUPAVgzpQpAIUjKQwBnNogHgM4s4HCGMCZDeJBgBMbKAwCnNggHgW4fwOFUYD7N4iHAZTbFxgGuHuDeBzgXkHMPIDCbSkMBNy5QTwSoNy4wEgACb+JS+nvGQ8FkA9/nmb+FzMVoNwBUBgLIAEQFxOA4sEAYsBczUDMZIDiDwEJowEoFpcTCcMBJJ8AFI8HkHw0IPMBHwgU8w0AJdcPvwKAkqtnXwJAybWjrwH8a+8OcQCGYRgAhuR/If7/V7aqYKCxtUlDVkybOgfKy8v0FSMAq9MXrAC8sOi4GYB+nVR01g4QAN4Bcu/3A/TFpaBugMimu9SMHaCrL31uB4jAHQZInM/UD7AJOAEJst4PEIGdB5CAWu8HWIYjersfYOXrcj/AZDKZTCa/5AK/3Qdyk7dphgAAAABJRU5ErkJggg==)
 //!
-//! Some of these should probably be turned into issues and discussed before this example is
-//! released.
-//!
-//! 3. The font docs could use screenshots of what the text looks like
-//! 4. Some sort of "layout" thing, like being able to say "position this thing centered in the
-//! display" - see digital clock positioning for example
-//! 5. The font docs should give examples of `write!()`ing into a fixed length buffer using
-//! `arrayvec`. This example uses `format!()` because the simulator is `std`, but this won't work in
-//! `no-std` environments
-//! 6. Can we allow `Point * Scalar` and `Point / Scalar` (same with `Size`)?
+//! This example shows some more advanced usage of Embedded Graphics. It draws a round clock face
+//! with hour, minute and second hands. A digital clock is drawn in the middle of the clock. The
+//! whole thing is updated with your computer's local time every 50ms.
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
