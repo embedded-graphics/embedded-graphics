@@ -20,10 +20,10 @@
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
 use embedded_graphics::egcircle;
+use embedded_graphics::fonts::Font12x16;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics::text_12x16;
+use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;
@@ -134,6 +134,25 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
     Line::new((CENTER, CENTER).into(), end).stroke(Some(BinaryColor::On))
 }
 
+/// Draw digital clock just above center with black text on a white background
+///
+/// NOTE: The formatted time str must be passed in as references to temporary values in a
+/// function can't be returned.
+fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
+    let text = Font12x16::<BinaryColor>::render_str(&time_str)
+        .stroke(Some(BinaryColor::Off))
+        .translate((CENTER - 48, CENTER - 48).into());
+
+    // Add some padding on the background around the time digits, here it's 2px in each direction
+    let offset = Size::new(2, 2);
+
+    let background = Rectangle::new(text.top_left() - offset, text.bottom_right() + offset)
+        .fill(Some(BinaryColor::On));
+
+    // Draw the white background first, then the black text. Order matters here
+    background.into_iter().chain(text)
+}
+
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Clock")
@@ -162,14 +181,7 @@ fn main() {
         );
 
         // Draw digital clock just above center
-        display.draw(
-            text_12x16!(
-                &clock_text,
-                fill = Some(BinaryColor::On),
-                stroke = Some(BinaryColor::Off)
-            )
-            .translate((CENTER - 48, CENTER - 48).into()),
-        );
+        display.draw(draw_digital_clock(&clock_text));
 
         let end = display.run_once();
 
