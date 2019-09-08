@@ -60,17 +60,10 @@ pub use self::triangle::Triangle;
 /// ```
 #[macro_export]
 macro_rules! egcircle {
-    (($cx:expr, $cy:expr), $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
-        $crate::primitives::Circle::new($crate::geometry::Point::new($cx, $cy), $r)
-            $( .$style_key($style_value) )*
-    }};
-
     ($center:expr, $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
-        $crate::primitives::Circle::new($center, $r)
+        $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
             $( .$style_key($style_value) )*
     }};
 }
@@ -115,17 +108,13 @@ macro_rules! egcircle {
 /// ```
 #[macro_export]
 macro_rules! egline {
-    (($x1:expr, $y1:expr), ($x2:expr, $y2:expr) $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
-        $crate::primitives::Line::new($crate::geometry::Point::new($x1, $y1), $crate::geometry::Point::new($x2, $y2))
-            $( .$style_key($style_value) )*
-    }};
-
     ($start:expr, $end:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
-        $crate::primitives::Line::new($start, $end)
+        $crate::primitives::Line::new(
+            $crate::geometry::Point::from($start),
+            $crate::geometry::Point::from($end)
+        )
             $( .$style_key($style_value) )*
     }};
 }
@@ -175,17 +164,13 @@ macro_rules! egline {
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
-    (($x1:expr, $y1:expr), ($x2:expr, $y2:expr) $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
-        $crate::primitives::Rectangle::new($crate::geometry::Point::new($x1, $y1), $crate::geometry::Point::new($x2, $y2))
-            $( .$style_key($style_value) )*
-    }};
-
     ($top_left:expr, $bottom_right:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
-        $crate::primitives::Rectangle::new($top_left, $bottom_right)
+        $crate::primitives::Rectangle::new(
+            $crate::geometry::Point::from($top_left),
+            $crate::geometry::Point::from($bottom_right)
+        )
             $( .$style_key($style_value) )*
     }};
 }
@@ -233,17 +218,14 @@ macro_rules! egrectangle {
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
-    (($x1:expr, $y1:expr), ($x2:expr, $y2:expr), ($x3:expr, $y3:expr) $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
-        $crate::primitives::Triangle::new($crate::geometry::Point::new($x1, $y1), $crate::geometry::Point::new($x2, $y2), $crate::geometry::Point::new($x3, $y3))
-            $( .$style_key($style_value) )*
-    }};
-
     ($p1:expr, $p2:expr, $p3:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_imports)]
         use $crate::style::WithStyle;
-        $crate::primitives::Triangle::new($p1, $p2, $p3)
+        $crate::primitives::Triangle::new(
+            $crate::geometry::Point::from($p1),
+            $crate::geometry::Point::from($p2),
+            $crate::geometry::Point::from($p3)
+        )
             $( .$style_key($style_value) )*
     }};
 }
