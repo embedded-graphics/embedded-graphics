@@ -181,8 +181,7 @@ where
 
             let is_border = len > radius_sq - radius && len < outer_radius_sq + radius;
 
-            // TODO: Should this be a <= or a <?
-            let is_fill = len <= outer_radius_sq;
+            let is_fill = len <= outer_radius_sq + 1;
 
             let item = if is_border && self.style.stroke_color.is_some() {
                 Some(Pixel(
