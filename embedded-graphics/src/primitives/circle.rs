@@ -280,11 +280,6 @@ mod tests {
             .stroke(Some(BinaryColor::On));
 
         assert_eq!(circle_stroke.size(), circle_no_stroke.size());
-        assert_eq!(
-            circle_stroke.into_iter().count(),
-            circle_no_stroke.into_iter().count()
-        );
-
         assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));
     }
 
