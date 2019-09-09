@@ -286,9 +286,7 @@ mod tests {
             circle_no_stroke.into_iter().count()
         );
 
-        for (no_stroke, stroke) in circle_no_stroke.into_iter().zip(circle_stroke.into_iter()) {
-            assert_eq!(no_stroke, stroke);
-        }
+        assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));
     }
 
     #[test]
