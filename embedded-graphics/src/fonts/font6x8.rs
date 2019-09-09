@@ -96,6 +96,7 @@ impl FontBuilderConf for Font6x8Conf {
 /// string formatting.
 ///
 /// ```rust
+/// use arrayvec::ArrayString;
 /// use core::fmt::Write;
 /// use embedded_graphics::fonts::Font6x8;
 /// use embedded_graphics::pixelcolor::Rgb565;
