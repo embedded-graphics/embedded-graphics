@@ -89,7 +89,40 @@ impl FontBuilderConf for Font6x8Conf {
 /// );
 /// ```
 ///
+/// ## Use `write!()` and arrayvec to render a formatted string
+///
+/// This example uses arrayvec's [`ArrayString`] to render a floating point value using the
+/// [`write!()`] macro. These strings have a fixed length, but allow the use of Rust's builtin
+/// string formatting.
+///
+/// ```rust
+/// use core::fmt::Write;
+/// use embedded_graphics::fonts::Font6x8;
+/// use embedded_graphics::pixelcolor::Rgb565;
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::text_6x8;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
+///
+/// let value = 12.34567;
+///
+/// // Create a fixed buffer of length 12
+/// let mut buf = ArrayString::<[_; 12]>::new();
+///
+/// // Output `Value: 12.35`
+/// write!(&mut buf, "Value: {:.2}", value).expect("Failed to write to buffer");
+///
+/// display.draw(text_6x8!(
+///     &buf,
+///     fill = Some(Rgb565::BLUE),
+///     stroke = Some(Rgb565::YELLOW)
+/// ));
+/// ```
+///
+/// [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
+/// [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 /// [`text_6x8`]: ../macro.text_6x8.html
+
 pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 
 #[cfg(test)]
