@@ -12,6 +12,31 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #143 Circles with no stroke are now drawn correctly
 
+### Changed
+
+- **(breaking)** #161 The `.fill()` and `.stroke()` style methods are renamed to `.fill_color()` and `.stroke_color()` respectively. This is to reduce confusion between names like `.stroke()` and `.stroke_width()`. Example:
+
+  ```rust
+  use embedded_graphics::{
+    prelude::*,
+    primitives::Circle,
+    egcircle
+  };
+
+  let circle = Circle::new(Point::new(20, 20), 5)
+      .stroke_width(10)
+      .stroke_color(Some(BinaryColor::On))
+      .fill_color(Some(BinaryColor::Off));
+
+  // Or for macros:
+
+  let circle = egcircle!((20, 20), 5,
+    stroke_width = 10,
+    stroke_color = Some(BinaryColor::On),
+    fill_color = Some(BinaryColor::Off)
+  );
+  ```
+
 ## 0.6.0-alpha.2
 
 ### Changed
