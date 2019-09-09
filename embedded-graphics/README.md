@@ -34,10 +34,10 @@ More information and up to date docs can be found on [docs.rs](https://docs.rs/e
 Example usage can be found [in the simulator](./simulator/examples):
 
 ```rust
-use embedded_graphics::prelude::*;
 use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::primitives::{Circle, Line};
 use embedded_graphics::pixelcolor::BinaryColor;
+use embedded_graphics::prelude::*;
+use embedded_graphics::primitives::{Circle, Line};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;
@@ -48,8 +48,11 @@ fn main() {
     let mut display = Display::new();
 
     display.draw(Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)));
-    display.draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)));
-    display.draw(Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)));
+    display
+        .draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)));
+    display.draw(
+        Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)),
+    );
 
     display.draw(
         Font6x8::render_str("Hello World!")
@@ -62,9 +65,9 @@ fn main() {
 Macros are also supported for text and primitives:
 
 ```rust
-use embedded_graphics::prelude::*;
 use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::{egcircle, egline, egrectangle, text_6x8, egtriangle};
+use embedded_graphics::prelude::*;
+use embedded_graphics::{egcircle, egline, egrectangle, egtriangle, text_6x8};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;
@@ -74,11 +77,31 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    display.draw(egcircle!((64, 64), 64, stroke_color = Some(BinaryColor::On)));
-    display.draw(egline!((64, 64), (0, 64), stroke_color = Some(BinaryColor::On)));
-    display.draw(egline!((64, 64), (80, 80), stroke_color = Some(BinaryColor::On)));
-    display.draw(egrectangle!((64, 64), (80, 80), stroke_color = None, fill_color = Some(BinaryColor::Off)));
-    display.draw(text_6x8!("Hello world!", stroke_color = Some(BinaryColor::On)).translate(Point::new(5, 50)));
+    display.draw(egcircle!(
+        (64, 64),
+        64,
+        stroke_color = Some(BinaryColor::On)
+    ));
+    display.draw(egline!(
+        (64, 64),
+        (0, 64),
+        stroke_color = Some(BinaryColor::On)
+    ));
+    display.draw(egline!(
+        (64, 64),
+        (80, 80),
+        stroke_color = Some(BinaryColor::On)
+    ));
+    display.draw(egrectangle!(
+        (64, 64),
+        (80, 80),
+        stroke_color = None,
+        fill_color = Some(BinaryColor::Off)
+    ));
+    display.draw(
+        text_6x8!("Hello world!", stroke_color = Some(BinaryColor::On))
+            .translate(Point::new(5, 50)),
+    );
 }
 ```
 
