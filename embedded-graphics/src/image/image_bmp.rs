@@ -339,7 +339,7 @@ mod tests {
 
     /// Test for issue #136
     #[test]
-    fn row_size_is_multiple_of_4_bytes() {
+    fn issue_136_row_size_is_multiple_of_4_bytes() {
         let image: ImageBmp<Rgb565> =
             ImageBmp::new(include_bytes!("../../tests/issue_136.bmp")).unwrap();
 

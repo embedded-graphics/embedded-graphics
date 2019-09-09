@@ -271,6 +271,7 @@ mod tests {
     use super::*;
     use crate::pixelcolor::BinaryColor;
 
+    /// Test for issue #143
     #[test]
     fn issue_143_stroke_and_fill() {
         let circle_no_stroke: Circle<BinaryColor> =
