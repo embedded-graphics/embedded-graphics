@@ -133,7 +133,7 @@ where
     ///     let mut disp = Display::default();
     ///     // Render a string with a red stroke
     ///     let text = Font6x8::render_str("Hello world")
-    ///         .style(Style::stroke(Rgb565::RED));
+    ///         .style(Style::stroke_color(Rgb565::RED));
     ///
     ///     disp.draw(text);
     /// }
@@ -161,8 +161,8 @@ macro_rules! impl_text {
 /// let text: Font6x8<Rgb565> = text_6x8!("Hello world!");
 /// let styled_text: Font6x8<Rgb565> = text_6x8!(
 ///     "Hello world!",
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -183,8 +183,8 @@ macro_rules! text_6x8 {
 /// let text: Font6x12<Rgb565> = text_6x12!("Hello world!");
 /// let styled_text: Font6x12<Rgb565> = text_6x12!(
 ///     "Hello world!",
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -205,8 +205,8 @@ macro_rules! text_6x12 {
 /// let text: Font8x16<Rgb565> = text_8x16!("Hello world!");
 /// let styled_text: Font8x16<Rgb565> = text_8x16!(
 ///     "Hello world!",
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -227,8 +227,8 @@ macro_rules! text_8x16 {
 /// let text: Font12x16<Rgb565> = text_12x16!("Hello world!");
 /// let styled_text: Font12x16<Rgb565> = text_12x16!(
 ///     "Hello world!",
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
@@ -256,9 +256,9 @@ mod tests {
 
     #[test]
     fn styled_text() {
-        let _text: Font6x8<Rgb565> = text_6x8!("Hello!", stroke = Some(Rgb565::RED));
-        let _text: Font6x12<Rgb565> = text_6x12!("Hello!", stroke = Some(Rgb565::GREEN));
-        let _text: Font8x16<Rgb565> = text_8x16!("Hello!", stroke = Some(Rgb565::BLUE));
-        let _text: Font12x16<Rgb565> = text_12x16!("Hello!", stroke = Some(Rgb565::YELLOW));
+        let _text: Font6x8<Rgb565> = text_6x8!("Hello!", stroke_color = Some(Rgb565::RED));
+        let _text: Font6x12<Rgb565> = text_6x12!("Hello!", stroke_color = Some(Rgb565::GREEN));
+        let _text: Font8x16<Rgb565> = text_8x16!("Hello!", stroke_color = Some(Rgb565::BLUE));
+        let _text: Font12x16<Rgb565> = text_12x16!("Hello!", stroke_color = Some(Rgb565::YELLOW));
     }
 }

@@ -50,15 +50,15 @@
 //!     let mut display = EpdDisplay {};
 //!
 //!     display.draw(
-//!         egrectangle!((0, 0), (100, 100), fill = Some(EpdColor::White))
+//!         egrectangle!((0, 0), (100, 100), fill_color = Some(EpdColor::White))
 //!     );
 //!
 //!     display.draw(
-//!         egrectangle!((100, 0), (200, 100), fill = Some(EpdColor::Black))
+//!         egrectangle!((100, 0), (200, 100), fill_color = Some(EpdColor::Black))
 //!     );
 //!
 //!     display.draw(
-//!         egrectangle!((200, 0), (300, 100), fill = Some(EpdColor::Red))
+//!         egrectangle!((200, 0), (300, 100), fill_color = Some(EpdColor::Red))
 //!     );
 //! }
 //! ```

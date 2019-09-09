@@ -48,11 +48,11 @@
 //!
 //!     display.draw(text_6x8!("Hello World!"));
 //!
-//!     display.draw(egcircle!((96, 32), 31, stroke = Some(BinaryColor::On)));
+//!     display.draw(egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)));
 //!
-//!     display.draw(egline!((32, 32), (1, 32), stroke = Some(BinaryColor::On))
+//!     display.draw(egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On))
 //!         .translate(Point::new(64, 0)));
-//!     display.draw(egline!((32, 32), (40, 40), stroke = Some(BinaryColor::On))
+//!     display.draw(egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On))
 //!         .translate(Point::new(64, 0)));
 //!
 //!     loop {

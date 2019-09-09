@@ -28,9 +28,9 @@ use crate::style::WithStyle;
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
 /// let r2 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
-///     .stroke(Some(Rgb565::RED))
+///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill(Some(Rgb565::GREEN));
+///     .fill_color(Some(Rgb565::GREEN));
 ///
 /// // Rectangle with translation applied
 /// let r3 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
@@ -95,7 +95,7 @@ where
         self
     }
 
-    fn stroke(mut self, color: Option<C>) -> Self {
+    fn stroke_color(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
@@ -107,7 +107,7 @@ where
         self
     }
 
-    fn fill(mut self, color: Option<C>) -> Self {
+    fn fill_color(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -230,7 +230,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(Rgb565::RED);
+    /// # let style = Style::stroke_color(Rgb565::RED);
     /// #
     /// let rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20))
     /// #    .style(style);
@@ -254,7 +254,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(Rgb565::RED);
+    /// # let style = Style::stroke_color(Rgb565::RED);
     /// #
     /// let mut rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20))
     /// #    .style(style);
@@ -304,7 +304,7 @@ mod tests {
     fn it_draws_unfilled_rect() {
         let mut rect: RectangleIterator<Rgb565> =
             Rectangle::new(Point::new(2, 2), Point::new(4, 4))
-                .style(Style::stroke(Rgb565::RED))
+                .style(Style::stroke_color(Rgb565::RED))
                 .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
@@ -323,12 +323,12 @@ mod tests {
     fn it_can_be_negative() {
         let negative: RectangleIterator<Rgb565> =
             Rectangle::new(Point::new(-2, -2), Point::new(2, 2))
-                .fill(Some(Rgb565::GREEN))
+                .fill_color(Some(Rgb565::GREEN))
                 .into_iter();
 
         let positive: RectangleIterator<Rgb565> =
             Rectangle::new(Point::new(2, 2), Point::new(6, 6))
-                .fill(Some(Rgb565::GREEN))
+                .fill_color(Some(Rgb565::GREEN))
                 .into_iter();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));

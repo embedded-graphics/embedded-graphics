@@ -84,8 +84,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Point::new(20, 20), 8).fill(Some(Rgb565::RED));
-//! let t = Font6x8::render_str("Hello Rust!").fill(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -103,8 +103,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = egcircle!((20, 20), 8, fill = Some(Rgb565::RED));
-//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
+//! let t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -122,8 +122,8 @@
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
-//!         .chain(egcircle!((20, 20), 8, fill = Some(Rgb565::RED)))
-//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
+//!         .chain(egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
+//!         .chain(text_6x8!(text, fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {
@@ -236,7 +236,7 @@ use crate::pixelcolor::PixelColor;
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
+///     display.draw(egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE)));
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
@@ -324,7 +324,7 @@ where
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
+///     display.draw_sized(egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE)));
 ///
 ///     // No `flush()` is required as `draw_sized()` sends the bytes directly
 /// }

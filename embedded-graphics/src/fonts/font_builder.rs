@@ -108,7 +108,7 @@ where
         self
     }
 
-    fn stroke(mut self, color: Option<C>) -> Self {
+    fn stroke_color(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
@@ -120,7 +120,7 @@ where
         self
     }
 
-    fn fill(mut self, color: Option<C>) -> Self {
+    fn fill_color(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -280,7 +280,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(BinaryColor::On);
+    /// # let style = Style::stroke_color(BinaryColor::On);
     /// #
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world")
@@ -304,7 +304,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(BinaryColor::On);
+    /// # let style = Style::stroke_color(BinaryColor::On);
     /// #
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world")
