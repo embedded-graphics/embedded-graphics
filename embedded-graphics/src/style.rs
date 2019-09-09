@@ -58,7 +58,7 @@ where
     /// Set the stroke colour for the object
     ///
     /// This can be a noop
-    fn stroke_color(self, stroke: Option<C>) -> Self;
+    fn stroke_color(self, color: Option<C>) -> Self;
 
     /// Set the stroke width for the object
     ///
@@ -68,5 +68,5 @@ where
     /// Set the fill property of the object's style
     ///
     /// This can be a noop
-    fn fill_color(self, stroke: Option<C>) -> Self;
+    fn fill_color(self, color: Option<C>) -> Self;
 }
