@@ -135,6 +135,8 @@ fn draw_line(display: &mut BinaryDisplay, x0: i32, y0: i32, dx: i32, dy: i32) {
             error = error + e_diag;
 
             if p_error > threshold {
+                draw_perp(display, x, y, dx, dy, p_error + e_diag + e_square);
+
                 p_error = e_square;
             }
 
