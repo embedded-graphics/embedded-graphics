@@ -221,6 +221,13 @@ impl RgbDisplay {
     pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
         self.window.get_input_events()
     }
+
+    /// Set an individual pixel's value
+    ///
+    /// DELETEME: Testing/development only
+    pub fn set_pixel(&mut self, x: usize, y: usize, color: Rgb888) {
+        self.pixels.set(x, y, color);
+    }
 }
 
 impl<C> Drawing<C> for RgbDisplay
