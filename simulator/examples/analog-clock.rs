@@ -42,7 +42,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     let face = egcircle!(
         CENTER,
         SIZE,
-        stroke = Some(BinaryColor::On),
+        stroke_color = Some(BinaryColor::On),
         stroke_width = 2
     );
 
@@ -58,7 +58,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
         let end = polar(angle, SIZE as f32 - tic_len);
 
         Line::new(start, end)
-            .stroke(Some(BinaryColor::On))
+            .stroke_color(Some(BinaryColor::On))
             .into_iter()
     });
 
@@ -75,15 +75,15 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     let end = polar(seconds_radians, SIZE as f32);
 
     // Basic line hand
-    let hand = Line::new(CENTER, end).stroke(Some(BinaryColor::On));
+    let hand = Line::new(CENTER, end).stroke_color(Some(BinaryColor::On));
 
     // Decoration position
     let decoration_position = polar(seconds_radians, SIZE as f32 - 20.0);
 
     // Add a fancy circle near the end of the hand
     let decoration = Circle::new(decoration_position, 5)
-        .fill(Some(BinaryColor::Off))
-        .stroke(Some(BinaryColor::On));
+        .fill_color(Some(BinaryColor::Off))
+        .stroke_color(Some(BinaryColor::On));
 
     hand.into_iter().chain(decoration)
 }
@@ -98,7 +98,7 @@ fn draw_hour_hand(hour: u32) -> Line<BinaryColor> {
     let end = polar(hour_radians, hand_len);
 
     // Basic line hand
-    Line::new(CENTER, end).stroke(Some(BinaryColor::On))
+    Line::new(CENTER, end).stroke_color(Some(BinaryColor::On))
 }
 
 /// Draw the minute hand (0-59)
@@ -111,7 +111,7 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
     let end = polar(minute_radians, hand_len);
 
     // Basic line hand
-    Line::new(CENTER, end).stroke(Some(BinaryColor::On))
+    Line::new(CENTER, end).stroke_color(Some(BinaryColor::On))
 }
 
 /// Draw digital clock just above center with black text on a white background
@@ -120,13 +120,13 @@ fn draw_minute_hand(minute: u32) -> Line<BinaryColor> {
 /// function can't be returned.
 fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
     let text = Font12x16::render_str(&time_str)
-        .stroke(Some(BinaryColor::Off))
+        .stroke_color(Some(BinaryColor::Off))
         .translate(CENTER - Size::new(48, 48));
 
     // Add a background around the time digits. Note that there is no bottom-right padding as this
     // is added by the font renderer itself
     let background = Rectangle::new(text.top_left() - Size::new(3, 3), text.bottom_right())
-        .fill(Some(BinaryColor::On));
+        .fill_color(Some(BinaryColor::On));
 
     // Draw the white background first, then the black text. Order matters here
     background.into_iter().chain(text)
@@ -163,7 +163,7 @@ fn main() {
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
-        display.draw(Circle::new(CENTER, 4).fill(Some(BinaryColor::On)));
+        display.draw(Circle::new(CENTER, 4).fill_color(Some(BinaryColor::On)));
 
         let end = display.run_once();
 
