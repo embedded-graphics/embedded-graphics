@@ -181,8 +181,7 @@ where
 
             let is_border = len > radius_sq - radius && len < outer_radius_sq + radius;
 
-            // TODO: Should this be a <= or a <?
-            let is_fill = len <= outer_radius_sq;
+            let is_fill = len <= outer_radius_sq + 1;
 
             let item = if is_border && self.style.stroke_color.is_some() {
                 Some(Pixel(
@@ -271,6 +270,19 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::BinaryColor;
+
+    /// Test for issue #143
+    #[test]
+    fn issue_143_stroke_and_fill() {
+        let circle_no_stroke: Circle<BinaryColor> =
+            Circle::new(Point::new(10, 16), 3).fill(Some(BinaryColor::On));
+        let circle_stroke: Circle<BinaryColor> = Circle::new(Point::new(10, 16), 3)
+            .fill(Some(BinaryColor::On))
+            .stroke(Some(BinaryColor::On));
+
+        assert_eq!(circle_stroke.size(), circle_no_stroke.size());
+        assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));
+    }
 
     #[test]
     fn negative_dimensions() {
