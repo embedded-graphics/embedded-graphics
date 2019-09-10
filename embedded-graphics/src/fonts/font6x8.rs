@@ -26,68 +26,14 @@ impl FontBuilderConf for Font6x8Conf {
 ///
 /// There is also the [`text_6x8`] macro to provide an easier to use interface.
 ///
+/// [![6x8 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x8.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x8.png)
+///
 /// # Examples
 ///
-/// ## Write some text to the screen at the default `(0, 0)` position
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::fonts::Font6x8;
-/// use embedded_graphics::text_6x8;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::BinaryColor;
-/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-///
-/// // Use struct methods directly
-/// display.draw(Font6x8::render_str("Hello Rust!"));
-///
-/// // Use a macro instead
-/// display.draw(text_6x8!("Hello Rust!"));
-/// ```
-///
-/// ## Translate text by (20px, 30px)
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::fonts::Font6x8;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::BinaryColor;
-/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-///
-/// display.draw(
-///     Font6x8::render_str("Hello Rust!").translate(Point::new(20, 30))
-/// );
-/// ```
-///
-/// ## Add some styling to the text
-///
-/// Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
-/// Properties like `fill` or `stroke` passed to the `text_6x8` macro are converted into method
-/// calls verbatim.
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::text_6x8;
-/// use embedded_graphics::fonts::Font6x8;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::default();
-///
-/// display.draw(text_6x8!(
-///     "Hello Rust!",
-///     fill = Some(Rgb565::BLUE),
-///     stroke = Some(Rgb565::YELLOW)
-/// ));
-///
-/// display.draw(
-///     Font6x8::render_str("Hello Rust!")
-///         .translate(Point::new(20, 30))
-///         .fill(Some(Rgb565::BLUE))
-///         .stroke(Some(Rgb565::YELLOW)),
-/// );
-/// ```
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_6x8`]: ../macro.text_6x8.html
+
 pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 
 #[cfg(test)]

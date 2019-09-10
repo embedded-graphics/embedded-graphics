@@ -23,66 +23,11 @@ impl FontBuilderConf for Font12x16Conf {
 ///
 /// There is also the [`text_12x16`] macro to provide an easier to use interface.
 ///
+/// [![12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
+///
 /// # Examples
 ///
-/// ## Write some text to the screen at the default `(0, 0)` position
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::fonts::Font12x16;
-/// use embedded_graphics::text_12x16;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::BinaryColor;
-/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-///
-/// // Use struct methods directly
-/// display.draw(Font12x16::render_str("Hello Rust!"));
-///
-/// // Use a macro instead
-/// display.draw(text_12x16!("Hello Rust!"));
-/// ```
-///
-/// ## Translate text by (20px, 30px)
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::fonts::Font12x16;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::BinaryColor;
-/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-///
-/// display.draw(
-///     Font12x16::render_str("Hello Rust!").translate(Point::new(20, 30))
-/// );
-/// ```
-///
-/// ## Add some styling to the text
-///
-/// Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
-/// Properties like `fill` or `stroke` passed to the `text_12x16` macro are converted into method
-/// calls verbatim.
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::text_12x16;
-/// use embedded_graphics::fonts::Font12x16;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::default();
-///
-/// display.draw(text_12x16!(
-///     "Hello Rust!",
-///     fill = Some(Rgb565::BLUE),
-///     stroke = Some(Rgb565::YELLOW)
-/// ));
-///
-/// display.draw(
-///     Font12x16::render_str("Hello Rust!")
-///         .translate(Point::new(20, 30))
-///         .fill(Some(Rgb565::BLUE))
-///         .stroke(Some(Rgb565::YELLOW)),
-/// );
-/// ```
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_12x16`]: ../macro.text_12x16.html
 pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;

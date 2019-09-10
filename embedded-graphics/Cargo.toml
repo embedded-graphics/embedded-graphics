@@ -48,3 +48,4 @@ tga = [ "tinytga" ]
 
 [dev-dependencies]
 criterion = { version = "0.2.11", default-features = false }
+arrayvec = "0.4.11"
