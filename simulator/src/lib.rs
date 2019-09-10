@@ -124,6 +124,11 @@ pub struct BinaryDisplay {
 }
 
 impl BinaryDisplay {
+    /// Clear all pixels to black (empty the pixel buffer)
+    pub fn clear(&mut self) {
+        self.pixels = PixelData::<BinaryColor>::new(self.pixels.width, self.pixels.height);
+    }
+
     /// Update the display to show drawn pixels
     pub fn run_once(&mut self) -> bool {
         if self.window.handle_events() {
@@ -170,6 +175,11 @@ pub struct RgbDisplay {
 }
 
 impl RgbDisplay {
+    /// Clear all pixels to black (empty the pixel buffer)
+    pub fn clear(&mut self) {
+        self.pixels = PixelData::<Rgb888>::new(self.pixels.width, self.pixels.height);
+    }
+
     /// Update the display to show drawn pixels
     pub fn run_once(&mut self) -> bool {
         if self.window.handle_events() {
