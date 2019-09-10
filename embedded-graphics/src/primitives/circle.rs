@@ -275,10 +275,10 @@ mod tests {
     #[test]
     fn issue_143_stroke_and_fill() {
         let circle_no_stroke: Circle<BinaryColor> =
-            Circle::new(Point::new(10, 16), 3).fill(Some(BinaryColor::On));
+            Circle::new(Point::new(10, 16), 3).fill_color(Some(BinaryColor::On));
         let circle_stroke: Circle<BinaryColor> = Circle::new(Point::new(10, 16), 3)
-            .fill(Some(BinaryColor::On))
-            .stroke(Some(BinaryColor::On));
+            .fill_color(Some(BinaryColor::On))
+            .stroke_color(Some(BinaryColor::On));
 
         assert_eq!(circle_stroke.size(), circle_no_stroke.size());
         assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));

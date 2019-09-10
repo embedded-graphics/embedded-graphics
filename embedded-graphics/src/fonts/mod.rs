@@ -39,7 +39,7 @@
 //! ## Add some styling to the text
 //!
 //! Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
-//! Properties like `fill` or `stroke` passed to the `text_6x8` macro are converted into method
+//! Properties like `fill_color` or `stroke_color` passed to the `text_6x8` macro are converted into method
 //! calls verbatim.
 //!
 //! ```rust
@@ -52,15 +52,15 @@
 //!
 //! display.draw(text_6x8!(
 //!     "Hello Rust!",
-//!     fill = Some(Rgb565::BLUE),
-//!     stroke = Some(Rgb565::YELLOW)
+//!     fill_color = Some(Rgb565::BLUE),
+//!     stroke_color = Some(Rgb565::YELLOW)
 //! ));
 //!
 //! display.draw(
 //!     Font6x8::render_str("Hello Rust!")
 //!         .translate(Point::new(20, 30))
-//!         .fill(Some(Rgb565::BLUE))
-//!         .stroke(Some(Rgb565::YELLOW)),
+//!         .fill_color(Some(Rgb565::BLUE))
+//!         .stroke_color(Some(Rgb565::YELLOW)),
 //! );
 //! ```
 //!
@@ -90,8 +90,8 @@
 //!
 //! display.draw(text_6x8!(
 //!     &buf,
-//!     fill = Some(Rgb565::BLUE),
-//!     stroke = Some(Rgb565::YELLOW)
+//!     fill_color = Some(Rgb565::BLUE),
+//!     stroke_color = Some(Rgb565::YELLOW)
 //! ));
 //! ```
 //!
