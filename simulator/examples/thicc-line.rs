@@ -23,7 +23,7 @@ fn draw_perp(
 
     let threshold = dx - 2 * dy;
 
-    let width_threshold = dbg!(2.0 * width as f32 * ((dx * dx + dy * dy) as f32).sqrt());
+    let width_threshold = 4 * (width * width) * (dx * dx + dy * dy);
 
     let e_diag = -2 * dx;
     let e_square = 2 * dy;
@@ -31,7 +31,7 @@ fn draw_perp(
     // TODO: WTF does `tk` mean?
     let mut tk = dx + dy - winit;
 
-    while tk as f32 <= width_threshold {
+    while (tk * tk) <= width_threshold {
         display.set_pixel(x as usize, y as usize, Rgb888::RED);
 
         if error > threshold {
@@ -51,7 +51,7 @@ fn draw_perp(
     let mut x = x0;
     let mut y = y0;
 
-    while tk as f32 <= width_threshold {
+    while (tk * tk) <= width_threshold {
         display.set_pixel(x as usize, y as usize, Rgb888::GREEN);
 
         if error > threshold {
