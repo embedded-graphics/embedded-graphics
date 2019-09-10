@@ -1,3 +1,4 @@
+use embedded_graphics::egline;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::DisplayBuilder;
@@ -81,7 +82,7 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32) {
 
     let width = 10;
 
-    for x in x0..(x0 + dx) {
+    for x in x0..=(x0 + dx) {
         draw_perp(display, x, y, dx, dy, p_error, width, error);
 
         if error > threshold {
@@ -108,6 +109,9 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32) {
 
         error += e_square;
     }
+
+    // Draw center line using existing e-g `Line`
+    display.draw(egline!((x0, y0), (x1, y1), stroke = Some(Rgb888::WHITE)));
 }
 
 fn main() {
@@ -119,7 +123,7 @@ fn main() {
 
     draw_line(&mut display, 20, 20, 100, 50);
 
-    // draw_line(&mut display, 10, 100, 50, 100);
+    draw_line(&mut display, 10, 100, 50, 100);
 
     loop {
         let end = display.run_once();
