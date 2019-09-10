@@ -62,8 +62,6 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, dx: i32, dy: i32) {
         draw_perp_left(display, x, y, dx, dy, p_error);
         draw_perp_right(display, x, y, dx, dy, p_error);
 
-        display.set_pixel(x as usize, y as usize, Rgb888::RED);
-
         if error > threshold {
             y += 1;
             error = error + e_diag;
@@ -72,7 +70,7 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, dx: i32, dy: i32) {
                 draw_perp_left(display, x, y, dx, dy, p_error + e_diag + e_square);
                 draw_perp_right(display, x, y, dx, dy, p_error + e_diag + e_square);
 
-                p_error = e_square;
+                p_error = e_diag;
             }
 
             p_error += e_square;
@@ -89,11 +87,9 @@ fn main() {
         .scale(3)
         .build_rgb();
 
-    // display.set_pixel(10, 10, BinaryColor::On);
-
-    // thick_octant1(&mut display, 20, 100, 100, 20, 5);
-
     draw_line(&mut display, 10, 50, 50, 40);
+
+    draw_line(&mut display, 10, 100, 50, 0);
 
     loop {
         let end = display.run_once();
