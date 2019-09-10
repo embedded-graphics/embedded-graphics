@@ -26,7 +26,7 @@ where
     P: PixelColor,
 {
     /// Create a new style with a given stroke value and defaults for everything else
-    pub fn stroke(stroke_color: P) -> Self {
+    pub fn stroke_color(stroke_color: P) -> Self {
         Self {
             stroke_color: Some(stroke_color),
             ..Style::default()
@@ -58,7 +58,7 @@ where
     /// Set the stroke colour for the object
     ///
     /// This can be a noop
-    fn stroke(self, stroke: Option<C>) -> Self;
+    fn stroke_color(self, color: Option<C>) -> Self;
 
     /// Set the stroke width for the object
     ///
@@ -68,5 +68,5 @@ where
     /// Set the fill property of the object's style
     ///
     /// This can be a noop
-    fn fill(self, stroke: Option<C>) -> Self;
+    fn fill_color(self, color: Option<C>) -> Self;
 }

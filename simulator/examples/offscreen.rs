@@ -15,7 +15,7 @@ fn main() {
     // Outline
     display.draw(
         Rectangle::new(Point::new(0, 0), Point::new(16, 16))
-            .stroke(Some(BinaryColor::On))
+            .stroke_color(Some(BinaryColor::On))
             .translate(Point::new(-8, -8)),
     );
 

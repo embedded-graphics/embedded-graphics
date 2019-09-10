@@ -13,15 +13,18 @@ fn main() {
         .build_binary();
 
     // Outline
-    display.draw(Circle::new(Point::new(64, 64), 64).stroke(Some(BinaryColor::On)));
+    display.draw(Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)));
 
     // Clock hands
-    display.draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke(Some(BinaryColor::On)));
-    display.draw(Line::new(Point::new(64, 64), Point::new(80, 80)).stroke(Some(BinaryColor::On)));
+    display
+        .draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)));
+    display.draw(
+        Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)),
+    );
 
     display.draw(
         Font6x8::render_str("Hello World!")
-            .stroke(Some(BinaryColor::On))
+            .stroke_color(Some(BinaryColor::On))
             .translate(Point::new(5, 50)),
     );
 

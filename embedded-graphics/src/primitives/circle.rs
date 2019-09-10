@@ -28,14 +28,14 @@ use crate::style::WithStyle;
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
 /// let c2 = Circle::new(Point::new(50, 20), 30)
-///     .stroke(Some(Rgb565::RED))
+///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill(Some(Rgb565::GREEN));
+///     .fill_color(Some(Rgb565::GREEN));
 ///
 /// // Circle with no stroke and a translation applied
 /// let c3 = Circle::new(Point::new(10, 20), 30)
-///     .stroke(None)
-///     .fill(Some(Rgb565::BLUE))
+///     .stroke_color(None)
+///     .fill_color(Some(Rgb565::BLUE))
 ///     .translate(Point::new(65, 35));
 ///
 /// display.draw(c1);
@@ -99,7 +99,7 @@ where
         self
     }
 
-    fn stroke(mut self, color: Option<C>) -> Self {
+    fn stroke_color(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
@@ -111,7 +111,7 @@ where
         self
     }
 
-    fn fill(mut self, color: Option<C>) -> Self {
+    fn fill_color(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -229,7 +229,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(Rgb565::RED);
+    /// # let style = Style::stroke_color(Rgb565::RED);
     /// #
     /// let circle = Circle::new(Point::new(5, 10), 10)
     /// #    .style(style);
@@ -251,7 +251,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(Rgb565::RED);
+    /// # let style = Style::stroke_color(Rgb565::RED);
     /// #
     /// let mut circle = Circle::new(Point::new(5, 10), 10)
     /// #    .style(style);
@@ -275,10 +275,10 @@ mod tests {
     #[test]
     fn issue_143_stroke_and_fill() {
         let circle_no_stroke: Circle<BinaryColor> =
-            Circle::new(Point::new(10, 16), 3).fill(Some(BinaryColor::On));
+            Circle::new(Point::new(10, 16), 3).fill_color(Some(BinaryColor::On));
         let circle_stroke: Circle<BinaryColor> = Circle::new(Point::new(10, 16), 3)
-            .fill(Some(BinaryColor::On))
-            .stroke(Some(BinaryColor::On));
+            .fill_color(Some(BinaryColor::On))
+            .stroke_color(Some(BinaryColor::On));
 
         assert_eq!(circle_stroke.size(), circle_no_stroke.size());
         assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));
@@ -314,8 +314,8 @@ mod tests {
     #[test]
     fn transparent_border() {
         let circ: Circle<BinaryColor> = Circle::new(Point::new(5, 5), 10)
-            .stroke(None)
-            .fill(Some(BinaryColor::On));
+            .stroke_color(None)
+            .fill_color(Some(BinaryColor::On));
 
         assert!(circ.into_iter().count() > 0);
     }
@@ -323,11 +323,11 @@ mod tests {
     #[test]
     fn it_handles_negative_coordinates() {
         let positive: CircleIterator<BinaryColor> = Circle::new(Point::new(10, 10), 5)
-            .style(Style::stroke(BinaryColor::On))
+            .style(Style::stroke_color(BinaryColor::On))
             .into_iter();
 
         let negative: CircleIterator<BinaryColor> = Circle::new(Point::new(-10, -10), 5)
-            .style(Style::stroke(BinaryColor::On))
+            .style(Style::stroke_color(BinaryColor::On))
             .into_iter();
 
         assert!(negative.into_iter().eq(positive

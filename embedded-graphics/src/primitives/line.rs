@@ -28,7 +28,7 @@ use crate::style::WithStyle;
 ///
 /// // Line with styled stroke from (50, 20) to (60, 35)
 /// let l2 = Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .stroke(Some(Rgb565::RED));
+///     .stroke_color(Some(Rgb565::RED));
 ///
 /// // Line with translation applied
 /// let l3 = Line::new(Point::new(50, 20), Point::new(60, 35))
@@ -93,7 +93,7 @@ where
         self
     }
 
-    fn stroke(mut self, color: Option<C>) -> Self {
+    fn stroke_color(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
@@ -105,7 +105,7 @@ where
         self
     }
 
-    fn fill(mut self, color: Option<C>) -> Self {
+    fn fill_color(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -219,7 +219,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(BinaryColor::On);
+    /// # let style = Style::stroke_color(BinaryColor::On);
     /// #
     /// let line = Line::new(Point::new(5, 10), Point::new(15, 20))
     /// #    .style(style);
@@ -243,7 +243,7 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// #
-    /// # let style = Style::stroke(BinaryColor::On);
+    /// # let style = Style::stroke_color(BinaryColor::On);
     /// #
     /// let mut line = Line::new(Point::new(5, 10), Point::new(15, 20))
     /// #    .style(style);
@@ -268,7 +268,7 @@ mod tests {
     use crate::style::Style;
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line = Line::new(start, end).style(Style::stroke(BinaryColor::On));
+        let line = Line::new(start, end).style(Style::stroke_color(BinaryColor::On));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {

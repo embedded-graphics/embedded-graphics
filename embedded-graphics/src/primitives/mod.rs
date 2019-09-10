@@ -28,13 +28,13 @@ pub use self::triangle::Triangle;
 /// let filled_circle: Circle<Rgb565> = egcircle!(
 ///     (10, 20),
 ///     30,
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let default_style: Circle<Rgb565> = egcircle!((10, 20), 30, style = Style::default());
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
+/// Style properties like `stroke_color` map to the method calls on the
 /// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
 /// identical circles:
 ///
@@ -45,18 +45,18 @@ pub use self::triangle::Triangle;
 /// let circle: Circle<Rgb565> = egcircle!(
 ///     (10, 20),
 ///     30,
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let circle: Circle<Rgb565> = egcircle!(
 ///     Point::new(10, 20),
 ///     30,
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let circle: Circle<Rgb565> = Circle::new(Point::new(10, 20), 30)
-///     .stroke(Some(Rgb565::RED))
-///     .fill(Some(Rgb565::GREEN));
+///     .stroke_color(Some(Rgb565::RED))
+///     .fill_color(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egcircle {
@@ -79,7 +79,7 @@ macro_rules! egcircle {
 ///
 /// let line: Line<Rgb565> = egline!((10, 20), (30, 40));
 /// let line: Line<Rgb565> = egline!(Point::new(10, 20), Point::new(30, 40));
-/// let stroke_line: Line<Rgb565> = egline!((10, 20), (30, 40), stroke = Some(Rgb565::BLUE));
+/// let stroke_line: Line<Rgb565> = egline!((10, 20), (30, 40), stroke_color = Some(Rgb565::BLUE));
 /// ```
 ///
 /// Style properties like `stroke` map to the method calls on the
@@ -93,18 +93,18 @@ macro_rules! egcircle {
 /// let Line: Line<Rgb565> = egline!(
 ///     Point::new(10, 20),
 ///     Point::new(30, 40),
-///     stroke = Some(Rgb565::BLUE),
-///     fill = Some(Rgb565::YELLOW)
+///     stroke_color = Some(Rgb565::BLUE),
+///     fill_color = Some(Rgb565::YELLOW)
 /// );
 /// let Line: Line<Rgb565> = egline!(
 ///     (10, 20),
 ///     (30, 40),
-///     stroke = Some(Rgb565::BLUE),
-///     fill = Some(Rgb565::YELLOW)
+///     stroke_color = Some(Rgb565::BLUE),
+///     fill_color = Some(Rgb565::YELLOW)
 /// );
 /// let Line: Line<Rgb565> = Line::new(Point::new(10, 20), Point::new(30, 40))
-///     .stroke(Some(Rgb565::BLUE))
-///     .fill(Some(Rgb565::YELLOW));
+///     .stroke_color(Some(Rgb565::BLUE))
+///     .fill_color(Some(Rgb565::YELLOW));
 /// ```
 #[macro_export]
 macro_rules! egline {
@@ -131,14 +131,14 @@ macro_rules! egline {
 /// let filled_rect: Rectangle<Rgb565> = egrectangle!(
 ///     (10, 20),
 ///     (30, 40),
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let rect_default_style: Rectangle<Rgb565> =
 ///     egrectangle!((10, 20), (30, 40), style = Style::default());
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
+/// Style properties like `stroke_color` map to the method calls on the
 /// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
 /// identical rectangles:
 ///
@@ -149,18 +149,18 @@ macro_rules! egline {
 /// let Rectangle: Rectangle<Rgb565> = egrectangle!(
 ///     (10, 20),
 ///     (30, 40),
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let Rectangle: Rectangle<Rgb565> = egrectangle!(
 ///     Point::new(10, 20),
 ///     Point::new(30, 40),
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let Rectangle: Rectangle<Rgb565> = Rectangle::new(Point::new(10, 20), Point::new(30, 40))
-///     .stroke(Some(Rgb565::RED))
-///     .fill(Some(Rgb565::GREEN));
+///     .stroke_color(Some(Rgb565::RED))
+///     .fill_color(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
@@ -189,14 +189,14 @@ macro_rules! egrectangle {
 ///     (10, 20),
 ///     (30, 40),
 ///     (50, 60),
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let triangle_default_style: Triangle<Rgb565> =
 ///     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
+/// Style properties like `stroke_color` map to the method calls on the
 /// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
 /// identical triangles:
 ///
@@ -208,13 +208,13 @@ macro_rules! egrectangle {
 ///     (10, 20),
 ///     (30, 40),
 ///     (50, 60),
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// let Triangle: Triangle<Rgb565> =
 ///     Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
-///         .stroke(Some(Rgb565::RED))
-///         .fill(Some(Rgb565::GREEN));
+///         .stroke_color(Some(Rgb565::RED))
+///         .fill_color(Some(Rgb565::GREEN));
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
@@ -244,8 +244,8 @@ mod tests {
         let _c: Circle<Rgb565> = egcircle!(
             (10, 20),
             30,
-            stroke = Some(Rgb565::RED),
-            fill = Some(Rgb565::GREEN)
+            stroke_color = Some(Rgb565::RED),
+            fill_color = Some(Rgb565::GREEN)
         );
         let _c: Circle<Rgb565> = egcircle!((10, 20), 30, style = Style::default());
     }
@@ -257,8 +257,8 @@ mod tests {
         let _l: Line<Rgb565> = egline!(
             (10, 20),
             (30, 40),
-            stroke = Some(Rgb565::RED),
-            fill = Some(Rgb565::GREEN)
+            stroke_color = Some(Rgb565::RED),
+            fill_color = Some(Rgb565::GREEN)
         );
         let _l: Line<Rgb565> = egline!((10, 20), (30, 40), style = Style::default());
     }
@@ -270,8 +270,8 @@ mod tests {
         let _r: Rectangle<Rgb565> = egrectangle!(
             (10, 20),
             (30, 40),
-            stroke = Some(Rgb565::RED),
-            fill = Some(Rgb565::GREEN)
+            stroke_color = Some(Rgb565::RED),
+            fill_color = Some(Rgb565::GREEN)
         );
         let _r: Rectangle<Rgb565> = egrectangle!((10, 20), (30, 40), style = Style::default());
     }
@@ -285,8 +285,8 @@ mod tests {
             (10, 20),
             (30, 40),
             (50, 60),
-            stroke = Some(Rgb565::RED),
-            fill = Some(Rgb565::GREEN)
+            stroke_color = Some(Rgb565::RED),
+            fill_color = Some(Rgb565::GREEN)
         );
         let _t: Triangle<Rgb565> =
             egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());

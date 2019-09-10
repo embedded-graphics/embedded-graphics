@@ -20,8 +20,8 @@ fn main() {
     // Show smallest font with white font on black background
     display.draw(
         Font6x8::render_str("Hello World! - inverse 6x8")
-            .stroke(Some(BinaryColor::Off))
-            .fill(Some(BinaryColor::On))
+            .stroke_color(Some(BinaryColor::Off))
+            .fill_color(Some(BinaryColor::On))
             .translate(Point::new(15, 30)),
     );
 
@@ -29,8 +29,8 @@ fn main() {
     display.draw(
         text_6x8!(
             "Hello world! - inverse 6x8 with macro",
-            stroke = Some(BinaryColor::Off),
-            fill = Some(BinaryColor::On)
+            stroke_color = Some(BinaryColor::Off),
+            fill_color = Some(BinaryColor::On)
         )
         .translate(Point::new(15, 40)),
     );

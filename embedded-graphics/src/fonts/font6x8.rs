@@ -50,8 +50,8 @@ mod tests {
     #[test]
     fn text_with_negative_y_does_not_infinite_loop() {
         let text: Font6x8<BinaryColor> = Font6x8::render_str("Hello World!")
-            .stroke(Some(BinaryColor::On))
-            .fill(Some(BinaryColor::Off))
+            .stroke_color(Some(BinaryColor::On))
+            .fill_color(Some(BinaryColor::Off))
             .translate(Point::new(5, -10));
 
         assert_eq!(text.into_iter().count(), 6 * 8 * "Hello World!".len());
@@ -81,7 +81,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str("Mm").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str("Mm").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -103,8 +103,8 @@ mod tests {
         let mut display = MockDisplay::new();
         display.draw(
             Font6x8::render_str("Mm")
-                .stroke(Some(BinaryColor::Off))
-                .fill(Some(BinaryColor::On)),
+                .stroke_color(Some(BinaryColor::Off))
+                .fill_color(Some(BinaryColor::On)),
         );
 
         assert_eq!(
@@ -128,15 +128,15 @@ mod tests {
         let mut display_inverse = MockDisplay::new();
         display_inverse.draw(
             Font6x8::render_str("Mm")
-                .stroke(Some(BinaryColor::Off))
-                .fill(Some(BinaryColor::On)),
+                .stroke_color(Some(BinaryColor::Off))
+                .fill_color(Some(BinaryColor::On)),
         );
 
         let mut display_normal = MockDisplay::new();
         display_normal.draw(
             Font6x8::render_str("Mm")
-                .stroke(Some(BinaryColor::On))
-                .fill(Some(BinaryColor::Off)),
+                .stroke_color(Some(BinaryColor::On))
+                .fill_color(Some(BinaryColor::Off)),
         );
 
         for y in 0..display_inverse.height() {
@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str(" ~").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str(" ~").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -174,7 +174,7 @@ mod tests {
     #[test]
     fn no_fill_doesnt_hang() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str(" ").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str(" ").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(display, MockDisplay::new());
     }
@@ -182,7 +182,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str("$y").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str("$y").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn correct_latin1() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str("¡ÿ").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str("¡ÿ").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -233,15 +233,15 @@ mod tests {
         ]);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str("\0\n").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str("\0\n").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str("\x7F\u{A0}").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str("\x7F\u{A0}").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x8::render_str("Ā💣").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x8::render_str("Ā💣").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
     }
 }

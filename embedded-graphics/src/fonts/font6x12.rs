@@ -46,8 +46,8 @@ mod tests {
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
         let text: Font6x12<BinaryColor> = Font6x12::render_str("Hello World!")
-            .stroke(Some(BinaryColor::On))
-            .fill(Some(BinaryColor::Off))
+            .stroke_color(Some(BinaryColor::On))
+            .fill_color(Some(BinaryColor::Off))
             .translate(Point::new(5, -20));
 
         assert_eq!(text.into_iter().count(), 6 * 12 * "Hello World!".len());
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str("Mm").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str("Mm").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str(" ~").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str(" ~").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -125,7 +125,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str("$y").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str("$y").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -164,27 +164,27 @@ mod tests {
         ]);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str("\0\n").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str("\0\n").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str("\x7F\u{A0}").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str("\x7F\u{A0}").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str("¡ÿ").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str("¡ÿ").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font6x12::render_str("Ā💣").stroke(Some(BinaryColor::On)));
+        display.draw(Font6x12::render_str("Ā💣").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
     }
 
     #[test]
     fn negative_y_no_infinite_loop() {
         let text: Font6x12<BinaryColor> = Font6x12::render_str("Testing string")
-            .stroke(Some(BinaryColor::On))
-            .fill(Some(BinaryColor::Off))
+            .stroke_color(Some(BinaryColor::On))
+            .fill_color(Some(BinaryColor::Off))
             .translate(Point::new(0, -12));
 
         assert_eq!(text.into_iter().count(), 6 * 12 * "Testing string".len());
@@ -193,8 +193,8 @@ mod tests {
     #[test]
     fn negative_x_no_infinite_loop() {
         let text: Font6x12<BinaryColor> = Font6x12::render_str("A")
-            .stroke(Some(BinaryColor::On))
-            .fill(Some(BinaryColor::Off))
+            .stroke_color(Some(BinaryColor::On))
+            .fill_color(Some(BinaryColor::Off))
             .translate(Point::new(-6, 0));
 
         assert_eq!(text.into_iter().count(), 6 * 12);

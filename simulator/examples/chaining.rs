@@ -15,13 +15,15 @@ fn main() {
         .build_binary();
 
     let objects = Circle::new(Point::new(64, 64), 64)
-        .stroke(Some(BinaryColor::On))
+        .stroke_color(Some(BinaryColor::On))
         .into_iter()
-        .chain(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke(Some(BinaryColor::On)))
-        .chain(Line::new(Point::new(64, 64), Point::new(80, 80)).stroke(Some(BinaryColor::On)))
+        .chain(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)))
+        .chain(
+            Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)),
+        )
         .chain(
             Font6x8::render_str("Hello World!")
-                .stroke(Some(BinaryColor::On))
+                .stroke_color(Some(BinaryColor::On))
                 .translate(Point::new(5, 50)),
         );
 

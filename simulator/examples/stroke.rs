@@ -15,19 +15,19 @@ fn main() {
 
     let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64))
         .translate(Point::new(0, 0))
-        .stroke(Some(BinaryColor::On));
+        .stroke_color(Some(BinaryColor::On));
 
     let rect = Rectangle::new(Point::new(0, 0), Point::new(64, 64))
         .translate(Point::new(64 + PADDING, 0))
-        .stroke(Some(BinaryColor::On));
+        .stroke_color(Some(BinaryColor::On));
 
     let line = Line::new(Point::new(0, 0), Point::new(64, 64))
         .translate(Point::new(128 + PADDING * 2, 0))
-        .stroke(Some(BinaryColor::On));
+        .stroke_color(Some(BinaryColor::On));
 
     let circ = Circle::new(Point::new(32, 32), 32)
         .translate(Point::new(192 + PADDING * 3, 0))
-        .stroke(Some(BinaryColor::On));
+        .stroke_color(Some(BinaryColor::On));
 
     display.draw(
         circ.into_iter()
