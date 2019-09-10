@@ -27,7 +27,7 @@ impl FontBuilderConf for Font6x12Conf {
 ///
 /// # Examples
 ///
-/// See the [module docs](./index.html) for examples.
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_6x12`]: ../macro.text_6x12.html
 pub type Font6x12<'a, C> = FontBuilder<'a, C, Font6x12Conf>;

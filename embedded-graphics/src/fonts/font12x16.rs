@@ -27,7 +27,7 @@ impl FontBuilderConf for Font12x16Conf {
 ///
 /// # Examples
 ///
-/// See the [module docs](./index.html) for examples.
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_12x16`]: ../macro.text_12x16.html
 pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;

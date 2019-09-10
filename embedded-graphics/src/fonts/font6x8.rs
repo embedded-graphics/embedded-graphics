@@ -30,7 +30,7 @@ impl FontBuilderConf for Font6x8Conf {
 ///
 /// # Examples
 ///
-/// See the [module docs](./index.html) for examples.
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_6x8`]: ../macro.text_6x8.html
 

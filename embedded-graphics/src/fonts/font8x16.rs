@@ -30,7 +30,7 @@ impl FontBuilderConf for Font8x16Conf {
 ///
 /// # Examples
 ///
-/// See the [module docs](./index.html) for examples.
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_8x16`]: ../macro.text_8x16.html
 pub type Font8x16<'a, C> = FontBuilder<'a, C, Font8x16Conf>;
