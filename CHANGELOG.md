@@ -12,7 +12,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #143 Circles with no stroke are now drawn correctly
 
-## 0.2.0-alpha.2
+## 0.6.0-alpha.2
 
 ### Changed
 
