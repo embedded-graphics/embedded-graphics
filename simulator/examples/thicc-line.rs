@@ -111,7 +111,11 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32) {
     }
 
     // Draw center line using existing e-g `Line`
-    display.draw(egline!((x0, y0), (x1, y1), stroke = Some(Rgb888::WHITE)));
+    display.draw(egline!(
+        (x0, y0),
+        (x1, y1),
+        stroke_color = Some(Rgb888::WHITE)
+    ));
 }
 
 fn main() {
