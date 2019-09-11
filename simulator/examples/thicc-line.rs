@@ -66,7 +66,7 @@ fn draw_perp(
     }
 }
 
-fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32) {
+fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32, width: i32) {
     let dx = x1 - x0;
     let dy = y1 - y0;
 
@@ -79,8 +79,6 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32) {
 
     let e_diag = -2 * dx;
     let e_square = 2 * dy;
-
-    let width = 10;
 
     for x in x0..=(x0 + dx) {
         draw_perp(display, x, y, dx, dy, p_error, width, error);
@@ -121,13 +119,15 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32) {
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
-        .size(320, 256)
-        .scale(3)
+        .size(256, 256)
+        .scale(8)
         .build_rgb();
 
-    draw_line(&mut display, 20, 20, 100, 50);
+    // draw_line(&mut display, 20, 20, 100, 50, 1);
 
-    draw_line(&mut display, 10, 100, 50, 100);
+    // draw_line(&mut display, 10, 100, 50, 100, 1);
+
+    let mut angle: f32 = 0.0;
 
     loop {
         let end = display.run_once();
@@ -136,6 +136,15 @@ fn main() {
             break;
         }
 
-        thread::sleep(Duration::from_millis(200));
+        display.clear();
+
+        let x = dbg!(127 + (angle.cos() * 120.0) as i32);
+        let y = dbg!(127 + (angle.sin() * 120.0) as i32);
+
+        draw_line(&mut display, 127, 127, x, y, 10);
+
+        angle += 0.1;
+
+        thread::sleep(Duration::from_millis(50));
     }
 }
