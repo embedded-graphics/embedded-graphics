@@ -135,8 +135,8 @@ fn main() {
 
         display.clear();
 
-        let x = dbg!(127 + (angle.cos() * 120.0) as i32);
-        let y = dbg!(127 + (angle.sin() * 120.0) as i32);
+        let x = 127 + (angle.cos() * 120.0) as i32;
+        let y = 127 + (angle.sin() * 120.0) as i32;
 
         draw_line(&mut display, 127, 127, x, y, 10);
 
