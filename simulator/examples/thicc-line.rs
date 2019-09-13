@@ -6,7 +6,6 @@ use embedded_graphics_simulator::RgbDisplay;
 use std::thread;
 use std::time::Duration;
 
-// TODO: Wtf does `winit` mean?
 fn draw_perp(
     display: &mut RgbDisplay,
     x0: i32,
@@ -23,46 +22,44 @@ fn draw_perp(
 
     let threshold = dx - 2 * dy;
 
-    let width_threshold = 4 * (width * width) * (dx * dx + dy * dy);
+    let width_threshold_sq = 4 * (width * width) * (dx * dx + dy * dy);
 
     let e_diag = -2 * dx;
     let e_square = 2 * dy;
 
-    // TODO: WTF does `tk` mean?
-    let mut tk = dx + dy - winit;
+    let mut width_accum = dx + dy - winit;
 
-    while (tk * tk) <= width_threshold {
+    while (width_accum * width_accum) <= width_threshold_sq {
         display.set_pixel(x as usize, y as usize, Rgb888::RED);
 
         if error > threshold {
             x -= 1;
             error += e_diag;
-            tk += 2 * dy;
+            width_accum += 2 * dy;
         }
 
         error += e_square;
         y += 1;
-        tk += 2 * dx;
+        width_accum += 2 * dx;
     }
 
-    // TODO: WTF does `tk` mean?
-    let mut tk = dx + dy + winit;
+    let mut width_accum = dx + dy + winit;
     let mut error = -error_initial;
     let mut x = x0;
     let mut y = y0;
 
-    while (tk * tk) <= width_threshold {
+    while (width_accum * width_accum) <= width_threshold_sq {
         display.set_pixel(x as usize, y as usize, Rgb888::GREEN);
 
         if error > threshold {
             x += 1;
             error += e_diag;
-            tk += 2 * dy;
+            width_accum += 2 * dy;
         }
 
         error += e_square;
         y -= 1;
-        tk += 2 * dx;
+        width_accum += 2 * dx;
     }
 }
 
@@ -120,7 +117,7 @@ fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
         .size(256, 256)
-        .scale(8)
+        .scale(3)
         .build_rgb();
 
     // draw_line(&mut display, 20, 20, 100, 50, 1);
