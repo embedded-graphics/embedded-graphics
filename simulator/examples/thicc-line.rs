@@ -12,11 +12,11 @@ fn draw_perp(
     y0: i32,
     dx: i32,
     dy: i32,
-    error_initial: i32,
+    p_error_initial: i32,
     width: i32,
-    winit: i32,
+    error_initial: i32,
 ) {
-    let mut error = error_initial;
+    let mut error = p_error_initial;
     let mut x = x0;
     let mut y = y0;
 
@@ -27,7 +27,7 @@ fn draw_perp(
     let e_diag = -2 * dx;
     let e_square = 2 * dy;
 
-    let mut width_accum = dx + dy - winit;
+    let mut width_accum = dx + dy - error_initial;
 
     while width_accum.pow(2) <= width_threshold_sq {
         display.set_pixel(x as usize, y as usize, Rgb888::RED);
@@ -43,8 +43,8 @@ fn draw_perp(
         width_accum += 2 * dx;
     }
 
-    let mut width_accum = dx + dy + winit;
-    let mut error = -error_initial;
+    let mut width_accum = dx + dy + error_initial;
+    let mut error = -p_error_initial;
     let mut x = x0;
     let mut y = y0;
 
@@ -85,18 +85,9 @@ fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32, width
             error += e_diag;
 
             if p_error > threshold {
-                draw_perp(
-                    display,
-                    x,
-                    y,
-                    dx,
-                    dy,
-                    p_error + e_diag + e_square,
-                    width,
-                    error,
-                );
-
                 p_error += e_diag;
+
+                draw_perp(display, x, y, dx, dy, p_error + e_square, width, error);
             }
 
             p_error += e_square;
