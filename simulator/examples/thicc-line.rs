@@ -22,14 +22,14 @@ fn draw_perp(
 
     let threshold = dx - 2 * dy;
 
-    let width_threshold_sq = 4 * (width * width) * (dx * dx + dy * dy);
+    let width_threshold_sq = 4 * width.pow(2) * (dx.pow(2) + dy.pow(2));
 
     let e_diag = -2 * dx;
     let e_square = 2 * dy;
 
     let mut width_accum = dx + dy - winit;
 
-    while (width_accum * width_accum) <= width_threshold_sq {
+    while width_accum.pow(2) <= width_threshold_sq {
         display.set_pixel(x as usize, y as usize, Rgb888::RED);
 
         if error > threshold {
@@ -48,7 +48,7 @@ fn draw_perp(
     let mut x = x0;
     let mut y = y0;
 
-    while (width_accum * width_accum) <= width_threshold_sq {
+    while width_accum.pow(2) <= width_threshold_sq {
         display.set_pixel(x as usize, y as usize, Rgb888::GREEN);
 
         if error > threshold {
