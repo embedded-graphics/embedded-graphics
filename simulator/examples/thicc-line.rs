@@ -8,100 +8,93 @@ use std::time::Duration;
 
 fn draw_perp(
     display: &mut RgbDisplay,
-    x0: i32,
-    y0: i32,
-    dx: i32,
-    dy: i32,
+    start: Point,
+    delta: Point,
     p_error_initial: i32,
     width: i32,
     error_initial: i32,
 ) {
     let mut error = p_error_initial;
-    let mut x = x0;
-    let mut y = y0;
+    let mut p = start;
 
-    let threshold = dx - 2 * dy;
+    let threshold = delta.x - 2 * delta.y;
 
-    let width_threshold_sq = 4 * width.pow(2) * (dx.pow(2) + dy.pow(2));
+    let width_threshold_sq = 4 * width.pow(2) * (delta.x.pow(2) + delta.y.pow(2));
 
-    let e_diag = -2 * dx;
-    let e_square = 2 * dy;
+    let e_diag = -2 * delta.x;
+    let e_square = 2 * delta.y;
 
-    let mut width_accum = dx + dy - error_initial;
+    let mut width_accum = delta.x + delta.y - error_initial;
 
     while width_accum.pow(2) <= width_threshold_sq {
-        display.set_pixel(x as usize, y as usize, Rgb888::RED);
+        display.set_pixel(p.x as usize, p.y as usize, Rgb888::RED);
 
         if error > threshold {
-            x -= 1;
+            p.x -= 1;
             error += e_diag;
-            width_accum += 2 * dy;
+            width_accum += 2 * delta.y;
         }
 
         error += e_square;
-        y += 1;
-        width_accum += 2 * dx;
+        p.y += 1;
+        width_accum += 2 * delta.x;
     }
 
-    let mut width_accum = dx + dy + error_initial;
+    let mut width_accum = delta.x + delta.y + error_initial;
     let mut error = -p_error_initial;
-    let mut x = x0;
-    let mut y = y0;
+    let mut p = start;
 
     while width_accum.pow(2) <= width_threshold_sq {
-        display.set_pixel(x as usize, y as usize, Rgb888::GREEN);
+        display.set_pixel(p.x as usize, p.y as usize, Rgb888::GREEN);
 
         if error > threshold {
-            x += 1;
+            p.x += 1;
             error += e_diag;
-            width_accum += 2 * dy;
+            width_accum += 2 * delta.y;
         }
 
         error += e_square;
-        y -= 1;
-        width_accum += 2 * dx;
+        p.y -= 1;
+        width_accum += 2 * delta.x;
     }
 }
 
-fn draw_line(display: &mut RgbDisplay, x0: i32, y0: i32, x1: i32, y1: i32, width: i32) {
-    let dx = x1 - x0;
-    let dy = y1 - y0;
+fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
+    let delta = p1 - p0;
 
     let mut error = 0;
     // Perpendicular error
     let mut p_error = 0;
-    let mut y = y0;
 
-    let threshold = dx - 2 * dy;
+    let mut p = p0;
 
-    let e_diag = -2 * dx;
-    let e_square = 2 * dy;
+    let threshold = delta.x - 2 * delta.y;
 
-    for x in x0..=(x0 + dx) {
-        draw_perp(display, x, y, dx, dy, p_error, width, error);
+    let e_diag = -2 * delta.x;
+    let e_square = 2 * delta.y;
+
+    for _ in p0.x..=(p0.x + delta.x) {
+        draw_perp(display, p, delta, p_error, width, error);
 
         if error > threshold {
-            y += 1;
+            p.y += 1;
             error += e_diag;
 
             if p_error > threshold {
                 p_error += e_diag;
 
-                draw_perp(display, x, y, dx, dy, p_error + e_square, width, error);
+                draw_perp(display, p, delta, p_error + e_square, width, error);
             }
 
             p_error += e_square;
         }
 
         error += e_square;
+        p.x += 1;
     }
 
     // Draw center line using existing e-g `Line`
-    display.draw(egline!(
-        (x0, y0),
-        (x1, y1),
-        stroke_color = Some(Rgb888::WHITE)
-    ));
+    display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE)));
 }
 
 fn main() {
@@ -129,7 +122,7 @@ fn main() {
         let x = 127 + (angle.cos() * 120.0) as i32;
         let y = 127 + (angle.sin() * 120.0) as i32;
 
-        draw_line(&mut display, 127, 127, x, y, 10);
+        draw_line(&mut display, Point::new(127, 127), Point::new(x, y), 10);
 
         angle += 0.1;
 
