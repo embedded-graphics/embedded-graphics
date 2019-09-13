@@ -10,6 +10,7 @@ fn draw_perp(
     display: &mut RgbDisplay,
     start: Point,
     delta: Point,
+    direction: Point,
     p_error_initial: i32,
     width: i32,
     error_initial: i32,
@@ -30,13 +31,13 @@ fn draw_perp(
         display.set_pixel(p.x as usize, p.y as usize, Rgb888::RED);
 
         if error > threshold {
-            p.x -= 1;
+            p -= Point::new(direction.x, 0);
             error += e_diag;
             width_accum += 2 * delta.y;
         }
 
         error += e_square;
-        p.y += 1;
+        p += Point::new(0, direction.y);
         width_accum += 2 * delta.x;
     }
 
@@ -62,6 +63,13 @@ fn draw_perp(
 fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
     let delta = p1 - p0;
 
+    let direction = match (delta.x < 0, delta.y < 0) {
+        (false, false) => Point::new(1, 1),
+        (false, true) => Point::new(1, -1),
+        (true, false) => Point::new(-1, 1),
+        (true, true) => Point::new(-1, -1),
+    };
+
     let mut error = 0;
     // Perpendicular error
     let mut p_error = 0;
@@ -73,24 +81,36 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
     let e_diag = -2 * delta.x;
     let e_square = 2 * delta.y;
 
-    for _ in p0.x..=(p0.x + delta.x) {
-        draw_perp(display, p, delta, p_error, width, error);
+    for _ in 0..=delta.x.max(delta.y).abs() {
+        // while p != p1 {
+        println!("{:?}", p);
+        draw_perp(display, p, delta, direction, p_error, width, error);
 
         if error > threshold {
-            p.y += 1;
+            // p.y += 1;
+            p += Point::new(0, direction.y);
             error += e_diag;
 
             if p_error > threshold {
                 p_error += e_diag;
 
-                draw_perp(display, p, delta, p_error + e_square, width, error);
+                draw_perp(
+                    display,
+                    p,
+                    delta,
+                    direction,
+                    p_error + e_square,
+                    width,
+                    error,
+                );
             }
 
             p_error += e_square;
         }
 
         error += e_square;
-        p.x += 1;
+        // p.x += 1;
+        p += Point::new(direction.x, 0);
     }
 
     // Draw center line using existing e-g `Line`
