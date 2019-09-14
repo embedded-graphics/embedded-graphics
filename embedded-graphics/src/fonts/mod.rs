@@ -251,8 +251,8 @@ macro_rules! text_12x16 {
 /// let text: Font24x32<Rgb565> = text_24x32!("Hello world!");
 /// let styled_text: Font24x32<Rgb565> = text_24x32!(
 ///     "Hello world!",
-///     stroke = Some(Rgb565::RED),
-///     fill = Some(Rgb565::GREEN)
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///

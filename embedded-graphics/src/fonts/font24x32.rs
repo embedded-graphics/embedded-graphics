@@ -23,66 +23,11 @@ impl FontBuilderConf for Font24x32Conf {
 ///
 /// There is also the [`text_24x32`] macro to provide an easier to use interface.
 ///
+/// The 24x32 font is just a scaled up version of the 12x16 font, so [![here is the 12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
+///
 /// # Examples
 ///
-/// ## Write some text to the screen at the default `(0, 0)` position
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::fonts::Font24x32;
-/// use embedded_graphics::text_24x32;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::BinaryColor;
-/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-///
-/// // Use struct methods directly
-/// display.draw(Font24x32::render_str("Hello Rust!"));
-///
-/// // Use a macro instead
-/// display.draw(text_24x32!("Hello Rust!"));
-/// ```
-///
-/// ## Translate text by (20px, 30px)
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::fonts::Font24x32;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # use embedded_graphics::pixelcolor::BinaryColor;
-/// # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-///
-/// display.draw(
-///     Font24x32::render_str("Hello Rust!").translate(Point::new(20, 30))
-/// );
-/// ```
-///
-/// ## Add some styling to the text
-///
-/// Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
-/// Properties like `fill` or `stroke` passed to the `text_24x32` macro are converted into method
-/// calls verbatim.
-///
-/// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::text_24x32;
-/// use embedded_graphics::fonts::Font24x32;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::default();
-///
-/// display.draw(text_24x32!(
-///     "Hello Rust!",
-///     fill = Some(Rgb565::BLUE),
-///     stroke = Some(Rgb565::YELLOW)
-/// ));
-///
-/// display.draw(
-///     Font24x32::render_str("Hello Rust!")
-///         .translate(Point::new(20, 30))
-///         .fill(Some(Rgb565::BLUE))
-///         .stroke(Some(Rgb565::YELLOW)),
-/// );
-/// ```
+/// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_24x32`]: ../macro.text_24x32.html
 pub type Font24x32<'a, C> = FontBuilder<'a, C, Font24x32Conf>;
@@ -101,8 +46,8 @@ mod tests {
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
         let text: Font24x32<BinaryColor> = Font24x32::render_str("Hello World!")
-            .stroke(Some(BinaryColor::On))
-            .fill(Some(BinaryColor::Off))
+            .stroke_color(Some(BinaryColor::On))
+            .fill_color(Some(BinaryColor::Off))
             .translate(Point::new(5, -32));
 
         assert_eq!(text.into_iter().count(), 24 * 32 * "Hello World!".len());
@@ -132,7 +77,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("Mm").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str("Mm").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -172,7 +117,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str(" ~").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str(" ~").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -192,7 +137,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("$y").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str("$y").stroke_color(Some(BinaryColor::On)));
 
         assert_eq!(
             display,
@@ -267,19 +212,19 @@ mod tests {
         ]);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("\0\n").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str("\0\n").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("\x7F\u{A0}").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str("\x7F\u{A0}").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("¡ÿ").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str("¡ÿ").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("Ā💣").stroke(Some(BinaryColor::On)));
+        display.draw(Font24x32::render_str("Ā💣").stroke_color(Some(BinaryColor::On)));
         assert_eq!(display, two_question_marks);
     }
 }
