@@ -1,7 +1,5 @@
 use embedded_graphics::fonts::{Font6x12, Font6x8, Font8x16};
-use embedded_graphics::icoord;
-use embedded_graphics::pixelcolor::BinaryColor::Off as C0;
-use embedded_graphics::pixelcolor::BinaryColor::On as C1;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{text_12x16, text_6x8};
 use embedded_graphics_simulator::DisplayBuilder;
@@ -15,35 +13,36 @@ fn main() {
         .build_binary();
 
     // Show smallest font with black font on white background (default value for fonts)
-    display
-        .draw(Font6x8::render_str("Hello World! - default style 6x8").translate(icoord!(15, 15)));
+    display.draw(
+        Font6x8::render_str("Hello World! - default style 6x8").translate(Point::new(15, 15)),
+    );
 
     // Show smallest font with white font on black background
     display.draw(
         Font6x8::render_str("Hello World! - inverse 6x8")
-            .stroke(Some(C0))
-            .fill(Some(C1))
-            .translate(icoord!(15, 30)),
+            .stroke_color(Some(BinaryColor::Off))
+            .fill_color(Some(BinaryColor::On))
+            .translate(Point::new(15, 30)),
     );
 
     // Show smallest font with white font on black background using a macro
     display.draw(
         text_6x8!(
             "Hello world! - inverse 6x8 with macro",
-            stroke = Some(C0),
-            fill = Some(C1)
+            stroke_color = Some(BinaryColor::Off),
+            fill_color = Some(BinaryColor::On)
         )
-        .translate(icoord!(15, 40)),
+        .translate(Point::new(15, 40)),
     );
 
     // Show 6x12 Font
-    display.draw(Font6x12::render_str("Hello 6x12!").translate(icoord!(15, 55)));
+    display.draw(Font6x12::render_str("Hello 6x12!").translate(Point::new(15, 55)));
 
     // Show 8x16 Font
-    display.draw(Font8x16::render_str("Hello 8x16!").translate(icoord!(15, 80)));
+    display.draw(Font8x16::render_str("Hello 8x16!").translate(Point::new(15, 80)));
 
     // Show 12x16 Font using a macro
-    display.draw(text_12x16!("Hello 12x16!").translate(icoord!(15, 105)));
+    display.draw(text_12x16!("Hello 12x16!").translate(Point::new(15, 105)));
 
     loop {
         let end = display.run_once();

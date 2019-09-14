@@ -1,9 +1,8 @@
-use crate::coord::{Coord, ToUnsigned};
-use crate::drawable::{Dimensions, Drawable, Pixel};
+use crate::drawable::{Drawable, Pixel};
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter};
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
-use crate::unsignedcoord::{ToSigned, UnsignedCoord};
 use core::marker::PhantomData;
 
 /// Image with little endian data.
@@ -31,6 +30,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::prelude::*;
+/// use embedded_graphics::image::Image;
 /// use embedded_graphics::pixelcolor::BinaryColor;
 /// # use embedded_graphics::mock_display::MockDisplay as Display;
 ///
@@ -62,7 +62,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::image::{ImageLE, ImageBE};
+/// use embedded_graphics::image::{ImageLE, ImageBE, Image};
 /// use embedded_graphics::pixelcolor::{Rgb565, Rgb888};
 /// use embedded_graphics::pixelcolor::raw::{BigEndian, LittleEndian};
 /// # const DATA: &[u8] = &[0x55; 8 * 8 * 3];
@@ -91,11 +91,14 @@ where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
 {
+    /// Image data, packed as dictated by raw data type `C::Raw`
     data: &'a [u8],
 
-    width: u32,
-    height: u32,
-    offset: Coord,
+    /// Image size in pixels
+    size: Size,
+
+    /// Image offset in pixels from screen origin (0,0)
+    offset: Point,
 
     pixel_type: PhantomData<C>,
     byte_order: PhantomData<BO>,
@@ -113,10 +116,9 @@ where
     /// If `data` doesn't have the correct length.
     pub fn new(data: &'a [u8], width: u32, height: u32) -> Self {
         let ret = Image {
-            width,
-            height,
             data,
-            offset: Coord::new(0, 0),
+            size: Size::new(width, height),
+            offset: Point::new(0, 0),
             pixel_type: PhantomData,
             byte_order: PhantomData,
         };
@@ -128,11 +130,11 @@ where
 
     /// Returns the length of each row in bytes.
     fn bytes_per_row(&self) -> usize {
-        (self.width as usize * C::Raw::BITS_PER_PIXEL + 7) / 8
+        (self.size.width as usize * C::Raw::BITS_PER_PIXEL + 7) / 8
     }
 
     /// Returns the offset.
-    pub fn offset(&self) -> Coord {
+    pub fn offset(&self) -> Point {
         self.offset
     }
 }
@@ -142,19 +144,16 @@ where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
 {
-    fn top_left(&self) -> Coord {
+    fn top_left(&self) -> Point {
         self.offset
     }
 
-    fn bottom_right(&self) -> Coord {
-        self.top_left() + self.size().to_signed()
+    fn bottom_right(&self) -> Point {
+        self.top_left() + self.size()
     }
 
-    fn size(&self) -> UnsignedCoord {
-        let height = self.height;
-        let width = self.width;
-
-        UnsignedCoord::new(width, height)
+    fn size(&self) -> Size {
+        self.size
     }
 }
 
@@ -177,20 +176,20 @@ where
     /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// # use embedded_graphics::image::Image;
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::geometry::Point;
     /// #
     /// // 8px x 1px test image
     /// let image: Image<BinaryColor> = Image::new(&[ 0xff ], 8, 1);
-    /// let moved = image.translate(Coord::new(25, 30));
+    /// let moved = image.translate(Point::new(25, 30));
     ///
-    /// assert_eq!(image.offset(), Coord::new(0, 0));
-    /// assert_eq!(moved.offset(), Coord::new(25, 30));
+    /// assert_eq!(image.offset(), Point::new(0, 0));
+    /// assert_eq!(moved.offset(), Point::new(25, 30));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(&self, by: Point) -> Self {
         Self {
-            data: self.data.clone(),
+            data: self.data,
             offset: self.offset + by,
-            ..*self.clone()
+            ..*self
         }
     }
 
@@ -200,14 +199,14 @@ where
     /// # use embedded_graphics::pixelcolor::BinaryColor;
     /// # use embedded_graphics::image::Image;
     /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::coord::Coord;
+    /// # use embedded_graphics::geometry::Point;
     /// #
     /// let mut image: Image<BinaryColor> = Image::new(&[ 0xff ], 8, 1);
-    /// image.translate_mut(Coord::new(25, 30));
+    /// image.translate_mut(Point::new(25, 30));
     ///
-    /// assert_eq!(image.offset(), Coord::new(25, 30));
+    /// assert_eq!(image.offset(), Point::new(25, 30));
     /// ```
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.offset += by;
 
         self
@@ -256,28 +255,22 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.y < self.image.height {
-                let data = self.data.next()?;
-                let mut point = Coord::new(self.x as i32, self.y as i32);
-                point += self.image.offset;
+        if self.y < self.image.size.height {
+            let data = self.data.next()?;
+            let mut point = Point::new(self.x as i32, self.y as i32);
+            point += self.image.offset;
 
-                self.x += 1;
-                if self.x >= self.image.width {
-                    self.data.align();
+            self.x += 1;
+            if self.x >= self.image.size.width {
+                self.data.align();
 
-                    self.y += 1;
-                    self.x = 0;
-                }
-
-                if point[0] < 0 || point[1] < 0 {
-                    continue;
-                }
-
-                break Some(Pixel(point.to_unsigned(), data.into()));
-            } else {
-                break None;
+                self.y += 1;
+                self.x = 0;
             }
+
+            Some(Pixel(point, data.into()))
+        } else {
+            None
         }
     }
 }
@@ -285,11 +278,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::coord::Coord;
     use crate::drawable::Pixel;
     use crate::pixelcolor::{raw::RawU32, *};
     use crate::transform::Transform;
-    use crate::unsignedcoord::UnsignedCoord;
 
     #[derive(Debug, PartialEq, Clone, Copy)]
     struct TestColorU32(RawU32);
@@ -304,24 +295,33 @@ mod tests {
         }
     }
 
+    fn assert_next<I, C>(iter: &mut I, x: i32, y: i32, color: C)
+    where
+        I: Iterator<Item = Pixel<C>>,
+        C: PixelColor + core::fmt::Debug,
+    {
+        let p = Point::new(x, y);
+        assert_eq!(iter.next(), Some(Pixel(p, color)));
+    }
+
     #[test]
     fn negative_top_left() {
         let image: Image<BinaryColor> =
-            Image::new(&[0xff, 0x00, 0xff, 0x00], 4, 4).translate(Coord::new(-1, -1));
+            Image::new(&[0xff, 0x00, 0xff, 0x00], 4, 4).translate(Point::new(-1, -1));
 
-        assert_eq!(image.top_left(), Coord::new(-1, -1));
-        assert_eq!(image.bottom_right(), Coord::new(3, 3));
-        assert_eq!(image.size(), UnsignedCoord::new(4, 4));
+        assert_eq!(image.top_left(), Point::new(-1, -1));
+        assert_eq!(image.bottom_right(), Point::new(3, 3));
+        assert_eq!(image.size(), Size::new(4, 4));
     }
 
     #[test]
     fn dimensions() {
         let image: Image<BinaryColor> =
-            Image::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4).translate(Coord::new(100, 200));
+            Image::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4).translate(Point::new(100, 200));
 
-        assert_eq!(image.top_left(), Coord::new(100, 200));
-        assert_eq!(image.bottom_right(), Coord::new(104, 204));
-        assert_eq!(image.size(), UnsignedCoord::new(4, 4));
+        assert_eq!(image.top_left(), Point::new(100, 200));
+        assert_eq!(image.bottom_right(), Point::new(104, 204));
+        assert_eq!(image.size(), Size::new(4, 4));
     }
 
     #[test]
@@ -331,36 +331,19 @@ mod tests {
             3,
             3,
         )
-        .translate(Coord::new(-1, -1));
-        let mut it = image.into_iter();
+        .translate(Point::new(-1, -1));
 
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 0), Gray8::new(0xcc)))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 0), Gray8::BLACK))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(0, 1), Gray8::BLACK))
-        );
-        assert_eq!(
-            it.next(),
-            Some(Pixel(UnsignedCoord::new(1, 1), Gray8::new(0xaa)))
-        );
-
-        assert_eq!(it.next(), None);
-    }
-
-    fn assert_next<I, C>(iter: &mut I, x: u32, y: u32, color: C)
-    where
-        I: Iterator<Item = Pixel<C>>,
-        C: PixelColor + core::fmt::Debug,
-    {
-        let p = UnsignedCoord::new(x, y);
-        assert_eq!(iter.next(), Some(Pixel(p, color)));
+        let mut iter = image.into_iter();
+        assert_next(&mut iter, -1, -1, Gray8::WHITE);
+        assert_next(&mut iter, 0, -1, Gray8::BLACK);
+        assert_next(&mut iter, 1, -1, Gray8::new(0xbb));
+        assert_next(&mut iter, -1, 0, Gray8::BLACK);
+        assert_next(&mut iter, 0, 0, Gray8::new(0xcc));
+        assert_next(&mut iter, 1, 0, Gray8::BLACK);
+        assert_next(&mut iter, -1, 1, Gray8::new(0xee));
+        assert_next(&mut iter, 0, 1, Gray8::BLACK);
+        assert_next(&mut iter, 1, 1, Gray8::new(0xaa));
+        assert!(iter.next().is_none());
     }
 
     #[test]

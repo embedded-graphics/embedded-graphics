@@ -27,10 +27,10 @@ fn main() {
 
  display.draw(text_6x8!("Hello World!"));
 
- display.draw(egcircle!((96, 32), 31, stroke = Some(1u8.into())));
+ display.draw(egcircle!((96, 32), 31, stroke_color = Some(1u8.into())));
 
- display.draw(egline!((32, 32), (1, 32), stroke = Some(1u8.into())).translate(icoord!(64, 0)));
- display.draw(egline!((32, 32), (40, 40), stroke = Some(1u8.into())).translate(icoord!(64, 0)));
+ display.draw(egline!((32, 32), (1, 32), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)));
+ display.draw(egline!((32, 32), (40, 40), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)));
 
  loop {
      let end = display.run_once();

@@ -17,6 +17,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
+//! use embedded_graphics::image::Image;
 //! use embedded_graphics::pixelcolor::raw::RawU4;
 //!
 //! /// RGBI color
@@ -203,8 +204,8 @@ impl_raw_data!(RawU2: u8, 2, 0x03, "2 bits");
 impl_raw_data!(RawU4: u8, 4, 0x0F, "4 bits");
 impl_raw_data!(RawU8: u8, 8, 0xFF, "8 bits");
 impl_raw_data!(RawU16: u16, 16, 0xFFFF, "16 bits");
-impl_raw_data!(RawU24: u32, 24, 0xFFFFFF, "24 bits");
-impl_raw_data!(RawU32: u32, 32, 0xFFFFFFFF, "32 bits");
+impl_raw_data!(RawU24: u32, 24, 0xFF_FFFF, "24 bits");
+impl_raw_data!(RawU32: u32, 32, 0xFFFF_FFFF, "32 bits");
 
 /// Raw data byte order.
 pub trait ByteOrder: private::Sealed {}

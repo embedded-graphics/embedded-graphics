@@ -66,7 +66,7 @@
 //! Add these to your `Cargo.toml` to turn on extra bits of functionality.
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-//! support to enable conversions from `nalgebra::Vector2` to [`Coord`] and [`UnsignedCoord`].
+//! support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
 //! * `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
 //! * `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
 //!
@@ -84,8 +84,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Coord::new(20, 20), 8).fill(Some(Rgb565::RED));
-//! let t = Font6x8::render_str("Hello Rust!").fill(Some(Rgb565::GREEN)).translate(Coord::new(20, 16));
+//! let c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -99,12 +99,12 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::{text_6x8, egcircle, icoord};
+//! use embedded_graphics::{text_6x8, egcircle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = egcircle!((20, 20), 8, fill = Some(Rgb565::RED));
-//! let t = text_6x8!("Hello Rust!", fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16));
+//! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
+//! let t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! display.draw(c);
 //! display.draw(t);
@@ -117,13 +117,13 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::{text_6x8, egcircle, icoord, egrectangle};
+//! use embedded_graphics::{text_6x8, egcircle, egrectangle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
-//!         .chain(egcircle!((20, 20), 8, fill = Some(Rgb565::RED)))
-//!         .chain(text_6x8!(text, fill = Some(Rgb565::GREEN)).translate(icoord!(20, 16)))
+//!         .chain(egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
+//!         .chain(text_6x8!(text, fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {
@@ -134,17 +134,15 @@
 //!
 //! # Implementing `embedded_graphics` in a driver
 //!
-//! To add support for embedded_graphics to a display driver, [`Drawing`] (and if possible
-//! [`SizedDrawing`]) should be implemented. This allows all embedded_graphics objects to be
-//! rendered by the display. See their [respective][`Drawing`] [docs][`SizedDrawing`] for
-//! implementation details.
+//! To add support for embedded_graphics to a display driver, [`Drawing`] should be implemented.
+//! This allows all embedded_graphics objects to be rendered by the display. See the [`Drawing`]
+//! documentation for implementation details.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
-//! [`Coord`]: ./coord/struct.Coord.html
-//! [`UnsignedCoord`]: ./unsignedcoord/struct.UnsignedCoord.html
+//! [`Point`]: ./geometry/struct.Point.html
+//! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
 //! [`Drawing`]: ./trait.Drawing.html
-//! [`SizedDrawing`]: ./trait.SizedDrawing.html
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/01d2ea6e7053f9f79cab19d0c193a00dbdaea321/assets/logo.png"
@@ -164,9 +162,9 @@
 extern crate nalgebra;
 
 mod check_readme;
-pub mod coord;
 pub mod drawable;
 pub mod fonts;
+pub mod geometry;
 pub mod image;
 #[doc(hidden)]
 pub mod mock_display;
@@ -175,15 +173,12 @@ pub mod prelude;
 pub mod primitives;
 pub mod style;
 pub mod transform;
-pub mod unsignedcoord;
 
-use crate::drawable::Dimensions;
+use crate::geometry::Dimensions;
 use crate::pixelcolor::PixelColor;
 
 /// To use this crate in a driver, `Drawing` must be implemented. This allows display drivers to
 /// support all embedded_graphics objects through the `draw()` method.
-///
-/// Note that you should also implement [`SizedDrawing`] if the display supports partial updates.
 ///
 /// Here's an example for an imaginary display that has a 64x64px framebuffer of 8 bit values that
 /// communicates over a (simplified) SPI interface:
@@ -237,14 +232,12 @@ use crate::pixelcolor::PixelColor;
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
+///     display.draw(egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE)));
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
 /// }
 /// ```
-///
-/// [`SizedDrawing`]: ./trait.SizedDrawing.html
 pub trait Drawing<C>
 where
     C: PixelColor,
@@ -253,92 +246,4 @@ where
     fn draw<T>(&mut self, item: T)
     where
         T: IntoIterator<Item = drawable::Pixel<C>>;
-}
-
-/// Very similar to the [`Drawing`] trait, but accepts drawable objects which have a known size
-///
-/// If the device used supports partial updates where only a given range of pixels is updated, you
-/// should also implement `SizedDrawing` alongside [`Drawing`]. This trait is similar to `Drawing`,
-/// but has a bound on [`Dimensions`](./drawable/trait.Dimensions.html) which provides methods for
-/// getting the bounding box of the passed item to draw.
-///
-/// The example below shows a contrived implementation for a display that doesn't require a
-/// framebuffer. It sends pixels one by one to over the SPI bus which isn't very efficient, but that
-/// could be fixed by using a fixed length chunked buffering scheme.
-///
-/// ```rust
-/// use embedded_graphics::egcircle;
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::SizedDrawing;
-/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
-///
-/// # struct SPI1;
-/// #
-/// # impl SPI1 {
-/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
-/// #         Ok(())
-/// #     }
-/// #
-/// #     pub fn send_command(&self, cmd: &[u8]) -> Result<(), ()> {
-/// #         Ok(())
-/// #     }
-/// # }
-/// #
-/// /// A fake display 64px x 64px where each pixel is stored as a single `u8`
-/// struct ExampleBufferlessDisplay {
-///     iface: SPI1,
-/// }
-///
-/// impl ExampleBufferlessDisplay {
-///     /// Set draw area
-///     pub fn set_draw_area(&self, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<(), ()> {
-///         // Some magic incantation to set a sub-area of the display to update
-///         self.iface
-///             .send_command(&[0xff, x1 as u8, y1 as u8, x2 as u8, y2 as u8])
-///     }
-/// }
-///
-/// impl SizedDrawing<Gray8> for ExampleBufferlessDisplay {
-///     fn draw_sized<T>(&mut self, item: T)
-///     where
-///         T: IntoIterator<Item = Pixel<Gray8>> + Dimensions,
-///     {
-///         // Get bounding box `Coord`s as `(u32, u32)`
-///         let tl = item.top_left();
-///         let br = item.bottom_right();
-///
-///         // Set a sub-area of the display to update
-///         self.set_draw_area(tl[0], tl[1], br[0], br[1]);
-///
-///         // Send updated pixel one at a time. Could use a chunked buffer to make this more efficient.
-///         // `coord` isn't used as the update area is the same as the item's bounding box which
-///         // wraps the bytes automatically
-///         for Pixel(_coord, color) in item {
-///             self.iface.send_bytes(&[color.luma()]);
-///         }
-///     }
-/// }
-///
-/// fn main() {
-///     let mut display = ExampleBufferlessDisplay {
-///         iface: SPI1
-///     };
-///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw_sized(egcircle!((32, 32), 10, stroke = Some(Gray8::WHITE)));
-///
-///     // No `flush()` is required as `draw_sized()` sends the bytes directly
-/// }
-/// ```
-///
-/// [`Drawing`]: ./trait.Drawing.html
-/// [`SizedDrawing`]: ./trait.SizedDrawing.html
-pub trait SizedDrawing<C>
-where
-    C: PixelColor + Clone,
-{
-    /// Draw an object from an iterator over its pixels
-    fn draw_sized<T>(&mut self, item: T)
-    where
-        T: IntoIterator<Item = drawable::Pixel<C>> + Dimensions;
 }

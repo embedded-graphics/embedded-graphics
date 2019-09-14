@@ -1,13 +1,12 @@
 //! The rectangle primitive. Also good for drawing squares.
 
-use super::super::drawable::*;
-use super::super::transform::*;
-use crate::coord::{Coord, ToUnsigned};
+use super::super::drawable::{Drawable, Pixel};
+use super::super::transform::Transform;
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
-use crate::unsignedcoord::UnsignedCoord;
 
 /// Rectangle primitive
 ///
@@ -25,17 +24,17 @@ use crate::unsignedcoord::UnsignedCoord;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
-/// let r1 = Rectangle::new(Coord::new(10, 20), Coord::new(30, 40));
+/// let r1 = Rectangle::new(Point::new(10, 20), Point::new(30, 40));
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
-/// let r2 = Rectangle::new(Coord::new(50, 20), Coord::new(60, 35))
-///     .stroke(Some(Rgb565::RED))
+/// let r2 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill(Some(Rgb565::GREEN));
+///     .fill_color(Some(Rgb565::GREEN));
 ///
 /// // Rectangle with translation applied
-/// let r3 = Rectangle::new(Coord::new(50, 20), Coord::new(60, 35))
-///     .translate(Coord::new(65, 35));
+/// let r3 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+///     .translate(Point::new(65, 35));
 ///
 /// display.draw(r1);
 /// display.draw(r2);
@@ -44,10 +43,10 @@ use crate::unsignedcoord::UnsignedCoord;
 #[derive(Debug, Clone, Copy)]
 pub struct Rectangle<C: PixelColor> {
     /// Top left point of the rect
-    pub top_left: Coord,
+    pub top_left: Point,
 
     /// Bottom right point of the rect
-    pub bottom_right: Coord,
+    pub bottom_right: Point,
 
     /// Object style
     pub style: Style<C>,
@@ -59,16 +58,16 @@ impl<C> Dimensions for Rectangle<C>
 where
     C: PixelColor,
 {
-    fn top_left(&self) -> Coord {
+    fn top_left(&self) -> Point {
         self.top_left
     }
 
-    fn bottom_right(&self) -> Coord {
+    fn bottom_right(&self) -> Point {
         self.bottom_right
     }
 
-    fn size(&self) -> UnsignedCoord {
-        (self.bottom_right - self.top_left).abs().to_unsigned()
+    fn size(&self) -> Size {
+        Size::from_bounding_box(self.top_left, self.bottom_right)
     }
 }
 
@@ -77,7 +76,7 @@ where
     C: PixelColor,
 {
     /// Create a new rectangle from the top left point to the bottom right point with a given style
-    pub fn new(top_left: Coord, bottom_right: Coord) -> Self {
+    pub fn new(top_left: Point, bottom_right: Point) -> Self {
         Rectangle {
             top_left,
             bottom_right,
@@ -96,7 +95,7 @@ where
         self
     }
 
-    fn stroke(mut self, color: Option<C>) -> Self {
+    fn stroke_color(mut self, color: Option<C>) -> Self {
         self.style.stroke_color = color;
 
         self
@@ -108,7 +107,7 @@ where
         self
     }
 
-    fn fill(mut self, color: Option<C>) -> Self {
+    fn fill_color(mut self, color: Option<C>) -> Self {
         self.style.fill_color = color;
 
         self
@@ -139,8 +138,7 @@ where
             top_left: self.top_left,
             bottom_right: self.bottom_right,
             style: self.style,
-            x: self.top_left[0],
-            y: self.top_left[1],
+            p: self.top_left,
         }
     }
 }
@@ -151,11 +149,10 @@ pub struct RectangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    top_left: Coord,
-    bottom_right: Coord,
+    top_left: Point,
+    bottom_right: Point,
     style: Style<C>,
-    x: i32,
-    y: i32,
+    p: Point,
 }
 
 impl<C> Iterator for RectangleIterator<C>
@@ -165,66 +162,57 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // If entire object is off the top left of the screen or has no border or fill colour,
-        // don't render anything
-        if (self.top_left[0] < 0 || self.top_left[1] < 0)
-            && (self.bottom_right[0] < 0 || self.bottom_right[1] < 0)
-            || (self.style.stroke_color.is_none() && self.style.fill_color.is_none())
-        {
+        // Don't render anything if the rectangle has no border or fill color.
+        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
             return None;
         }
 
-        let pixel = loop {
+        loop {
             let mut out = None;
 
             // Finished, i.e. we're below the rect
-            if self.y > self.bottom_right[1] {
+            if self.p.y > self.bottom_right.y {
                 break None;
             }
 
-            let border_width = self.style.stroke_width as i32;
+            let border_width = i32::from(self.style.stroke_width);
             let tl = self.top_left;
             let br = self.bottom_right;
 
-            if self.x >= 0 && self.y >= 0 {
-                // Border
-                if (
-                    // Top border
-                    (self.y >= tl[1] && self.y < tl[1] + border_width)
-                // Bottom border
-                || (self.y <= br[1] && self.y > br[1] - border_width)
-                // Left border
-                || (self.x >= tl[0] && self.x < tl[0] + border_width)
-                // Right border
-                || (self.x <= br[0] && self.x > br[0] - border_width)
-                ) && self.style.stroke_color.is_some()
-                {
-                    out = Some((
-                        self.x,
-                        self.y,
-                        self.style.stroke_color.expect("Expected stroke"),
-                    ));
-                }
-                // Fill
-                else if let Some(fill) = self.style.fill_color {
-                    out = Some((self.x, self.y, fill));
-                }
+            // Border
+            if (
+                // Top border
+                (self.p.y >= tl.y && self.p.y < tl.y + border_width)
+            // Bottom border
+            || (self.p.y <= br.y && self.p.y > br.y - border_width)
+            // Left border
+            || (self.p.x >= tl.x && self.p.x < tl.x + border_width)
+            // Right border
+            || (self.p.x <= br.x && self.p.x > br.x - border_width)
+            ) && self.style.stroke_color.is_some()
+            {
+                out = Some(Pixel(
+                    self.p,
+                    self.style.stroke_color.expect("Expected stroke"),
+                ));
+            }
+            // Fill
+            else if let Some(fill) = self.style.fill_color {
+                out = Some(Pixel(self.p, fill));
             }
 
-            self.x += 1;
+            self.p.x += 1;
 
             // Reached end of row? Jump down one line
-            if self.x > self.bottom_right[0] {
-                self.x = self.top_left[0];
-                self.y += 1;
+            if self.p.x > self.bottom_right.x {
+                self.p.x = self.top_left.x;
+                self.p.y += 1;
             }
 
             if out.is_some() {
                 break out;
             }
-        };
-
-        pixel.map(|(x, y, c)| Pixel(Coord::new(x, y).to_unsigned(), c))
+        }
     }
 }
 
@@ -242,20 +230,20 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(Rgb565::RED);
+    /// # let style = Style::stroke_color(Rgb565::RED);
     /// #
-    /// let rect = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// let rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20))
     /// #    .style(style);
-    /// let moved = rect.translate(Coord::new(10, 10));
+    /// let moved = rect.translate(Point::new(10, 10));
     ///
-    /// assert_eq!(moved.top_left, Coord::new(15, 20));
-    /// assert_eq!(moved.bottom_right, Coord::new(25, 30));
+    /// assert_eq!(moved.top_left, Point::new(15, 20));
+    /// assert_eq!(moved.bottom_right, Point::new(25, 30));
     /// ```
-    fn translate(&self, by: Coord) -> Self {
+    fn translate(&self, by: Point) -> Self {
         Self {
             top_left: self.top_left + by,
             bottom_right: self.bottom_right + by,
-            ..self.clone()
+            ..*self
         }
     }
 
@@ -266,16 +254,16 @@ where
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::Rgb565;
     /// #
-    /// # let style = Style::stroke(Rgb565::RED);
+    /// # let style = Style::stroke_color(Rgb565::RED);
     /// #
-    /// let mut rect = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20))
+    /// let mut rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20))
     /// #    .style(style);
-    /// rect.translate_mut(Coord::new(10, 10));
+    /// rect.translate_mut(Point::new(10, 10));
     ///
-    /// assert_eq!(rect.top_left, Coord::new(15, 20));
-    /// assert_eq!(rect.bottom_right, Coord::new(25, 30));
+    /// assert_eq!(rect.top_left, Point::new(15, 20));
+    /// assert_eq!(rect.bottom_right, Point::new(25, 30));
     /// ```
-    fn translate_mut(&mut self, by: Coord) -> &mut Self {
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.top_left += by;
         self.bottom_right += by;
 
@@ -288,102 +276,61 @@ mod tests {
     use super::*;
     use crate::pixelcolor::BinaryColor;
     use crate::pixelcolor::{Rgb565, RgbColor};
-    use crate::unsignedcoord::UnsignedCoord;
 
     #[test]
     fn dimensions() {
-        let rect: Rectangle<BinaryColor> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
-        let moved = rect.translate(Coord::new(-10, -10));
+        let rect: Rectangle<BinaryColor> = Rectangle::new(Point::new(5, 10), Point::new(15, 30));
+        let moved = rect.translate(Point::new(-10, -20));
 
-        assert_eq!(rect.top_left(), Coord::new(5, 10));
-        assert_eq!(rect.bottom_right(), Coord::new(15, 20));
-        assert_eq!(rect.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(rect.top_left(), Point::new(5, 10));
+        assert_eq!(rect.bottom_right(), Point::new(15, 30));
+        assert_eq!(rect.size(), Size::new(10, 20));
 
-        assert_eq!(moved.top_left(), Coord::new(-5, 0));
-        assert_eq!(moved.bottom_right(), Coord::new(5, 10));
-        assert_eq!(moved.size(), UnsignedCoord::new(10, 10));
+        assert_eq!(moved.top_left(), Point::new(-5, -10));
+        assert_eq!(moved.bottom_right(), Point::new(5, 10));
+        assert_eq!(moved.size(), Size::new(10, 20));
     }
 
     #[test]
     fn it_can_be_translated() {
-        let rect: Rectangle<BinaryColor> = Rectangle::new(Coord::new(5, 10), Coord::new(15, 20));
-        let moved = rect.translate(Coord::new(10, 10));
+        let rect: Rectangle<BinaryColor> = Rectangle::new(Point::new(5, 10), Point::new(15, 20));
+        let moved = rect.translate(Point::new(10, 15));
 
-        assert_eq!(moved.top_left, Coord::new(15, 20));
-        assert_eq!(moved.bottom_right, Coord::new(25, 30));
+        assert_eq!(moved.top_left, Point::new(15, 25));
+        assert_eq!(moved.bottom_right, Point::new(25, 35));
     }
 
     #[test]
     fn it_draws_unfilled_rect() {
         let mut rect: RectangleIterator<Rgb565> =
-            Rectangle::new(Coord::new(2, 2), Coord::new(4, 4))
-                .style(Style::stroke(Rgb565::RED))
+            Rectangle::new(Point::new(2, 2), Point::new(4, 4))
+                .style(Style::stroke_color(Rgb565::RED))
                 .into_iter();
 
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(2, 2), Rgb565::RED))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(3, 2), Rgb565::RED))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(4, 2), Rgb565::RED))
-        );
+        assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
+        assert_eq!(rect.next(), Some(Pixel(Point::new(3, 2), Rgb565::RED)));
+        assert_eq!(rect.next(), Some(Pixel(Point::new(4, 2), Rgb565::RED)));
 
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(2, 3), Rgb565::RED))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(4, 3), Rgb565::RED))
-        );
+        assert_eq!(rect.next(), Some(Pixel(Point::new(2, 3), Rgb565::RED)));
+        assert_eq!(rect.next(), Some(Pixel(Point::new(4, 3), Rgb565::RED)));
 
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(2, 4), Rgb565::RED))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(3, 4), Rgb565::RED))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(4, 4), Rgb565::RED))
-        );
+        assert_eq!(rect.next(), Some(Pixel(Point::new(2, 4), Rgb565::RED)));
+        assert_eq!(rect.next(), Some(Pixel(Point::new(3, 4), Rgb565::RED)));
+        assert_eq!(rect.next(), Some(Pixel(Point::new(4, 4), Rgb565::RED)));
     }
 
     #[test]
     fn it_can_be_negative() {
-        let mut rect: RectangleIterator<Rgb565> =
-            Rectangle::new(Coord::new(-2, -2), Coord::new(2, 2))
-                .style(Style::stroke(Rgb565::GREEN))
+        let negative: RectangleIterator<Rgb565> =
+            Rectangle::new(Point::new(-2, -2), Point::new(2, 2))
+                .fill_color(Some(Rgb565::GREEN))
                 .into_iter();
 
-        // TODO: Macro
-        // Only the bottom right corner of the rect should be visible
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(2, 0), Rgb565::GREEN))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(2, 1), Rgb565::GREEN))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(0, 2), Rgb565::GREEN))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(1, 2), Rgb565::GREEN))
-        );
-        assert_eq!(
-            rect.next(),
-            Some(Pixel(UnsignedCoord::new(2, 2), Rgb565::GREEN))
-        );
+        let positive: RectangleIterator<Rgb565> =
+            Rectangle::new(Point::new(2, 2), Point::new(6, 6))
+                .fill_color(Some(Rgb565::GREEN))
+                .into_iter();
+
+        assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));
     }
 }
