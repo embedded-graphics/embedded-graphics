@@ -89,6 +89,7 @@ mod tests {
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
+
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
