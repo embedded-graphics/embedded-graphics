@@ -46,37 +46,40 @@ mod tests {
     use crate::transform::Transform;
     use crate::Drawing;
 
+    const WIDTH: usize = Font8x16Conf::CHAR_WIDTH as usize;
+    const HEIGHT: usize = Font8x16Conf::CHAR_HEIGHT as usize;
+    const HELLO_WORLD: &'static str = "Hello World!";
+
     #[test]
-    fn off_screen_text_does_not_infinite_loop() {
-        let text: Font8x16<BinaryColor> = Font8x16::render_str("Hello World!")
+    fn text_with_negative_y_does_not_infinite_loop() {
+        let text: Font8x16<BinaryColor> = Font8x16::render_str(HELLO_WORLD)
             .stroke_color(Some(BinaryColor::On))
             .fill_color(Some(BinaryColor::Off))
-            .translate(Point::new(5, -20));
+            .translate(Point::new(5, -10));
 
-        assert_eq!(text.into_iter().count(), 8 * 16 * "Hello World!".len());
+        assert_eq!(text.into_iter().count(), WIDTH * HEIGHT * HELLO_WORLD.len());
     }
 
     #[test]
     fn text_dimensions() {
-        let hello: Font8x16<BinaryColor> = Font8x16::render_str("Hello World!");
+        let hello: Font8x16<BinaryColor> = Font8x16::render_str(HELLO_WORLD);
         let empty: Font8x16<BinaryColor> = Font8x16::render_str("");
 
-        assert_eq!(hello.size(), Size::new(96, 16));
+        assert_eq!(hello.size(), Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32));
         assert_eq!(empty.size(), Size::new(0, 0));
     }
 
     #[test]
     fn text_corners() {
         let hello: Font8x16<BinaryColor> =
-            Font8x16::render_str("Hello World!").translate(Point::new(5, -20));
+            Font8x16::render_str(HELLO_WORLD).translate(Point::new(5, -20));
         let empty: Font8x16<BinaryColor> = Font8x16::render_str("").translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
-        assert_eq!(hello.bottom_right(), Point::new(96 + 5, 16 - 20));
+        assert_eq!(hello.bottom_right(), Point::new(((HELLO_WORLD.len() * WIDTH) as i32) + 5, (HEIGHT as i32) - 20));
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
-
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
