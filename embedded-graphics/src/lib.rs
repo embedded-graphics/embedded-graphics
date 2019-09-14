@@ -134,17 +134,15 @@
 //!
 //! # Implementing `embedded_graphics` in a driver
 //!
-//! To add support for embedded_graphics to a display driver, [`Drawing`] (and if possible
-//! [`SizedDrawing`]) should be implemented. This allows all embedded_graphics objects to be
-//! rendered by the display. See their [respective][`Drawing`] [docs][`SizedDrawing`] for
-//! implementation details.
+//! To add support for embedded_graphics to a display driver, [`Drawing`] should be implemented.
+//! This allows all embedded_graphics objects to be rendered by the display. See the [`Drawing`]
+//! documentation for implementation details.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
 //! [`Drawing`]: ./trait.Drawing.html
-//! [`SizedDrawing`]: ./trait.SizedDrawing.html
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/01d2ea6e7053f9f79cab19d0c193a00dbdaea321/assets/logo.png"
@@ -181,8 +179,6 @@ use crate::pixelcolor::PixelColor;
 
 /// To use this crate in a driver, `Drawing` must be implemented. This allows display drivers to
 /// support all embedded_graphics objects through the `draw()` method.
-///
-/// Note that you should also implement [`SizedDrawing`] if the display supports partial updates.
 ///
 /// Here's an example for an imaginary display that has a 64x64px framebuffer of 8 bit values that
 /// communicates over a (simplified) SPI interface:
@@ -242,8 +238,6 @@ use crate::pixelcolor::PixelColor;
 ///     display.flush().expect("Failed to send data to display");
 /// }
 /// ```
-///
-/// [`SizedDrawing`]: ./trait.SizedDrawing.html
 pub trait Drawing<C>
 where
     C: PixelColor,
@@ -252,93 +246,4 @@ where
     fn draw<T>(&mut self, item: T)
     where
         T: IntoIterator<Item = drawable::Pixel<C>>;
-}
-
-/// Very similar to the [`Drawing`] trait, but accepts drawable objects which have a known size
-///
-/// If the device used supports partial updates where only a given range of pixels is updated, you
-/// should also implement `SizedDrawing` alongside [`Drawing`]. This trait is similar to `Drawing`,
-/// but has a bound on [`Dimensions`] which provides methods for getting the bounding box of the
-/// passed item to draw.
-///
-/// The example below shows a contrived implementation for a display that doesn't require a
-/// framebuffer. It sends pixels one by one to over the SPI bus which isn't very efficient, but that
-/// could be fixed by using a fixed length chunked buffering scheme.
-///
-/// ```rust
-/// use embedded_graphics::egcircle;
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::SizedDrawing;
-/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
-///
-/// # struct SPI1;
-/// #
-/// # impl SPI1 {
-/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
-/// #         Ok(())
-/// #     }
-/// #
-/// #     pub fn send_command(&self, cmd: &[u8]) -> Result<(), ()> {
-/// #         Ok(())
-/// #     }
-/// # }
-/// #
-/// /// A fake display 64px x 64px where each pixel is stored as a single `u8`
-/// struct ExampleBufferlessDisplay {
-///     iface: SPI1,
-/// }
-///
-/// impl ExampleBufferlessDisplay {
-///     /// Set draw area
-///     pub fn set_draw_area(&self, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<(), ()> {
-///         // Some magic incantation to set a sub-area of the display to update
-///         self.iface
-///             .send_command(&[0xff, x1 as u8, y1 as u8, x2 as u8, y2 as u8])
-///     }
-/// }
-///
-/// impl SizedDrawing<Gray8> for ExampleBufferlessDisplay {
-///     fn draw_sized<T>(&mut self, item: T)
-///     where
-///         T: IntoIterator<Item = Pixel<Gray8>> + Dimensions,
-///     {
-///         // Get bounding box `Point`s as `(u32, u32)`
-///         let tl = item.top_left();
-///         let br = item.bottom_right();
-///
-///         // Set a sub-area of the display to update
-///         self.set_draw_area(tl[0], tl[1], br[0], br[1]);
-///
-///         // Send updated pixel one at a time. Could use a chunked buffer to make this more efficient.
-///         // `coord` isn't used as the update area is the same as the item's bounding box which
-///         // wraps the bytes automatically
-///         for Pixel(_coord, color) in item {
-///             self.iface.send_bytes(&[color.luma()]);
-///         }
-///     }
-/// }
-///
-/// fn main() {
-///     let mut display = ExampleBufferlessDisplay {
-///         iface: SPI1
-///     };
-///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw_sized(egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE)));
-///
-///     // No `flush()` is required as `draw_sized()` sends the bytes directly
-/// }
-/// ```
-///
-/// [`Drawing`]: ./trait.Drawing.html
-/// [`Dimensions`]: ./geometry/trait.Dimensions.html
-/// [`SizedDrawing`]: ./trait.SizedDrawing.html
-pub trait SizedDrawing<C>
-where
-    C: PixelColor + Clone,
-{
-    /// Draw an object from an iterator over its pixels
-    fn draw_sized<T>(&mut self, item: T)
-    where
-        T: IntoIterator<Item = drawable::Pixel<C>> + Dimensions;
 }
