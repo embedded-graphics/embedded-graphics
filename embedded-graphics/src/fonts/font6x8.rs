@@ -66,7 +66,10 @@ mod tests {
         let hello: Font6x8<BinaryColor> = Font6x8::render_str(HELLO_WORLD);
         let empty: Font6x8<BinaryColor> = Font6x8::render_str("");
 
-        assert_eq!(hello.size(), Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32));
+        assert_eq!(
+            hello.size(),
+            Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32)
+        );
         assert_eq!(empty.size(), Size::new(0, 0));
     }
 
@@ -77,7 +80,13 @@ mod tests {
         let empty: Font6x8<BinaryColor> = Font6x8::render_str("").translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
-        assert_eq!(hello.bottom_right(), Point::new(((HELLO_WORLD.len() * WIDTH) as i32) + 5, (HEIGHT as i32) - 20));
+        assert_eq!(
+            hello.bottom_right(),
+            Point::new(
+                ((HELLO_WORLD.len() * WIDTH) as i32) + 5,
+                (HEIGHT as i32) - 20
+            )
+        );
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
