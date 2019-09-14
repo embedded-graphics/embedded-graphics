@@ -86,8 +86,8 @@ mod tests {
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
-    #[test]
 
+    #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
         display.draw(Font12x16::render_str("Mm").stroke_color(Some(BinaryColor::On)));
