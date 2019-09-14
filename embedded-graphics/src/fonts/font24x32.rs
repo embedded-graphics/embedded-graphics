@@ -48,7 +48,7 @@ mod tests {
     const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
-    fn text_with_negative_y_does_not_infinite_loop() {
+    fn off_screen_text_does_not_infinite_loop() {
         let text: Font24x32<BinaryColor> = Font24x32::render_str(HELLO_WORLD)
             .stroke_color(Some(BinaryColor::On))
             .fill_color(Some(BinaryColor::Off))
