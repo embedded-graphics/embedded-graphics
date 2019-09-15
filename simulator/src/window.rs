@@ -91,8 +91,9 @@ impl Window {
                     return true;
                 }
                 Event::MouseButtonUp { x, y, .. } => {
+                    let pitch = (self.scale + self.pixel_spacing) as i32;
                     self.input_events
-                        .push(Point::new(x / self.scale as i32, y / self.scale as i32));
+                        .push(Point::new(x / pitch, y / pitch as i32));
                     return false;
                 }
                 _ => {}
