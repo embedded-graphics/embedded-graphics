@@ -23,7 +23,11 @@ impl FontBuilderConf for Font24x32Conf {
 ///
 /// There is also the [`text_24x32`] macro to provide an easier to use interface.
 ///
-/// The 24x32 font is just a scaled up version of the 12x16 font, so [![here is the 12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
+/// The 24x32 font is a 2x scaling of the [12x16 font].
+///
+/// The 12x16 font sprite is shown here for reference:
+///
+/// [![12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
 ///
 /// # Examples
 ///
