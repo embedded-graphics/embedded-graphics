@@ -61,9 +61,9 @@ fn draw_perp(
 }
 
 fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
-    let delta = p1 - p0;
+    let delta = (p1 - p0).abs();
 
-    let direction = match (delta.x < 0, delta.y < 0) {
+    let direction = match (p0.x >= p1.x, p0.y >= p1.y) {
         (false, false) => Point::new(1, 1),
         (false, true) => Point::new(1, -1),
         (true, false) => Point::new(-1, 1),
@@ -76,33 +76,43 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
 
     let mut p = p0;
 
-    let threshold = delta.x - 2 * delta.y;
+    let (threshold, e_diag, e_square) = if delta.x > delta.y {
+        (delta.x - 2 * delta.y, -2 * delta.x, 2 * delta.y)
+    } else {
+        (delta.y - 2 * delta.x, -2 * delta.y, 2 * delta.x)
+    };
 
-    let e_diag = -2 * delta.x;
-    let e_square = 2 * delta.y;
+    // let e_diag = ;
+    // let e_square =;
 
     for _ in 0..=delta.x.max(delta.y).abs() {
         // while p != p1 {
         println!("{:?}", p);
-        draw_perp(display, p, delta, direction, p_error, width, error);
+        display.set_pixel(p.x as usize, p.y as usize, Rgb888::RED);
+        // draw_perp(display, p, delta, direction, p_error, width, error);
 
         if error > threshold {
             // p.y += 1;
-            p += Point::new(0, direction.y);
+            if delta.x > delta.y {
+                p += Point::new(0, direction.y);
+            } else {
+                p += Point::new(direction.x, 0);
+            };
+
             error += e_diag;
 
-            if p_error > threshold {
+            if p_error >= threshold {
                 p_error += e_diag;
 
-                draw_perp(
-                    display,
-                    p,
-                    delta,
-                    direction,
-                    p_error + e_square,
-                    width,
-                    error,
-                );
+                // draw_perp(
+                //     display,
+                //     p,
+                //     delta,
+                //     direction,
+                //     p_error + e_square,
+                //     width,
+                //     error,
+                // );
             }
 
             p_error += e_square;
@@ -110,11 +120,15 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
 
         error += e_square;
         // p.x += 1;
-        p += Point::new(direction.x, 0);
+        if delta.x > delta.y {
+            p += Point::new(direction.x, 0);
+        } else {
+            p += Point::new(0, direction.y);
+        };
     }
 
     // Draw center line using existing e-g `Line`
-    display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE)));
+    // display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE)));
 }
 
 fn main() {
