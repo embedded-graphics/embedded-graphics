@@ -62,6 +62,10 @@
 //!             break;
 //!         }
 //!
+//!         if let Some((x, y)) = display.get_input_event() {
+//!             println!("Click event at ({}, {})", x, y);
+//!         }
+//!
 //!         thread::sleep(Duration::from_millis(200));
 //!     }
 //! }
