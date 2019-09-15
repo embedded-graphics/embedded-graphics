@@ -148,6 +148,11 @@ impl BinaryDisplay {
         self.window.present();
         false
     }
+
+    /// Get coordinates of a mouse input event from the FIFO
+    pub fn get_input_event(&mut self) -> Option<(i32, i32)> {
+        self.window.get_input_event()
+    }
 }
 
 impl Drawing<BinaryColor> for BinaryDisplay {
@@ -197,6 +202,11 @@ impl RgbDisplay {
 
         self.window.present();
         false
+    }
+
+    /// Get coordinates of a mouse input event from the FIFO
+    pub fn get_input_event(&mut self) -> Option<(i32, i32)> {
+        self.window.get_input_event()
     }
 }
 

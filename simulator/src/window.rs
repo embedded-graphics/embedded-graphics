@@ -12,6 +12,7 @@ pub struct Window {
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
+    input_events: Vec<(i32, i32)>,
 }
 
 impl Window {
@@ -43,6 +44,7 @@ impl Window {
             pixel_spacing,
             canvas,
             event_pump,
+            input_events: vec![],
         }
     }
 
@@ -87,10 +89,18 @@ impl Window {
                 } => {
                     return true;
                 }
+                Event::MouseButtonUp { x, y, .. } => {
+                    self.input_events.push((x, y));
+                    return false;
+                }
                 _ => {}
             }
         }
 
         false
+    }
+
+    pub fn get_input_event(&mut self) -> Option<(i32, i32)> {
+        self.input_events.pop()
     }
 }
