@@ -1,10 +1,29 @@
 use embedded_graphics::geometry::Point;
 use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use sdl2::keyboard::{Keycode, Mod};
+use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render;
+
+/// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
+pub enum SimulatorEvent {
+    /// A keypress event, fired on keyDown
+    KeyDown {
+        /// The key being pressed
+        keycode: Option<Keycode>,
+        /// Any modifier being held at the time of keydown
+        keymod: Mod,
+    },
+    /// A mouse click event, fired on mouseUp
+    MouseButtonUp {
+        /// The mouse button being clicked
+        mouse_btn: MouseButton,
+        /// The location of the click in Simulator coordinates
+        point: Point,
+    },
+}
 
 /// Simulator window
 pub struct Window {
@@ -13,7 +32,7 @@ pub struct Window {
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
-    input_events: Vec<Point>,
+    input_events: Vec<SimulatorEvent>,
 }
 
 impl Window {
@@ -90,9 +109,19 @@ impl Window {
                 } => {
                     return true;
                 }
-                Event::MouseButtonUp { x, y, .. } => {
-                    let pitch = (self.scale + self.pixel_spacing) as i32;
-                    self.input_events.push(Point::new(x / pitch, y / pitch));
+                Event::KeyDown {
+                    keycode, keymod, ..
+                } => {
+                    self.input_events
+                        .push(SimulatorEvent::KeyDown { keycode, keymod });
+                    return false;
+                }
+                Event::MouseButtonUp {
+                    x, y, mouse_btn, ..
+                } => {
+                    let point = self.map_input_to_point((x, y));
+                    self.input_events
+                        .push(SimulatorEvent::MouseButtonUp { point, mouse_btn });
                     return false;
                 }
                 _ => {}
@@ -102,7 +131,13 @@ impl Window {
         false
     }
 
-    pub fn get_input_event(&mut self) -> Option<Point> {
+    pub fn get_input_event(&mut self) -> Option<SimulatorEvent> {
         self.input_events.pop()
+    }
+
+    /// Convert SDL2 input event coordinates into a point on the simulator coordinate system
+    fn map_input_to_point(&self, coords: (i32, i32)) -> Point {
+        let pitch = (self.scale + self.pixel_spacing) as i32;
+        Point::new(coords.0 / pitch, coords.1 / pitch)
     }
 }

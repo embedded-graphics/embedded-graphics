@@ -36,7 +36,7 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::{egcircle, egline, text_6x8};
 //! use embedded_graphics::pixelcolor::BinaryColor;
-//! use embedded_graphics_simulator::{DisplayBuilder, BinaryColorTheme};
+//! use embedded_graphics_simulator::{DisplayBuilder, BinaryColorTheme, SimulatorEvent};
 //! use std::thread;
 //! use std::time::Duration;
 //!
@@ -62,8 +62,8 @@
 //!             break;
 //!         }
 //!
-//!         if let Some(Point{x, y}) = display.get_input_event() {
-//!             println!("Click event at ({}, {})", x, y);
+//!         if let Some(SimulatorEvent::MouseButtonUp { point, ..}) = display.get_input_event() {
+//!             println!("Click event at ({}, {})", point.x, point.y);
 //!         }
 //!
 //!         thread::sleep(Duration::from_millis(200));
@@ -79,6 +79,7 @@ mod window;
 
 pub use crate::display_builder::DisplayBuilder;
 pub use crate::display_theme::BinaryColorTheme;
+pub use crate::window::SimulatorEvent;
 use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
@@ -154,7 +155,7 @@ impl BinaryDisplay {
     }
 
     /// Get coordinates of a mouse input event from the FIFO
-    pub fn get_input_event(&mut self) -> Option<Point> {
+    pub fn get_input_event(&mut self) -> Option<SimulatorEvent> {
         self.window.get_input_event()
     }
 }
@@ -209,7 +210,7 @@ impl RgbDisplay {
     }
 
     /// Get coordinates of a mouse input event from the FIFO
-    pub fn get_input_event(&mut self) -> Option<Point> {
+    pub fn get_input_event(&mut self) -> Option<SimulatorEvent> {
         self.window.get_input_event()
     }
 }
