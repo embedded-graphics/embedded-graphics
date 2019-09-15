@@ -10,16 +10,15 @@ extern crate embedded_graphics_simulator;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Circle;
 use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics_simulator::{DisplayBuilder, RgbDisplay};
-
-let background_color = Some(Rgb888::new(0, 0, 0));
-let foreground_color = Some(Rgb888::new(255, 0, 0));
+use embedded_graphics_simulator::DisplayBuilder;
 
 fn main() {
     let mut display = DisplayBuilder::new().size(800, 480).build_rgb();
+    let background_color = Some(Rgb888::new(0, 0, 0));
+    let foreground_color = Some(Rgb888::new(255, 0, 0));
 
     let mut position = Point::new(200, 200);
-    display.draw(Circle::new(position, 100).fill(foreground_color));
+    display.draw(Circle::new(position, 100).fill_color(foreground_color));
 
     loop {
         let end = display.run_once();
@@ -28,12 +27,12 @@ fn main() {
             break;
         }
 
-        if let Some((x, y)) = display.get_input_event() {
+        if let Some(Point{x, y}) = display.get_input_event() {
             // Clear old circle
-            display.draw(Circle::new(position, 100).fill(background_color));
+            display.draw(Circle::new(position, 100).fill_color(background_color));
             position = Point::new(x, y);
             // Draw circle at new location
-            display.draw(Circle::new(position, 100).fill(foreground_color));
+            display.draw(Circle::new(position, 100).fill_color(foreground_color));
         }
     }
 }

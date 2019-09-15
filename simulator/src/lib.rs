@@ -62,7 +62,7 @@
 //!             break;
 //!         }
 //!
-//!         if let Some((x, y)) = display.get_input_event() {
+//!         if let Some(Point{x, y}) = display.get_input_event() {
 //!             println!("Click event at ({}, {})", x, y);
 //!         }
 //!
