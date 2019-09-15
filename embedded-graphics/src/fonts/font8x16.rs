@@ -51,16 +51,6 @@ mod tests {
     const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
-    fn off_screen_text_does_not_infinite_loop() {
-        let text: Font8x16<BinaryColor> = Font8x16::render_str(HELLO_WORLD)
-            .stroke_color(Some(BinaryColor::On))
-            .fill_color(Some(BinaryColor::Off))
-            .translate(Point::new(5, -10));
-
-        assert_eq!(text.into_iter().count(), WIDTH * HEIGHT * HELLO_WORLD.len());
-    }
-
-    #[test]
     fn text_dimensions() {
         let hello: Font8x16<BinaryColor> = Font8x16::render_str(HELLO_WORLD);
         let empty: Font8x16<BinaryColor> = Font8x16::render_str("");
