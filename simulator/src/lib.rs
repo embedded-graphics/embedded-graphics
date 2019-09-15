@@ -154,7 +154,7 @@ impl BinaryDisplay {
     }
 
     /// Get coordinates of a mouse input event from the FIFO
-    pub fn get_input_event(&mut self) -> Option<(i32, i32)> {
+    pub fn get_input_event(&mut self) -> Option<Point> {
         self.window.get_input_event()
     }
 }
@@ -209,7 +209,7 @@ impl RgbDisplay {
     }
 
     /// Get coordinates of a mouse input event from the FIFO
-    pub fn get_input_event(&mut self) -> Option<(i32, i32)> {
+    pub fn get_input_event(&mut self) -> Option<Point> {
         self.window.get_input_event()
     }
 }

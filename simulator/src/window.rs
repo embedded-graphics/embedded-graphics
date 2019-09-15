@@ -1,4 +1,5 @@
 use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
+use embedded_graphics::geometry::Point;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -12,7 +13,7 @@ pub struct Window {
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
-    input_events: Vec<(i32, i32)>,
+    input_events: Vec<Point>,
 }
 
 impl Window {
@@ -90,7 +91,12 @@ impl Window {
                     return true;
                 }
                 Event::MouseButtonUp { x, y, .. } => {
-                    self.input_events.push((x, y));
+                    self.input_events.push(
+                        Point::new(
+                            x / self.scale as i32,
+                            y / self.scale as i32,
+                        )
+                    );
                     return false;
                 }
                 _ => {}
@@ -100,7 +106,7 @@ impl Window {
         false
     }
 
-    pub fn get_input_event(&mut self) -> Option<(i32, i32)> {
+    pub fn get_input_event(&mut self) -> Option<Point> {
         self.input_events.pop()
     }
 }
