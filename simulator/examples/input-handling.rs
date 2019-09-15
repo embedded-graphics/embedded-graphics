@@ -7,9 +7,9 @@
 extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
+use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Circle;
-use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics_simulator::DisplayBuilder;
 
 fn main() {
@@ -27,7 +27,7 @@ fn main() {
             break;
         }
 
-        if let Some(Point{x, y}) = display.get_input_event() {
+        if let Some(Point { x, y }) = display.get_input_event() {
             // Clear old circle
             display.draw(Circle::new(position, 100).fill_color(background_color));
             position = Point::new(x, y);

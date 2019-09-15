@@ -1,5 +1,5 @@
-use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
 use embedded_graphics::geometry::Point;
+use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -91,12 +91,8 @@ impl Window {
                     return true;
                 }
                 Event::MouseButtonUp { x, y, .. } => {
-                    self.input_events.push(
-                        Point::new(
-                            x / self.scale as i32,
-                            y / self.scale as i32,
-                        )
-                    );
+                    self.input_events
+                        .push(Point::new(x / self.scale as i32, y / self.scale as i32));
                     return false;
                 }
                 _ => {}
