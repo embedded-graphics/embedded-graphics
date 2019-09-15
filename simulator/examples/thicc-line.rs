@@ -19,22 +19,18 @@ fn draw_perp(
 
     let width_threshold_sq = 4 * width.pow(2) * (delta.x.pow(2) + delta.y.pow(2));
 
-    let (mut error, e_diag, e_square, mut width_accum, threshold) = if delta.x > delta.y {
-        (
-            p_error_initial,
-            delta.x * -2,
-            delta.y * 2,
-            delta.x + delta.y - error_initial,
-            delta.x - 2 * delta.y,
-        )
+    let larger_component = delta.x.max(delta.y);
+    let other_component = delta.x.min(delta.y);
+
+    let e_diag = larger_component * -2;
+    let e_square = other_component * 2;
+
+    let threshold = larger_component - 2 * other_component;
+
+    let (mut error, mut width_accum) = if delta.x > delta.y {
+        (p_error_initial, delta.x + delta.y - error_initial)
     } else {
-        (
-            -p_error_initial,
-            delta.y * -2,
-            delta.x * 2,
-            delta.x + delta.y + error_initial,
-            delta.y - 2 * delta.x,
-        )
+        (-p_error_initial, delta.x + delta.y + error_initial)
     };
 
     // Left hand side of line
@@ -43,18 +39,14 @@ fn draw_perp(
 
         if error > threshold {
             if delta.x > delta.y {
-                p += Point::new(-direction.x, 0);
+                p -= Point::new(direction.x, 0);
             } else {
                 p += Point::new(0, direction.y);
             };
 
             error += e_diag;
 
-            if delta.x > delta.y {
-                width_accum += 2 * delta.y;
-            } else {
-                width_accum += 2 * delta.x;
-            }
+            width_accum += 2 * other_component;
         }
 
         error += e_square;
@@ -62,14 +54,10 @@ fn draw_perp(
         if delta.x > delta.y {
             p += Point::new(0, direction.y);
         } else {
-            p += Point::new(-direction.x, 0);
+            p -= Point::new(direction.x, 0);
         };
 
-        if delta.x > delta.y {
-            width_accum += 2 * delta.x;
-        } else {
-            width_accum += 2 * delta.y;
-        }
+        width_accum += 2 * larger_component;
     }
 
     let mut p = start;
@@ -88,31 +76,23 @@ fn draw_perp(
             if delta.x > delta.y {
                 p += Point::new(direction.x, 0);
             } else {
-                p += Point::new(0, -direction.y);
+                p -= Point::new(0, direction.y);
             };
 
             error += e_diag;
 
-            if delta.x > delta.y {
-                width_accum += 2 * delta.y;
-            } else {
-                width_accum += 2 * delta.x;
-            }
+            width_accum += 2 * other_component;
         }
 
         error += e_square;
 
         if delta.x > delta.y {
-            p += Point::new(0, -direction.y);
+            p -= Point::new(0, direction.y);
         } else {
             p += Point::new(direction.x, 0);
         };
 
-        if delta.x > delta.y {
-            width_accum += 2 * delta.x;
-        } else {
-            width_accum += 2 * delta.y;
-        }
+        width_accum += 2 * larger_component;
     }
 }
 
