@@ -13,9 +13,12 @@ use embedded_graphics::primitives::Circle;
 use embedded_graphics_simulator::DisplayBuilder;
 
 fn main() {
-    let mut display = DisplayBuilder::new().size(800, 480).build_rgb();
-    let background_color = Some(Rgb888::new(0, 0, 0));
-    let foreground_color = Some(Rgb888::new(255, 0, 0));
+    let mut display = DisplayBuilder::new()
+        .title("Click to move circle")
+        .size(800, 480)
+        .build_rgb();
+    let background_color = Some(Rgb888::BLACK);
+    let foreground_color = Some(Rgb888::RED);
 
     let mut position = Point::new(200, 200);
     display.draw(Circle::new(position, 100).fill_color(foreground_color));
@@ -27,10 +30,10 @@ fn main() {
             break;
         }
 
-        if let Some(Point { x, y }) = display.get_input_event() {
+        if let Some(new_position) = display.get_input_event() {
             // Clear old circle
             display.draw(Circle::new(position, 100).fill_color(background_color));
-            position = Point::new(x, y);
+            position = new_position;
             // Draw circle at new location
             display.draw(Circle::new(position, 100).fill_color(foreground_color));
         }
