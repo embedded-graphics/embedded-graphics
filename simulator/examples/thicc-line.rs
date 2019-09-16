@@ -17,6 +17,8 @@ fn draw_perp(
 ) {
     let mut p = start;
 
+    let width = width / 2;
+
     let width_threshold_sq = 4 * width.pow(2) * (delta.x.pow(2) + delta.y.pow(2));
 
     let larger_component = delta.x.max(delta.y);
@@ -122,7 +124,6 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
         draw_perp(display, p, delta, direction, p_error, width, error);
 
         if error > threshold {
-            // p.y += 1;
             if delta.x > delta.y {
                 p += Point::new(0, direction.y);
             } else {
@@ -131,7 +132,7 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
 
             error += e_diag;
 
-            if p_error >= threshold {
+            if p_error > threshold {
                 p_error += e_diag;
 
                 draw_perp(
@@ -149,7 +150,7 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
         }
 
         error += e_square;
-        // p.x += 1;
+
         if delta.x > delta.y {
             p += Point::new(direction.x, 0);
         } else {
