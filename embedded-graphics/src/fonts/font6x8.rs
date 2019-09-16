@@ -47,33 +47,36 @@ mod tests {
     use crate::transform::Transform;
     use crate::Drawing;
 
-    #[test]
-    fn text_with_negative_y_does_not_infinite_loop() {
-        let text: Font6x8<BinaryColor> = Font6x8::render_str("Hello World!")
-            .stroke_color(Some(BinaryColor::On))
-            .fill_color(Some(BinaryColor::Off))
-            .translate(Point::new(5, -10));
-
-        assert_eq!(text.into_iter().count(), 6 * 8 * "Hello World!".len());
-    }
+    const WIDTH: usize = Font6x8Conf::CHAR_WIDTH as usize;
+    const HEIGHT: usize = Font6x8Conf::CHAR_HEIGHT as usize;
+    const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
     fn text_dimensions() {
-        let hello: Font6x8<BinaryColor> = Font6x8::render_str("Hello World!");
+        let hello: Font6x8<BinaryColor> = Font6x8::render_str(HELLO_WORLD);
         let empty: Font6x8<BinaryColor> = Font6x8::render_str("");
 
-        assert_eq!(hello.size(), Size::new(72, 8));
+        assert_eq!(
+            hello.size(),
+            Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32)
+        );
         assert_eq!(empty.size(), Size::new(0, 0));
     }
 
     #[test]
     fn text_corners() {
         let hello: Font6x8<BinaryColor> =
-            Font6x8::render_str("Hello World!").translate(Point::new(5, -20));
+            Font6x8::render_str(HELLO_WORLD).translate(Point::new(5, -20));
         let empty: Font6x8<BinaryColor> = Font6x8::render_str("").translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
-        assert_eq!(hello.bottom_right(), Point::new(72 + 5, 8 - 20));
+        assert_eq!(
+            hello.bottom_right(),
+            Point::new(
+                ((HELLO_WORLD.len() * WIDTH) as i32) + 5,
+                (HEIGHT as i32) - 20
+            )
+        );
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }

@@ -101,12 +101,14 @@
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
 mod font12x16;
+mod font24x32;
 mod font6x12;
 mod font6x8;
 mod font8x16;
 pub mod font_builder;
 
 pub use self::font12x16::Font12x16;
+pub use self::font24x32::Font24x32;
 pub use self::font6x12::Font6x12;
 pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
@@ -241,6 +243,28 @@ macro_rules! text_12x16 {
     };
 }
 
+/// Render text using the [`Font24x32`](./fonts/type.Font24x32.html) font
+///
+/// ```rust
+/// use embedded_graphics::{text_24x32, prelude::*, fonts::Font24x32, pixelcolor::Rgb565};
+///
+/// let text: Font24x32<Rgb565> = text_24x32!("Hello world!");
+/// let styled_text: Font24x32<Rgb565> = text_24x32!(
+///     "Hello world!",
+///     stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN)
+/// );
+/// ```
+///
+/// Style properties like `stroke` map to the method calls on the
+/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+#[macro_export]
+macro_rules! text_24x32 {
+    ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
+        $crate::impl_text!(Font24x32, $text $(, $style_key = $style_value )*)
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -252,6 +276,7 @@ mod tests {
         let _text: Font6x12<BinaryColor> = text_6x12!("Hello!");
         let _text: Font8x16<BinaryColor> = text_8x16!("Hello!");
         let _text: Font12x16<BinaryColor> = text_12x16!("Hello!");
+        let _text: Font24x32<BinaryColor> = text_24x32!("Hello!");
     }
 
     #[test]
@@ -260,5 +285,6 @@ mod tests {
         let _text: Font6x12<Rgb565> = text_6x12!("Hello!", stroke_color = Some(Rgb565::GREEN));
         let _text: Font8x16<Rgb565> = text_8x16!("Hello!", stroke_color = Some(Rgb565::BLUE));
         let _text: Font12x16<Rgb565> = text_12x16!("Hello!", stroke_color = Some(Rgb565::YELLOW));
+        let _text: Font24x32<Rgb565> = text_24x32!("Hello!", stroke_color = Some(Rgb565::MAGENTA));
     }
 }

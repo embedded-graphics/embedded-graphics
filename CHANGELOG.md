@@ -8,6 +8,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #171 Added a more complex `analog-clock` example to the simulator - [check it out](https://github.com/jamwaffles/embedded-graphics/tree/embedded-graphics-v0.6.0-alpha.3/simulator/examples/analog-clock.rs) for some more in-depth usage of Embedded Graphics.
 
+- #170 Added a `24x32` font based on the existing `12x16` font.
+
 ### Fixed
 
 - #143 Circles with no stroke are now drawn correctly
