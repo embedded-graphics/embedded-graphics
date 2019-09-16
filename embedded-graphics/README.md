@@ -128,11 +128,14 @@ There may be other drivers out there we don't know about yet. If you know of a d
 
 ## Development setup
 
-Ensure you have a reasonably recent version of Rust installed, preferably through <https://rustup.rs>.
+Ensure you have the latest stable version of Rust installed, preferably through <https://rustup.rs>.
 
 ### Ubuntu/Linux Mint
 
 ```bash
+# Update to latest stable version of Rust
+rustup update
+
 # Ensure rustfmt is installed
 rustup component add rustfmt
 
