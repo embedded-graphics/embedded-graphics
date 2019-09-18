@@ -1,6 +1,6 @@
-use embedded_graphics::egline;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
+// use embedded_graphics::{egline, fonts::Font6x8, text_6x8};
 use embedded_graphics_simulator::DisplayBuilder;
 use embedded_graphics_simulator::RgbDisplay;
 use std::thread;
@@ -15,11 +15,9 @@ fn draw_perp(
     width: i32,
     error_initial: i32,
 ) {
-    let mut p = start;
-
-    let width = width / 2;
-
-    let width_threshold_sq = 4 * width.pow(2) * (delta.x.pow(2) + delta.y.pow(2));
+    let width_threshold_sq =
+        (2.0 * (width / 2) as f32 * ((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt()).round()
+            as i32;
 
     let larger_component = delta.x.max(delta.y);
     let other_component = delta.x.min(delta.y);
@@ -29,72 +27,85 @@ fn draw_perp(
 
     let threshold = larger_component - 2 * other_component;
 
-    let (mut error, mut width_accum) = if delta.x > delta.y {
-        (p_error_initial, delta.x + delta.y - error_initial)
-    } else {
-        (-p_error_initial, delta.x + delta.y + error_initial)
-    };
+    {
+        let mut p = start;
 
-    // Left hand side of line
-    while width_accum.pow(2) <= width_threshold_sq {
-        display.set_pixel(p.x as usize, p.y as usize, Rgb888::RED);
-
-        if error > threshold {
-            if delta.x > delta.y {
-                p -= Point::new(direction.x, 0);
-            } else {
-                p += Point::new(0, direction.y);
-            };
-
-            error += e_diag;
-
-            width_accum += 2 * other_component;
-        }
-
-        error += e_square;
-
-        if delta.x > delta.y {
-            p += Point::new(0, direction.y);
+        let (mut error, mut width_accum) = if delta.x > delta.y {
+            (p_error_initial, delta.x + delta.y - error_initial)
         } else {
-            p -= Point::new(direction.x, 0);
+            (-p_error_initial, delta.x + delta.y + error_initial)
         };
 
-        width_accum += 2 * larger_component;
+        // Right hand side of line
+        while width_accum <= width_threshold_sq {
+            if error > threshold {
+                if delta.x > delta.y {
+                    p -= Point::new(direction.x, 0);
+                } else {
+                    p += Point::new(0, direction.y);
+                };
+
+                error += e_diag;
+
+                width_accum += 2 * other_component;
+            }
+
+            error += e_square;
+
+            if delta.x > delta.y {
+                p += Point::new(0, direction.y);
+            } else {
+                p -= Point::new(direction.x, 0);
+            };
+
+            width_accum += 2 * larger_component;
+
+            display.set_pixel(p.x as usize, p.y as usize, Rgb888::CYAN);
+        }
     }
 
-    let mut p = start;
+    {
+        let mut p = start;
 
-    let (mut error, mut width_accum) = if delta.x > delta.y {
-        (-p_error_initial, delta.x + delta.y + error_initial)
-    } else {
-        (p_error_initial, delta.x + delta.y - error_initial)
-    };
-
-    // Right hand side of line
-    while width_accum.pow(2) <= width_threshold_sq {
-        display.set_pixel(p.x as usize, p.y as usize, Rgb888::YELLOW);
-
-        if error > threshold {
-            if delta.x > delta.y {
-                p += Point::new(direction.x, 0);
-            } else {
-                p -= Point::new(0, direction.y);
-            };
-
-            error += e_diag;
-
-            width_accum += 2 * other_component;
-        }
-
-        error += e_square;
-
-        if delta.x > delta.y {
-            p -= Point::new(0, direction.y);
+        let (mut error, mut width_accum) = if delta.x > delta.y {
+            (-p_error_initial, delta.x + delta.y + error_initial)
         } else {
-            p += Point::new(direction.x, 0);
+            (p_error_initial, delta.x + delta.y - error_initial)
         };
 
-        width_accum += 2 * larger_component;
+        // Add an extra iteration for odd-sized lines
+        let width_threshold_sq = if width % 2 == 0 {
+            width_threshold_sq
+        } else {
+            width_threshold_sq + 2 * larger_component
+        };
+
+        // Left hand side of line
+        while width_accum <= width_threshold_sq {
+            display.set_pixel(p.x as usize, p.y as usize, Rgb888::YELLOW);
+
+            if error > threshold {
+                if delta.x > delta.y {
+                    p += Point::new(direction.x, 0);
+                } else {
+                    p -= Point::new(0, direction.y);
+                };
+
+                error += e_diag;
+
+                width_accum += 2 * other_component;
+            }
+
+            error += e_square;
+
+            if delta.x > delta.y {
+                p -= Point::new(0, direction.y);
+            } else {
+                p += Point::new(direction.x, 0);
+            };
+
+            width_accum += 2 * larger_component;
+        }
     }
 }
 
@@ -158,22 +169,39 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
         };
     }
 
-    // Draw center line using existing e-g `Line`
-    display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE)));
+    // Draw center line using existing e-g `Line`. Uncomment to debug.
+    // display.draw(egline!(
+    //     p0,
+    //     p0 + Point::new(20, 0),
+    //     stroke_color = Some(Rgb888::WHITE)
+    // ));
 }
 
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
         .size(256, 256)
-        .scale(3)
+        .scale(5)
+        .pixel_spacing(1)
         .build_rgb();
 
-    // draw_line(&mut display, 20, 20, 100, 50, 1);
-
-    // draw_line(&mut display, 10, 100, 50, 100, 1);
-
     let mut angle: f32 = 0.0;
+
+    // Uncomment to draw out straight test lines
+    // for i in 0..12 {
+    //     draw_line(
+    //         &mut display,
+    //         Point::new(10, 5 + (i * 15)),
+    //         Point::new(100, 5 + (i * 15)),
+    //         i,
+    //     );
+
+    //     let t = format!("W: {}", i);
+
+    //     let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
+
+    //     display.draw(&text);
+    // }
 
     loop {
         let end = display.run_once();
@@ -187,8 +215,9 @@ fn main() {
         let x = 127 + (angle.cos() * 120.0) as i32;
         let y = 127 + (angle.sin() * 120.0) as i32;
 
-        draw_line(&mut display, Point::new(127, 127), Point::new(x, y), 10);
-        // draw_line(&mut display, Point::new(127, 127), Point::new(150, 10), 10);
+        let width = 9;
+
+        draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
         angle += 0.1;
 
