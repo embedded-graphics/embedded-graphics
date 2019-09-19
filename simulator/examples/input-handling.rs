@@ -56,7 +56,7 @@ fn main() {
                 move_circle(&mut display, position, point);
                 position = point;
             }
-            None => {}
+            _ => {}
         }
     }
 }
