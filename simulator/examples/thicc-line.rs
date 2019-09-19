@@ -20,7 +20,7 @@ fn draw_perp(
     //     2 * (width / 2) * ((((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt()) as i32);
 
     // let width_threshold_sq_2 = 4 * (width / 2).pow(2) * (delta.x.pow(2) + delta.y.pow(2));
-    let width_threshold_sq = 2 * (width / 2) * (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
+    let width_threshold_sq = width * (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
 
     // assert_eq!(width_threshold_sq.pow(2), width_threshold_sq_2);
 
