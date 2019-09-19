@@ -126,6 +126,26 @@ fn main() {
 
 There may be other drivers out there we don't know about yet. If you know of a driver to add to this list, please open [an issue](https://github.com/jamwaffles/embedded-graphics/issues/new)!
 
+## Development setup
+
+Ensure you have the latest stable version of Rust installed, preferably through <https://rustup.rs>.
+
+### Ubuntu/Linux Mint
+
+```bash
+# Update to latest stable version of Rust
+rustup update
+
+# Ensure rustfmt is installed
+rustup component add rustfmt
+
+# Install SDL2 for simulator and PIP to install linkchecker
+sudo apt install libsdl2-dev python-pip
+
+# Install linkchecker so doc links can be checked
+sudo pip install linkchecker
+```
+
 ## Attribution
 
 All source font PNGs are taken from the excellent [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps).
