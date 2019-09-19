@@ -1,8 +1,9 @@
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
-// use embedded_graphics::{egline, fonts::Font6x8, text_6x8};
+use embedded_graphics::{egline, fonts::Font6x8, text_6x8};
 use embedded_graphics_simulator::DisplayBuilder;
 use embedded_graphics_simulator::RgbDisplay;
+use integer_sqrt::IntegerSquareRoot;
 use std::thread;
 use std::time::Duration;
 
@@ -15,9 +16,15 @@ fn draw_perp(
     width: i32,
     error_initial: i32,
 ) {
-    let width_threshold_sq =
-        (2.0 * (width / 2) as f32 * ((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt()).round()
-            as i32;
+    // let width_threshold_sq =
+    //     2 * (width / 2) * ((((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt()) as i32);
+
+    // let width_threshold_sq_2 = 4 * (width / 2).pow(2) * (delta.x.pow(2) + delta.y.pow(2));
+    let width_threshold_sq = 2 * (width / 2) * (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
+
+    // assert_eq!(width_threshold_sq.pow(2), width_threshold_sq_2);
+
+    // let width_threshold_sq = width_threshold_sq_2;
 
     let larger_component = delta.x.max(delta.y);
     let other_component = delta.x.min(delta.y);
@@ -170,38 +177,38 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
     }
 
     // Draw center line using existing e-g `Line`. Uncomment to debug.
-    // display.draw(egline!(
-    //     p0,
-    //     p0 + Point::new(20, 0),
-    //     stroke_color = Some(Rgb888::WHITE)
-    // ));
+    display.draw(egline!(
+        p0,
+        p0 + Point::new(20, 0),
+        stroke_color = Some(Rgb888::WHITE)
+    ));
 }
 
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
         .size(256, 256)
-        .scale(5)
+        .scale(4)
         .pixel_spacing(1)
         .build_rgb();
 
     let mut angle: f32 = 0.0;
 
     // Uncomment to draw out straight test lines
-    // for i in 0..12 {
-    //     draw_line(
-    //         &mut display,
-    //         Point::new(10, 5 + (i * 15)),
-    //         Point::new(100, 5 + (i * 15)),
-    //         i,
-    //     );
+    for i in 0..12 {
+        draw_line(
+            &mut display,
+            Point::new(10, 5 + (i * 15)),
+            Point::new(100, 5 + (i * 15)),
+            i,
+        );
 
-    //     let t = format!("W: {}", i);
+        let t = format!("W: {}", i);
 
-    //     let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
+        let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
 
-    //     display.draw(&text);
-    // }
+        display.draw(&text);
+    }
 
     loop {
         let end = display.run_once();
@@ -210,14 +217,14 @@ fn main() {
             break;
         }
 
-        display.clear();
+        // display.clear();
 
         let x = 127 + (angle.cos() * 120.0) as i32;
         let y = 127 + (angle.sin() * 120.0) as i32;
 
-        let width = 9;
+        let width = 1;
 
-        draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
+        // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
         angle += 0.1;
 
