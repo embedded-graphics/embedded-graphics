@@ -2,19 +2,30 @@ use embedded_graphics::geometry::Point;
 use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Mod};
-use sdl2::mouse::MouseButton;
+use sdl2::mouse::{MouseButton, MouseWheelDirection};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
 pub enum SimulatorEvent {
+    /// A keypress event, fired on keyUp
+    KeyUp {
+        /// The key being pressed
+        keycode: Option<Keycode>,
+        /// Any modifier being held at the time of keydown
+        keymod: Mod,
+        /// Whether the key is repeating
+        repeat: bool,
+    },
     /// A keypress event, fired on keyDown
     KeyDown {
         /// The key being pressed
         keycode: Option<Keycode>,
         /// Any modifier being held at the time of keydown
         keymod: Mod,
+        /// Whether the key is repeating
+        repeat: bool,
     },
     /// A mouse click event, fired on mouseUp
     MouseButtonUp {
@@ -22,6 +33,20 @@ pub enum SimulatorEvent {
         mouse_btn: MouseButton,
         /// The location of the click in Simulator coordinates
         point: Point,
+    },
+    /// A mouse click event, fired on mouseDown
+    MouseButtonDown {
+        /// The mouse button being clicked
+        mouse_btn: MouseButton,
+        /// The location of the click in Simulator coordinates
+        point: Point,
+    },
+    /// A mouse wheel event
+    MouseWheel {
+        /// The location of the mouse in Simulator coordinates
+        point: Point,
+        /// The direction of the wheel scroll
+        direction: MouseWheelDirection,
     },
 }
 
@@ -110,10 +135,29 @@ impl Window {
                     return true;
                 }
                 Event::KeyDown {
-                    keycode, keymod, ..
+                    keycode,
+                    keymod,
+                    repeat,
+                    ..
                 } => {
-                    self.input_events
-                        .push(SimulatorEvent::KeyDown { keycode, keymod });
+                    self.input_events.push(SimulatorEvent::KeyDown {
+                        keycode,
+                        keymod,
+                        repeat,
+                    });
+                    return false;
+                }
+                Event::KeyUp {
+                    keycode,
+                    keymod,
+                    repeat,
+                    ..
+                } => {
+                    self.input_events.push(SimulatorEvent::KeyUp {
+                        keycode,
+                        keymod,
+                        repeat,
+                    });
                     return false;
                 }
                 Event::MouseButtonUp {
@@ -122,6 +166,22 @@ impl Window {
                     let point = self.map_input_to_point((x, y));
                     self.input_events
                         .push(SimulatorEvent::MouseButtonUp { point, mouse_btn });
+                    return false;
+                }
+                Event::MouseButtonDown {
+                    x, y, mouse_btn, ..
+                } => {
+                    let point = self.map_input_to_point((x, y));
+                    self.input_events
+                        .push(SimulatorEvent::MouseButtonDown { point, mouse_btn });
+                    return false;
+                }
+                Event::MouseWheel {
+                    x, y, direction, ..
+                } => {
+                    let point = self.map_input_to_point((x, y));
+                    self.input_events
+                        .push(SimulatorEvent::MouseWheel { point, direction });
                     return false;
                 }
                 _ => {}
