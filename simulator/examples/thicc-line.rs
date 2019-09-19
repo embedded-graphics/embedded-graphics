@@ -238,7 +238,7 @@ fn main() {
         //         .into_iter(),
         // );
 
-        if angle <= 2.0 * core::f32::consts::PI {
+        if angle < (2.0 * core::f32::consts::PI - 0.1) {
             angle += 0.1;
         }
 
