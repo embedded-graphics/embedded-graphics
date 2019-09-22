@@ -144,6 +144,11 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             (true, true) => Point::new(-1, -1),
         };
 
+        let width: i32 = 10;
+
+        // let mut perp_delta = dbg!(Point::new(delta.y, delta.x));
+        let perp_delta = delta;
+
         LineIterator {
             style: self.style,
 
@@ -153,6 +158,16 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             direction,
             err: delta.x + delta.y,
             stop: self.start == self.end, // if line length is zero, draw nothing
+
+            perp: PerpLineIterator {
+                style: self.style,
+                start: self.start,
+                delta: dbg!(perp_delta),
+                direction,
+                err: dbg!(perp_delta.x + perp_delta.y),
+                current_iter: 0,
+                width: width as u32,
+            },
         }
     }
 }
@@ -172,6 +187,7 @@ where
     direction: Point,
     err: i32,
     stop: bool,
+    perp: PerpLineIterator<C>,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -183,19 +199,87 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         self.style.stroke_color?;
 
         if !self.stop {
+            // let point = self.start;
+            let point = if let Some(point) = self.perp.next() {
+                point
+            } else {
+                if self.start == self.end {
+                    self.stop = true;
+                }
+                let err_double = 2 * self.err;
+
+                // Move in minor direction (smaller delta)
+                if err_double > self.delta.y {
+                    // println!("minor");
+                    self.err += self.delta.y;
+                    self.start += Point::new(self.direction.x, 0);
+                }
+
+                // Move in major direction (greater delta)
+                if err_double < self.delta.x {
+                    // println!("MAJOR");
+                    self.err += self.delta.x;
+                    self.start += Point::new(0, self.direction.y);
+                }
+
+                self.perp = PerpLineIterator {
+                    style: self.style,
+                    start: self.start,
+                    delta: self.perp.delta,
+                    direction: self.direction,
+                    err: self.perp.delta.x + self.perp.delta.y,
+                    current_iter: 0,
+                    width: 10,
+                };
+
+                Pixel(self.start, self.style.fill_color.unwrap())
+            };
+
+            Some(point)
+        } else {
+            None
+        }
+    }
+}
+
+/// TODO: Docs
+#[derive(Debug, Clone, Copy)]
+pub struct PerpLineIterator<C>
+where
+    C: PixelColor,
+{
+    style: Style<C>,
+    start: Point,
+    width: u32,
+    delta: Point,
+    direction: Point,
+    err: i32,
+    current_iter: u32,
+}
+
+impl<C: PixelColor> Iterator for PerpLineIterator<C> {
+    type Item = Pixel<C>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_iter < self.width {
+            self.current_iter += 1;
+
             let point = self.start;
 
-            if self.start == self.end {
-                self.stop = true;
-            }
             let err_double = 2 * self.err;
+
+            // Move in minor direction (smaller delta)
             if err_double > self.delta.y {
+                // println!("minor");
                 self.err += self.delta.y;
-                self.start += Point::new(self.direction.x, 0);
-            }
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
                 self.start += Point::new(0, self.direction.y);
+            }
+
+            // Move in major direction (greater delta)
+            if err_double < self.delta.x {
+                // println!("MAJOR");
+                self.err += self.delta.x;
+                self.start += Point::new(-self.direction.x, 0);
             }
 
             Some(Pixel(point, self.style.stroke_color.unwrap()))

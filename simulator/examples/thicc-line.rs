@@ -119,7 +119,7 @@ fn draw_perp(
 fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
     match width {
         0 => return,
-        1 => display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE))),
+        // 1 => display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE))),
         width => {
             let delta = (p1 - p0).abs();
 
@@ -194,20 +194,34 @@ fn main() {
     let mut angle: f32 = 0.0;
 
     // Uncomment to draw out straight test lines
-    for i in 0..12 {
-        draw_line(
-            &mut display,
-            Point::new(10, 5 + (i * 15)),
-            Point::new(100, 5 + (i * 15)),
-            i,
-        );
+    // for i in 0..12 {
+    //     draw_line(
+    //         &mut display,
+    //         Point::new(10, 5 + (i * 15)),
+    //         Point::new(100, 5 + (i * 15)),
+    //         i,
+    //     );
 
-        let t = format!("W: {}", i);
+    //     let t = format!("W: {}", i);
 
-        let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
+    //     let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
 
-        display.draw(&text);
-    }
+    //     display.draw(&text);
+    // }
+
+    // draw_line(&mut display, Point::new(10, 20), Point::new(20, 10), 1);
+    // display.draw(
+    //     Line::new(Point::new(10, 20), Point::new(100, 10))
+    //         .stroke_color(Some(Rgb888::WHITE))
+    //         .fill_color(Some(Rgb888::RED)),
+    // );
+
+    // display.draw(
+    //     Line::new(Point::new(127, 127), Point::new(200, 150))
+    //         .stroke_color(Some(Rgb888::WHITE))
+    //         .fill_color(Some(Rgb888::RED))
+    //         .into_iter(),
+    // );
 
     loop {
         let end = display.run_once();
@@ -216,25 +230,27 @@ fn main() {
             break;
         }
 
-        // display.clear();
+        display.clear();
 
         let x = 127 + (angle.cos() * 120.0) as i32;
         let y = 127 + (angle.sin() * 120.0) as i32;
 
-        let width = 4;
+        let width = 1;
 
         // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
-        // display.draw(
-        //     Line::new(Point::new(127, 127), Point::new(x, y))
-        //         .stroke_color(Some(Rgb888::WHITE))
-        //         .into_iter(),
-        // );
+        display.draw(
+            Line::new(Point::new(127, 127), Point::new(x, y))
+                .stroke_color(Some(Rgb888::WHITE))
+                .fill_color(Some(Rgb888::RED))
+                .into_iter(),
+        );
 
-        if angle < (2.0 * core::f32::consts::PI - 0.1) {
-            angle += 0.1;
-        }
+        // if angle < (2.0 * core::f32::consts::PI - 0.1) {
+        //     angle += 0.1;
+        // }
+        angle += 0.1;
 
-        thread::sleep(Duration::from_millis(10));
+        thread::sleep(Duration::from_millis(30));
     }
 }
