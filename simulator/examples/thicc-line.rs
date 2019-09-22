@@ -117,77 +117,70 @@ fn draw_perp(
 }
 
 fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
-    if width == 1 {
-        display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE)));
+    match width {
+        0 => return,
+        1 => display.draw(egline!(p0, p1, stroke_color = Some(Rgb888::WHITE))),
+        width => {
+            let delta = (p1 - p0).abs();
 
-        return;
-    }
-
-    let delta = (p1 - p0).abs();
-
-    let direction = match (p1.x >= p0.x, p1.y >= p0.y) {
-        (true, true) => Point::new(1, 1),
-        (true, false) => Point::new(1, -1),
-        (false, true) => Point::new(-1, 1),
-        (false, false) => Point::new(-1, -1),
-    };
-
-    let mut error = 0;
-    // Perpendicular error
-    let mut p_error = 0;
-
-    let mut p = p0;
-
-    let (threshold, e_diag, e_square) = if delta.x > delta.y {
-        (delta.x - 2 * delta.y, -2 * delta.x, 2 * delta.y)
-    } else {
-        (delta.y - 2 * delta.x, -2 * delta.y, 2 * delta.x)
-    };
-
-    for _ in 0..=delta.x.max(delta.y).abs() {
-        draw_perp(display, p, delta, direction, p_error, width, error);
-
-        if error > threshold {
-            if delta.x > delta.y {
-                p += Point::new(0, direction.y);
-            } else {
-                p += Point::new(direction.x, 0);
+            let direction = match (p1.x >= p0.x, p1.y >= p0.y) {
+                (true, true) => Point::new(1, 1),
+                (true, false) => Point::new(1, -1),
+                (false, true) => Point::new(-1, 1),
+                (false, false) => Point::new(-1, -1),
             };
 
-            error += e_diag;
+            let mut error = 0;
+            // Perpendicular error
+            let mut p_error = 0;
 
-            if p_error > threshold {
-                draw_perp(
-                    display,
-                    p,
-                    delta,
-                    direction,
-                    p_error + e_diag + e_square,
-                    width,
-                    error,
-                );
+            let mut p = p0;
 
-                p_error += e_diag;
+            let (threshold, e_diag, e_square) = if delta.x > delta.y {
+                (delta.x - 2 * delta.y, -2 * delta.x, 2 * delta.y)
+            } else {
+                (delta.y - 2 * delta.x, -2 * delta.y, 2 * delta.x)
+            };
+
+            for _ in 0..=delta.x.max(delta.y).abs() {
+                draw_perp(display, p, delta, direction, p_error, width, error);
+
+                if error > threshold {
+                    if delta.x > delta.y {
+                        p += Point::new(0, direction.y);
+                    } else {
+                        p += Point::new(direction.x, 0);
+                    };
+
+                    error += e_diag;
+
+                    if p_error > threshold {
+                        draw_perp(
+                            display,
+                            p,
+                            delta,
+                            direction,
+                            p_error + e_diag + e_square,
+                            width,
+                            error,
+                        );
+
+                        p_error += e_diag;
+                    }
+
+                    p_error += e_square;
+                }
+
+                error += e_square;
+
+                if delta.x > delta.y {
+                    p += Point::new(direction.x, 0);
+                } else {
+                    p += Point::new(0, direction.y);
+                };
             }
-
-            p_error += e_square;
         }
-
-        error += e_square;
-
-        if delta.x > delta.y {
-            p += Point::new(direction.x, 0);
-        } else {
-            p += Point::new(0, direction.y);
-        };
     }
-
-    // Draw center line using existing e-g `Line`. Uncomment to debug.
-    // display.draw(egline!(
-    //     p0,
-    //     p0 + Point::new(20, 0),
-    //     stroke_color = Some(Rgb888::WHITE)
-    // ));
 }
 
 fn main() {
@@ -201,20 +194,20 @@ fn main() {
     let mut angle: f32 = 0.0;
 
     // Uncomment to draw out straight test lines
-    // for i in 0..12 {
-    //     draw_line(
-    //         &mut display,
-    //         Point::new(10, 5 + (i * 15)),
-    //         Point::new(100, 5 + (i * 15)),
-    //         i,
-    //     );
+    for i in 0..12 {
+        draw_line(
+            &mut display,
+            Point::new(10, 5 + (i * 15)),
+            Point::new(100, 5 + (i * 15)),
+            i,
+        );
 
-    //     let t = format!("W: {}", i);
+        let t = format!("W: {}", i);
 
-    //     let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
+        let text: Font6x8<Rgb888> = text_6x8!(&t).translate(Point::new(110, 5 + i * 15));
 
-    //     display.draw(&text);
-    // }
+        display.draw(&text);
+    }
 
     loop {
         let end = display.run_once();
@@ -230,7 +223,7 @@ fn main() {
 
         let width = 4;
 
-        draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
+        // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
         // display.draw(
         //     Line::new(Point::new(127, 127), Point::new(x, y))
