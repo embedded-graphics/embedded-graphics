@@ -251,6 +251,6 @@ fn main() {
         // }
         angle += 0.1;
 
-        thread::sleep(Duration::from_millis(30));
+        thread::sleep(Duration::from_millis(50));
     }
 }

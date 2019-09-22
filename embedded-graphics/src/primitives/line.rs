@@ -7,6 +7,7 @@ use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
+use integer_sqrt::IntegerSquareRoot;
 
 /// Line primitive
 ///
@@ -144,7 +145,11 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             (true, true) => Point::new(-1, -1),
         };
 
-        let width: i32 = 10;
+        let len = dbg!((delta.x.pow(2) + delta.y.pow(2)).integer_sqrt());
+
+        let normal = dbg!(Point::new((delta.x * 10) / len, (delta.y * 10) / len));
+
+        let width: i32 = normal.x.abs().max(normal.y.abs());
 
         // let mut perp_delta = dbg!(Point::new(delta.y, delta.x));
         let perp_delta = delta;
@@ -158,15 +163,18 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             direction,
             err: delta.x + delta.y,
             stop: self.start == self.end, // if line length is zero, draw nothing
+            perp_err: 0,
+            width: width as u32,
 
             perp: PerpLineIterator {
                 style: self.style,
                 start: self.start,
-                delta: dbg!(perp_delta),
+                delta: perp_delta,
                 direction,
-                err: dbg!(perp_delta.x + perp_delta.y),
+                err: perp_delta.x + perp_delta.y,
                 current_iter: 0,
                 width: width as u32,
+                // perp_err: 0,
             },
         }
     }
@@ -187,7 +195,9 @@ where
     direction: Point,
     err: i32,
     stop: bool,
+    width: u32,
     perp: PerpLineIterator<C>,
+    perp_err: i32,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -212,6 +222,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 if err_double > self.delta.y {
                     // println!("minor");
                     self.err += self.delta.y;
+                    self.perp_err += self.delta.y;
                     self.start += Point::new(self.direction.x, 0);
                 }
 
@@ -228,8 +239,9 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     delta: self.perp.delta,
                     direction: self.direction,
                     err: self.perp.delta.x + self.perp.delta.y,
+                    // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
                     current_iter: 0,
-                    width: 10,
+                    width: self.width,
                 };
 
                 Pixel(self.start, self.style.fill_color.unwrap())
@@ -254,6 +266,7 @@ where
     delta: Point,
     direction: Point,
     err: i32,
+    // perp_err: i32,
     current_iter: u32,
 }
 
