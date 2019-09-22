@@ -43,6 +43,13 @@ fn draw_perp(
             (-p_error_initial, delta.x + delta.y + error_initial)
         };
 
+        // Add another pixel if line width is even
+        let width_threshold_sq = if width % 2 == 0 {
+            width_threshold_sq + 2 * larger_component
+        } else {
+            width_threshold_sq
+        };
+
         // Right hand side of line
         while width_accum <= width_threshold_sq {
             display.set_pixel(p.x as usize, p.y as usize, Rgb888::CYAN);
@@ -79,13 +86,6 @@ fn draw_perp(
         } else {
             (p_error_initial, delta.x + delta.y - error_initial)
         };
-
-        // // Add an extra iteration for odd-sized lines
-        // let width_threshold_sq = if width % 2 == 0 {
-        //     width_threshold_sq
-        // } else {
-        //     width_threshold_sq + 2 * larger_component
-        // };
 
         // Left hand side of line
         while width_accum <= width_threshold_sq {
