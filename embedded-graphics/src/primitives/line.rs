@@ -173,7 +173,8 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         let normal = dbg!(Point::new((delta.x * 10) / len, (delta.y * 10) / len));
 
-        let width: i32 = normal.x.abs().max(normal.y.abs());
+        // let width: i32 = normal.x.abs().max(normal.y.abs());
+        let width = 10i32;
 
         LineIterator {
             style: self.style,
@@ -193,7 +194,8 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 start: self.start,
                 delta: dbg!(perp_delta),
                 direction: dbg!(perp_direction),
-                err: dbg!(delta.x + delta.y),
+                // err: dbg!(delta.y),
+                err: 0,
                 current_iter: 0,
                 width: width as u32,
                 // perp_err: 0,
@@ -232,13 +234,17 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
         if !self.stop {
             // let point = self.start;
-            let point = if let Some(point) = self.perp.next() {
-                point
+            if let Some(point) = self.perp.next() {
+                Some(point)
             } else {
+                // if self.perp.color == self.style.fill_color {
+                //     return None;
+                // }
                 if self.start == self.end {
                     self.stop = true;
                 }
                 let err_double = 2 * self.err;
+                let mut diag = 0;
 
                 // Move in minor direction (smaller delta)
                 if err_double > self.delta.y {
@@ -246,6 +252,8 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     self.err += self.delta.y;
                     self.perp_err += self.delta.x;
                     self.start += Point::new(self.direction.x, 0);
+
+                    diag += 1;
                 }
 
                 // Move in major direction (greater delta)
@@ -253,28 +261,33 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     // println!("MAJOR");
                     self.err += self.delta.x;
                     self.start += Point::new(0, self.direction.y);
+
+                    diag += 1;
                 }
 
-                // self.perp = PerpLineIterator {
-                //     // style: self.style,
-                //     color: if self.perp.color == self.style.fill_color {
-                //         self.style.stroke_color
-                //     } else {
-                //         self.style.fill_color
-                //     },
-                //     start: self.start,
-                //     delta: self.perp.delta,
-                //     direction: -self.direction,
-                //     err: self.perp_err,
-                //     // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
-                //     current_iter: 0,
-                //     width: self.width,
-                // };
+                self.perp = PerpLineIterator {
+                    // style: self.style,
+                    color: if self.perp.color == self.style.fill_color {
+                        self.style.stroke_color
+                    } else {
+                        self.style.fill_color
+                    },
+                    start: self.start,
+                    // delta: self.perp.delta,
+                    // direction: -self.direction,
+                    // err: self.perp_err,
+                    // err: self.err,
+                    err: 0,
+                    // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
+                    current_iter: 0,
+                    // width: self.width,
+                    ..self.perp
+                };
 
-                Pixel(self.start, self.style.fill_color.unwrap())
-            };
-
-            Some(point)
+                self.perp.next()
+                // Some(Pixel(self.start, self.style.fill_color.unwrap()))
+                // None
+            }
         } else {
             None
         }

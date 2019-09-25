@@ -187,7 +187,7 @@ fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
         .size(256, 256)
-        .scale(4)
+        .scale(6)
         .pixel_spacing(1)
         .build_rgb();
 
@@ -237,8 +237,6 @@ fn main() {
             break;
         }
 
-        // display.clear();
-
         let x = 127 + (angle.cos() * 120.0) as i32;
         let y = 127 + (angle.sin() * 120.0) as i32;
 
@@ -246,6 +244,7 @@ fn main() {
 
         // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
+        // display.clear();
         // display.draw(
         //     Line::new(Point::new(127, 127), Point::new(x, y))
         //         .stroke_color(Some(Rgb888::WHITE))
