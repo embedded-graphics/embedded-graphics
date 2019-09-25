@@ -223,6 +223,13 @@ fn main() {
     //         .into_iter(),
     // );
 
+    display.draw(
+        Line::new(Point::new(127, 127), Point::new(250, 80))
+            .stroke_color(Some(Rgb888::YELLOW))
+            .fill_color(Some(Rgb888::RED))
+            .into_iter(),
+    );
+
     loop {
         let end = display.run_once();
 
@@ -230,7 +237,7 @@ fn main() {
             break;
         }
 
-        display.clear();
+        // display.clear();
 
         let x = 127 + (angle.cos() * 120.0) as i32;
         let y = 127 + (angle.sin() * 120.0) as i32;
@@ -239,12 +246,12 @@ fn main() {
 
         // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
-        display.draw(
-            Line::new(Point::new(127, 127), Point::new(x, y))
-                .stroke_color(Some(Rgb888::WHITE))
-                .fill_color(Some(Rgb888::RED))
-                .into_iter(),
-        );
+        // display.draw(
+        //     Line::new(Point::new(127, 127), Point::new(x, y))
+        //         .stroke_color(Some(Rgb888::WHITE))
+        //         .fill_color(Some(Rgb888::RED))
+        //         .into_iter(),
+        // );
 
         // if angle < (2.0 * core::f32::consts::PI - 0.1) {
         //     angle += 0.1;
