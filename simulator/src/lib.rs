@@ -46,14 +46,12 @@
 //!         .size(128, 64)
 //!         .build_binary();
 //!
-//!     display.draw(text_6x8!("Hello World!"));
+//!     text_6x8!("Hello World!").draw(&mut display);
 //!
-//!     display.draw(egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)));
+//!     egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
 //!
-//!     display.draw(egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On))
-//!         .translate(Point::new(64, 0)));
-//!     display.draw(egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On))
-//!         .translate(Point::new(64, 0)));
+//!     egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On)).translate(Point::new(64, 0)).draw(&mut display);
+//!     egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On)) .translate(Point::new(64, 0)).draw(&mut display);
 //!
 //!     loop {
 //!         let end = display.run_once();

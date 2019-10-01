@@ -26,31 +26,28 @@ fn main() {
         )),
     );
 
-    display.draw(
-        text_6x8!(
-            "Hello world! - no background",
-            stroke_color = Some(Rgb565::WHITE)
-        )
-        .translate(Point::new(15, 15)),
-    );
+    text_6x8!(
+        "Hello world! - no background",
+        stroke_color = Some(Rgb565::WHITE)
+    )
+    .translate(Point::new(15, 15))
+    .draw(&mut display);
 
-    display.draw(
-        text_6x8!(
-            "Hello world! - filled background",
-            stroke_color = Some(Rgb565::YELLOW),
-            fill_color = Some(Rgb565::BLUE)
-        )
-        .translate(Point::new(15, 30)),
-    );
+    text_6x8!(
+        "Hello world! - filled background",
+        stroke_color = Some(Rgb565::YELLOW),
+        fill_color = Some(Rgb565::BLUE)
+    )
+    .translate(Point::new(15, 30))
+    .draw(&mut display);
 
-    display.draw(
-        text_6x8!(
-            "Hello world! - inverse background",
-            stroke_color = Some(Rgb565::BLUE),
-            fill_color = Some(Rgb565::YELLOW)
-        )
-        .translate(Point::new(15, 45)),
-    );
+    text_6x8!(
+        "Hello world! - inverse background",
+        stroke_color = Some(Rgb565::BLUE),
+        fill_color = Some(Rgb565::YELLOW)
+    )
+    .translate(Point::new(15, 45))
+    .draw(&mut display);
 
     loop {
         let end = display.run_once();

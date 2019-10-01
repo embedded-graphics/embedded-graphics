@@ -27,7 +27,7 @@ fn main() {
                 .translate(Point::new(5, 50)),
         );
 
-    display.draw(objects);
+    objects.draw(&mut display);
 
     loop {
         let end = display.run_once();

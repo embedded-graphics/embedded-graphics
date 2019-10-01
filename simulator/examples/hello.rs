@@ -13,20 +13,16 @@ fn main() {
         .build_binary();
 
     // Outline
-    display.draw(Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)));
+    Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)).draw(&mut display);
 
     // Clock hands
-    display
-        .draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)));
-    display.draw(
-        Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)),
-    );
+    Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)).draw(&mut display);
 
-    display.draw(
-        Font6x8::render_str("Hello World!")
-            .stroke_color(Some(BinaryColor::On))
-            .translate(Point::new(5, 50)),
-    );
+    Font6x8::render_str("Hello World!")
+        .stroke_color(Some(BinaryColor::On))
+        .translate(Point::new(5, 50))
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

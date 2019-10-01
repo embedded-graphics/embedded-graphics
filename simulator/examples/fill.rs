@@ -14,64 +14,55 @@ fn main() {
         .scale(2)
         .build_binary();
 
-    display.draw(
-        Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-            .stroke_color(Some(BinaryColor::On)),
-    );
+    Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+        .stroke_color(Some(BinaryColor::On))
+        .draw(&mut display);
 
-    display.draw(
-        Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-            .translate(Point::new(16, 16))
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::On)),
-    );
+    Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+        .translate(Point::new(16, 16))
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::On))
+        .draw(&mut display);
 
-    display.draw(
-        Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-            .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::Off)),
-    );
+    Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+        .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::Off))
+        .draw(&mut display);
 
-    display.draw(
-        Rectangle::new(Point::new(0, 0), Point::new(64, 64))
-            .translate(Point::new(96, 0))
-            .stroke_color(Some(BinaryColor::On)),
-    );
+    Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .translate(Point::new(96, 0))
+        .stroke_color(Some(BinaryColor::On))
+        .draw(&mut display);
 
-    display.draw(
-        &Rectangle::new(Point::new(0, 0), Point::new(64, 64))
-            .translate(Point::new(96 + 16, 16))
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::On)),
-    );
+    Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .translate(Point::new(96 + 16, 16))
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::On))
+        .draw(&mut display);
 
-    display.draw(
-        Rectangle::new(Point::new(0, 0), Point::new(64, 64))
-            .translate(Point::new(96 + 32, 32))
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::Off)),
-    );
+    Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .translate(Point::new(96 + 32, 32))
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::Off))
+        .draw(&mut display);
 
-    display.draw(
-        Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
-            .translate(Point::new(96 * 2, 0))
-            .stroke_color(Some(BinaryColor::On)),
-    );
+    Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
+        .translate(Point::new(96 * 2, 0))
+        .stroke_color(Some(BinaryColor::On))
+        .draw(&mut display);
 
-    display.draw(
-        Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
-            .translate(Point::new(96 * 2 + 16, 16))
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::On)),
-    );
+    Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
+        .translate(Point::new(96 * 2 + 16, 16))
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::On))
+        .draw(&mut display);
 
-    display.draw(
-        Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
-            .translate(Point::new(96 * 2 + 32, 32))
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::Off)),
-    );
+    Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
+        .translate(Point::new(96 * 2 + 32, 32))
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::Off))
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

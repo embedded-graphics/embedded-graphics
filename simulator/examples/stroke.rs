@@ -29,44 +29,41 @@ fn main() {
         .translate(Point::new(192 + PADDING * 3, 0))
         .stroke_color(Some(BinaryColor::On));
 
-    display.draw(
-        circ.into_iter()
-            .chain(rect.into_iter())
-            .chain(line.into_iter())
-            .chain(triangle.into_iter()),
-    );
+    circ.into_iter()
+        .chain(rect.into_iter())
+        .chain(line.into_iter())
+        .chain(triangle.into_iter())
+        .draw(&mut display);
 
-    display.draw(
-        circ.translate(Point::new(0, 64 + PADDING))
-            .stroke_width(3)
-            .into_iter()
-            .chain(rect.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
-            .chain(line.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
-            .chain(
-                triangle
-                    .translate(Point::new(0, 64 + PADDING))
-                    .stroke_width(3),
-            ),
-    );
+    circ.translate(Point::new(0, 64 + PADDING))
+        .stroke_width(3)
+        .into_iter()
+        .chain(rect.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
+        .chain(line.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
+        .chain(
+            triangle
+                .translate(Point::new(0, 64 + PADDING))
+                .stroke_width(3),
+        )
+        .draw(&mut display);
 
-    display.draw(
-        circ.translate(Point::new(0, 128 + PADDING * 2))
-            .stroke_width(10)
-            .into_iter()
-            .chain(
-                rect.translate(Point::new(0, 128 + PADDING * 2))
-                    .stroke_width(10),
-            )
-            .chain(
-                line.translate(Point::new(0, 128 + PADDING * 2))
-                    .stroke_width(10),
-            )
-            .chain(
-                triangle
-                    .translate(Point::new(0, 128 + PADDING * 2))
-                    .stroke_width(10),
-            ),
-    );
+    circ.translate(Point::new(0, 128 + PADDING * 2))
+        .stroke_width(10)
+        .into_iter()
+        .chain(
+            rect.translate(Point::new(0, 128 + PADDING * 2))
+                .stroke_width(10),
+        )
+        .chain(
+            line.translate(Point::new(0, 128 + PADDING * 2))
+                .stroke_width(10),
+        )
+        .chain(
+            triangle
+                .translate(Point::new(0, 128 + PADDING * 2))
+                .stroke_width(10),
+        )
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();
