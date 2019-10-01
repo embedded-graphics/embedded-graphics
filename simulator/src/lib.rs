@@ -62,10 +62,11 @@
 //!             break;
 //!         }
 //!
-//!         if let Some(SimulatorEvent::MouseButtonUp { point, ..}) = display.get_input_event() {
-//!             println!("Click event at ({}, {})", point.x, point.y);
+//!         for event in display.get_input_events() {
+//!             if let SimulatorEvent::MouseButtonUp { point, ..} = event {
+//!                 println!("Click event at ({}, {})", point.x, point.y);
+//!             }
 //!         }
-//!
 //!         thread::sleep(Duration::from_millis(200));
 //!     }
 //! }
