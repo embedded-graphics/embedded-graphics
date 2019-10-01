@@ -29,8 +29,8 @@ use tinybmp::Bmp;
 /// let image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
 ///
 /// // Equivalent behavior
-/// display.draw(&image);
-/// display.draw(image.into_iter());
+/// image.draw(&mut display);
+/// image.into_iter().draw(&mut display);
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C>
@@ -121,7 +121,12 @@ where
     }
 }
 
-impl<'a, C> Drawable for ImageBmp<'a, C> where C: PixelColor + From<<C as PixelColor>::Raw> {}
+impl<'a, C> Drawable<C> for ImageBmp<'a, C>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    for<'b> &'b ImageBmp<'a, C>: IntoIterator<Item = Pixel<C>>,
+{
+}
 
 impl<'a, C> IntoIterator for &'a ImageBmp<'a, C>
 where
@@ -195,7 +200,7 @@ mod tests {
     use super::*;
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor};
-    use crate::Drawing;
+    use crate::DrawTarget;
 
     #[test]
     fn negative_top_left() {

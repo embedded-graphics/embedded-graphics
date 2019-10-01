@@ -22,7 +22,7 @@
 use crate::drawable::Pixel;
 use crate::geometry::Point;
 use crate::pixelcolor::{BinaryColor, PixelColor};
-use crate::Drawing;
+use crate::DrawTarget;
 use core::{
     cmp::PartialEq,
     fmt::{self, Write},
@@ -166,22 +166,19 @@ where
     }
 }
 
-impl<C> Drawing<C> for MockDisplay<C>
+impl<C> DrawTarget<C> for MockDisplay<C>
 where
     C: PixelColor,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = Pixel<C>>,
+    fn draw_pixel(&mut self, pixel: Pixel<C>)
     {
-        for Pixel(Point { x, y }, color) in item_pixels {
-            if x < 0 || y < 0 || x >= SIZE as i32 || y >= SIZE as i32 {
-                continue;
-            }
-
-            let i = x + y * SIZE as i32;
-            self.0[i as usize] = Some(color);
+        let Pixel(Point { x, y }, color) = pixel;
+        if x < 0 || y < 0 || x >= SIZE as i32 || y >= SIZE as i32 {
+            return;
         }
+
+        let i = x + y * SIZE as i32;
+        self.0[i as usize] = Some(color);
     }
 }
 

@@ -2,6 +2,7 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
+use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
@@ -34,9 +35,9 @@ use crate::style::WithStyle;
 /// let l3 = Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35));
 ///
-/// display.draw(l1);
-/// display.draw(l2);
-/// display.draw(l3);
+/// l1.draw(&mut display);
+/// l2.draw(&mut display);
+/// l3.draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Line<C: PixelColor> {
@@ -205,7 +206,11 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     }
 }
 
-impl<C> Drawable for Line<C> where C: PixelColor {}
+impl<C> Drawable<C> for Line<C> where C: PixelColor {
+    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+        display.draw_line(self);
+    }
+}
 
 impl<C> Transform for Line<C>
 where

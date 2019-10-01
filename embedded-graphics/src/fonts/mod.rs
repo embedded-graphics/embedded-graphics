@@ -16,10 +16,10 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
 //! // Use struct methods directly
-//! display.draw(Font6x8::render_str("Hello Rust!"));
+//! Font6x8::render_str("Hello Rust!").draw(&mut display);
 //!
 //! // Use a macro instead
-//! display.draw(text_6x8!("Hello Rust!"));
+//! text_6x8!("Hello Rust!").draw(&mut display);
 //! ```
 //!
 //! ## Translate text by (20px, 30px)
@@ -31,9 +31,7 @@
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
-//! display.draw(
-//!     Font6x8::render_str("Hello Rust!").translate(Point::new(20, 30))
-//! );
+//! Font6x8::render_str("Hello Rust!").translate(Point::new(20, 30)).draw(&mut display)
 //! ```
 //!
 //! ## Add some styling to the text
@@ -50,18 +48,17 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! display.draw(text_6x8!(
+//! text_6x8!(
 //!     "Hello Rust!",
 //!     fill_color = Some(Rgb565::BLUE),
 //!     stroke_color = Some(Rgb565::YELLOW)
-//! ));
+//! ).draw(&mut display);
 //!
-//! display.draw(
-//!     Font6x8::render_str("Hello Rust!")
-//!         .translate(Point::new(20, 30))
-//!         .fill_color(Some(Rgb565::BLUE))
-//!         .stroke_color(Some(Rgb565::YELLOW)),
-//! );
+//! Font6x8::render_str("Hello Rust!")
+//!     .translate(Point::new(20, 30))
+//!     .fill_color(Some(Rgb565::BLUE))
+//!     .stroke_color(Some(Rgb565::YELLOW))
+//!     .draw(&mut display);
 //! ```
 //!
 //! ## Use `write!()` and arrayvec to render a formatted string
@@ -88,11 +85,11 @@
 //! // Output `Value: 12.35`
 //! write!(&mut buf, "Value: {:.2}", value).expect("Failed to write to buffer");
 //!
-//! display.draw(text_6x8!(
+//! text_6x8!(
 //!     &buf,
 //!     fill_color = Some(Rgb565::BLUE),
 //!     stroke_color = Some(Rgb565::YELLOW)
-//! ));
+//! ).draw(&mut display);
 //! ```
 //!
 //! [`text_6x8`]: ../macro.text_6x8.html

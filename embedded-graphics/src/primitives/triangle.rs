@@ -2,6 +2,7 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
+use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::line::{Line, LineIterator};
@@ -35,9 +36,9 @@ use crate::style::WithStyle;
 /// let t3 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .translate(Point::new(65, 35));
 ///
-/// display.draw(t1);
-/// display.draw(t2);
-/// display.draw(t3);
+/// t1.draw(&mut display);
+/// t2.draw(&mut display);
+/// t3.draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle<C: PixelColor> {
@@ -321,7 +322,11 @@ where
     }
 }
 
-impl<C> Drawable for Triangle<C> where C: PixelColor {}
+impl<C> Drawable<C> for Triangle<C> where C: PixelColor {
+    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+        display.draw_triangle(self);
+    }
+}
 
 impl<C> Transform for Triangle<C>
 where

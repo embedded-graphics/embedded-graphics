@@ -3,7 +3,7 @@ extern crate embedded_graphics;
 use embedded_graphics::geometry::Point;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
-use embedded_graphics::Drawing;
+use embedded_graphics::DrawTarget;
 
 struct FakeDisplay {}
 
@@ -20,12 +20,9 @@ impl From<u8> for TestPixelColor {
     }
 }
 
-impl Drawing<TestPixelColor> for FakeDisplay {
-    fn draw<T>(&mut self, _item_pixels: T)
-    where
-        T: IntoIterator<Item = Pixel<TestPixelColor>>,
-    {
-        // Noop
+impl DrawTarget<TestPixelColor> for FakeDisplay {
+    fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>)
+    { // Noop 
     }
 }
 
@@ -37,7 +34,7 @@ fn it_supports_chaining() {
         .into_iter()
         .chain(Circle::new(Point::new(2, 2), 1).into_iter());
 
-    disp.draw(chained);
+    chained.draw(&mut disp);
 }
 
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
@@ -58,7 +55,7 @@ fn return_from_fn() {
 
     let chained = multi();
 
-    disp.draw(chained);
+    chained.draw(&mut disp);
 }
 
 #[test]
@@ -69,5 +66,5 @@ fn implicit_into_iter() {
         .into_iter()
         .chain(Circle::new(Point::new(2, 2), 1));
 
-    disp.draw(chained);
+    chained.draw(&mut disp);
 }

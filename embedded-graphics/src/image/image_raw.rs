@@ -52,7 +52,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///     let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
 ///
 ///     let mut display = Display::default();
-///     display.draw(&image);
+///     image.draw(&mut display);
 /// }
 /// ```
 ///
@@ -157,10 +157,11 @@ where
     }
 }
 
-impl<'a, C, BO> Drawable for Image<'a, C, BO>
+impl<'a, C, BO> Drawable<C> for Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
+    for<'b> &'b Image<'a, C, BO>: IntoIterator<Item = Pixel<C>>,
 {
 }
 

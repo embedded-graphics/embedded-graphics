@@ -29,8 +29,8 @@ use tinytga::{Tga, TgaIterator};
 /// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
 ///
 /// // Equivalent behavior
-/// display.draw(&image);
-/// display.draw(image.into_iter());
+/// image.draw(&mut display);
+/// image.into_iter().draw(&mut display);
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C>
@@ -140,7 +140,11 @@ where
     }
 }
 
-impl<'a, C> Drawable for ImageTga<'a, C> where C: PixelColor + From<<C as PixelColor>::Raw> {}
+impl<'a, C> Drawable<C> for ImageTga<'a, C>
+where 
+    C: PixelColor + From<<C as PixelColor>::Raw> ,
+    for<'b> &'b ImageTga<'a, C>: IntoIterator<Item=Pixel<C>>,
+{}
 
 impl<'a, C> Transform for ImageTga<'a, C>
 where

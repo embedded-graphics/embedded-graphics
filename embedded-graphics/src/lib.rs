@@ -87,8 +87,8 @@
 //! let c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
 //! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
-//! display.draw(c);
-//! display.draw(t);
+//! c.draw(&mut display);
+//! t.draw(&mut display);
 //! ```
 //!
 //! ## Draw a circle and some text
@@ -106,8 +106,8 @@
 //! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
 //! let t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
-//! display.draw(c);
-//! display.draw(t);
+//! c.draw(&mut display);
+//! t.draw(&mut display);
 //! ```
 //!
 //! ## Chaining
@@ -128,7 +128,7 @@
 //!
 //! fn main() {
 //!     # let mut display = MockDisplay::default();
-//!     display.draw(build_thing("Hello Rust!"));
+//!     build_thing("Hello Rust!").draw(&mut display);
 //! }
 //! ```
 //!
@@ -188,6 +188,7 @@ use crate::pixelcolor::PixelColor;
 /// use embedded_graphics::Drawing;
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
+/// use embedded_graphics::drawable::Pixel;
 ///
 /// # struct SPI1;
 /// #
@@ -210,18 +211,13 @@ use crate::pixelcolor::PixelColor;
 ///     }
 /// }
 ///
-/// impl Drawing<Gray8> for ExampleDisplay {
+/// impl DrawTarget<Gray8> for ExampleDisplay {
 ///     /// Draw any item that can produce an iterator of `Pixel`s that have a colour defined as a `Gray8`
-///     fn draw<T>(&mut self, item: T)
-///     where
-///         T: IntoIterator<Item = Pixel<Gray8>>,
-///     {
-///         for Pixel(coord, color) in item {
-///             // Place an (x, y) pixel at the right index in the framebuffer
-///             let index = coord[0] + (coord[1] * 64);
-///
-///             self.framebuffer[index as usize] = color.luma();
-///         }
+///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) {
+///         let Pixel(coord, color) = pixel;
+///         // Place an (x, y) pixel at the right index in the framebuffer
+///         let index = coord[0] + (coord[1] * 64);
+///         self.framebuffer[index as usize] = color.luma();
 ///     }
 /// }
 ///
@@ -232,18 +228,47 @@ use crate::pixelcolor::PixelColor;
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     display.draw(egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE)));
+///     let circle = egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE));
+///     circle.draw(&mut display);
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
 /// }
 /// ```
-pub trait Drawing<C>
+pub trait DrawTarget<C>
 where
     C: PixelColor,
 {
+    /// Draw a pixel on the display
+    fn draw_pixel(&mut self, item: drawable::Pixel<C>);
+
     /// Draw an object from an iterator over its pixels
-    fn draw<T>(&mut self, item: T)
+    fn draw_iter<T>(&mut self, item: T)
     where
-        T: IntoIterator<Item = drawable::Pixel<C>>;
+        T: IntoIterator<Item = drawable::Pixel<C>>,
+    {
+        for pixel in item {
+            self.draw_pixel(pixel);
+        }
+    }
+
+    /// Draw a line primitive
+    fn draw_line(&mut self, item: &primitives::Line<C>) {
+        self.draw_iter(item);
+    }
+
+    /// Draw a triangle primitive
+    fn draw_triangle(&mut self, item: &primitives::Triangle<C>) {
+        self.draw_iter(item);
+    }
+
+    /// Draw a rectangle primitive
+    fn draw_rectangle(&mut self, item: &primitives::Rectangle<C>) {
+        self.draw_iter(item);
+    }
+
+    /// Draw a circle primitive
+    fn draw_circle(&mut self, item: &primitives::Circle<C>) {
+        self.draw_iter(item);
+    }
 }

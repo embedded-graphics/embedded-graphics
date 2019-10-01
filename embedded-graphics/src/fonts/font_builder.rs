@@ -261,10 +261,11 @@ where
     }
 }
 
-impl<'a, C: 'a, Conf: 'a> Drawable for FontBuilder<'a, C, Conf>
+impl<'a, C: 'a, Conf: 'a> Drawable<C> for FontBuilder<'a, C, Conf>
 where
     C: PixelColor,
     Conf: FontBuilderConf,
+    for<'b> &'b FontBuilder<'a, C, Conf>: IntoIterator<Item = Pixel<C>>,
 {
 }
 

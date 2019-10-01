@@ -2,6 +2,7 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
+use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
@@ -38,9 +39,9 @@ use crate::style::WithStyle;
 ///     .fill_color(Some(Rgb565::BLUE))
 ///     .translate(Point::new(65, 35));
 ///
-/// display.draw(c1);
-/// display.draw(c2);
-/// display.draw(c3);
+/// c1.draw(&mut display);
+/// c2.draw(&mut display);
+/// c3.draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Circle<C: PixelColor> {
@@ -215,7 +216,11 @@ where
     }
 }
 
-impl<C> Drawable for Circle<C> where C: PixelColor {}
+impl<C> Drawable<C> for Circle<C> where C: PixelColor {
+    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+        display.draw_circle(self);
+    }
+}
 
 impl<C> Transform for Circle<C>
 where
