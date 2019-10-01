@@ -154,9 +154,9 @@ impl BinaryDisplay {
         false
     }
 
-    /// Get coordinates of a mouse input event from the FIFO
-    pub fn get_input_event(&mut self) -> Option<SimulatorEvent> {
-        self.window.get_input_event()
+    /// Get a vector of detected input events
+    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+        self.window.get_input_events()
     }
 }
 
@@ -209,9 +209,9 @@ impl RgbDisplay {
         false
     }
 
-    /// Get coordinates of a mouse input event from the FIFO
-    pub fn get_input_event(&mut self) -> Option<SimulatorEvent> {
-        self.window.get_input_event()
+    /// Get a vector of detected input events
+    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+        self.window.get_input_events()
     }
 }
 

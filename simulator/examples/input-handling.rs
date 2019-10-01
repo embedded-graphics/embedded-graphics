@@ -1,9 +1,9 @@
 //! # Example: Input Handling
 //!
 //! This example allows you to move a red circle to the location of a click on the simulator
-//! screen. Although input handling is not a part of the embedded-graphics API, the simulator can
-//! be used to emulate input controls in order to represent more complex UI systems such as touch
-//! screens.
+//! screen, or move the circle using the arrow keys. Although input handling is not a part of the
+//! embedded-graphics API, the simulator can be used to emulate input controls in order to
+//! represent more complex UI systems such as touch screens.
 extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
@@ -40,23 +40,26 @@ fn main() {
             break;
         }
 
-        match display.get_input_event() {
-            Some(SimulatorEvent::KeyDown { keycode, .. }) => {
-                let new_position = match keycode {
-                    Some(Keycode::Left) => Point::new(position.x - KEYBOARD_DELTA, position.y),
-                    Some(Keycode::Right) => Point::new(position.x + KEYBOARD_DELTA, position.y),
-                    Some(Keycode::Up) => Point::new(position.x, position.y - KEYBOARD_DELTA),
-                    Some(Keycode::Down) => Point::new(position.x, position.y + KEYBOARD_DELTA),
-                    _ => position,
-                };
-                move_circle(&mut display, position, new_position);
-                position = new_position;
+        for event in display.get_input_events() {
+            match event {
+                SimulatorEvent::KeyDown { keycode, .. } => {
+                    let delta = match keycode {
+                        Keycode::Left => Point::new(-KEYBOARD_DELTA, 0),
+                        Keycode::Right => Point::new(KEYBOARD_DELTA, 0),
+                        Keycode::Up => Point::new(0, -KEYBOARD_DELTA),
+                        Keycode::Down => Point::new(0, KEYBOARD_DELTA),
+                        _ => Point::zero(),
+                    };
+                    let new_position = position + delta;
+                    move_circle(&mut display, position, new_position);
+                    position = new_position;
+                }
+                SimulatorEvent::MouseButtonUp { point, .. } => {
+                    move_circle(&mut display, position, point);
+                    position = point;
+                }
+                _ => {}
             }
-            Some(SimulatorEvent::MouseButtonUp { point, .. }) => {
-                move_circle(&mut display, position, point);
-                position = point;
-            }
-            _ => {}
         }
     }
 }

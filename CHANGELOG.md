@@ -6,7 +6,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- #183 Added limited mouse and keyboard handling to the simulator in order to simulate input systems such as touch screens or rotary encoders.
+- #183 Added limited mouse and keyboard event handling to the simulator in order to simulate input devices such as touch screens, buttons, or rotary encoders.
 
 - #171 Added a more complex `analog-clock` example to the simulator - [check it out](https://github.com/jamwaffles/embedded-graphics/tree/embedded-graphics-v0.6.0-alpha.3/simulator/examples/analog-clock.rs) for some more in-depth usage of Embedded Graphics.
 

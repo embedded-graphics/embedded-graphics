@@ -8,12 +8,13 @@ use sdl2::rect::Rect;
 use sdl2::render;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
+#[derive(Copy, Clone)]
 pub enum SimulatorEvent {
     /// A keypress event, fired on keyUp
     KeyUp {
-        /// The key being pressed
-        keycode: Option<Keycode>,
-        /// Any modifier being held at the time of keydown
+        /// The key being released
+        keycode: Keycode,
+        /// Any modifier being held at the time of keyup
         keymod: Mod,
         /// Whether the key is repeating
         repeat: bool,
@@ -21,7 +22,7 @@ pub enum SimulatorEvent {
     /// A keypress event, fired on keyDown
     KeyDown {
         /// The key being pressed
-        keycode: Option<Keycode>,
+        keycode: Keycode,
         /// Any modifier being held at the time of keydown
         keymod: Mod,
         /// Whether the key is repeating
@@ -29,23 +30,23 @@ pub enum SimulatorEvent {
     },
     /// A mouse click event, fired on mouseUp
     MouseButtonUp {
-        /// The mouse button being clicked
+        /// The mouse button being released
         mouse_btn: MouseButton,
-        /// The location of the click in Simulator coordinates
+        /// The location of the mouse in Simulator coordinates
         point: Point,
     },
     /// A mouse click event, fired on mouseDown
     MouseButtonDown {
-        /// The mouse button being clicked
+        /// The mouse button being pressed
         mouse_btn: MouseButton,
-        /// The location of the click in Simulator coordinates
+        /// The location of the mouse in Simulator coordinates
         point: Point,
     },
     /// A mouse wheel event
     MouseWheel {
-        /// The location of the mouse in Simulator coordinates
-        point: Point,
-        /// The direction of the wheel scroll
+        /// The scroll wheel delta in the x and y direction
+        scroll_delta: Point,
+        /// The directionality of the scroll (normal or flipped)
         direction: MouseWheelDirection,
     },
 }
@@ -140,12 +141,13 @@ impl Window {
                     repeat,
                     ..
                 } => {
-                    self.input_events.push(SimulatorEvent::KeyDown {
-                        keycode,
-                        keymod,
-                        repeat,
-                    });
-                    return false;
+                    if let Some(valid_keycode) = keycode {
+                        self.input_events.push(SimulatorEvent::KeyDown {
+                            keycode: valid_keycode,
+                            keymod,
+                            repeat,
+                        });
+                    }
                 }
                 Event::KeyUp {
                     keycode,
@@ -153,36 +155,40 @@ impl Window {
                     repeat,
                     ..
                 } => {
-                    self.input_events.push(SimulatorEvent::KeyUp {
-                        keycode,
-                        keymod,
-                        repeat,
-                    });
-                    return false;
+                    if let Some(valid_keycode) = keycode {
+                        self.input_events.push(SimulatorEvent::KeyUp {
+                            keycode: valid_keycode,
+                            keymod,
+                            repeat,
+                        });
+                    }
                 }
                 Event::MouseButtonUp {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = self.map_input_to_point((x, y));
+                    let point = map_input_to_point((x, y), self.scale, self.pixel_spacing);
                     self.input_events
                         .push(SimulatorEvent::MouseButtonUp { point, mouse_btn });
-                    return false;
                 }
                 Event::MouseButtonDown {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = self.map_input_to_point((x, y));
+                    let point = map_input_to_point((x, y), self.scale, self.pixel_spacing);
                     self.input_events
                         .push(SimulatorEvent::MouseButtonDown { point, mouse_btn });
-                    return false;
                 }
                 Event::MouseWheel {
                     x, y, direction, ..
                 } => {
-                    let point = self.map_input_to_point((x, y));
-                    self.input_events
-                        .push(SimulatorEvent::MouseWheel { point, direction });
-                    return false;
+                    let scroll_delta = if direction == MouseWheelDirection::Flipped {
+                        Point::new(-1 * x, -1 * y)
+                    } else {
+                        Point::new(x, y)
+                    };
+                    self.input_events.push(SimulatorEvent::MouseWheel {
+                        scroll_delta,
+                        direction,
+                    });
                 }
                 _ => {}
             }
@@ -191,13 +197,21 @@ impl Window {
         false
     }
 
-    pub fn get_input_event(&mut self) -> Option<SimulatorEvent> {
-        self.input_events.pop()
+    /// Return all captured input events
+    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+        let input_events = self.input_events.clone();
+        self.clear_event_queue();
+        input_events
     }
 
-    /// Convert SDL2 input event coordinates into a point on the simulator coordinate system
-    fn map_input_to_point(&self, coords: (i32, i32)) -> Point {
-        let pitch = (self.scale + self.pixel_spacing) as i32;
-        Point::new(coords.0 / pitch, coords.1 / pitch)
+    /// Clear the input event queue once events are handled
+    fn clear_event_queue(&mut self) {
+        self.input_events = vec![];
     }
+}
+
+/// Convert SDL2 input event coordinates into a point on the simulator coordinate system
+fn map_input_to_point(coords: (i32, i32), scale: usize, pixel_spacing: usize) -> Point {
+    let pitch = (scale + pixel_spacing) as i32;
+    Point::new(coords.0 / pitch, coords.1 / pitch)
 }
