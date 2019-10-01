@@ -2,6 +2,7 @@
 //!
 //! See the [module level type definitions](../index.html#types) for a list of usable fonts.
 
+use crate::DrawTarget;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::fonts::Font;
@@ -165,7 +166,7 @@ where
     }
 }
 
-impl<'a, C, Conf> IntoIterator for &'a FontBuilder<'a, C, Conf>
+impl<'a, 'b, C, Conf> IntoIterator for &'b FontBuilder<'a, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
@@ -261,11 +262,11 @@ where
     }
 }
 
-impl<'a, C: 'a, Conf: 'a> Drawable<C> for FontBuilder<'a, C, Conf>
+impl<'b, C: 'b, Conf: 'b> Drawable<C> for FontBuilder<'b, C, Conf>
 where
-    C: PixelColor,
+    C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
-    for<'b> &'b FontBuilder<'a, C, Conf>: IntoIterator<Item = Pixel<C>>,
+    for<'a> &'a Self: IntoIterator<Item=Pixel<C>>,
 {
 }
 

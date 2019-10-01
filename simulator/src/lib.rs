@@ -77,7 +77,6 @@ use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
 use embedded_graphics::prelude::*;
-use embedded_graphics::Drawing;
 
 struct PixelData<C> {
     pub width: usize,
@@ -148,17 +147,13 @@ impl BinaryDisplay {
     }
 }
 
-impl Drawing<BinaryColor> for BinaryDisplay {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = Pixel<BinaryColor>>,
+impl DrawTarget<BinaryColor> for BinaryDisplay {
+    fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>)
     {
-        for Pixel(coord, color) in item_pixels {
-            let x = coord[0] as usize;
-            let y = coord[1] as usize;
-
-            self.pixels.set(x, y, color);
-        }
+        let Pixel(coord, color) = pixel;
+        let x = coord[0] as usize;
+        let y = coord[1] as usize;
+        self.pixels.set(x, y, color);
     }
 }
 
@@ -198,19 +193,15 @@ impl RgbDisplay {
     }
 }
 
-impl<C> Drawing<C> for RgbDisplay
+impl<C> DrawTarget<C> for RgbDisplay
 where
     C: PixelColor + Into<Rgb888>,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = Pixel<C>>,
+    fn draw_pixel(&mut self, pixel: Pixel<C>)
     {
-        for Pixel(coord, color) in item_pixels {
-            let x = coord[0] as usize;
-            let y = coord[1] as usize;
-
-            self.pixels.set(x, y, color.into());
-        }
+        let Pixel(coord, color) = pixel;
+        let x = coord[0] as usize;
+        let y = coord[1] as usize;
+        self.pixels.set(x, y, color.into());
     }
 }

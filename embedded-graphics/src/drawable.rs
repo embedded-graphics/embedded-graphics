@@ -20,10 +20,10 @@ where
     }
 }
 
-impl<T, C> Drawable<C> for T
-where
-    C: PixelColor,
-    T: Iterator<Item = Pixel<C>>,
-    for <'a> &'a T: IntoIterator<Item = Pixel<C>>,
-{
-}
+// impl<C, T> Drawable<C> for T
+// where
+//     C: PixelColor,
+//     T: Iterator<Item=Pixel<C>>,
+//     for<'a> &'a T: Iterator<Item=Pixel<C>>,
+// {
+// }
