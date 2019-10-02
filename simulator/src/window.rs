@@ -8,7 +8,7 @@ use sdl2::rect::Rect;
 use sdl2::render;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum SimulatorEvent {
     /// A keypress event, fired on keyUp
     KeyUp {
@@ -180,13 +180,8 @@ impl Window {
                 Event::MouseWheel {
                     x, y, direction, ..
                 } => {
-                    let scroll_delta = if direction == MouseWheelDirection::Flipped {
-                        Point::new(-1 * x, -1 * y)
-                    } else {
-                        Point::new(x, y)
-                    };
                     self.input_events.push(SimulatorEvent::MouseWheel {
-                        scroll_delta,
+                        scroll_delta: Point::new(x, y),
                         direction,
                     });
                 }
@@ -200,13 +195,8 @@ impl Window {
     /// Return all captured input events
     pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
         let input_events = self.input_events.clone();
-        self.clear_event_queue();
+        self.input_events.clear();
         input_events
-    }
-
-    /// Clear the input event queue once events are handled
-    fn clear_event_queue(&mut self) {
-        self.input_events = vec![];
     }
 }
 
