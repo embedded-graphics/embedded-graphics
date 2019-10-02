@@ -277,7 +277,12 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     // direction: -self.direction,
                     // err: self.perp_err,
                     // err: self.err,
-                    err: 0,
+                    err: if diag == 2 {
+                        // -self.delta.y - self.delta.x
+                        -self.delta.y
+                    } else {
+                        0
+                    },
                     // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
                     current_iter: 0,
                     // width: self.width,

@@ -224,7 +224,7 @@ fn main() {
     // );
 
     display.draw(
-        Line::new(Point::new(127, 127), Point::new(250, 80))
+        Line::new(Point::new(127, 127), Point::new(250, 120))
             .stroke_color(Some(Rgb888::YELLOW))
             .fill_color(Some(Rgb888::RED))
             .into_iter(),
