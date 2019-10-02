@@ -3,7 +3,9 @@ use embedded_graphics::prelude::*;
 use embedded_graphics::{egline, fonts::Font6x8, primitives::Line, text_6x8};
 use embedded_graphics_simulator::DisplayBuilder;
 use embedded_graphics_simulator::RgbDisplay;
+use embedded_graphics_simulator::SimulatorEvent;
 use integer_sqrt::IntegerSquareRoot;
+use sdl2::keyboard::Keycode;
 use std::thread;
 use std::time::Duration;
 
@@ -223,12 +225,7 @@ fn main() {
     //         .into_iter(),
     // );
 
-    display.draw(
-        Line::new(Point::new(127, 127), Point::new(250, 120))
-            .stroke_color(Some(Rgb888::YELLOW))
-            .fill_color(Some(Rgb888::RED))
-            .into_iter(),
-    );
+    let mut position = Point::new(250, 120);
 
     loop {
         let end = display.run_once();
@@ -257,6 +254,30 @@ fn main() {
         // }
         angle += 0.1;
 
-        thread::sleep(Duration::from_millis(50));
+        display.clear();
+
+        display.draw(
+            Line::new(Point::new(127, 127), position)
+                .stroke_color(Some(Rgb888::YELLOW))
+                .fill_color(Some(Rgb888::RED))
+                .into_iter(),
+        );
+
+        for event in display.get_input_events() {
+            match event {
+                SimulatorEvent::KeyDown { keycode, .. } => {
+                    let delta = match keycode {
+                        Keycode::Left => Point::new(-1, 0),
+                        Keycode::Right => Point::new(1, 0),
+                        Keycode::Up => Point::new(0, -1),
+                        Keycode::Down => Point::new(0, 1),
+                        _ => Point::zero(),
+                    };
+                    position += delta;
+                }
+
+                _ => {}
+            }
+        }
     }
 }
