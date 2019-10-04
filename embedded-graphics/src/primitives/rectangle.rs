@@ -144,6 +144,24 @@ where
     }
 }
 
+impl<'a, C> IntoIterator for &'a mut Rectangle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = RectangleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        RectangleIterator {
+            top_left: self.top_left,
+            bottom_right: self.bottom_right,
+            style: self.style,
+            p: self.top_left,
+        }
+    }
+}
+
+
 /// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Clone, Copy)]
 pub struct RectangleIterator<C: PixelColor>
@@ -218,7 +236,7 @@ where
 }
 
 impl<C> Drawable<C> for Rectangle<C> where C: PixelColor {
-    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+    fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_rectangle(self);
     }
 }

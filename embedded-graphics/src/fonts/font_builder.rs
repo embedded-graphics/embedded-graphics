@@ -266,7 +266,7 @@ impl<'b, C: 'b, Conf: 'b> Drawable<C> for FontBuilder<'b, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
-    for<'a> &'a Self: IntoIterator<Item=Pixel<C>>,
+    for<'a> &'a mut Self: IntoIterator<Item=Pixel<C>>,
 {
 }
 

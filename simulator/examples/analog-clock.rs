@@ -35,7 +35,7 @@ fn polar(angle: f32, radius: f32) -> Point {
 }
 
 /// Draw a circle and 12 tics as a simple clock face
-fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
+fn draw_face() -> impl Iterator<Item=Pixel<BinaryColor>> {
     let tic_len = 10.0;
 
     // Use the circle macro to create the outer face

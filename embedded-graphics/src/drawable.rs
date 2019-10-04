@@ -11,19 +11,59 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 pub trait Drawable<C>
 where
     C: PixelColor,
-    for<'a> &'a Self: IntoIterator<Item = Pixel<C>>,
+    for<'a> &'a mut Self: IntoIterator<Item = Pixel<C>>,
 {
     /// Draw the graphics object. Override this method with primitive drawing methods as
     /// applicable.
-    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+    fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_iter(self);
     }
 }
 
-// impl<C, T> Drawable<C> for T
+impl<C, T> Drawable<C> for T
+where
+    C: PixelColor,
+    T: Iterator<Item=Pixel<C>>,
+    // for<'a> &'a T: Iterator<Item=Pixel<C>>,
+{
+}
+
+// /// Draw container
+// #[derive(Debug)]
+// pub struct DrawContainer<C, T>
 // where
 //     C: PixelColor,
-//     T: Iterator<Item=Pixel<C>>,
-//     for<'a> &'a T: Iterator<Item=Pixel<C>>,
+//     T: Iterator<Item=Pixel<C>>
+// {
+//     inner: T,
+// }
+
+// impl<C, T> DrawContainer<C, T>
+// where
+//     C: PixelColor,
+//     T: Iterator<Item=Pixel<C>>
+// {
+//     fn new(inner: T) -> Self {
+//         DrawContainer { inner }
+//     }
+// }
+
+// impl<C, T> IntoIterator for &DrawContainer<C, T>
+// where
+//     C: PixelColor,
+//     T: Iterator<Item=Pixel<C>>
+// {
+//     type Item = Pixel<C>;
+//     type IntoIterator = Iterator<Item=Pixel<C>>;
+
+//     fn into_iter(self) -> Iterator<Item=Self::Item> {
+
+//     }
+// }
+
+// impl<C, T> Drawable<C> for DrawContainer<C, T>
+// where
+//     C: PixelColor,
+//     T: Iterator<Item=Pixel<C>>
 // {
 // }

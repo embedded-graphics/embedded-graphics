@@ -158,6 +158,39 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     }
 }
 
+impl<'a, C: PixelColor> IntoIterator for &'a mut Line<C> {
+    type Item = Pixel<C>;
+    type IntoIter = LineIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut delta = self.end - self.start;
+        if delta.x < 0 {
+            delta = Point::new(-delta.x, delta.y);
+        }
+        if delta.y > 0 {
+            delta = Point::new(delta.x, -delta.y);
+        }
+
+        let direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+            (false, false) => Point::new(1, 1),
+            (false, true) => Point::new(1, -1),
+            (true, false) => Point::new(-1, 1),
+            (true, true) => Point::new(-1, -1),
+        };
+
+        LineIterator {
+            style: self.style,
+
+            start: self.start,
+            end: self.end,
+            delta,
+            direction,
+            err: delta.x + delta.y,
+            stop: self.start == self.end, // if line length is zero, draw nothing
+        }
+    }
+}
+
 /// Pixel iterator for each pixel in the line
 #[derive(Debug, Clone, Copy)]
 pub struct LineIterator<C>
@@ -207,7 +240,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 }
 
 impl<C> Drawable<C> for Line<C> where C: PixelColor {
-    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+    fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_line(self);
     }
 }

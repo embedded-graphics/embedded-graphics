@@ -40,12 +40,11 @@ fn main() {
     .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
     .draw(&mut display);
 
-    
     egrectangle!((0, 0), (64, 64), stroke_color = Some(BinaryColor::On))
         .translate(Point::new(96, 0))
-        .draw(&mut display)
+        .draw(&mut display);
 
-    &egrectangle!(
+    egrectangle!(
         (0, 0),
         (64, 64),
         stroke_color = Some(BinaryColor::Off),

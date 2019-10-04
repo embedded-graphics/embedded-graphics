@@ -161,7 +161,7 @@ impl<'a, C, BO> Drawable<C> for Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
-    for<'b> &'b Image<'a, C, BO>: IntoIterator<Item = Pixel<C>>,
+    for<'b> &'b mut Image<'a, C, BO>: IntoIterator<Item = Pixel<C>>,
 {
 }
 

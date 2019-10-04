@@ -148,6 +148,24 @@ where
     }
 }
 
+impl<'a, C> IntoIterator for &'a mut Circle<C>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = CircleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        CircleIterator {
+            center: self.center,
+            radius: self.radius,
+            style: self.style,
+            p: Point::new(-(self.radius as i32), -(self.radius as i32)),
+        }
+    }
+}
+
+
 /// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
 pub struct CircleIterator<C: PixelColor> {
@@ -217,7 +235,7 @@ where
 }
 
 impl<C> Drawable<C> for Circle<C> where C: PixelColor {
-    fn draw<T: DrawTarget<C>>(&self, display: &mut T) {
+    fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_circle(self);
     }
 }

@@ -86,8 +86,9 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a ImageTga<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b ImageTga<'a, C>
 where
+    'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
@@ -143,7 +144,7 @@ where
 impl<'a, C> Drawable<C> for ImageTga<'a, C>
 where 
     C: PixelColor + From<<C as PixelColor>::Raw> ,
-    for<'b> &'b ImageTga<'a, C>: IntoIterator<Item=Pixel<C>>,
+    for<'b> &'b mut ImageTga<'a, C>: IntoIterator<Item=Pixel<C>>,
 {}
 
 impl<'a, C> Transform for ImageTga<'a, C>

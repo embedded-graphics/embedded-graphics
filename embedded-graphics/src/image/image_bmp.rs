@@ -124,12 +124,13 @@ where
 impl<'a, C> Drawable<C> for ImageBmp<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
-    for<'b> &'b ImageBmp<'a, C>: IntoIterator<Item = Pixel<C>>,
+    for<'b> &'b mut ImageBmp<'a, C>: IntoIterator<Item = Pixel<C>>,
 {
 }
 
-impl<'a, C> IntoIterator for &'a ImageBmp<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b ImageBmp<'a, C>
 where
+    'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
@@ -349,7 +350,7 @@ mod tests {
             ImageBmp::new(include_bytes!("../../tests/issue_136.bmp")).unwrap();
 
         let mut display = MockDisplay::new();
-        display.draw(image.into_iter().map(|Pixel(p, c)| {
+        image.into_iter().map(|Pixel(p, c)| {
             Pixel(
                 p,
                 match c {
@@ -358,7 +359,7 @@ mod tests {
                     _ => panic!("Unexpected color in image"),
                 },
             )
-        }));
+        }).draw(&mut display);
 
         assert_eq!(
             display,
