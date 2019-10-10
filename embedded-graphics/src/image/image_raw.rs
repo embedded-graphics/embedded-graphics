@@ -1,3 +1,4 @@
+use crate::DrawTarget;
 use crate::drawable::{Drawable, Pixel};
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter};
@@ -231,6 +232,9 @@ where
     BO: ByteOrder,
     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
+    fn draw<D: DrawTarget<C>>(&'a mut self, display: &mut D) {
+        display.draw_iter(self.into_iter());
+    }
 }
 
 #[derive(Debug)]

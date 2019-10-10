@@ -4,6 +4,7 @@ use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{LittleEndian, RawData, RawDataIter};
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
+use crate::DrawTarget;
 use core::marker::PhantomData;
 use tinybmp::Bmp;
 
@@ -213,9 +214,13 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<'a, C> for ImageBmp<'a, C> where
-    C: PixelColor + From<<C as PixelColor>::Raw>
+impl<'a, C: 'a> Drawable<'a, C> for ImageBmp<'a, C>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
+    fn draw<D: DrawTarget<C>>(&'a mut self, display: &mut D) {
+        display.draw_iter(self.into_iter());
+    }
 }
 
 #[cfg(test)]

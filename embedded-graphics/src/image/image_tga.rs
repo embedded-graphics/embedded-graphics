@@ -1,6 +1,7 @@
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
 use super::ImageFile;
+use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::RawData;
 use crate::pixelcolor::PixelColor;
@@ -139,6 +140,9 @@ where
 impl<'a, C: 'a> Drawable<'a, C> for ImageTga<'a, C> where
     C: PixelColor + From<<C as PixelColor>::Raw>
 {
+    fn draw<D: DrawTarget<C>>(&'a mut self, display: &mut D) {
+        display.draw_iter(self.into_iter());
+    }
 }
 
 impl<'a, C> Transform for ImageTga<'a, C>
