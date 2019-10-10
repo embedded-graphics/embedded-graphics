@@ -19,9 +19,13 @@ const KEYBOARD_DELTA: i32 = 20;
 
 fn move_circle(display: &mut RgbDisplay, old_center: Point, new_center: Point) {
     // Clear old circle
-    display.draw(Circle::new(old_center, 100).fill_color(BACKGROUND_COLOR));
+    Circle::new(old_center, 100)
+        .fill_color(BACKGROUND_COLOR)
+        .draw(display);
     // Draw circle at new location
-    display.draw(Circle::new(new_center, 100).fill_color(FOREGROUND_COLOR));
+    Circle::new(new_center, 100)
+        .fill_color(FOREGROUND_COLOR)
+        .draw(display);
 }
 
 fn main() {
@@ -31,7 +35,9 @@ fn main() {
         .build_rgb();
 
     let mut position = Point::new(200, 200);
-    display.draw(Circle::new(position, 100).fill_color(FOREGROUND_COLOR));
+    Circle::new(position, 100)
+        .fill_color(FOREGROUND_COLOR)
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

@@ -43,9 +43,9 @@ mod tests {
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
+    use crate::prelude::*;
     use crate::style::WithStyle;
     use crate::transform::Transform;
-    use crate::Drawing;
 
     const WIDTH: usize = Font24x32Conf::CHAR_WIDTH as usize;
     const HEIGHT: usize = Font24x32Conf::CHAR_HEIGHT as usize;
@@ -84,7 +84,9 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("Mm").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str("Mm")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -124,7 +126,9 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str(" ~").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str(" ~")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -144,7 +148,9 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("$y").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str("$y")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -219,19 +225,27 @@ mod tests {
         ]);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("\0\n").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str("\0\n")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("\x7F\u{A0}").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str("\x7F\u{A0}")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("¡ÿ").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str("¡ÿ")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        display.draw(Font24x32::render_str("Ā💣").stroke_color(Some(BinaryColor::On)));
+        Font24x32::render_str("Ā💣")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
     }
 }
