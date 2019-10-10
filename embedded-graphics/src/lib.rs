@@ -84,8 +84,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
-//! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let mut c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
+//! let mut t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -103,8 +103,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
-//! let t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let mut c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
+//! let mut t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -185,7 +185,7 @@ use crate::pixelcolor::PixelColor;
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::Drawing;
+/// use embedded_graphics::DrawTarget;
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// use embedded_graphics::drawable::Pixel;
@@ -228,7 +228,7 @@ use crate::pixelcolor::PixelColor;
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     let circle = egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE));
+///     let mut circle = egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE));
 ///     circle.draw(&mut display);
 ///
 ///     // Update the display

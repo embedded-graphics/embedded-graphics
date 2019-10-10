@@ -129,10 +129,10 @@ where
     /// fn main() {
     ///     let mut disp = Display::default();
     ///     // Render a string with a red stroke
-    ///     let text = Font6x8::render_str("Hello world")
+    ///     let mut text = Font6x8::render_str("Hello world")
     ///         .style(Style::stroke_color(Rgb565::RED));
     ///
-    ///     disp.draw(text);
+    ///     text.draw(&mut disp);
     /// }
     /// ```
     fn render_str(chars: &'a str) -> Self;

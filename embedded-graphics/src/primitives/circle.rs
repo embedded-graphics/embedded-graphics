@@ -2,12 +2,12 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
-use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
+use crate::DrawTarget;
 
 /// Circle primitive
 ///
@@ -25,16 +25,16 @@ use crate::style::WithStyle;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default circle with only a stroke centered around (10, 20) with a radius of 30
-/// let c1 = Circle::new(Point::new(10, 20), 30);
+/// let mut c1 = Circle::new(Point::new(10, 20), 30);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
-/// let c2 = Circle::new(Point::new(50, 20), 30)
+/// let mut c2 = Circle::new(Point::new(50, 20), 30)
 ///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
 ///     .fill_color(Some(Rgb565::GREEN));
 ///
 /// // Circle with no stroke and a translation applied
-/// let c3 = Circle::new(Point::new(10, 20), 30)
+/// let mut c3 = Circle::new(Point::new(10, 20), 30)
 ///     .stroke_color(None)
 ///     .fill_color(Some(Rgb565::BLUE))
 ///     .translate(Point::new(65, 35));
@@ -165,7 +165,6 @@ where
     }
 }
 
-
 /// Pixel iterator for each pixel in the circle border
 #[derive(Debug, Copy, Clone)]
 pub struct CircleIterator<C: PixelColor> {
@@ -234,7 +233,10 @@ where
     }
 }
 
-impl<C> Drawable<C> for Circle<C> where C: PixelColor {
+impl<'a, C: 'a> Drawable<'a, C> for Circle<C>
+where
+    C: PixelColor,
+{
     fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_circle(self);
     }

@@ -2,13 +2,13 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
-use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::line::{Line, LineIterator};
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
+use crate::DrawTarget;
 
 /// Triangle primitive
 ///
@@ -26,14 +26,14 @@ use crate::style::WithStyle;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default triangle with no styling
-/// let t1 = Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60));
+/// let mut t1 = Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60));
 ///
 /// // Triangle with styled stroke from (50, 20) to (60, 35)
-/// let t2 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
+/// let mut t2 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .stroke_color(Some(Rgb565::RED));
 ///
 /// // Triangle with translation applied
-/// let t3 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
+/// let mut t3 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .translate(Point::new(65, 35));
 ///
 /// t1.draw(&mut display);
@@ -360,7 +360,10 @@ where
     }
 }
 
-impl<C> Drawable<C> for Triangle<C> where C: PixelColor {
+impl<'a, C: 'a> Drawable<'a, C> for Triangle<C>
+where
+    C: PixelColor,
+{
     fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_triangle(self);
     }

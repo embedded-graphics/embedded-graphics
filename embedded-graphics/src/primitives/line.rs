@@ -2,12 +2,12 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
-use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
+use crate::DrawTarget;
 
 /// Line primitive
 ///
@@ -25,14 +25,14 @@ use crate::style::WithStyle;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default line from (10, 20) to (30, 40)
-/// let l1 = Line::new(Point::new(10, 20), Point::new(30, 40));
+/// let mut l1 = Line::new(Point::new(10, 20), Point::new(30, 40));
 ///
 /// // Line with styled stroke from (50, 20) to (60, 35)
-/// let l2 = Line::new(Point::new(50, 20), Point::new(60, 35))
+/// let mut l2 = Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .stroke_color(Some(Rgb565::RED));
 ///
 /// // Line with translation applied
-/// let l3 = Line::new(Point::new(50, 20), Point::new(60, 35))
+/// let mut l3 = Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35));
 ///
 /// l1.draw(&mut display);
@@ -239,7 +239,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     }
 }
 
-impl<C> Drawable<C> for Line<C> where C: PixelColor {
+impl<'a, C: 'a> Drawable<'a, C> for Line<C>
+where
+    C: PixelColor,
+{
     fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_line(self);
     }

@@ -260,7 +260,7 @@ where
     }
 }
 
-impl<'b, C: 'b, Conf: 'b> Drawable<C> for FontBuilder<'b, C, Conf>
+impl<'a, C: 'a, Conf: 'a> Drawable<'a, C> for FontBuilder<'a, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,

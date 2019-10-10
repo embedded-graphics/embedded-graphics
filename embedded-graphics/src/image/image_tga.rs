@@ -15,9 +15,6 @@ use tinytga::{Tga, TgaIterator};
 ///
 /// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
 ///
-/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
-/// `.into_iter()` on them, unlike other embedded_graphics objects.
-///
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::ImageTga;
@@ -26,11 +23,9 @@ use tinytga::{Tga, TgaIterator};
 /// # let mut display: MockDisplay<Rgb888> = MockDisplay::default();
 ///
 /// // Load `patch.tga`, a 32BPP 4x4px image
-/// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
+/// let mut image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
 ///
-/// // Equivalent behavior
 /// image.draw(&mut display);
-/// image.into_iter().draw(&mut display);
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C>
@@ -86,17 +81,17 @@ where
     }
 }
 
-impl<'a, 'b, C> IntoIterator for &'b ImageTga<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b mut ImageTga<'a, C>
 where
     'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
-    type IntoIter = ImageTgaIterator<'a, C>;
+    type IntoIter = ImageTgaIterator<'a, 'b, C>;
 
     // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
-        ImageTgaIterator {
+        Self::IntoIter {
             im: self,
             image_data: self.tga.into_iter(),
             x: 0,
@@ -106,17 +101,17 @@ where
 }
 
 #[derive(Debug)]
-pub struct ImageTgaIterator<'a, C: 'a>
+pub struct ImageTgaIterator<'a, 'b, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     x: u32,
     y: u32,
-    im: &'a ImageTga<'a, C>,
+    im: &'b ImageTga<'a, C>,
     image_data: TgaIterator<'a>,
 }
 
-impl<'a, C> Iterator for ImageTgaIterator<'a, C>
+impl<'a, 'b, C> Iterator for ImageTgaIterator<'a, 'b, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
@@ -141,11 +136,10 @@ where
     }
 }
 
-impl<'a, C> Drawable<C> for ImageTga<'a, C>
-where 
-    C: PixelColor + From<<C as PixelColor>::Raw> ,
-    for<'b> &'b mut ImageTga<'a, C>: IntoIterator<Item=Pixel<C>>,
-{}
+impl<'a, C: 'a> Drawable<'a, C> for ImageTga<'a, C> where
+    C: PixelColor + From<<C as PixelColor>::Raw>
+{
+}
 
 impl<'a, C> Transform for ImageTga<'a, C>
 where
@@ -194,7 +188,8 @@ mod tests {
 
     #[test]
     fn chessboard_compressed() -> Result<(), ()> {
-        let im: ImageTga<Rgb888> = ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
+        let mut im: ImageTga<Rgb888> =
+            ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
 
         let mut pixels = im.into_iter();
 
@@ -215,7 +210,8 @@ mod tests {
 
     #[test]
     fn chessboard_uncompressed() -> Result<(), ()> {
-        let im: ImageTga<Rgb888> = ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
+        let mut im: ImageTga<Rgb888> =
+            ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
 
         let mut pixels = im.into_iter();
 

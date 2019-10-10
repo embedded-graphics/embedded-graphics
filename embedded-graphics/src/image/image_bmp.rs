@@ -26,11 +26,11 @@ use tinybmp::Bmp;
 /// # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 ///
 /// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
-/// let image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
+/// let mut image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
 ///
 /// // Equivalent behavior
-/// image.draw(&mut display);
 /// image.into_iter().draw(&mut display);
+/// image.draw(&mut display);
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C>
@@ -121,14 +121,31 @@ where
     }
 }
 
-impl<'a, C> Drawable<C> for ImageBmp<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b ImageBmp<'a, C>
 where
+    'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
-    for<'b> &'b mut ImageBmp<'a, C>: IntoIterator<Item = Pixel<C>>,
 {
+    type Item = Pixel<C>;
+    type IntoIter = ImageBmpIterator<'a, C>;
+
+    // NOTE: `self` is a reference already, no copies here!
+    fn into_iter(self) -> Self::IntoIter {
+        // Check that image bpp is equal to required bpp for `C`.
+        if self.bmp.bpp() as usize != C::Raw::BITS_PER_PIXEL {
+            panic!("invalid bits per pixel");
+        }
+
+        ImageBmpIterator {
+            data: RawDataIter::new(self.bmp.image_data()),
+            x: 0,
+            y: 0,
+            image: self,
+        }
+    }
 }
 
-impl<'a, 'b, C> IntoIterator for &'b ImageBmp<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b mut ImageBmp<'a, C>
 where
     'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -196,12 +213,16 @@ where
     }
 }
 
+impl<'a, C: 'a> Drawable<'a, C> for ImageBmp<'a, C> where
+    C: PixelColor + From<<C as PixelColor>::Raw>
+{
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor};
-    use crate::DrawTarget;
 
     #[test]
     fn negative_top_left() {
@@ -237,6 +258,11 @@ mod tests {
         ))
         .unwrap()
         .translate(Point::new(-1, -1));
+
+        {
+            assert_eq!(image.into_iter().count(), 9);
+        }
+
         let it = image.into_iter();
 
         let expected: [Pixel<Rgb565>; 9] = [
@@ -252,8 +278,6 @@ mod tests {
             Pixel(Point::new(1, 2), Rgb565::BLACK),
             Pixel(Point::new(2, 2), Rgb565::WHITE),
         ];
-
-        assert_eq!(image.into_iter().count(), 9);
 
         for (idx, pixel) in it.enumerate() {
             assert_eq!(pixel, expected[idx]);
@@ -272,7 +296,7 @@ mod tests {
 
     macro_rules! test_pattern {
         ($color_type:ident, $image_data:expr) => {
-            let image: ImageBmp<$color_type> = ImageBmp::new($image_data).unwrap();
+            let mut image: ImageBmp<$color_type> = ImageBmp::new($image_data).unwrap();
 
             let pattern = create_color_pattern();
 
@@ -321,7 +345,7 @@ mod tests {
 
     #[test]
     fn colors_grey8() {
-        let image: ImageBmp<Gray8> =
+        let mut image: ImageBmp<Gray8> =
             ImageBmp::new(include_bytes!("../../tests/colors_grey8.bmp")).unwrap();
 
         assert_eq!(image.size(), Size::new(3, 1));
@@ -346,20 +370,23 @@ mod tests {
     /// Test for issue #136
     #[test]
     fn issue_136_row_size_is_multiple_of_4_bytes() {
-        let image: ImageBmp<Rgb565> =
+        let mut image: ImageBmp<Rgb565> =
             ImageBmp::new(include_bytes!("../../tests/issue_136.bmp")).unwrap();
 
         let mut display = MockDisplay::new();
-        image.into_iter().map(|Pixel(p, c)| {
-            Pixel(
-                p,
-                match c {
-                    Rgb565::BLACK => BinaryColor::Off,
-                    Rgb565::WHITE => BinaryColor::On,
-                    _ => panic!("Unexpected color in image"),
-                },
-            )
-        }).draw(&mut display);
+        image
+            .into_iter()
+            .map(|Pixel(p, c)| {
+                Pixel(
+                    p,
+                    match c {
+                        Rgb565::BLACK => BinaryColor::Off,
+                        Rgb565::WHITE => BinaryColor::On,
+                        _ => panic!("Unexpected color in image"),
+                    },
+                )
+            })
+            .draw(&mut display);
 
         assert_eq!(
             display,

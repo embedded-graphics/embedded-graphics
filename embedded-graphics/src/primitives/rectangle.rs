@@ -2,12 +2,12 @@
 
 use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
-use crate::DrawTarget;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
+use crate::DrawTarget;
 
 /// Rectangle primitive
 ///
@@ -25,16 +25,16 @@ use crate::style::WithStyle;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
-/// let r1 = Rectangle::new(Point::new(10, 20), Point::new(30, 40));
+/// let mut r1 = Rectangle::new(Point::new(10, 20), Point::new(30, 40));
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
-/// let r2 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+/// let mut r2 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
 ///     .fill_color(Some(Rgb565::GREEN));
 ///
 /// // Rectangle with translation applied
-/// let r3 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+/// let mut r3 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35));
 ///
 /// r1.draw(&mut display);
@@ -161,7 +161,6 @@ where
     }
 }
 
-
 /// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Clone, Copy)]
 pub struct RectangleIterator<C: PixelColor>
@@ -235,7 +234,10 @@ where
     }
 }
 
-impl<C> Drawable<C> for Rectangle<C> where C: PixelColor {
+impl<'a, C: 'a> Drawable<'a, C> for Rectangle<C>
+where
+    C: PixelColor,
+{
     fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
         display.draw_rectangle(self);
     }
