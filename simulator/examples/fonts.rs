@@ -13,7 +13,9 @@ fn main() {
         .build_binary();
 
     // Show smallest font with black font on white background (default value for fonts)
-    Font6x8::render_str("Hello World! - default style 6x8").translate(Point::new(15, 15)).draw(&mut display);
+    Font6x8::render_str("Hello World! - default style 6x8")
+        .translate(Point::new(15, 15))
+        .draw(&mut display);
 
     // Show smallest font with white font on black background
     Font6x8::render_str("Hello World! - inverse 6x8")
@@ -32,13 +34,19 @@ fn main() {
     .draw(&mut display);
 
     // Show 6x12 Font
-    Font6x12::render_str("Hello 6x12!").translate(Point::new(15, 55)).draw(&mut display);
+    Font6x12::render_str("Hello 6x12!")
+        .translate(Point::new(15, 55))
+        .draw(&mut display);
 
     // Show 8x16 Font
-    Font8x16::render_str("Hello 8x16!").translate(Point::new(15, 80)).draw(&mut display);
+    Font8x16::render_str("Hello 8x16!")
+        .translate(Point::new(15, 80))
+        .draw(&mut display);
 
     // Show 12x16 Font using a macro
-    text_12x16!("Hello 12x16!").translate(Point::new(15, 105)).draw(&mut display);
+    text_12x16!("Hello 12x16!")
+        .translate(Point::new(15, 105))
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

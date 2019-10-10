@@ -12,7 +12,7 @@ fn main() {
         .scale(4)
         .build_binary();
 
-// Outline
+    // Outline
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))
         .stroke_color(Some(BinaryColor::On))
         .translate(Point::new(-8, -8))

@@ -148,8 +148,7 @@ impl BinaryDisplay {
 }
 
 impl DrawTarget<BinaryColor> for BinaryDisplay {
-    fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>)
-    {
+    fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>) {
         let Pixel(coord, color) = pixel;
         let x = coord[0] as usize;
         let y = coord[1] as usize;
@@ -197,8 +196,7 @@ impl<C> DrawTarget<C> for RgbDisplay
 where
     C: PixelColor + Into<Rgb888>,
 {
-    fn draw_pixel(&mut self, pixel: Pixel<C>)
-    {
+    fn draw_pixel(&mut self, pixel: Pixel<C>) {
         let Pixel(coord, color) = pixel;
         let x = coord[0] as usize;
         let y = coord[1] as usize;

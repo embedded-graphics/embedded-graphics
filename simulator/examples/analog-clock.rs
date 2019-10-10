@@ -35,7 +35,7 @@ fn polar(angle: f32, radius: f32) -> Point {
 }
 
 /// Draw a circle and 12 tics as a simple clock face
-fn draw_face() -> impl Iterator<Item=Pixel<BinaryColor>> {
+fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     let tic_len = 10.0;
 
     // Use the circle macro to create the outer face
@@ -163,7 +163,9 @@ fn main() {
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
-        Circle::new(CENTER, 4).fill_color(Some(BinaryColor::On)).draw(&mut display);
+        Circle::new(CENTER, 4)
+            .fill_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         let end = display.run_once();
 

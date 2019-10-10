@@ -230,7 +230,8 @@ where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
-{ }
+{
+}
 
 #[derive(Debug)]
 pub struct ImageIterator<'a, C, BO>

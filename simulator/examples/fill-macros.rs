@@ -20,7 +20,8 @@ fn main() {
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::On)
-    ).draw(&mut display);
+    )
+    .draw(&mut display);
 
     egcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),
@@ -49,8 +50,9 @@ fn main() {
         (64, 64),
         stroke_color = Some(BinaryColor::Off),
         fill_color = Some(BinaryColor::On)
-    ).translate(Point::new(96 + 16, 16))
-     .draw(&mut display);
+    )
+    .translate(Point::new(96 + 16, 16))
+    .draw(&mut display);
 
     egrectangle!(
         (0, 0),

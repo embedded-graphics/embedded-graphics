@@ -21,8 +21,7 @@ impl From<u8> for TestPixelColor {
 }
 
 impl DrawTarget<TestPixelColor> for FakeDisplay {
-    fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>)
-    { // Noop 
+    fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>) { // Noop
     }
 }
 

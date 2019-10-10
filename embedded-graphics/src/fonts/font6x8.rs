@@ -39,11 +39,11 @@ pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use crate::fonts::Font;
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
+    use crate::prelude::*;
     use crate::style::WithStyle;
     use crate::transform::Transform;
 
@@ -81,7 +81,9 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("Mm").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str("Mm")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -151,7 +153,9 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str(" ~").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str(" ~")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -171,7 +175,9 @@ mod tests {
     #[test]
     fn no_fill_doesnt_hang() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str(" ").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str(" ")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(display, MockDisplay::new());
     }
@@ -179,7 +185,9 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("$y").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str("$y")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -199,7 +207,9 @@ mod tests {
     #[test]
     fn correct_latin1() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("¡ÿ").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str("¡ÿ")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -230,15 +240,21 @@ mod tests {
         ]);
 
         let mut display = MockDisplay::new();
-        Font6x8::render_str("\0\n").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str("\0\n")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x8::render_str("\x7F\u{A0}").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str("\x7F\u{A0}")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x8::render_str("Ā💣").stroke_color(Some(BinaryColor::On)).draw(&mut display);
+        Font6x8::render_str("Ā💣")
+            .stroke_color(Some(BinaryColor::On))
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
     }
 }
