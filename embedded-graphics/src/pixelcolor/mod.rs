@@ -53,11 +53,11 @@
 //! }
 //! ```
 //!
-//! The implementation of the [`Drawing`] trait uses a `match` statement to
+//! The implementation of the [`DrawTarget`] trait uses a `match` statement to
 //! draw the specified color and doesn't depend on the raw data conversions,
 //! see the [`raw` module] documentation for an example that uses this feature.
 //!
-//! [`Drawing`]: ../trait.Drawing.html
+//! [`DrawTarget`]: ../trait.DrawTarget.html
 //! [`PixelColor`]: trait.PixelColor.html
 //! [`Raw`]: trait.PixelColor.html#associatedtype.Raw
 //! [`raw` module]: raw/index.html

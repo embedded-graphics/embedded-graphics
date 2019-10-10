@@ -41,7 +41,7 @@ fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
         .stroke_color(Some(1u8.into()))
         .into_iter();
 
-    let mut circle = Circle::new(Point::new(5, 5), 3)
+    let circle = Circle::new(Point::new(5, 5), 3)
         .stroke_color(Some(1u8.into()))
         .into_iter();
 

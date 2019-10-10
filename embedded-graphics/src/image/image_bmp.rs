@@ -301,7 +301,7 @@ mod tests {
 
     macro_rules! test_pattern {
         ($color_type:ident, $image_data:expr) => {
-            let mut image: ImageBmp<$color_type> = ImageBmp::new($image_data).unwrap();
+            let image: ImageBmp<$color_type> = ImageBmp::new($image_data).unwrap();
 
             let pattern = create_color_pattern();
 
@@ -350,7 +350,7 @@ mod tests {
 
     #[test]
     fn colors_grey8() {
-        let mut image: ImageBmp<Gray8> =
+        let image: ImageBmp<Gray8> =
             ImageBmp::new(include_bytes!("../../tests/colors_grey8.bmp")).unwrap();
 
         assert_eq!(image.size(), Size::new(3, 1));
@@ -375,7 +375,7 @@ mod tests {
     /// Test for issue #136
     #[test]
     fn issue_136_row_size_is_multiple_of_4_bytes() {
-        let mut image: ImageBmp<Rgb565> =
+        let image: ImageBmp<Rgb565> =
             ImageBmp::new(include_bytes!("../../tests/issue_136.bmp")).unwrap();
 
         let mut display = MockDisplay::new();
