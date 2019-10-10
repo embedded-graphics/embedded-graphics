@@ -1,6 +1,7 @@
 use crate::fonts::font_builder::{FontBuilder, FontBuilderConf};
 
 #[derive(Debug, Copy, Clone)]
+/// Config for 6x8 font
 pub enum Font6x8Conf {}
 impl FontBuilderConf for Font6x8Conf {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font6x8_1bpp.raw");
