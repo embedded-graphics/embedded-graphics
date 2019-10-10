@@ -36,7 +36,7 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::{egcircle, egline, text_6x8};
 //! use embedded_graphics::pixelcolor::BinaryColor;
-//! use embedded_graphics_simulator::{DisplayBuilder, BinaryColorTheme};
+//! use embedded_graphics_simulator::{DisplayBuilder, BinaryColorTheme, SimulatorEvent};
 //! use std::thread;
 //! use std::time::Duration;
 //!
@@ -60,6 +60,11 @@
 //!             break;
 //!         }
 //!
+//!         for event in display.get_input_events() {
+//!             if let SimulatorEvent::MouseButtonUp { point, ..} = event {
+//!                 println!("Click event at ({}, {})", point.x, point.y);
+//!             }
+//!         }
 //!         thread::sleep(Duration::from_millis(200));
 //!     }
 //! }
@@ -73,6 +78,7 @@ mod window;
 
 pub use crate::display_builder::DisplayBuilder;
 pub use crate::display_theme::BinaryColorTheme;
+pub use crate::window::SimulatorEvent;
 use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
@@ -145,6 +151,11 @@ impl BinaryDisplay {
         self.window.present();
         false
     }
+
+    /// Get a vector of detected input events
+    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+        self.window.get_input_events()
+    }
 }
 
 impl DrawTarget<BinaryColor> for BinaryDisplay {
@@ -189,6 +200,11 @@ impl RgbDisplay {
 
         self.window.present();
         false
+    }
+
+    /// Get a vector of detected input events
+    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+        self.window.get_input_events()
     }
 }
 

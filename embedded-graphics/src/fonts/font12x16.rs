@@ -43,33 +43,36 @@ mod tests {
     use crate::style::WithStyle;
     use crate::transform::Transform;
 
-    #[test]
-    fn off_screen_text_does_not_infinite_loop() {
-        let text: Font12x16<BinaryColor> = Font12x16::render_str("Hello World!")
-            .stroke_color(Some(BinaryColor::On))
-            .fill_color(Some(BinaryColor::Off))
-            .translate(Point::new(5, -20));
-
-        assert_eq!(text.into_iter().count(), 12 * 16 * "Hello World!".len());
-    }
+    const WIDTH: usize = Font12x16Conf::CHAR_WIDTH as usize;
+    const HEIGHT: usize = Font12x16Conf::CHAR_HEIGHT as usize;
+    const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
     fn text_dimensions() {
-        let hello: Font12x16<BinaryColor> = Font12x16::render_str("Hello World!");
+        let hello: Font12x16<BinaryColor> = Font12x16::render_str(HELLO_WORLD);
         let empty: Font12x16<BinaryColor> = Font12x16::render_str("");
 
-        assert_eq!(hello.size(), Size::new(144, 16));
+        assert_eq!(
+            hello.size(),
+            Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32)
+        );
         assert_eq!(empty.size(), Size::new(0, 0));
     }
 
     #[test]
     fn text_corners() {
         let hello: Font12x16<BinaryColor> =
-            Font12x16::render_str("Hello World!").translate(Point::new(5, -20));
+            Font12x16::render_str(HELLO_WORLD).translate(Point::new(5, -20));
         let empty: Font12x16<BinaryColor> = Font12x16::render_str("").translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
-        assert_eq!(hello.bottom_right(), Point::new(144 + 5, 16 - 20));
+        assert_eq!(
+            hello.bottom_right(),
+            Point::new(
+                ((HELLO_WORLD.len() * WIDTH) as i32) + 5,
+                (HEIGHT as i32) - 20
+            )
+        );
         assert_eq!(empty.top_left(), Point::new(10, 20));
         assert_eq!(empty.bottom_right(), Point::new(10, 20));
     }
