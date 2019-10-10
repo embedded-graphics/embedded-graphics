@@ -1,8 +1,6 @@
 //! Common code used to define available monospace pixel fonts.
 //!
 //! See the [module level type definitions](../index.html#types) for a list of usable fonts.
-
-use crate::DrawTarget;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::fonts::Font;
@@ -166,7 +164,7 @@ where
     }
 }
 
-impl<'a, 'b, C, Conf> IntoIterator for &'b FontBuilder<'a, C, Conf>
+impl<'a, 'b, C, Conf> IntoIterator for &mut FontBuilder<'a, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
@@ -266,7 +264,6 @@ impl<'b, C: 'b, Conf: 'b> Drawable<C> for FontBuilder<'b, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
-    for<'a> &'a mut Self: IntoIterator<Item=Pixel<C>>,
 {
 }
 

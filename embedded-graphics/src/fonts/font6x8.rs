@@ -39,13 +39,13 @@ pub type Font6x8<'a, C> = FontBuilder<'a, C, Font6x8Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::prelude::*;
     use crate::fonts::Font;
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::WithStyle;
     use crate::transform::Transform;
-    use crate::DrawTarget;
 
     #[test]
     fn text_with_negative_y_does_not_infinite_loop() {
@@ -125,18 +125,16 @@ mod tests {
     #[test]
     fn compare_inverse_coloured_m() {
         let mut display_inverse = MockDisplay::new();
-        display_inverse.draw(
-            Font6x8::render_str("Mm")
-                .stroke_color(Some(BinaryColor::Off))
-                .fill_color(Some(BinaryColor::On)),
-        );
+        Font6x8::render_str("Mm")
+            .stroke_color(Some(BinaryColor::Off))
+            .fill_color(Some(BinaryColor::On))
+            .draw(&mut display_inverse);
 
         let mut display_normal = MockDisplay::new();
-        display_normal.draw(
-            Font6x8::render_str("Mm")
-                .stroke_color(Some(BinaryColor::On))
-                .fill_color(Some(BinaryColor::Off)),
-        );
+        Font6x8::render_str("Mm")
+            .stroke_color(Some(BinaryColor::On))
+            .fill_color(Some(BinaryColor::Off))
+            .draw(&mut display_normal);
 
         for y in 0..display_inverse.height() {
             for x in 0..display_inverse.width() {

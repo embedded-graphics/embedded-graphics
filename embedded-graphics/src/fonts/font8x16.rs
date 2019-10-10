@@ -38,13 +38,13 @@ pub type Font8x16<'a, C> = FontBuilder<'a, C, Font8x16Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::prelude::*;
     use crate::fonts::Font;
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::WithStyle;
     use crate::transform::Transform;
-    use crate::DrawTarget;
 
     #[test]
     fn off_screen_text_does_not_infinite_loop() {
