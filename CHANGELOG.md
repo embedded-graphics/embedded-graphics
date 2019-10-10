@@ -18,6 +18,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
+- **(breaking)** The `Drawable` trait now has a required trait method `draw()`, which describes how the object will be drawn on the screen. See the docs for more details.
+
+- **(breaking)** The `Drawing` trait has been renamed `DrawTarget`. The required trait method to implement has changed from `draw()` to `draw_pixel()`, and optional trait methods have been added to allow an implementing display driver to specify hardware-accelerated methods for drawing graphics primitives.
+
 - **(breaking)** #161 The `.fill()` and `.stroke()` style methods are renamed to `.fill_color()` and `.stroke_color()` respectively. This is to reduce confusion between names like `.stroke()` and `.stroke_width()`. Example:
 
   ```rust
