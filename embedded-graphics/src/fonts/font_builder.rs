@@ -1,7 +1,6 @@
 //! Common code used to define available monospace pixel fonts.
 //!
 //! See the [module level type definitions](../index.html#types) for a list of usable fonts.
-use crate::DrawTarget;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::fonts::Font;
@@ -10,6 +9,7 @@ use crate::pixelcolor::{BinaryColor, PixelColor};
 use crate::style::Style;
 use crate::style::WithStyle;
 use crate::transform::Transform;
+use crate::DrawTarget;
 use core::marker::PhantomData;
 
 /// The configuration of the font

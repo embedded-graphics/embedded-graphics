@@ -1,9 +1,9 @@
-use crate::DrawTarget;
 use crate::drawable::{Drawable, Pixel};
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter};
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
+use crate::DrawTarget;
 use core::marker::PhantomData;
 
 /// Image with little endian data.
