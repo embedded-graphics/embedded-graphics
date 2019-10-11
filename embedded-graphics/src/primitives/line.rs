@@ -129,8 +129,19 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     type Item = Pixel<C>;
     type IntoIter = LineIterator<C>;
 
+    /// Create a line iterator
+    ///
+    /// ### Quadrants
+    ///
+    /// ```
+    /// 3 | 0
+    /// --+--
+    /// 2 | 1
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         let mut delta = dbg!(self.end - self.start);
+
+        // Ensure delta points into quadrant 1 so signs are always positive
         if delta.x < 0 {
             delta = Point::new(-delta.x, delta.y);
         }
