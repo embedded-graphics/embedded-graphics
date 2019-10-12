@@ -188,8 +188,8 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
-        .size(256, 256)
-        .scale(6)
+        .size(100, 100)
+        .scale(10)
         .pixel_spacing(1)
         .build_rgb();
 
@@ -225,7 +225,7 @@ fn main() {
     //         .into_iter(),
     // );
 
-    let mut position = Point::new(250, 120);
+    let mut position = Point::new(40, 20);
 
     loop {
         let end = display.run_once();
@@ -257,9 +257,15 @@ fn main() {
         display.clear();
 
         display.draw(
-            Line::new(Point::new(127, 127), position)
-                .stroke_color(Some(Rgb888::YELLOW))
-                .fill_color(Some(Rgb888::RED))
+            Line::new(Point::new(10, 10), position)
+                // .stroke_color(Some(Rgb888::YELLOW))
+                // .fill_color(Some(Rgb888::RED))
+                .style(Style {
+                    stroke_color: Some(Rgb888::YELLOW),
+                    fill_color: Some(Rgb888::RED),
+                    test_color: Some(Rgb888::CYAN),
+                    ..Style::default()
+                })
                 .into_iter(),
         );
 

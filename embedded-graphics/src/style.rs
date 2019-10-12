@@ -15,6 +15,9 @@ pub struct Style<P: PixelColor> {
     /// For fonts, this is the foreground colour of the text
     pub stroke_color: Option<P>,
 
+    /// DELETEME
+    pub test_color: Option<P>,
+
     /// Stroke width
     ///
     /// Set the stroke width for an object. Has no effect on fonts.
@@ -43,6 +46,7 @@ where
             fill_color: None,
             stroke_color: None,
             stroke_width: 1,
+            test_color: None,
         }
     }
 }
