@@ -227,6 +227,19 @@ fn main() {
 
     let mut position = Point::new(40, 20);
 
+    // display.draw(
+    //     Line::new(Point::new(10, 10), Point::new(40, -6))
+    //         // .stroke_color(Some(Rgb888::YELLOW))
+    //         // .fill_color(Some(Rgb888::RED))
+    //         .style(Style {
+    //             stroke_color: Some(Rgb888::YELLOW),
+    //             fill_color: Some(Rgb888::RED),
+    //             test_color: Some(Rgb888::CYAN),
+    //             ..Style::default()
+    //         })
+    //         .into_iter(),
+    // );
+
     loop {
         let end = display.run_once();
 

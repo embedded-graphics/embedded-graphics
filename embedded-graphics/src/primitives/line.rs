@@ -201,6 +201,8 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             stop: self.start == self.end, // if line length is zero, draw nothing
             perp_err,
             width: width as u32,
+            is_diag: false,
+            extra_perp: None,
 
             perp: PerpLineIterator {
                 // style: self.style,
@@ -236,7 +238,9 @@ where
     stop: bool,
     width: u32,
     perp: PerpLineIterator<C>,
+    extra_perp: Option<PerpLineIterator<C>>,
     perp_err: i32,
+    is_diag: bool,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -248,7 +252,19 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         self.style.stroke_color?;
 
         if !self.stop {
-            // let point = self.start;
+            match self.extra_perp.as_mut() {
+                Some(it) => {
+                    if let Some(p) = it.next() {
+                        // println!("IT {:?}", p.0);
+                        return Some(p);
+                    } else {
+                        // println!("IT NONE");
+                        self.extra_perp = None;
+                    }
+                }
+                None => {}
+            }
+
             if let Some(point) = self.perp.next() {
                 Some(point)
             } else {
@@ -262,7 +278,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
                 let mut diag = 0;
 
-                let mut perp = None;
+                // let mut perp = None;
 
                 // Move in major direction (larger delta)
                 if err_double > self.delta.y {
@@ -284,15 +300,19 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     if self.perp_err * 2 < self.delta.x {
                         self.perp_err += self.delta.x;
 
-                        perp = Some(PerpLineIterator {
+                        // self.is_diag = true;
+
+                        self.extra_perp = Some(PerpLineIterator {
                             color: self.style.test_color,
-                            start: self.start,
+                            start: self.start - Point::new(self.direction.x, 0),
                             delta: self.delta,
                             err: self.perp_err + self.delta.y,
                             current_iter: 0,
                             width: 10,
                             direction: self.perp.direction,
                         });
+
+                        // println!("PERP EXTRA GEN");
                     }
 
                     self.perp_err += self.delta.y;
@@ -310,37 +330,38 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     //
                 }
 
-                self.perp = if let Some(perp) = perp {
-                    perp
-                } else {
-                    PerpLineIterator {
-                        // style: self.style,
-                        color: if self.perp.color == self.style.fill_color {
-                            self.style.stroke_color
-                        } else {
-                            self.style.fill_color
-                        },
-                        start: self.start,
+                // self.perp = if let Some(perp) = perp {
+                //     perp
+                // } else {
+                // println!("DOWN TO HERE");
+                self.perp = PerpLineIterator {
+                    // style: self.style,
+                    color: if self.perp.color == self.style.fill_color {
+                        self.style.stroke_color
+                    } else {
+                        self.style.fill_color
+                    },
+                    start: self.start,
 
-                        delta: self.delta,
-                        err: self.perp_err,
-                        // delta: self.perp.delta,
-                        // direction: -self.direction,
-                        // err: self.perp_err,
-                        // err: self.err,
-                        // err: if diag == 2 {
-                        //     // -self.delta.y - self.delta.x
-                        //     -self.delta.y
-                        // } else {
-                        //     0
-                        // },
-                        // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
-                        current_iter: 0,
-                        // width: self.width,
-                        width: 10,
-                        direction: self.perp.direction,
-                    }
+                    delta: self.delta,
+                    err: self.perp_err,
+                    // delta: self.perp.delta,
+                    // direction: -self.direction,
+                    // err: self.perp_err,
+                    // err: self.err,
+                    // err: if diag == 2 {
+                    //     // -self.delta.y - self.delta.x
+                    //     -self.delta.y
+                    // } else {
+                    //     0
+                    // },
+                    // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
+                    current_iter: 0,
+                    // width: self.width,
+                    width: 10,
+                    direction: self.perp.direction,
                 };
+                // };
 
                 self.perp.next()
                 // Some(Pixel(self.start, self.style.fill_color.unwrap()))
