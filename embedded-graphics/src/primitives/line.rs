@@ -251,122 +251,41 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
+        if let Some(p) = self.perp.next() {
+            return Some(p);
+        }
+
         if !self.stop {
-            match self.extra_perp.as_mut() {
-                Some(it) => {
-                    if let Some(p) = it.next() {
-                        // println!("IT {:?}", p.0);
-                        return Some(p);
-                    } else {
-                        // println!("IT NONE");
-                        self.extra_perp = None;
-                    }
-                }
-                None => {}
+            let point = self.start;
+
+            if self.start == self.end {
+                self.stop = true;
+            }
+            let err_double = 2 * self.err;
+            if err_double > self.delta.y {
+                self.err += self.delta.y;
+                self.start += Point::new(self.direction.x, 0);
+            }
+            if err_double < self.delta.x {
+                self.err += self.delta.x;
+                self.start += Point::new(0, self.direction.y);
             }
 
-            if let Some(point) = self.perp.next() {
-                Some(point)
-            } else {
-                // if self.perp.color == self.style.fill_color {
-                //     return None;
-                // }
-                if self.start == self.end {
-                    self.stop = true;
-                }
-                let err_double = 2 * self.err;
+            self.perp = PerpLineIterator {
+                color: if self.perp.color == self.style.stroke_color {
+                    self.style.fill_color
+                } else {
+                    self.style.stroke_color
+                },
+                err: self.delta.x + self.delta.y,
+                start: self.start,
+                current_iter: 0,
+                ..self.perp
+            };
 
-                let mut diag = 0;
+            self.perp.next()
 
-                // let mut perp = None;
-
-                // Move in major direction (larger delta)
-                if err_double > self.delta.y {
-                    // println!("minor");
-                    self.err += self.delta.y;
-                    self.start += Point::new(self.direction.x, 0);
-
-                    diag += 1;
-                }
-
-                // Move in minor direction (smaller delta)
-                if err_double < self.delta.x {
-                    // println!("MAJOR");
-                    self.err += self.delta.x;
-                    self.start += Point::new(0, self.direction.y);
-
-                    diag += 1;
-
-                    if self.perp_err * 2 < self.delta.x {
-                        self.perp_err += self.delta.x;
-
-                        // self.is_diag = true;
-
-                        self.extra_perp = Some(PerpLineIterator {
-                            color: self.style.test_color,
-                            start: self.start - Point::new(self.direction.x, 0),
-                            delta: self.delta,
-                            err: self.perp_err + self.delta.y,
-                            current_iter: 0,
-                            width: 10,
-                            direction: self.perp.direction,
-                        });
-
-                        // println!("PERP EXTRA GEN");
-                    }
-
-                    self.perp_err += self.delta.y;
-
-                    // if self.perp_err * 2 > self.delta.y {
-                    //     self.perp_err += self.delta.y;
-                    // }
-
-                    // self.perp_err += self.delta.y;
-                    // self.perp_err += self.delta.x;
-                }
-
-                // Diagonal move
-                if diag == 2 {
-                    //
-                }
-
-                // self.perp = if let Some(perp) = perp {
-                //     perp
-                // } else {
-                // println!("DOWN TO HERE");
-                self.perp = PerpLineIterator {
-                    // style: self.style,
-                    color: if self.perp.color == self.style.fill_color {
-                        self.style.stroke_color
-                    } else {
-                        self.style.fill_color
-                    },
-                    start: self.start,
-
-                    delta: self.delta,
-                    err: self.perp_err,
-                    // delta: self.perp.delta,
-                    // direction: -self.direction,
-                    // err: self.perp_err,
-                    // err: self.err,
-                    // err: if diag == 2 {
-                    //     // -self.delta.y - self.delta.x
-                    //     -self.delta.y
-                    // } else {
-                    //     0
-                    // },
-                    // err: self.perp.delta.x + self.perp.delta.y + self.perp_err,
-                    current_iter: 0,
-                    // width: self.width,
-                    width: 10,
-                    direction: self.perp.direction,
-                };
-                // };
-
-                self.perp.next()
-                // Some(Pixel(self.start, self.style.fill_color.unwrap()))
-                // None
-            }
+        // Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else {
             None
         }
