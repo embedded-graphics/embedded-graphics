@@ -256,19 +256,34 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         }
 
         if !self.stop {
-            let point = self.start;
-
             if self.start == self.end {
                 self.stop = true;
             }
+
+            let mut diag = 0;
+
             let err_double = 2 * self.err;
             if err_double > self.delta.y {
                 self.err += self.delta.y;
                 self.start += Point::new(self.direction.x, 0);
+
+                // self.perp_err += self.delta.x;
+
+                diag += 1;
             }
             if err_double < self.delta.x {
                 self.err += self.delta.x;
                 self.start += Point::new(0, self.direction.y);
+
+                // self.perp_err += self.delta.y;
+
+                diag += 1;
+            }
+
+            // There was a diagonal move
+            if diag == 2 {
+                // self.perp_err -= self.delta.x + self.delta.y;
+                self.perp_err -= self.delta.y;
             }
 
             self.perp = PerpLineIterator {
@@ -277,7 +292,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 } else {
                     self.style.stroke_color
                 },
-                err: self.delta.x + self.delta.y,
+                err: self.perp_err,
                 start: self.start,
                 current_iter: 0,
                 ..self.perp
