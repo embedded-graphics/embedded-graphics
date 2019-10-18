@@ -282,8 +282,17 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             // There was a diagonal move
             if diag == 2 {
+                let perp_err_double = self.perp_err * 2;
                 // self.perp_err -= self.delta.x + self.delta.y;
-                self.perp_err -= self.delta.y;
+                // self.perp_err -= self.delta.y;
+
+                if perp_err_double > self.delta.y {
+                    self.perp_err += self.delta.y;
+                }
+
+                if perp_err_double < self.delta.x {
+                    self.perp_err += self.delta.x;
+                }
             }
 
             self.perp = PerpLineIterator {

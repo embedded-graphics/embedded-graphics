@@ -225,7 +225,7 @@ fn main() {
     //         .into_iter(),
     // );
 
-    let mut position = Point::new(40, 20);
+    let mut position = Point::new(60, 40);
 
     // display.draw(
     //     Line::new(Point::new(10, 10), Point::new(40, -6))
@@ -270,7 +270,7 @@ fn main() {
         display.clear();
 
         display.draw(
-            Line::new(Point::new(10, 10), position)
+            Line::new(Point::new(30, 30), position)
                 // .stroke_color(Some(Rgb888::YELLOW))
                 // .fill_color(Some(Rgb888::RED))
                 .style(Style {
