@@ -172,7 +172,7 @@ where
 {
     fn draw_pixel(&mut self, pixel: Pixel<C>) {
         let Pixel(Point { x, y }, color) = pixel;
-        if x < 0 || y < 0 || x >= SIZE as i32 || y >= SIZE as i32 {
+        if !(0..SIZE).contains(&x) || !(0..SIZE).contains(&y) {
             return;
         }
 

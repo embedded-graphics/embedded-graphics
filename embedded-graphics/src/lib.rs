@@ -184,8 +184,8 @@ use crate::pixelcolor::PixelColor;
 /// graphical primitives such as lines, rectangles, triangles, and circles.
 ///
 /// Once a `DrawTarget` is defined, it can be used to render [`Drawable` objects][drawable]. Note
-/// that any object that can produce an iterator of `Pixels` has a default implementation for the
-/// `Drawable` trait-- see the trait documentation for more details.
+/// that any object that can produce an iterator of `Pixel`s has a default implementation for the
+/// `Drawable` trait. See [the `Drawable` trait documentation](drawable) for more details.
 ///
 /// [drawable]: ./drawable/trait.Drawable.html
 ///
