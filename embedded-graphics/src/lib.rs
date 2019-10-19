@@ -360,6 +360,13 @@ where
             .draw(self);
     }
 
+    /// Flushes changes to the framebuffer.
+    ///
+    /// Note that some displays operate in "immediate mode", which does not require any flushing.
+    /// Because of this, the default implementation of this method is a noop. If the implementing
+    /// display requires flushing, this method should be overriden in the trait impl.
+    fn flush(&mut self) {}
+
     /// Draws a line primitive.
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
