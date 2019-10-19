@@ -226,13 +226,13 @@ where
     }
 }
 
-impl<'a, C: 'a, BO: 'a> Drawable<'a, C> for Image<'a, C, BO>
+impl<'a, C: 'a, BO: 'a> Drawable<'a, C> for &'a mut Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
-    fn draw<D: DrawTarget<C>>(&'a mut self, display: &mut D) {
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
         display.draw_iter(self.into_iter());
     }
 }

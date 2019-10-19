@@ -137,11 +137,11 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<'a, C> for ImageTga<'a, C>
+impl<'a, C: 'a> Drawable<'a, C> for &'a mut ImageTga<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn draw<D: DrawTarget<C>>(&'a mut self, display: &mut D) {
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
         display.draw_iter(self.into_iter());
     }
 }

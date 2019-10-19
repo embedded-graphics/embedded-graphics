@@ -232,11 +232,11 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<'a, C> for Rectangle<C>
+impl<'a, C: 'a> Drawable<'a, C> for &Rectangle<C>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(&mut self, display: &mut T) {
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
         display.draw_rectangle(self);
     }
 }

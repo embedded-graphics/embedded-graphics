@@ -27,11 +27,11 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 ///     text: &'a str
 /// }
 ///
-/// impl<'a, C: 'a> Drawable<'a, C> for Button<'a, C>
+/// impl<'a, C: 'a> Drawable<'a, C> for &Button<'a, C>
 /// where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
-///     fn draw<D: DrawTarget<C>>(&mut self, display: &mut D) {
+///     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
 ///         egrectangle!(self.p1, self.p2, stroke_color = Some(self.bg_color)).draw(display);
 ///         text_6x8!(self.text, fill_color = Some(self.fg_color))
 ///             .translate(Point::new(20, 16))
@@ -60,7 +60,7 @@ where
     C: PixelColor,
 {
     /// Draw the graphics object using the supplied DrawTarget.
-    fn draw<T: DrawTarget<C>>(&'a mut self, display: &mut T);
+    fn draw<T: DrawTarget<C>>(self, display: &mut T);
 }
 
 impl<'a, C, T> Drawable<'a, C> for T
@@ -68,7 +68,7 @@ where
     C: PixelColor,
     T: Iterator<Item = Pixel<C>>,
 {
-    fn draw<D: DrawTarget<C>>(&mut self, display: &mut D) {
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
         display.draw_iter(self);
     }
 }
