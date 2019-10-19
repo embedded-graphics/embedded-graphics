@@ -337,6 +337,12 @@ where
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing lines.
+    ///
+    /// ## Caution
+    ///
+    /// This method should not be called directly from application code. It is used to define the
+    /// internals of the `draw()` method used for the `Line` primitive. To draw a line, call
+    /// `.draw(&mut display)` on a `Line` primitive object.
     fn draw_line(&mut self, item: &primitives::Line<C>) {
         self.draw_iter(item);
     }
@@ -345,6 +351,12 @@ where
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing triangles.
+    ///
+    /// ## Caution
+    ///
+    /// This method should not be called directly from application code. It is used to define the
+    /// internals of the `draw()` method used for the `Triangle` primitive. To draw a triangle, call
+    /// `.draw(&mut display)` on a `Triangle` primitive object.
     fn draw_triangle(&mut self, item: &primitives::Triangle<C>) {
         self.draw_iter(item);
     }
@@ -353,6 +365,12 @@ where
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing rectangle.
+    ///
+    /// ## Caution
+    ///
+    /// This method should not be called directly from application code. It is used to define the
+    /// internals of the `draw()` method used for the `Rectangle` primitive. To draw a rectangle, call
+    /// `.draw(&mut display)` on a `Rectangle` primitive object.
     fn draw_rectangle(&mut self, item: &primitives::Rectangle<C>) {
         self.draw_iter(item);
     }
@@ -361,6 +379,12 @@ where
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing circles.
+    ///
+    /// ## Caution
+    ///
+    /// This method should not be called directly from application code. It is used to define the
+    /// internals of the `draw()` method used for the `Circle` primitive. To draw a circle, call
+    /// `.draw(&mut display)` on a `Circle` primitive object.
     fn draw_circle(&mut self, item: &primitives::Circle<C>) {
         self.draw_iter(item);
     }
