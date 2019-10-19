@@ -24,7 +24,7 @@ use tinytga::{Tga, TgaIterator};
 /// # let mut display: MockDisplay<Rgb888> = MockDisplay::default();
 ///
 /// // Load `patch.tga`, a 32BPP 4x4px image
-/// let mut image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
+/// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
 ///
 /// image.draw(&mut display);
 /// ```
@@ -82,7 +82,7 @@ where
     }
 }
 
-impl<'a, 'b, C> IntoIterator for &'b mut ImageTga<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b ImageTga<'a, C>
 where
     'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -137,7 +137,7 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<'a, C> for &'a mut ImageTga<'a, C>
+impl<'a, C: 'a> Drawable<C> for &'a ImageTga<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
@@ -193,8 +193,7 @@ mod tests {
 
     #[test]
     fn chessboard_compressed() -> Result<(), ()> {
-        let mut im: ImageTga<Rgb888> =
-            ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
+        let im: ImageTga<Rgb888> = ImageTga::new(include_bytes!("../../tests/chessboard_rle.tga"))?;
 
         let mut pixels = im.into_iter();
 
@@ -215,8 +214,7 @@ mod tests {
 
     #[test]
     fn chessboard_uncompressed() -> Result<(), ()> {
-        let mut im: ImageTga<Rgb888> =
-            ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
+        let im: ImageTga<Rgb888> = ImageTga::new(include_bytes!("../../tests/chessboard_raw.tga"))?;
 
         let mut pixels = im.into_iter();
 

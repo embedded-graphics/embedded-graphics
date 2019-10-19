@@ -184,7 +184,7 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<'a, C> for &mut ImageBmp<'a, C>
+impl<'a, C: 'a> Drawable<C> for &ImageBmp<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {

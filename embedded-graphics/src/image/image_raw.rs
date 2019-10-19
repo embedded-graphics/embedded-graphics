@@ -50,7 +50,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///     // The type annotation `Image<BinaryColor>` is used to specify the format
 ///     // of the stored raw data (`PixelColor::Raw`) and which color type the
 ///     // raw data gets converted into.
-///     let mut image: Image<BinaryColor> = Image::new(DATA, 12, 5);
+///     let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
 ///
 ///     let mut display = Display::default();
 ///     image.draw(&mut display);
@@ -207,7 +207,7 @@ where
     }
 }
 
-impl<'a, 'b: 'a, C: 'a, BO: 'a> IntoIterator for &'b mut Image<'a, C, BO>
+impl<'a, 'b: 'a, C: 'a, BO: 'a> IntoIterator for &'b Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
@@ -226,7 +226,7 @@ where
     }
 }
 
-impl<'a, C: 'a, BO: 'a> Drawable<'a, C> for &'a mut Image<'a, C, BO>
+impl<'a, C: 'a, BO: 'a> Drawable<C> for &'a Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
@@ -331,7 +331,7 @@ mod tests {
 
     #[test]
     fn it_can_have_negative_offsets() {
-        let mut image: Image<Gray8> = Image::new(
+        let image: Image<Gray8> = Image::new(
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
@@ -354,7 +354,7 @@ mod tests {
     #[test]
     fn bpp1() {
         let data = [0xAA, 0x00, 0x55, 0xFF, 0xAA, 0x00];
-        let mut image: Image<BinaryColor> = Image::new(&data, 9, 3);
+        let image: Image<BinaryColor> = Image::new(&data, 9, 3);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, BinaryColor::On);
@@ -396,7 +396,7 @@ mod tests {
     #[test]
     fn bpp2() {
         let data = [0b00011011, 0x0, 0b11100100, 0xFF];
-        let mut image: Image<Gray2> = Image::new(&data, 5, 2);
+        let image: Image<Gray2> = Image::new(&data, 5, 2);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Gray2::new(0));
@@ -417,7 +417,7 @@ mod tests {
     #[test]
     fn bpp4() {
         let data = [0b00011000, 0b11110000, 0b01011010, 0x0];
-        let mut image: Image<Gray4> = Image::new(&data, 3, 2);
+        let image: Image<Gray4> = Image::new(&data, 3, 2);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Gray4::new(0x1));
@@ -434,7 +434,7 @@ mod tests {
     #[test]
     fn bpp8() {
         let data = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06];
-        let mut image: Image<Gray8> = Image::new(&data, 2, 3);
+        let image: Image<Gray8> = Image::new(&data, 2, 3);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Gray8::new(1));
@@ -450,7 +450,7 @@ mod tests {
     #[test]
     fn bpp16_little_endian() {
         let data = [0x00, 0xF8, 0xE0, 0x07, 0x1F, 0x00, 0x00, 0x00];
-        let mut image: ImageLE<Rgb565> = Image::new(&data, 1, 4);
+        let image: ImageLE<Rgb565> = Image::new(&data, 1, 4);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Rgb565::RED);
@@ -464,7 +464,7 @@ mod tests {
     #[test]
     fn bpp16_big_endian() {
         let data = [0xF8, 0x00, 0x07, 0xE0, 0x00, 0x1F, 0x00, 0x00];
-        let mut image: ImageBE<Rgb565> = Image::new(&data, 2, 2);
+        let image: ImageBE<Rgb565> = Image::new(&data, 2, 2);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Rgb565::RED);
@@ -480,7 +480,7 @@ mod tests {
         let data = [
             0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
         ];
-        let mut image: ImageLE<Bgr888> = Image::new(&data, 1, 4);
+        let image: ImageLE<Bgr888> = Image::new(&data, 1, 4);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Bgr888::RED);
@@ -496,7 +496,7 @@ mod tests {
         let data = [
             0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
         ];
-        let mut image: ImageBE<Rgb888> = Image::new(&data, 4, 1);
+        let image: ImageBE<Rgb888> = Image::new(&data, 4, 1);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Rgb888::RED);
@@ -516,7 +516,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF,
         ];
-        let mut image: ImageLE<TestColorU32> = Image::new(&data, 2, 2);
+        let image: ImageLE<TestColorU32> = Image::new(&data, 2, 2);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, TestColorU32(RawU32::new(0x78563412)));
@@ -536,7 +536,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF,
         ];
-        let mut image: ImageBE<TestColorU32> = Image::new(&data, 4, 1);
+        let image: ImageBE<TestColorU32> = Image::new(&data, 4, 1);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, TestColorU32(RawU32::new(0x12345678)));

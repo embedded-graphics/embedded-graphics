@@ -189,44 +189,6 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a mut Triangle<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = TriangleIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        let (v1, v2, v3) = sort_yx(self.p1, self.p2, self.p3);
-
-        let mut line_a = Line::new(v1, v2)
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let mut line_b = Line::new(v1, v3)
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let mut line_c = Line::new(v2, v3)
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0);
-        let next_b = line_b.next().map(|p| p.0);
-
-        TriangleIterator {
-            line_a,
-            line_b,
-            line_c,
-            cur_ac: None,
-            cur_b: None,
-            next_ac,
-            next_b,
-            x: 0,
-            min_y: v1.y,
-            max_y: v3.y,
-            style: self.style,
-        }
-    }
-}
-
 enum IterState {
     Border(Point),
     LeftRight(Point, Point),
@@ -359,7 +321,7 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<'a, C> for &Triangle<C>
+impl<'a, C: 'a> Drawable<C> for &Triangle<C>
 where
     C: PixelColor,
 {

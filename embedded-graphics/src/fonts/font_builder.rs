@@ -165,7 +165,7 @@ where
     }
 }
 
-impl<'a, 'b, C, Conf> IntoIterator for &mut FontBuilder<'a, C, Conf>
+impl<'a, C, Conf> IntoIterator for &FontBuilder<'a, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,
@@ -261,7 +261,7 @@ where
     }
 }
 
-impl<'a, C, Conf> Drawable<'a, C> for &mut FontBuilder<'a, C, Conf>
+impl<'a, C, Conf> Drawable<C> for &FontBuilder<'a, C, Conf>
 where
     C: PixelColor + From<BinaryColor>,
     Conf: FontBuilderConf,

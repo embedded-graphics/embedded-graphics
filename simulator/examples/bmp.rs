@@ -17,7 +17,7 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+    let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
 
     let mut display = DisplayBuilder::new()
         .title("BMP image")

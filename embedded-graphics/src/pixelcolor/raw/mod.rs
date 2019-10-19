@@ -66,7 +66,7 @@
 //!
 //! fn main() {
 //!     // Create new image with RGBI colors.
-//!     let mut image: Image<RGBI> = Image::new(IMAGE_DATA, 2, 2);
+//!     let image: Image<RGBI> = Image::new(IMAGE_DATA, 2, 2);
 //!
 //!     // In a real application the image could now be drawn to a display:
 //!     // display.draw(&image);

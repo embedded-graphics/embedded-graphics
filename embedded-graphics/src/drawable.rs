@@ -11,7 +11,7 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 ///
 /// The `Drawable` trait describes how a particular graphical object is drawn. A `Drawable` object
 /// can define its `draw` method as a collection of graphical primitives or as an iterator
-/// over pixels being rendered with `DrawTarget::draw_iter()`.
+/// over pixels being rendered with [`DrawTarget`]'s [`draw_iter`] method.
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
@@ -20,29 +20,29 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 /// use embedded_graphics::pixelcolor::{PixelColor, BinaryColor, Rgb888};
 ///
 /// struct Button<'a, C: PixelColor> {
-///     p1: Point,
-///     p2: Point,
+///     top_left: Point,
+///     bottom_right: Point,
 ///     bg_color: C,
 ///     fg_color: C,
 ///     text: &'a str
 /// }
 ///
-/// impl<'a, C: 'a> Drawable<'a, C> for &Button<'a, C>
+/// impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
 /// where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
-///         egrectangle!(self.p1, self.p2, stroke_color = Some(self.bg_color)).draw(display);
-///         text_6x8!(self.text, fill_color = Some(self.fg_color))
-///             .translate(Point::new(20, 16))
+///         egrectangle!(self.top_left, self.bottom_right, fill_color = Some(self.bg_color)).draw(display);
+///         text_6x8!(self.text, stroke_color = Some(self.fg_color))
+///             .translate(Point::new(20, 20))
 ///             .draw(display);
 ///     }
 /// }
 ///
 /// fn main() {
 ///     let mut button = Button {
-///         p1: Point::new(0, 0),
-///         p2: Point::new(10, 10),
+///         top_left: Point::zero(),
+///         bottom_right: Point::new(100, 50),
 ///         bg_color: Rgb888::RED,
 ///         fg_color: Rgb888::BLUE,
 ///         text: "Click me!",
@@ -54,8 +54,9 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 ///
 /// ```
 ///
-/// [draw_iter]: ../trait.DrawTarget.html#method.draw_iter
-pub trait Drawable<'a, C>
+/// [`DrawTarget`]: ../trait.DrawTarget.html
+/// [`draw_iter`]: ../trait.DrawTarget.html#method.draw_iter
+pub trait Drawable<C>
 where
     C: PixelColor,
 {
@@ -63,7 +64,7 @@ where
     fn draw<T: DrawTarget<C>>(self, display: &mut T);
 }
 
-impl<'a, C, T> Drawable<'a, C> for T
+impl<C, T> Drawable<C> for T
 where
     C: PixelColor,
     T: Iterator<Item = Pixel<C>>,

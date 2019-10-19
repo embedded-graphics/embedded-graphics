@@ -13,8 +13,8 @@
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
-//! You can also add your own objects by implementing [`Drawable`][drawable] on them. Additionally,
-//! all iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default `Drawable`
+//! You can also add your own objects by implementing [`Drawable`] on them. Additionally,
+//! all iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default [`Drawable`]
 //! implementation already created.
 //!
 //! A core goal is to do the above without using any buffers; the crate should work without a
@@ -85,8 +85,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let mut c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
-//! let mut t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -104,8 +104,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let mut c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
-//! let mut t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
+//! let t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -144,7 +144,7 @@
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/type.Font6x8.html
 //! [`DrawTarget`]: ./trait.DrawTarget.html
-//! [drawable]: ./drawable/trait.Drawable.html
+//! [`Drawable`]: ./drawable/trait.Drawable.html
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/01d2ea6e7053f9f79cab19d0c193a00dbdaea321/assets/logo.png"
@@ -180,15 +180,18 @@ use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::prelude::*;
 
+/// Defines a display that can be used to render [`Drawable'] objects.
+///
 /// To use this crate in a driver, `DrawTarget` must be implemented. This trait defines how a
 /// display draws pixels, and optionally provides a way to define accelerated drawing methods for
 /// graphical primitives such as lines, rectangles, triangles, and circles.
 ///
-/// Once a `DrawTarget` is defined, it can be used to render [`Drawable` objects][drawable]. Note
-/// that any object that can produce an iterator of `Pixel`s has a default implementation for the
-/// `Drawable` trait. See [the `Drawable` trait documentation][drawable] for more details.
+/// Once a `DrawTarget` is defined, it can be used to render [`Drawable`]. Note that any iterator
+/// over [`Pixel`]s has a default implementation for the [`Drawable`] trait. See the [`Drawable`]
+/// trait documentation for more details.
 ///
-/// [drawable]: ./drawable/trait.Drawable.html
+/// [`Drawable`]: ./drawable/trait.Drawable.html
+/// [`Pixel`]: ./drawable/struct.Pixel.html
 ///
 /// Here's an example for an imaginary display that has a 64x64px framebuffer of 8 bit values that
 /// communicates over a (simplified) SPI interface:
@@ -223,11 +226,11 @@ use crate::prelude::*;
 /// }
 ///
 /// impl DrawTarget<Gray8> for ExampleDisplay {
-///     /// Draw a `pixel` that has a colour defined as `Gray8`
+///     /// Draw a `Pixel` that has a color defined as `Gray8`.
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) {
 ///         let Pixel(coord, color) = pixel;
 ///         // Place an (x, y) pixel at the right index in the framebuffer
-///         let index = coord[0] + (coord[1] * 64);
+///         let index = coord.x + coord.y * 64;
 ///         self.framebuffer[index as usize] = color.luma();
 ///     }
 ///
@@ -243,7 +246,7 @@ use crate::prelude::*;
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     let mut circle = egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE));
+///     let circle = egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE));
 ///     circle.draw(&mut display);
 ///
 ///     // Update the display
@@ -253,9 +256,12 @@ use crate::prelude::*;
 ///
 /// ## Hardware Acceleration
 ///
-/// In addition to defining `draw_pixel`, an implementation of `DrawTarget` can also provide
+/// In addition to defining [`draw_pixel`], an implementation of [`DrawTarget`] can also provide
 /// alternative implementations of drawing methods for graphical primitives. Here is an example of
-/// how a display with accelerated methods can implement `DrawTarget`:
+/// how a display with accelerated methods can implement [`DrawTarget`]:
+///
+/// [`draw_pixel`]: ./trait.DrawTarget.html#method.draw_pixel
+/// [`DrawTarget`]: ./trait.DrawTarget.html
 ///
 /// ```rust
 /// # use embedded_graphics::prelude::*;
@@ -296,7 +302,7 @@ use crate::prelude::*;
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) {
 ///         let Pixel(coord, color) = pixel;
 ///         // Place an (x, y) pixel at the right index in the framebuffer
-///         let index = coord[0] + (coord[1] * 64);
+///         let index = coord.x + coord.y * 64;
 ///         self.framebuffer[index as usize] = color.luma();
 ///     }
 ///
@@ -317,7 +323,7 @@ use crate::prelude::*;
 ///     };
 ///
 ///     // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
-///     let mut rect = egrectangle!((10, 20), (30, 40), stroke_color = Some(Gray8::WHITE));
+///     let rect = egrectangle!((10, 20), (30, 40), stroke_color = Some(Gray8::WHITE));
 ///     rect.draw(&mut display); // Uses the accelerated draw_rectangle function
 ///
 ///     // Update the display
@@ -329,7 +335,9 @@ pub trait DrawTarget<C>
 where
     C: PixelColor,
 {
-    /// Draws a pixel on the display. Note that some displays require a "flush" operation
+    /// Draws a pixel on the display.
+    ///
+    /// Note that some displays require a "flush" operation
     /// to actually write changes to the framebuffer.
     fn draw_pixel(&mut self, item: Pixel<C>);
 
@@ -348,14 +356,13 @@ where
 
     /// Clears the display with the supplied color.
     ///
-    /// This default implementation should be replaced if the implementing display provides an
+    /// This default implementation should be replaced if the implementing driver provides an
     /// accelerated clearing method.
     fn clear(&mut self, color: C)
     where
         Self: Sized,
     {
-        let s = self.size();
-        primitives::Rectangle::new(Point::zero(), Point::new(s.width as i32, s.height as i32))
+        primitives::Rectangle::new(Point::zero(), Point::zero() + self.size())
             .fill_color(Some(color))
             .draw(self);
     }
@@ -372,11 +379,14 @@ where
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing lines.
     ///
-    /// ## Caution
+    /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the `draw()` method used for the `Line` primitive. To draw a line, call
-    /// `.draw(&mut display)` on a `Line` primitive object.
+    /// internals of the [`draw`] method used for the [`Line`] primitive. To draw a line, call
+    /// [`draw`] on a [`Line`] primitive object.
+    ///
+    /// [`Line`]: ./primitives/line/struct.Line.html
+    /// [`draw`]: ./trait.DrawTarget.html#method.draw
     fn draw_line(&mut self, item: &primitives::Line<C>) {
         self.draw_iter(item);
     }
@@ -386,11 +396,14 @@ where
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing triangles.
     ///
-    /// ## Caution
+    /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the `draw()` method used for the `Triangle` primitive. To draw a triangle, call
-    /// `.draw(&mut display)` on a `Triangle` primitive object.
+    /// internals of the [`draw`] method used for the [`Triangle`] primitive. To draw a triangle, call
+    /// [`draw`] on a [`Triangle`] primitive object.
+    ///
+    /// [`Triangle`]: ./primitives/triangle/struct.Triangle.html
+    /// [`draw`]: ./trait.DrawTarget.html#method.draw
     fn draw_triangle(&mut self, item: &primitives::Triangle<C>) {
         self.draw_iter(item);
     }
@@ -400,11 +413,14 @@ where
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing rectangle.
     ///
-    /// ## Caution
+    /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the `draw()` method used for the `Rectangle` primitive. To draw a rectangle, call
-    /// `.draw(&mut display)` on a `Rectangle` primitive object.
+    /// internals of the [`draw`] method used for the [`Rectangle`] primitive. To draw a rectangle, call
+    /// [`draw`] on a [`Rectangle`] primitive object.
+    ///
+    /// [`Rectangle`]: ./primitives/rectangle/struct.Rectangle.html
+    /// [`draw`]: ./trait.DrawTarget.html#method.draw
     fn draw_rectangle(&mut self, item: &primitives::Rectangle<C>) {
         self.draw_iter(item);
     }
@@ -414,11 +430,14 @@ where
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing circles.
     ///
-    /// ## Caution
+    /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the `draw()` method used for the `Circle` primitive. To draw a circle, call
-    /// `.draw(&mut display)` on a `Circle` primitive object.
+    /// internals of the [`draw`] method used for the [`Circle`] primitive. To draw a circle, call
+    /// [`draw`] on a [`Circle`] primitive object.
+    ///
+    /// [`Circle`]: ./primitives/circle/struct.Circle.html
+    /// [`draw`]: ./trait.DrawTarget.html#method.draw
     fn draw_circle(&mut self, item: &primitives::Circle<C>) {
         self.draw_iter(item);
     }

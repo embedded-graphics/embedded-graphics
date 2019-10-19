@@ -17,7 +17,7 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut image: ImageTga<Rgb888> = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
+    let image: ImageTga<Rgb888> = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
 
     let mut display = DisplayBuilder::new()
         .title("TGA image")
