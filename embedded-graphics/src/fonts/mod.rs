@@ -104,11 +104,11 @@ mod font6x8;
 mod font8x16;
 pub mod font_builder;
 
-pub use self::font12x16::{Font12x16, Font12x16Conf};
-pub use self::font24x32::{Font24x32, Font24x32Conf};
-pub use self::font6x12::{Font6x12, Font6x12Conf};
-pub use self::font6x8::{Font6x8, Font6x8Conf};
-pub use self::font8x16::{Font8x16, Font8x16Conf};
+pub use self::font12x16::Font12x16;
+pub use self::font24x32::Font24x32;
+pub use self::font6x12::Font6x12;
+pub use self::font6x8::Font6x8;
+pub use self::font8x16::Font8x16;
 use crate::geometry::Dimensions;
 use crate::pixelcolor::PixelColor;
 use crate::style::WithStyle;

@@ -25,19 +25,17 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default line from (10, 20) to (30, 40)
-/// let mut l1 = Line::new(Point::new(10, 20), Point::new(30, 40));
+/// Line::new(Point::new(10, 20), Point::new(30, 40)).draw(&mut display);
 ///
 /// // Line with styled stroke from (50, 20) to (60, 35)
-/// let mut l2 = Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .stroke_color(Some(Rgb565::RED));
+/// Line::new(Point::new(50, 20), Point::new(60, 35))
+///     .stroke_color(Some(Rgb565::RED))
+///     .draw(&mut display);
 ///
 /// // Line with translation applied
-/// let mut l3 = Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .translate(Point::new(65, 35));
-///
-/// l1.draw(&mut display);
-/// l2.draw(&mut display);
-/// l3.draw(&mut display);
+/// Line::new(Point::new(50, 20), Point::new(60, 35))
+///     .translate(Point::new(65, 35))
+///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Line<C: PixelColor> {

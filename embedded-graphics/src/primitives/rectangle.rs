@@ -25,21 +25,19 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
-/// let mut r1 = Rectangle::new(Point::new(10, 20), Point::new(30, 40));
+/// Rectangle::new(Point::new(10, 20), Point::new(30, 40)).draw(&mut display);
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
-/// let mut r2 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+/// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill_color(Some(Rgb565::GREEN));
+///     .fill_color(Some(Rgb565::GREEN))
+///     .draw(&mut display);
 ///
 /// // Rectangle with translation applied
-/// let mut r3 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
-///     .translate(Point::new(65, 35));
-///
-/// r1.draw(&mut display);
-/// r2.draw(&mut display);
-/// r3.draw(&mut display);
+/// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+///     .translate(Point::new(65, 35))
+///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Rectangle<C: PixelColor> {

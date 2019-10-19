@@ -16,9 +16,6 @@ use tinybmp::Bmp;
 ///
 /// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
 ///
-/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
-/// `.into_iter()` on them, unlike other embedded_graphics objects.
-///
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::ImageBmp;
@@ -28,9 +25,6 @@ use tinybmp::Bmp;
 ///
 /// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
 /// let mut image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
-///
-/// // Equivalent behavior
-/// image.into_iter().draw(&mut display);
 /// image.draw(&mut display);
 /// ```
 #[derive(Debug, Clone)]
@@ -123,30 +117,6 @@ where
 }
 
 impl<'a, 'b, C> IntoIterator for &'b ImageBmp<'a, C>
-where
-    'b: 'a,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    type Item = Pixel<C>;
-    type IntoIter = ImageBmpIterator<'a, C>;
-
-    // NOTE: `self` is a reference already, no copies here!
-    fn into_iter(self) -> Self::IntoIter {
-        // Check that image bpp is equal to required bpp for `C`.
-        if self.bmp.bpp() as usize != C::Raw::BITS_PER_PIXEL {
-            panic!("invalid bits per pixel");
-        }
-
-        ImageBmpIterator {
-            data: RawDataIter::new(self.bmp.image_data()),
-            x: 0,
-            y: 0,
-            image: self,
-        }
-    }
-}
-
-impl<'a, 'b, C> IntoIterator for &'b mut ImageBmp<'a, C>
 where
     'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -264,9 +234,7 @@ mod tests {
         .unwrap()
         .translate(Point::new(-1, -1));
 
-        {
-            assert_eq!(image.into_iter().count(), 9);
-        }
+        assert_eq!(image.into_iter().count(), 9);
 
         let it = image.into_iter();
 

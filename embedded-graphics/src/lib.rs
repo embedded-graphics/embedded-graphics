@@ -319,10 +319,11 @@ pub trait DrawTarget<C>
 where
     C: PixelColor,
 {
-    /// Draw a pixel on the display
+    /// Draws a pixel on the display. Note that some displays require a "flush" operation
+    /// to actually write changes to the framebuffer.
     fn draw_pixel(&mut self, item: drawable::Pixel<C>);
 
-    /// Draw an object from an iterator over its pixels
+    /// Draws an object from an iterator over its pixels.
     fn draw_iter<T>(&mut self, item: T)
     where
         T: IntoIterator<Item = drawable::Pixel<C>>,
@@ -332,7 +333,7 @@ where
         }
     }
 
-    /// Draw a line primitive.
+    /// Draws a line primitive.
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing lines.
@@ -340,7 +341,7 @@ where
         self.draw_iter(item);
     }
 
-    /// Draw a triangle primitive
+    /// Draws a triangle primitive.
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing triangles.
@@ -348,7 +349,7 @@ where
         self.draw_iter(item);
     }
 
-    /// Draw a rectangle primitive
+    /// Draws a rectangle primitive.
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing rectangle.
@@ -356,7 +357,7 @@ where
         self.draw_iter(item);
     }
 
-    /// Draw a circle primitive
+    /// Draws a circle primitive.
     ///
     /// This default trait method should be overridden if a display provides hardware-accelerated
     /// methods for drawing circles.

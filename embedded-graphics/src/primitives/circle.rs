@@ -25,23 +25,21 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default circle with only a stroke centered around (10, 20) with a radius of 30
-/// let mut c1 = Circle::new(Point::new(10, 20), 30);
+/// Circle::new(Point::new(10, 20), 30).draw(&mut display);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
-/// let mut c2 = Circle::new(Point::new(50, 20), 30)
+/// Circle::new(Point::new(50, 20), 30)
 ///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill_color(Some(Rgb565::GREEN));
+///     .fill_color(Some(Rgb565::GREEN))
+///     .draw(&mut display);
 ///
 /// // Circle with no stroke and a translation applied
-/// let mut c3 = Circle::new(Point::new(10, 20), 30)
+/// Circle::new(Point::new(10, 20), 30)
 ///     .stroke_color(None)
 ///     .fill_color(Some(Rgb565::BLUE))
-///     .translate(Point::new(65, 35));
-///
-/// c1.draw(&mut display);
-/// c2.draw(&mut display);
-/// c3.draw(&mut display);
+///     .translate(Point::new(65, 35))
+///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Circle<C: PixelColor> {

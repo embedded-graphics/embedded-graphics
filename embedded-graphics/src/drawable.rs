@@ -32,11 +32,13 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 ///     C: PixelColor + From<BinaryColor>,
 /// {
 ///     fn draw<D: DrawTarget<C>>(&mut self, display: &mut D) {
-///         egrectangle!(self.p1, self.p2, stroke_color=Some(self.bg_color)).draw(display);
-///         text_6x8!(self.text, fill_color = Some(self.fg_color)).translate(Point::new(20, 16)).draw(display);
+///         egrectangle!(self.p1, self.p2, stroke_color = Some(self.bg_color)).draw(display);
+///         text_6x8!(self.text, fill_color = Some(self.fg_color))
+///             .translate(Point::new(20, 16))
+///             .draw(display);
 ///     }
 /// }
-///
+/// 
 /// fn main() {
 ///     let mut button = Button {
 ///         p1: Point::new(0, 0),
@@ -57,8 +59,7 @@ pub trait Drawable<'a, C>
 where
     C: PixelColor,
 {
-    /// Draw the graphics object. Override this method with primitive drawing methods as
-    /// applicable.
+    /// Draw the graphics object using the supplied DrawTarget.
     fn draw<T: DrawTarget<C>>(&'a mut self, display: &mut T);
 }
 

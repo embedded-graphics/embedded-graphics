@@ -26,19 +26,18 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default triangle with no styling
-/// let mut t1 = Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60));
+/// Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
+///     .draw(&mut display);
 ///
 /// // Triangle with styled stroke from (50, 20) to (60, 35)
-/// let mut t2 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .stroke_color(Some(Rgb565::RED));
+/// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
+///     .stroke_color(Some(Rgb565::RED))
+///     .draw(&mut display);
 ///
 /// // Triangle with translation applied
-/// let mut t3 = Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .translate(Point::new(65, 35));
-///
-/// t1.draw(&mut display);
-/// t2.draw(&mut display);
-/// t3.draw(&mut display);
+/// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
+///     .translate(Point::new(65, 35))
+///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle<C: PixelColor> {
