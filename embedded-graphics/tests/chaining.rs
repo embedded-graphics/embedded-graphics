@@ -1,6 +1,6 @@
 extern crate embedded_graphics;
 
-use embedded_graphics::geometry::Point;
+use embedded_graphics::geometry::{Point, Size};
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics::DrawTarget;
@@ -22,6 +22,10 @@ impl From<u8> for TestPixelColor {
 
 impl DrawTarget<TestPixelColor> for FakeDisplay {
     fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>) { // Noop
+    }
+
+    fn size(&self) -> Size {
+        Size::zero()
     }
 }
 

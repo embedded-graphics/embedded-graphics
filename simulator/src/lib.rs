@@ -165,6 +165,10 @@ impl DrawTarget<BinaryColor> for BinaryDisplay {
         let y = coord[1] as usize;
         self.pixels.set(x, y, color);
     }
+
+    fn size(&self) -> Size {
+        Size::new(self.pixels.width as u32, self.pixels.height as u32)
+    }
 }
 
 /// Simulated RGB display
@@ -217,5 +221,9 @@ where
         let x = coord[0] as usize;
         let y = coord[1] as usize;
         self.pixels.set(x, y, color.into());
+    }
+
+    fn size(&self) -> Size {
+        Size::new(self.pixels.width as u32, self.pixels.height as u32)
     }
 }

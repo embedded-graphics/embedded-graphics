@@ -13,6 +13,7 @@
 //! ```
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::egrectangle;
+//! use embedded_graphics::geometry::Size;
 //!
 //! /// Color with 3 states.
 //! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -39,6 +40,10 @@
 //!             EpdColor::Black => {} // draw black pixel at `point`
 //!             EpdColor::Red => {} // draw red pixel at `point`
 //!         }
+//!     }
+//!
+//!     fn size(&self) -> Size {
+//!         Size::zero()
 //!     }
 //! }
 //!

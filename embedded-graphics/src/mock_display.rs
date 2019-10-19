@@ -20,7 +20,7 @@
 //! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
 
 use crate::drawable::Pixel;
-use crate::geometry::Point;
+use crate::geometry::{Point, Size};
 use crate::pixelcolor::{BinaryColor, PixelColor};
 use crate::DrawTarget;
 use core::{
@@ -172,12 +172,16 @@ where
 {
     fn draw_pixel(&mut self, pixel: Pixel<C>) {
         let Pixel(Point { x, y }, color) = pixel;
-        if !(0..SIZE).contains(&x) || !(0..SIZE).contains(&y) {
+        if !(0..SIZE).contains(&(x as usize)) || !(0..SIZE).contains(&(y as usize)) {
             return;
         }
 
         let i = x + y * SIZE as i32;
         self.0[i as usize] = Some(color);
+    }
+
+    fn size(&self) -> Size {
+        Size::new(self.width() as u32, self.height() as u32)
     }
 }
 

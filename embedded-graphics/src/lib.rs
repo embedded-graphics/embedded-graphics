@@ -176,8 +176,9 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-use crate::geometry::Dimensions;
+use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
+use crate::prelude::*;
 
 /// To use this crate in a driver, `DrawTarget` must be implemented. This trait defines how a
 /// display draws pixels, and optionally provides a way to define accelerated drawing methods for
@@ -198,6 +199,7 @@ use crate::pixelcolor::PixelColor;
 /// use embedded_graphics::egcircle;
 /// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// use embedded_graphics::drawable::Pixel;
+/// use embedded_graphics::geometry::Size;
 ///
 /// # struct SPI1;
 /// #
@@ -227,6 +229,10 @@ use crate::pixelcolor::PixelColor;
 ///         // Place an (x, y) pixel at the right index in the framebuffer
 ///         let index = coord[0] + (coord[1] * 64);
 ///         self.framebuffer[index as usize] = color.luma();
+///     }
+///
+///     fn size(&self) -> Size {
+///         Size::new(64, 64)
 ///     }
 /// }
 ///
@@ -294,6 +300,10 @@ use crate::pixelcolor::PixelColor;
 ///         self.framebuffer[index as usize] = color.luma();
 ///     }
 ///
+///     fn size(&self) -> Size {
+///         Size::new(64, 64)
+///     }
+///
 ///     /// Use the accelerated method when drawing rectangles
 ///     fn draw_rectangle(&mut self, item: &Rectangle<Gray8>) {
 ///         self.fast_rectangle(item);
@@ -321,16 +331,33 @@ where
 {
     /// Draws a pixel on the display. Note that some displays require a "flush" operation
     /// to actually write changes to the framebuffer.
-    fn draw_pixel(&mut self, item: drawable::Pixel<C>);
+    fn draw_pixel(&mut self, item: Pixel<C>);
 
     /// Draws an object from an iterator over its pixels.
     fn draw_iter<T>(&mut self, item: T)
     where
-        T: IntoIterator<Item = drawable::Pixel<C>>,
+        T: IntoIterator<Item = Pixel<C>>,
     {
         for pixel in item {
             self.draw_pixel(pixel);
         }
+    }
+
+    /// Returns the dimensions of the `DrawTarget` in pixels.
+    fn size(&self) -> Size;
+
+    /// Clears the display with the supplied color.
+    ///
+    /// This default implementation should be replaced if the implementing display provides an
+    /// accelerated clearing method.
+    fn clear(&mut self, color: C)
+    where
+        Self: Sized,
+    {
+        let s = self.size();
+        primitives::Rectangle::new(Point::zero(), Point::new(s.width as i32, s.height as i32))
+            .fill_color(Some(color))
+            .draw(self);
     }
 
     /// Draws a line primitive.

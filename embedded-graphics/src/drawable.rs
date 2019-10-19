@@ -38,7 +38,7 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 ///             .draw(display);
 ///     }
 /// }
-/// 
+///
 /// fn main() {
 ///     let mut button = Button {
 ///         p1: Point::new(0, 0),
