@@ -192,12 +192,12 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
         //     perp_delta = Point::new(perp_delta.x, -perp_delta.y);
         // }
 
-        // let len = dbg!((delta.x.pow(2) + delta.y.pow(2)).integer_sqrt());
+        let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
 
-        // let normal = dbg!(Point::new((delta.x * 10) / len, (delta.y * 10) / len));
+        let normal = Point::new((delta.x * 10) / len, (delta.y * 10) / len);
 
-        // let width: i32 = normal.x.abs().max(normal.y.abs());
-        let width = 10i32;
+        let width: i32 = normal.x.abs().max(normal.y.abs());
+        // let width = 10i32;
 
         let perp_err = delta.x + delta.y;
 
