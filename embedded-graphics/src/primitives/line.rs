@@ -290,13 +290,13 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             }
 
             let mut diag = 0;
-            // let mut did_move_x = false;
+            let mut did_move_x = false;
 
             let err_double = 2 * self.err;
             if err_double > self.delta.y {
                 self.err += self.delta.y;
                 self.start += Point::new(self.direction.x, 0);
-                // did_move_x = true;
+                did_move_x = true;
 
                 // self.perp_err += self.delta.x;
 
@@ -323,14 +323,19 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     self.perp_err += self.delta.x;
                 }
 
-                if self.show_extra_perp {
+                if self.show_extra_perp && perp_err_double < self.delta.x {
                     self.extra_perp = PerpLineIterator {
                         color: self.style.test_color,
                         err: self.perp_err,
-                        start: if self.direction.x > self.direction.y {
+                        // start: if self.direction.x > self.direction.y {
+                        //     self.start - Point::new(self.direction.x, 0)
+                        // } else {
+                        //     self.start - Point::new(0, self.direction.y)
+                        // },
+                        start: if did_move_x {
                             self.start - Point::new(self.direction.x, 0)
                         } else {
-                            self.start - Point::new(0, self.direction.y)
+                            self.start
                         },
                         current_iter: 0,
                         ..self.perp
