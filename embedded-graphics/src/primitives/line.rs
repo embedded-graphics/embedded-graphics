@@ -185,9 +185,16 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
 
-        let normal = Point::new((delta.x * 10) / len, (delta.y * 10) / len);
+        let normal = Point::new(
+            (delta.x * self.style.stroke_width as i32) / len,
+            (delta.y * self.style.stroke_width as i32) / len,
+        );
 
-        let width: i32 = normal.x.abs().max(normal.y.abs()) / 2;
+        let width: i32 = dbg!(normal.x.abs().max(normal.y.abs()));
+
+        // let width = dbg!(((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt() / 2.0) as i32;
+
+        // let width = 5;
 
         let perp_err = delta.x + delta.y;
 
@@ -362,6 +369,8 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
 
         if self.return_other_side {
             self.return_other_side = false;
+
+            self.current_iter += 1;
 
             return Some(Pixel(self.other_start, self.color.unwrap()));
         }

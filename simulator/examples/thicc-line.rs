@@ -188,7 +188,7 @@ fn draw_line(display: &mut RgbDisplay, p0: Point, p1: Point, width: i32) {
 fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
-        .size(200, 100)
+        .size(120, 120)
         .scale(10)
         .pixel_spacing(1)
         .build_rgb();
@@ -242,6 +242,9 @@ fn main() {
     //         .into_iter(),
     // );
 
+    let len = 50.0;
+    let center = Point::new(60, 60);
+
     loop {
         let end = display.run_once();
 
@@ -249,8 +252,8 @@ fn main() {
             break;
         }
 
-        let x = 127 + (angle.cos() * 120.0) as i32;
-        let y = 127 + (angle.sin() * 120.0) as i32;
+        let x = center.x + (angle.cos() * len) as i32;
+        let y = center.y + (angle.sin() * len) as i32;
 
         let width = 1;
 
@@ -258,19 +261,25 @@ fn main() {
 
         // display.clear();
         // display.draw(
-        //     Line::new(Point::new(127, 127), Point::new(x, y))
-        //         .stroke_color(Some(Rgb888::WHITE))
-        //         .fill_color(Some(Rgb888::RED))
+        //     Line::new(center, Point::new(x, y))
+        //         .show_extra_perp()
+        //         .style(Style {
+        //             stroke_color: Some(Rgb888::WHITE),
+        //             fill_color: Some(Rgb888::WHITE),
+        //             test_color: Some(Rgb888::WHITE),
+        //             stroke_width: 10,
+        //             ..Style::default()
+        //         })
         //         .into_iter(),
         // );
 
         // if angle < (2.0 * core::f32::consts::PI - 0.1) {
         //     angle += 0.1;
         // }
-        angle += 0.1;
+        // angle += 0.1;
+        // thread::sleep(Duration::from_millis(100));
 
         display.clear();
-
         display.draw(
             Line::new(Point::new(30, 30), position)
                 .show_extra_perp()
@@ -280,11 +289,11 @@ fn main() {
                     stroke_color: Some(Rgb888::YELLOW),
                     fill_color: Some(Rgb888::RED),
                     test_color: Some(Rgb888::CYAN),
+                    stroke_width: 10,
                     ..Style::default()
                 })
                 .into_iter(),
         );
-
         display.draw(
             Line::new(Point::new(30, 30) + offs, position + offs)
                 // .stroke_color(Some(Rgb888::YELLOW))
@@ -293,6 +302,7 @@ fn main() {
                     stroke_color: Some(Rgb888::YELLOW),
                     fill_color: Some(Rgb888::RED),
                     test_color: Some(Rgb888::CYAN),
+                    stroke_width: 10,
                     ..Style::default()
                 })
                 .into_iter(),
