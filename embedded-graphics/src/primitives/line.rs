@@ -291,6 +291,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             let mut diag = 0;
             let mut did_move_x = false;
+            let mut did_move_y = false;
 
             let err_double = 2 * self.err;
             if err_double > self.delta.y {
@@ -305,6 +306,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             if err_double < self.delta.x {
                 self.err += self.delta.x;
                 self.start += Point::new(0, self.direction.y);
+                did_move_y = true;
 
                 // self.perp_err += self.delta.y;
 
@@ -315,15 +317,15 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             if diag == 2 {
                 let perp_err_double = self.perp_err * 2;
 
-                if perp_err_double > self.delta.y {
-                    self.perp_err += self.delta.y;
-                }
+                // if perp_err_double > self.delta.y {
+                //     self.perp_err += self.delta.y;
+                // }
 
-                if perp_err_double < self.delta.x {
-                    self.perp_err += self.delta.x;
-                }
+                // if perp_err_double < self.delta.x {
+                //     self.perp_err += self.delta.x;
+                // }
 
-                if self.show_extra_perp && perp_err_double < self.delta.x {
+                if self.show_extra_perp {
                     self.extra_perp = PerpLineIterator {
                         color: self.style.test_color,
                         err: self.perp_err,
@@ -332,8 +334,8 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                         // } else {
                         //     self.start - Point::new(0, self.direction.y)
                         // },
-                        start: if did_move_x {
-                            self.start - Point::new(self.direction.x, 0)
+                        start: if did_move_y {
+                            self.start - Point::new(0, self.direction.y)
                         } else {
                             self.start
                         },
@@ -365,6 +367,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
         // Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else {
+            // println!("---");
             None
         }
     }
