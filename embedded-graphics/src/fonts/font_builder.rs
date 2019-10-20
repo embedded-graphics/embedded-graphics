@@ -1,8 +1,7 @@
 //! Common code used to define available monospace pixel fonts.
 //!
 //! See the [module level type definitions](../index.html#types) for a list of usable fonts.
-use crate::drawable::Drawable;
-use crate::drawable::Pixel;
+use crate::drawable::{Drawable, Pixel};
 use crate::fonts::Font;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::{BinaryColor, PixelColor};

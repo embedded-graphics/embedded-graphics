@@ -36,11 +36,11 @@ pub type Font6x12<'a, C> = FontBuilder<'a, C, Font6x12Conf>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::drawable::Drawable;
     use crate::fonts::Font;
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
-    use crate::prelude::*;
     use crate::style::WithStyle;
     use crate::transform::Transform;
 

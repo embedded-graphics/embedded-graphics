@@ -178,15 +178,16 @@ pub mod transform;
 
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::prelude::*;
+use crate::drawable::Drawable;
+use crate::style::WithStyle;
 
-/// Defines a display that can be used to render [`Drawable'] objects.
+/// Defines a display that can be used to render [`Drawable`] objects.
 ///
 /// To use this crate in a driver, `DrawTarget` must be implemented. This trait defines how a
 /// display draws pixels, and optionally provides a way to define accelerated drawing methods for
 /// graphical primitives such as lines, rectangles, triangles, and circles.
 ///
-/// Once a `DrawTarget` is defined, it can be used to render [`Drawable`]. Note that any iterator
+/// Once a `DrawTarget` is defined, it can be used to render [`Drawable`]s. Note that any iterator
 /// over [`Pixel`]s has a default implementation for the [`Drawable`] trait. See the [`Drawable`]
 /// trait documentation for more details.
 ///
@@ -339,12 +340,12 @@ where
     ///
     /// Note that some displays require a "flush" operation
     /// to actually write changes to the framebuffer.
-    fn draw_pixel(&mut self, item: Pixel<C>);
+    fn draw_pixel(&mut self, item: drawable::Pixel<C>);
 
     /// Draws an object from an iterator over its pixels.
     fn draw_iter<T>(&mut self, item: T)
     where
-        T: IntoIterator<Item = Pixel<C>>,
+        T: IntoIterator<Item = drawable::Pixel<C>>,
     {
         for pixel in item {
             self.draw_pixel(pixel);

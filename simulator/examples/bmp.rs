@@ -9,9 +9,9 @@
 //! [dependencies]
 //! embedded-graphics = { version = "*", features = [ "bmp" ] }
 
+use embedded_graphics::prelude::*;
 use embedded_graphics::image::ImageBmp;
 use embedded_graphics::pixelcolor::Rgb565;
-use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;

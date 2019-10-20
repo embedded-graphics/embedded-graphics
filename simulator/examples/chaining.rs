@@ -1,8 +1,8 @@
 //! Demonstrate the chaining abilities of embedded graphics iterators
 
+use embedded_graphics::prelude::*;
 use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
 use embedded_graphics_simulator::{BinaryColorTheme, DisplayBuilder};
 use std::thread;

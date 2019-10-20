@@ -1,7 +1,6 @@
 use criterion::*;
 use embedded_graphics::{
     pixelcolor::Gray8,
-    prelude::*,
     primitives::{Circle, Line, Rectangle, Triangle},
 };
 

@@ -9,9 +9,9 @@
 //! [dependencies]
 //! embedded-graphics = { version = "*", features = [ "tga" ] }
 
+use embedded_graphics::prelude::*;
 use embedded_graphics::image::ImageTga;
 use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
 use std::time::Duration;

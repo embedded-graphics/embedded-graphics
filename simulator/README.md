@@ -13,7 +13,6 @@ The simulator can be used to test and debug [embedded-graphics](https://crates.i
 ## Simulate a 128x64 SSD1306 OLED
 
 ```rust
-use embedded_graphics::prelude::*;
 use embedded_graphics::{icoord, circle, line, text_6x8};
 use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
 use std::thread;

@@ -1,5 +1,5 @@
-use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;
