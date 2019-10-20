@@ -214,7 +214,19 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             width: width as u32,
             show_extra_perp: self.show_extra_perp,
             is_diag: false,
-            extra_perp: None,
+            extra_perp: PerpLineIterator {
+                // style: self.style,
+                color: self.style.stroke_color,
+                start: self.start,
+                // delta: dbg!(perp_delta),
+                delta,
+                direction: perp_direction,
+                // err: dbg!(delta.y),
+                err: perp_err,
+                current_iter: width as u32,
+                width: width as u32,
+                // perp_err: 0,
+            },
 
             perp: PerpLineIterator {
                 // style: self.style,
@@ -264,6 +276,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
+        if let Some(p) = self.extra_perp.next() {
+            return Some(p);
+        }
+
         if let Some(p) = self.perp.next() {
             return Some(p);
         }
@@ -274,11 +290,13 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             }
 
             let mut diag = 0;
+            // let mut did_move_x = false;
 
             let err_double = 2 * self.err;
             if err_double > self.delta.y {
                 self.err += self.delta.y;
                 self.start += Point::new(self.direction.x, 0);
+                // did_move_x = true;
 
                 // self.perp_err += self.delta.x;
 
@@ -296,8 +314,6 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             // There was a diagonal move
             if diag == 2 {
                 let perp_err_double = self.perp_err * 2;
-                // self.perp_err -= self.delta.x + self.delta.y;
-                // self.perp_err -= self.delta.y;
 
                 if perp_err_double > self.delta.y {
                     self.perp_err += self.delta.y;
@@ -305,6 +321,22 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
                 if perp_err_double < self.delta.x {
                     self.perp_err += self.delta.x;
+                }
+
+                if self.show_extra_perp {
+                    self.extra_perp = PerpLineIterator {
+                        color: self.style.test_color,
+                        err: self.perp_err,
+                        start: if self.direction.x > self.direction.y {
+                            self.start - Point::new(self.direction.x, 0)
+                        } else {
+                            self.start - Point::new(0, self.direction.y)
+                        },
+                        current_iter: 0,
+                        ..self.perp
+                    };
+
+                    // return self.extra_perp.next();
                 }
             }
 
@@ -319,6 +351,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 current_iter: 0,
                 ..self.perp
             };
+
+            if let Some(p) = self.extra_perp.next() {
+                return Some(p);
+            }
 
             self.perp.next()
 
