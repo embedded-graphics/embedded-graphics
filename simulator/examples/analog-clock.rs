@@ -8,10 +8,10 @@
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
-use embedded_graphics::prelude::*;
 use embedded_graphics::egcircle;
 use embedded_graphics::fonts::Font12x16;
 use embedded_graphics::pixelcolor::BinaryColor;
+use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;

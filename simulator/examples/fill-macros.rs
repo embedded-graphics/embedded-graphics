@@ -1,7 +1,7 @@
 //! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
 
-use embedded_graphics::prelude::*;
 use embedded_graphics::pixelcolor::BinaryColor;
+use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egline, egrectangle, egtriangle};
 use embedded_graphics_simulator::DisplayBuilder;
 use std::thread;

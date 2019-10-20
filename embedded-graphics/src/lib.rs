@@ -176,9 +176,9 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
+use crate::drawable::Drawable;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::drawable::Drawable;
 use crate::style::WithStyle;
 
 /// Defines a display that can be used to render [`Drawable`] objects.

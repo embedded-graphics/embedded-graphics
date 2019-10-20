@@ -1,8 +1,8 @@
 //! Demonstrate the chaining abilities of embedded graphics iterators
 
-use embedded_graphics::prelude::*;
 use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
+use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
 use embedded_graphics_simulator::{BinaryColorTheme, DisplayBuilder};
 use std::thread;
@@ -14,7 +14,7 @@ fn main() {
         .theme(BinaryColorTheme::OledBlue)
         .build_binary();
 
-    let objects = Circle::new(Point::new(64, 64), 64)
+    let mut objects = Circle::new(Point::new(64, 64), 64)
         .stroke_color(Some(BinaryColor::On))
         .into_iter()
         .chain(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)))

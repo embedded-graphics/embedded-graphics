@@ -7,8 +7,8 @@
 extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
-use embedded_graphics::prelude::*;
 use embedded_graphics::pixelcolor::Rgb888;
+use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Circle;
 use embedded_graphics_simulator::{DisplayBuilder, RgbDisplay, SimulatorEvent};
 use sdl2::keyboard::Keycode;

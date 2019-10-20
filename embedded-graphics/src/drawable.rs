@@ -64,7 +64,7 @@ where
     fn draw<T: DrawTarget<C>>(self, display: &mut T);
 }
 
-impl<C, T> Drawable<C> for T
+impl<C, T> Drawable<C> for &mut T
 where
     C: PixelColor,
     T: Iterator<Item = Pixel<C>>,

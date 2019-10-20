@@ -80,10 +80,10 @@ pub use crate::display_builder::DisplayBuilder;
 pub use crate::display_theme::BinaryColorTheme;
 pub use crate::window::SimulatorEvent;
 use crate::window::Window;
-use embedded_graphics::DrawTarget;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::geometry::Size;
-use embedded_graphics::pixelcolor::{PixelColor, BinaryColor, Rgb888, RgbColor};
+use embedded_graphics::pixelcolor::{BinaryColor, PixelColor, Rgb888, RgbColor};
+use embedded_graphics::DrawTarget;
 
 struct PixelData<C> {
     pub width: usize,
