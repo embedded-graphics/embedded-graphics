@@ -50,6 +50,9 @@ pub struct Line<C: PixelColor> {
 
     /// Line style
     pub style: Style<C>,
+
+    /// DELETEME
+    show_extra_perp: bool,
 }
 
 impl<C> Primitive for Line<C> where C: PixelColor {}
@@ -81,7 +84,15 @@ where
             start,
             end,
             style: Style::default(),
+            show_extra_perp: false,
         }
+    }
+
+    /// DELETEME
+    pub fn show_extra_perp(&mut self) -> &mut Self {
+        self.show_extra_perp = true;
+
+        self
     }
 }
 
@@ -201,6 +212,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             stop: self.start == self.end, // if line length is zero, draw nothing
             perp_err,
             width: width as u32,
+            show_extra_perp: self.show_extra_perp,
             is_diag: false,
             extra_perp: None,
 
@@ -238,7 +250,8 @@ where
     stop: bool,
     width: u32,
     perp: PerpLineIterator<C>,
-    extra_perp: Option<PerpLineIterator<C>>,
+    extra_perp: PerpLineIterator<C>,
+    show_extra_perp: bool,
     perp_err: i32,
     is_diag: bool,
 }
