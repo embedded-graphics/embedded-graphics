@@ -46,14 +46,12 @@
 //!         .size(128, 64)
 //!         .build_binary();
 //!
-//!     display.draw(text_6x8!("Hello World!"));
+//!     text_6x8!("Hello World!").draw(&mut display);
 //!
-//!     display.draw(egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)));
+//!     egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
 //!
-//!     display.draw(egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On))
-//!         .translate(Point::new(64, 0)));
-//!     display.draw(egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On))
-//!         .translate(Point::new(64, 0)));
+//!     egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On)).translate(Point::new(64, 0)).draw(&mut display);
+//!     egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On)) .translate(Point::new(64, 0)).draw(&mut display);
 //!
 //!     loop {
 //!         let end = display.run_once();
@@ -83,9 +81,9 @@ pub use crate::display_theme::BinaryColorTheme;
 pub use crate::window::SimulatorEvent;
 use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
-use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
-use embedded_graphics::prelude::*;
-use embedded_graphics::Drawing;
+use embedded_graphics::geometry::Size;
+use embedded_graphics::pixelcolor::{BinaryColor, PixelColor, Rgb888, RgbColor};
+use embedded_graphics::DrawTarget;
 
 struct PixelData<C> {
     pub width: usize,
@@ -161,17 +159,16 @@ impl BinaryDisplay {
     }
 }
 
-impl Drawing<BinaryColor> for BinaryDisplay {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = Pixel<BinaryColor>>,
-    {
-        for Pixel(coord, color) in item_pixels {
-            let x = coord[0] as usize;
-            let y = coord[1] as usize;
+impl DrawTarget<BinaryColor> for BinaryDisplay {
+    fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>) {
+        let Pixel(coord, color) = pixel;
+        let x = coord[0] as usize;
+        let y = coord[1] as usize;
+        self.pixels.set(x, y, color);
+    }
 
-            self.pixels.set(x, y, color);
-        }
+    fn size(&self) -> Size {
+        Size::new(self.pixels.width as u32, self.pixels.height as u32)
     }
 }
 
@@ -216,19 +213,18 @@ impl RgbDisplay {
     }
 }
 
-impl<C> Drawing<C> for RgbDisplay
+impl<C> DrawTarget<C> for RgbDisplay
 where
     C: PixelColor + Into<Rgb888>,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = Pixel<C>>,
-    {
-        for Pixel(coord, color) in item_pixels {
-            let x = coord[0] as usize;
-            let y = coord[1] as usize;
+    fn draw_pixel(&mut self, pixel: Pixel<C>) {
+        let Pixel(coord, color) = pixel;
+        let x = coord[0] as usize;
+        let y = coord[1] as usize;
+        self.pixels.set(x, y, color.into());
+    }
 
-            self.pixels.set(x, y, color.into());
-        }
+    fn size(&self) -> Size {
+        Size::new(self.pixels.width as u32, self.pixels.height as u32)
     }
 }

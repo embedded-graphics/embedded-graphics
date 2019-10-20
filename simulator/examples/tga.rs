@@ -25,7 +25,7 @@ fn main() {
         .scale(2)
         .build_rgb();
 
-    display.draw(&image);
+    image.draw(&mut display);
 
     loop {
         let end = display.run_once();

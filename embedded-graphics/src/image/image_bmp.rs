@@ -4,6 +4,7 @@ use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{LittleEndian, RawData, RawDataIter};
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
+use crate::DrawTarget;
 use core::marker::PhantomData;
 use tinybmp::Bmp;
 
@@ -15,9 +16,6 @@ use tinybmp::Bmp;
 ///
 /// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
 ///
-/// Note that images must be passed to `Display#draw` by reference, or by explicitly calling
-/// `.into_iter()` on them, unlike other embedded_graphics objects.
-///
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::image::ImageBmp;
@@ -26,11 +24,8 @@ use tinybmp::Bmp;
 /// # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 ///
 /// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
-/// let image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
-///
-/// // Equivalent behavior
-/// display.draw(&image);
-/// display.draw(image.into_iter());
+/// let mut image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
+/// image.draw(&mut display);
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C>
@@ -121,10 +116,9 @@ where
     }
 }
 
-impl<'a, C> Drawable for ImageBmp<'a, C> where C: PixelColor + From<<C as PixelColor>::Raw> {}
-
-impl<'a, C> IntoIterator for &'a ImageBmp<'a, C>
+impl<'a, 'b, C> IntoIterator for &'b ImageBmp<'a, C>
 where
+    'b: 'a,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
@@ -190,12 +184,20 @@ where
     }
 }
 
+impl<'a, C: 'a> Drawable<C> for &ImageBmp<'a, C>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+{
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
+        display.draw_iter(self.into_iter());
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor};
-    use crate::Drawing;
 
     #[test]
     fn negative_top_left() {
@@ -231,6 +233,9 @@ mod tests {
         ))
         .unwrap()
         .translate(Point::new(-1, -1));
+
+        assert_eq!(image.into_iter().count(), 9);
+
         let it = image.into_iter();
 
         let expected: [Pixel<Rgb565>; 9] = [
@@ -246,8 +251,6 @@ mod tests {
             Pixel(Point::new(1, 2), Rgb565::BLACK),
             Pixel(Point::new(2, 2), Rgb565::WHITE),
         ];
-
-        assert_eq!(image.into_iter().count(), 9);
 
         for (idx, pixel) in it.enumerate() {
             assert_eq!(pixel, expected[idx]);
@@ -344,16 +347,19 @@ mod tests {
             ImageBmp::new(include_bytes!("../../tests/issue_136.bmp")).unwrap();
 
         let mut display = MockDisplay::new();
-        display.draw(image.into_iter().map(|Pixel(p, c)| {
-            Pixel(
-                p,
-                match c {
-                    Rgb565::BLACK => BinaryColor::Off,
-                    Rgb565::WHITE => BinaryColor::On,
-                    _ => panic!("Unexpected color in image"),
-                },
-            )
-        }));
+        image
+            .into_iter()
+            .map(|Pixel(p, c)| {
+                Pixel(
+                    p,
+                    match c {
+                        Rgb565::BLACK => BinaryColor::Off,
+                        Rgb565::WHITE => BinaryColor::On,
+                        _ => panic!("Unexpected color in image"),
+                    },
+                )
+            })
+            .draw(&mut display);
 
         assert_eq!(
             display,

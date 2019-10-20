@@ -1,8 +1,10 @@
 use criterion::*;
 use embedded_graphics::{
+    drawable::Pixel,
+    geometry::Point,
     pixelcolor::Gray8,
-    prelude::*,
     primitives::{Circle, Line, Rectangle, Triangle},
+    style::WithStyle,
 };
 
 fn filled_circle(c: &mut Criterion) {

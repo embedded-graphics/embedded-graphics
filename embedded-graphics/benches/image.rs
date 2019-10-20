@@ -1,5 +1,9 @@
 use criterion::*;
-use embedded_graphics::{image::ImageBmp, pixelcolor::Rgb565, prelude::*};
+use embedded_graphics::{
+    drawable::Pixel,
+    image::{ImageBmp, ImageFile},
+    pixelcolor::Rgb565,
+};
 
 fn image_bmp_4x4(c: &mut Criterion) {
     c.bench_function("image BMP 4x4px", |b| {

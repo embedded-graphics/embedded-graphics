@@ -16,93 +16,85 @@ fn main() {
         .scale(2)
         .build_binary();
 
-    display.draw(egcircle!(
+    egcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::On)
-    ));
+    )
+    .draw(&mut display);
 
-    display.draw(
-        egcircle!(
-            (CIRCLE_SIZE, CIRCLE_SIZE),
-            CIRCLE_SIZE as u32,
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::On)
-        )
-        .translate(Point::new(16, 16)),
-    );
+    egcircle!(
+        (CIRCLE_SIZE, CIRCLE_SIZE),
+        CIRCLE_SIZE as u32,
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::On)
+    )
+    .translate(Point::new(16, 16))
+    .draw(&mut display);
 
-    display.draw(
-        egcircle!(
-            (CIRCLE_SIZE, CIRCLE_SIZE),
-            CIRCLE_SIZE as u32,
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::Off)
-        )
-        .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE)),
-    );
+    egcircle!(
+        (CIRCLE_SIZE, CIRCLE_SIZE),
+        CIRCLE_SIZE as u32,
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::Off)
+    )
+    .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
+    .draw(&mut display);
 
-    display.draw(
-        egrectangle!((0, 0), (64, 64), stroke_color = Some(BinaryColor::On))
-            .translate(Point::new(96, 0)),
-    );
+    egrectangle!((0, 0), (64, 64), stroke_color = Some(BinaryColor::On))
+        .translate(Point::new(96, 0))
+        .draw(&mut display);
 
-    display.draw(
-        &egrectangle!(
-            (0, 0),
-            (64, 64),
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::On)
-        )
-        .translate(Point::new(96 + 16, 16)),
-    );
+    egrectangle!(
+        (0, 0),
+        (64, 64),
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::On)
+    )
+    .translate(Point::new(96 + 16, 16))
+    .draw(&mut display);
 
-    display.draw(
-        egrectangle!(
-            (0, 0),
-            (64, 64),
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::Off)
-        )
-        .translate(Point::new(96 + 32, 32)),
-    );
+    egrectangle!(
+        (0, 0),
+        (64, 64),
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::Off)
+    )
+    .translate(Point::new(96 + 32, 32))
+    .draw(&mut display);
 
-    display.draw(
-        egtriangle!(
-            (32, 0),
-            (0, 64),
-            (64, 64),
-            stroke_color = Some(BinaryColor::On)
-        )
-        .translate(Point::new(96 * 2, 0)),
-    );
+    egtriangle!(
+        (32, 0),
+        (0, 64),
+        (64, 64),
+        stroke_color = Some(BinaryColor::On)
+    )
+    .translate(Point::new(96 * 2, 0))
+    .draw(&mut display);
 
-    display.draw(
-        egtriangle!(
-            (32, 0),
-            (0, 64),
-            (64, 64),
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::On)
-        )
-        .translate(Point::new(96 * 2 + 16, 16)),
-    );
+    egtriangle!(
+        (32, 0),
+        (0, 64),
+        (64, 64),
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::On)
+    )
+    .translate(Point::new(96 * 2 + 16, 16))
+    .draw(&mut display);
 
-    display.draw(
-        egtriangle!(
-            (32, 0),
-            (0, 64),
-            (64, 64),
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::Off)
-        )
-        .translate(Point::new(96 * 2 + 32, 32)),
-    );
+    egtriangle!(
+        (32, 0),
+        (0, 64),
+        (64, 64),
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::Off)
+    )
+    .translate(Point::new(96 * 2 + 32, 32))
+    .draw(&mut display);
 
-    display.draw(
-        egline!((0, 0), (64, 64), stroke_color = Some(BinaryColor::Off),)
-            .translate(Point::new(256 + 32, 0)),
-    );
+    egline!((0, 0), (64, 64), stroke_color = Some(BinaryColor::Off),)
+        .translate(Point::new(256 + 32, 0))
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

@@ -47,18 +47,14 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    display.draw(Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)));
-    display
-        .draw(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)));
-    display.draw(
-        Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)),
-    );
+    Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)).draw(&mut display);
 
-    display.draw(
-        Font6x8::render_str("Hello World!")
-            .stroke_color(Some(BinaryColor::On))
-            .translate(Point::new(5, 50)),
-    );
+    Font6x8::render_str("Hello World!")
+        .stroke_color(Some(BinaryColor::On))
+        .translate(Point::new(5, 50))
+        .draw(&mut display);
 }
 ```
 
@@ -77,31 +73,30 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    display.draw(egcircle!(
+    egcircle!(
         (64, 64),
         64,
         stroke_color = Some(BinaryColor::On)
-    ));
-    display.draw(egline!(
+    ).draw(&mut display);
+    egline!(
         (64, 64),
         (0, 64),
         stroke_color = Some(BinaryColor::On)
-    ));
-    display.draw(egline!(
+    ).draw(&mut display);
+    egline!(
         (64, 64),
         (80, 80),
         stroke_color = Some(BinaryColor::On)
-    ));
-    display.draw(egrectangle!(
+    ).draw(&mut display);
+    egrectangle!(
         (64, 64),
         (80, 80),
         stroke_color = None,
         fill_color = Some(BinaryColor::Off)
-    ));
-    display.draw(
-        text_6x8!("Hello world!", stroke_color = Some(BinaryColor::On))
-            .translate(Point::new(5, 50)),
-    );
+    ).draw(&mut display);
+    text_6x8!("Hello world!", stroke_color = Some(BinaryColor::On))
+        .translate(Point::new(5, 50))
+        .draw(&mut display);
 }
 ```
 

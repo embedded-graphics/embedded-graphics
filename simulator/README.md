@@ -13,7 +13,6 @@ The simulator can be used to test and debug [embedded-graphics](https://crates.i
 ## Simulate a 128x64 SSD1306 OLED
 
 ```rust
-use embedded_graphics::prelude::*;
 use embedded_graphics::{icoord, circle, line, text_6x8};
 use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
 use std::thread;
@@ -25,12 +24,12 @@ fn main() {
      .size(128, 64)
      .build();
 
- display.draw(text_6x8!("Hello World!"));
+ text_6x8!("Hello World!").draw(&mut display);
 
- display.draw(egcircle!((96, 32), 31, stroke_color = Some(1u8.into())));
+ egcircle!((96, 32), 31, stroke_color = Some(1u8.into())).draw(&mut display);
 
- display.draw(egline!((32, 32), (1, 32), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)));
- display.draw(egline!((32, 32), (40, 40), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)));
+ egline!((32, 32), (1, 32), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)).draw(&mut display);
+ egline!((32, 32), (40, 40), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)).draw(&mut display);
 
  loop {
      let end = display.run_once();

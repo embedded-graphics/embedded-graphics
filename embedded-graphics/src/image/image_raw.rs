@@ -3,6 +3,7 @@ use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter};
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
+use crate::DrawTarget;
 use core::marker::PhantomData;
 
 /// Image with little endian data.
@@ -52,7 +53,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///     let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
 ///
 ///     let mut display = Display::default();
-///     display.draw(&image);
+///     image.draw(&mut display);
 /// }
 /// ```
 ///
@@ -157,13 +158,6 @@ where
     }
 }
 
-impl<'a, C, BO> Drawable for Image<'a, C, BO>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    BO: ByteOrder,
-{
-}
-
 impl<'a, C, BO> Transform for Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -213,7 +207,7 @@ where
     }
 }
 
-impl<'a, C, BO> IntoIterator for &'a Image<'a, C, BO>
+impl<'a, 'b: 'a, C: 'a, BO: 'a> IntoIterator for &'b Image<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
@@ -229,6 +223,17 @@ where
             y: 0,
             image: self,
         }
+    }
+}
+
+impl<'a, C: 'a, BO: 'a> Drawable<C> for &'a Image<'a, C, BO>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    BO: ByteOrder,
+    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
+{
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
+        display.draw_iter(self.into_iter());
     }
 }
 

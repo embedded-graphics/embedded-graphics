@@ -13,6 +13,7 @@
 //! ```
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::egrectangle;
+//! use embedded_graphics::geometry::Size;
 //!
 //! /// Color with 3 states.
 //! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -31,43 +32,37 @@
 //! /// Mock EPD display.
 //! pub struct EpdDisplay {}
 //!
-//! impl Drawing<EpdColor> for EpdDisplay {
-//!     fn draw<T>(&mut self, item: T)
-//!     where
-//!         T: IntoIterator<Item = Pixel<EpdColor>>
-//!     {
-//!         for Pixel(point, color) in item {
-//!             match color {
-//!                 EpdColor::White => {} // draw white pixel at `point`
-//!                 EpdColor::Black => {} // draw black pixel at `point`
-//!                 EpdColor::Red => {} // draw red pixel at `point`
-//!             }
+//! impl DrawTarget<EpdColor> for EpdDisplay {
+//!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) {
+//!         let Pixel(point, color) = item;
+//!         match color {
+//!             EpdColor::White => {} // draw white pixel at `point`
+//!             EpdColor::Black => {} // draw black pixel at `point`
+//!             EpdColor::Red => {} // draw red pixel at `point`
 //!         }
+//!     }
+//!
+//!     fn size(&self) -> Size {
+//!         Size::zero()
 //!     }
 //! }
 //!
 //! fn main() {
 //!     let mut display = EpdDisplay {};
 //!
-//!     display.draw(
-//!         egrectangle!((0, 0), (100, 100), fill_color = Some(EpdColor::White))
-//!     );
+//!     egrectangle!((0, 0), (100, 100), fill_color = Some(EpdColor::White)).draw(&mut display);
 //!
-//!     display.draw(
-//!         egrectangle!((100, 0), (200, 100), fill_color = Some(EpdColor::Black))
-//!     );
+//!     egrectangle!((100, 0), (200, 100), fill_color = Some(EpdColor::Black)).draw(&mut display);
 //!
-//!     display.draw(
-//!         egrectangle!((200, 0), (300, 100), fill_color = Some(EpdColor::Red))
-//!     );
+//!     egrectangle!((200, 0), (300, 100), fill_color = Some(EpdColor::Red)).draw(&mut display);
 //! }
 //! ```
 //!
-//! The implementation of the [`Drawing`] trait uses a `match` statement to
+//! The implementation of the [`DrawTarget`] trait uses a `match` statement to
 //! draw the specified color and doesn't depend on the raw data conversions,
 //! see the [`raw` module] documentation for an example that uses this feature.
 //!
-//! [`Drawing`]: ../trait.Drawing.html
+//! [`DrawTarget`]: ../trait.DrawTarget.html
 //! [`PixelColor`]: trait.PixelColor.html
 //! [`Raw`]: trait.PixelColor.html#associatedtype.Raw
 //! [`raw` module]: raw/index.html

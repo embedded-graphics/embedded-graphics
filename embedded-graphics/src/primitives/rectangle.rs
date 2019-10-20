@@ -7,6 +7,7 @@ use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
+use crate::DrawTarget;
 
 /// Rectangle primitive
 ///
@@ -24,21 +25,19 @@ use crate::style::WithStyle;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
-/// let r1 = Rectangle::new(Point::new(10, 20), Point::new(30, 40));
+/// Rectangle::new(Point::new(10, 20), Point::new(30, 40)).draw(&mut display);
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
-/// let r2 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+/// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .stroke_color(Some(Rgb565::RED))
 ///     .stroke_width(3)
-///     .fill_color(Some(Rgb565::GREEN));
+///     .fill_color(Some(Rgb565::GREEN))
+///     .draw(&mut display);
 ///
 /// // Rectangle with translation applied
-/// let r3 = Rectangle::new(Point::new(50, 20), Point::new(60, 35))
-///     .translate(Point::new(65, 35));
-///
-/// display.draw(r1);
-/// display.draw(r2);
-/// display.draw(r3);
+/// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
+///     .translate(Point::new(65, 35))
+///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Rectangle<C: PixelColor> {
@@ -216,7 +215,14 @@ where
     }
 }
 
-impl<C> Drawable for Rectangle<C> where C: PixelColor {}
+impl<'a, C: 'a> Drawable<C> for &Rectangle<C>
+where
+    C: PixelColor,
+{
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
+        display.draw_rectangle(self);
+    }
+}
 
 impl<C> Transform for Rectangle<C>
 where

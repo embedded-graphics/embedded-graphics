@@ -13,11 +13,10 @@ fn main() {
         .build_binary();
 
     // Outline
-    display.draw(
-        Rectangle::new(Point::new(0, 0), Point::new(16, 16))
-            .stroke_color(Some(BinaryColor::On))
-            .translate(Point::new(-8, -8)),
-    );
+    Rectangle::new(Point::new(0, 0), Point::new(16, 16))
+        .stroke_color(Some(BinaryColor::On))
+        .translate(Point::new(-8, -8))
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

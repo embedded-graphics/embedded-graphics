@@ -153,17 +153,19 @@ fn main() {
 
         display.clear();
 
-        display.draw(draw_face());
-        display.draw(draw_hour_hand(time.hour()));
-        display.draw(draw_minute_hand(time.minute()));
-        display.draw(draw_seconds_hand(time.second()));
+        draw_face().draw(&mut display);
+        draw_hour_hand(time.hour()).draw(&mut display);
+        draw_minute_hand(time.minute()).draw(&mut display);
+        draw_seconds_hand(time.second()).draw(&mut display);
 
         // Draw digital clock just above center
-        display.draw(draw_digital_clock(&digital_clock_text));
+        draw_digital_clock(&digital_clock_text).draw(&mut display);
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
-        display.draw(Circle::new(CENTER, 4).fill_color(Some(BinaryColor::On)));
+        Circle::new(CENTER, 4)
+            .fill_color(Some(BinaryColor::On))
+            .draw(&mut display);
 
         let end = display.run_once();
 

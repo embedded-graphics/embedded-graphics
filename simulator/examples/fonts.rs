@@ -13,36 +13,40 @@ fn main() {
         .build_binary();
 
     // Show smallest font with black font on white background (default value for fonts)
-    display.draw(
-        Font6x8::render_str("Hello World! - default style 6x8").translate(Point::new(15, 15)),
-    );
+    Font6x8::render_str("Hello World! - default style 6x8")
+        .translate(Point::new(15, 15))
+        .draw(&mut display);
 
     // Show smallest font with white font on black background
-    display.draw(
-        Font6x8::render_str("Hello World! - inverse 6x8")
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::On))
-            .translate(Point::new(15, 30)),
-    );
+    Font6x8::render_str("Hello World! - inverse 6x8")
+        .stroke_color(Some(BinaryColor::Off))
+        .fill_color(Some(BinaryColor::On))
+        .translate(Point::new(15, 30))
+        .draw(&mut display);
 
     // Show smallest font with white font on black background using a macro
-    display.draw(
-        text_6x8!(
-            "Hello world! - inverse 6x8 with macro",
-            stroke_color = Some(BinaryColor::Off),
-            fill_color = Some(BinaryColor::On)
-        )
-        .translate(Point::new(15, 40)),
-    );
+    text_6x8!(
+        "Hello world! - inverse 6x8 with macro",
+        stroke_color = Some(BinaryColor::Off),
+        fill_color = Some(BinaryColor::On)
+    )
+    .translate(Point::new(15, 40))
+    .draw(&mut display);
 
     // Show 6x12 Font
-    display.draw(Font6x12::render_str("Hello 6x12!").translate(Point::new(15, 55)));
+    Font6x12::render_str("Hello 6x12!")
+        .translate(Point::new(15, 55))
+        .draw(&mut display);
 
     // Show 8x16 Font
-    display.draw(Font8x16::render_str("Hello 8x16!").translate(Point::new(15, 80)));
+    Font8x16::render_str("Hello 8x16!")
+        .translate(Point::new(15, 80))
+        .draw(&mut display);
 
     // Show 12x16 Font using a macro
-    display.draw(text_12x16!("Hello 12x16!").translate(Point::new(15, 105)));
+    text_12x16!("Hello 12x16!")
+        .translate(Point::new(15, 105))
+        .draw(&mut display);
 
     loop {
         let end = display.run_once();

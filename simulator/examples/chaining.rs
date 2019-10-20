@@ -14,7 +14,7 @@ fn main() {
         .theme(BinaryColorTheme::OledBlue)
         .build_binary();
 
-    let objects = Circle::new(Point::new(64, 64), 64)
+    let mut objects = Circle::new(Point::new(64, 64), 64)
         .stroke_color(Some(BinaryColor::On))
         .into_iter()
         .chain(Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)))
@@ -27,7 +27,7 @@ fn main() {
                 .translate(Point::new(5, 50)),
         );
 
-    display.draw(objects);
+    objects.draw(&mut display);
 
     loop {
         let end = display.run_once();
