@@ -196,7 +196,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         let normal = Point::new((delta.x * 10) / len, (delta.y * 10) / len);
 
-        let width: i32 = normal.x.abs().max(normal.y.abs());
+        let width: i32 = normal.x.abs().max(normal.y.abs()) / 2;
         // let width = 10i32;
 
         let perp_err = delta.x + delta.y;
@@ -215,9 +215,11 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             show_extra_perp: self.show_extra_perp,
             is_diag: false,
             extra_perp: PerpLineIterator {
+                ret_other: false,
                 // style: self.style,
                 color: self.style.stroke_color,
                 start: self.start,
+                other_start: self.start,
                 // delta: dbg!(perp_delta),
                 delta,
                 direction: perp_direction,
@@ -229,9 +231,11 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             },
 
             perp: PerpLineIterator {
+                ret_other: false,
                 // style: self.style,
                 color: self.style.stroke_color,
                 start: self.start,
+                other_start: self.start,
                 // delta: dbg!(perp_delta),
                 delta,
                 direction: perp_direction,
@@ -326,6 +330,11 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 // }
 
                 if self.show_extra_perp {
+                    let start = if did_move_y {
+                        self.start - Point::new(0, self.direction.y)
+                    } else {
+                        self.start
+                    };
                     self.extra_perp = PerpLineIterator {
                         color: self.style.test_color,
                         err: self.perp_err,
@@ -334,11 +343,8 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                         // } else {
                         //     self.start - Point::new(0, self.direction.y)
                         // },
-                        start: if did_move_y {
-                            self.start - Point::new(0, self.direction.y)
-                        } else {
-                            self.start
-                        },
+                        start,
+                        other_start: start,
                         current_iter: 0,
                         ..self.perp
                     };
@@ -355,6 +361,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 },
                 err: self.perp_err,
                 start: self.start,
+                other_start: self.start,
                 current_iter: 0,
                 ..self.perp
             };
@@ -388,12 +395,20 @@ where
     err: i32,
     // perp_err: i32,
     current_iter: u32,
+    other_start: Point,
+    ret_other: bool,
 }
 
 impl<C: PixelColor> Iterator for PerpLineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.ret_other {
+            self.ret_other = false;
+
+            return Some(Pixel(self.other_start, self.color.unwrap()));
+        }
+
         if self.current_iter < self.width {
             self.current_iter += 1;
 
@@ -405,13 +420,17 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
                 // println!("minor");
                 self.err += self.delta.y;
                 self.start += Point::new(0, self.direction.y);
+                self.other_start -= Point::new(0, self.direction.y);
             }
 
             if err_double < self.delta.x {
                 // println!("MAJOR");
                 self.err += self.delta.x;
                 self.start += Point::new(self.direction.x, 0);
+                self.other_start -= Point::new(self.direction.x, 0);
             }
+
+            self.ret_other = true;
 
             // Some(Pixel(point, self.style.stroke_color.unwrap()))
             Some(Pixel(point, self.color.unwrap()))
