@@ -287,7 +287,28 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             self.num_iter += 1;
 
-            Some(Pixel(self.start, self.style.stroke_color.unwrap()))
+            self.perp = PerpLineIterator {
+                start: self.start,
+                color: if self.perp.color == self.style.stroke_color {
+                    self.style.fill_color
+                } else {
+                    self.style.stroke_color
+                },
+                width: self.style.stroke_width as u32,
+                err: 0,
+                stop: false,
+                current_iter: 0,
+                ..self.perp
+                // delta,
+                // direction: perp_direction,
+                // err: 0,
+                // current_iter: 0,
+                // stop: false,
+            };
+
+            self.perp.next()
+
+        // Some(Pixel(self.start, self.style.stroke_color.unwrap()))
         } else {
             None
         }
