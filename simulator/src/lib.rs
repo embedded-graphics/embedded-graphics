@@ -109,7 +109,7 @@ impl BinaryDisplay {
     }
 
     /// Get a vector of detected input events
-    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+    pub fn get_input_events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
         self.window.get_input_events()
     }
 }
@@ -145,7 +145,7 @@ impl RgbDisplay {
     }
 
     /// Get a vector of detected input events
-    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+    pub fn get_input_events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
         self.window.get_input_events()
     }
 

@@ -46,7 +46,9 @@ fn main() {
         .draw(&mut display);
 
     'running: loop {
-        for event in display.get_input_events() {
+        //hrm not much better, todo, be good at lifetimes.
+        let events: Vec<SimulatorEvent> = display.get_input_events().collect();
+        for event in events {
             match event {
                 SimulatorEvent::Quit => break 'running,
                 SimulatorEvent::KeyDown { keycode, .. } => {

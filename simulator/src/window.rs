@@ -64,7 +64,6 @@ pub struct Window {
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
-    input_events: Vec<SimulatorEvent>,
 }
 
 impl Window {
@@ -97,7 +96,6 @@ impl Window {
             pixel_spacing,
             canvas,
             event_pump,
-            input_events: vec![],
         }
     }
 
@@ -208,20 +206,18 @@ impl Window {
         }
     }
 
-    /// Handle and return all captured input events
-    //todo, just map them and return an iterator rather than collecting
-    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
-        self.input_events.clear();
-
-        for event in self.event_pump.poll_iter() {
-            match event {
+    /// Return an iterator of all captured SimulatorEvent
+    pub fn get_input_events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
+        let scale = self.scale.clone();
+        let pixel_spacing = self.pixel_spacing.clone();
+        self.event_pump
+            .poll_iter()
+            .filter_map(move |event| match event {
                 Event::Quit { .. }
                 | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
-                } => {
-                    self.input_events.push(SimulatorEvent::Quit);
-                }
+                } => Some(SimulatorEvent::Quit),
                 Event::KeyDown {
                     keycode,
                     keymod,
@@ -229,11 +225,13 @@ impl Window {
                     ..
                 } => {
                     if let Some(valid_keycode) = keycode {
-                        self.input_events.push(SimulatorEvent::KeyDown {
+                        Some(SimulatorEvent::KeyDown {
                             keycode: valid_keycode,
                             keymod,
                             repeat,
-                        });
+                        })
+                    } else {
+                        None
                     }
                 }
                 Event::KeyUp {
@@ -243,40 +241,35 @@ impl Window {
                     ..
                 } => {
                     if let Some(valid_keycode) = keycode {
-                        self.input_events.push(SimulatorEvent::KeyUp {
+                        Some(SimulatorEvent::KeyUp {
                             keycode: valid_keycode,
                             keymod,
                             repeat,
-                        });
+                        })
+                    } else {
+                        None
                     }
                 }
                 Event::MouseButtonUp {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = map_input_to_point((x, y), self.scale, self.pixel_spacing);
-                    self.input_events
-                        .push(SimulatorEvent::MouseButtonUp { point, mouse_btn });
+                    let point = map_input_to_point((x, y), scale, pixel_spacing);
+                    Some(SimulatorEvent::MouseButtonUp { point, mouse_btn })
                 }
                 Event::MouseButtonDown {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = map_input_to_point((x, y), self.scale, self.pixel_spacing);
-                    self.input_events
-                        .push(SimulatorEvent::MouseButtonDown { point, mouse_btn });
+                    let point = map_input_to_point((x, y), scale, pixel_spacing);
+                    Some(SimulatorEvent::MouseButtonDown { point, mouse_btn })
                 }
                 Event::MouseWheel {
                     x, y, direction, ..
-                } => {
-                    self.input_events.push(SimulatorEvent::MouseWheel {
-                        scroll_delta: Point::new(x, y),
-                        direction,
-                    });
-                }
-                _ => {}
-            }
-        }
-
-        self.input_events.clone()
+                } => Some(SimulatorEvent::MouseWheel {
+                    scroll_delta: Point::new(x, y),
+                    direction,
+                }),
+                _ => None,
+            })
     }
 }
 
