@@ -1,7 +1,6 @@
 use embedded_graphics::geometry::Point;
-
 use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
-use embedded_graphics::primitives::Circle;
+use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
 
 use sdl2::event::Event;
 //todo any reason to feature gate gfx?
@@ -140,7 +139,7 @@ impl Window {
     //     unimplemented!();
     // }
 
-    pub fn draw_circle<C>(&mut self, circle: &Circle<C>)
+    pub fn draw_circle<C>(&mut self, item: &Circle<C>)
     where
         C: RgbColor + Into<Rgb888>,
     {
@@ -148,7 +147,7 @@ impl Window {
             center,
             radius,
             style,
-        } = circle;
+        } = item;
 
         let Point { x, y } = center;
 
@@ -167,6 +166,45 @@ impl Window {
             let _ = self
                 .canvas
                 .circle(*x as i16, *y as i16, *radius as i16, color);
+        }
+    }
+
+    pub fn draw_line<C>(&mut self, _item: &Line<C>)
+    where
+        C: RgbColor + Into<Rgb888>,
+    {
+        unimplemented!();
+    }
+
+    pub fn draw_triangle<C>(&mut self, _item: &Triangle<C>)
+    where
+        C: RgbColor + Into<Rgb888>,
+    {
+        unimplemented!();
+    }
+
+    pub fn draw_rectangle<C>(&mut self, item: &Rectangle<C>)
+    where
+        C: RgbColor + Into<Rgb888>,
+    {
+        let Rectangle {
+            top_left,
+            bottom_right,
+            style,
+        } = item;
+
+        let Point { x: x1, y: y1 } = top_left;
+        let Point { x: x2, y: y2 } = bottom_right;
+
+        //todo, fill or stroke?
+        //todo, i16 from i32...
+        if let Some(fill) = style.fill_color {
+            //neccesary?
+            let color = Color::RGB(fill.r(), fill.g(), fill.b());
+
+            let _ = self
+                .canvas
+                .rectangle(*x1 as i16, *y1 as i16, *x2 as i16, *y2 as i16, color);
         }
     }
 

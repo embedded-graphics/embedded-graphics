@@ -83,7 +83,7 @@ use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::geometry::Size;
 use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
-use embedded_graphics::primitives::circle::Circle;
+use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
 use embedded_graphics::DrawTarget;
 
 struct PixelData {
@@ -169,6 +169,18 @@ where
     fn draw_circle(&mut self, item: &Circle<C>) {
         // todo, theme?
         self.window.draw_circle(item);
+    }
+
+    fn draw_line(&mut self, _item: &Line<C>) {
+        unimplemented!();
+    }
+
+    fn draw_triangle(&mut self, _item: &Triangle<C>) {
+        unimplemented!();
+    }
+
+    fn draw_rectangle(&mut self, item: &Rectangle<C>) {
+        self.window.draw_rectangle(item);
     }
 
     fn size(&self) -> Size {
