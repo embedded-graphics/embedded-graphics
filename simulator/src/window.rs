@@ -1,6 +1,11 @@
 use embedded_graphics::geometry::Point;
+
 use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
+use embedded_graphics::primitives::Circle;
+
 use sdl2::event::Event;
+//todo any reason to feature gate gfx?
+use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::{MouseButton, MouseWheelDirection};
 use sdl2::pixels::Color;
@@ -49,6 +54,8 @@ pub enum SimulatorEvent {
         /// The directionality of the scroll (normal or flipped)
         direction: MouseWheelDirection,
     },
+    /// An exit events
+    Quit,
 }
 
 /// Simulator window
@@ -79,6 +86,7 @@ impl Window {
         let window = video_subsystem
             .window(title, window_width as u32, window_height as u32)
             .position_centered()
+            .opengl()
             .build()
             .unwrap();
 
@@ -111,6 +119,7 @@ impl Window {
     }
 
     /// Draw pixel
+    /// very costly, better to use a gfx primitive
     pub fn draw_pixel(&mut self, x: usize, y: usize, color: Rgb888) {
         self.set_color(color);
 
@@ -124,8 +133,48 @@ impl Window {
         self.canvas.fill_rect(r).unwrap();
     }
 
-    /// Handle events
-    pub fn handle_events(&mut self) -> bool {
+    // pub fn draw_rectangles<C>(&mut self, rects: &[Rectangle<C>])
+    // where
+    //     C: PixelColor + Into<Rgb888>,
+    // {
+    //     unimplemented!();
+    // }
+
+    pub fn draw_circle<C>(&mut self, circle: &Circle<C>)
+    where
+        C: RgbColor + Into<Rgb888>,
+    {
+        let Circle {
+            center,
+            radius,
+            style,
+        } = circle;
+
+        let Point { x, y } = center;
+
+        //todo, i16 from i32...
+        if let Some(fill) = style.fill_color {
+            //neccesary?
+            let color = Color::RGB(fill.r(), fill.g(), fill.b());
+
+            let _ = self
+                .canvas
+                .filled_circle(*x as i16, *y as i16, *radius as i16, color);
+        } else if let Some(stroke) = style.stroke_color {
+            //how to stroke? style.stroke_width
+            let color = Color::RGB(stroke.r(), stroke.g(), stroke.b());
+
+            let _ = self
+                .canvas
+                .circle(*x as i16, *y as i16, *radius as i16, color);
+        }
+    }
+
+    /// Handle and return all captured input events
+    //todo, just map them and return an iterator rather than collecting
+    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
+        self.input_events.clear();
+
         for event in self.event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
@@ -133,7 +182,7 @@ impl Window {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => {
-                    return true;
+                    self.input_events.push(SimulatorEvent::Quit);
                 }
                 Event::KeyDown {
                     keycode,
@@ -189,14 +238,7 @@ impl Window {
             }
         }
 
-        false
-    }
-
-    /// Return all captured input events
-    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
-        let input_events = self.input_events.clone();
-        self.input_events.clear();
-        input_events
+        self.input_events.clone()
     }
 }
 

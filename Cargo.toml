@@ -10,3 +10,6 @@ members = [
 [patch.crates-io]
 embedded-graphics = { path = "embedded-graphics" }
 embedded-graphics-simulator = { path = "simulator" }
+
+[profile.release]
+debug = true

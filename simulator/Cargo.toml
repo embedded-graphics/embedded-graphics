@@ -21,7 +21,7 @@ exclude = [
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
 [dependencies]
-sdl2 = "0.32.2"
+sdl2 = { version = "0.32.2", features = ["gfx"]}
 
 [dependencies.embedded-graphics]
 version = "0.6.0-alpha.2"
@@ -29,3 +29,13 @@ features = [ "bmp", "tga" ]
 
 [dev-dependencies]
 chrono = "0.4.9"
+
+
+[features]
+default = []
+gfx = ["sdl2/gfx"]
+
+#todo cant get this to work
+# [[example]]
+# required-features = ["gfx"]
+# name = "input-handling"

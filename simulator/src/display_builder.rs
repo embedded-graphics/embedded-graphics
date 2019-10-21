@@ -87,7 +87,10 @@ impl DisplayBuilder {
     /// Finish building the simulated binary display and open an SDL window to render it into
     pub fn build_binary(&self) -> BinaryDisplay {
         let window = self.build_window();
-        let pixels = PixelData::new(self.width, self.height);
+        let pixels = PixelData {
+            width: self.width,
+            height: self.height,
+        };
 
         BinaryDisplay {
             theme: self.theme.clone(),
@@ -99,7 +102,10 @@ impl DisplayBuilder {
     /// Finish building the simulated RGB display and open an SDL window to render it into
     pub fn build_rgb(&self) -> RgbDisplay {
         let window = self.build_window();
-        let pixels = PixelData::new(self.width, self.height);
+        let pixels = PixelData {
+            width: self.width,
+            height: self.height,
+        };
 
         RgbDisplay { pixels, window }
     }

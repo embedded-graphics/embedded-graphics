@@ -82,38 +82,13 @@ pub use crate::window::SimulatorEvent;
 use crate::window::Window;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::geometry::Size;
-use embedded_graphics::pixelcolor::{BinaryColor, PixelColor, Rgb888, RgbColor};
+use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
+use embedded_graphics::primitives::circle::Circle;
 use embedded_graphics::DrawTarget;
 
-struct PixelData<C> {
+struct PixelData {
     pub width: usize,
     pub height: usize,
-    data: Box<[C]>,
-}
-
-impl<C> PixelData<C>
-where
-    C: PixelColor + From<BinaryColor>,
-{
-    fn new(width: usize, height: usize) -> Self {
-        let data = vec![BinaryColor::Off.into(); width * height];
-
-        Self {
-            width,
-            height,
-            data: data.into_boxed_slice(),
-        }
-    }
-
-    fn get(&self, x: usize, y: usize) -> C {
-        self.data[x + y * self.width]
-    }
-
-    fn set(&mut self, x: usize, y: usize, color: C) {
-        if x < self.width && y < self.height {
-            self.data[x + y * self.width] = color;
-        }
-    }
 }
 
 /// Simulated binary color display
@@ -122,35 +97,15 @@ where
 ///
 /// [`DisplayBuilder`]: ./display_builder/struct.DisplayBuilder.html
 pub struct BinaryDisplay {
-    pixels: PixelData<BinaryColor>,
+    pixels: PixelData,
     theme: BinaryColorTheme,
     window: Window,
 }
 
 impl BinaryDisplay {
-    /// Clear all pixels to black (empty the pixel buffer)
+    /// Clear all pixels to black
     pub fn clear(&mut self) {
-        self.pixels = PixelData::<BinaryColor>::new(self.pixels.width, self.pixels.height);
-    }
-
-    /// Update the display to show drawn pixels
-    pub fn run_once(&mut self) -> bool {
-        if self.window.handle_events() {
-            return true;
-        }
-
         self.window.clear(self.theme.convert(BinaryColor::Off));
-
-        for y in 0..self.pixels.height {
-            for x in 0..self.pixels.width {
-                let color = self.pixels.get(x, y);
-                let color = self.theme.convert(color);
-                self.window.draw_pixel(x, y, color);
-            }
-        }
-
-        self.window.present();
-        false
     }
 
     /// Get a vector of detected input events
@@ -164,7 +119,8 @@ impl DrawTarget<BinaryColor> for BinaryDisplay {
         let Pixel(coord, color) = pixel;
         let x = coord[0] as usize;
         let y = coord[1] as usize;
-        self.pixels.set(x, y, color);
+        self.window.draw_pixel(x, y, color.into());
+        self.window.present();
     }
 
     fn size(&self) -> Size {
@@ -178,33 +134,14 @@ impl DrawTarget<BinaryColor> for BinaryDisplay {
 ///
 /// [`DisplayBuilder`]: ./display_builder/struct.DisplayBuilder.html
 pub struct RgbDisplay {
-    pixels: PixelData<Rgb888>,
+    pixels: PixelData,
     window: Window,
 }
 
 impl RgbDisplay {
-    /// Clear all pixels to black (empty the pixel buffer)
+    /// Clear all pixels to black
     pub fn clear(&mut self) {
-        self.pixels = PixelData::<Rgb888>::new(self.pixels.width, self.pixels.height);
-    }
-
-    /// Update the display to show drawn pixels
-    pub fn run_once(&mut self) -> bool {
-        if self.window.handle_events() {
-            return true;
-        }
-
         self.window.clear(Rgb888::BLACK);
-
-        for y in 0..self.pixels.height {
-            for x in 0..self.pixels.width {
-                let color = self.pixels.get(x, y);
-                self.window.draw_pixel(x, y, color);
-            }
-        }
-
-        self.window.present();
-        false
     }
 
     /// Get a vector of detected input events
@@ -215,16 +152,23 @@ impl RgbDisplay {
 
 impl<C> DrawTarget<C> for RgbDisplay
 where
-    C: PixelColor + Into<Rgb888>,
+    C: RgbColor + Into<Rgb888>,
 {
     fn draw_pixel(&mut self, pixel: Pixel<C>) {
         let Pixel(coord, color) = pixel;
         let x = coord[0] as usize;
         let y = coord[1] as usize;
-        self.pixels.set(x, y, color.into());
+        self.window.draw_pixel(x, y, color.into());
+        self.window.present();
     }
 
     fn size(&self) -> Size {
         Size::new(self.pixels.width as u32, self.pixels.height as u32)
+    }
+
+    fn draw_circle(&mut self, item: &Circle<C>) {
+        // todo, theme?
+        self.window.draw_circle(item);
+        self.window.present();
     }
 }

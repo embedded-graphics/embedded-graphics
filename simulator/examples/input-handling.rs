@@ -39,15 +39,10 @@ fn main() {
         .fill_color(FOREGROUND_COLOR)
         .draw(&mut display);
 
-    loop {
-        let end = display.run_once();
-
-        if end {
-            break;
-        }
-
+    'running: loop {
         for event in display.get_input_events() {
             match event {
+                SimulatorEvent::Quit => break 'running,
                 SimulatorEvent::KeyDown { keycode, .. } => {
                     let delta = match keycode {
                         Keycode::Left => Point::new(-KEYBOARD_DELTA, 0),
