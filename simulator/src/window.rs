@@ -1,6 +1,6 @@
 use embedded_graphics::geometry::Point;
 use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
-use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
+use embedded_graphics::primitives::Triangle;
 
 use sdl2::event::Event;
 //todo any reason to feature gate gfx?
@@ -136,41 +136,52 @@ impl Window {
     //     unimplemented!();
     // }
 
-    pub fn draw_circle<C>(&mut self, item: &Circle<C>)
-    where
-        C: RgbColor + Into<Rgb888>,
-    {
-        let Circle {
-            center,
-            radius,
-            style,
-        } = item;
-
-        let Point { x, y } = center;
-
-        //todo, i16 from i32...
-        if let Some(fill) = style.fill_color {
-            //neccesary?
-            let color = Color::RGB(fill.r(), fill.g(), fill.b());
+    pub fn draw_circle(
+        &mut self,
+        x: i32,
+        y: i32,
+        radius: u32,
+        fill_color: Option<Rgb888>,
+        stroke_color: Option<Rgb888>,
+    ) {
+        // todo, i16 from i32...
+        if let Some(color) = fill_color {
+            let color = Color::RGB(color.r(), color.g(), color.b());
 
             let _ = self
                 .canvas
-                .filled_circle(*x as i16, *y as i16, *radius as i16, color);
-        } else if let Some(stroke) = style.stroke_color {
-            //how to stroke? style.stroke_width
-            let color = Color::RGB(stroke.r(), stroke.g(), stroke.b());
+                .filled_circle(x as i16, y as i16, radius as i16, color);
+        } else if let Some(color) = stroke_color {
+            // how to stroke? style.stroke_width
+            let color = Color::RGB(color.r(), color.g(), color.b());
 
-            let _ = self
-                .canvas
-                .circle(*x as i16, *y as i16, *radius as i16, color);
+            let _ = self.canvas.circle(x as i16, y as i16, radius as i16, color);
         }
     }
 
-    pub fn draw_line<C>(&mut self, _item: &Line<C>)
-    where
-        C: RgbColor + Into<Rgb888>,
-    {
-        unimplemented!();
+    pub fn draw_line(
+        &mut self,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        fill_color: Option<Rgb888>,
+        _stroke_color: Option<Rgb888>,
+    ) {
+        if let Some(color) = fill_color {
+            let color = Color::RGB(color.r(), color.g(), color.b());
+
+            //any performance reason to use vline and hline?
+            if x1 == x2 {
+                let _ = self.canvas.vline(x1 as i16, y1 as i16, y2 as i16, color);
+            } else if y1 == y2 {
+                let _ = self.canvas.hline(x1 as i16, x2 as i16, y1 as i16, color);
+            } else {
+                let _ = self
+                    .canvas
+                    .rectangle(x1 as i16, y1 as i16, x2 as i16, y2 as i16, color);
+            }
+        }
     }
 
     pub fn draw_triangle<C>(&mut self, _item: &Triangle<C>)
@@ -180,28 +191,24 @@ impl Window {
         unimplemented!();
     }
 
-    pub fn draw_rectangle<C>(&mut self, item: &Rectangle<C>)
-    where
-        C: RgbColor + Into<Rgb888>,
-    {
-        let Rectangle {
-            top_left,
-            bottom_right,
-            style,
-        } = item;
-
-        let Point { x: x1, y: y1 } = top_left;
-        let Point { x: x2, y: y2 } = bottom_right;
-
+    pub fn draw_rectangle(
+        &mut self,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        fill_color: Option<Rgb888>,
+        _stroke_color: Option<Rgb888>,
+    ) {
         //todo, fill or stroke?
         //todo, i16 from i32...
-        if let Some(fill) = style.fill_color {
-            //neccesary?
-            let color = Color::RGB(fill.r(), fill.g(), fill.b());
+
+        if let Some(color) = fill_color {
+            let color = Color::RGB(color.r(), color.g(), color.b());
 
             let _ = self
                 .canvas
-                .rectangle(*x1 as i16, *y1 as i16, *x2 as i16, *y2 as i16, color);
+                .rectangle(x1 as i16, y1 as i16, x2 as i16, y2 as i16, color);
         }
     }
 
