@@ -172,16 +172,16 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             (true, true) => Point::new(-1, -1),
         };
 
-        // let perp_direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
-        //     // Quadrant 0
-        //     (false, true) => Point::new(-1, -1),
-        //     // Quadrant 1
-        //     (false, false) => Point::new(1, -1),
-        //     // Quadrant 2
-        //     (true, false) => Point::new(-1, -1),
-        //     // Quadrant 3
-        //     (true, true) => Point::new(1, -1),
-        // };
+        let perp_direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+            // Quadrant 0
+            (false, true) => Point::new(-1, -1),
+            // Quadrant 1
+            (false, false) => Point::new(1, -1),
+            // Quadrant 2
+            (true, false) => Point::new(-1, -1),
+            // Quadrant 3
+            (true, true) => Point::new(1, -1),
+        };
 
         // let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
 
@@ -208,6 +208,16 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             err: 0,
             stop: self.start == self.end, // if line length is zero, draw nothing
             num_iter: 0,
+            perp: PerpLineIterator {
+                start: self.start,
+                color: self.style.test_color,
+                width: self.style.stroke_width as u32,
+                delta,
+                direction: perp_direction,
+                err: 0,
+                current_iter: 0,
+                stop: false,
+            },
         }
     }
 }
@@ -229,7 +239,7 @@ where
     stop: bool,
     num_iter: u32,
     // width: u32,
-    // perp: PerpLineIterator<C>,
+    perp: PerpLineIterator<C>,
     // extra_perp: PerpLineIterator<C>,
     // show_extra_perp: bool,
     // perp_err: i32,
@@ -243,6 +253,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     fn next(&mut self) -> Option<Self::Item> {
         // return none if stroke color is none
         self.style.stroke_color?;
+
+        if let Some(perp) = self.perp.next() {
+            return Some(perp);
+        }
 
         if !self.stop {
             if self.start == self.end || self.num_iter > 500 {
@@ -293,8 +307,7 @@ where
     direction: Point,
     err: i32,
     current_iter: u32,
-    other_start: Point,
-    return_other_side: bool,
+    stop: bool,
 }
 
 impl<C: PixelColor> Iterator for PerpLineIterator<C> {
@@ -304,36 +317,36 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
         // Noop if color is none (line is transparent)
         self.color?;
 
-        if self.return_other_side {
-            self.return_other_side = false;
+        if !self.stop {
+            if self.current_iter >= self.width {
+                self.stop = true;
+            }
+
+            if self.delta.x >= self.delta.y {
+                if self.err > self.delta.x - 2 * self.delta.y {
+                    self.start += Point::new(self.direction.y, 0);
+
+                    self.err -= 2 * self.delta.x;
+                }
+
+                self.err += 2 * self.delta.y;
+
+                self.start += Point::new(0, self.direction.x);
+            } else {
+                if self.err > self.delta.y - 2 * self.delta.x {
+                    self.start += Point::new(0, self.direction.x);
+
+                    self.err -= 2 * self.delta.y;
+                }
+
+                self.err += 2 * self.delta.x;
+
+                self.start += Point::new(self.direction.y, 0);
+            }
 
             self.current_iter += 1;
 
-            return Some(Pixel(self.other_start, self.color.unwrap()));
-        }
-
-        if self.current_iter < self.width {
-            self.current_iter += 1;
-
-            let point = self.start;
-
-            let err_double = 2 * self.err;
-
-            if err_double > self.delta.y {
-                self.err += self.delta.y;
-                self.start += Point::new(0, self.direction.y);
-                self.other_start -= Point::new(0, self.direction.y);
-            }
-
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
-                self.start += Point::new(self.direction.x, 0);
-                self.other_start -= Point::new(self.direction.x, 0);
-            }
-
-            self.return_other_side = true;
-
-            Some(Pixel(point, self.color.unwrap()))
+            Some(Pixel(self.start, self.color.unwrap()))
         } else {
             None
         }
