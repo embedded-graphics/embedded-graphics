@@ -143,18 +143,8 @@ where
 
         let Point { x, y } = center;
 
-        let fill_color: Option<Rgb888> = if let Some(color) = style.fill_color {
-            let color: Rgb888 = self.theme.convert(color.into());
-            Some(color)
-        } else {
-            None
-        };
-        let stroke_color: Option<Rgb888> = if let Some(color) = style.stroke_color {
-            let color: Rgb888 = self.theme.convert(color.into());
-            Some(color)
-        } else {
-            None
-        };
+        let fill_color = style.fill_color.map(|c| self.theme.convert(c.into()));
+        let stroke_color = style.stroke_color.map(|c| self.theme.convert(c.into()));
 
         self.window
             .draw_circle(*x, *y, *radius, fill_color, stroke_color);
@@ -166,18 +156,8 @@ where
         let Point { x: x1, y: y1 } = start;
         let Point { x: x2, y: y2 } = end;
 
-        let fill_color: Option<Rgb888> = if let Some(color) = style.fill_color {
-            let color: Rgb888 = self.theme.convert(color.into());
-            Some(color)
-        } else {
-            None
-        };
-        let stroke_color: Option<Rgb888> = if let Some(color) = style.stroke_color {
-            let color: Rgb888 = self.theme.convert(color.into());
-            Some(color)
-        } else {
-            None
-        };
+        let fill_color = style.fill_color.map(|c| self.theme.convert(c.into()));
+        let stroke_color = style.stroke_color.map(|c| self.theme.convert(c.into()));
 
         self.window
             .draw_line(*x1, *y1, *x2, *y2, fill_color, stroke_color);
@@ -197,18 +177,8 @@ where
         let Point { x: x1, y: y1 } = top_left;
         let Point { x: x2, y: y2 } = bottom_right;
 
-        let fill_color: Option<Rgb888> = if let Some(color) = style.fill_color {
-            let color: Rgb888 = self.theme.convert(color.into());
-            Some(color)
-        } else {
-            None
-        };
-        let stroke_color: Option<Rgb888> = if let Some(color) = style.stroke_color {
-            let color: Rgb888 = self.theme.convert(color.into());
-            Some(color)
-        } else {
-            None
-        };
+        let fill_color = style.fill_color.map(|c| self.theme.convert(c.into()));
+        let stroke_color = style.stroke_color.map(|c| self.theme.convert(c.into()));
 
         self.window
             .draw_rectangle(*x1, *y1, *x2, *y2, fill_color, stroke_color);
@@ -266,17 +236,8 @@ where
 
         let Point { x, y } = center;
 
-        //really?
-        let fill_color: Option<Rgb888> = if let Some(color) = style.fill_color {
-            Some(color.into())
-        } else {
-            None
-        };
-        let stroke_color: Option<Rgb888> = if let Some(color) = style.stroke_color {
-            Some(color.into())
-        } else {
-            None
-        };
+        let fill_color = style.fill_color.map(|c| c.into());
+        let stroke_color = style.stroke_color.map(|c| c.into());
 
         self.window
             .draw_circle(*x, *y, *radius, fill_color, stroke_color);
@@ -288,17 +249,8 @@ where
         let Point { x: x1, y: y1 } = start;
         let Point { x: x2, y: y2 } = end;
 
-        //really?
-        let fill_color: Option<Rgb888> = if let Some(color) = style.fill_color {
-            Some(color.into())
-        } else {
-            None
-        };
-        let stroke_color: Option<Rgb888> = if let Some(color) = style.stroke_color {
-            Some(color.into())
-        } else {
-            None
-        };
+        let fill_color = style.fill_color.map(|c| c.into());
+        let stroke_color = style.stroke_color.map(|c| c.into());
 
         self.window
             .draw_line(*x1, *y1, *x2, *y2, fill_color, stroke_color);
@@ -318,17 +270,8 @@ where
         let Point { x: x1, y: y1 } = top_left;
         let Point { x: x2, y: y2 } = bottom_right;
 
-        //really?
-        let fill_color: Option<Rgb888> = if let Some(color) = style.fill_color {
-            Some(color.into())
-        } else {
-            None
-        };
-        let stroke_color: Option<Rgb888> = if let Some(color) = style.stroke_color {
-            Some(color.into())
-        } else {
-            None
-        };
+        let fill_color = style.fill_color.map(|c| c.into());
+        let stroke_color = style.stroke_color.map(|c| c.into());
 
         self.window
             .draw_rectangle(*x1, *y1, *x2, *y2, fill_color, stroke_color);
