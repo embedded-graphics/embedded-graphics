@@ -148,6 +148,11 @@ impl RgbDisplay {
     pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
         self.window.get_input_events()
     }
+
+    /// Update the display
+    pub fn flush(&mut self) {
+        self.window.present();
+    }
 }
 
 impl<C> DrawTarget<C> for RgbDisplay
@@ -159,16 +164,14 @@ where
         let x = coord[0] as usize;
         let y = coord[1] as usize;
         self.window.draw_pixel(x, y, color.into());
-        self.window.present();
-    }
-
-    fn size(&self) -> Size {
-        Size::new(self.pixels.width as u32, self.pixels.height as u32)
     }
 
     fn draw_circle(&mut self, item: &Circle<C>) {
         // todo, theme?
         self.window.draw_circle(item);
-        self.window.present();
+    }
+
+    fn size(&self) -> Size {
+        Size::new(self.pixels.width as u32, self.pixels.height as u32)
     }
 }

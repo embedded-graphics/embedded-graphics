@@ -62,5 +62,7 @@ fn main() {
                 _ => {}
             }
         }
+
+        display.flush();
     }
 }
