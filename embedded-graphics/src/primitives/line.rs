@@ -151,15 +151,15 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     /// 2 | 1
     /// ```
     fn into_iter(self) -> Self::IntoIter {
-        let mut delta = self.end - self.start;
+        let mut delta = (self.end - self.start).abs();
 
-        // Ensure delta points into quadrant 1 so signs are always positive
-        if delta.x < 0 {
-            delta = Point::new(-delta.x, delta.y);
-        }
-        if delta.y > 0 {
-            delta = Point::new(delta.x, -delta.y);
-        }
+        // // Ensure delta points into quadrant 1 so signs are always positive
+        // if delta.x < 0 {
+        //     delta = Point::new(-delta.x, delta.y);
+        // }
+        // if delta.y > 0 {
+        //     delta = Point::new(delta.x, -delta.y);
+        // }
 
         let direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
             // Quadrant 0
@@ -172,31 +172,31 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             (true, true) => Point::new(-1, -1),
         };
 
-        let perp_direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
-            // Quadrant 0
-            (false, true) => Point::new(-1, -1),
-            // Quadrant 1
-            (false, false) => Point::new(1, -1),
-            // Quadrant 2
-            (true, false) => Point::new(-1, -1),
-            // Quadrant 3
-            (true, true) => Point::new(1, -1),
-        };
+        // let perp_direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+        //     // Quadrant 0
+        //     (false, true) => Point::new(-1, -1),
+        //     // Quadrant 1
+        //     (false, false) => Point::new(1, -1),
+        //     // Quadrant 2
+        //     (true, false) => Point::new(-1, -1),
+        //     // Quadrant 3
+        //     (true, true) => Point::new(1, -1),
+        // };
 
-        let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
+        // let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
 
-        let normal = Point::new(
-            (delta.x * self.style.stroke_width as i32) / len,
-            (delta.y * self.style.stroke_width as i32) / len,
-        );
+        // let normal = Point::new(
+        //     (delta.x * self.style.stroke_width as i32) / len,
+        //     (delta.y * self.style.stroke_width as i32) / len,
+        // );
 
-        let width: i32 = dbg!(normal.x.abs().max(normal.y.abs()));
+        // let width: i32 = normal.x.abs().max(normal.y.abs());
 
         // let width = dbg!(((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt() / 2.0) as i32;
 
         // let width = 5;
 
-        let perp_err = delta.x + delta.y;
+        // let perp_err = delta.x + delta.y;
 
         LineIterator {
             style: self.style,
@@ -205,35 +205,9 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             end: self.end,
             delta,
             direction,
-            err: delta.x + delta.y,
+            err: 0,
             stop: self.start == self.end, // if line length is zero, draw nothing
-            perp_err,
-            width: width as u32,
-            show_extra_perp: self.show_extra_perp,
-            is_diag: false,
-            extra_perp: PerpLineIterator {
-                return_other_side: false,
-                color: self.style.stroke_color,
-                start: self.start,
-                other_start: self.start,
-                delta,
-                direction: perp_direction,
-                err: perp_err,
-                current_iter: width as u32,
-                width: width as u32,
-            },
-
-            perp: PerpLineIterator {
-                return_other_side: false,
-                color: self.style.stroke_color,
-                start: self.start,
-                other_start: self.start,
-                delta,
-                direction: perp_direction,
-                err: perp_err,
-                current_iter: 0,
-                width: width as u32,
-            },
+            num_iter: 0,
         }
     }
 }
@@ -253,12 +227,13 @@ where
     direction: Point,
     err: i32,
     stop: bool,
-    width: u32,
-    perp: PerpLineIterator<C>,
-    extra_perp: PerpLineIterator<C>,
-    show_extra_perp: bool,
-    perp_err: i32,
-    is_diag: bool,
+    num_iter: u32,
+    // width: u32,
+    // perp: PerpLineIterator<C>,
+    // extra_perp: PerpLineIterator<C>,
+    // show_extra_perp: bool,
+    // perp_err: i32,
+    // is_diag: bool
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -269,74 +244,36 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
-        if let Some(p) = self.extra_perp.next() {
-            return Some(p);
-        }
-
-        if let Some(p) = self.perp.next() {
-            return Some(p);
-        }
-
         if !self.stop {
-            if self.start == self.end {
+            if self.start == self.end || self.num_iter > 500 {
                 self.stop = true;
             }
 
-            let mut diag = 0;
-            let mut did_move_y = false;
+            if self.delta.x >= self.delta.y {
+                if self.err > self.delta.x - 2 * self.delta.y {
+                    self.start += Point::new(0, self.direction.y);
 
-            let err_double = 2 * self.err;
-            if err_double > self.delta.y {
-                self.err += self.delta.y;
-                self.start += Point::new(self.direction.x, 0);
-
-                diag += 1;
-            }
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
-                self.start += Point::new(0, self.direction.y);
-                did_move_y = true;
-
-                diag += 1;
-            }
-
-            // There was a diagonal move
-            if diag == 2 {
-                if self.show_extra_perp {
-                    let start = if did_move_y {
-                        self.start - Point::new(0, self.direction.y)
-                    } else {
-                        self.start
-                    };
-                    self.extra_perp = PerpLineIterator {
-                        color: self.style.test_color,
-                        err: self.perp_err,
-                        start,
-                        other_start: start,
-                        current_iter: 0,
-                        ..self.perp
-                    };
+                    self.err -= 2 * self.delta.x;
                 }
+
+                self.err += 2 * self.delta.y;
+
+                self.start += Point::new(self.direction.x, 0);
+            } else {
+                if self.err > self.delta.y - 2 * self.delta.x {
+                    self.start += Point::new(self.direction.x, 0);
+
+                    self.err -= 2 * self.delta.y;
+                }
+
+                self.err += 2 * self.delta.x;
+
+                self.start += Point::new(0, self.direction.y);
             }
 
-            self.perp = PerpLineIterator {
-                color: if self.perp.color == self.style.stroke_color {
-                    self.style.fill_color
-                } else {
-                    self.style.stroke_color
-                },
-                err: self.perp_err,
-                start: self.start,
-                other_start: self.start,
-                current_iter: 0,
-                ..self.perp
-            };
+            self.num_iter += 1;
 
-            if let Some(p) = self.extra_perp.next() {
-                return Some(p);
-            }
-
-            self.perp.next()
+            Some(Pixel(self.start, self.style.stroke_color.unwrap()))
         } else {
             None
         }

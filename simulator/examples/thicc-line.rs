@@ -259,41 +259,41 @@ fn main() {
 
         // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
-        display.clear();
-        display.draw(
-            Line::new(center, Point::new(x, y))
-                .show_extra_perp()
-                .style(Style {
-                    stroke_color: Some(Rgb888::WHITE),
-                    fill_color: Some(Rgb888::WHITE),
-                    test_color: Some(Rgb888::WHITE),
-                    stroke_width: 1,
-                    ..Style::default()
-                })
-                .into_iter(),
-        );
-
-        if angle < (2.0 * core::f32::consts::PI - 0.1) {
-            angle += 0.1;
-        }
-        angle += 0.1;
-        thread::sleep(Duration::from_millis(100));
-
         // display.clear();
         // display.draw(
-        //     Line::new(Point::new(30, 30), position)
+        //     Line::new(center, Point::new(x, y))
         //         .show_extra_perp()
-        //         // .stroke_color(Some(Rgb888::YELLOW))
-        //         // .fill_color(Some(Rgb888::RED))
         //         .style(Style {
-        //             stroke_color: Some(Rgb888::YELLOW),
-        //             fill_color: Some(Rgb888::RED),
-        //             test_color: Some(Rgb888::CYAN),
-        //             stroke_width: 10,
+        //             stroke_color: Some(Rgb888::WHITE),
+        //             fill_color: Some(Rgb888::WHITE),
+        //             test_color: Some(Rgb888::WHITE),
+        //             stroke_width: 1,
         //             ..Style::default()
         //         })
         //         .into_iter(),
         // );
+
+        // if angle < (2.0 * core::f32::consts::PI - 0.1) {
+        //     angle += 0.1;
+        // }
+        // angle += 0.1;
+        // thread::sleep(Duration::from_millis(100));
+
+        display.clear();
+        display.draw(
+            Line::new(Point::new(30, 30), position)
+                .show_extra_perp()
+                // .stroke_color(Some(Rgb888::YELLOW))
+                // .fill_color(Some(Rgb888::RED))
+                .style(Style {
+                    stroke_color: Some(Rgb888::YELLOW),
+                    fill_color: Some(Rgb888::RED),
+                    test_color: Some(Rgb888::CYAN),
+                    stroke_width: 10,
+                    ..Style::default()
+                })
+                .into_iter(),
+        );
         // display.draw(
         //     Line::new(Point::new(30, 30) + offs, position + offs)
         //         // .stroke_color(Some(Rgb888::YELLOW))
