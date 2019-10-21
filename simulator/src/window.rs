@@ -84,11 +84,10 @@ impl Window {
         let window = video_subsystem
             .window(title, window_width as u32, window_height as u32)
             .position_centered()
-            .opengl()
             .build()
             .unwrap();
 
-        let canvas = window.into_canvas().build().unwrap();
+        let canvas = window.into_canvas().software().build().unwrap();
         let event_pump = sdl_context.event_pump().unwrap();
 
         Self {
