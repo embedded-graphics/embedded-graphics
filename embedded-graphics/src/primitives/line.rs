@@ -354,6 +354,8 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
                 self.stop = true;
             }
 
+            let point = self.start;
+
             if self.delta.x >= self.delta.y {
                 if self.err > self.delta.x - 2 * self.delta.y {
                     self.start += Point::new(self.direction.y, 0);
@@ -378,7 +380,7 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
 
             self.current_iter += 1;
 
-            Some(Pixel(self.start, self.color.unwrap()))
+            Some(Pixel(point, self.color.unwrap()))
         } else {
             None
         }
