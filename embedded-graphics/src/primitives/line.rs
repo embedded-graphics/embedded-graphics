@@ -266,23 +266,31 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             }
 
             if self.delta.x >= self.delta.y {
-                if self.err > self.delta.x - 2 * self.delta.y {
+                let threshold = self.delta.x - 2 * self.delta.y;
+                let e_diag = -2 * self.delta.x;
+                let e_square = 2 * self.delta.y;
+
+                if self.err > threshold {
                     self.start += Point::new(0, self.direction.y);
 
-                    self.err -= 2 * self.delta.x;
+                    self.err += e_diag;
                 }
 
-                self.err += 2 * self.delta.y;
+                self.err += e_square;
 
                 self.start += Point::new(self.direction.x, 0);
             } else {
-                if self.err > self.delta.y - 2 * self.delta.x {
+                let threshold = self.delta.y - 2 * self.delta.x;
+                let e_diag = -2 * self.delta.y;
+                let e_square = 2 * self.delta.x;
+
+                if self.err > threshold {
                     self.start += Point::new(self.direction.x, 0);
 
-                    self.err -= 2 * self.delta.y;
+                    self.err += e_diag;
                 }
 
-                self.err += 2 * self.delta.x;
+                self.err += e_square;
 
                 self.start += Point::new(0, self.direction.y);
             }
