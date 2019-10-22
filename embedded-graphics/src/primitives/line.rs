@@ -259,6 +259,8 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         }
 
         if !self.stop {
+            let start = self.start;
+
             if self.start == self.end || self.num_iter > 500 {
                 self.stop = true;
             }
@@ -288,7 +290,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             self.num_iter += 1;
 
             self.perp = PerpLineIterator {
-                start: self.start,
+                start,
                 color: if self.perp.color == self.style.stroke_color {
                     self.style.fill_color
                 } else {
