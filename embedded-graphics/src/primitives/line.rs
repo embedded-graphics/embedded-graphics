@@ -89,8 +89,8 @@ where
     }
 
     /// DELETEME
-    pub fn show_extra_perp(&mut self) -> &mut Self {
-        self.show_extra_perp = true;
+    pub fn show_extra_perp(&mut self, show: bool) -> &mut Self {
+        self.show_extra_perp = show;
 
         self
     }
@@ -208,6 +208,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             err: 0,
             stop: self.start == self.end, // if line length is zero, draw nothing
             num_iter: 0,
+            show_extra_perp: self.show_extra_perp,
             perp: PerpLineIterator {
                 start: self.start,
                 color: self.style.test_color,
@@ -241,7 +242,7 @@ where
     // width: u32,
     perp: PerpLineIterator<C>,
     // extra_perp: PerpLineIterator<C>,
-    // show_extra_perp: bool,
+    show_extra_perp: bool,
     // perp_err: i32,
     // is_diag: bool
 }

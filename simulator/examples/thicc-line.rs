@@ -244,6 +244,7 @@ fn main() {
 
     let len = 50.0;
     let center = Point::new(60, 60);
+    let mut show_extra_perp = true;
 
     loop {
         let end = display.run_once();
@@ -282,7 +283,7 @@ fn main() {
         display.clear();
         display.draw(
             Line::new(Point::new(30, 30), position)
-                .show_extra_perp()
+                .show_extra_perp(show_extra_perp)
                 // .stroke_color(Some(Rgb888::YELLOW))
                 // .fill_color(Some(Rgb888::RED))
                 .style(Style {
@@ -319,6 +320,10 @@ fn main() {
                         _ => Point::zero(),
                     };
                     position += delta;
+
+                    if keycode == Keycode::Space {
+                        show_extra_perp = !show_extra_perp;
+                    }
                 }
 
                 _ => {}
