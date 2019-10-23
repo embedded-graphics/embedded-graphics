@@ -213,7 +213,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             show_extra_perp: self.show_extra_perp,
             perp: PerpLineIterator {
                 start: self.start,
-                color: self.style.test_color,
+                color: self.style.stroke_color,
                 width: self.style.stroke_width as u32,
                 delta,
                 direction: perp_direction,
@@ -229,7 +229,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 direction: perp_direction,
                 err: 0,
                 current_iter: 0,
-                stop: false,
+                stop: true,
             },
         }
     }
