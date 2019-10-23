@@ -172,15 +172,16 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             (true, true) => Point::new(-1, -1),
         };
 
+        // Perpendicular direction, always on left side of line from start position's point of view
         let perp_direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
             // Quadrant 0
             (false, true) => Point::new(-1, -1),
             // Quadrant 1
             (false, false) => Point::new(1, -1),
             // Quadrant 2
-            (true, false) => Point::new(-1, -1),
+            (true, false) => Point::new(1, 1),
             // Quadrant 3
-            (true, true) => Point::new(1, -1),
+            (true, true) => Point::new(-1, 1),
         };
 
         // let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
