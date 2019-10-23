@@ -219,7 +219,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 direction: perp_direction,
                 err: 0,
                 current_iter: 0,
-                stop: false,
+                stop: true,
             },
             extra_perp: PerpLineIterator {
                 start: self.start,
@@ -267,12 +267,14 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
-        if let Some(perp) = self.extra_perp.next() {
-            return Some(perp);
-        }
+        if self.show_extra_perp {
+            if let Some(perp) = self.extra_perp.next() {
+                return Some(perp);
+            }
 
-        if let Some(perp) = self.perp.next() {
-            return Some(perp);
+            if let Some(perp) = self.perp.next() {
+                return Some(perp);
+            }
         }
 
         if !self.stop {
@@ -283,6 +285,20 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
             }
 
             let mut extra = false;
+
+            self.perp = PerpLineIterator {
+                start,
+                color: if self.perp.color == self.style.stroke_color {
+                    self.style.fill_color
+                } else {
+                    self.style.stroke_color
+                },
+                width: self.style.stroke_width as u32,
+                err: self.perp_err,
+                stop: false,
+                current_iter: 0,
+                ..self.perp
+            };
 
             if self.delta.x >= self.delta.y {
                 let threshold = self.delta.x - 2 * self.delta.y;
@@ -295,12 +311,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     self.err += e_diag;
 
                     if self.perp_err > threshold {
-                        println!("EXTRA PERP {}", self.num_iter);
-
                         if self.show_extra_perp {
                             self.extra_perp = PerpLineIterator {
                                 start: self.start,
-                                err: 0,
+                                err: self.perp_err + e_diag + e_square,
                                 current_iter: 0,
                                 stop: false,
                                 ..self.extra_perp
@@ -329,12 +343,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     self.err += e_diag;
 
                     if self.perp_err > threshold {
-                        println!("EXTRA PERP {}", self.num_iter);
-
                         if self.show_extra_perp {
                             self.extra_perp = PerpLineIterator {
                                 start: self.start,
-                                err: 0,
+                                err: self.perp_err + e_diag + e_square,
                                 current_iter: 0,
                                 stop: false,
                                 ..self.extra_perp
@@ -356,32 +368,15 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             self.num_iter += 1;
 
-            self.perp = PerpLineIterator {
-                start,
-                color: if self.perp.color == self.style.stroke_color {
-                    self.style.fill_color
+            if self.show_extra_perp {
+                if extra {
+                    self.extra_perp.next()
                 } else {
-                    self.style.stroke_color
-                },
-                width: self.style.stroke_width as u32,
-                err: 0,
-                stop: false,
-                current_iter: 0,
-                ..self.perp
-                // delta,
-                // direction: perp_direction,
-                // err: 0,
-                // current_iter: 0,
-                // stop: false,
-            };
-
-            if extra {
-                self.extra_perp.next()
+                    self.perp.next()
+                }
             } else {
-                self.perp.next()
+                Some(Pixel(start, self.style.stroke_color.unwrap()))
             }
-
-        // Some(Pixel(self.start, self.style.stroke_color.unwrap()))
         } else {
             None
         }
