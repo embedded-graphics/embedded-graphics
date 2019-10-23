@@ -189,7 +189,7 @@ fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
         .size(120, 120)
-        .scale(3)
+        .scale(6)
         .pixel_spacing(1)
         .build_rgb();
 
