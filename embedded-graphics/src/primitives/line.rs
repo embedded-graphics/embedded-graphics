@@ -362,28 +362,28 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
                 let e_square = 2 * self.delta.y;
 
                 if self.err > threshold {
-                    self.start += Point::new(self.direction.y, 0);
+                    self.start += Point::new(self.direction.x, 0);
 
                     self.err += e_diag;
                 }
 
                 self.err += e_square;
 
-                self.start += Point::new(0, self.direction.x);
+                self.start += Point::new(0, self.direction.y);
             } else {
                 let threshold = self.delta.y - 2 * self.delta.x;
                 let e_diag = -2 * self.delta.y;
                 let e_square = 2 * self.delta.x;
 
                 if self.err > threshold {
-                    self.start += Point::new(0, self.direction.x);
+                    self.start += Point::new(0, self.direction.y);
 
                     self.err += e_diag;
                 }
 
                 self.err += e_square;
 
-                self.start += Point::new(self.direction.y, 0);
+                self.start += Point::new(self.direction.x, 0);
             }
 
             self.current_iter += 1;
