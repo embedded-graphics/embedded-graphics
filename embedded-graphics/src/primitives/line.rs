@@ -201,6 +201,10 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         // let perp_err = delta.x + delta.y;
 
+        let width_threshold =
+            (2.0 * self.style.stroke_width as f32
+                * ((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt()) as u32;
+
         LineIterator {
             style: self.style,
 
@@ -216,7 +220,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             perp: PerpLineIterator {
                 start: self.start,
                 color: self.style.stroke_color,
-                width: self.style.stroke_width as u32,
+                width: width_threshold,
                 delta,
                 direction: perp_direction,
                 err: 0,
@@ -226,7 +230,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             extra_perp: PerpLineIterator {
                 start: self.start,
                 color: self.style.test_color,
-                width: self.style.stroke_width as u32,
+                width: width_threshold,
                 delta,
                 direction: perp_direction,
                 err: 0,
@@ -295,10 +299,9 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 } else {
                     self.style.stroke_color
                 },
-                width: self.style.stroke_width as u32,
                 err: self.perp_err,
                 stop: false,
-                current_iter: 0,
+                current_iter: self.delta.x + self.delta.y - self.err,
                 ..self.perp
             };
 
@@ -317,7 +320,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                             self.extra_perp = PerpLineIterator {
                                 start: self.start,
                                 err: self.perp_err + e_diag + e_square,
-                                current_iter: 0,
+                                current_iter: self.delta.x + self.delta.y - self.err,
                                 stop: false,
                                 ..self.extra_perp
                             };
@@ -349,7 +352,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                             self.extra_perp = PerpLineIterator {
                                 start: self.start,
                                 err: self.perp_err + e_diag + e_square,
-                                current_iter: 0,
+                                current_iter: self.delta.x + self.delta.y - self.err,
                                 stop: false,
                                 ..self.extra_perp
                             };
@@ -397,7 +400,7 @@ where
     delta: Point,
     direction: Point,
     err: i32,
-    current_iter: u32,
+    current_iter: i32,
     stop: bool,
 }
 
@@ -409,7 +412,7 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
         self.color?;
 
         if !self.stop {
-            if self.current_iter >= self.width {
+            if self.current_iter >= self.width as i32 {
                 self.stop = true;
             }
 
@@ -424,9 +427,11 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
                     self.start += Point::new(self.direction.x, 0);
 
                     self.err += e_diag;
+                    self.current_iter += 2 * self.delta.y;
                 }
 
                 self.err += e_square;
+                self.current_iter += 2 * self.delta.x;
 
                 self.start += Point::new(0, self.direction.y);
             } else {
@@ -438,14 +443,14 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
                     self.start += Point::new(0, self.direction.y);
 
                     self.err += e_diag;
+                    self.current_iter += 2 * self.delta.x;
                 }
 
                 self.err += e_square;
+                self.current_iter += 2 * self.delta.y;
 
                 self.start += Point::new(self.direction.x, 0);
             }
-
-            self.current_iter += 1;
 
             Some(Pixel(point, self.color.unwrap()))
         } else {
