@@ -214,8 +214,8 @@ impl Window {
 
     /// Return an iterator of all captured SimulatorEvent
     pub fn get_input_events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
-        let scale = self.scale.clone();
-        let pixel_spacing = self.pixel_spacing.clone();
+        let scale = self.scale;
+        let pixel_spacing = self.pixel_spacing;
         self.event_pump
             .poll_iter()
             .filter_map(move |event| match event {
