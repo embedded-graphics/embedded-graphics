@@ -4,11 +4,9 @@ use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::pixelcolor::{Rgb888, RgbColor};
 use crate::primitives::Primitive;
 use crate::style::Style;
 use crate::style::WithStyle;
-use integer_sqrt::IntegerSquareRoot;
 
 /// Line primitive
 ///
@@ -151,7 +149,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
     /// 2 | 1
     /// ```
     fn into_iter(self) -> Self::IntoIter {
-        let mut delta = (self.end - self.start).abs();
+        let delta = (self.end - self.start).abs();
 
         // // Ensure delta points into quadrant 1 so signs are always positive
         // if delta.x < 0 {
@@ -223,6 +221,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             perp_err: 0,
             show_extra_perp: true,
             swap,
+            draw_left_side: true,
             perp: PerpLineIterator {
                 start: self.start,
                 color: self.style.stroke_color,
@@ -271,6 +270,7 @@ where
     show_extra_perp: bool,
     perp_err: i32,
     swap: i32,
+    draw_left_side: bool,
     // is_diag: bool
 }
 
@@ -282,7 +282,6 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
-        // if self.show_extra_perp {
         if let Some(perp) = self.extra_perp.next() {
             return Some(perp);
         }
@@ -290,7 +289,22 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         if let Some(perp) = self.perp.next() {
             return Some(perp);
         }
-        // }
+
+        self.draw_left_side = !self.draw_left_side;
+
+        if self.draw_left_side == false {
+            self.perp = PerpLineIterator {
+                start: self.start,
+                color: self.style.stroke_color,
+                err: self.perp_err * -self.swap,
+                stop: false,
+                current_iter: self.delta.x + self.delta.y - self.err * -self.swap,
+                swap: -self.swap,
+                ..self.perp
+            };
+
+            return self.perp.next();
+        }
 
         if !self.stop {
             let start = self.start;
@@ -303,14 +317,11 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             self.perp = PerpLineIterator {
                 start,
-                color: if self.perp.color == self.style.stroke_color {
-                    self.style.fill_color
-                } else {
-                    self.style.stroke_color
-                },
+                color: self.style.fill_color,
                 err: self.perp_err * self.swap,
                 stop: false,
                 current_iter: self.delta.x + self.delta.y - self.err * self.swap,
+                swap: self.swap,
                 ..self.perp
             };
 
