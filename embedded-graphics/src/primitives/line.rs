@@ -175,15 +175,16 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
         let swap = if delta.y > delta.x { -1 } else { 1 };
 
         // Perpendicular direction, always on left side of line from start position's point of view
-        let perp_direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+        let (swap, perp_direction) = match (self.start.x >= self.end.x, self.start.y >= self.end.y)
+        {
             // Quadrant 0
-            (false, true) => Point::new(-1 * swap, -1 * swap),
+            (false, true) => (swap, Point::new(-1 * swap, -1 * swap)),
             // Quadrant 1
-            (false, false) => Point::new(-1 * swap, 1 * swap),
+            (false, false) => (-swap, Point::new(-1 * swap, 1 * swap)),
             // Quadrant 2
-            (true, false) => Point::new(1 * swap, 1 * swap),
+            (true, false) => (swap, Point::new(1 * swap, 1 * swap)),
             // Quadrant 3
-            (true, true) => Point::new(1 * swap, -1 * swap),
+            (true, true) => (-swap, Point::new(1 * swap, -1 * swap)),
         };
 
         // let len = (delta.x.pow(2) + delta.y.pow(2)).integer_sqrt();
@@ -201,7 +202,8 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         // let perp_err = delta.x + delta.y;
 
-        let swap = if self.show_extra_perp { 1 } else { -1 };
+        // let swap = if self.show_extra_perp { 1 } else { -1 };
+        // let swap = swap * -1;
 
         let width_threshold = (2.0
             * self.style.stroke_width as f32
