@@ -201,9 +201,10 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
 
         // let perp_err = delta.x + delta.y;
 
-        let width_threshold =
-            (2.0 * self.style.stroke_width as f32
-                * ((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt()) as u32;
+        let width_threshold = (2.0
+            * self.style.stroke_width as f32
+            * ((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt())
+        .round() as u32;
 
         LineIterator {
             style: self.style,
