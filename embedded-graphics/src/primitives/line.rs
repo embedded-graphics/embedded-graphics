@@ -374,15 +374,13 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             self.num_iter += 1;
 
-            if self.show_extra_perp {
-                if extra {
-                    self.extra_perp.next()
-                } else {
-                    self.perp.next()
-                }
+            if extra {
+                self.extra_perp.next()
             } else {
-                Some(Pixel(start, self.style.stroke_color.unwrap()))
+                self.perp.next()
             }
+
+        // Some(Pixel(start, self.style.stroke_color.unwrap()))
         } else {
             None
         }
