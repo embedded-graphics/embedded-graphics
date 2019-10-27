@@ -189,7 +189,7 @@ fn main() {
     let mut display = DisplayBuilder::new()
         .title("Delete me and update 'strokes' demo")
         .size(120, 120)
-        .scale(6)
+        .scale(12)
         .pixel_spacing(1)
         .build_rgb();
 
@@ -245,6 +245,7 @@ fn main() {
     let len = 50.0;
     let center = Point::new(60, 60);
     let mut show_extra_perp = true;
+    let mut width = 10i8;
 
     loop {
         let end = display.run_once();
@@ -255,8 +256,6 @@ fn main() {
 
         let x = center.x + (angle.cos() * len) as i32;
         let y = center.y + (angle.sin() * len) as i32;
-
-        let width = 1;
 
         // draw_line(&mut display, Point::new(127, 127), Point::new(x, y), width);
 
@@ -290,7 +289,7 @@ fn main() {
                     stroke_color: Some(Rgb888::YELLOW),
                     fill_color: Some(Rgb888::RED),
                     test_color: Some(Rgb888::CYAN),
-                    stroke_width: 10,
+                    stroke_width: width as u8,
                     ..Style::default()
                 })
                 .into_iter(),
@@ -309,6 +308,11 @@ fn main() {
         //         .into_iter(),
         // );
 
+        display.draw(text_6x8!(
+            &format!("W: {}", width),
+            stroke_color = Some(Rgb888::RED),
+        ));
+
         for event in display.get_input_events() {
             match event {
                 SimulatorEvent::KeyDown { keycode, .. } => {
@@ -321,8 +325,13 @@ fn main() {
                     };
                     position += delta;
 
-                    if keycode == Keycode::Space {
-                        show_extra_perp = !show_extra_perp;
+                    match keycode {
+                        Keycode::Space => {
+                            show_extra_perp = !show_extra_perp;
+                        }
+                        Keycode::O => width += 1,
+                        Keycode::L => width = (width - 1).max(0),
+                        _ => (),
                     }
                 }
 
