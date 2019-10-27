@@ -308,22 +308,22 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
         self.draw_left_side = !self.draw_left_side;
 
-        if self.draw_left_side == false {
-            self.perp = PerpLineIterator {
-                start: self.start,
-                color: self.style.stroke_color,
-                err: self.perp_err * -self.swap,
-                stop: false,
-                current_iter: self.delta.x + self.delta.y - self.err * -self.swap,
-                swap: -self.swap,
-                ..self.perp
-            };
-
-            return self.perp.next();
-        }
-
         if !self.stop {
             let start = self.start;
+
+            if self.draw_left_side == false {
+                self.perp = PerpLineIterator {
+                    start: self.start,
+                    color: self.style.stroke_color,
+                    err: self.perp_err * -self.swap,
+                    stop: false,
+                    current_iter: self.delta.x + self.delta.y - self.err * -self.swap,
+                    swap: -self.swap,
+                    ..self.perp
+                };
+
+                return self.perp.next();
+            }
 
             if self.start == self.end || self.num_iter > 500 {
                 self.stop = true;
