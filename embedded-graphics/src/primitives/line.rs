@@ -244,6 +244,17 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 stop: true,
                 swap,
             },
+            extra_perp_right: PerpLineIterator {
+                start: self.start,
+                color: self.style.test_color,
+                width: width_threshold,
+                delta,
+                direction: perp_direction,
+                err: 0,
+                current_iter: 0,
+                stop: true,
+                swap: -swap,
+            },
         }
     }
 }
@@ -267,6 +278,7 @@ where
     // width: u32,
     perp: PerpLineIterator<C>,
     extra_perp: PerpLineIterator<C>,
+    extra_perp_right: PerpLineIterator<C>,
     show_extra_perp: bool,
     perp_err: i32,
     swap: i32,
@@ -283,6 +295,10 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         self.style.stroke_color?;
 
         if let Some(perp) = self.extra_perp.next() {
+            return Some(perp);
+        }
+
+        if let Some(perp) = self.extra_perp_right.next() {
             return Some(perp);
         }
 
@@ -345,6 +361,14 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                                 ..self.extra_perp
                             };
 
+                            self.extra_perp_right = PerpLineIterator {
+                                start: self.start,
+                                err: (self.perp_err + e_diag + e_square) * -self.swap,
+                                current_iter: self.delta.x + self.delta.y - self.err * -self.swap,
+                                stop: false,
+                                ..self.extra_perp_right
+                            };
+
                             extra = true;
                         }
 
@@ -375,6 +399,14 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                                 current_iter: self.delta.x + self.delta.y - self.err * self.swap,
                                 stop: false,
                                 ..self.extra_perp
+                            };
+
+                            self.extra_perp_right = PerpLineIterator {
+                                start: self.start,
+                                err: (self.perp_err + e_diag + e_square) * -self.swap,
+                                current_iter: self.delta.x + self.delta.y - self.err * -self.swap,
+                                stop: false,
+                                ..self.extra_perp_right
                             };
 
                             extra = true;
