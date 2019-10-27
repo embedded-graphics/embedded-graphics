@@ -215,7 +215,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             delta,
             direction,
             err: 0,
-            stop: self.start == self.end, // if line length is zero, draw nothing
+            stop: self.start == self.end || self.style.stroke_width == 0, // if line length or width is zero, draw nothing
             num_iter: 0,
             perp_err: 0,
             show_extra_perp: true,
