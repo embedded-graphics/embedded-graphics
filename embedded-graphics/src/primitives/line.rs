@@ -203,8 +203,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
         // let swap = if self.show_extra_perp { 1 } else { -1 };
         // let swap = swap * -1;
 
-        let width_threshold = (2.0
-            * self.style.stroke_width as f32
+        let width_threshold = (self.style.stroke_width as f32
             * ((delta.x.pow(2) + delta.y.pow(2)) as f32).sqrt())
         .round() as u32;
 
