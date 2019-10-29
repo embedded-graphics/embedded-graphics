@@ -55,7 +55,7 @@
 //!
 //!     loop {
 //!         window.update(&display);
-//! 
+//!
 //!         let end = window.handle_events();
 //!         if end {
 //!             break;
