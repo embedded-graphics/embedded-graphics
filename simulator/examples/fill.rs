@@ -1,18 +1,19 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
-use embedded_graphics_simulator::DisplayBuilder;
+use embedded_graphics_simulator::SimulatorDisplay;
 use std::thread;
 use std::time::Duration;
 
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
-    let mut display = DisplayBuilder::new()
+    let mut display = SimulatorDisplay::new(Size::new(304, 128));
+    let mut window = display
+        .build_window()
         .title("Filled primitives")
-        .size(304, 128)
         .scale(2)
-        .build_binary();
+        .build();
 
     Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
         .stroke_color(Some(BinaryColor::On))
@@ -65,8 +66,9 @@ fn main() {
         .draw(&mut display);
 
     loop {
-        let end = display.run_once();
+        window.update(&display);
 
+        let end = window.handle_events();
         if end {
             break;
         }

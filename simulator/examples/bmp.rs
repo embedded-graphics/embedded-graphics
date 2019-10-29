@@ -12,24 +12,22 @@
 use embedded_graphics::image::ImageBmp;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics_simulator::DisplayBuilder;
+use embedded_graphics_simulator::SimulatorDisplay;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
     let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
 
-    let mut display = DisplayBuilder::new()
-        .title("BMP image")
-        .size(304, 128)
-        .scale(2)
-        .build_rgb();
+    let mut display = SimulatorDisplay::new(Size::new(304, 128));
+    let mut window = display.build_window().title("BMP image").scale(2).build();
 
     image.draw(&mut display);
 
     loop {
-        let end = display.run_once();
+        window.update(&display);
 
+        let end = window.handle_events();
         if end {
             break;
         }

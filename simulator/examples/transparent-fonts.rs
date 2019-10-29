@@ -1,15 +1,17 @@
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egrectangle, text_6x8};
-use embedded_graphics_simulator::DisplayBuilder;
+use embedded_graphics_simulator::SimulatorDisplay;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display = DisplayBuilder::new()
+    let mut display = SimulatorDisplay::new(Size::new(256, 256));
+    let mut window = display
+        .build_window()
         .title("Fonts with transparent background")
         .scale(3)
-        .build_rgb();
+        .build();
 
     egcircle!(
         (20, 20),
@@ -49,8 +51,9 @@ fn main() {
     .draw(&mut display);
 
     loop {
-        let end = display.run_once();
+        window.update(&display);
 
+        let end = window.handle_events();
         if end {
             break;
         }

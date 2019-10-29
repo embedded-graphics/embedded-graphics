@@ -1,11 +1,15 @@
-use embedded_graphics::geometry::Point;
-use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
+use crate::display::SimulatorDisplay;
+use crate::theme::BinaryColorTheme;
+use embedded_graphics::geometry::{Point, Size};
+use embedded_graphics::pixelcolor::{PixelColor, Rgb888, RgbColor};
+use embedded_graphics::DrawTarget;
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::{MouseButton, MouseWheelDirection};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render;
+use std::convert::TryFrom;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -55,6 +59,7 @@ pub enum SimulatorEvent {
 pub struct Window {
     scale: usize,
     pixel_spacing: usize,
+    theme: BinaryColorTheme,
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
@@ -62,17 +67,19 @@ pub struct Window {
 }
 
 impl Window {
-    /// Create a new simulator window
-    pub fn new(
-        width: usize,
-        height: usize,
+    /// Creates a new simulator window.
+    pub(crate) fn new(
+        display_size: Size,
         scale: usize,
         pixel_spacing: usize,
+        theme: BinaryColorTheme,
         title: &str,
     ) -> Self {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
+        let width = display_size.width as usize;
+        let height = display_size.height as usize;
         let window_width = width * scale + (width - 1) * pixel_spacing;
         let window_height = height * scale + (height - 1) * pixel_spacing;
 
@@ -88,40 +95,56 @@ impl Window {
         Self {
             scale,
             pixel_spacing,
+            theme,
             canvas,
             event_pump,
             input_events: vec![],
         }
     }
 
-    fn set_color(&mut self, color: Rgb888) {
+    /// Updates the window.
+    pub fn update<C>(&mut self, display: &SimulatorDisplay<C>)
+    where
+        C: PixelColor + Into<Rgb888>,
+    {
+        //self.window.clear(self.theme.convert(BinaryColor::Off));
         self.canvas
-            .set_draw_color(Color::RGB(color.r(), color.g(), color.b()));
-    }
-
-    /// Clear window
-    pub fn clear(&mut self, color: Rgb888) {
-        self.set_color(color);
+            .set_draw_color(self.convert_color(Rgb888::BLACK));
         self.canvas.clear();
-    }
 
-    /// Present window
-    pub fn present(&mut self) {
+        let Size { width, height } = display.size();
+        let width = i32::try_from(width).expect("display width too large");
+        let height = i32::try_from(height).expect("display height too large");
+
+        let pixel_pitch = i32::try_from(self.scale + self.pixel_spacing)
+            .expect("pixel scale and/or spacing too large");
+        let pixel_size = u32::try_from(self.scale).expect("pixel scale too large");
+
+        for y in 0..height {
+            for x in 0..width {
+                let point = Point { x, y };
+                let color = display.get_pixel(point);
+
+                //let color = self.theme.convert(color);
+
+                let x = x * pixel_pitch;
+                let y = y * pixel_pitch;
+
+                let r = Rect::new(x, y, pixel_size, pixel_size);
+                self.canvas.set_draw_color(self.convert_color(color));
+                self.canvas.fill_rect(r).unwrap();
+            }
+        }
+
         self.canvas.present();
     }
 
-    /// Draw pixel
-    pub fn draw_pixel(&mut self, x: usize, y: usize, color: Rgb888) {
-        self.set_color(color);
-
-        let pitch = self.scale + self.pixel_spacing;
-
-        let x = (x * pitch) as i32;
-        let y = (y * pitch) as i32;
-        let size = self.scale as u32;
-
-        let r = Rect::new(x, y, size, size);
-        self.canvas.fill_rect(r).unwrap();
+    fn convert_color<C>(&self, color: C) -> Color
+    where
+        C: PixelColor + Into<Rgb888>,
+    {
+        let color = self.theme.convert(color.into());
+        Color::RGB(color.r(), color.g(), color.b())
     }
 
     /// Handle events

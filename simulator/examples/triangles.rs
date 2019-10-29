@@ -1,18 +1,15 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Triangle;
-use embedded_graphics_simulator::DisplayBuilder;
+use embedded_graphics_simulator::SimulatorDisplay;
 use std::thread;
 use std::time::Duration;
 
 const PAD: i32 = 10;
 
 fn main() {
-    let mut display = DisplayBuilder::new()
-        .title("Triangles")
-        .size(256 * 2, 128)
-        .scale(2)
-        .build_binary();
+    let mut display = SimulatorDisplay::new(Size::new(512, 128));
+    let mut window = display.build_window().title("Triangles").scale(2).build();
 
     // no straight lines
     Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64))
@@ -56,8 +53,9 @@ fn main() {
         .draw(&mut display);
 
     loop {
-        let end = display.run_once();
+        window.update(&display);
 
+        let end = window.handle_events();
         if end {
             break;
         }

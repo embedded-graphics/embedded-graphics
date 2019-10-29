@@ -1,17 +1,15 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle, Triangle};
-use embedded_graphics_simulator::DisplayBuilder;
+use embedded_graphics_simulator::SimulatorDisplay;
 use std::thread;
 use std::time::Duration;
 
 const PADDING: i32 = 16;
 
 fn main() {
-    let mut display = DisplayBuilder::new()
-        .title("Strokes")
-        .size(320, 256)
-        .build_binary();
+    let mut display = SimulatorDisplay::new(Size::new(320, 256));
+    let mut window = display.build_window().title("Strokes").build();
 
     let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64))
         .translate(Point::new(0, 0))
@@ -66,8 +64,9 @@ fn main() {
         .draw(&mut display);
 
     loop {
-        let end = display.run_once();
+        window.update(&display);
 
+        let end = window.handle_events();
         if end {
             break;
         }
