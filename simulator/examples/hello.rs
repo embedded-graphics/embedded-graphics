@@ -2,14 +2,13 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay};
+use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display = SimulatorDisplay::new(Size::new(130, 130));
-    let mut window = display
-        .build_window()
+    let mut display = SimulatorDisplay::new(Size::new(129, 129));
+    let mut window = WindowBuilder::new(&display)
         .title("Hello World")
         .theme(BinaryColorTheme::OledBlue)
         .build();

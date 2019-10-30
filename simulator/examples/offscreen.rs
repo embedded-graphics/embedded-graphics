@@ -1,13 +1,16 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
-use embedded_graphics_simulator::SimulatorDisplay;
+use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(32, 32));
-    let mut window = display.build_window().title("Offscreen").scale(4).build();
+    let mut window = WindowBuilder::new(&display)
+        .title("Offscreen")
+        .scale(4)
+        .build();
 
     // Outline
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))

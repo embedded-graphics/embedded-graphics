@@ -1,7 +1,7 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
-use embedded_graphics_simulator::SimulatorDisplay;
+use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
@@ -9,8 +9,7 @@ static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(304, 128));
-    let mut window = display
-        .build_window()
+    let mut window = WindowBuilder::new(&display)
         .title("Filled primitives")
         .scale(2)
         .build();

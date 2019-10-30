@@ -4,14 +4,13 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay};
+use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut display = SimulatorDisplay::new(Size::new(256, 256));
-    let mut window = display
-        .build_window()
+    let mut display = SimulatorDisplay::new(Size::new(129, 129));
+    let mut window = WindowBuilder::new(&display)
         .title("Chained drawing")
         .theme(BinaryColorTheme::OledBlue)
         .build();

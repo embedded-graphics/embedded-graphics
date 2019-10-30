@@ -1,4 +1,3 @@
-use crate::window_builder::WindowBuilder;
 use embedded_graphics::drawable::Pixel;
 use embedded_graphics::geometry::{Point, Size};
 use embedded_graphics::pixelcolor::{BinaryColor, PixelColor};
@@ -23,11 +22,6 @@ where
         let pixels = vec![default_color; pixel_count].into_boxed_slice();
 
         SimulatorDisplay { size, pixels }
-    }
-
-    /// Creates a new window builder.
-    pub fn build_window(&self) -> WindowBuilder {
-        WindowBuilder::new(self.size)
     }
 
     /// Returns the color of the pixel at a point.

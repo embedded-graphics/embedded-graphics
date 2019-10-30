@@ -3,7 +3,7 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egline, egrectangle, egtriangle};
-use embedded_graphics_simulator::SimulatorDisplay;
+use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
@@ -11,8 +11,7 @@ static CIRCLE_SIZE: i32 = 32;
 
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(384, 128));
-    let mut window = display
-        .build_window()
+    let mut window = WindowBuilder::new(&display)
         .title("Filled primitives using macros")
         .scale(2)
         .build();

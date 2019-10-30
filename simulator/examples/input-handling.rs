@@ -10,7 +10,7 @@ extern crate embedded_graphics_simulator;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Circle;
-use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent};
+use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use sdl2::keyboard::Keycode;
 
 const BACKGROUND_COLOR: Option<Rgb888> = Some(Rgb888::BLACK);
@@ -30,7 +30,9 @@ fn move_circle(display: &mut SimulatorDisplay<Rgb888>, old_center: Point, new_ce
 
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(800, 480));
-    let mut window = display.build_window().title("Click to move circle").build();
+    let mut window = WindowBuilder::new(&display)
+        .title("Click to move circle")
+        .build();
 
     let mut position = Point::new(200, 200);
     Circle::new(position, 100)

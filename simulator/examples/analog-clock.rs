@@ -13,7 +13,7 @@ use embedded_graphics::fonts::Font12x16;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
-use embedded_graphics_simulator::SimulatorDisplay;
+use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
@@ -134,7 +134,7 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
 
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(DISP_SIZE as u32, DISP_SIZE as u32));
-    let mut window = display.build_window().title("Clock").scale(2).build();
+    let mut window = WindowBuilder::new(&display).title("Clock").scale(2).build();
 
     loop {
         let time = Local::now();

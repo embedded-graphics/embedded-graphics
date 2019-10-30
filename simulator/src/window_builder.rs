@@ -1,8 +1,11 @@
+use crate::display::SimulatorDisplay;
 use crate::theme::BinaryColorTheme;
 use crate::window::Window;
 use embedded_graphics::geometry::Size;
+use embedded_graphics::pixelcolor::PixelColor;
+use embedded_graphics::DrawTarget;
 
-/// Create a simulator display using the builder pattern
+/// Builder for simulator windows.
 #[derive(Debug)]
 pub struct WindowBuilder {
     display_size: Size,
@@ -13,9 +16,15 @@ pub struct WindowBuilder {
 }
 
 impl WindowBuilder {
-    pub(crate) fn new(display_size: Size) -> Self {
+    /// Creates a new simulator window builder.
+    ///
+    /// The display parameter is used to set the size of the window.
+    pub fn new<C>(display: &SimulatorDisplay<C>) -> Self
+    where
+        C: PixelColor,
+    {
         Self {
-            display_size,
+            display_size: display.size(),
             scale: 1,
             pixel_spacing: 0,
             theme: BinaryColorTheme::Default,
