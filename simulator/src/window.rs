@@ -2,14 +2,10 @@ use crate::display::SimulatorDisplay;
 use crate::theme::BinaryColorTheme;
 use embedded_graphics::geometry::{Point, Size};
 use embedded_graphics::pixelcolor::{PixelColor, Rgb888, RgbColor};
-use embedded_graphics::DrawTarget;
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::{MouseButton, MouseWheelDirection};
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::render;
-use std::convert::TryFrom;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -107,44 +103,43 @@ impl Window {
     where
         C: PixelColor + Into<Rgb888>,
     {
-        //self.window.clear(self.theme.convert(BinaryColor::Off));
-        self.canvas
-            .set_draw_color(self.convert_color(Rgb888::BLACK));
-        self.canvas.clear();
+        let (width, height) = self.canvas.window().size();
 
-        let Size { width, height } = display.size();
-        let width = i32::try_from(width).expect("display width too large");
-        let height = i32::try_from(height).expect("display height too large");
+        let texture_creator = self.canvas.texture_creator();
+        let mut texture = texture_creator
+            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, width, height)
+            .unwrap();
 
-        let pixel_pitch = i32::try_from(self.scale + self.pixel_spacing)
-            .expect("pixel scale and/or spacing too large");
-        let pixel_size = u32::try_from(self.scale).expect("pixel scale too large");
+        texture
+            .with_lock(None, |data: &mut [u8], pitch: usize| {
+                let pixel_pitch = (self.scale + self.pixel_spacing) as i32;
 
-        for y in 0..height {
-            for x in 0..width {
-                let point = Point { x, y };
-                let color = display.get_pixel(point);
+                for y in 0..height {
+                    for x in 0..width {
+                        let source_point = Point {
+                            x: x as i32 / pixel_pitch,
+                            y: y as i32 / pixel_pitch,
+                        };
+                        let color = if x as i32 % pixel_pitch < self.scale as i32
+                            && y as i32 % pixel_pitch < self.scale as i32
+                        {
+                            display.get_pixel(source_point).into()
+                        } else {
+                            Rgb888::BLACK
+                        };
+                        let color = self.theme.convert(color);
 
-                //let color = self.theme.convert(color);
+                        let index = x as usize * 3 + y as usize * pitch;
+                        data[index] = color.r();
+                        data[index + 1] = color.g();
+                        data[index + 2] = color.b();
+                    }
+                }
+            })
+            .unwrap();
 
-                let x = x * pixel_pitch;
-                let y = y * pixel_pitch;
-
-                let r = Rect::new(x, y, pixel_size, pixel_size);
-                self.canvas.set_draw_color(self.convert_color(color));
-                self.canvas.fill_rect(r).unwrap();
-            }
-        }
-
+        self.canvas.copy(&texture, None, None).unwrap();
         self.canvas.present();
-    }
-
-    fn convert_color<C>(&self, color: C) -> Color
-    where
-        C: PixelColor + Into<Rgb888>,
-    {
-        let color = self.theme.convert(color.into());
-        Color::RGB(color.r(), color.g(), color.b())
     }
 
     /// Handle events
