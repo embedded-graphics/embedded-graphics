@@ -36,13 +36,13 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::{egcircle, egline, text_6x8};
 //! use embedded_graphics::pixelcolor::BinaryColor;
-//! use embedded_graphics_simulator::{SimulatorDisplay, BinaryColorTheme, SimulatorEvent};
+//! use embedded_graphics_simulator::{SimulatorDisplay, BinaryColorTheme, SimulatorEvent, WindowBuilder};
 //! use std::thread;
 //! use std::time::Duration;
 //!
 //! fn main() {
 //!     let mut display = SimulatorDisplay::new(Size::new(128, 64));
-//!     let mut window = display.build_window()
+//!     let mut window = WindowBuilder::new(&display)
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
 //!
