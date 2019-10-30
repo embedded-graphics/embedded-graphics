@@ -6,6 +6,8 @@ use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::{MouseButton, MouseWheelDirection};
 use sdl2::render;
+use std::thread;
+use std::time::Duration;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -140,6 +142,26 @@ impl Window {
 
         self.canvas.copy(&texture, None, None).unwrap();
         self.canvas.present();
+    }
+
+    /// Shows a static display.
+    ///
+    /// This methods updates the window once and loops until the simulator window
+    /// is closed.
+    pub fn show_static<C>(&mut self, display: &SimulatorDisplay<C>)
+    where
+        C: PixelColor + Into<Rgb888>,
+    {
+        self.update(&display);
+
+        loop {
+            let end = self.handle_events();
+            if end {
+                break;
+            }
+
+            thread::sleep(Duration::from_millis(20));
+        }
     }
 
     /// Handle events
