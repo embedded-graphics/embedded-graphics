@@ -4,16 +4,10 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics_simulator::{BinaryColorTheme, DisplayBuilder};
-use std::thread;
-use std::time::Duration;
+use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 fn main() {
-    let mut display = DisplayBuilder::new()
-        .title("Chained drawing")
-        .theme(BinaryColorTheme::OledBlue)
-        .build_binary();
-
+    let mut display = SimulatorDisplay::new(Size::new(129, 129));
     let mut objects = Circle::new(Point::new(64, 64), 64)
         .stroke_color(Some(BinaryColor::On))
         .into_iter()
@@ -29,13 +23,9 @@ fn main() {
 
     objects.draw(&mut display);
 
-    loop {
-        let end = display.run_once();
-
-        if end {
-            break;
-        }
-
-        thread::sleep(Duration::from_millis(200));
-    }
+    let mut window = WindowBuilder::new(&display)
+        .title("Chained drawing")
+        .theme(BinaryColorTheme::OledBlue)
+        .build();
+    window.show_static(&display);
 }

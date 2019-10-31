@@ -10,14 +10,14 @@ extern crate embedded_graphics_simulator;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Circle;
-use embedded_graphics_simulator::{DisplayBuilder, RgbDisplay, SimulatorEvent};
+use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use sdl2::keyboard::Keycode;
 
 const BACKGROUND_COLOR: Option<Rgb888> = Some(Rgb888::BLACK);
 const FOREGROUND_COLOR: Option<Rgb888> = Some(Rgb888::RED);
 const KEYBOARD_DELTA: i32 = 20;
 
-fn move_circle(display: &mut RgbDisplay, old_center: Point, new_center: Point) {
+fn move_circle(display: &mut SimulatorDisplay<Rgb888>, old_center: Point, new_center: Point) {
     // Clear old circle
     Circle::new(old_center, 100)
         .fill_color(BACKGROUND_COLOR)
@@ -29,10 +29,10 @@ fn move_circle(display: &mut RgbDisplay, old_center: Point, new_center: Point) {
 }
 
 fn main() {
-    let mut display = DisplayBuilder::new()
+    let mut display = SimulatorDisplay::new(Size::new(800, 480));
+    let mut window = WindowBuilder::new(&display)
         .title("Click to move circle")
-        .size(800, 480)
-        .build_rgb();
+        .build();
 
     let mut position = Point::new(200, 200);
     Circle::new(position, 100)
@@ -40,13 +40,14 @@ fn main() {
         .draw(&mut display);
 
     loop {
-        let end = display.run_once();
+        window.update(&display);
 
+        let end = window.handle_events();
         if end {
             break;
         }
 
-        for event in display.get_input_events() {
+        for event in window.get_input_events() {
             match event {
                 SimulatorEvent::KeyDown { keycode, .. } => {
                     let delta = match keycode {

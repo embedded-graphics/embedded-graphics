@@ -1,7 +1,7 @@
-use embedded_graphics::pixelcolor::{BinaryColor, Rgb888, RgbColor};
+use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
 
 /// Color theme for binary displays
-#[derive(Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BinaryColorTheme {
     /// A simple on/off, non-styled display with black background and white pixels
     Default,
@@ -22,18 +22,18 @@ pub enum BinaryColorTheme {
     OledBlue,
 }
 
-pub fn map_color(color: BinaryColor, color_off: Rgb888, color_on: Rgb888) -> Rgb888 {
+fn map_color(color: Rgb888, color_off: Rgb888, color_on: Rgb888) -> Rgb888 {
     match color {
-        BinaryColor::On => color_on,
-        BinaryColor::Off => color_off,
+        Rgb888::BLACK => color_off,
+        _ => color_on,
     }
 }
 
 impl BinaryColorTheme {
-    /// Get the theme's pixel color for a given pixel state
-    pub fn convert(&self, color: BinaryColor) -> Rgb888 {
+    /// Gets the theme's pixel color for a given pixel state.
+    pub(crate) fn convert(&self, color: Rgb888) -> Rgb888 {
         match self {
-            BinaryColorTheme::Default => color.into(),
+            BinaryColorTheme::Default => color,
             BinaryColorTheme::LcdWhite => {
                 map_color(color, Rgb888::new(245, 245, 245), Rgb888::new(32, 32, 32))
             }

@@ -16,6 +16,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #143 Circles with no stroke are now drawn correctly
 
+- #192 Performance of drawing in the simulator is increased.
+
 ### Changed
 
 - **(breaking)** The `Drawable` trait now has a required trait method `draw()`, which describes how the object will be drawn on the screen. See the docs for more details.
@@ -44,6 +46,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
     fill_color = Some(BinaryColor::Off)
   );
   ```
+
+- **(breaking)** The simulator API changed.
 
 ### Removed
 

@@ -1,11 +1,13 @@
-use embedded_graphics::geometry::Point;
-use embedded_graphics::pixelcolor::{Rgb888, RgbColor};
+use crate::display::SimulatorDisplay;
+use crate::theme::BinaryColorTheme;
+use embedded_graphics::geometry::{Point, Size};
+use embedded_graphics::pixelcolor::{PixelColor, Rgb888, RgbColor};
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::{MouseButton, MouseWheelDirection};
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::render;
+use std::thread;
+use std::time::Duration;
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -55,6 +57,7 @@ pub enum SimulatorEvent {
 pub struct Window {
     scale: usize,
     pixel_spacing: usize,
+    theme: BinaryColorTheme,
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
@@ -62,17 +65,19 @@ pub struct Window {
 }
 
 impl Window {
-    /// Create a new simulator window
-    pub fn new(
-        width: usize,
-        height: usize,
+    /// Creates a new simulator window.
+    pub(crate) fn new(
+        display_size: Size,
         scale: usize,
         pixel_spacing: usize,
+        theme: BinaryColorTheme,
         title: &str,
     ) -> Self {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
+        let width = display_size.width as usize;
+        let height = display_size.height as usize;
         let window_width = width * scale + (width - 1) * pixel_spacing;
         let window_height = height * scale + (height - 1) * pixel_spacing;
 
@@ -88,40 +93,75 @@ impl Window {
         Self {
             scale,
             pixel_spacing,
+            theme,
             canvas,
             event_pump,
             input_events: vec![],
         }
     }
 
-    fn set_color(&mut self, color: Rgb888) {
-        self.canvas
-            .set_draw_color(Color::RGB(color.r(), color.g(), color.b()));
-    }
+    /// Updates the window.
+    pub fn update<C>(&mut self, display: &SimulatorDisplay<C>)
+    where
+        C: PixelColor + Into<Rgb888>,
+    {
+        let (width, height) = self.canvas.window().size();
 
-    /// Clear window
-    pub fn clear(&mut self, color: Rgb888) {
-        self.set_color(color);
-        self.canvas.clear();
-    }
+        let texture_creator = self.canvas.texture_creator();
+        let mut texture = texture_creator
+            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, width, height)
+            .unwrap();
 
-    /// Present window
-    pub fn present(&mut self) {
+        texture
+            .with_lock(None, |data: &mut [u8], pitch: usize| {
+                let pixel_pitch = (self.scale + self.pixel_spacing) as i32;
+
+                for y in 0..height {
+                    for x in 0..width {
+                        let source_point = Point {
+                            x: x as i32 / pixel_pitch,
+                            y: y as i32 / pixel_pitch,
+                        };
+                        let color = if x as i32 % pixel_pitch < self.scale as i32
+                            && y as i32 % pixel_pitch < self.scale as i32
+                        {
+                            display.get_pixel(source_point).into()
+                        } else {
+                            Rgb888::BLACK
+                        };
+                        let color = self.theme.convert(color);
+
+                        let index = x as usize * 3 + y as usize * pitch;
+                        data[index] = color.r();
+                        data[index + 1] = color.g();
+                        data[index + 2] = color.b();
+                    }
+                }
+            })
+            .unwrap();
+
+        self.canvas.copy(&texture, None, None).unwrap();
         self.canvas.present();
     }
 
-    /// Draw pixel
-    pub fn draw_pixel(&mut self, x: usize, y: usize, color: Rgb888) {
-        self.set_color(color);
+    /// Shows a static display.
+    ///
+    /// This methods updates the window once and loops until the simulator window
+    /// is closed.
+    pub fn show_static<C>(&mut self, display: &SimulatorDisplay<C>)
+    where
+        C: PixelColor + Into<Rgb888>,
+    {
+        self.update(&display);
 
-        let pitch = self.scale + self.pixel_spacing;
+        loop {
+            let end = self.handle_events();
+            if end {
+                break;
+            }
 
-        let x = (x * pitch) as i32;
-        let y = (y * pitch) as i32;
-        let size = self.scale as u32;
-
-        let r = Rect::new(x, y, size, size);
-        self.canvas.fill_rect(r).unwrap();
+            thread::sleep(Duration::from_millis(20));
+        }
     }
 
     /// Handle events
