@@ -60,6 +60,7 @@ pub struct Window {
     scale: usize,
     pixel_spacing: usize,
     theme: BinaryColorTheme,
+
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
 }
