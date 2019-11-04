@@ -51,6 +51,8 @@ pub enum SimulatorEvent {
         /// The directionality of the scroll (normal or flipped)
         direction: MouseWheelDirection,
     },
+    /// An exit event
+    Quit,
 }
 
 /// Simulator window
@@ -61,7 +63,6 @@ pub struct Window {
 
     canvas: render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
-    input_events: Vec<SimulatorEvent>,
 }
 
 impl Window {
@@ -96,7 +97,6 @@ impl Window {
             theme,
             canvas,
             event_pump,
-            input_events: vec![],
         }
     }
 
@@ -154,27 +154,27 @@ impl Window {
     {
         self.update(&display);
 
-        loop {
-            let end = self.handle_events();
-            if end {
-                break;
+        'running: loop {
+            if self.events().any(|e| e == SimulatorEvent::Quit) {
+                break 'running;
             }
-
             thread::sleep(Duration::from_millis(20));
         }
     }
 
     /// Handle events
-    pub fn handle_events(&mut self) -> bool {
-        for event in self.event_pump.poll_iter() {
-            match event {
+    /// Return an iterator of all captured SimulatorEvent
+    pub fn events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
+        let scale = self.scale;
+        let pixel_spacing = self.pixel_spacing;
+        self.event_pump
+            .poll_iter()
+            .filter_map(move |event| match event {
                 Event::Quit { .. }
                 | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
-                } => {
-                    return true;
-                }
+                } => Some(SimulatorEvent::Quit),
                 Event::KeyDown {
                     keycode,
                     keymod,
@@ -182,11 +182,13 @@ impl Window {
                     ..
                 } => {
                     if let Some(valid_keycode) = keycode {
-                        self.input_events.push(SimulatorEvent::KeyDown {
+                        Some(SimulatorEvent::KeyDown {
                             keycode: valid_keycode,
                             keymod,
                             repeat,
-                        });
+                        })
+                    } else {
+                        None
                     }
                 }
                 Event::KeyUp {
@@ -196,47 +198,35 @@ impl Window {
                     ..
                 } => {
                     if let Some(valid_keycode) = keycode {
-                        self.input_events.push(SimulatorEvent::KeyUp {
+                        Some(SimulatorEvent::KeyUp {
                             keycode: valid_keycode,
                             keymod,
                             repeat,
-                        });
+                        })
+                    } else {
+                        None
                     }
                 }
                 Event::MouseButtonUp {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = map_input_to_point((x, y), self.scale, self.pixel_spacing);
-                    self.input_events
-                        .push(SimulatorEvent::MouseButtonUp { point, mouse_btn });
+                    let point = map_input_to_point((x, y), scale, pixel_spacing);
+                    Some(SimulatorEvent::MouseButtonUp { point, mouse_btn })
                 }
                 Event::MouseButtonDown {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = map_input_to_point((x, y), self.scale, self.pixel_spacing);
-                    self.input_events
-                        .push(SimulatorEvent::MouseButtonDown { point, mouse_btn });
+                    let point = map_input_to_point((x, y), scale, pixel_spacing);
+                    Some(SimulatorEvent::MouseButtonDown { point, mouse_btn })
                 }
                 Event::MouseWheel {
                     x, y, direction, ..
-                } => {
-                    self.input_events.push(SimulatorEvent::MouseWheel {
-                        scroll_delta: Point::new(x, y),
-                        direction,
-                    });
-                }
-                _ => {}
-            }
-        }
-
-        false
-    }
-
-    /// Return all captured input events
-    pub fn get_input_events(&mut self) -> Vec<SimulatorEvent> {
-        let input_events = self.input_events.clone();
-        self.input_events.clear();
-        input_events
+                } => Some(SimulatorEvent::MouseWheel {
+                    scroll_delta: Point::new(x, y),
+                    direction,
+                }),
+                _ => None,
+            })
     }
 }
 

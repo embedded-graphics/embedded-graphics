@@ -13,7 +13,7 @@ use embedded_graphics::fonts::Font12x16;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use std::thread;
 use std::time::Duration;
 
@@ -164,13 +164,13 @@ fn main() {
             .fill_color(Some(BinaryColor::On))
             .draw(&mut display);
 
-        window.update(&display);
+        'running: loop {
+            window.update(&display);
 
-        let end = window.handle_events();
-        if end {
-            break;
+            if window.events().any(|e| e == SimulatorEvent::Quit) {
+                break 'running;
+            }
+            thread::sleep(Duration::from_millis(50));
         }
-
-        thread::sleep(Duration::from_millis(50));
     }
 }

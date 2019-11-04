@@ -33,10 +33,12 @@
 //! ## Simulate a 128x64 SSD1306 OLED
 //!
 //! ```rust,no_run
+//! use embedded_graphics::pixelcolor::BinaryColor;
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::{egcircle, egline, text_6x8};
-//! use embedded_graphics::pixelcolor::BinaryColor;
-//! use embedded_graphics_simulator::{SimulatorDisplay, BinaryColorTheme, SimulatorEvent, WindowBuilder};
+//! use embedded_graphics_simulator::{
+//!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, WindowBuilder,
+//! };
 //! use std::thread;
 //! use std::time::Duration;
 //!
@@ -50,23 +52,27 @@
 //!
 //!     egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
 //!
-//!     egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On)).translate(Point::new(64, 0)).draw(&mut display);
-//!     egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On)) .translate(Point::new(64, 0)).draw(&mut display);
+//!     egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On))
+//!         .translate(Point::new(64, 0))
+//!         .draw(&mut display);
+//!     egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On))
+//!         .translate(Point::new(64, 0))
+//!         .draw(&mut display);
 //!
-//!     loop {
+//!     'running: loop {
 //!         window.update(&display);
 //!
-//!         let end = window.handle_events();
-//!         if end {
-//!             break;
-//!         }
-//!
-//!         for event in window.get_input_events() {
-//!             if let SimulatorEvent::MouseButtonUp { point, ..} = event {
-//!                 println!("Click event at ({}, {})", point.x, point.y);
+//!         for event in window.events() {
+//!             match event {
+//!                 SimulatorEvent::MouseButtonUp { point, .. } => {
+//!                     println!("Click event at ({}, {})", point.x, point.y);
+//!                 }
+//!                 SimulatorEvent::Quit => break 'running,
+//!                 _ => {}
 //!             }
+//!
+//!             thread::sleep(Duration::from_millis(200));
 //!         }
-//!         thread::sleep(Duration::from_millis(200));
 //!     }
 //! }
 //! ```
