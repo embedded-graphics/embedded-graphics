@@ -136,7 +136,7 @@ fn main() {
     let mut display = SimulatorDisplay::new(Size::new(DISP_SIZE as u32, DISP_SIZE as u32));
     let mut window = WindowBuilder::new(&display).title("Clock").scale(2).build();
 
-    loop {
+    'running: loop {
         let time = Local::now();
 
         // NOTE: In no-std environments, consider using
@@ -164,13 +164,11 @@ fn main() {
             .fill_color(Some(BinaryColor::On))
             .draw(&mut display);
 
-        'running: loop {
-            window.update(&display);
+        window.update(&display);
 
-            if window.events().any(|e| e == SimulatorEvent::Quit) {
-                break 'running;
-            }
-            thread::sleep(Duration::from_millis(50));
+        if window.events().any(|e| e == SimulatorEvent::Quit) {
+            break 'running;
         }
+        thread::sleep(Duration::from_millis(50));
     }
 }
