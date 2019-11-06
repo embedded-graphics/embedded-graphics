@@ -98,7 +98,7 @@ where
         self
     }
 
-    fn stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u32) -> Self {
         self.style.stroke_width = width;
 
         self

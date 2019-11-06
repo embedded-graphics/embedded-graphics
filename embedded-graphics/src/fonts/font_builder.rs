@@ -113,7 +113,7 @@ where
         self
     }
 
-    fn stroke_width(self, _width: u8) -> Self {
+    fn stroke_width(self, _width: u32) -> Self {
         // Noop
 
         self
