@@ -13,7 +13,7 @@ fn main() {
         fill_color = Some(Rgb565::RED)
     )
     .into_iter()
-    .chain(egrectangle!(
+    .chain(&egrectangle!(
         (20, 20),
         (100, 80),
         fill_color = Some(Rgb565::RED)

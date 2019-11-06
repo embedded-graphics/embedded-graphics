@@ -8,6 +8,7 @@ fn main() {
 
     // Outline
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))
+        .into_styled()
         .stroke_color(Some(BinaryColor::On))
         .translate(Point::new(-8, -8))
         .draw(&mut display);

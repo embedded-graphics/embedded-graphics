@@ -9,50 +9,59 @@ fn main() {
     let mut display = SimulatorDisplay::new(Size::new(304, 128));
 
     Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+        .into_styled()
         .stroke_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
         .translate(Point::new(16, 16))
+        .into_styled()
         .stroke_color(Some(BinaryColor::Off))
         .fill_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
         .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
+        .into_styled()
         .stroke_color(Some(BinaryColor::Off))
         .fill_color(Some(BinaryColor::Off))
         .draw(&mut display);
 
     Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .into_styled()
         .translate(Point::new(96, 0))
         .stroke_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .into_styled()
         .translate(Point::new(96 + 16, 16))
         .stroke_color(Some(BinaryColor::Off))
         .fill_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+        .into_styled()
         .translate(Point::new(96 + 32, 32))
         .stroke_color(Some(BinaryColor::Off))
         .fill_color(Some(BinaryColor::Off))
         .draw(&mut display);
 
     Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
+        .into_styled()
         .translate(Point::new(96 * 2, 0))
         .stroke_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
+        .into_styled()
         .translate(Point::new(96 * 2 + 16, 16))
         .stroke_color(Some(BinaryColor::Off))
         .fill_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
+        .into_styled()
         .translate(Point::new(96 * 2 + 32, 32))
         .stroke_color(Some(BinaryColor::Off))
         .fill_color(Some(BinaryColor::Off))

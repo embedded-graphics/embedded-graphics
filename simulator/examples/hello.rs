@@ -9,14 +9,17 @@ fn main() {
 
     // Outline
     Circle::new(Point::new(64, 64), 64)
+        .into_styled()
         .stroke_color(Some(BinaryColor::On))
         .draw(&mut display);
 
     // Clock hands
     Line::new(Point::new(64, 64), Point::new(0, 64))
+        .into_styled()
         .stroke_color(Some(BinaryColor::On))
         .draw(&mut display);
     Line::new(Point::new(64, 64), Point::new(80, 80))
+        .into_styled()
         .stroke_color(Some(BinaryColor::On))
         .draw(&mut display);
 
