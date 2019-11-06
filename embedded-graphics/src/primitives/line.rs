@@ -231,6 +231,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 current_iter: 0,
                 stop: true,
                 swap,
+                skip_first: false,
             },
             extra_perp: PerpLineIterator {
                 start: self.start,
@@ -242,6 +243,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 current_iter: 0,
                 stop: true,
                 swap,
+                skip_first: false,
             },
             extra_perp_right: PerpLineIterator {
                 start: self.start,
@@ -253,6 +255,7 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
                 current_iter: 0,
                 stop: true,
                 swap: -swap,
+                skip_first: true,
             },
         }
     }
@@ -312,6 +315,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         if !self.stop {
             let start = self.start;
 
+            // Draw right side
             if self.draw_left_side == false {
                 self.perp = PerpLineIterator {
                     start: self.start,
@@ -320,6 +324,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                     stop: false,
                     current_iter: self.delta.x + self.delta.y - self.err * -self.swap,
                     swap: -self.swap,
+                    skip_first: true,
                     ..self.perp
                 };
 
@@ -339,6 +344,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
                 stop: false,
                 current_iter: self.delta.x + self.delta.y - self.err * self.swap,
                 swap: self.swap,
+                skip_first: false,
                 ..self.perp
             };
 
@@ -456,6 +462,7 @@ where
     current_iter: i32,
     stop: bool,
     swap: i32,
+    skip_first: bool,
 }
 
 impl<C: PixelColor> Iterator for PerpLineIterator<C> {
@@ -467,7 +474,8 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
 
         if !self.stop {
             if self.current_iter >= self.width as i32 {
-                self.stop = true;
+                // self.stop = true;
+                return None;
             }
 
             let point = self.start;
@@ -506,7 +514,10 @@ impl<C: PixelColor> Iterator for PerpLineIterator<C> {
                 self.start += Point::new(self.direction.x * self.swap, 0);
             }
 
-            Some(Pixel(point, self.color.unwrap()))
+            Some(Pixel(
+                if self.skip_first { self.start } else { point },
+                self.color.unwrap(),
+            ))
         } else {
             None
         }
