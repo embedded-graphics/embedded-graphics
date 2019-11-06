@@ -293,16 +293,18 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
         // return none if stroke color is none
         self.style.stroke_color?;
 
-        if let Some(perp) = self.extra_perp.next() {
-            return Some(perp);
-        }
+        if self.style.stroke_width > 1 {
+            if let Some(perp) = self.extra_perp.next() {
+                return Some(perp);
+            }
 
-        if let Some(perp) = self.extra_perp_right.next() {
-            return Some(perp);
-        }
+            if let Some(perp) = self.extra_perp_right.next() {
+                return Some(perp);
+            }
 
-        if let Some(perp) = self.perp.next() {
-            return Some(perp);
+            if let Some(perp) = self.perp.next() {
+                return Some(perp);
+            }
         }
 
         self.draw_left_side = !self.draw_left_side;
@@ -424,7 +426,9 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
 
             self.num_iter += 1;
 
-            if extra {
+            if self.style.stroke_width == 1 {
+                Some(Pixel(start, self.style.fill_color.unwrap()))
+            } else if extra {
                 self.extra_perp.next()
             } else {
                 self.perp.next()
