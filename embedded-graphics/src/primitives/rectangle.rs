@@ -100,7 +100,7 @@ where
         self
     }
 
-    fn stroke_width(mut self, width: u8) -> Self {
+    fn stroke_width(mut self, width: u32) -> Self {
         self.style.stroke_width = width;
 
         self
@@ -174,7 +174,7 @@ where
                 break None;
             }
 
-            let border_width = i32::from(self.style.stroke_width);
+            let border_width = self.style.stroke_width_i32();
             let tl = self.top_left;
             let br = self.bottom_right;
 
