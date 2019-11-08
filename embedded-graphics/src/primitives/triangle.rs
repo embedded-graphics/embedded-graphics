@@ -6,7 +6,7 @@ use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::line::{Line, StyledLineIterator};
 use crate::primitives::{Primitive, Styled};
-use crate::style::{Style, WithStyle};
+use crate::style::Style;
 use crate::DrawTarget;
 
 /// Triangle primitive
@@ -24,21 +24,20 @@ use crate::DrawTarget;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Default triangle with no styling
+/// // Default triangle with default styling
 /// Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
-///     .into_styled()
+///     .into_styled(Style::default())
 ///     .draw(&mut display);
 ///
 /// // Triangle with styled stroke from (50, 20) to (60, 35)
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::RED))
+///     .into_styled(Style::stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
 /// // Triangle with translation applied
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .into_styled()
 ///     .translate(Point::new(65, 35))
+///     .into_styled(Style::default())
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
@@ -152,18 +151,10 @@ where
     fn into_iter(self) -> Self::IntoIter {
         let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
 
-        let mut line_a = Line::new(v1, v2)
-            .into_styled()
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let mut line_b = Line::new(v1, v3)
-            .into_styled()
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let mut line_c = Line::new(v2, v3)
-            .into_styled()
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
+        let mut line_a = Line::new(v1, v2).into_styled(self.style).into_iter();
+        let mut line_b = Line::new(v1, v3).into_styled(self.style).into_iter();
+        let mut line_c = Line::new(v2, v3).into_styled(self.style).into_iter();
+
         let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0);
         let next_b = line_b.next().map(|p| p.0);
 
@@ -358,8 +349,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_tri_line_y() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
-            .into_styled()
-            .style(Style::stroke_color(BinaryColor::On))
+            .into_styled(Style::stroke(BinaryColor::On, 1))
             .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
@@ -376,8 +366,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_tri_line_x() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2))
-            .into_styled()
-            .style(Style::stroke_color(BinaryColor::On))
+            .into_styled(Style::stroke(BinaryColor::On, 1))
             .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
@@ -393,8 +382,7 @@ mod tests {
     #[ignore]
     fn it_can_be_negative() {
         let mut tri = Triangle::new(Point::new(-2, -2), Point::new(2, 0), Point::new(-2, 0))
-            .into_styled()
-            .style(Style::stroke_color(BinaryColor::On))
+            .into_styled(Style::stroke(BinaryColor::On, 1))
             .into_iter();
 
         // Only the bottom of the triangle should be visible

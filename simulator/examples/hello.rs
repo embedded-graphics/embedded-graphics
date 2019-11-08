@@ -7,20 +7,19 @@ use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuil
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(129, 129));
 
+    let line_style = Style::stroke(BinaryColor::On, 1);
+
     // Outline
     Circle::new(Point::new(64, 64), 64)
-        .into_styled()
-        .stroke_color(Some(BinaryColor::On))
+        .into_styled(line_style)
         .draw(&mut display);
 
     // Clock hands
     Line::new(Point::new(64, 64), Point::new(0, 64))
-        .into_styled()
-        .stroke_color(Some(BinaryColor::On))
+        .into_styled(line_style)
         .draw(&mut display);
     Line::new(Point::new(64, 64), Point::new(80, 80))
-        .into_styled()
-        .stroke_color(Some(BinaryColor::On))
+        .into_styled(line_style)
         .draw(&mut display);
 
     Font6x8::render_str("Hello World!")

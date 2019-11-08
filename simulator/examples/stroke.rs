@@ -8,64 +8,66 @@ const PADDING: i32 = 16;
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(320, 256));
 
-    let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64))
-        .into_styled()
-        .translate(Point::new(0, 0))
-        .stroke_color(Some(BinaryColor::On));
+    let thin_stroke = Style::stroke(BinaryColor::On, 1);
+    let medium_stroke = Style::stroke(BinaryColor::On, 3);
+    let thick_stroke = Style::stroke(BinaryColor::On, 10);
 
-    let rect = Rectangle::new(Point::new(0, 0), Point::new(64, 64))
-        .into_styled()
-        .translate(Point::new(64 + PADDING, 0))
-        .stroke_color(Some(BinaryColor::On));
-
+    let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64));
+    let rectangle =
+        Rectangle::new(Point::new(0, 0), Point::new(64, 64)).translate(Point::new(64 + PADDING, 0));
     let line = Line::new(Point::new(0, 0), Point::new(64, 64))
-        .into_styled()
-        .translate(Point::new(128 + PADDING * 2, 0))
-        .stroke_color(Some(BinaryColor::On));
-
-    let circle = Circle::new(Point::new(32, 32), 32)
-        .translate(Point::new(192 + PADDING * 3, 0))
-        .into_styled()
-        .stroke_color(Some(BinaryColor::On));
+        .translate(Point::new((64 + PADDING) * 2, 0));
+    let circle = Circle::new(Point::new(32, 32), 32).translate(Point::new((64 + PADDING) * 3, 0));
 
     circle
+        .into_styled(thin_stroke)
         .into_iter()
-        .chain(rect.into_iter())
-        .chain(line.into_iter())
-        .chain(triangle.into_iter())
+        .chain(rectangle.into_styled(thin_stroke).into_iter())
+        .chain(line.into_styled(thin_stroke).into_iter())
+        .chain(triangle.into_styled(thin_stroke).into_iter())
         .draw(&mut display);
 
+    let offset = Point::new(0, 64 + PADDING);
     circle
-        .translate(Point::new(0, 64 + PADDING))
-        .stroke_width(3)
+        .translate(offset)
+        .into_styled(medium_stroke)
         .into_iter()
-        .chain(&rect.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
-        .chain(&line.translate(Point::new(0, 64 + PADDING)).stroke_width(3))
         .chain(
-            &triangle
-                .translate(Point::new(0, 64 + PADDING))
-                .stroke_width(3),
+            rectangle
+                .translate(offset)
+                .into_styled(medium_stroke)
+                .into_iter(),
+        )
+        .chain(
+            line.translate(offset)
+                .into_styled(medium_stroke)
+                .into_iter(),
+        )
+        .chain(
+            triangle
+                .translate(offset)
+                .into_styled(medium_stroke)
+                .into_iter(),
         )
         .draw(&mut display);
 
+    let offset = Point::new(0, (64 + PADDING) * 2);
     circle
-        .translate(Point::new(0, 128 + PADDING * 2))
-        .stroke_width(10)
+        .translate(offset)
+        .into_styled(thick_stroke)
         .into_iter()
         .chain(
-            &rect
-                .translate(Point::new(0, 128 + PADDING * 2))
-                .stroke_width(10),
+            rectangle
+                .translate(offset)
+                .into_styled(thick_stroke)
+                .into_iter(),
         )
+        .chain(line.translate(offset).into_styled(thick_stroke).into_iter())
         .chain(
-            &line
-                .translate(Point::new(0, 128 + PADDING * 2))
-                .stroke_width(10),
-        )
-        .chain(
-            &triangle
-                .translate(Point::new(0, 128 + PADDING * 2))
-                .stroke_width(10),
+            triangle
+                .translate(offset)
+                .into_styled(thick_stroke)
+                .into_iter(),
         )
         .draw(&mut display);
 

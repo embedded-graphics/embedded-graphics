@@ -24,19 +24,19 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default rect from (10, 20) to (30, 40)
-/// Rectangle::new(Point::new(10, 20), Point::new(30, 40)).into_styled().draw(&mut display);
+/// Rectangle::new(Point::new(10, 20), Point::new(30, 40)).into_styled(Style::default()).draw(&mut display);
 ///
 /// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
+/// let mut style = Style::stroke(Rgb565::RED, 3);
+/// style.fill_color = Some(Rgb565::GREEN);
+///
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::RED))
-///     .stroke_width(3)
-///     .fill_color(Some(Rgb565::GREEN))
+///     .into_styled(style)
 ///     .draw(&mut display);
 ///
 /// // Rectangle with translation applied
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled()
+///     .into_styled(Style::default())
 ///     .translate(Point::new(65, 35))
 ///     .draw(&mut display);
 /// ```
@@ -218,7 +218,6 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::{Rgb565, RgbColor};
-    use crate::style::WithStyle;
 
     #[test]
     fn dimensions() {
@@ -246,8 +245,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_rect() {
         let mut rect = Rectangle::new(Point::new(2, 2), Point::new(4, 4))
-            .into_styled()
-            .style(Style::stroke_color(Rgb565::RED))
+            .into_styled(Style::stroke(Rgb565::RED, 1))
             .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
@@ -265,13 +263,11 @@ mod tests {
     #[test]
     fn it_can_be_negative() {
         let negative = Rectangle::new(Point::new(-2, -2), Point::new(2, 2))
-            .into_styled()
-            .fill_color(Some(Rgb565::GREEN))
+            .into_styled(Style::fill(Rgb565::GREEN))
             .into_iter();
 
         let positive = Rectangle::new(Point::new(2, 2), Point::new(6, 6))
-            .into_styled()
-            .fill_color(Some(Rgb565::GREEN))
+            .into_styled(Style::fill(Rgb565::GREEN))
             .into_iter();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));

@@ -25,22 +25,20 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default circle with only a stroke centered around (10, 20) with a radius of 30
-/// Circle::new(Point::new(10, 20), 30).into_styled().draw(&mut display);
+/// Circle::new(Point::new(10, 20), 30).into_styled(Style::default()).draw(&mut display);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
+/// let mut style = Style::stroke(Rgb565::RED, 3);
+/// style.fill_color = Some(Rgb565::GREEN);
+///
 /// Circle::new(Point::new(50, 20), 30)
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::RED))
-///     .stroke_width(3)
-///     .fill_color(Some(Rgb565::GREEN))
+///     .into_styled(style)
 ///     .draw(&mut display);
 ///
 /// // Circle with no stroke and a translation applied
 /// Circle::new(Point::new(10, 20), 30)
-///     .into_styled()
-///     .stroke_color(None)
-///     .fill_color(Some(Rgb565::BLUE))
 ///     .translate(Point::new(65, 35))
+///     .into_styled(Style::fill(Rgb565::BLUE))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
@@ -215,18 +213,18 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::WithStyle;
 
     /// Test for issue #143
     #[test]
     fn issue_143_stroke_and_fill() {
-        let circle_no_stroke: Styled<Circle, BinaryColor> = Circle::new(Point::new(10, 16), 3)
-            .into_styled()
-            .fill_color(Some(BinaryColor::On));
-        let circle_stroke: Styled<Circle, BinaryColor> = Circle::new(Point::new(10, 16), 3)
-            .into_styled()
-            .fill_color(Some(BinaryColor::On))
-            .stroke_color(Some(BinaryColor::On));
+        let circle_no_stroke: Styled<Circle, BinaryColor> =
+            Circle::new(Point::new(10, 16), 3).into_styled(Style::fill(BinaryColor::On));
+
+        let mut style = Style::default();
+        style.fill_color = Some(BinaryColor::On);
+        style.stroke_color = Some(BinaryColor::On);
+        let circle_stroke: Styled<Circle, BinaryColor> =
+            Circle::new(Point::new(10, 16), 3).into_styled(style);
 
         assert_eq!(circle_stroke.size(), circle_no_stroke.size());
         assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));
@@ -261,10 +259,8 @@ mod tests {
 
     #[test]
     fn transparent_border() {
-        let circ: Styled<Circle, BinaryColor> = Circle::new(Point::new(5, 5), 10)
-            .into_styled()
-            .stroke_color(None)
-            .fill_color(Some(BinaryColor::On));
+        let circ: Styled<Circle, BinaryColor> =
+            Circle::new(Point::new(5, 5), 10).into_styled(Style::fill(BinaryColor::On));
 
         assert!(circ.into_iter().count() > 0);
     }
@@ -272,13 +268,11 @@ mod tests {
     #[test]
     fn it_handles_negative_coordinates() {
         let positive = Circle::new(Point::new(10, 10), 5)
-            .into_styled()
-            .style(Style::stroke_color(BinaryColor::On))
+            .into_styled(Style::stroke(BinaryColor::On, 1))
             .into_iter();
 
         let negative = Circle::new(Point::new(-10, -10), 5)
-            .into_styled()
-            .style(Style::stroke_color(BinaryColor::On))
+            .into_styled(Style::stroke(BinaryColor::On, 1))
             .into_iter();
 
         assert!(negative.into_iter().eq(positive

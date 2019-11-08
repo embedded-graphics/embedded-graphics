@@ -24,18 +24,17 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Default line from (10, 20) to (30, 40)
-/// Line::new(Point::new(10, 20), Point::new(30, 40)).into_styled().draw(&mut display);
+/// Line::new(Point::new(10, 20), Point::new(30, 40)).into_styled(Style::default()).draw(&mut display);
 ///
 /// // Line with styled stroke from (50, 20) to (60, 35)
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::RED))
+///     .into_styled(Style::stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
 /// // Line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled()
 ///     .translate(Point::new(65, 35))
+///     .into_styled(Style::default())
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
@@ -211,12 +210,10 @@ mod tests {
     use super::*;
     use crate::drawable::Pixel;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::{Style, WithStyle};
+    use crate::style::Style;
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line = Line::new(start, end)
-            .into_styled()
-            .style(Style::stroke_color(BinaryColor::On));
+        let line = Line::new(start, end).into_styled(Style::stroke(BinaryColor::On, 1));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {

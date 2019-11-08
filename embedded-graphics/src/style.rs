@@ -27,9 +27,18 @@ where
     P: PixelColor,
 {
     /// Create a new style with a given stroke value and defaults for everything else
-    pub fn stroke_color(stroke_color: P) -> Self {
+    pub fn stroke(stroke_color: P, stroke_width: u32) -> Self {
         Self {
             stroke_color: Some(stroke_color),
+            stroke_width,
+            ..Style::default()
+        }
+    }
+
+    /// Creates a new fill style.
+    pub fn fill(fill_color: P) -> Self {
+        Self {
+            fill_color: Some(fill_color),
             ..Style::default()
         }
     }

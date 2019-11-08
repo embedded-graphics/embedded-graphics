@@ -1,6 +1,6 @@
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::style::{Style, WithStyle};
+use crate::style::Style;
 use crate::transform::Transform;
 
 /// Styled.
@@ -20,40 +20,8 @@ where
     C: PixelColor,
 {
     /// Creates a styled.
-    pub fn new(primitive: T) -> Self {
-        Self {
-            primitive,
-            style: Style::default(),
-        }
-    }
-}
-
-impl<T, C> WithStyle<C> for Styled<T, C>
-where
-    C: PixelColor,
-{
-    fn style(mut self, new_style: Style<C>) -> Self {
-        self.style = new_style;
-
-        self
-    }
-
-    fn fill_color(mut self, color: Option<C>) -> Self {
-        self.style.fill_color = color;
-
-        self
-    }
-
-    fn stroke_color(mut self, color: Option<C>) -> Self {
-        self.style.stroke_color = color;
-
-        self
-    }
-
-    fn stroke_width(mut self, width: u32) -> Self {
-        self.style.stroke_width = width;
-
-        self
+    pub fn new(primitive: T, style: Style<C>) -> Self {
+        Self { primitive, style }
     }
 }
 

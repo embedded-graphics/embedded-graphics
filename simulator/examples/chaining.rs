@@ -9,18 +9,15 @@ use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuil
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(129, 129));
     let mut objects = Circle::new(Point::new(64, 64), 64)
-        .into_styled()
-        .stroke_color(Some(BinaryColor::On))
+        .into_styled(Style::stroke(BinaryColor::On, 1))
         .into_iter()
         .chain(
             &Line::new(Point::new(64, 64), Point::new(0, 64))
-                .into_styled()
-                .stroke_color(Some(BinaryColor::On)),
+                .into_styled(Style::stroke(BinaryColor::On, 1)),
         )
         .chain(
             &Line::new(Point::new(64, 64), Point::new(80, 80))
-                .into_styled()
-                .stroke_color(Some(BinaryColor::On)),
+                .into_styled(Style::stroke(BinaryColor::On, 1)),
         )
         .chain(
             Font6x8::render_str("Hello World!")

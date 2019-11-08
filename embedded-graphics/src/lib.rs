@@ -85,7 +85,7 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Point::new(20, 20), 8).into_styled().fill_color(Some(Rgb565::RED));
+//! let c = Circle::new(Point::new(20, 20), 8).into_styled(Style::fill(Rgb565::RED));
 //! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
@@ -180,7 +180,7 @@ use crate::drawable::Drawable;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::{Primitive, Styled};
-use crate::style::WithStyle;
+use crate::style::Style;
 
 /// Defines a display that can be used to render [`Drawable`] objects.
 ///
@@ -365,8 +365,7 @@ where
         Self: Sized,
     {
         primitives::Rectangle::new(Point::zero(), Point::zero() + self.size())
-            .into_styled()
-            .fill_color(Some(color))
+            .into_styled(Style::fill(color))
             .draw(self);
     }
 

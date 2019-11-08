@@ -14,16 +14,17 @@ pub use self::line::Line;
 pub use self::rectangle::Rectangle;
 pub use self::styled::Styled;
 pub use self::triangle::Triangle;
+use crate::style::Style;
 
 /// Primitive trait
 pub trait Primitive: Dimensions {
     /// Converts this primitive into a `Styled`.
-    fn into_styled<C>(self) -> Styled<Self, C>
+    fn into_styled<C>(self, style: Style<C>) -> Styled<Self, C>
     where
         C: PixelColor,
         Self: Sized,
     {
-        Styled::new(self)
+        Styled::new(self, style)
     }
 }
 
@@ -43,6 +44,8 @@ pub trait Primitive: Dimensions {
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
+/// ```
+/// ```rust,ignore
 /// let default_style: Styled<Circle, Rgb565> = egcircle!((10, 20), 30, style = Style::default());
 /// ```
 ///
@@ -66,19 +69,22 @@ pub trait Primitive: Dimensions {
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
+///
+/// let mut style = Style::fill(Rgb565::GREEN);
+/// style.stroke_color = Some(Rgb565::RED);
+///
 /// let circle: Styled<Circle, Rgb565> = Circle::new(Point::new(10, 20), 30)
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::RED))
-///     .fill_color(Some(Rgb565::GREEN));
+///     .into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egcircle {
     ($center:expr, $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
+        #[allow(unused_mut)]
+        let mut style = Style::default();
+        $( style.$style_key = $style_value; )*
+
         $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
-            .into_styled()
-            $( .$style_key($style_value) )*
+            .into_styled(style)
     }};
 }
 
@@ -116,22 +122,25 @@ macro_rules! egcircle {
 ///     stroke_color = Some(Rgb565::BLUE),
 ///     fill_color = Some(Rgb565::YELLOW)
 /// );
+///
+/// let mut style = Style::fill(Rgb565::YELLOW);
+/// style.stroke_color = Some(Rgb565::BLUE);
+///
 /// let Line: Styled<Line, Rgb565> = Line::new(Point::new(10, 20), Point::new(30, 40))
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::BLUE))
-///     .fill_color(Some(Rgb565::YELLOW));
+///     .into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egline {
     ($start:expr, $end:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
+        #[allow(unused_mut)]
+        let mut style = Style::default();
+        $( style.$style_key = $style_value; )*
+
         $crate::primitives::Line::new(
             $crate::geometry::Point::from($start),
             $crate::geometry::Point::from($end)
         )
-            .into_styled()
-            $( .$style_key($style_value) )*
+            .into_styled(style)
     }};
 }
 
@@ -150,6 +159,8 @@ macro_rules! egline {
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
+/// ```
+/// ```rust,ignore
 /// let rect_default_style: Styled<Rectangle, Rgb565> =
 ///     egrectangle!((10, 20), (30, 40), style = Style::default());
 /// ```
@@ -174,22 +185,25 @@ macro_rules! egline {
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
+///
+/// let mut style = Style::fill(Rgb565::GREEN);
+/// style.stroke_color = Some(Rgb565::RED);
+///
 /// let rectangle: Styled<Rectangle, Rgb565> = Rectangle::new(Point::new(10, 20), Point::new(30, 40))
-///     .into_styled()
-///     .stroke_color(Some(Rgb565::RED))
-///     .fill_color(Some(Rgb565::GREEN));
+///     .into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
     ($top_left:expr, $bottom_right:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
+        #[allow(unused_mut)]
+        let mut style = Style::default();
+        $( style.$style_key = $style_value; )*
+
         $crate::primitives::Rectangle::new(
             $crate::geometry::Point::from($top_left),
             $crate::geometry::Point::from($bottom_right)
         )
-            .into_styled()
-            $( .$style_key($style_value) )*
+            .into_styled(style)
     }};
 }
 
@@ -210,6 +224,8 @@ macro_rules! egrectangle {
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
+/// ```
+/// ```rust,ignore
 /// let triangle_default_style: Styled<Triangle, Rgb565> =
 ///     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
 /// ```
@@ -229,24 +245,27 @@ macro_rules! egrectangle {
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
+///
+/// let mut style = Style::fill(Rgb565::GREEN);
+/// style.stroke_color = Some(Rgb565::RED);
+///
 /// let triangle: Styled<Triangle, Rgb565> =
 ///     Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
-///         .into_styled()
-///         .stroke_color(Some(Rgb565::RED))
-///         .fill_color(Some(Rgb565::GREEN));
+///         .into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
     ($p1:expr, $p2:expr, $p3:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
+        #[allow(unused_mut)]
+        let mut style = Style::default();
+        $( style.$style_key = $style_value; )*
+
         $crate::primitives::Triangle::new(
             $crate::geometry::Point::from($p1),
             $crate::geometry::Point::from($p2),
             $crate::geometry::Point::from($p3)
         )
-            .into_styled()
-            $( .$style_key($style_value) )*
+            .into_styled(style)
     }};
 }
 
@@ -267,7 +286,7 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        let _c: Styled<Circle, Rgb565> = egcircle!((10, 20), 30, style = Style::default());
+        // let _c: Styled<Circle, Rgb565> = egcircle!((10, 20), 30, style = Style::default());
     }
 
     #[test]
@@ -280,7 +299,7 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        let _l: Styled<Line, Rgb565> = egline!((10, 20), (30, 40), style = Style::default());
+        // let _l: Styled<Line, Rgb565> = egline!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
@@ -293,8 +312,8 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        let _r: Styled<Rectangle, Rgb565> =
-            egrectangle!((10, 20), (30, 40), style = Style::default());
+        // let _r: Styled<Rectangle, Rgb565> =
+        //     egrectangle!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
@@ -309,7 +328,7 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        let _t: Styled<Triangle, Rgb565> =
-            egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
+        // let _t: Styled<Triangle, Rgb565> =
+        //     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
     }
 }
