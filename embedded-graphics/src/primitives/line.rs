@@ -4,8 +4,8 @@ use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::primitives::{Primitive, Styled};
-use crate::style::Style;
+use crate::primitives::Primitive;
+use crate::style::{PrimitiveStyle, Styled};
 use crate::DrawTarget;
 
 /// Line primitive
@@ -23,18 +23,15 @@ use crate::DrawTarget;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Default line from (10, 20) to (30, 40)
-/// Line::new(Point::new(10, 20), Point::new(30, 40)).into_styled(Style::default()).draw(&mut display);
-///
-/// // Line with styled stroke from (50, 20) to (60, 35)
+/// // Red 1 pixel wide line from (50, 20) to (60, 35)
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled(Style::stroke(Rgb565::RED, 1))
+///     .into_styled(PrimitiveStyle::stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
-/// // Line with translation applied
+/// // Green 1 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
-///     .into_styled(Style::default())
+///     .into_styled(PrimitiveStyle::stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
@@ -109,7 +106,7 @@ impl Transform for Line {
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Line, C>
+impl<'a, C> IntoIterator for &'a Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -154,7 +151,7 @@ pub struct StyledLineIterator<C>
 where
     C: PixelColor,
 {
-    style: Style<C>,
+    style: PrimitiveStyle<C>,
 
     start: Point,
     end: Point,
@@ -196,7 +193,7 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Styled<Line, C>
+impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -210,10 +207,9 @@ mod tests {
     use super::*;
     use crate::drawable::Pixel;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::Style;
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line = Line::new(start, end).into_styled(Style::stroke(BinaryColor::On, 1));
+        let line = Line::new(start, end).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {

@@ -47,12 +47,11 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    Circle::new(Point::new(64, 64), 64).into_styled(Style::stroke(BinaryColor::On, 1)).draw(&mut display);
-    Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(Style::stroke(BinaryColor::On, 1)).draw(&mut display);
-    Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(Style::stroke(BinaryColor::On, 1)).draw(&mut display);
+    Circle::new(Point::new(64, 64), 64).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1)).draw(&mut display);
 
-    Font6x8::render_str("Hello World!")
-        .stroke_color(Some(BinaryColor::On))
+    Font6x8::render_str("Hello World!", TextStyle::new(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 }
@@ -94,7 +93,7 @@ fn main() {
         stroke_color = None,
         fill_color = Some(BinaryColor::Off)
     ).draw(&mut display);
-    text_6x8!("Hello world!", stroke_color = Some(BinaryColor::On))
+    text_6x8!("Hello world!", text_color = Some(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 }

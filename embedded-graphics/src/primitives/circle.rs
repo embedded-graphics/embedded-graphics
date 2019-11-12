@@ -6,7 +6,7 @@ use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
 use crate::primitives::Styled;
-use crate::style::Style;
+use crate::style::PrimitiveStyle;
 use crate::DrawTarget;
 
 /// Circle primitive
@@ -24,21 +24,23 @@ use crate::DrawTarget;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Default circle with only a stroke centered around (10, 20) with a radius of 30
-/// Circle::new(Point::new(10, 20), 30).into_styled(Style::default()).draw(&mut display);
+/// // Circle with 1 pixel wide white stroke centered around (10, 20) with a radius of 30
+/// Circle::new(Point::new(10, 20), 30)
+///     .into_styled(PrimitiveStyle::stroke(Rgb565::WHITE, 1))
+///     .draw(&mut display);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
-/// let mut style = Style::stroke(Rgb565::RED, 3);
+/// let mut style = PrimitiveStyle::stroke(Rgb565::RED, 3);
 /// style.fill_color = Some(Rgb565::GREEN);
 ///
 /// Circle::new(Point::new(50, 20), 30)
 ///     .into_styled(style)
 ///     .draw(&mut display);
 ///
-/// // Circle with no stroke and a translation applied
+/// // Circle with blue fill and no stroke with a translation applied
 /// Circle::new(Point::new(10, 20), 30)
 ///     .translate(Point::new(65, 35))
-///     .into_styled(Style::fill(Rgb565::BLUE))
+///     .into_styled(PrimitiveStyle::fill(Rgb565::BLUE))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
@@ -116,7 +118,7 @@ impl Transform for Circle {
 pub struct StyledCircleIterator<C: PixelColor> {
     center: Point,
     radius: u32,
-    style: Style<C>,
+    style: PrimitiveStyle<C>,
     p: Point,
 }
 
@@ -179,7 +181,7 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Styled<Circle, C>
+impl<'a, C: 'a> Drawable<C> for &Styled<Circle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -188,7 +190,7 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Circle, C>
+impl<'a, C> IntoIterator for &'a Styled<Circle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -217,13 +219,13 @@ mod tests {
     /// Test for issue #143
     #[test]
     fn issue_143_stroke_and_fill() {
-        let circle_no_stroke: Styled<Circle, BinaryColor> =
-            Circle::new(Point::new(10, 16), 3).into_styled(Style::fill(BinaryColor::On));
+        let circle_no_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
+            Circle::new(Point::new(10, 16), 3).into_styled(PrimitiveStyle::fill(BinaryColor::On));
 
-        let mut style = Style::default();
+        let mut style = PrimitiveStyle::default();
         style.fill_color = Some(BinaryColor::On);
         style.stroke_color = Some(BinaryColor::On);
-        let circle_stroke: Styled<Circle, BinaryColor> =
+        let circle_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
             Circle::new(Point::new(10, 16), 3).into_styled(style);
 
         assert_eq!(circle_stroke.size(), circle_no_stroke.size());
@@ -259,20 +261,20 @@ mod tests {
 
     #[test]
     fn transparent_border() {
-        let circ: Styled<Circle, BinaryColor> =
-            Circle::new(Point::new(5, 5), 10).into_styled(Style::fill(BinaryColor::On));
+        let circle: Styled<Circle, PrimitiveStyle<BinaryColor>> =
+            Circle::new(Point::new(5, 5), 10).into_styled(PrimitiveStyle::fill(BinaryColor::On));
 
-        assert!(circ.into_iter().count() > 0);
+        assert!(circle.into_iter().count() > 0);
     }
 
     #[test]
     fn it_handles_negative_coordinates() {
         let positive = Circle::new(Point::new(10, 10), 5)
-            .into_styled(Style::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
             .into_iter();
 
         let negative = Circle::new(Point::new(-10, -10), 5)
-            .into_styled(Style::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
             .into_iter();
 
         assert!(negative.into_iter().eq(positive

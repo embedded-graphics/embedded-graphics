@@ -8,13 +8,13 @@ static CIRCLE_SIZE: i32 = 32;
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(304, 128));
 
-    let stroke = Style::stroke(BinaryColor::On, 1);
+    let stroke = PrimitiveStyle::stroke(BinaryColor::On, 1);
 
-    let mut stroke_off_fill_off = Style::default();
+    let mut stroke_off_fill_off = PrimitiveStyle::default();
     stroke_off_fill_off.stroke_color = Some(BinaryColor::Off);
     stroke_off_fill_off.fill_color = Some(BinaryColor::Off);
 
-    let mut stroke_off_fill_on = Style::default();
+    let mut stroke_off_fill_on = PrimitiveStyle::default();
     stroke_off_fill_on.stroke_color = Some(BinaryColor::Off);
     stroke_off_fill_on.fill_color = Some(BinaryColor::On);
 
@@ -39,7 +39,7 @@ fn main() {
 
     Rectangle::new(Point::new(0, 0), Point::new(64, 64))
         .translate(Point::new(96 + 16, 16))
-        .into_styled(stroke_off_fill_off)
+        .into_styled(stroke_off_fill_on)
         .draw(&mut display);
 
     Rectangle::new(Point::new(0, 0), Point::new(64, 64))

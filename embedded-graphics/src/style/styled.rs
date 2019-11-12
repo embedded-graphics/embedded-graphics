@@ -1,34 +1,26 @@
 use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::style::Style;
 use crate::transform::Transform;
 
 /// Styled.
 #[derive(Debug, Clone)]
-pub struct Styled<T, C>
-where
-    C: PixelColor,
-{
+pub struct Styled<T, S> {
     /// Primitive.
     pub primitive: T,
     /// Style.
-    pub style: Style<C>,
+    pub style: S,
 }
 
-impl<T, C> Styled<T, C>
-where
-    C: PixelColor,
-{
+impl<T, S> Styled<T, S> {
     /// Creates a styled.
-    pub fn new(primitive: T, style: Style<C>) -> Self {
+    pub fn new(primitive: T, style: S) -> Self {
         Self { primitive, style }
     }
 }
 
-impl<T, C> Transform for Styled<T, C>
+impl<T, S> Transform for Styled<T, S>
 where
-    C: PixelColor,
     T: Transform,
+    S: Clone,
 {
     fn translate(&self, by: Point) -> Self {
         Self {
@@ -44,9 +36,8 @@ where
     }
 }
 
-impl<T, C> Dimensions for Styled<T, C>
+impl<T, S> Dimensions for Styled<T, S>
 where
-    C: PixelColor,
     T: Dimensions,
 {
     fn top_left(&self) -> Point {

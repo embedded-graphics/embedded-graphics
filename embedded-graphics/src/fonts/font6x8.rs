@@ -45,7 +45,7 @@ mod tests {
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::WithStyle;
+    use crate::style::TextStyle;
     use crate::transform::Transform;
 
     const WIDTH: usize = Font6x8Conf::CHAR_WIDTH as usize;
@@ -54,8 +54,9 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let hello: Font6x8<BinaryColor> = Font6x8::render_str(HELLO_WORLD);
-        let empty: Font6x8<BinaryColor> = Font6x8::render_str("");
+        let style = TextStyle::new(BinaryColor::On);
+        let hello = Font6x8::render_str(HELLO_WORLD, style);
+        let empty = Font6x8::render_str("", style);
 
         assert_eq!(
             hello.size(),
@@ -66,9 +67,9 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let hello: Font6x8<BinaryColor> =
-            Font6x8::render_str(HELLO_WORLD).translate(Point::new(5, -20));
-        let empty: Font6x8<BinaryColor> = Font6x8::render_str("").translate(Point::new(10, 20));
+        let style = TextStyle::new(BinaryColor::On);
+        let hello = Font6x8::render_str(HELLO_WORLD, style).translate(Point::new(5, -20));
+        let empty = Font6x8::render_str("", style).translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
         assert_eq!(
@@ -85,9 +86,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("Mm")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str("Mm", TextStyle::new(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -107,10 +106,9 @@ mod tests {
     #[test]
     fn correct_inverse_coloured_m() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("Mm")
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        let mut style = TextStyle::new(BinaryColor::Off);
+        style.background_color = Some(BinaryColor::On);
+        Font6x8::render_str("Mm", style).draw(&mut display);
 
         assert_eq!(
             display,
@@ -127,20 +125,18 @@ mod tests {
         );
     }
 
-    // tests if black on white has really the same behaviour as white on black
+    // tests if black on white has really the same behavior as white on black
     #[test]
     fn compare_inverse_coloured_m() {
         let mut display_inverse = MockDisplay::new();
-        Font6x8::render_str("Mm")
-            .stroke_color(Some(BinaryColor::Off))
-            .fill_color(Some(BinaryColor::On))
-            .draw(&mut display_inverse);
+        let mut style_inverse = TextStyle::new(BinaryColor::Off);
+        style_inverse.background_color = Some(BinaryColor::On);
+        Font6x8::render_str("Mm", style_inverse).draw(&mut display_inverse);
 
         let mut display_normal = MockDisplay::new();
-        Font6x8::render_str("Mm")
-            .stroke_color(Some(BinaryColor::On))
-            .fill_color(Some(BinaryColor::Off))
-            .draw(&mut display_normal);
+        let mut style_normal = TextStyle::new(BinaryColor::On);
+        style_normal.background_color = Some(BinaryColor::Off);
+        Font6x8::render_str("Mm", style_normal).draw(&mut display_normal);
 
         for y in 0..display_inverse.height() {
             for x in 0..display_inverse.width() {
@@ -157,9 +153,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str(" ~")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str(" ~", TextStyle::new(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -179,9 +173,7 @@ mod tests {
     #[test]
     fn no_fill_doesnt_hang() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str(" ")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str(" ", TextStyle::new(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(display, MockDisplay::new());
     }
@@ -189,9 +181,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("$y")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str("$y", TextStyle::new(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -211,9 +201,7 @@ mod tests {
     #[test]
     fn correct_latin1() {
         let mut display = MockDisplay::new();
-        Font6x8::render_str("¡ÿ")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str("¡ÿ", TextStyle::new(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -243,22 +231,18 @@ mod tests {
             "  #     #  ",
         ]);
 
+        let style = TextStyle::new(BinaryColor::On);
+
         let mut display = MockDisplay::new();
-        Font6x8::render_str("\0\n")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str("\0\n", style).draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x8::render_str("\x7F\u{A0}")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str("\x7F\u{A0}", style).draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x8::render_str("Ā💣")
-            .stroke_color(Some(BinaryColor::On))
-            .draw(&mut display);
+        Font6x8::render_str("Ā💣", style).draw(&mut display);
         assert_eq!(display, two_question_marks);
     }
 }

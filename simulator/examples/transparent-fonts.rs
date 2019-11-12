@@ -22,23 +22,23 @@ fn main() {
 
     text_6x8!(
         "Hello world! - no background",
-        stroke_color = Some(Rgb565::WHITE)
+        text_color = Some(Rgb565::WHITE),
     )
     .translate(Point::new(15, 15))
     .draw(&mut display);
 
     text_6x8!(
         "Hello world! - filled background",
-        stroke_color = Some(Rgb565::YELLOW),
-        fill_color = Some(Rgb565::BLUE)
+        text_color = Some(Rgb565::YELLOW),
+        background_color = Some(Rgb565::BLUE)
     )
     .translate(Point::new(15, 30))
     .draw(&mut display);
 
     text_6x8!(
         "Hello world! - inverse background",
-        stroke_color = Some(Rgb565::BLUE),
-        fill_color = Some(Rgb565::YELLOW)
+        text_color = Some(Rgb565::BLUE),
+        background_color = Some(Rgb565::YELLOW)
     )
     .translate(Point::new(15, 45))
     .draw(&mut display);
