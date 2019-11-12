@@ -3,7 +3,7 @@
 //! # Examples
 //!
 //! The examples below use the [`Font6x8`] font and the [`text_6x8`] macro, however any of the [font
-//! types in this module](#types) or [`text_*` macros](../index.html#macros) can be substituted.
+//! types in this module](#types) or [`text_*`] macros can be substituted.
 //!
 //! ## Write some text to the screen at the default `(0, 0)` position
 //!
@@ -38,9 +38,9 @@
 //!
 //! ## Add some styling to the text
 //!
-//! Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
-//! Properties like `fill_color` or `stroke_color` passed to the `text_6x8` macro are converted into method
-//! calls verbatim.
+//! Text can be styled by setting style properties on a [`TextStyle`] object.
+//! The style properties provided by [`TextStyle`] are also accessible using the
+//! [`text_*`] macros.
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
@@ -96,7 +96,9 @@
 //! ```
 //!
 //! [`text_6x8`]: ../macro.text_6x8.html
+//! [`text_*`]: ../index.html#macros
 //! [`Font6x8`]: ./type.Font6x8.html
+//! [`TextStyle`]: ../style/struct.TextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 

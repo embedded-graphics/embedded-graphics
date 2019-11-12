@@ -2,9 +2,9 @@ use crate::pixelcolor::PixelColor;
 
 /// Style properties for texts.
 ///
-/// `FontStyle` can be applied to a [font] to define how the font is drawn.
+/// `TextStyle` can be applied to a [font] to define how the font is drawn.
 ///
-/// [font]: ../mod.font.html
+/// [font]: ../fonts/index.html
 #[derive(Debug, Copy, Clone)]
 pub struct TextStyle<C>
 where

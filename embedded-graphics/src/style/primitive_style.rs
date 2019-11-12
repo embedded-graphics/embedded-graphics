@@ -3,10 +3,10 @@ use core::convert::TryFrom;
 
 /// Style properties for primitives.
 ///
-/// `PrimitiveStyle` can be applied to a [`primitive`] to define how the primitive
+/// `PrimitiveStyle` can be applied to a [primitive] to define how the primitive
 /// is drawn.
 ///
-/// [`primitive`]: ../mod.primitive.html
+/// [primitive]: ../primitives/index.html
 #[derive(Debug, Copy, Clone)]
 pub struct PrimitiveStyle<C>
 where

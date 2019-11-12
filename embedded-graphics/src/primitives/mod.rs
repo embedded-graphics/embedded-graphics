@@ -47,9 +47,10 @@ pub trait Primitive: Dimensions {
 /// let default_style: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!((10, 20), 30, style = Style::default());
 /// ```
 ///
-/// Style properties like `stroke_color` map to the method calls on the
-/// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
-/// identical circles:
+/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// For example, the following code makes two identical circles:
+///
+/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
@@ -100,9 +101,10 @@ macro_rules! egcircle {
 /// let stroke_line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!((10, 20), (30, 40), stroke_color = Some(Rgb565::BLUE));
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
-/// identical lines:
+/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// For example, the following code makes two identical lines:
+///
+/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
@@ -164,9 +166,10 @@ macro_rules! egline {
 ///     egrectangle!((10, 20), (30, 40), style = Style::default());
 /// ```
 ///
-/// Style properties like `stroke_color` map to the method calls on the
-/// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
-/// identical rectangles:
+/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// For example, the following code makes two identical rectangles:
+///
+/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
@@ -229,9 +232,10 @@ macro_rules! egrectangle {
 ///     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
 /// ```
 ///
-/// Style properties like `stroke_color` map to the method calls on the
-/// [`WithStyle`](style/trait.WithStyle.html) trait. For example, the following code makes two
-/// identical triangles:
+/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// For example, the following code makes two identical triangles:
+///
+/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
