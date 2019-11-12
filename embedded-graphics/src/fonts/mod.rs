@@ -172,8 +172,9 @@ macro_rules! impl_text {
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_6x8 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -194,8 +195,9 @@ macro_rules! text_6x8 {
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_6x12 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -216,8 +218,9 @@ macro_rules! text_6x12 {
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_8x16 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -238,8 +241,9 @@ macro_rules! text_8x16 {
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_12x16 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -260,8 +264,9 @@ macro_rules! text_12x16 {
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_24x32 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
