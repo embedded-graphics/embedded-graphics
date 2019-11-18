@@ -41,6 +41,7 @@
 //! * [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
 //! * [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
 //! * [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
+//! * [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
 //!
 //! # Simulator
 //!
