@@ -51,6 +51,12 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** The type of `Style::stroke_width` changed from `u8` to `u32`.
 
+- **(breaking)** Primitives shapes need to be converted into `Styled`s to be drawn.
+
+- **(breaking)** The primitive macros like `egline` don't accept a `style` setting anymore. Use `object.style = new_style` instead.
+
+- **(breaking)** The `Style` struct was replaced by `PrimitveStyle` and `TextStyle`.
+
 ### Removed
 
 - **(breaking)** The `SizedDrawing` trait is removed.
