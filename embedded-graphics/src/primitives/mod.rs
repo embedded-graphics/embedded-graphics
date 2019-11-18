@@ -43,9 +43,6 @@ pub trait Primitive: Dimensions {
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
-/// ```rust,ignore
-/// let default_style: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!((10, 20), 30, style = Style::default());
-/// ```
 ///
 /// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
 /// For example, the following code makes two identical circles:
@@ -161,10 +158,6 @@ macro_rules! egline {
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
-/// ```rust,ignore
-/// let rect_default_style: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
-///     egrectangle!((10, 20), (30, 40), style = Style::default());
-/// ```
 ///
 /// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
 /// For example, the following code makes two identical rectangles:
@@ -227,10 +220,6 @@ macro_rules! egrectangle {
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
 /// ```
-/// ```rust,ignore
-/// let triangle_default_style: Styled<Triangle, PrimitiveStyle<Rgb565>> =
-///     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
-/// ```
 ///
 /// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
 /// For example, the following code makes two identical triangles:
@@ -289,7 +278,6 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        // let _c: Styled<Circle, Rgb565> = egcircle!((10, 20), 30, style = Style::default());
     }
 
     #[test]
@@ -303,7 +291,6 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        // let _l: Styled<Line, Rgb565> = egline!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
@@ -317,8 +304,6 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        // let _r: Styled<Rectangle, Rgb565> =
-        //     egrectangle!((10, 20), (30, 40), style = Style::default());
     }
 
     #[test]
@@ -334,7 +319,5 @@ mod tests {
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );
-        // let _t: Styled<Triangle, Rgb565> =
-        //     egtriangle!((10, 20), (30, 40), (50, 60), style = Style::default());
     }
 }
