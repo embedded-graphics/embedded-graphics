@@ -247,6 +247,7 @@ where
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
+    /// # use embedded_graphics::style::TextStyle;
     /// #
     /// // 8px x 1px test image
     /// let text = Font8x16::render_str("Hello world", TextStyle::new(BinaryColor::On));
@@ -268,6 +269,7 @@ where
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
+    /// # use embedded_graphics::style::TextStyle;
     /// #
     /// // 8px x 1px test image
     /// let mut text = Font8x16::render_str("Hello world", TextStyle::new(BinaryColor::On));

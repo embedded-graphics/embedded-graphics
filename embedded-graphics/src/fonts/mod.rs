@@ -11,6 +11,7 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::text_6x8;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
@@ -27,6 +28,7 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::Font6x8;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
@@ -47,6 +49,7 @@
 //! use embedded_graphics::text_6x8;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::pixelcolor::Rgb565;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
@@ -131,6 +134,7 @@ where
     /// use embedded_graphics::prelude::*;
     /// use embedded_graphics::fonts::Font6x8;
     /// use embedded_graphics::pixelcolor::Rgb565;
+    /// use embedded_graphics::style::TextStyle;
     /// # use embedded_graphics::mock_display::MockDisplay as Display;
     ///
     /// fn main() {
@@ -150,6 +154,7 @@ where
 macro_rules! impl_text {
     ($Font:ident, $text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         use $crate::pixelcolor::BinaryColor;
+        use $crate::style::TextStyle;
 
         #[allow(unused_mut)]
         let mut style = TextStyle::new(BinaryColor::On.into());

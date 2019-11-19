@@ -1,6 +1,7 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
+use embedded_graphics::style::PrimitiveStyle;
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 static CIRCLE_SIZE: i32 = 32;

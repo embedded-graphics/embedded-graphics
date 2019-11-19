@@ -3,6 +3,7 @@ use embedded_graphics::{
     fonts::{Font12x16, Font6x8},
     pixelcolor::Gray8,
     prelude::*,
+    style::TextStyle,
 };
 
 fn font_6x8(c: &mut Criterion) {

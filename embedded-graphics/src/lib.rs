@@ -83,6 +83,7 @@
 //! use embedded_graphics::primitives::Circle;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::pixelcolor::Rgb565;
+//! use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
@@ -273,6 +274,7 @@ use crate::style::{PrimitiveStyle, Styled};
 /// # use embedded_graphics::primitives::rectangle::Rectangle;
 /// # use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// # use embedded_graphics::drawable::Pixel;
+/// # use embedded_graphics::style::{PrimitiveStyle, Styled};
 /// #
 /// # struct SPI1;
 /// #

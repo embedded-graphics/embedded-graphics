@@ -38,6 +38,7 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
+use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;

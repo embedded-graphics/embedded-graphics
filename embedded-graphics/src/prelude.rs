@@ -7,6 +7,5 @@ pub use super::geometry::{Dimensions, Point, Size};
 pub use super::image::ImageFile;
 pub use super::pixelcolor::{raw::RawData, GrayColor, PixelColor, RgbColor};
 pub use super::primitives::Primitive;
-pub use super::style::{PrimitiveStyle, Styled, TextStyle};
 pub use super::transform::Transform;
 pub use super::DrawTarget;

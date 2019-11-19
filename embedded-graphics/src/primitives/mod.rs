@@ -33,6 +33,7 @@ pub trait Primitive: Dimensions {
 /// use embedded_graphics::pixelcolor::Rgb565;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egcircle, primitives::Circle};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!((10, 20), 30);
 /// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(Point::new(10, 20), 30);
@@ -52,6 +53,7 @@ pub trait Primitive: Dimensions {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egcircle, pixelcolor::Rgb565, primitives::Circle};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     (10, 20),
@@ -75,6 +77,8 @@ pub trait Primitive: Dimensions {
 #[macro_export]
 macro_rules! egcircle {
     ($center:expr, $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
+        use $crate::style::PrimitiveStyle;
+
         #[allow(unused_mut)]
         let mut style = PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
@@ -92,6 +96,7 @@ macro_rules! egcircle {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egline, pixelcolor::Rgb565, primitives::Line};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!((10, 20), (30, 40));
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(Point::new(10, 20), Point::new(30, 40));
@@ -106,6 +111,7 @@ macro_rules! egcircle {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egline, pixelcolor::Rgb565, primitives::Line};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     Point::new(10, 20),
@@ -130,6 +136,8 @@ macro_rules! egcircle {
 #[macro_export]
 macro_rules! egline {
     ($start:expr, $end:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
+        use $crate::style::PrimitiveStyle;
+
         #[allow(unused_mut)]
         let mut style = PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
@@ -148,6 +156,7 @@ macro_rules! egline {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!((10, 20), (30, 40));
 /// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(Point::new(10, 20), Point::new(30, 40));
@@ -167,6 +176,7 @@ macro_rules! egline {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     (10, 20),
@@ -190,6 +200,8 @@ macro_rules! egline {
 #[macro_export]
 macro_rules! egrectangle {
     ($top_left:expr, $bottom_right:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
+        use $crate::style::PrimitiveStyle;
+
         #[allow(unused_mut)]
         let mut style = PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
@@ -208,6 +220,7 @@ macro_rules! egrectangle {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!((10, 20), (30, 40), (50, 60));
 /// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
@@ -229,6 +242,7 @@ macro_rules! egrectangle {
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle};
+/// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
 /// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     (10, 20),
@@ -248,6 +262,8 @@ macro_rules! egrectangle {
 #[macro_export]
 macro_rules! egtriangle {
     ($p1:expr, $p2:expr, $p3:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
+        use $crate::style::PrimitiveStyle;
+
         #[allow(unused_mut)]
         let mut style = PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*

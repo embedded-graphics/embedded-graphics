@@ -13,6 +13,7 @@ use embedded_graphics::fonts::Font12x16;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
+use embedded_graphics::style::{PrimitiveStyle, Styled, TextStyle};
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use std::thread;
 use std::time::Duration;
