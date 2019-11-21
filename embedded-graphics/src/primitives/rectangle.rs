@@ -246,7 +246,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_rect() {
         let mut rect = Rectangle::new(Point::new(2, 2), Point::new(4, 4))
-            .into_styled(PrimitiveStyle::stroke(Rgb565::RED, 1))
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
             .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
@@ -264,11 +264,11 @@ mod tests {
     #[test]
     fn it_can_be_negative() {
         let negative = Rectangle::new(Point::new(-2, -2), Point::new(2, 2))
-            .into_styled(PrimitiveStyle::fill(Rgb565::GREEN))
+            .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
             .into_iter();
 
         let positive = Rectangle::new(Point::new(2, 2), Point::new(6, 6))
-            .into_styled(PrimitiveStyle::fill(Rgb565::GREEN))
+            .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
             .into_iter();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));

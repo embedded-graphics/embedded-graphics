@@ -31,10 +31,19 @@ impl<C> PrimitiveStyle<C>
 where
     C: PixelColor,
 {
+    /// Creates a primitive style without fill and stroke.
+    pub fn new() -> Self {
+        Self {
+            fill_color: None,
+            stroke_color: None,
+            stroke_width: 0,
+        }
+    }
+
     /// Creates a stroke primitive style.
     ///
     /// If the `stroke_width` is `0` the resulting style won't draw a stroke.
-    pub fn stroke(stroke_color: C, stroke_width: u32) -> Self {
+    pub fn with_stroke(stroke_color: C, stroke_width: u32) -> Self {
         Self {
             stroke_color: Some(stroke_color),
             stroke_width,
@@ -43,7 +52,7 @@ where
     }
 
     /// Creates a fill primitive style.
-    pub fn fill(fill_color: C) -> Self {
+    pub fn with_fill(fill_color: C) -> Self {
         Self {
             fill_color: Some(fill_color),
             ..PrimitiveStyle::default()
@@ -64,11 +73,7 @@ where
     C: PixelColor,
 {
     fn default() -> Self {
-        Self {
-            fill_color: None,
-            stroke_color: None,
-            stroke_width: 0,
-        }
+        Self::new()
     }
 }
 
@@ -79,11 +84,11 @@ mod tests {
 
     #[test]
     fn constructors() {
-        let style = PrimitiveStyle::fill(Rgb888::RED);
+        let style = PrimitiveStyle::with_fill(Rgb888::RED);
         assert_eq!(style.fill_color, Some(Rgb888::RED));
         assert_eq!(style.stroke_color, None);
 
-        let style = PrimitiveStyle::stroke(Rgb888::GREEN, 123);
+        let style = PrimitiveStyle::with_stroke(Rgb888::GREEN, 123);
         assert_eq!(style.fill_color, None);
         assert_eq!(style.stroke_color, Some(Rgb888::GREEN));
         assert_eq!(style.stroke_width, 123);

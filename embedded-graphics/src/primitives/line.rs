@@ -26,13 +26,13 @@ use crate::DrawTarget;
 ///
 /// // Red 1 pixel wide line from (50, 20) to (60, 35)
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled(PrimitiveStyle::stroke(Rgb565::RED, 1))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
 /// // Green 1 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
-///     .into_styled(PrimitiveStyle::stroke(Rgb565::GREEN, 1))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
@@ -210,7 +210,8 @@ mod tests {
     use crate::pixelcolor::BinaryColor;
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line = Line::new(start, end).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1));
+        let line =
+            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {

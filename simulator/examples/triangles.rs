@@ -9,7 +9,7 @@ const PAD: i32 = 10;
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(512, 128));
 
-    let style = PrimitiveStyle::stroke(BinaryColor::On, 1);
+    let style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
     // no straight lines
     Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64))

@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::new(BinaryColor::On);
+        let style = TextStyle::with_text_color(BinaryColor::On);
         let hello = Font12x16::render_str(HELLO_WORLD, style);
         let empty = Font12x16::render_str("", style);
 
@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let style = TextStyle::new(BinaryColor::On);
+        let style = TextStyle::with_text_color(BinaryColor::On);
         let hello = Font12x16::render_str(HELLO_WORLD, style).translate(Point::new(5, -20));
         let empty = Font12x16::render_str("", style).translate(Point::new(10, 20));
 
@@ -82,7 +82,7 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        Font12x16::render_str("Mm", TextStyle::new(BinaryColor::On)).draw(&mut display);
+        Font12x16::render_str("Mm", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        Font12x16::render_str(" ~", TextStyle::new(BinaryColor::On)).draw(&mut display);
+        Font12x16::render_str(" ~", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        Font12x16::render_str("$y", TextStyle::new(BinaryColor::On)).draw(&mut display);
+        Font12x16::render_str("$y", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
 
         assert_eq!(
             display,
@@ -184,7 +184,7 @@ mod tests {
             "                        ",
         ]);
 
-        let style = TextStyle::new(BinaryColor::On);
+        let style = TextStyle::with_text_color(BinaryColor::On);
 
         let mut display = MockDisplay::new();
         Font12x16::render_str("\0\n", style).draw(&mut display);

@@ -9,7 +9,7 @@ fn main() {
 
     // Outline
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))
-        .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
+        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .translate(Point::new(-8, -8))
         .draw(&mut display);
 

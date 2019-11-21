@@ -21,12 +21,29 @@ impl<C> TextStyle<C>
 where
     C: PixelColor,
 {
+    /// Creates a font style with transparent text and background.
+    pub fn new() -> Self {
+        Self {
+            text_color: None,
+            background_color: None,
+        }
+    }
+
     /// Creates a font style with transparent background.
-    pub fn new(text_color: C) -> Self {
+    pub fn with_text_color(text_color: C) -> Self {
         Self {
             text_color: Some(text_color),
             background_color: None,
         }
+    }
+}
+
+impl<C> Default for TextStyle<C>
+where
+    C: PixelColor,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -37,7 +54,7 @@ mod tests {
 
     #[test]
     fn constructor() {
-        let style = TextStyle::new(Rgb888::MAGENTA);
+        let style = TextStyle::with_text_color(Rgb888::MAGENTA);
         assert_eq!(style.text_color, Some(Rgb888::MAGENTA));
         assert_eq!(style.background_color, None);
     }

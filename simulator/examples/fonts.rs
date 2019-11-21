@@ -11,7 +11,7 @@ fn main() {
     // Show smallest font with black font on white background (default value for fonts)
     Font6x8::render_str(
         "Hello World! - default style 6x8",
-        TextStyle::new(BinaryColor::On),
+        TextStyle::with_text_color(BinaryColor::On),
     )
     .translate(Point::new(15, 15))
     .draw(&mut display);
@@ -35,7 +35,7 @@ fn main() {
     .translate(Point::new(15, 40))
     .draw(&mut display);
 
-    let style = TextStyle::new(BinaryColor::On);
+    let style = TextStyle::with_text_color(BinaryColor::On);
 
     // Show 6x12 Font
     Font6x12::render_str("Hello 6x12!", style)

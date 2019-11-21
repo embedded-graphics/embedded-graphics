@@ -9,9 +9,9 @@ const PADDING: i32 = 16;
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(320, 256));
 
-    let thin_stroke = PrimitiveStyle::stroke(BinaryColor::On, 1);
-    let medium_stroke = PrimitiveStyle::stroke(BinaryColor::On, 3);
-    let thick_stroke = PrimitiveStyle::stroke(BinaryColor::On, 10);
+    let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
+    let medium_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+    let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 10);
 
     let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64));
     let rectangle =

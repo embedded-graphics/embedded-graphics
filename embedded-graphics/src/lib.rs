@@ -87,8 +87,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::fill(Rgb565::RED));
-//! let t = Font6x8::render_str("Hello Rust!", TextStyle::new(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!", TextStyle::with_text_color(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -368,7 +368,7 @@ where
         Self: Sized,
     {
         primitives::Rectangle::new(Point::zero(), Point::zero() + self.size())
-            .into_styled(PrimitiveStyle::fill(color))
+            .into_styled(PrimitiveStyle::with_fill(color))
             .draw(self);
     }
 

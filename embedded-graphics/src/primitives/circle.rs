@@ -27,7 +27,7 @@ use crate::DrawTarget;
 ///
 /// // Circle with 1 pixel wide white stroke centered around (10, 20) with a radius of 30
 /// Circle::new(Point::new(10, 20), 30)
-///     .into_styled(PrimitiveStyle::stroke(Rgb565::WHITE, 1))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
 ///     .draw(&mut display);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
@@ -44,7 +44,7 @@ use crate::DrawTarget;
 /// // Circle with blue fill and no stroke with a translation applied
 /// Circle::new(Point::new(10, 20), 30)
 ///     .translate(Point::new(65, 35))
-///     .into_styled(PrimitiveStyle::fill(Rgb565::BLUE))
+///     .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
@@ -224,7 +224,8 @@ mod tests {
     #[test]
     fn issue_143_stroke_and_fill() {
         let circle_no_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
-            Circle::new(Point::new(10, 16), 3).into_styled(PrimitiveStyle::fill(BinaryColor::On));
+            Circle::new(Point::new(10, 16), 3)
+                .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         let style = PrimitiveStyle {
             fill_color: Some(BinaryColor::On),
@@ -267,8 +268,8 @@ mod tests {
 
     #[test]
     fn transparent_border() {
-        let circle: Styled<Circle, PrimitiveStyle<BinaryColor>> =
-            Circle::new(Point::new(5, 5), 10).into_styled(PrimitiveStyle::fill(BinaryColor::On));
+        let circle: Styled<Circle, PrimitiveStyle<BinaryColor>> = Circle::new(Point::new(5, 5), 10)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         assert!(circle.into_iter().count() > 0);
     }
@@ -276,11 +277,11 @@ mod tests {
     #[test]
     fn it_handles_negative_coordinates() {
         let positive = Circle::new(Point::new(10, 10), 5)
-            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter();
 
         let negative = Circle::new(Point::new(-10, -10), 5)
-            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter();
 
         assert!(negative.into_iter().eq(positive

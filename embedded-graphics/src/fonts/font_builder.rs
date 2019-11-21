@@ -250,7 +250,7 @@ where
     /// # use embedded_graphics::style::TextStyle;
     /// #
     /// // 8px x 1px test image
-    /// let text = Font8x16::render_str("Hello world", TextStyle::new(BinaryColor::On));
+    /// let text = Font8x16::render_str("Hello world", TextStyle::with_text_color(BinaryColor::On));
     /// let moved = text.translate(Point::new(25, 30));
     ///
     /// assert_eq!(text.pos, Point::new(0, 0));
@@ -272,7 +272,7 @@ where
     /// # use embedded_graphics::style::TextStyle;
     /// #
     /// // 8px x 1px test image
-    /// let mut text = Font8x16::render_str("Hello world", TextStyle::new(BinaryColor::On));
+    /// let mut text = Font8x16::render_str("Hello world", TextStyle::with_text_color(BinaryColor::On));
     /// text.translate_mut(Point::new(25, 30));
     ///
     /// assert_eq!(text.pos, Point::new(25, 30));

@@ -50,11 +50,11 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    Circle::new(Point::new(64, 64), 64).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1)).draw(&mut display);
-    Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1)).draw(&mut display);
-    Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1)).draw(&mut display);
+    Circle::new(Point::new(64, 64), 64).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
 
-    Font6x8::render_str("Hello World!", TextStyle::new(BinaryColor::On))
+    Font6x8::render_str("Hello World!", TextStyle::with_text_color(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 }

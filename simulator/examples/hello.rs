@@ -8,7 +8,7 @@ use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuil
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(129, 129));
 
-    let line_style = PrimitiveStyle::stroke(BinaryColor::On, 1);
+    let line_style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
     // Outline
     Circle::new(Point::new(64, 64), 64)
@@ -23,7 +23,7 @@ fn main() {
         .into_styled(line_style)
         .draw(&mut display);
 
-    Font6x8::render_str("Hello World!", TextStyle::new(BinaryColor::On))
+    Font6x8::render_str("Hello World!", TextStyle::with_text_color(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 

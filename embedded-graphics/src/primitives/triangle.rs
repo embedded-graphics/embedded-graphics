@@ -27,13 +27,13 @@ use crate::DrawTarget;
 ///
 /// // Triangle with red 1 px wide stroke
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .into_styled(PrimitiveStyle::stroke(Rgb565::RED, 1))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
 /// // Triangle with translation applied
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .translate(Point::new(65, 35))
-///     .into_styled(PrimitiveStyle::stroke(Rgb565::GREEN, 1))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
@@ -345,7 +345,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_tri_line_y() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
-            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
@@ -362,7 +362,7 @@ mod tests {
     #[test]
     fn it_draws_unfilled_tri_line_x() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2))
-            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
@@ -378,7 +378,7 @@ mod tests {
     #[ignore]
     fn it_can_be_negative() {
         let mut tri = Triangle::new(Point::new(-2, -2), Point::new(2, 0), Point::new(-2, 0))
-            .into_styled(PrimitiveStyle::stroke(BinaryColor::On, 1))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter();
 
         // Only the bottom of the triangle should be visible

@@ -68,8 +68,11 @@ pub trait Primitive: Dimensions {
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
 ///
-/// let mut style = PrimitiveStyle::fill(Rgb565::GREEN);
-/// style.stroke_color = Some(Rgb565::RED);
+/// let style = PrimitiveStyle {
+///     fill_color: Some(Rgb565::GREEN),
+///     stroke_color: Some(Rgb565::RED),
+///     stroke_width: 1,
+/// };
 ///
 /// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = Circle::new(Point::new(10, 20), 30)
 ///     .into_styled(style);
@@ -126,8 +129,11 @@ macro_rules! egcircle {
 ///     fill_color = Some(Rgb565::YELLOW)
 /// );
 ///
-/// let mut style = PrimitiveStyle::fill(Rgb565::YELLOW);
-/// style.stroke_color = Some(Rgb565::BLUE);
+/// let style = PrimitiveStyle {
+///     fill_color: Some(Rgb565::YELLOW),
+///     stroke_color: Some(Rgb565::BLUE),
+///     stroke_width: 1,
+/// };
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> =
 ///     Line::new(Point::new(10, 20), Point::new(30, 40))
@@ -191,8 +197,11 @@ macro_rules! egline {
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
 ///
-/// let mut style = PrimitiveStyle::fill(Rgb565::GREEN);
-/// style.stroke_color = Some(Rgb565::RED);
+/// let style = PrimitiveStyle {
+///     fill_color: Some(Rgb565::GREEN),
+///     stroke_color: Some(Rgb565::RED),
+///     stroke_width: 1,
+/// };
 ///
 /// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = Rectangle::new(Point::new(10, 20), Point::new(30, 40))
 ///     .into_styled(style);
@@ -252,8 +261,11 @@ macro_rules! egrectangle {
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
 ///
-/// let mut style = PrimitiveStyle::fill(Rgb565::GREEN);
-/// style.stroke_color = Some(Rgb565::RED);
+/// let style = PrimitiveStyle {
+///     fill_color: Some(Rgb565::GREEN),
+///     stroke_color: Some(Rgb565::RED),
+///     stroke_width: 1,
+/// };
 ///
 /// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
 ///     Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))

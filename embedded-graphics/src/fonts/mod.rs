@@ -17,7 +17,7 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
 //! // Use struct methods directly
-//! Font6x8::render_str("Hello Rust!", TextStyle::new(BinaryColor::On)).draw(&mut display);
+//! Font6x8::render_str("Hello Rust!", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
 //!
 //! // Use a macro instead
 //! text_6x8!("Hello Rust!").draw(&mut display);
@@ -33,7 +33,7 @@
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
-//! Font6x8::render_str("Hello Rust!", TextStyle::new(BinaryColor::On))
+//! Font6x8::render_str("Hello Rust!", TextStyle::with_text_color(BinaryColor::On))
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display)
 //! ```
@@ -143,7 +143,7 @@ where
     ///     let mut disp = Display::default();
     ///
     ///     // Render a string with red characters
-    ///     let text = Font6x8::render_str("Hello world", TextStyle::new(Rgb565::RED));
+    ///     let text = Font6x8::render_str("Hello world", TextStyle::with_text_color(Rgb565::RED));
     ///     text.draw(&mut disp);
     /// }
     /// ```
@@ -159,7 +159,7 @@ macro_rules! impl_text {
         use $crate::style::TextStyle;
 
         #[allow(unused_mut)]
-        let mut style = TextStyle::new(BinaryColor::On.into());
+        let mut style = TextStyle::with_text_color(BinaryColor::On.into());
         $( style.$style_key = $style_value; )*
 
         $crate::fonts::$Font::render_str($text, style)

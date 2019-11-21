@@ -9,7 +9,7 @@ static CIRCLE_SIZE: i32 = 32;
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(304, 128));
 
-    let stroke = PrimitiveStyle::stroke(BinaryColor::On, 1);
+    let stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
     let stroke_off_fill_off = PrimitiveStyle {
         stroke_color: Some(BinaryColor::Off),
