@@ -57,6 +57,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** The `Style` struct was replaced by `PrimitveStyle` and `TextStyle`.
 
+- #203 updated simulator screenshots and added them to README
+
 ### Removed
 
 - **(breaking)** The `SizedDrawing` trait is removed.
