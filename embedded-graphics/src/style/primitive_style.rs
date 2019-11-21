@@ -13,9 +13,14 @@ where
     C: PixelColor,
 {
     /// Fill color of the primitive.
+    ///
+    /// If `fill_color` is set to `None` no fill will be drawn.
     pub fill_color: Option<C>,
 
     /// Stroke color of the primitive.
+    ///
+    /// If `stroke_color` is set to `None` or the `stroke_width` is set to `0` no stroke will be
+    /// drawn.
     pub stroke_color: Option<C>,
 
     /// Stroke width in pixels.
@@ -27,6 +32,8 @@ where
     C: PixelColor,
 {
     /// Creates a stroke primitive style.
+    ///
+    /// If the `stroke_width` is `0` the resulting style won't draw a stroke.
     pub fn stroke(stroke_color: C, stroke_width: u32) -> Self {
         Self {
             stroke_color: Some(stroke_color),
@@ -60,7 +67,7 @@ where
         Self {
             fill_color: None,
             stroke_color: None,
-            stroke_width: 1,
+            stroke_width: 0,
         }
     }
 }
