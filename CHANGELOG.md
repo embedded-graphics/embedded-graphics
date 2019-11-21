@@ -51,6 +51,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** The type of `Style::stroke_width` changed from `u8` to `u32`.
 
+- #203 updated simulator screenshots and added them to README
+
 ### Removed
 
 - **(breaking)** The `SizedDrawing` trait is removed.

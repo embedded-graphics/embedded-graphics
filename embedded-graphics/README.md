@@ -4,6 +4,8 @@
 [![Crates.io](https://img.shields.io/crates/v/embedded-graphics.svg)](https://crates.io/crates/embedded-graphics)
 [![Docs.rs](https://docs.rs/embedded-graphics/badge.svg)](https://docs.rs/embedded-graphics)
 
+![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
+
 ## [Documentation](https://docs.rs/embedded-graphics)
 
 A small 2D graphics library to draw things on embedded graphical LCDs, like the SSD1306 OLED display.
