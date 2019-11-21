@@ -189,8 +189,10 @@ mod tests {
 
     #[test]
     fn negative_y_no_infinite_loop() {
-        let mut style = TextStyle::new(BinaryColor::On);
-        style.background_color = Some(BinaryColor::Off);
+        let style = TextStyle {
+            text_color: Some(BinaryColor::On),
+            background_color: Some(BinaryColor::Off),
+        };
 
         let mut text = Font6x12::render_str("Testing string", style);
         text.translate_mut(Point::new(0, -12));
@@ -200,8 +202,10 @@ mod tests {
 
     #[test]
     fn negative_x_no_infinite_loop() {
-        let mut style = TextStyle::new(BinaryColor::On);
-        style.background_color = Some(BinaryColor::Off);
+        let style = TextStyle {
+            text_color: Some(BinaryColor::On),
+            background_color: Some(BinaryColor::Off),
+        };
 
         let mut text = Font6x12::render_str("A", style);
         text.translate_mut(Point::new(-6, 0));

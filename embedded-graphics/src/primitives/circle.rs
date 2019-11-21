@@ -31,8 +31,11 @@ use crate::DrawTarget;
 ///     .draw(&mut display);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
-/// let mut style = PrimitiveStyle::stroke(Rgb565::RED, 3);
-/// style.fill_color = Some(Rgb565::GREEN);
+/// let style = PrimitiveStyle {
+///     stroke_color: Some(Rgb565::RED),
+///     stroke_width: 3,
+///     fill_color: Some(Rgb565::GREEN),
+/// };
 ///
 /// Circle::new(Point::new(50, 20), 30)
 ///     .into_styled(style)
@@ -223,9 +226,11 @@ mod tests {
         let circle_no_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
             Circle::new(Point::new(10, 16), 3).into_styled(PrimitiveStyle::fill(BinaryColor::On));
 
-        let mut style = PrimitiveStyle::default();
-        style.fill_color = Some(BinaryColor::On);
-        style.stroke_color = Some(BinaryColor::On);
+        let style = PrimitiveStyle {
+            fill_color: Some(BinaryColor::On),
+            stroke_color: Some(BinaryColor::On),
+            stroke_width: 1,
+        };
         let circle_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
             Circle::new(Point::new(10, 16), 3).into_styled(style);
 

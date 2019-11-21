@@ -11,13 +11,17 @@ fn main() {
 
     let stroke = PrimitiveStyle::stroke(BinaryColor::On, 1);
 
-    let mut stroke_off_fill_off = PrimitiveStyle::default();
-    stroke_off_fill_off.stroke_color = Some(BinaryColor::Off);
-    stroke_off_fill_off.fill_color = Some(BinaryColor::Off);
+    let stroke_off_fill_off = PrimitiveStyle {
+        stroke_color: Some(BinaryColor::Off),
+        stroke_width: 1,
+        fill_color: Some(BinaryColor::Off),
+    };
 
-    let mut stroke_off_fill_on = PrimitiveStyle::default();
-    stroke_off_fill_on.stroke_color = Some(BinaryColor::Off);
-    stroke_off_fill_on.fill_color = Some(BinaryColor::On);
+    let stroke_off_fill_on = PrimitiveStyle {
+        stroke_color: Some(BinaryColor::Off),
+        stroke_width: 1,
+        fill_color: Some(BinaryColor::On),
+    };
 
     Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
         .into_styled(stroke)

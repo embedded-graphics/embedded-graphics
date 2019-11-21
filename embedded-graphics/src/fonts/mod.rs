@@ -59,8 +59,10 @@
 //!     background_color = Some(Rgb565::BLUE),
 //! ).draw(&mut display);
 //!
-//! let mut style = TextStyle::new(Rgb565::YELLOW);
-//! style.background_color = Some(Rgb565::BLUE);
+//! let style = TextStyle {
+//!     text_color: Some(Rgb565::YELLOW),
+//!     background_color: Some(Rgb565::BLUE),
+//! };
 //!
 //! Font6x8::render_str("Hello Rust!", style)
 //!     .translate(Point::new(20, 30))

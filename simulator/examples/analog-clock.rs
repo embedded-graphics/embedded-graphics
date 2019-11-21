@@ -82,9 +82,11 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     let decoration_position = polar(seconds_radians, SIZE as f32 - 20.0);
 
     // Decoration style
-    let mut decoration_style = PrimitiveStyle::default();
-    decoration_style.fill_color = Some(BinaryColor::Off);
-    decoration_style.stroke_color = Some(BinaryColor::On);
+    let decoration_style = PrimitiveStyle {
+        fill_color: Some(BinaryColor::Off),
+        stroke_color: Some(BinaryColor::On),
+        stroke_width: 1,
+    };
 
     // Add a fancy circle near the end of the hand
     let decoration = Circle::new(decoration_position, 5).into_styled(decoration_style);

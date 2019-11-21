@@ -25,8 +25,11 @@ use crate::DrawTarget;
 /// # let mut display = MockDisplay::default();
 ///
 /// // Rectangle with red 3 pixel wide stroke and green fill from (50, 20) to (60, 35)
-/// let mut style = PrimitiveStyle::stroke(Rgb565::RED, 3);
-/// style.fill_color = Some(Rgb565::GREEN);
+/// let style = PrimitiveStyle {
+///     stroke_color: Some(Rgb565::RED),
+///     stroke_width: 3,
+///     fill_color: Some(Rgb565::GREEN),
+/// };
 ///
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .into_styled(style)

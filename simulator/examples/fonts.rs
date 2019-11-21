@@ -17,8 +17,10 @@ fn main() {
     .draw(&mut display);
 
     // Show smallest font with white font on black background
-    let mut style = TextStyle::new(BinaryColor::Off);
-    style.background_color = Some(BinaryColor::On);
+    let style = TextStyle {
+        text_color: Some(BinaryColor::Off),
+        background_color: Some(BinaryColor::On),
+    };
 
     Font6x8::render_str("Hello World! - inverse 6x8", style)
         .translate(Point::new(15, 30))

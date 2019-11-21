@@ -9,9 +9,11 @@ use embedded_graphics::{
 
 fn filled_circle(c: &mut Criterion) {
     c.bench_function("filled circle", |b| {
-        let mut style = PrimitiveStyle::default();
-        style.fill_color = Some(Gray8::new(1));
-        style.stroke_color = Some(Gray8::new(10));
+        let style = PrimitiveStyle {
+            fill_color: Some(Gray8::new(1)),
+            stroke_color: Some(Gray8::new(10)),
+            stroke_width: 1,
+        };
 
         let object = &Circle::new(Point::new(100, 100), 100).into_styled(style);
 
@@ -21,9 +23,11 @@ fn filled_circle(c: &mut Criterion) {
 
 fn filled_rect(c: &mut Criterion) {
     c.bench_function("filled rectangle", |b| {
-        let mut style = PrimitiveStyle::default();
-        style.fill_color = Some(Gray8::new(1));
-        style.stroke_color = Some(Gray8::new(10));
+        let style = PrimitiveStyle {
+            fill_color: Some(Gray8::new(1)),
+            stroke_color: Some(Gray8::new(10)),
+            stroke_width: 1,
+        };
 
         let object = &Rectangle::new(Point::new(100, 100), Point::new(200, 200)).into_styled(style);
 
