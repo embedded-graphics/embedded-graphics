@@ -3,15 +3,19 @@ use embedded_graphics::{
     drawable::Pixel,
     geometry::Point,
     pixelcolor::Gray8,
-    primitives::{Circle, Line, Rectangle, Triangle},
-    style::WithStyle,
+    primitives::{Circle, Line, Primitive, Rectangle, Triangle},
+    style::PrimitiveStyle,
 };
 
 fn filled_circle(c: &mut Criterion) {
     c.bench_function("filled circle", |b| {
-        let object: Circle<Gray8> = Circle::new(Point::new(100, 100), 100)
-            .fill_color(Some(Gray8::new(1)))
-            .stroke_color(Some(Gray8::new(10)));
+        let style = PrimitiveStyle {
+            fill_color: Some(Gray8::new(1)),
+            stroke_color: Some(Gray8::new(10)),
+            stroke_width: 1,
+        };
+
+        let object = &Circle::new(Point::new(100, 100), 100).into_styled(style);
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });
@@ -19,9 +23,13 @@ fn filled_circle(c: &mut Criterion) {
 
 fn filled_rect(c: &mut Criterion) {
     c.bench_function("filled rectangle", |b| {
-        let object: Rectangle<Gray8> = Rectangle::new(Point::new(100, 100), Point::new(200, 200))
-            .fill_color(Some(Gray8::new(1)))
-            .stroke_color(Some(Gray8::new(10)));
+        let style = PrimitiveStyle {
+            fill_color: Some(Gray8::new(1)),
+            stroke_color: Some(Gray8::new(10)),
+            stroke_width: 1,
+        };
+
+        let object = &Rectangle::new(Point::new(100, 100), Point::new(200, 200)).into_styled(style);
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });
@@ -29,8 +37,8 @@ fn filled_rect(c: &mut Criterion) {
 
 fn empty_rect(c: &mut Criterion) {
     c.bench_function("unfilled rectangle", |b| {
-        let object: Rectangle<Gray8> = Rectangle::new(Point::new(100, 100), Point::new(200, 200))
-            .stroke_color(Some(Gray8::new(10)));
+        let object = &Rectangle::new(Point::new(100, 100), Point::new(200, 200))
+            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });
@@ -38,8 +46,8 @@ fn empty_rect(c: &mut Criterion) {
 
 fn line(c: &mut Criterion) {
     c.bench_function("line", |b| {
-        let object: Line<Gray8> = Line::new(Point::new(100, 100), Point::new(200, 200))
-            .stroke_color(Some(Gray8::new(10)));
+        let object = &Line::new(Point::new(100, 100), Point::new(200, 200))
+            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });
@@ -47,8 +55,8 @@ fn line(c: &mut Criterion) {
 
 fn triangle(c: &mut Criterion) {
     c.bench_function("triangle", |b| {
-        let object: Triangle<Gray8> =
-            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20));
+        let object = &Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
+            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });
@@ -56,9 +64,8 @@ fn triangle(c: &mut Criterion) {
 
 fn filled_triangle(c: &mut Criterion) {
     c.bench_function("filled_triangle", |b| {
-        let object: Triangle<Gray8> =
-            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
-                .fill_color(Some(Gray8::new(1)));
+        let object = &Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
+            .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });

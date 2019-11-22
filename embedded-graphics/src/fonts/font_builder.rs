@@ -4,9 +4,8 @@
 use crate::drawable::{Drawable, Pixel};
 use crate::fonts::Font;
 use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::{BinaryColor, PixelColor};
-use crate::style::Style;
-use crate::style::WithStyle;
+use crate::pixelcolor::PixelColor;
+use crate::style::TextStyle;
 use crate::transform::Transform;
 use crate::DrawTarget;
 use core::marker::PhantomData;
@@ -38,8 +37,8 @@ pub struct FontBuilder<'a, C: PixelColor, Conf> {
     /// Text to draw
     text: &'a str,
 
-    /// Style of the font
-    style: Style<C>,
+    /// Style of the text.
+    pub style: TextStyle<C>,
 
     _conf: PhantomData<Conf>,
 }
@@ -87,42 +86,13 @@ where
     C: PixelColor,
     Conf: FontBuilderConf,
 {
-    fn render_str(text: &'a str) -> Self {
+    fn render_str(text: &'a str, style: TextStyle<C>) -> Self {
         Self {
             pos: Point::zero(),
             text,
-            style: Style::default(),
+            style,
             _conf: Default::default(),
         }
-    }
-}
-
-impl<'a, C, Conf> WithStyle<C> for FontBuilder<'a, C, Conf>
-where
-    C: PixelColor,
-{
-    fn style(mut self, style: Style<C>) -> Self {
-        self.style = style;
-
-        self
-    }
-
-    fn stroke_color(mut self, color: Option<C>) -> Self {
-        self.style.stroke_color = color;
-
-        self
-    }
-
-    fn stroke_width(self, _width: u32) -> Self {
-        // Noop
-
-        self
-    }
-
-    fn fill_color(mut self, color: Option<C>) -> Self {
-        self.style.fill_color = color;
-
-        self
     }
 }
 
@@ -138,13 +108,13 @@ where
     idx: usize,
     pos: Point,
     text: &'a str,
-    style: Style<C>,
+    style: TextStyle<C>,
     _conf: PhantomData<Conf>,
 }
 
 impl<'a, C: 'a, Conf: 'a> IntoIterator for FontBuilder<'a, C, Conf>
 where
-    C: PixelColor + From<BinaryColor>,
+    C: PixelColor,
     Conf: FontBuilderConf,
 {
     type Item = Pixel<C>;
@@ -166,7 +136,7 @@ where
 
 impl<'a, C, Conf> IntoIterator for &FontBuilder<'a, C, Conf>
 where
-    C: PixelColor + From<BinaryColor>,
+    C: PixelColor,
     Conf: FontBuilderConf,
 {
     type IntoIter = FontBuilderIterator<'a, C, Conf>;
@@ -188,7 +158,7 @@ where
 
 impl<'a, C, Conf> Iterator for FontBuilderIterator<'a, C, Conf>
 where
-    C: PixelColor + From<BinaryColor>,
+    C: PixelColor,
     Conf: FontBuilderConf,
 {
     type Item = Pixel<C>;
@@ -221,13 +191,9 @@ where
                 let bitmap_bit = 7 - (bitmap_bit_index % 8);
 
                 let color = if Conf::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
-                    Some(
-                        self.style
-                            .stroke_color
-                            .unwrap_or_else(|| BinaryColor::On.into()),
-                    )
+                    self.style.text_color.or(self.style.background_color)
                 } else {
-                    self.style.fill_color
+                    self.style.background_color
                 };
 
                 let x = self.pos.x
@@ -262,7 +228,7 @@ where
 
 impl<'a, C, Conf> Drawable<C> for &FontBuilder<'a, C, Conf>
 where
-    C: PixelColor + From<BinaryColor>,
+    C: PixelColor,
     Conf: FontBuilderConf,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
@@ -281,12 +247,10 @@ where
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// #
-    /// # let style = Style::stroke_color(BinaryColor::On);
+    /// # use embedded_graphics::style::TextStyle;
     /// #
     /// // 8px x 1px test image
-    /// let text = Font8x16::render_str("Hello world")
-    /// #    .style(style);
+    /// let text = Font8x16::render_str("Hello world", TextStyle::with_text_color(BinaryColor::On));
     /// let moved = text.translate(Point::new(25, 30));
     ///
     /// assert_eq!(text.pos, Point::new(0, 0));
@@ -305,12 +269,10 @@ where
     /// # use embedded_graphics::fonts::{ Font, Font8x16 };
     /// # use embedded_graphics::prelude::*;
     /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// #
-    /// # let style = Style::stroke_color(BinaryColor::On);
+    /// # use embedded_graphics::style::TextStyle;
     /// #
     /// // 8px x 1px test image
-    /// let mut text = Font8x16::render_str("Hello world")
-    /// #    .style(style);
+    /// let mut text = Font8x16::render_str("Hello world", TextStyle::with_text_color(BinaryColor::On));
     /// text.translate_mut(Point::new(25, 30));
     ///
     /// assert_eq!(text.pos, Point::new(25, 30));

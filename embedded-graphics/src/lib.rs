@@ -83,11 +83,12 @@
 //! use embedded_graphics::primitives::Circle;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::pixelcolor::Rgb565;
+//! use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Point::new(20, 20), 8).fill_color(Some(Rgb565::RED));
-//! let t = Font6x8::render_str("Hello Rust!").fill_color(Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
+//! let t = Font6x8::render_str("Hello Rust!", TextStyle::with_text_color(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -106,7 +107,7 @@
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
-//! let t = text_6x8!("Hello Rust!", fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let t = text_6x8!("Hello Rust!", text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -124,8 +125,8 @@
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
-//!         .chain(egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
-//!         .chain(text_6x8!(text, fill_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
+//!         .chain(&egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
+//!         .chain(text_6x8!(text, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {
@@ -180,7 +181,8 @@ pub mod transform;
 use crate::drawable::Drawable;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::style::WithStyle;
+use crate::primitives::Primitive;
+use crate::style::{PrimitiveStyle, Styled};
 
 /// Defines a display that can be used to render [`Drawable`] objects.
 ///
@@ -272,6 +274,7 @@ use crate::style::WithStyle;
 /// # use embedded_graphics::primitives::rectangle::Rectangle;
 /// # use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// # use embedded_graphics::drawable::Pixel;
+/// # use embedded_graphics::style::{PrimitiveStyle, Styled};
 /// #
 /// # struct SPI1;
 /// #
@@ -294,7 +297,7 @@ use crate::style::WithStyle;
 ///     }
 ///
 ///     /// A HW-accelerated method for drawing rectangles
-///     pub fn fast_rectangle(&self, rect: &Rectangle<Gray8>) {
+///     pub fn fast_rectangle(&self, rect: &Styled<Rectangle, PrimitiveStyle<Gray8>>) {
 ///         // Does some speedy drawing
 ///     }
 /// }
@@ -313,7 +316,7 @@ use crate::style::WithStyle;
 ///     }
 ///
 ///     /// Use the accelerated method when drawing rectangles
-///     fn draw_rectangle(&mut self, item: &Rectangle<Gray8>) {
+///     fn draw_rectangle(&mut self, item: &Styled<Rectangle, PrimitiveStyle<Gray8>>) {
 ///         self.fast_rectangle(item);
 ///     }
 /// }
@@ -365,7 +368,7 @@ where
         Self: Sized,
     {
         primitives::Rectangle::new(Point::zero(), Point::zero() + self.size())
-            .fill_color(Some(color))
+            .into_styled(PrimitiveStyle::with_fill(color))
             .draw(self);
     }
 
@@ -389,7 +392,7 @@ where
     ///
     /// [`Line`]: ./primitives/line/struct.Line.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_line(&mut self, item: &primitives::Line<C>) {
+    fn draw_line(&mut self, item: &Styled<primitives::Line, PrimitiveStyle<C>>) {
         self.draw_iter(item);
     }
 
@@ -406,7 +409,7 @@ where
     ///
     /// [`Triangle`]: ./primitives/triangle/struct.Triangle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_triangle(&mut self, item: &primitives::Triangle<C>) {
+    fn draw_triangle(&mut self, item: &Styled<primitives::Triangle, PrimitiveStyle<C>>) {
         self.draw_iter(item);
     }
 
@@ -423,7 +426,7 @@ where
     ///
     /// [`Rectangle`]: ./primitives/rectangle/struct.Rectangle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_rectangle(&mut self, item: &primitives::Rectangle<C>) {
+    fn draw_rectangle(&mut self, item: &Styled<primitives::Rectangle, PrimitiveStyle<C>>) {
         self.draw_iter(item);
     }
 
@@ -440,7 +443,7 @@ where
     ///
     /// [`Circle`]: ./primitives/circle/struct.Circle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_circle(&mut self, item: &primitives::Circle<C>) {
+    fn draw_circle(&mut self, item: &Styled<primitives::Circle, PrimitiveStyle<C>>) {
         self.draw_iter(item);
     }
 }

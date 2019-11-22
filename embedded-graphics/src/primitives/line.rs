@@ -5,8 +5,7 @@ use super::super::transform::Transform;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
-use crate::style::Style;
-use crate::style::WithStyle;
+use crate::style::{PrimitiveStyle, Styled};
 use crate::DrawTarget;
 
 /// Line primitive
@@ -21,40 +20,33 @@ use crate::DrawTarget;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Line;
 /// use embedded_graphics::pixelcolor::Rgb565;
+/// use embedded_graphics::style::PrimitiveStyle;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Default line from (10, 20) to (30, 40)
-/// Line::new(Point::new(10, 20), Point::new(30, 40)).draw(&mut display);
-///
-/// // Line with styled stroke from (50, 20) to (60, 35)
+/// // Red 1 pixel wide line from (50, 20) to (60, 35)
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .stroke_color(Some(Rgb565::RED))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
-/// // Line with translation applied
+/// // Green 1 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Copy, Clone)]
-pub struct Line<C: PixelColor> {
+pub struct Line {
     /// Start point
     pub start: Point,
 
     /// End point
     pub end: Point,
-
-    /// Line style
-    pub style: Style<C>,
 }
 
-impl<C> Primitive for Line<C> where C: PixelColor {}
+impl Primitive for Line {}
 
-impl<C> Dimensions for Line<C>
-where
-    C: PixelColor,
-{
+impl Dimensions for Line {
     fn top_left(&self) -> Point {
         Point::new(self.start.x.min(self.end.x), self.start.y.min(self.end.y))
     }
@@ -68,67 +60,62 @@ where
     }
 }
 
-impl<C> Line<C>
-where
-    C: PixelColor,
-{
+impl Line {
     /// Create a new line
-    pub fn new(start: Point, end: Point) -> Self {
-        Line {
-            start,
-            end,
-            style: Style::default(),
+    pub const fn new(start: Point, end: Point) -> Self {
+        Line { start, end }
+    }
+}
+
+impl Transform for Line {
+    /// Translate the line from its current position to a new position by (x, y) pixels, returning
+    /// a new `Line`. For a mutating transform, see `translate_mut`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Line;
+    /// # use embedded_graphics::prelude::*;
+    /// let line = Line::new(Point::new(5, 10), Point::new(15, 20));
+    /// let moved = line.translate(Point::new(10, 10));
+    ///
+    /// assert_eq!(moved.start, Point::new(15, 20));
+    /// assert_eq!(moved.end, Point::new(25, 30));
+    /// ```
+    fn translate(&self, by: Point) -> Self {
+        Self {
+            start: self.start + by,
+            end: self.end + by,
+            ..*self
         }
     }
-}
 
-impl<C> WithStyle<C> for Line<C>
-where
-    C: PixelColor,
-{
-    fn style(mut self, style: Style<C>) -> Self {
-        self.style = style;
-
-        self
-    }
-
-    fn stroke_color(mut self, color: Option<C>) -> Self {
-        self.style.stroke_color = color;
-
-        self
-    }
-
-    fn stroke_width(mut self, width: u32) -> Self {
-        self.style.stroke_width = width;
-
-        self
-    }
-
-    fn fill_color(mut self, color: Option<C>) -> Self {
-        self.style.fill_color = color;
+    /// Translate the line from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Line;
+    /// # use embedded_graphics::prelude::*;
+    /// let mut line = Line::new(Point::new(5, 10), Point::new(15, 20));
+    /// line.translate_mut(Point::new(10, 10));
+    ///
+    /// assert_eq!(line.start, Point::new(15, 20));
+    /// assert_eq!(line.end, Point::new(25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
+        self.start += by;
+        self.end += by;
 
         self
     }
 }
 
-impl<C> IntoIterator for Line<C>
+impl<'a, C> IntoIterator for &'a Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = LineIterator<C>;
+    type IntoIter = StyledLineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        (&self).into_iter()
-    }
-}
-
-impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
-    type Item = Pixel<C>;
-    type IntoIter = LineIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        let mut delta = self.end - self.start;
+        let mut delta = self.primitive.end - self.primitive.start;
         if delta.x < 0 {
             delta = Point::new(-delta.x, delta.y);
         }
@@ -136,33 +123,36 @@ impl<'a, C: PixelColor> IntoIterator for &'a Line<C> {
             delta = Point::new(delta.x, -delta.y);
         }
 
-        let direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+        let direction = match (
+            self.primitive.start.x >= self.primitive.end.x,
+            self.primitive.start.y >= self.primitive.end.y,
+        ) {
             (false, false) => Point::new(1, 1),
             (false, true) => Point::new(1, -1),
             (true, false) => Point::new(-1, 1),
             (true, true) => Point::new(-1, -1),
         };
 
-        LineIterator {
+        StyledLineIterator {
             style: self.style,
 
-            start: self.start,
-            end: self.end,
+            start: self.primitive.start,
+            end: self.primitive.end,
             delta,
             direction,
             err: delta.x + delta.y,
-            stop: self.start == self.end, // if line length is zero, draw nothing
+            stop: self.primitive.start == self.primitive.end, // if line length is zero, draw nothing
         }
     }
 }
 
 /// Pixel iterator for each pixel in the line
 #[derive(Debug, Clone, Copy)]
-pub struct LineIterator<C>
+pub struct StyledLineIterator<C>
 where
     C: PixelColor,
 {
-    style: Style<C>,
+    style: PrimitiveStyle<C>,
 
     start: Point,
     end: Point,
@@ -174,7 +164,7 @@ where
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<C: PixelColor> Iterator for LineIterator<C> {
+impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -204,7 +194,7 @@ impl<C: PixelColor> Iterator for LineIterator<C> {
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Line<C>
+impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -213,68 +203,15 @@ where
     }
 }
 
-impl<C> Transform for Line<C>
-where
-    C: PixelColor,
-{
-    /// Translate the line from its current position to a new position by (x, y) pixels, returning
-    /// a new `Line`. For a mutating transform, see `translate_mut`.
-    ///
-    /// ```
-    /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// #
-    /// # let style = Style::stroke_color(BinaryColor::On);
-    /// #
-    /// let line = Line::new(Point::new(5, 10), Point::new(15, 20))
-    /// #    .style(style);
-    /// let moved = line.translate(Point::new(10, 10));
-    ///
-    /// assert_eq!(moved.start, Point::new(15, 20));
-    /// assert_eq!(moved.end, Point::new(25, 30));
-    /// ```
-    fn translate(&self, by: Point) -> Self {
-        Self {
-            start: self.start + by,
-            end: self.end + by,
-            ..*self
-        }
-    }
-
-    /// Translate the line from its current position to a new position by (x, y) pixels.
-    ///
-    /// ```
-    /// # use embedded_graphics::primitives::Line;
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// #
-    /// # let style = Style::stroke_color(BinaryColor::On);
-    /// #
-    /// let mut line = Line::new(Point::new(5, 10), Point::new(15, 20))
-    /// #    .style(style);
-    /// line.translate_mut(Point::new(10, 10));
-    ///
-    /// assert_eq!(line.start, Point::new(15, 20));
-    /// assert_eq!(line.end, Point::new(25, 30));
-    /// ```
-    fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.start += by;
-        self.end += by;
-
-        self
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::drawable::Pixel;
     use crate::pixelcolor::BinaryColor;
-    use crate::style::Style;
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line = Line::new(start, end).style(Style::stroke_color(BinaryColor::On));
+        let line =
+            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {
@@ -292,8 +229,8 @@ mod tests {
         let start = Point::new(10, 10);
         let end = Point::new(20, 20);
 
-        let line: Line<BinaryColor> = Line::new(start, end);
-        let backwards_line: Line<BinaryColor> = Line::new(end, start);
+        let line: Line = Line::new(start, end);
+        let backwards_line: Line = Line::new(end, start);
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);

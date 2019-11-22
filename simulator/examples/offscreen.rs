@@ -1,6 +1,7 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
+use embedded_graphics::style::PrimitiveStyle;
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() {
@@ -8,7 +9,7 @@ fn main() {
 
     // Outline
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))
-        .stroke_color(Some(BinaryColor::On))
+        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .translate(Point::new(-8, -8))
         .draw(&mut display);
 

@@ -3,7 +3,7 @@
 //! # Examples
 //!
 //! The examples below use the [`Font6x8`] font and the [`text_6x8`] macro, however any of the [font
-//! types in this module](#types) or [`text_*` macros](../index.html#macros) can be substituted.
+//! types in this module](#types) or [`text_*`] macros can be substituted.
 //!
 //! ## Write some text to the screen at the default `(0, 0)` position
 //!
@@ -11,12 +11,13 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::text_6x8;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
 //! // Use struct methods directly
-//! Font6x8::render_str("Hello Rust!").draw(&mut display);
+//! Font6x8::render_str("Hello Rust!", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
 //!
 //! // Use a macro instead
 //! text_6x8!("Hello Rust!").draw(&mut display);
@@ -27,37 +28,44 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::Font6x8;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
-//! Font6x8::render_str("Hello Rust!").translate(Point::new(20, 30)).draw(&mut display)
+//! Font6x8::render_str("Hello Rust!", TextStyle::with_text_color(BinaryColor::On))
+//!     .translate(Point::new(20, 30))
+//!     .draw(&mut display)
 //! ```
 //!
 //! ## Add some styling to the text
 //!
-//! Use [any method provided by the `WithStyle` trait](../style/trait.WithStyle.html#required-methods).
-//! Properties like `fill_color` or `stroke_color` passed to the `text_6x8` macro are converted into method
-//! calls verbatim.
+//! Text can be styled by setting style properties on a [`TextStyle`] object.
+//! The style properties provided by [`TextStyle`] are also accessible using the
+//! [`text_*`] macros.
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::text_6x8;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::pixelcolor::Rgb565;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
 //! text_6x8!(
 //!     "Hello Rust!",
-//!     fill_color = Some(Rgb565::BLUE),
-//!     stroke_color = Some(Rgb565::YELLOW)
+//!     text_color = Some(Rgb565::YELLOW),
+//!     background_color = Some(Rgb565::BLUE),
 //! ).draw(&mut display);
 //!
-//! Font6x8::render_str("Hello Rust!")
+//! let style = TextStyle {
+//!     text_color: Some(Rgb565::YELLOW),
+//!     background_color: Some(Rgb565::BLUE),
+//! };
+//!
+//! Font6x8::render_str("Hello Rust!", style)
 //!     .translate(Point::new(20, 30))
-//!     .fill_color(Some(Rgb565::BLUE))
-//!     .stroke_color(Some(Rgb565::YELLOW))
 //!     .draw(&mut display);
 //! ```
 //!
@@ -87,13 +95,15 @@
 //!
 //! text_6x8!(
 //!     &buf,
-//!     fill_color = Some(Rgb565::BLUE),
-//!     stroke_color = Some(Rgb565::YELLOW)
+//!     text_color = Some(Rgb565::YELLOW),
+//!     background_color = Some(Rgb565::BLUE),
 //! ).draw(&mut display);
 //! ```
 //!
 //! [`text_6x8`]: ../macro.text_6x8.html
+//! [`text_*`]: ../index.html#macros
 //! [`Font6x8`]: ./type.Font6x8.html
+//! [`TextStyle`]: ../style/struct.TextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
@@ -111,10 +121,10 @@ pub use self::font6x8::Font6x8;
 pub use self::font8x16::Font8x16;
 use crate::geometry::Dimensions;
 use crate::pixelcolor::PixelColor;
-use crate::style::WithStyle;
+use crate::style::TextStyle;
 
 /// Common methods for all fonts
-pub trait Font<'a, C>: WithStyle<C> + Dimensions
+pub trait Font<'a, C>: Dimensions
 where
     C: PixelColor,
 {
@@ -126,18 +136,18 @@ where
     /// use embedded_graphics::prelude::*;
     /// use embedded_graphics::fonts::Font6x8;
     /// use embedded_graphics::pixelcolor::Rgb565;
+    /// use embedded_graphics::style::TextStyle;
     /// # use embedded_graphics::mock_display::MockDisplay as Display;
     ///
     /// fn main() {
     ///     let mut disp = Display::default();
-    ///     // Render a string with a red stroke
-    ///     let text = Font6x8::render_str("Hello world")
-    ///         .style(Style::stroke_color(Rgb565::RED));
     ///
+    ///     // Render a string with red characters
+    ///     let text = Font6x8::render_str("Hello world", TextStyle::with_text_color(Rgb565::RED));
     ///     text.draw(&mut disp);
     /// }
     /// ```
-    fn render_str(chars: &'a str) -> Self;
+    fn render_str(chars: &'a str, style: TextStyle<C>) -> Self;
 }
 
 /// Internal macro used to implement `text_*` on fonts. Do not use directly!
@@ -145,10 +155,14 @@ where
 #[macro_export]
 macro_rules! impl_text {
     ($Font:ident, $text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_imports)]
-        use $crate::style::WithStyle;
-        $crate::fonts::$Font::render_str($text)
-            $( .$style_key($style_value) )*
+        use $crate::pixelcolor::BinaryColor;
+        use $crate::style::TextStyle;
+
+        #[allow(unused_mut)]
+        let mut style = TextStyle::with_text_color(BinaryColor::On.into());
+        $( style.$style_key = $style_value; )*
+
+        $crate::fonts::$Font::render_str($text, style)
     }};
 }
 
@@ -160,13 +174,14 @@ macro_rules! impl_text {
 /// let text: Font6x8<Rgb565> = text_6x8!("Hello world!");
 /// let styled_text: Font6x8<Rgb565> = text_6x8!(
 ///     "Hello world!",
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     text_color = Some(Rgb565::RED),
+///     background_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_6x8 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -182,13 +197,14 @@ macro_rules! text_6x8 {
 /// let text: Font6x12<Rgb565> = text_6x12!("Hello world!");
 /// let styled_text: Font6x12<Rgb565> = text_6x12!(
 ///     "Hello world!",
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     text_color = Some(Rgb565::RED),
+///     background_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_6x12 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -204,13 +220,14 @@ macro_rules! text_6x12 {
 /// let text: Font8x16<Rgb565> = text_8x16!("Hello world!");
 /// let styled_text: Font8x16<Rgb565> = text_8x16!(
 ///     "Hello world!",
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     text_color = Some(Rgb565::RED),
+///     background_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_8x16 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -226,13 +243,14 @@ macro_rules! text_8x16 {
 /// let text: Font12x16<Rgb565> = text_12x16!("Hello world!");
 /// let styled_text: Font12x16<Rgb565> = text_12x16!(
 ///     "Hello world!",
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     text_color = Some(Rgb565::RED),
+///     background_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_12x16 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -248,13 +266,14 @@ macro_rules! text_12x16 {
 /// let text: Font24x32<Rgb565> = text_24x32!("Hello world!");
 /// let styled_text: Font24x32<Rgb565> = text_24x32!(
 ///     "Hello world!",
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     text_color = Some(Rgb565::RED),
+///     background_color = Some(Rgb565::GREEN)
 /// );
 /// ```
 ///
-/// Style properties like `stroke` map to the method calls on the
-/// [`WithStyle`](./style/trait.WithStyle.html) trait.
+/// Style properties like `text_color` map to properties in the [`TextStyle`] struct.
+///
+/// [`TextStyle`]: style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_24x32 {
     ($text:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {
@@ -278,10 +297,10 @@ mod tests {
 
     #[test]
     fn styled_text() {
-        let _text: Font6x8<Rgb565> = text_6x8!("Hello!", stroke_color = Some(Rgb565::RED));
-        let _text: Font6x12<Rgb565> = text_6x12!("Hello!", stroke_color = Some(Rgb565::GREEN));
-        let _text: Font8x16<Rgb565> = text_8x16!("Hello!", stroke_color = Some(Rgb565::BLUE));
-        let _text: Font12x16<Rgb565> = text_12x16!("Hello!", stroke_color = Some(Rgb565::YELLOW));
-        let _text: Font24x32<Rgb565> = text_24x32!("Hello!", stroke_color = Some(Rgb565::MAGENTA));
+        let _text: Font6x8<Rgb565> = text_6x8!("Hello!", text_color = Some(Rgb565::RED));
+        let _text: Font6x12<Rgb565> = text_6x12!("Hello!", text_color = Some(Rgb565::GREEN));
+        let _text: Font8x16<Rgb565> = text_8x16!("Hello!", text_color = Some(Rgb565::BLUE));
+        let _text: Font12x16<Rgb565> = text_12x16!("Hello!", text_color = Some(Rgb565::YELLOW));
+        let _text: Font24x32<Rgb565> = text_24x32!("Hello!", text_color = Some(Rgb565::MAGENTA));
     }
 }

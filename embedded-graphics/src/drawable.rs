@@ -33,7 +33,7 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 /// {
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
 ///         egrectangle!(self.top_left, self.bottom_right, fill_color = Some(self.bg_color)).draw(display);
-///         text_6x8!(self.text, stroke_color = Some(self.fg_color))
+///         text_6x8!(self.text, text_color = Some(self.fg_color))
 ///             .translate(Point::new(20, 20))
 ///             .draw(display);
 ///     }

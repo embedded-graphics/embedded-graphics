@@ -40,6 +40,7 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
+use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;
@@ -49,12 +50,11 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    Circle::new(Point::new(64, 64), 64).stroke_color(Some(BinaryColor::On)).draw(&mut display);
-    Line::new(Point::new(64, 64), Point::new(0, 64)).stroke_color(Some(BinaryColor::On)).draw(&mut display);
-    Line::new(Point::new(64, 64), Point::new(80, 80)).stroke_color(Some(BinaryColor::On)).draw(&mut display);
+    Circle::new(Point::new(64, 64), 64).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
 
-    Font6x8::render_str("Hello World!")
-        .stroke_color(Some(BinaryColor::On))
+    Font6x8::render_str("Hello World!", TextStyle::with_text_color(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 }
@@ -96,7 +96,7 @@ fn main() {
         stroke_color = None,
         fill_color = Some(BinaryColor::Off)
     ).draw(&mut display);
-    text_6x8!("Hello world!", stroke_color = Some(BinaryColor::On))
+    text_6x8!("Hello world!", text_color = Some(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 }

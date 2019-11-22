@@ -10,21 +10,23 @@ extern crate embedded_graphics_simulator;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Circle;
+use embedded_graphics::style::PrimitiveStyle;
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use sdl2::keyboard::Keycode;
 
-const BACKGROUND_COLOR: Option<Rgb888> = Some(Rgb888::BLACK);
-const FOREGROUND_COLOR: Option<Rgb888> = Some(Rgb888::RED);
+const BACKGROUND_COLOR: Rgb888 = Rgb888::BLACK;
+const FOREGROUND_COLOR: Rgb888 = Rgb888::RED;
 const KEYBOARD_DELTA: i32 = 20;
 
 fn move_circle(display: &mut SimulatorDisplay<Rgb888>, old_center: Point, new_center: Point) {
     // Clear old circle
     Circle::new(old_center, 100)
-        .fill_color(BACKGROUND_COLOR)
+        .into_styled(PrimitiveStyle::with_fill(BACKGROUND_COLOR))
         .draw(display);
+
     // Draw circle at new location
     Circle::new(new_center, 100)
-        .fill_color(FOREGROUND_COLOR)
+        .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
         .draw(display);
 }
 
@@ -36,7 +38,7 @@ fn main() {
 
     let mut position = Point::new(200, 200);
     Circle::new(position, 100)
-        .fill_color(FOREGROUND_COLOR)
+        .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
         .draw(&mut display);
 
     'running: loop {

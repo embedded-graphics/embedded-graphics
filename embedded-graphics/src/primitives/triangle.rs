@@ -4,10 +4,9 @@ use super::super::drawable::{Drawable, Pixel};
 use super::super::transform::Transform;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
-use crate::primitives::line::{Line, LineIterator};
+use crate::primitives::line::{Line, StyledLineIterator};
 use crate::primitives::Primitive;
-use crate::style::Style;
-use crate::style::WithStyle;
+use crate::style::{PrimitiveStyle, Styled};
 use crate::DrawTarget;
 
 /// Triangle primitive
@@ -22,25 +21,23 @@ use crate::DrawTarget;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Triangle;
 /// use embedded_graphics::pixelcolor::Rgb565;
+/// use embedded_graphics::style::PrimitiveStyle;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Default triangle with no styling
-/// Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
-///     .draw(&mut display);
-///
-/// // Triangle with styled stroke from (50, 20) to (60, 35)
+/// // Triangle with red 1 px wide stroke
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .stroke_color(Some(Rgb565::RED))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
 ///     .draw(&mut display);
 ///
 /// // Triangle with translation applied
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .translate(Point::new(65, 35))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
-pub struct Triangle<C: PixelColor> {
+pub struct Triangle {
     /// First point of the triangle
     pub p1: Point,
 
@@ -49,17 +46,11 @@ pub struct Triangle<C: PixelColor> {
 
     /// Third point of the triangle
     pub p3: Point,
-
-    /// Object style
-    pub style: Style<C>,
 }
 
-impl<C> Primitive for Triangle<C> where C: PixelColor {}
+impl Primitive for Triangle {}
 
-impl<C> Dimensions for Triangle<C>
-where
-    C: PixelColor,
-{
+impl Dimensions for Triangle {
     fn top_left(&self) -> Point {
         let &x = [self.p1.x, self.p2.x, self.p3.x].iter().min().unwrap();
         let &y = [self.p1.y, self.p2.y, self.p3.y].iter().min().unwrap();
@@ -79,45 +70,52 @@ where
     }
 }
 
-impl<C> Triangle<C>
-where
-    C: PixelColor,
-{
+impl Triangle {
     /// Create a new triangle with a given style
-    pub fn new(p1: Point, p2: Point, p3: Point) -> Self {
-        Triangle {
-            p1,
-            p2,
-            p3,
-            style: Style::default(),
-        }
+    pub const fn new(p1: Point, p2: Point, p3: Point) -> Self {
+        Triangle { p1, p2, p3 }
     }
 }
 
-impl<C> WithStyle<C> for Triangle<C>
-where
-    C: PixelColor,
-{
-    fn style(mut self, style: Style<C>) -> Self {
-        self.style = style;
-
-        self
+impl Transform for Triangle {
+    /// Translate the triangle from its current position to a new position by (x, y) pixels,
+    /// returning a new `Triangle`. For a mutating transform, see `translate_mut`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Triangle;
+    /// # use embedded_graphics::prelude::*;
+    /// let tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(8, 15));
+    /// let moved = tri.translate(Point::new(10, 10));
+    ///
+    /// assert_eq!(moved.p1, Point::new(15, 20));
+    /// assert_eq!(moved.p2, Point::new(25, 30));
+    /// assert_eq!(moved.p3, Point::new(18, 25));
+    /// ```
+    fn translate(&self, by: Point) -> Self {
+        Self {
+            p1: self.p1 + by,
+            p2: self.p2 + by,
+            p3: self.p3 + by,
+            ..*self
+        }
     }
 
-    fn stroke_color(mut self, color: Option<C>) -> Self {
-        self.style.stroke_color = color;
-
-        self
-    }
-
-    fn stroke_width(mut self, width: u32) -> Self {
-        self.style.stroke_width = width;
-
-        self
-    }
-
-    fn fill_color(mut self, color: Option<C>) -> Self {
-        self.style.fill_color = color;
+    /// Translate the triangle from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Triangle;
+    /// # use embedded_graphics::prelude::*;
+    /// let mut tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
+    /// tri.translate_mut(Point::new(10, 10));
+    ///
+    /// assert_eq!(tri.p1, Point::new(15, 20));
+    /// assert_eq!(tri.p2, Point::new(25, 30));
+    /// assert_eq!(tri.p3, Point::new(20, 25));
+    /// ```
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
+        self.p1 += by;
+        self.p2 += by;
+        self.p3 += by;
 
         self
     }
@@ -139,41 +137,24 @@ fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     (y1, y2, y3)
 }
 
-impl<C> IntoIterator for Triangle<C>
+impl<C> IntoIterator for &Styled<Triangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = TriangleIterator<C>;
+    type IntoIter = StyledTriangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        (&self).into_iter()
-    }
-}
+        let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
 
-impl<'a, C> IntoIterator for &'a Triangle<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = TriangleIterator<C>;
+        let mut line_a = Line::new(v1, v2).into_styled(self.style).into_iter();
+        let mut line_b = Line::new(v1, v3).into_styled(self.style).into_iter();
+        let mut line_c = Line::new(v2, v3).into_styled(self.style).into_iter();
 
-    fn into_iter(self) -> Self::IntoIter {
-        let (v1, v2, v3) = sort_yx(self.p1, self.p2, self.p3);
-
-        let mut line_a = Line::new(v1, v2)
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let mut line_b = Line::new(v1, v3)
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
-        let mut line_c = Line::new(v2, v3)
-            .stroke_color(self.style.stroke_color.or(self.style.fill_color))
-            .into_iter();
         let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0);
         let next_b = line_b.next().map(|p| p.0);
 
-        TriangleIterator {
+        StyledTriangleIterator {
             line_a,
             line_b,
             line_c,
@@ -197,13 +178,13 @@ enum IterState {
 
 /// Pixel iterator for each pixel in the triangle border
 #[derive(Debug, Clone, Copy)]
-pub struct TriangleIterator<C: PixelColor>
+pub struct StyledTriangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    line_a: LineIterator<C>,
-    line_b: LineIterator<C>,
-    line_c: LineIterator<C>,
+    line_a: StyledLineIterator<C>,
+    line_b: StyledLineIterator<C>,
+    line_c: StyledLineIterator<C>,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
     next_ac: Option<Point>,
@@ -211,10 +192,10 @@ where
     x: i32,
     max_y: i32,
     min_y: i32,
-    style: Style<C>,
+    style: PrimitiveStyle<C>,
 }
 
-impl<C> TriangleIterator<C>
+impl<C> StyledTriangleIterator<C>
 where
     C: PixelColor,
 {
@@ -276,7 +257,7 @@ where
     }
 }
 
-impl<C> Iterator for TriangleIterator<C>
+impl<C> Iterator for StyledTriangleIterator<C>
 where
     C: PixelColor,
 {
@@ -321,69 +302,12 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Triangle<C>
+impl<'a, C: 'a> Drawable<C> for &Styled<Triangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
     fn draw<T: DrawTarget<C>>(self, display: &mut T) {
         display.draw_triangle(self);
-    }
-}
-
-impl<C> Transform for Triangle<C>
-where
-    C: PixelColor,
-{
-    /// Translate the triangle from its current position to a new position by (x, y) pixels,
-    /// returning a new `Triangle`. For a mutating transform, see `translate_mut`.
-    ///
-    /// ```
-    /// # use embedded_graphics::primitives::Triangle;
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// #
-    /// # let style = Style::stroke_color(BinaryColor::On);
-    /// #
-    /// let tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(8, 15))
-    /// #    .style(style);
-    /// let moved = tri.translate(Point::new(10, 10));
-    ///
-    /// assert_eq!(moved.p1, Point::new(15, 20));
-    /// assert_eq!(moved.p2, Point::new(25, 30));
-    /// assert_eq!(moved.p3, Point::new(18, 25));
-    /// ```
-    fn translate(&self, by: Point) -> Self {
-        Self {
-            p1: self.p1 + by,
-            p2: self.p2 + by,
-            p3: self.p3 + by,
-            ..*self
-        }
-    }
-
-    /// Translate the triangle from its current position to a new position by (x, y) pixels.
-    ///
-    /// ```
-    /// # use embedded_graphics::primitives::Triangle;
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// #
-    /// # let style = Style::stroke_color(BinaryColor::On);
-    /// #
-    /// let mut tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15))
-    /// #    .style(style);
-    /// tri.translate_mut(Point::new(10, 10));
-    ///
-    /// assert_eq!(tri.p1, Point::new(15, 20));
-    /// assert_eq!(tri.p2, Point::new(25, 30));
-    /// assert_eq!(tri.p3, Point::new(20, 25));
-    /// ```
-    fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.p1 += by;
-        self.p2 += by;
-        self.p3 += by;
-
-        self
     }
 }
 
@@ -394,8 +318,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let tri: Triangle<BinaryColor> =
-            Triangle::new(Point::new(5, 10), Point::new(15, 25), Point::new(5, 25));
+        let tri = Triangle::new(Point::new(5, 10), Point::new(15, 25), Point::new(5, 25));
         let moved = tri.translate(Point::new(-10, -11));
 
         assert_eq!(tri.p1, Point::new(5, 10));
@@ -411,8 +334,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let tri: Triangle<BinaryColor> =
-            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
+        let tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
         let moved = tri.translate(Point::new(5, 10));
 
         assert_eq!(moved.p1, Point::new(10, 20));
@@ -422,10 +344,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_y() {
-        let mut tri: TriangleIterator<BinaryColor> =
-            Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
-                .style(Style::stroke_color(BinaryColor::On))
-                .into_iter();
+        let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
         // After that line a ends where line c starts.
@@ -440,10 +361,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_tri_line_x() {
-        let mut tri: TriangleIterator<BinaryColor> =
-            Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2))
-                .style(Style::stroke_color(BinaryColor::On))
-                .into_iter();
+        let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter();
 
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
@@ -457,10 +377,9 @@ mod tests {
     #[test]
     #[ignore]
     fn it_can_be_negative() {
-        let mut tri: TriangleIterator<BinaryColor> =
-            Triangle::new(Point::new(-2, -2), Point::new(2, 0), Point::new(-2, 0))
-                .style(Style::stroke_color(BinaryColor::On))
-                .into_iter();
+        let mut tri = Triangle::new(Point::new(-2, -2), Point::new(2, 0), Point::new(-2, 0))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter();
 
         // Only the bottom of the triangle should be visible
         assert_eq!(tri.next(), Some(Pixel(Point::new(0, 0), BinaryColor::On)));

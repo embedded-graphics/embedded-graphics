@@ -5,8 +5,7 @@ use super::super::transform::Transform;
 use crate::geometry::{Dimensions, Point, Size};
 use crate::pixelcolor::PixelColor;
 use crate::primitives::Primitive;
-use crate::style::Style;
-use crate::style::WithStyle;
+use crate::style::{PrimitiveStyle, Styled};
 use crate::DrawTarget;
 
 /// Rectangle primitive
@@ -21,42 +20,39 @@ use crate::DrawTarget;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Rectangle;
 /// use embedded_graphics::pixelcolor::Rgb565;
+/// use embedded_graphics::style::PrimitiveStyle;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Default rect from (10, 20) to (30, 40)
-/// Rectangle::new(Point::new(10, 20), Point::new(30, 40)).draw(&mut display);
+/// // Rectangle with red 3 pixel wide stroke and green fill from (50, 20) to (60, 35)
+/// let style = PrimitiveStyle {
+///     stroke_color: Some(Rgb565::RED),
+///     stroke_width: 3,
+///     fill_color: Some(Rgb565::GREEN),
+/// };
 ///
-/// // Rectangle with styled stroke and fill from (50, 20) to (60, 35)
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
-///     .stroke_color(Some(Rgb565::RED))
-///     .stroke_width(3)
-///     .fill_color(Some(Rgb565::GREEN))
+///     .into_styled(style)
 ///     .draw(&mut display);
 ///
 /// // Rectangle with translation applied
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
+///     .into_styled(style)
 ///     .draw(&mut display);
 /// ```
 #[derive(Debug, Clone, Copy)]
-pub struct Rectangle<C: PixelColor> {
+pub struct Rectangle {
     /// Top left point of the rect
     pub top_left: Point,
 
     /// Bottom right point of the rect
     pub bottom_right: Point,
-
-    /// Object style
-    pub style: Style<C>,
 }
 
-impl<C> Primitive for Rectangle<C> where C: PixelColor {}
+impl Primitive for Rectangle {}
 
-impl<C> Dimensions for Rectangle<C>
-where
-    C: PixelColor,
-{
+impl Dimensions for Rectangle {
     fn top_left(&self) -> Point {
         self.top_left
     }
@@ -70,91 +66,86 @@ where
     }
 }
 
-impl<C> Rectangle<C>
-where
-    C: PixelColor,
-{
+impl Rectangle {
     /// Create a new rectangle from the top left point to the bottom right point with a given style
-    pub fn new(top_left: Point, bottom_right: Point) -> Self {
+    pub const fn new(top_left: Point, bottom_right: Point) -> Self {
         Rectangle {
             top_left,
             bottom_right,
-            style: Style::default(),
         }
     }
 }
 
-impl<C> WithStyle<C> for Rectangle<C>
-where
-    C: PixelColor,
-{
-    fn style(mut self, style: Style<C>) -> Self {
-        self.style = style;
-
-        self
+impl Transform for Rectangle {
+    /// Translate the rect from its current position to a new position by (x, y) pixels, returning
+    /// a new `Rectangle`. For a mutating transform, see `translate_mut`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Rectangle;
+    /// # use embedded_graphics::prelude::*;
+    /// let rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20));
+    /// let moved = rect.translate(Point::new(10, 10));
+    ///
+    /// assert_eq!(moved.top_left, Point::new(15, 20));
+    /// assert_eq!(moved.bottom_right, Point::new(25, 30));
+    /// ```
+    fn translate(&self, by: Point) -> Self {
+        Self {
+            top_left: self.top_left + by,
+            bottom_right: self.bottom_right + by,
+            ..*self
+        }
     }
 
-    fn stroke_color(mut self, color: Option<C>) -> Self {
-        self.style.stroke_color = color;
-
-        self
-    }
-
-    fn stroke_width(mut self, width: u32) -> Self {
-        self.style.stroke_width = width;
-
-        self
-    }
-
-    fn fill_color(mut self, color: Option<C>) -> Self {
-        self.style.fill_color = color;
+    /// Translate the rect from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Rectangle;
+    /// # use embedded_graphics::prelude::*;
+    /// let mut rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20));
+    /// rect.translate_mut(Point::new(10, 10));
+    ///
+    /// assert_eq!(rect.top_left, Point::new(15, 20));
+    /// assert_eq!(rect.bottom_right, Point::new(25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
+        self.top_left += by;
+        self.bottom_right += by;
 
         self
     }
 }
 
-impl<C> IntoIterator for Rectangle<C>
+impl<C> IntoIterator for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = RectangleIterator<C>;
+    type IntoIter = StyledRectangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        (&self).into_iter()
-    }
-}
-
-impl<'a, C> IntoIterator for &'a Rectangle<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = RectangleIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        RectangleIterator {
-            top_left: self.top_left,
-            bottom_right: self.bottom_right,
+        StyledRectangleIterator {
+            top_left: self.primitive.top_left,
+            bottom_right: self.primitive.bottom_right,
             style: self.style,
-            p: self.top_left,
+            p: self.primitive.top_left,
         }
     }
 }
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Debug, Clone, Copy)]
-pub struct RectangleIterator<C: PixelColor>
+pub struct StyledRectangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
     top_left: Point,
     bottom_right: Point,
-    style: Style<C>,
+    style: PrimitiveStyle<C>,
     p: Point,
 }
 
-impl<C> Iterator for RectangleIterator<C>
+impl<C> Iterator for StyledRectangleIterator<C>
 where
     C: PixelColor,
 {
@@ -215,7 +206,7 @@ where
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Rectangle<C>
+impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -224,68 +215,14 @@ where
     }
 }
 
-impl<C> Transform for Rectangle<C>
-where
-    C: PixelColor,
-{
-    /// Translate the rect from its current position to a new position by (x, y) pixels, returning
-    /// a new `Rectangle`. For a mutating transform, see `translate_mut`.
-    ///
-    /// ```
-    /// # use embedded_graphics::primitives::Rectangle;
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::Rgb565;
-    /// #
-    /// # let style = Style::stroke_color(Rgb565::RED);
-    /// #
-    /// let rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20))
-    /// #    .style(style);
-    /// let moved = rect.translate(Point::new(10, 10));
-    ///
-    /// assert_eq!(moved.top_left, Point::new(15, 20));
-    /// assert_eq!(moved.bottom_right, Point::new(25, 30));
-    /// ```
-    fn translate(&self, by: Point) -> Self {
-        Self {
-            top_left: self.top_left + by,
-            bottom_right: self.bottom_right + by,
-            ..*self
-        }
-    }
-
-    /// Translate the rect from its current position to a new position by (x, y) pixels.
-    ///
-    /// ```
-    /// # use embedded_graphics::primitives::Rectangle;
-    /// # use embedded_graphics::prelude::*;
-    /// # use embedded_graphics::pixelcolor::Rgb565;
-    /// #
-    /// # let style = Style::stroke_color(Rgb565::RED);
-    /// #
-    /// let mut rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20))
-    /// #    .style(style);
-    /// rect.translate_mut(Point::new(10, 10));
-    ///
-    /// assert_eq!(rect.top_left, Point::new(15, 20));
-    /// assert_eq!(rect.bottom_right, Point::new(25, 30));
-    /// ```
-    fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.top_left += by;
-        self.bottom_right += by;
-
-        self
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::BinaryColor;
     use crate::pixelcolor::{Rgb565, RgbColor};
 
     #[test]
     fn dimensions() {
-        let rect: Rectangle<BinaryColor> = Rectangle::new(Point::new(5, 10), Point::new(15, 30));
+        let rect = Rectangle::new(Point::new(5, 10), Point::new(15, 30));
         let moved = rect.translate(Point::new(-10, -20));
 
         assert_eq!(rect.top_left(), Point::new(5, 10));
@@ -299,7 +236,7 @@ mod tests {
 
     #[test]
     fn it_can_be_translated() {
-        let rect: Rectangle<BinaryColor> = Rectangle::new(Point::new(5, 10), Point::new(15, 20));
+        let rect = Rectangle::new(Point::new(5, 10), Point::new(15, 20));
         let moved = rect.translate(Point::new(10, 15));
 
         assert_eq!(moved.top_left, Point::new(15, 25));
@@ -308,10 +245,9 @@ mod tests {
 
     #[test]
     fn it_draws_unfilled_rect() {
-        let mut rect: RectangleIterator<Rgb565> =
-            Rectangle::new(Point::new(2, 2), Point::new(4, 4))
-                .style(Style::stroke_color(Rgb565::RED))
-                .into_iter();
+        let mut rect = Rectangle::new(Point::new(2, 2), Point::new(4, 4))
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
+            .into_iter();
 
         assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
         assert_eq!(rect.next(), Some(Pixel(Point::new(3, 2), Rgb565::RED)));
@@ -327,15 +263,13 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let negative: RectangleIterator<Rgb565> =
-            Rectangle::new(Point::new(-2, -2), Point::new(2, 2))
-                .fill_color(Some(Rgb565::GREEN))
-                .into_iter();
+        let negative = Rectangle::new(Point::new(-2, -2), Point::new(2, 2))
+            .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
+            .into_iter();
 
-        let positive: RectangleIterator<Rgb565> =
-            Rectangle::new(Point::new(2, 2), Point::new(6, 6))
-                .fill_color(Some(Rgb565::GREEN))
-                .into_iter();
+        let positive = Rectangle::new(Point::new(2, 2), Point::new(6, 6))
+            .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
+            .into_iter();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));
     }
