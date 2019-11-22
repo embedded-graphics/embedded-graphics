@@ -106,8 +106,10 @@ mod tests {
     #[test]
     fn correct_inverse_coloured_m() {
         let mut display = MockDisplay::new();
-        let mut style = TextStyle::with_text_color(BinaryColor::Off);
-        style.background_color = Some(BinaryColor::On);
+        let style = TextStyle {
+            text_color: Some(BinaryColor::Off),
+            background_color: Some(BinaryColor::On),
+        };
         Font6x8::render_str("Mm", style).draw(&mut display);
 
         assert_eq!(
@@ -129,13 +131,17 @@ mod tests {
     #[test]
     fn compare_inverse_coloured_m() {
         let mut display_inverse = MockDisplay::new();
-        let mut style_inverse = TextStyle::with_text_color(BinaryColor::Off);
-        style_inverse.background_color = Some(BinaryColor::On);
+        let style_inverse = TextStyle {
+            text_color: Some(BinaryColor::Off),
+            background_color: Some(BinaryColor::On),
+        };
         Font6x8::render_str("Mm", style_inverse).draw(&mut display_inverse);
 
         let mut display_normal = MockDisplay::new();
-        let mut style_normal = TextStyle::with_text_color(BinaryColor::On);
-        style_normal.background_color = Some(BinaryColor::Off);
+        let style_normal = TextStyle {
+            text_color: Some(BinaryColor::On),
+            background_color: Some(BinaryColor::Off),
+        };
         Font6x8::render_str("Mm", style_normal).draw(&mut display_normal);
 
         for y in 0..display_inverse.height() {
