@@ -62,7 +62,7 @@ impl Dimensions for Line {
 
 impl Line {
     /// Create a new line
-    pub fn new(start: Point, end: Point) -> Self {
+    pub const fn new(start: Point, end: Point) -> Self {
         Line { start, end }
     }
 }

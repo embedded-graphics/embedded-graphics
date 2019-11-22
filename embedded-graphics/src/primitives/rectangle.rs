@@ -68,7 +68,7 @@ impl Dimensions for Rectangle {
 
 impl Rectangle {
     /// Create a new rectangle from the top left point to the bottom right point with a given style
-    pub fn new(top_left: Point, bottom_right: Point) -> Self {
+    pub const fn new(top_left: Point, bottom_right: Point) -> Self {
         Rectangle {
             top_left,
             bottom_right,

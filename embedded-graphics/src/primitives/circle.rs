@@ -58,7 +58,7 @@ pub struct Circle {
 
 impl Circle {
     /// Create a new circle centered around a given point with a specific radius
-    pub fn new(center: Point, radius: u32) -> Self {
+    pub const fn new(center: Point, radius: u32) -> Self {
         Circle { center, radius }
     }
 }

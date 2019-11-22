@@ -72,7 +72,7 @@ impl Dimensions for Triangle {
 
 impl Triangle {
     /// Create a new triangle with a given style
-    pub fn new(p1: Point, p2: Point, p3: Point) -> Self {
+    pub const fn new(p1: Point, p2: Point, p3: Point) -> Self {
         Triangle { p1, p2, p3 }
     }
 }
