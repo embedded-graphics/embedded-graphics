@@ -1,6 +1,6 @@
 use criterion::*;
 use embedded_graphics::{
-    fonts::{Text, Font12x16, Font6x8},
+    fonts::{Font12x16, Font6x8, Text},
     geometry::Point,
     pixelcolor::Gray8,
     prelude::*,

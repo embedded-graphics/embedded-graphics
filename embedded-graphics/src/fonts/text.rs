@@ -22,10 +22,7 @@ impl<'a> Text<'a> {
     }
 
     /// Converts this text into a styled.
-    pub fn into_styled<C, F>(
-        self,
-        style: TextStyle<C, F>,
-    ) -> Styled<Self, TextStyle<C, F>>
+    pub fn into_styled<C, F>(self, style: TextStyle<C, F>) -> Styled<Self, TextStyle<C, F>>
     where
         C: PixelColor,
         F: Font,
