@@ -1,13 +1,30 @@
-use crate::fonts::font_builder::{FontBuilder, FontBuilderConf};
+use crate::fonts::Font;
 
-#[derive(Debug, Copy, Clone)]
-/// Config for 8x16 font
-pub enum Font8x16Conf {}
-impl FontBuilderConf for Font8x16Conf {
+/// 8x16 pixel monospace font
+///
+/// There is also the [`text_8x16`] macro to provide an easier to use interface.
+///
+/// [![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)
+///
+/// # Examples
+///
+/// See the [module-level documentation](./index.html) for examples.
+///
+/// [`text_8x16`]: ../macro.text_8x16.html
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Font8x16 {}
+
+const FONT8X16_OBJECT: Font8x16 = Font8x16 {};
+
+/// Font 8x16
+pub const FONT8X16: &Font8x16 = &FONT8X16_OBJECT;
+
+impl Font for Font8x16 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font8x16_1bpp.raw");
     const CHAR_HEIGHT: u32 = 16;
     const CHAR_WIDTH: u32 = 8;
     const FONT_IMAGE_WIDTH: u32 = 240;
+
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
         if c < ' ' {
@@ -23,39 +40,26 @@ impl FontBuilderConf for Font8x16Conf {
     }
 }
 
-/// 8x16 pixel monospace font
-///
-/// There is also the [`text_8x16`] macro to provide an easier to use interface.
-///
-/// [![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)
-///
-/// # Examples
-///
-/// See the [module-level documentation](./index.html) for examples.
-///
-/// [`text_8x16`]: ../macro.text_8x16.html
-pub type Font8x16<'a, C> = FontBuilder<'a, C, Font8x16Conf>;
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::drawable::Drawable;
-    use crate::fonts::Font;
+    use crate::fonts::{Font, Text};
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::TextStyle;
     use crate::transform::Transform;
 
-    const WIDTH: usize = Font8x16Conf::CHAR_WIDTH as usize;
-    const HEIGHT: usize = Font8x16Conf::CHAR_HEIGHT as usize;
+    const WIDTH: usize = Font8x16::CHAR_WIDTH as usize;
+    const HEIGHT: usize = Font8x16::CHAR_HEIGHT as usize;
     const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::with_text_color(BinaryColor::On);
-        let hello = Font8x16::render_str(HELLO_WORLD, style);
-        let empty = Font8x16::render_str("", style);
+        let style = TextStyle::with_text_color(FONT8X16, BinaryColor::On);
+        let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
+        let empty = Text::new("", Point::zero()).into_styled(style);
 
         assert_eq!(
             hello.size(),
@@ -66,9 +70,13 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let style = TextStyle::with_text_color(BinaryColor::On);
-        let hello = Font8x16::render_str(HELLO_WORLD, style).translate(Point::new(5, -20));
-        let empty = Font8x16::render_str("", style).translate(Point::new(10, 20));
+        let style = TextStyle::with_text_color(FONT8X16, BinaryColor::On);
+        let hello = Text::new(HELLO_WORLD, Point::zero())
+            .into_styled(style)
+            .translate(Point::new(5, -20));
+        let empty = Text::new("", Point::zero())
+            .into_styled(style)
+            .translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
         assert_eq!(
@@ -85,7 +93,9 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        Font8x16::render_str("Mm", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("Mm", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT8X16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -113,7 +123,9 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        Font8x16::render_str(" ~", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new(" ~", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT8X16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -141,7 +153,9 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        Font8x16::render_str("$y", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("$y", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT8X16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -169,7 +183,9 @@ mod tests {
     #[test]
     fn correct_latin1() {
         let mut display = MockDisplay::new();
-        Font8x16::render_str("¡ÿ", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("¡ÿ", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT8X16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -215,18 +231,24 @@ mod tests {
             "                        ",
         ]);
 
-        let style = TextStyle::with_text_color(BinaryColor::On);
+        let style = TextStyle::with_text_color(FONT8X16, BinaryColor::On);
 
         let mut display = MockDisplay::new();
-        Font8x16::render_str("\0\n", style).draw(&mut display);
+        Text::new("\0\n", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font8x16::render_str("\x7F\u{A0}", style).draw(&mut display);
+        Text::new("\x7F\u{A0}", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font8x16::render_str("Ā💣", style).draw(&mut display);
+        Text::new("Ā💣", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
     }
 }

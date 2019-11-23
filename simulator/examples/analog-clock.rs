@@ -9,7 +9,7 @@
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
 use embedded_graphics::egcircle;
-use embedded_graphics::fonts::Font12x16;
+use embedded_graphics::fonts::{Text, FONT12X16};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
@@ -125,8 +125,8 @@ fn draw_minute_hand(minute: u32) -> Styled<Line, PrimitiveStyle<BinaryColor>> {
 /// NOTE: The formatted time str must be passed in as references to temporary values in a
 /// function can't be returned.
 fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
-    let text = Font12x16::render_str(&time_str, TextStyle::with_text_color(BinaryColor::Off))
-        .translate(CENTER - Size::new(48, 48));
+    let text = Text::new(&time_str, CENTER - Size::new(48, 48))
+        .into_styled(TextStyle::with_text_color(FONT12X16, BinaryColor::Off));
 
     // Add a background around the time digits. Note that there is no bottom-right padding as this
     // is added by the font renderer itself
@@ -134,7 +134,7 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
         .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
     // Draw the white background first, then the black text. Order matters here
-    background.into_iter().chain(text)
+    background.into_iter().chain(&text)
 }
 
 fn main() {

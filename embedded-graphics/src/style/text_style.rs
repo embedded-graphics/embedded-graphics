@@ -1,3 +1,4 @@
+use crate::fonts::Font;
 use crate::pixelcolor::PixelColor;
 
 /// Style properties for texts.
@@ -6,55 +7,66 @@ use crate::pixelcolor::PixelColor;
 ///
 /// [font]: ../fonts/index.html
 #[derive(Debug, Copy, Clone)]
-pub struct TextStyle<C>
+pub struct TextStyle<'a, C, F>
 where
     C: PixelColor,
+    F: Font,
 {
     /// Text color.
     pub text_color: Option<C>,
 
     /// Background color.
     pub background_color: Option<C>,
+
+    /// Font,
+    pub font: &'a F,
 }
 
-impl<C> TextStyle<C>
+impl<'a, C, F> TextStyle<'a, C, F>
 where
     C: PixelColor,
+    F: Font,
 {
-    /// Creates a font style with transparent text and background.
-    pub fn new() -> Self {
-        Self {
-            text_color: None,
-            background_color: None,
-        }
-    }
+    // TODO: Set default value for `font`
+    // /// Creates a font style with transparent text and background.
+    // pub fn new() -> Self {
+    //     Self {
+    //         text_color: None,
+    //         background_color: None,
+    //     }
+    // }
 
     /// Creates a font style with transparent background.
-    pub fn with_text_color(text_color: C) -> Self {
+    pub fn with_text_color(font: &'a F, text_color: C) -> Self {
         Self {
+            font,
             text_color: Some(text_color),
             background_color: None,
         }
     }
 }
 
-impl<C> Default for TextStyle<C>
-where
-    C: PixelColor,
-{
-    fn default() -> Self {
-        Self::new()
-    }
-}
+// TODO: uncomment when `TextStyle::new` is implemented
+//
+// impl<C> Default for TextStyle<C>
+// where
+//     C: PixelColor,
+// {
+//     fn default() -> Self {
+//         Self::new()
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fonts::FONT6X8;
     use crate::pixelcolor::{Rgb888, RgbColor};
 
     #[test]
     fn constructor() {
-        let style = TextStyle::with_text_color(Rgb888::MAGENTA);
+        let style = TextStyle::with_text_color(FONT6X8, Rgb888::MAGENTA);
+        assert_eq!(style.font, FONT6X8);
         assert_eq!(style.text_color, Some(Rgb888::MAGENTA));
         assert_eq!(style.background_color, None);
     }

@@ -36,7 +36,7 @@ More information and up to date docs can be found on [docs.rs](https://docs.rs/e
 Example usage can be found [in the simulator](./simulator/examples):
 
 ```rust
-use embedded_graphics::fonts::Font6x8;
+use embedded_graphics::fonts::{FONT6X8, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
@@ -54,9 +54,7 @@ fn main() {
     Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
     Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
 
-    Font6x8::render_str("Hello World!", TextStyle::with_text_color(BinaryColor::On))
-        .translate(Point::new(5, 50))
-        .draw(&mut display);
+    Text::new("Hello World!", Point::new(5, 50)).into_styled(TextStyle::with_text_color(FONT6X8, BinaryColor::On)).draw(&mut display);
 }
 ```
 
@@ -65,7 +63,8 @@ Macros are also supported for text and primitives:
 ```rust
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egline, egrectangle, egtriangle, text_6x8};
+use embedded_graphics::fonts::FONT6X8;
+use embedded_graphics::{egcircle, egline, egrectangle, egtriangle, egtext};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;
@@ -96,7 +95,7 @@ fn main() {
         stroke_color = None,
         fill_color = Some(BinaryColor::Off)
     ).draw(&mut display);
-    text_6x8!("Hello world!", text_color = Some(BinaryColor::On))
+    egtext!("Hello world!", font = FONT6X8, text_color = Some(BinaryColor::On))
         .translate(Point::new(5, 50))
         .draw(&mut display);
 }

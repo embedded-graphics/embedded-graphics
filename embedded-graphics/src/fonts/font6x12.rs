@@ -1,24 +1,4 @@
-use crate::fonts::font_builder::{FontBuilder, FontBuilderConf};
-
-#[derive(Debug, Copy, Clone)]
-/// Config for 6x12 font
-pub enum Font6x12Conf {}
-impl FontBuilderConf for Font6x12Conf {
-    const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font6x12_1bpp.raw");
-    const CHAR_HEIGHT: u32 = 12;
-    const CHAR_WIDTH: u32 = 6;
-    const FONT_IMAGE_WIDTH: u32 = 96;
-    fn char_offset(c: char) -> u32 {
-        let fallback = '?' as u32 - ' ' as u32;
-        if c < ' ' {
-            return fallback;
-        }
-        if c <= '~' {
-            return c as u32 - ' ' as u32;
-        }
-        fallback
-    }
-}
+use crate::fonts::Font;
 
 /// 6x12 pixel monospace font
 ///
@@ -31,28 +11,52 @@ impl FontBuilderConf for Font6x12Conf {
 /// See the [module-level documentation](./index.html) for examples.
 ///
 /// [`text_6x12`]: ../macro.text_6x12.html
-pub type Font6x12<'a, C> = FontBuilder<'a, C, Font6x12Conf>;
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Font6x12 {}
+
+const FONT6X12_OBJECT: Font6x12 = Font6x12 {};
+
+/// Font 6x12
+pub const FONT6X12: &Font6x12 = &FONT6X12_OBJECT;
+
+impl Font for Font6x12 {
+    const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font6x12_1bpp.raw");
+    const CHAR_HEIGHT: u32 = 12;
+    const CHAR_WIDTH: u32 = 6;
+    const FONT_IMAGE_WIDTH: u32 = 96;
+
+    fn char_offset(c: char) -> u32 {
+        let fallback = '?' as u32 - ' ' as u32;
+        if c < ' ' {
+            return fallback;
+        }
+        if c <= '~' {
+            return c as u32 - ' ' as u32;
+        }
+        fallback
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::drawable::Drawable;
-    use crate::fonts::Font;
+    use crate::fonts::{Font, Text};
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::TextStyle;
     use crate::transform::Transform;
 
-    const WIDTH: usize = Font6x12Conf::CHAR_WIDTH as usize;
-    const HEIGHT: usize = Font6x12Conf::CHAR_HEIGHT as usize;
+    const WIDTH: usize = Font6x12::CHAR_WIDTH as usize;
+    const HEIGHT: usize = Font6x12::CHAR_HEIGHT as usize;
     const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::with_text_color(BinaryColor::On);
-        let hello = Font6x12::render_str(HELLO_WORLD, style);
-        let empty = Font6x12::render_str("", style);
+        let style = TextStyle::with_text_color(FONT6X12, BinaryColor::On);
+        let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
+        let empty = Text::new("", Point::zero()).into_styled(style);
 
         assert_eq!(
             hello.size(),
@@ -63,9 +67,13 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let style = TextStyle::with_text_color(BinaryColor::On);
-        let hello = Font6x12::render_str(HELLO_WORLD, style).translate(Point::new(5, -20));
-        let empty = Font6x12::render_str("", style).translate(Point::new(10, 20));
+        let style = TextStyle::with_text_color(FONT6X12, BinaryColor::On);
+        let hello = Text::new(HELLO_WORLD, Point::zero())
+            .into_styled(style)
+            .translate(Point::new(5, -20));
+        let empty = Text::new("", Point::zero())
+            .into_styled(style)
+            .translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
         assert_eq!(
@@ -82,7 +90,9 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        Font6x12::render_str("Mm", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("Mm", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT6X12, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -106,7 +116,9 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        Font6x12::render_str(" ~", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new(" ~", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT6X12, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -130,7 +142,9 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        Font6x12::render_str("$y", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("$y", Point::zero())
+            .into_styled(TextStyle::with_text_color(FONT6X12, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -168,33 +182,42 @@ mod tests {
             "            ",
         ]);
 
-        let style = TextStyle::with_text_color(BinaryColor::On);
+        let style = TextStyle::with_text_color(FONT6X12, BinaryColor::On);
 
         let mut display = MockDisplay::new();
-        Font6x12::render_str("\0\n", style).draw(&mut display);
+        Text::new("\0\n", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x12::render_str("\x7F\u{A0}", style).draw(&mut display);
+        Text::new("\x7F\u{A0}", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x12::render_str("¡ÿ", style).draw(&mut display);
+        Text::new("¡ÿ", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font6x12::render_str("Ā💣", style).draw(&mut display);
+        Text::new("Ā💣", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
     }
 
     #[test]
     fn negative_y_no_infinite_loop() {
         let style = TextStyle {
+            font: FONT6X12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
         };
 
-        let mut text = Font6x12::render_str("Testing string", style);
+        let mut text = Text::new("Testing string", Point::zero()).into_styled(style);
         text.translate_mut(Point::new(0, -12));
 
         assert_eq!(text.into_iter().count(), 6 * 12 * "Testing string".len());
@@ -203,11 +226,12 @@ mod tests {
     #[test]
     fn negative_x_no_infinite_loop() {
         let style = TextStyle {
+            font: FONT6X12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
         };
 
-        let mut text = Font6x12::render_str("A", style);
+        let mut text = Text::new("A", Point::zero()).into_styled(style);
         text.translate_mut(Point::new(-6, 0));
 
         assert_eq!(text.into_iter().count(), 6 * 12);

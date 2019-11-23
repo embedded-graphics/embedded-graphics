@@ -15,7 +15,8 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, text_6x8};
+/// use embedded_graphics::{egrectangle, egtext};
+/// use embedded_graphics::fonts::FONT6X8;
 /// use embedded_graphics::geometry::Point;
 /// use embedded_graphics::pixelcolor::{PixelColor, BinaryColor, Rgb888};
 ///
@@ -33,7 +34,7 @@ pub struct Pixel<C: PixelColor>(pub Point, pub C);
 /// {
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
 ///         egrectangle!(self.top_left, self.bottom_right, fill_color = Some(self.bg_color)).draw(display);
-///         text_6x8!(self.text, text_color = Some(self.fg_color))
+///         egtext!(self.text, font = FONT6X8, text_color = Some(self.fg_color))
 ///             .translate(Point::new(20, 20))
 ///             .draw(display);
 ///     }
