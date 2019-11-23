@@ -12,12 +12,7 @@ use crate::fonts::Font;
 ///
 /// [`text_6x12`]: ../macro.text_6x12.html
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Font6x12 {}
-
-const FONT6X12_OBJECT: Font6x12 = Font6x12 {};
-
-/// Font 6x12
-pub const FONT6X12: &Font6x12 = &FONT6X12_OBJECT;
+pub struct Font6x12;
 
 impl Font for Font6x12 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font6x12_1bpp.raw");
@@ -54,7 +49,7 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::with_text_color(FONT6X12, BinaryColor::On);
+        let style = TextStyle::with_text_color(Font6x12, BinaryColor::On);
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
         let empty = Text::new("", Point::zero()).into_styled(style);
 
@@ -67,7 +62,7 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let style = TextStyle::with_text_color(FONT6X12, BinaryColor::On);
+        let style = TextStyle::with_text_color(Font6x12, BinaryColor::On);
         let hello = Text::new(HELLO_WORLD, Point::zero())
             .into_styled(style)
             .translate(Point::new(5, -20));
@@ -91,7 +86,7 @@ mod tests {
     fn correct_m() {
         let mut display = MockDisplay::new();
         Text::new("Mm", Point::zero())
-            .into_styled(TextStyle::with_text_color(FONT6X12, BinaryColor::On))
+            .into_styled(TextStyle::with_text_color(Font6x12, BinaryColor::On))
             .draw(&mut display);
 
         assert_eq!(
@@ -117,7 +112,7 @@ mod tests {
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
         Text::new(" ~", Point::zero())
-            .into_styled(TextStyle::with_text_color(FONT6X12, BinaryColor::On))
+            .into_styled(TextStyle::with_text_color(Font6x12, BinaryColor::On))
             .draw(&mut display);
 
         assert_eq!(
@@ -143,7 +138,7 @@ mod tests {
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
         Text::new("$y", Point::zero())
-            .into_styled(TextStyle::with_text_color(FONT6X12, BinaryColor::On))
+            .into_styled(TextStyle::with_text_color(Font6x12, BinaryColor::On))
             .draw(&mut display);
 
         assert_eq!(
@@ -182,7 +177,7 @@ mod tests {
             "            ",
         ]);
 
-        let style = TextStyle::with_text_color(FONT6X12, BinaryColor::On);
+        let style = TextStyle::with_text_color(Font6x12, BinaryColor::On);
 
         let mut display = MockDisplay::new();
         Text::new("\0\n", Point::zero())
@@ -212,7 +207,7 @@ mod tests {
     #[test]
     fn negative_y_no_infinite_loop() {
         let style = TextStyle {
-            font: FONT6X12,
+            font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
         };
@@ -226,7 +221,7 @@ mod tests {
     #[test]
     fn negative_x_no_infinite_loop() {
         let style = TextStyle {
-            font: FONT6X12,
+            font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
         };

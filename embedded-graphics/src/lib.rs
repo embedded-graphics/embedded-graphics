@@ -81,14 +81,14 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::primitives::Circle;
-//! use embedded_graphics::fonts::{Text, FONT6X8};
+//! use embedded_graphics::fonts::{Text, Font6x8};
 //! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
-//! let t = Text::new("Hello Rust!", Point::new(20, 16)).into_styled(TextStyle::with_text_color(FONT6X8, Rgb565::GREEN));
+//! let t = Text::new("Hello Rust!", Point::new(20, 16)).into_styled(TextStyle::with_text_color(Font6x8, Rgb565::GREEN));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -102,13 +102,13 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::fonts::FONT6X8;
+//! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::{egtext, egcircle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
-//! let t = egtext!("Hello Rust!", font = FONT6X8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let t = egtext!("Hello Rust!", font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -121,14 +121,14 @@
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::fonts::FONT6X8;
+//! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::{egtext, egcircle, egrectangle};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
 //!         .chain(&egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
-//!         .chain(&egtext!(text, font = FONT6X8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
+//!         .chain(&egtext!(text, font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {

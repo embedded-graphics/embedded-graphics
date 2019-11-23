@@ -20,7 +20,7 @@ pub trait Font {
 
 /// Pixel iterator for the `FontBuilder` object
 #[derive(Debug, Clone, Copy)]
-pub struct FontIterator<'a, 'b, C, F>
+pub struct FontIterator<'a, C, F>
 where
     C: PixelColor,
     F: Font,
@@ -31,10 +31,10 @@ where
     pub(crate) idx: usize,
     pub(crate) pos: Point,
     pub(crate) text: &'a str,
-    pub(crate) style: TextStyle<'b, C, F>,
+    pub(crate) style: TextStyle<C, F>,
 }
 
-impl<C, F> Iterator for FontIterator<'_, '_, C, F>
+impl<C, F> Iterator for FontIterator<'_, C, F>
 where
     C: PixelColor,
     F: Font,

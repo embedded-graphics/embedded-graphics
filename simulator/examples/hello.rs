@@ -1,4 +1,4 @@
-use embedded_graphics::fonts::{Text, FONT6X8};
+use embedded_graphics::fonts::{Text, Font6x8};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
@@ -24,7 +24,7 @@ fn main() {
         .draw(&mut display);
 
     Text::new("Hello World!", Point::new(5, 50))
-        .into_styled(TextStyle::with_text_color(FONT6X8, BinaryColor::On))
+        .into_styled(TextStyle::with_text_color(Font6x8, BinaryColor::On))
         .draw(&mut display);
 
     let mut window = WindowBuilder::new(&display)

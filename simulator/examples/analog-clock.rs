@@ -9,7 +9,7 @@
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
 use embedded_graphics::egcircle;
-use embedded_graphics::fonts::{Text, FONT12X16};
+use embedded_graphics::fonts::{Text, Font12x16};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
@@ -126,7 +126,7 @@ fn draw_minute_hand(minute: u32) -> Styled<Line, PrimitiveStyle<BinaryColor>> {
 /// function can't be returned.
 fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
     let text = Text::new(&time_str, CENTER - Size::new(48, 48))
-        .into_styled(TextStyle::with_text_color(FONT12X16, BinaryColor::Off));
+        .into_styled(TextStyle::with_text_color(Font12x16, BinaryColor::Off));
 
     // Add a background around the time digits. Note that there is no bottom-right padding as this
     // is added by the font renderer itself

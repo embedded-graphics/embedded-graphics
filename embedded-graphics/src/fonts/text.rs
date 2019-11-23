@@ -22,10 +22,10 @@ impl<'a> Text<'a> {
     }
 
     /// Converts this text into a styled.
-    pub fn into_styled<'b, C, F>(
+    pub fn into_styled<C, F>(
         self,
-        style: TextStyle<'b, C, F>,
-    ) -> Styled<Self, TextStyle<'b, C, F>>
+        style: TextStyle<C, F>,
+    ) -> Styled<Self, TextStyle<C, F>>
     where
         C: PixelColor,
         F: Font,
@@ -51,7 +51,7 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<C, F> Drawable<C> for &Styled<Text<'_>, TextStyle<'_, C, F>>
+impl<C, F> Drawable<C> for &Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font + Copy,
@@ -61,13 +61,13 @@ where
     }
 }
 
-impl<'a, 'b, C, F> IntoIterator for &Styled<Text<'a>, TextStyle<'b, C, F>>
+impl<'a, C, F> IntoIterator for &Styled<Text<'a>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font + Copy,
 {
     type Item = Pixel<C>;
-    type IntoIter = FontIterator<'a, 'b, C, F>;
+    type IntoIter = FontIterator<'a, C, F>;
 
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter {
@@ -82,7 +82,7 @@ where
     }
 }
 
-impl<C, F> Dimensions for Styled<Text<'_>, TextStyle<'_, C, F>>
+impl<C, F> Dimensions for Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font,
