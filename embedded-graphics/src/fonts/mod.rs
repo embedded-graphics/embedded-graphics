@@ -159,12 +159,9 @@ macro_rules! egtext {
     ($text:expr, $position:expr,
         font = $font:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
 
-        use $crate::pixelcolor::BinaryColor;
-        use $crate::style::TextStyle;
-        use $crate::geometry::Point;
-
+        let color = $crate::pixelcolor::BinaryColor::On.into();
         #[allow(unused_mut)]
-        let mut style = TextStyle::with_text_color($font, BinaryColor::On.into());
+        let mut style = $crate::style::TextStyle::with_text_color($font, color);
         $( style.$style_key = $style_value; )*
 
         $crate::fonts::Text::new($text, $position).into_styled(style)
@@ -174,6 +171,7 @@ macro_rules! egtext {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::geometry::Point;
     use crate::pixelcolor::{BinaryColor, Rgb565, RgbColor};
     use crate::style::{Styled, TextStyle};
 
