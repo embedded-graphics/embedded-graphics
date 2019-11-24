@@ -49,7 +49,7 @@
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
 //!
-//!     egtext!("Hello World!", font = Font6x8).draw(&mut display);
+//!     egtext!("Hello World!", Point::zero(), font = Font6x8).draw(&mut display);
 //!
 //!     egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
 //!

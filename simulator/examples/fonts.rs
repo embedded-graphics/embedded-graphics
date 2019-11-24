@@ -27,11 +27,11 @@ fn main() {
     // Show smallest font with white font on black background using a macro
     egtext!(
         "Hello world! - inverse 6x8 with macro",
+        Point::new(15, 40),
         font = Font6x8,
         text_color = Some(BinaryColor::On),
         background_color = Some(BinaryColor::Off),
     )
-    .translate(Point::new(15, 40))
     .draw(&mut display);
 
     // Show 6x12 Font
@@ -45,9 +45,7 @@ fn main() {
         .draw(&mut display);
 
     // Show 12x16 Font using a macro
-    egtext!("Hello 12x16!", font = Font12x16)
-        .translate(Point::new(15, 105))
-        .draw(&mut display);
+    egtext!("Hello 12x16!", Point::new(15, 105), font = Font12x16).draw(&mut display);
 
     let mut window = WindowBuilder::new(&display).title("Fonts").build();
     window.show_static(&display);

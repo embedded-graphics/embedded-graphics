@@ -108,7 +108,7 @@
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
-//! let t = egtext!("Hello Rust!", font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let t = egtext!("Hello Rust!", Point::zero(), font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -128,7 +128,7 @@
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!((0, 0), (40, 40)).into_iter()
 //!         .chain(&egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
-//!         .chain(&egtext!(text, font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
+//!         .chain(&egtext!(text, Point::zero(), font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {

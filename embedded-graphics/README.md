@@ -95,9 +95,12 @@ fn main() {
         stroke_color = None,
         fill_color = Some(BinaryColor::Off)
     ).draw(&mut display);
-    egtext!("Hello world!", font = Font6x8, text_color = Some(BinaryColor::On))
-        .translate(Point::new(5, 50))
-        .draw(&mut display);
+    egtext!(
+        "Hello world!",
+        Point::new(5, 50),
+        font = Font6x8,
+        text_color = Some(BinaryColor::On)
+    ).draw(&mut display);
 }
 ```
 
