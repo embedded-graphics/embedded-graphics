@@ -1,4 +1,5 @@
 use crate::fonts::Font;
+use crate::geometry::Size;
 
 /// 24x32 pixel monospace font
 ///
@@ -20,9 +21,9 @@ pub struct Font24x32;
 
 impl Font for Font24x32 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font24x32_1bpp.raw");
-    const CHAR_HEIGHT: u32 = 32;
-    const CHAR_WIDTH: u32 = 24;
     const FONT_IMAGE_WIDTH: u32 = 960;
+
+    const CHARACTER_SIZE: Size = Size::new(24, 32);
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -47,8 +48,8 @@ mod tests {
     use crate::style::TextStyle;
     use crate::transform::Transform;
 
-    const WIDTH: usize = Font24x32::CHAR_WIDTH as usize;
-    const HEIGHT: usize = Font24x32::CHAR_HEIGHT as usize;
+    const WIDTH: usize = Font24x32::CHARACTER_SIZE.width as usize;
+    const HEIGHT: usize = Font24x32::CHARACTER_SIZE.height as usize;
     const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]

@@ -137,18 +137,28 @@ pub use font6x12::Font6x12;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
 
+use crate::geometry::Size;
+
 /// Font
 pub trait Font {
-    /// Raw image containing the font
+    /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
-    /// `char` height of the font
-    const CHAR_HEIGHT: u32;
 
-    /// `char` width of the font
-    const CHAR_WIDTH: u32;
-    /// Font image width, must be divisible by `8` and `CHAR_WIDTH`.
-    const FONT_IMAGE_WIDTH: u32 = 240;
-    /// Returns the index in the font of the correponding `char`
+    /// The width of the raw image data.
+    ///
+    /// The width must be divisible by `8` and `CHARACTER_SIZE.width`.
+    const FONT_IMAGE_WIDTH: u32;
+
+    /// Size of a single character in pixel.
+    const CHARACTER_SIZE: Size;
+
+    /// Spacing between characters.
+    ///
+    /// The spacing defines how many empty pixels are added horizontally between adjacent characters
+    /// on a single line of text.
+    const CHARACTER_SPACING: u32 = 0;
+
+    /// Returns the position a character in the font.
     fn char_offset(_: char) -> u32;
 }
 
