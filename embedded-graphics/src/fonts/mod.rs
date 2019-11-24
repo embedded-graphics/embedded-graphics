@@ -111,7 +111,6 @@
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
-mod font;
 mod font12x16;
 mod font24x32;
 mod font6x12;
@@ -119,14 +118,28 @@ mod font6x8;
 mod font8x16;
 mod text;
 
-pub use font::{Font, FontIterator};
-pub use text::Text;
+pub use text::{StyledTextIterator, Text};
 
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
 pub use font6x12::Font6x12;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
+
+/// Font
+pub trait Font {
+    /// Raw image containing the font
+    const FONT_IMAGE: &'static [u8];
+    /// `char` height of the font
+    const CHAR_HEIGHT: u32;
+
+    /// `char` width of the font
+    const CHAR_WIDTH: u32;
+    /// Font image width, must be divisible by `8` and `CHAR_WIDTH`.
+    const FONT_IMAGE_WIDTH: u32 = 240;
+    /// Returns the index in the font of the correponding `char`
+    fn char_offset(_: char) -> u32;
+}
 
 /// TODO: docs
 /// TODO: don't require font as first parameter
