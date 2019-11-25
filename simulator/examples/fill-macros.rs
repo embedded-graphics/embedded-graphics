@@ -13,7 +13,8 @@ fn main() {
     egcircle!(
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
-        stroke_color = Some(BinaryColor::On)
+        stroke_color = Some(BinaryColor::On),
+        stroke_width = 1,
     )
     .draw(&mut display);
 
@@ -21,7 +22,8 @@ fn main() {
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::Off),
-        fill_color = Some(BinaryColor::On)
+        stroke_width = 1,
+        fill_color = Some(BinaryColor::On),
     )
     .translate(Point::new(16, 16))
     .draw(&mut display);
@@ -30,19 +32,26 @@ fn main() {
         (CIRCLE_SIZE, CIRCLE_SIZE),
         CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::Off),
+        stroke_width = 1,
         fill_color = Some(BinaryColor::Off)
     )
     .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
     .draw(&mut display);
 
-    egrectangle!((0, 0), (64, 64), stroke_color = Some(BinaryColor::On))
-        .translate(Point::new(96, 0))
-        .draw(&mut display);
+    egrectangle!(
+        (0, 0),
+        (64, 64),
+        stroke_color = Some(BinaryColor::On),
+        stroke_width = 1,
+    )
+    .translate(Point::new(96, 0))
+    .draw(&mut display);
 
     egrectangle!(
         (0, 0),
         (64, 64),
         stroke_color = Some(BinaryColor::Off),
+        stroke_width = 1,
         fill_color = Some(BinaryColor::On)
     )
     .translate(Point::new(96 + 16, 16))
@@ -52,6 +61,7 @@ fn main() {
         (0, 0),
         (64, 64),
         stroke_color = Some(BinaryColor::Off),
+        stroke_width = 1,
         fill_color = Some(BinaryColor::Off)
     )
     .translate(Point::new(96 + 32, 32))
@@ -61,7 +71,8 @@ fn main() {
         (32, 0),
         (0, 64),
         (64, 64),
-        stroke_color = Some(BinaryColor::On)
+        stroke_color = Some(BinaryColor::On),
+        stroke_width = 1,
     )
     .translate(Point::new(96 * 2, 0))
     .draw(&mut display);
@@ -71,7 +82,8 @@ fn main() {
         (0, 64),
         (64, 64),
         stroke_color = Some(BinaryColor::Off),
-        fill_color = Some(BinaryColor::On)
+        stroke_width = 1,
+        fill_color = Some(BinaryColor::On),
     )
     .translate(Point::new(96 * 2 + 16, 16))
     .draw(&mut display);
@@ -81,14 +93,11 @@ fn main() {
         (0, 64),
         (64, 64),
         stroke_color = Some(BinaryColor::Off),
-        fill_color = Some(BinaryColor::Off)
+        stroke_width = 1,
+        fill_color = Some(BinaryColor::Off),
     )
     .translate(Point::new(96 * 2 + 32, 32))
     .draw(&mut display);
-
-    egline!((0, 0), (64, 64), stroke_color = Some(BinaryColor::Off),)
-        .translate(Point::new(256 + 32, 0))
-        .draw(&mut display);
 
     let mut window = WindowBuilder::new(&display)
         .title("Filled primitives using macros")
