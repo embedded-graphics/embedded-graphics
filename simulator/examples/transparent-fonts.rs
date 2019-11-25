@@ -7,19 +7,14 @@ use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 fn main() {
     let mut display = SimulatorDisplay::new(Size::new(256, 128));
 
-    egcircle!(
-        (20, 20),
-        20 as u32,
-        stroke_color = Some(Rgb565::RED),
-        fill_color = Some(Rgb565::RED)
-    )
-    .into_iter()
-    .chain(&egrectangle!(
-        (20, 20),
-        (100, 80),
-        fill_color = Some(Rgb565::RED)
-    ))
-    .draw(&mut display);
+    egcircle!((20, 20), 20 as u32, fill_color = Some(Rgb565::RED))
+        .into_iter()
+        .chain(&egrectangle!(
+            (20, 20),
+            (100, 80),
+            fill_color = Some(Rgb565::RED)
+        ))
+        .draw(&mut display);
 
     egtext!(
         "Hello world! - no background",
