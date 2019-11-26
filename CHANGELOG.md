@@ -55,9 +55,11 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** The primitive macros like `egline` don't accept a `style` setting anymore. Use `object.style = new_style` instead.
 
-- **(breaking)** The `Style` struct was replaced by `PrimitveStyle` and `TextStyle`.
+- **(breaking)** The `Style` struct was replaced by `PrimitiveStyle` and `TextStyle`.
 
 - #203 updated simulator screenshots and added them to README
+
+- **(breaking)** Text rendering is now implemented using `Text`, `TextStyle` and `Font` objects instead of using `Font::render_str`.
 
 ### Removed
 
