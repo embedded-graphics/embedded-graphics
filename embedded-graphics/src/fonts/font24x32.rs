@@ -1,9 +1,7 @@
 use crate::fonts::Font;
 use crate::geometry::Size;
 
-/// 24x32 pixel monospace font
-///
-/// There is also the [`text_24x32`] macro to provide an easier to use interface.
+/// 24x32 pixel monospace font.
 ///
 /// The 24x32 font is a 2x scaling of the [12x16 font].
 ///
@@ -15,7 +13,7 @@ use crate::geometry::Size;
 ///
 /// See the [module-level documentation](./index.html) for examples.
 ///
-/// [`text_24x32`]: ../macro.text_24x32.html
+/// [12x16 font]: struct.Font12x16.html
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Font24x32;
 

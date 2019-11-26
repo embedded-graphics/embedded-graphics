@@ -1,17 +1,13 @@
 use crate::fonts::Font;
 use crate::geometry::Size;
 
-/// 8x16 pixel monospace font
-///
-/// There is also the [`text_8x16`] macro to provide an easier to use interface.
+/// 8x16 pixel monospace font.
 ///
 /// [![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png)
 ///
 /// # Examples
 ///
 /// See the [module-level documentation](./index.html) for examples.
-///
-/// [`text_8x16`]: ../macro.text_8x16.html
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Font8x16;
 

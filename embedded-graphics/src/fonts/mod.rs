@@ -1,30 +1,67 @@
-//! Pixel based fonts
+//! Monospaced bitmap fonts.
+//!
+//! This module contains support for drawing monospaced bitmap fonts and provides
+//! several [built-in fonts].
+//!
+//! Additional custom fonts can be added by the application or other crates. This
+//! is demonstrated in the `custom-font` example in the simulator crate.
 //!
 //! # Examples
 //!
-//! The examples below use the [`Font6x8`] font, however any of the [font
-//! types in this module](#stucts) can be substituted.
+//! The examples below use the [`Font6x8`] font, however any of the [built-in fonts]
+//! in this module or custom fonts can be substituted.
 //!
-//! ## Write some text to the screen at the top left corner
+//! ## Draw text without using `egtext` macro
+//!
+//! Text can be drawn to a display by creating a [`Text`] object and attaching a
+//! text style to it by using a [`Styled`] object. By creating the text style manually,
+//! without using the [`egtext`] macro, it can be reused to style multiple text objects.
 //!
 //! ```rust
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::{Text, Font6x8};
-//! use embedded_graphics::egtext;
 //! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
-//! // Create a text object and convert it into a styled text
-//! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(TextStyle::with_text_color(Font6x8, BinaryColor::On))
+//! // Create a new text style
+//! let style = TextStyle {
+//!     font: Font6x8,
+//!     text_color: Some(Rgb565::YELLOW),
+//!     background_color: Some(Rgb565::BLUE),
+//! };
+//!
+//! // Create a text at position (20, 30) and draw it using the previously defined style
+//! Text::new("Hello Rust!", Point::new(20, 30))
+//!     .into_styled(style)
 //!     .draw(&mut display);
-//!
-//! // Use the egtext macro instead
-//! egtext!("Hello Rust!", Point::zero(), font = Font6x8).draw(&mut display);
 //! ```
+//! ## Draw text using the `egtext` macro
 //!
+//! Creating styled texts can be simplified by using the [`egtext`] macro.
+//! All style properties in [`TextStyle`] can be set by using assignments inside
+//! the [`egtext`] macro call.
+//!
+//! The following example draws the same text as the previous example but uses
+//! the [`egtext`] macro to build the necessary styled text objects.
+//!
+//! ```rust
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::fonts::Font6x8;
+//! use embedded_graphics::egtext;
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # use embedded_graphics::pixelcolor::BinaryColor;
+//! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
+//!
+//! egtext!(
+//!     "Hello Rust!",
+//!     Point::new(20, 30),
+//!     font = Font6x8,
+//!     text_color = Some(Rgb565::YELLOW),
+//!     background_color = Some(Rgb565::BLUE),
+//! ).draw(&mut display);
+//! ```
 //! ## Translate text by (20px, 30px)
 //!
 //! ```rust
@@ -47,47 +84,11 @@
 //!     .draw(&mut display);
 //! ```
 //!
-//! ## Add some styling to the text
-//!
-//! Text can be styled by setting style properties on a [`TextStyle`] object.
-//! The style properties provided by [`TextStyle`] are also accessible using the
-//! [`egtext`] macro.
-//!
-//! ```rust
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::egtext;
-//! use embedded_graphics::fonts::{Text, Font6x8};
-//! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::style::TextStyle;
-//! # use embedded_graphics::mock_display::MockDisplay;
-//! # let mut display = MockDisplay::default();
-//!
-//! egtext!(
-//!     "Hello Rust!",
-//!     Point::new(20, 30),
-//!     font = Font6x8,
-//!     text_color = Some(Rgb565::YELLOW),
-//!     background_color = Some(Rgb565::BLUE),
-//! ).draw(&mut display);
-//!
-//! // this is equivalent to:
-//!
-//! let style = TextStyle {
-//!     font: Font6x8,
-//!     text_color: Some(Rgb565::YELLOW),
-//!     background_color: Some(Rgb565::BLUE),
-//! };
-//!
-//! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(style)
-//!     .draw(&mut display);
-//! ```
-//!
 //! ## Use `write!()` and arrayvec to render a formatted string
 //!
 //! This example uses arrayvec's [`ArrayString`] to render a floating point value using the
-//! [`write!()`] macro. These strings have a fixed length, but allow the use of Rust's builtin
-//! string formatting.
+//! [`write!()`] macro. These strings have a fixed maximum length, but allow the use of
+//! Rust's builtin string formatting.
 //!
 //! ```rust
 //! use arrayvec::ArrayString;
@@ -116,8 +117,25 @@
 //! ).draw(&mut display);
 //! ```
 //!
+//! # Built-in fonts
+//!
+//! | Type | Screenshot |
+//! |------|------------|
+//! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x8.png) |
+//! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x12.png) |
+//! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png) |
+//! | [`Font12x16`] | ![12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png) |
+//! | [`Font24x32`] | The 24x32 font is a pixel doubled version of the 12x16 font. |
+//!
+//! [built-in fonts]: #built-in-fonts
 //! [`egtext`]: ../macro.egtext.html
-//! [`Font6x8`]: ./type.Font6x8.html
+//! [`Font6x8`]: struct.Font6x8.html
+//! [`Font6x12`]: struct.Font6x12.html
+//! [`Font8x16`]: struct.Font8x16.html
+//! [`Font12x16`]: struct.Font12x16.html
+//! [`Font24x32`]: struct.Font24x32.html
+//! [`Text`]: struct.Text.html
+//! [`Styled`]: ../style/struct.Styled.html
 //! [`TextStyle`]: ../style/struct.TextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
@@ -139,7 +157,7 @@ pub use font8x16::Font8x16;
 
 use crate::geometry::Size;
 
-/// Font
+/// Monospaced bitmap font.
 pub trait Font {
     /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
@@ -162,8 +180,24 @@ pub trait Font {
     fn char_offset(_: char) -> u32;
 }
 
-/// TODO: docs
-/// TODO: don't require font as first parameter
+/// Creates a styled text.
+///
+/// The `egtext` macro expects the text, the position and styling properties as arguments.
+///
+/// # Examples
+///
+/// ```rust
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::pixelcolor::Rgb888;
+/// use embedded_graphics::fonts::Font6x8;
+///
+/// let text = egtext!(
+///     "text",
+///     Position::zero(),
+///     font = Font6x8, // font needs to be the first styling property
+///     text_color = Rgb888::RED,
+/// );
+/// ```
 #[macro_export]
 macro_rules! egtext {
     ($text:expr, $position:expr,

@@ -6,12 +6,27 @@ use crate::style::{Styled, TextStyle};
 use crate::transform::Transform;
 use crate::{Dimensions, DrawTarget};
 
-/// Text
+/// A text object.
+///
+/// The `Text` struct represents a string that can be drawn onto a display.
+///
+/// The text object only contains the string and position and no additional styling information,
+/// like the font or color. To draw a text object it is necessary to attach a style to it by using
+/// the [`into_styled`] method to create a [`Styled`] object.
+///
+/// See the [module-level documentation] for examples how to use text objects.
+///
+/// [`into_styled`]: #method.into_styled
+/// [`Styled`]: ../style/struct.Styled.html
+/// [module-level documentation]: index.html
 #[derive(Debug, PartialEq, Eq)]
 pub struct Text<'a> {
-    /// Text
+    /// The string.
     pub text: &'a str,
-    /// Position
+
+    /// The position.
+    ///
+    /// The position of a text is defined as the top left pixel of the text.
     pub position: Point,
 }
 
@@ -21,7 +36,7 @@ impl<'a> Text<'a> {
         Self { text, position }
     }
 
-    /// Converts this text into a styled.
+    /// Attaches a text style the the text object.
     pub fn into_styled<C, F>(self, style: TextStyle<C, F>) -> Styled<Self, TextStyle<C, F>>
     where
         C: PixelColor,
@@ -32,7 +47,6 @@ impl<'a> Text<'a> {
 }
 
 impl Transform for Text<'_> {
-    /// Translate.
     fn translate(&self, by: Point) -> Self {
         Self {
             position: self.position + by,
@@ -40,7 +54,6 @@ impl Transform for Text<'_> {
         }
     }
 
-    /// Translate_mut.
     fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.position += by;
 
@@ -92,10 +105,10 @@ where
         self.top_left() + self.size()
     }
 
-    /// Get the bounding box of a piece of text
+    /// Returns the size of the bounding box of a styled text.
     ///
-    /// Currently does not handle newlines (but neither does the rasteriser). It will give `(0, 0)`
-    /// if the string to render is empty.
+    /// Currently does not handle newlines (but neither does the rasteriser).
+    /// It will return `Size::zero()` if the string to render is empty.
     fn size(&self) -> Size {
         // TODO: Handle height of text with newlines in it
         let width = F::CHARACTER_SIZE.width * self.primitive.text.len() as u32;
@@ -109,7 +122,7 @@ where
     }
 }
 
-/// Pixel iterator for the `FontBuilder` object
+/// Pixel iterator for styled texts.
 #[derive(Debug, Clone, Copy)]
 pub struct StyledTextIterator<'a, C, F>
 where
