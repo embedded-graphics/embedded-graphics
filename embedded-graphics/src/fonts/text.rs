@@ -110,8 +110,14 @@ where
     /// Currently does not handle newlines (but neither does the rasteriser).
     /// It will return `Size::zero()` if the string to render is empty.
     fn size(&self) -> Size {
+        let width = if self.primitive.text.len() > 0 {
+            (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.primitive.text.len() as u32
+                - F::CHARACTER_SPACING
+        } else {
+            0
+        };
+
         // TODO: Handle height of text with newlines in it
-        let width = F::CHARACTER_SIZE.width * self.primitive.text.len() as u32;
         let height = if width > 0 {
             F::CHARACTER_SIZE.height
         } else {
@@ -210,6 +216,22 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mock_display::MockDisplay;
+    use crate::pixelcolor::BinaryColor;
+
+    #[derive(Debug, Clone, Copy)]
+    struct SpacedFont;
+
+    impl Font for SpacedFont {
+        const FONT_IMAGE: &'static [u8] = &[0xF0, 0xA0, 0x50, 0x10];
+        const FONT_IMAGE_WIDTH: u32 = 8;
+        const CHARACTER_SIZE: Size = Size::new(4, 4);
+        const CHARACTER_SPACING: u32 = 5;
+
+        fn char_offset(_c: char) -> u32 {
+            0
+        }
+    }
 
     #[test]
     fn constructor() {
@@ -221,6 +243,43 @@ mod tests {
                 text: "Hello e-g",
                 position: Point::new(10, 11),
             }
+        );
+    }
+
+    #[test]
+    fn character_spacing() {
+        let mut display = MockDisplay::new();
+
+        Text::new("##", Point::zero())
+            .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
+            .draw(&mut display);
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "####     ####",
+                "# #      # # ",
+                " # #      # #",
+                "   #        #",
+            ])
+        );
+
+        assert_eq!(
+            Text::new("#", Point::zero())
+                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
+                .size(),
+            Size::new(4, 4)
+        );
+        assert_eq!(
+            Text::new("##", Point::zero())
+                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
+                .size(),
+            Size::new(4 * 2 + 5, 4)
+        );
+        assert_eq!(
+            Text::new("###", Point::zero())
+                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
+                .size(),
+            Size::new(4 * 3 + 5 * 2, 4)
         );
     }
 }
