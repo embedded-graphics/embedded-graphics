@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::with_text_color(Font12x16, BinaryColor::On);
+        let style = TextStyle::new(Font12x16, BinaryColor::On);
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
         let empty = Text::new("", Point::zero()).into_styled(style);
 
@@ -60,7 +60,7 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let style = TextStyle::with_text_color(Font12x16, BinaryColor::On);
+        let style = TextStyle::new(Font12x16, BinaryColor::On);
         let hello = Text::new(HELLO_WORLD, Point::zero())
             .into_styled(style)
             .translate(Point::new(5, -20));
@@ -84,7 +84,7 @@ mod tests {
     fn correct_m() {
         let mut display = MockDisplay::new();
         Text::new("Mm", Point::zero())
-            .into_styled(TextStyle::with_text_color(Font12x16, BinaryColor::On))
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
             .draw(&mut display);
 
         assert_eq!(
@@ -114,7 +114,7 @@ mod tests {
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
         Text::new(" ~", Point::zero())
-            .into_styled(TextStyle::with_text_color(Font12x16, BinaryColor::On))
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
             .draw(&mut display);
 
         assert_eq!(
@@ -144,7 +144,7 @@ mod tests {
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
         Text::new("$y", Point::zero())
-            .into_styled(TextStyle::with_text_color(Font12x16, BinaryColor::On))
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
             .draw(&mut display);
 
         assert_eq!(
@@ -191,7 +191,7 @@ mod tests {
             "                        ",
         ]);
 
-        let style = TextStyle::with_text_color(Font12x16, BinaryColor::On);
+        let style = TextStyle::new(Font12x16, BinaryColor::On);
 
         let mut display = MockDisplay::new();
         Text::new("\0\n", Point::zero())

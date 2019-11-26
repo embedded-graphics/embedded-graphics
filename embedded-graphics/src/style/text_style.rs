@@ -3,9 +3,9 @@ use crate::pixelcolor::PixelColor;
 
 /// Style properties for texts.
 ///
-/// `TextStyle` can be applied to a [font] to define how the font is drawn.
+/// `TextStyle` can be applied to a [`Text`] object to define how a text is drawn.
 ///
-/// [font]: ../fonts/index.html
+/// [`Text`]: ../fonts/struct.Text.html
 #[derive(Debug, Copy, Clone)]
 pub struct TextStyle<C, F>
 where
@@ -18,7 +18,7 @@ where
     /// Background color.
     pub background_color: Option<C>,
 
-    /// Font,
+    /// Font.
     pub font: F,
 }
 
@@ -27,17 +27,8 @@ where
     C: PixelColor,
     F: Font,
 {
-    // TODO: Set default value for `font`
-    // /// Creates a font style with transparent text and background.
-    // pub fn new() -> Self {
-    //     Self {
-    //         text_color: None,
-    //         background_color: None,
-    //     }
-    // }
-
-    /// Creates a font style with transparent background.
-    pub fn with_text_color(font: F, text_color: C) -> Self {
+    /// Creates a text style with transparent background.
+    pub fn new(font: F, text_color: C) -> Self {
         Self {
             font,
             text_color: Some(text_color),
@@ -45,17 +36,6 @@ where
         }
     }
 }
-
-// TODO: uncomment when `TextStyle::new` is implemented
-//
-// impl<C> Default for TextStyle<C>
-// where
-//     C: PixelColor,
-// {
-//     fn default() -> Self {
-//         Self::new()
-//     }
-// }
 
 #[cfg(test)]
 mod tests {
@@ -65,7 +45,7 @@ mod tests {
 
     #[test]
     fn constructor() {
-        let style = TextStyle::with_text_color(Font6x8, Rgb888::MAGENTA);
+        let style = TextStyle::new(Font6x8, Rgb888::MAGENTA);
         assert_eq!(style.font, Font6x8);
         assert_eq!(style.text_color, Some(Rgb888::MAGENTA));
         assert_eq!(style.background_color, None);

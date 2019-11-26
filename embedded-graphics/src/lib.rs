@@ -88,7 +88,7 @@
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
-//! let t = Text::new("Hello Rust!", Point::new(20, 16)).into_styled(TextStyle::with_text_color(Font6x8, Rgb565::GREEN));
+//! let t = Text::new("Hello Rust!", Point::new(20, 16)).into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);

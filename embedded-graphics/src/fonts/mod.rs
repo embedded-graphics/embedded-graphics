@@ -21,9 +21,9 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::{Text, Font6x8};
 //! use embedded_graphics::style::TextStyle;
+//! use embedded_graphics::pixelcolor::Rgb565;
 //! # use embedded_graphics::mock_display::MockDisplay;
-//! # use embedded_graphics::pixelcolor::BinaryColor;
-//! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! // Create a new text style
 //! let style = TextStyle {
@@ -50,9 +50,9 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::egtext;
+//! use embedded_graphics::pixelcolor::Rgb565;
 //! # use embedded_graphics::mock_display::MockDisplay;
-//! # use embedded_graphics::pixelcolor::BinaryColor;
-//! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! egtext!(
 //!     "Hello Rust!",
@@ -68,19 +68,19 @@
 //! use embedded_graphics::prelude::*;
 //! use embedded_graphics::fonts::{Text, Font6x8};
 //! use embedded_graphics::style::TextStyle;
+//! use embedded_graphics::pixelcolor::BinaryColor;
 //! # use embedded_graphics::mock_display::MockDisplay;
-//! # use embedded_graphics::pixelcolor::BinaryColor;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
 //! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(TextStyle::with_text_color(Font6x8, BinaryColor::On))
+//!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display);
 //!
 //! // this is equivalent to:
 //!
 //! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(TextStyle::with_text_color(Font6x8, BinaryColor::On))
+//!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
 //!     .draw(&mut display);
 //! ```
 //!
@@ -190,12 +190,13 @@ pub trait Font {
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::pixelcolor::Rgb888;
 /// use embedded_graphics::fonts::Font6x8;
+/// use embedded_graphics::egtext;
 ///
 /// let text = egtext!(
 ///     "text",
-///     Position::zero(),
+///     Point::zero(),
 ///     font = Font6x8, // font needs to be the first styling property
-///     text_color = Rgb888::RED,
+///     text_color = Some(Rgb888::RED),
 /// );
 /// ```
 #[macro_export]
@@ -205,7 +206,7 @@ macro_rules! egtext {
 
         let color = $crate::pixelcolor::BinaryColor::On.into();
         #[allow(unused_mut)]
-        let mut style = $crate::style::TextStyle::with_text_color($font, color);
+        let mut style = $crate::style::TextStyle::new($font, color);
         $( style.$style_key = $style_value; )*
 
         $crate::fonts::Text::new($text, $position).into_styled(style)

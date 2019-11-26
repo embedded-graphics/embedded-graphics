@@ -10,7 +10,7 @@ fn main() {
 
     // Show smallest font with black font on white background (default value for fonts)
     Text::new("Hello World! - default style 6x8", Point::new(15, 15))
-        .into_styled(TextStyle::with_text_color(Font6x8, BinaryColor::On))
+        .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
         .draw(&mut display);
 
     // Show smallest font with white font on black background
@@ -36,12 +36,12 @@ fn main() {
 
     // Show 6x12 Font
     Text::new("Hello 6x12!", Point::new(15, 55))
-        .into_styled(TextStyle::with_text_color(Font6x12, BinaryColor::On))
+        .into_styled(TextStyle::new(Font6x12, BinaryColor::On))
         .draw(&mut display);
 
     // Show 8x16 Font
     Text::new("Hello 8x16!", Point::new(15, 80))
-        .into_styled(TextStyle::with_text_color(Font8x16, BinaryColor::On))
+        .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
         .draw(&mut display);
 
     // Show 12x16 Font using a macro

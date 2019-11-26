@@ -126,7 +126,7 @@ fn draw_minute_hand(minute: u32) -> Styled<Line, PrimitiveStyle<BinaryColor>> {
 /// function can't be returned.
 fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<BinaryColor>> + 'a {
     let text = Text::new(&time_str, CENTER - Size::new(48, 48))
-        .into_styled(TextStyle::with_text_color(Font12x16, BinaryColor::Off));
+        .into_styled(TextStyle::new(Font12x16, BinaryColor::Off));
 
     // Add a background around the time digits. Note that there is no bottom-right padding as this
     // is added by the font renderer itself

@@ -54,7 +54,7 @@ fn main() {
     Line::new(Point::new(64, 64), Point::new(0, 64)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
     Line::new(Point::new(64, 64), Point::new(80, 80)).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)).draw(&mut display);
 
-    Text::new("Hello World!", Point::new(5, 50)).into_styled(TextStyle::with_text_color(Font6x8, BinaryColor::On)).draw(&mut display);
+    Text::new("Hello World!", Point::new(5, 50)).into_styled(TextStyle::new(Font6x8, BinaryColor::On)).draw(&mut display);
 }
 ```
 
