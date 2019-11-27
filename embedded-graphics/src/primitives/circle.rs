@@ -139,19 +139,19 @@ where
             return None;
         }
 
-        let radius = self.radius as i32 - self.style.stroke_width_i32() + 1;
+        let inner_radius = self.radius as i32 - self.style.stroke_width_i32();
         let outer_radius = self.radius as i32;
 
-        let radius_sq = radius * radius;
+        let inner_radius_sq = inner_radius * inner_radius;
         let outer_radius_sq = outer_radius * outer_radius;
 
         loop {
             let t = self.p;
             let len = t.x * t.x + t.y * t.y;
 
-            let is_border = len > radius_sq - radius && len < outer_radius_sq + radius;
+            let is_border = len >= inner_radius_sq && len <= outer_radius_sq;
 
-            let is_fill = len <= outer_radius_sq + 1;
+            let is_fill = len <= outer_radius_sq;
 
             let item = if is_border && self.style.stroke_color.is_some() {
                 Some(Pixel(
