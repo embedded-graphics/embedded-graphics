@@ -223,20 +223,31 @@ mod tests {
     /// Test for issue #143
     #[test]
     fn issue_143_stroke_and_fill() {
-        let circle_no_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
-            Circle::new(Point::new(10, 16), 3)
-                .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+        for size in 0..10 {
+            let circle_no_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
+                Circle::new(Point::new(10, 16), size)
+                    .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        let style = PrimitiveStyle {
-            fill_color: Some(BinaryColor::On),
-            stroke_color: Some(BinaryColor::On),
-            stroke_width: 1,
-        };
-        let circle_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
-            Circle::new(Point::new(10, 16), 3).into_styled(style);
+            let style = PrimitiveStyle {
+                fill_color: Some(BinaryColor::On),
+                stroke_color: Some(BinaryColor::On),
+                stroke_width: 1,
+            };
+            let circle_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
+                Circle::new(Point::new(10, 16), size).into_styled(style);
 
-        assert_eq!(circle_stroke.size(), circle_no_stroke.size());
-        assert!(circle_no_stroke.into_iter().eq(circle_stroke.into_iter()));
+            assert_eq!(
+                circle_stroke.size(),
+                circle_no_stroke.size(),
+                "Filled and unfilled circle iters are unequal for radius {}",
+                size
+            );
+            assert!(
+                circle_no_stroke.into_iter().eq(circle_stroke.into_iter()),
+                "Filled and unfilled circle iters are unequal for radius {}",
+                size
+            );
+        }
     }
 
     #[test]
