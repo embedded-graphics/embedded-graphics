@@ -132,14 +132,16 @@ where
 {
     type Item = Pixel<C>;
 
-    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles
+    // https://stackoverflow.com/a/1237519/383609
+    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles#comment80182898_1237519
     fn next(&mut self) -> Option<Self::Item> {
         // If border or stroke colour is `None`, treat entire object as transparent and exit early
         if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
             return None;
         }
 
-        let inner_radius = self.radius as i32 - self.style.stroke_width_i32();
+        // A stroke width of zero renders a 1px border, so add 1 to inner radius to compensate
+        let inner_radius = self.radius as i32 - self.style.stroke_width_i32() + 1;
         let outer_radius = self.radius as i32;
 
         let inner_radius_sq = inner_radius * inner_radius;
@@ -149,9 +151,10 @@ where
             let t = self.p;
             let len = t.x * t.x + t.y * t.y;
 
-            let is_border = len >= inner_radius_sq && len <= outer_radius_sq;
+            let is_border =
+                len > inner_radius_sq - inner_radius && len < outer_radius_sq + outer_radius;
 
-            let is_fill = len <= outer_radius_sq;
+            let is_fill = len < outer_radius_sq + outer_radius;
 
             let item = if is_border && self.style.stroke_color.is_some() {
                 Some(Pixel(
