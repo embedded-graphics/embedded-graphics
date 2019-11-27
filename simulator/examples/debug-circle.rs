@@ -2,6 +2,9 @@
 //!
 //! Use <kbd>Up</kb>/<kbd>Down</kbd> to change circle size. Circle's edge should lie on horizontal
 //! line for correct size. The red/green circles should look identicle (aside from colour).
+//!
+//! Use <kbd>Left</kb>/<kbd>Right</kbd> to change circle stroke width.
+
 extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
@@ -21,15 +24,24 @@ fn main() {
         .build();
 
     let mut size: u32 = 4;
+    let mut stroke_width: u32 = 1;
 
     'running: loop {
         display.clear(Rgb888::BLACK);
 
         text_6x8!(
-            &format!("Sz: {}", size),
+            &format!("Size: {}", size),
             text_color = Some(Rgb888::WHITE),
             background_color = Some(Rgb888::BLACK),
         )
+        .draw(&mut display);
+
+        text_6x8!(
+            &format!("Stroke: {}", stroke_width),
+            text_color = Some(Rgb888::WHITE),
+            background_color = Some(Rgb888::BLACK),
+        )
+        .translate(Point::new(0, 8))
         .draw(&mut display);
 
         // Bounding lines to check size
@@ -49,7 +61,7 @@ fn main() {
                 // fill_color: Some(Rgb888::GREEN),
                 fill_color: None,
                 stroke_color: Some(Rgb888::GREEN),
-                stroke_width: 1,
+                stroke_width,
             })
             .draw(&mut display);
 
@@ -62,6 +74,14 @@ fn main() {
                     match keycode {
                         Keycode::Up => size += 1,
                         Keycode::Down => size = if size > 0 { size - 1 } else { 0 },
+                        Keycode::Right => stroke_width += 1,
+                        Keycode::Left => {
+                            stroke_width = if stroke_width > 0 {
+                                stroke_width - 1
+                            } else {
+                                0
+                            }
+                        }
                         _ => (),
                     };
                 }
