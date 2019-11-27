@@ -124,6 +124,8 @@ pub struct StyledCircleIterator<C: PixelColor> {
     radius: u32,
     style: PrimitiveStyle<C>,
     p: Point,
+    outer_threshold: i32,
+    inner_threshold: i32,
 }
 
 impl<C> Iterator for StyledCircleIterator<C>
@@ -140,21 +142,13 @@ where
             return None;
         }
 
-        // A stroke width of zero renders a 1px border, so add 1 to inner radius to compensate
-        let inner_radius = self.radius as i32 - self.style.stroke_width_i32() + 1;
-        let outer_radius = self.radius as i32;
-
-        let inner_radius_sq = inner_radius * inner_radius;
-        let outer_radius_sq = outer_radius * outer_radius;
-
         loop {
             let t = self.p;
-            let len = t.x * t.x + t.y * t.y;
+            let len = t.x.pow(2) + t.y.pow(2);
 
-            let is_border =
-                len > inner_radius_sq - inner_radius && len < outer_radius_sq + outer_radius;
+            let is_border = len > self.inner_threshold && len < self.outer_threshold;
 
-            let is_fill = len < outer_radius_sq + outer_radius;
+            let is_fill = len < self.outer_threshold;
 
             let item = if is_border && self.style.stroke_color.is_some() {
                 Some(Pixel(
@@ -209,11 +203,21 @@ where
             -(self.primitive.radius as i32),
             -(self.primitive.radius as i32),
         );
+
+        // A stroke width of zero renders a 1px border, so add 1 to inner radius to compensate
+        let inner_radius = self.primitive.radius as i32 - self.style.stroke_width_i32() + 1;
+        let outer_radius = self.primitive.radius as i32;
+
+        let inner_threshold = inner_radius.pow(2) - inner_radius;
+        let outer_threshold = outer_radius.pow(2) + outer_radius;
+
         StyledCircleIterator {
             center: self.primitive.center,
             radius: self.primitive.radius,
             style: self.style,
             p: top_left,
+            outer_threshold,
+            inner_threshold,
         }
     }
 }
