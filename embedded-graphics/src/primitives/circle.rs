@@ -231,51 +231,47 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
-
-    fn test_expected_circle(
-        circle: Styled<Circle, PrimitiveStyle<BinaryColor>>,
-        expected: &[(i32, i32)],
-    ) {
-        let mut expected_iter = expected.iter();
-
-        for (idx, Pixel(coord, _)) in circle.into_iter().enumerate() {
-            match expected_iter.next() {
-                Some(point) => assert_eq!(
-                    coord,
-                    Point::from(*point),
-                    "Coordinate at index {} does not match expected value",
-                    idx
-                ),
-
-                // expected runs out of points before circle does
-                None => unreachable!(),
-            }
-        }
-        // check that expected has no points left
-        assert!(expected_iter.next().is_none())
-    }
 
     // Check that tiny circles render as a "+" shape with a hole in the center
     #[test]
     fn tiny_circle() {
-        let circle = Circle::new(Point::new(10, 10), 1)
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
+        let mut display = MockDisplay::new();
 
-        let expected = [(10, 9), (9, 10), (11, 10), (10, 11)];
+        Circle::new(Point::new(1, 1), 1)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut display);
 
-        test_expected_circle(circle, &expected);
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " # ",
+                "# #",
+                " # "
+            ])
+        );
     }
 
     // Check that tiny filled circle render as a "+" shape with NO hole in the center
     #[test]
     fn tiny_circle_filled() {
-        let circle = Circle::new(Point::new(10, 10), 1)
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+        let mut display = MockDisplay::new();
 
-        let expected = [(10, 9), (9, 10), (10, 10), (11, 10), (10, 11)];
+        Circle::new(Point::new(1, 1), 1)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display);
 
-        test_expected_circle(circle, &expected);
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " # ",
+                "###",
+                " # "
+            ])
+        );
     }
 
     /// Test for issue #143
