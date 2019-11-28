@@ -146,11 +146,11 @@ where
             let t = self.p;
             let len = t.x.pow(2) + t.y.pow(2);
 
-            let is_border = len > self.inner_threshold && len < self.outer_threshold;
+            let is_stroke = len > self.inner_threshold && len < self.outer_threshold;
 
             let is_fill = len < self.outer_threshold;
 
-            let item = if is_border && self.style.stroke_color.is_some() {
+            let item = if is_stroke && self.style.stroke_color.is_some() {
                 Some(Pixel(
                     self.center + t,
                     self.style.stroke_color.expect("Border color not defined"),
@@ -204,7 +204,7 @@ where
             -(self.primitive.radius as i32),
         );
 
-        // A stroke width of zero renders a 1px border, so add 1 to inner radius to compensate
+        // A stroke width of zero renders a 1px stroke, so add 1 to inner radius to compensate
         let inner_radius = self.primitive.radius as i32 - self.style.stroke_width_i32() + 1;
         let outer_radius = self.primitive.radius as i32;
 
