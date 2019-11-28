@@ -233,6 +233,51 @@ mod tests {
     use super::*;
     use crate::pixelcolor::BinaryColor;
 
+    fn test_expected_circle(
+        circle: Styled<Circle, PrimitiveStyle<BinaryColor>>,
+        expected: &[(i32, i32)],
+    ) {
+        let mut expected_iter = expected.iter();
+
+        for (idx, Pixel(coord, _)) in circle.into_iter().enumerate() {
+            match expected_iter.next() {
+                Some(point) => assert_eq!(
+                    coord,
+                    Point::from(*point),
+                    "Coordinate at index {} does not match expected value",
+                    idx
+                ),
+
+                // expected runs out of points before circle does
+                None => unreachable!(),
+            }
+        }
+        // check that expected has no points left
+        assert!(expected_iter.next().is_none())
+    }
+
+    // Check that tiny circles render as a "+" shape with a hole in the center
+    #[test]
+    fn tiny_circle() {
+        let circle = Circle::new(Point::new(10, 10), 1)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
+
+        let expected = [(10, 9), (9, 10), (11, 10), (10, 11)];
+
+        test_expected_circle(circle, &expected);
+    }
+
+    // Check that tiny filled circle render as a "+" shape with NO hole in the center
+    #[test]
+    fn tiny_circle_filled() {
+        let circle = Circle::new(Point::new(10, 10), 1)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+
+        let expected = [(10, 9), (9, 10), (10, 10), (11, 10), (10, 11)];
+
+        test_expected_circle(circle, &expected);
+    }
+
     /// Test for issue #143
     #[test]
     fn issue_143_stroke_and_fill() {
