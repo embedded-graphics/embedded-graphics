@@ -147,9 +147,8 @@ where
             let t = self.p;
             let len = t.x.pow(2) + t.y.pow(2);
 
-            let is_stroke = len > self.inner_threshold && len <= self.outer_threshold;
-
-            let is_fill = len <= self.outer_threshold;
+            let is_fill = len <= self.inner_threshold;
+            let is_stroke = len <= self.outer_threshold && !is_fill;
 
             let item = if is_stroke && self.style.stroke_color.is_some() {
                 Some(Pixel(self.center + t, self.style.stroke_color.unwrap()))
@@ -203,12 +202,13 @@ where
         let inner_radius = self.primitive.radius as i32 - self.style.stroke_width_i32() + 1;
         let outer_radius = self.primitive.radius as i32;
 
-        let inner_threshold = inner_radius.pow(2) - inner_radius;
+        let mut inner_threshold = inner_radius.pow(2) - inner_radius;
         let mut outer_threshold = outer_radius.pow(2) + outer_radius;
 
         // Special case for small circles. This kludge removes the top-left pixel and leaves the
         // circle as a `+` shape.
         if self.primitive.radius == 1 {
+            inner_threshold -= 1;
             outer_threshold -= 1;
         }
 
