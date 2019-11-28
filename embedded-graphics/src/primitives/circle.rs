@@ -137,7 +137,8 @@ where
     // https://stackoverflow.com/a/1237519/383609
     // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles#comment80182898_1237519
     fn next(&mut self) -> Option<Self::Item> {
-        // If border or stroke colour is `None`, treat entire object as transparent and exit early
+        // If the fill and stroke colors are `None`, treat entire object as transparent and exit
+        // early.
         if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
             return None;
         }
@@ -151,15 +152,9 @@ where
             let is_fill = len <= self.outer_threshold;
 
             let item = if is_stroke && self.style.stroke_color.is_some() {
-                Some(Pixel(
-                    self.center + t,
-                    self.style.stroke_color.expect("Border color not defined"),
-                ))
+                Some(Pixel(self.center + t, self.style.stroke_color.unwrap()))
             } else if is_fill && self.style.fill_color.is_some() {
-                Some(Pixel(
-                    self.center + t,
-                    self.style.fill_color.expect("Fill color not defined"),
-                ))
+                Some(Pixel(self.center + t, self.style.fill_color.unwrap()))
             } else {
                 None
             };
