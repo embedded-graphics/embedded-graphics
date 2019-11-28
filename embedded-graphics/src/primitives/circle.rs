@@ -145,11 +145,10 @@ where
 
         loop {
             let t = self.p;
-            let len = t.x.pow(2) + t.y.pow(2);
+            let len = (2 * t.x).pow(2) + (2 * t.y).pow(2);
 
-            let is_stroke = len > self.inner_threshold && len <= self.outer_threshold;
-
-            let is_fill = len <= self.outer_threshold;
+            let is_fill = len < self.inner_threshold;
+            let is_stroke = len < self.outer_threshold && !is_fill;
 
             let item = if is_stroke && self.style.stroke_color.is_some() {
                 Some(Pixel(self.center + t, self.style.stroke_color.unwrap()))
@@ -186,6 +185,16 @@ where
     }
 }
 
+fn radius_to_threshold(radius: i32) -> i32 {
+    if radius == 1 {
+        // Special case for small circles. This kludge removes the top-left pixel and leaves the
+        // circle as a `+` shape.
+        5
+    } else {
+        4 * (radius.pow(2) + radius) + 1
+    }
+}
+
 impl<'a, C> IntoIterator for &'a Styled<Circle, PrimitiveStyle<C>>
 where
     C: PixelColor,
@@ -199,18 +208,11 @@ where
             -(self.primitive.radius as i32),
         );
 
-        // A stroke width of zero renders a 1px stroke, so add 1 to inner radius to compensate
-        let inner_radius = self.primitive.radius as i32 - self.style.stroke_width_i32() + 1;
+        let inner_radius = self.primitive.radius as i32 - self.style.stroke_width_i32();
         let outer_radius = self.primitive.radius as i32;
 
-        let inner_threshold = inner_radius.pow(2) - inner_radius;
-        let mut outer_threshold = outer_radius.pow(2) + outer_radius;
-
-        // Special case for small circles. This kludge removes the top-left pixel and leaves the
-        // circle as a `+` shape.
-        if self.primitive.radius == 1 {
-            outer_threshold -= 1;
-        }
+        let inner_threshold = radius_to_threshold(inner_radius);
+        let outer_threshold = radius_to_threshold(outer_radius);
 
         StyledCircleIterator {
             center: self.primitive.center,
