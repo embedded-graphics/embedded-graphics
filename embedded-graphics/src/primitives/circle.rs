@@ -146,9 +146,9 @@ where
             let t = self.p;
             let len = t.x.pow(2) + t.y.pow(2);
 
-            let is_stroke = len > self.inner_threshold && len < self.outer_threshold;
+            let is_stroke = len > self.inner_threshold && len <= self.outer_threshold;
 
-            let is_fill = len < self.outer_threshold;
+            let is_fill = len <= self.outer_threshold;
 
             let item = if is_stroke && self.style.stroke_color.is_some() {
                 Some(Pixel(
