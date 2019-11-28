@@ -209,7 +209,13 @@ where
         let outer_radius = self.primitive.radius as i32;
 
         let inner_threshold = inner_radius.pow(2) - inner_radius;
-        let outer_threshold = outer_radius.pow(2) + outer_radius;
+        let mut outer_threshold = outer_radius.pow(2) + outer_radius;
+
+        // Special case for small circles. This kludge removes the top-left pixel and leaves the
+        // circle as a `+` shape.
+        if self.primitive.radius == 1 {
+            outer_threshold -= 1;
+        }
 
         StyledCircleIterator {
             center: self.primitive.center,
