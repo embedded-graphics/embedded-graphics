@@ -17,7 +17,7 @@ use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilde
 use sdl2::keyboard::Keycode;
 
 fn main() {
-    let mut display = SimulatorDisplay::new(Size::new(200, 100));
+    let mut display = SimulatorDisplay::new(Size::new(300, 100));
     let mut window = WindowBuilder::new(&display)
         .scale(3)
         .title("Debug circle")
@@ -47,7 +47,7 @@ fn main() {
         // Bounding lines to check size
         Line::new(
             Point::new(0, 50 - size as i32),
-            Point::new(200, 50 - size as i32),
+            Point::new(300, 50 - size as i32),
         )
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(&mut display);
@@ -61,6 +61,14 @@ fn main() {
                 // fill_color: Some(Rgb888::GREEN),
                 fill_color: None,
                 stroke_color: Some(Rgb888::GREEN),
+                stroke_width,
+            })
+            .draw(&mut display);
+
+        Circle::new(Point::new(250, 50), size)
+            .into_styled(PrimitiveStyle {
+                fill_color: Some(Rgb888::MAGENTA),
+                stroke_color: Some(Rgb888::CYAN),
                 stroke_width,
             })
             .draw(&mut display);
