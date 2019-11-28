@@ -144,19 +144,17 @@ where
         }
 
         loop {
-            let t = self.p;
-            let len = (2 * t.x).pow(2) + (2 * t.y).pow(2);
+            let len = (2 * self.p.x).pow(2) + (2 * self.p.y).pow(2);
 
-            let is_fill = len < self.inner_threshold;
-            let is_stroke = len < self.outer_threshold && !is_fill;
-
-            let item = if is_stroke && self.style.stroke_color.is_some() {
-                Some(Pixel(self.center + t, self.style.stroke_color.unwrap()))
-            } else if is_fill && self.style.fill_color.is_some() {
-                Some(Pixel(self.center + t, self.style.fill_color.unwrap()))
+            let color = if len < self.inner_threshold {
+                self.style.fill_color
+            } else if len < self.outer_threshold {
+                // Use fill_color if no stroke_color was set
+                self.style.stroke_color.or(self.style.fill_color)
             } else {
                 None
             };
+            let item = color.map(|c| Pixel(self.center + self.p, c));
 
             self.p.x += 1;
 
@@ -230,6 +228,23 @@ mod tests {
     use super::*;
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
+
+    #[test]
+    fn stroke_width_doesnt_affect_fill() {
+        let mut expected = MockDisplay::new();
+        let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
+        Circle::new(Point::new(5, 5), 4)
+            .into_styled(style)
+            .draw(&mut expected);
+
+        let mut with_stroke_width = MockDisplay::new();
+        style.stroke_width = 1;
+        Circle::new(Point::new(5, 5), 4)
+            .into_styled(style)
+            .draw(&mut with_stroke_width);
+
+        assert_eq!(expected, with_stroke_width);
+    }
 
     // Check that tiny circles render as a "+" shape with a hole in the center
     #[test]
