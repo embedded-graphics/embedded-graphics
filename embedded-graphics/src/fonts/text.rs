@@ -110,7 +110,7 @@ where
     /// Currently does not handle newlines (but neither does the rasteriser).
     /// It will return [`Size::zero()`] if the string to render is empty.
     ///
-    /// [`Size::zero()`]: struct.Size.html#method.zero
+    /// [`Size::zero()`]: ../geometry/struct.Size.html#method.zero
     fn size(&self) -> Size {
         let width = if self.primitive.text.len() > 0 {
             (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.primitive.text.len() as u32
