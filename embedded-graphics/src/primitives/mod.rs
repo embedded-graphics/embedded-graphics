@@ -80,10 +80,8 @@ pub trait Primitive: Dimensions {
 #[macro_export]
 macro_rules! egcircle {
     ($center:expr, $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        use $crate::style::PrimitiveStyle;
-
         #[allow(unused_mut)]
-        let mut style = PrimitiveStyle::default();
+        let mut style = $crate::style::PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
 
         $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
@@ -142,10 +140,8 @@ macro_rules! egcircle {
 #[macro_export]
 macro_rules! egline {
     ($start:expr, $end:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        use $crate::style::PrimitiveStyle;
-
         #[allow(unused_mut)]
-        let mut style = PrimitiveStyle::default();
+        let mut style = $crate::style::PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
 
         $crate::primitives::Line::new(
@@ -209,10 +205,8 @@ macro_rules! egline {
 #[macro_export]
 macro_rules! egrectangle {
     ($top_left:expr, $bottom_right:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        use $crate::style::PrimitiveStyle;
-
         #[allow(unused_mut)]
-        let mut style = PrimitiveStyle::default();
+        let mut style = $crate::style::PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
 
         $crate::primitives::Rectangle::new(
@@ -274,10 +268,8 @@ macro_rules! egrectangle {
 #[macro_export]
 macro_rules! egtriangle {
     ($p1:expr, $p2:expr, $p3:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        use $crate::style::PrimitiveStyle;
-
         #[allow(unused_mut)]
-        let mut style = PrimitiveStyle::default();
+        let mut style = $crate::style::PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
 
         $crate::primitives::Triangle::new(

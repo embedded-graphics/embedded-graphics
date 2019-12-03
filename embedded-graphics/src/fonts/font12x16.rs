@@ -1,13 +1,23 @@
-use crate::fonts::font_builder::{FontBuilder, FontBuilderConf};
+use crate::fonts::Font;
+use crate::geometry::Size;
 
-#[derive(Debug, Copy, Clone)]
+/// 12x16 pixel monospace font.
+///
+/// [![12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
+///
+/// # Examples
+///
+/// See the [module-level documentation](./index.html) for examples.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Font12x16;
+
 /// Config for 12x16 font
-pub enum Font12x16Conf {}
-impl FontBuilderConf for Font12x16Conf {
+impl Font for Font12x16 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font12x16_1bpp.raw");
-    const CHAR_HEIGHT: u32 = 16;
-    const CHAR_WIDTH: u32 = 12;
     const FONT_IMAGE_WIDTH: u32 = 480;
+
+    const CHARACTER_SIZE: Size = Size::new(12, 16);
+
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
         if c < ' ' {
@@ -20,39 +30,26 @@ impl FontBuilderConf for Font12x16Conf {
     }
 }
 
-/// 12x16 pixel monospace font
-///
-/// There is also the [`text_12x16`] macro to provide an easier to use interface.
-///
-/// [![12x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font12x16.png)
-///
-/// # Examples
-///
-/// See the [module-level documentation](./index.html) for examples.
-///
-/// [`text_12x16`]: ../macro.text_12x16.html
-pub type Font12x16<'a, C> = FontBuilder<'a, C, Font12x16Conf>;
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::drawable::Drawable;
-    use crate::fonts::Font;
+    use crate::fonts::{Font, Text};
     use crate::geometry::{Dimensions, Point, Size};
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
     use crate::style::TextStyle;
     use crate::transform::Transform;
 
-    const WIDTH: usize = Font12x16Conf::CHAR_WIDTH as usize;
-    const HEIGHT: usize = Font12x16Conf::CHAR_HEIGHT as usize;
+    const WIDTH: usize = Font12x16::CHARACTER_SIZE.width as usize;
+    const HEIGHT: usize = Font12x16::CHARACTER_SIZE.height as usize;
     const HELLO_WORLD: &'static str = "Hello World!";
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::with_text_color(BinaryColor::On);
-        let hello = Font12x16::render_str(HELLO_WORLD, style);
-        let empty = Font12x16::render_str("", style);
+        let style = TextStyle::new(Font12x16, BinaryColor::On);
+        let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
+        let empty = Text::new("", Point::zero()).into_styled(style);
 
         assert_eq!(
             hello.size(),
@@ -63,9 +60,13 @@ mod tests {
 
     #[test]
     fn text_corners() {
-        let style = TextStyle::with_text_color(BinaryColor::On);
-        let hello = Font12x16::render_str(HELLO_WORLD, style).translate(Point::new(5, -20));
-        let empty = Font12x16::render_str("", style).translate(Point::new(10, 20));
+        let style = TextStyle::new(Font12x16, BinaryColor::On);
+        let hello = Text::new(HELLO_WORLD, Point::zero())
+            .into_styled(style)
+            .translate(Point::new(5, -20));
+        let empty = Text::new("", Point::zero())
+            .into_styled(style)
+            .translate(Point::new(10, 20));
 
         assert_eq!(hello.top_left(), Point::new(5, -20));
         assert_eq!(
@@ -82,7 +83,9 @@ mod tests {
     #[test]
     fn correct_m() {
         let mut display = MockDisplay::new();
-        Font12x16::render_str("Mm", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("Mm", Point::zero())
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -110,7 +113,9 @@ mod tests {
     #[test]
     fn correct_ascii_borders() {
         let mut display = MockDisplay::new();
-        Font12x16::render_str(" ~", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new(" ~", Point::zero())
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -138,7 +143,9 @@ mod tests {
     #[test]
     fn correct_dollar_y() {
         let mut display = MockDisplay::new();
-        Font12x16::render_str("$y", TextStyle::with_text_color(BinaryColor::On)).draw(&mut display);
+        Text::new("$y", Point::zero())
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+            .draw(&mut display);
 
         assert_eq!(
             display,
@@ -184,22 +191,30 @@ mod tests {
             "                        ",
         ]);
 
-        let style = TextStyle::with_text_color(BinaryColor::On);
+        let style = TextStyle::new(Font12x16, BinaryColor::On);
 
         let mut display = MockDisplay::new();
-        Font12x16::render_str("\0\n", style).draw(&mut display);
+        Text::new("\0\n", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font12x16::render_str("\x7F\u{A0}", style).draw(&mut display);
+        Text::new("\x7F\u{A0}", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font12x16::render_str("¡ÿ", style).draw(&mut display);
+        Text::new("¡ÿ", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Font12x16::render_str("Ā💣", style).draw(&mut display);
+        Text::new("Ā💣", Point::zero())
+            .into_styled(style)
+            .draw(&mut display);
         assert_eq!(display, two_question_marks);
     }
 }

@@ -1,6 +1,6 @@
 //! Demonstrate the chaining abilities of embedded graphics iterators
 
-use embedded_graphics::fonts::Font6x8;
+use embedded_graphics::fonts::{Font6x8, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
@@ -21,8 +21,8 @@ fn main() {
                 .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)),
         )
         .chain(
-            Font6x8::render_str("Hello World!", TextStyle::with_text_color(BinaryColor::On))
-                .translate(Point::new(5, 50)),
+            &Text::new("Hello World!", Point::new(5, 50))
+                .into_styled(TextStyle::new(Font6x8, BinaryColor::On)),
         );
 
     objects.draw(&mut display);

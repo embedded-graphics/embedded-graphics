@@ -2,7 +2,7 @@
 
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egline, egrectangle, egtriangle};
+use embedded_graphics::{egcircle, egrectangle, egtriangle};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 static CIRCLE_SIZE: i32 = 32;

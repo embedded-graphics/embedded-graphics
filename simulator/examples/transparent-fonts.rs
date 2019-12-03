@@ -1,6 +1,7 @@
+use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egrectangle, text_6x8};
+use embedded_graphics::{egcircle, egrectangle, egtext};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() {
@@ -15,27 +16,30 @@ fn main() {
         ))
         .draw(&mut display);
 
-    text_6x8!(
+    egtext!(
         "Hello world! - no background",
+        Point::new(15, 15),
+        font = Font6x8,
         text_color = Some(Rgb565::WHITE),
     )
-    .translate(Point::new(15, 15))
     .draw(&mut display);
 
-    text_6x8!(
+    egtext!(
         "Hello world! - filled background",
+        Point::new(15, 30),
+        font = Font6x8,
         text_color = Some(Rgb565::YELLOW),
         background_color = Some(Rgb565::BLUE)
     )
-    .translate(Point::new(15, 30))
     .draw(&mut display);
 
-    text_6x8!(
+    egtext!(
         "Hello world! - inverse background",
+        Point::new(15, 45),
+        font = Font6x8,
         text_color = Some(Rgb565::BLUE),
         background_color = Some(Rgb565::YELLOW)
     )
-    .translate(Point::new(15, 45))
     .draw(&mut display);
 
     let mut window = WindowBuilder::new(&display)
