@@ -26,7 +26,7 @@ pub struct Text<'a> {
 
     /// The position.
     ///
-    /// The position of a text is defined as the top left pixel of the text.
+    /// Defines the top-left starting pixel of the text object.
     pub position: Point,
 }
 
@@ -36,7 +36,7 @@ impl<'a> Text<'a> {
         Self { text, position }
     }
 
-    /// Attaches a text style the the text object.
+    /// Attaches a text style to the text object.
     pub fn into_styled<C, F>(self, style: TextStyle<C, F>) -> Styled<Self, TextStyle<C, F>>
     where
         C: PixelColor,
@@ -108,7 +108,9 @@ where
     /// Returns the size of the bounding box of a styled text.
     ///
     /// Currently does not handle newlines (but neither does the rasteriser).
-    /// It will return `Size::zero()` if the string to render is empty.
+    /// It will return [`Size::zero()`] if the string to render is empty.
+    ///
+    /// [`Size::zero()`]: struct.Size.html#method.zero
     fn size(&self) -> Size {
         let width = if self.primitive.text.len() > 0 {
             (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.primitive.text.len() as u32
@@ -128,7 +130,7 @@ where
     }
 }
 
-/// Pixel iterator for styled texts.
+/// Pixel iterator for styled text.
 #[derive(Debug, Clone, Copy)]
 pub struct StyledTextIterator<'a, C, F>
 where
