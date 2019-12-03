@@ -151,7 +151,7 @@
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/01d2ea6e7053f9f79cab19d0c193a00dbdaea321/assets/logo.png"
+    html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"
 )]
 #![no_std]
 #![deny(missing_docs)]
