@@ -1,7 +1,7 @@
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
-use embedded_graphics::style::PrimitiveStyle;
+use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 static CIRCLE_SIZE: i32 = 32;
@@ -11,17 +11,17 @@ fn main() {
 
     let stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
-    let stroke_off_fill_off = PrimitiveStyle {
-        stroke_color: Some(BinaryColor::Off),
-        stroke_width: 1,
-        fill_color: Some(BinaryColor::Off),
-    };
+    let stroke_off_fill_off = PrimitiveStyleBuilder::new()
+        .stroke_color(BinaryColor::Off)
+        .stroke_width(1)
+        .fill_color(BinaryColor::Off)
+        .build();
 
-    let stroke_off_fill_on = PrimitiveStyle {
-        stroke_color: Some(BinaryColor::Off),
-        stroke_width: 1,
-        fill_color: Some(BinaryColor::On),
-    };
+    let stroke_off_fill_on = PrimitiveStyleBuilder::new()
+        .stroke_color(BinaryColor::Off)
+        .stroke_width(1)
+        .fill_color(BinaryColor::On)
+        .build();
 
     Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
         .into_styled(stroke)

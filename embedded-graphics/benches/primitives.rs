@@ -4,16 +4,16 @@ use embedded_graphics::{
     geometry::Point,
     pixelcolor::Gray8,
     primitives::{Circle, Line, Primitive, Rectangle, Triangle},
-    style::PrimitiveStyle,
+    style::{PrimitiveStyle, PrimitiveStyleBuilder},
 };
 
 fn filled_circle(c: &mut Criterion) {
     c.bench_function("filled circle", |b| {
-        let style = PrimitiveStyle {
-            fill_color: Some(Gray8::new(1)),
-            stroke_color: Some(Gray8::new(10)),
-            stroke_width: 1,
-        };
+        let style = PrimitiveStyleBuilder::new()
+            .fill_color(Gray8::new(1))
+            .stroke_color(Gray8::new(10))
+            .stroke_width(1)
+            .build();
 
         let object = &Circle::new(Point::new(100, 100), 100).into_styled(style);
 
@@ -23,11 +23,11 @@ fn filled_circle(c: &mut Criterion) {
 
 fn filled_rect(c: &mut Criterion) {
     c.bench_function("filled rectangle", |b| {
-        let style = PrimitiveStyle {
-            fill_color: Some(Gray8::new(1)),
-            stroke_color: Some(Gray8::new(10)),
-            stroke_width: 1,
-        };
+        let style = PrimitiveStyleBuilder::new()
+            .fill_color(Gray8::new(1))
+            .stroke_color(Gray8::new(10))
+            .stroke_width(1)
+            .build();
 
         let object = &Rectangle::new(Point::new(100, 100), Point::new(200, 200)).into_styled(style);
 
