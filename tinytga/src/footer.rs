@@ -1,4 +1,4 @@
-use nom::*;
+use nom::{bytes::complete::tag, number::complete::le_u32, IResult};
 
 /// TGA footer length in bytes
 pub const FOOTER_LEN: usize = 26;
@@ -13,16 +13,16 @@ pub struct TgaFooter {
     pub developer_directory_offset: u32,
 }
 
-named!(pub footer<&[u8], TgaFooter>,
-    do_parse!(
-        extension_area_offset: le_u32 >>
-        developer_directory_offset: le_u32 >>
-        tag!("TRUEVISION-XFILE.") >>
-        ({
-            TgaFooter {
-                extension_area_offset,
-                developer_directory_offset
-            }
-        })
-    )
-);
+pub fn footer(input: &[u8]) -> IResult<&[u8], TgaFooter> {
+    let (input, extension_area_offset) = le_u32(input)?;
+    let (input, developer_directory_offset) = le_u32(input)?;
+    let (input, _) = tag("TRUEVISION-XFILE.")(input)?;
+
+    Ok((
+        input,
+        TgaFooter {
+            extension_area_offset,
+            developer_directory_offset,
+        },
+    ))
+}

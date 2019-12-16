@@ -1,4 +1,10 @@
-use nom::*;
+use super::pixel_count;
+use nom::{
+    bits::{bits, complete::tag},
+    bytes::complete::take,
+    sequence::preceded,
+    IResult,
+};
 
 #[derive(Debug, PartialEq)]
 pub struct RawPacket<'a> {
@@ -16,25 +22,21 @@ impl<'a> RawPacket<'a> {
     }
 }
 
-named_args!(pub raw_packet(bytes_per_pixel: u8)<&[u8], RawPacket>,
-    do_parse!(
-        num_pixels: bits!(
-            preceded!(
-                // 0x00 = raw packet, 0x01 = RLE packet
-                tag_bits!(u8, 1, 0x00),
-                // Run length is encoded as 0 = 1 pixel, 1 = 2 pixels, etc, hence this offset
-                map!(take_bits!(u8, 7), |len| len + 1)
-            )
-        ) >>
-        pixel_data: take!(num_pixels * bytes_per_pixel) >>
-        (
+pub fn raw_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RawPacket> {
+    move |input| {
+        // 0x00 = raw packet, 0x01 = RLE packet
+        let (input, num_pixels) = bits(preceded(tag(0, 1u8), pixel_count))(input)?;
+        let (input, pixel_data) = take(num_pixels * bytes_per_pixel)(input)?;
+
+        Ok((
+            input,
             RawPacket {
                 num_pixels,
-                pixel_data
-            }
-        )
-    )
-);
+                pixel_data,
+            },
+        ))
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -57,7 +59,7 @@ mod tests {
             0x44,
         ];
 
-        let (remaining, packet) = raw_packet(&input, 4).unwrap();
+        let (remaining, packet) = raw_packet(4)(&input).unwrap();
 
         assert_eq!(remaining, &[]);
         assert_eq!(
@@ -84,7 +86,7 @@ mod tests {
             0xDD,
         ];
 
-        let result = raw_packet(&input, 4);
+        let result = raw_packet(4)(&input);
 
         assert!(result.is_err());
     }
@@ -111,7 +113,7 @@ mod tests {
             0x88,
         ];
 
-        let (remaining, packet) = raw_packet(&input, 4).unwrap();
+        let (remaining, packet) = raw_packet(4)(&input).unwrap();
 
         assert_eq!(remaining, &[0x55, 0x66, 0x77, 0x88]);
         assert_eq!(
