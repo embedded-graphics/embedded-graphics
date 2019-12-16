@@ -170,7 +170,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{Rgb888, RgbColor};
+    use crate::mock_display::MockDisplay;
+    use crate::pixelcolor::{Gray8, Rgb888, RgbColor};
 
     const PIXEL_COLORS: [(i32, i32, Rgb888); 16] = [
         (0, 0, Rgb888::WHITE),
@@ -231,5 +232,119 @@ mod tests {
         assert_eq!(pixels.next(), None);
 
         Ok(())
+    }
+
+    fn test_color_tga(data: &[u8]) {
+        let image: ImageTga<Rgb888> = ImageTga::new(data).unwrap();
+
+        let mut display = MockDisplay::new();
+        image.draw(&mut display);
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "WKRGBYMCW",
+                "KKRGBYMCW",
+                "WKRGBYMCW",
+                "KKKKKKKKK",
+                "WKWCMYBGR",
+            ])
+        );
+    }
+
+    fn test_gray_tga(data: &[u8]) {
+        let image: ImageTga<Gray8> = ImageTga::new(data).unwrap();
+
+        let mut display = MockDisplay::new();
+        image.draw(&mut display);
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "0F0F0F0F0",
+                "00FF00FF0",
+                "0000FFFF0",
+                "012345670",
+                "89ABCDEF0",
+            ])
+        );
+    }
+
+    /// Tests color mapped, uncompressed, bottom left origin TGA file.
+    #[test]
+    #[ignore]
+    fn type1_bl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type1_bl.tga"));
+    }
+
+    /// Tests color mapped, uncompressed, top left origin TGA file.
+    #[test]
+    fn type1_tl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type1_tl.tga"));
+    }
+
+    /// Tests true color, uncompressed, bottom left origin TGA file.
+    #[test]
+    #[ignore]
+    fn type2_bl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type2_bl.tga"));
+    }
+
+    /// Tests true color, uncompressed, top left origin TGA file.
+    #[test]
+    fn type2_tl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type2_tl.tga"));
+    }
+
+    /// Tests grayscale, uncompressed, bottom left origin TGA file.
+    #[test]
+    #[ignore]
+    fn type3_bl() {
+        test_gray_tga(include_bytes!("../../../tinytga/tests/type3_bl.tga"));
+    }
+
+    /// Tests grayscale, uncompressed, top left origin TGA file.
+    #[test]
+    fn type3_tl() {
+        test_gray_tga(include_bytes!("../../../tinytga/tests/type3_tl.tga"));
+    }
+
+    /// Tests color mapped, RLE compressed, bottom left origin TGA file.
+    #[test]
+    #[ignore]
+    fn type9_bl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type9_bl.tga"));
+    }
+
+    /// Tests color mapped, RLE compressed, top left origin TGA file.
+    #[test]
+    fn type9_tl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type9_tl.tga"));
+    }
+
+    /// Tests true color, RLE compressed, bottom left origin TGA file.
+    #[test]
+    #[ignore]
+    fn type10_bl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type10_bl.tga"));
+    }
+
+    /// Tests true color, RLE compressed, top left origin TGA file.
+    #[test]
+    fn type10_tl() {
+        test_color_tga(include_bytes!("../../../tinytga/tests/type10_tl.tga"));
+    }
+
+    /// Tests grayscale, RLE compressed, bottom left origin TGA file.
+    #[test]
+    #[ignore]
+    fn type11_bl() {
+        test_gray_tga(include_bytes!("../../../tinytga/tests/type11_bl.tga"));
+    }
+
+    /// Tests grayscale, RLE compressed, top left origin TGA file.
+    #[test]
+    fn type11_tl() {
+        test_gray_tga(include_bytes!("../../../tinytga/tests/type11_tl.tga"));
     }
 }
