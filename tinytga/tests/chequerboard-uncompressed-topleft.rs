@@ -35,10 +35,10 @@ fn chequerboard_uncompressed_topleft() {
     // Footer is empty for this image
     assert_eq!(
         img.footer,
-        TgaFooter {
+        Some(TgaFooter {
             extension_area_offset: 0,
             developer_directory_offset: 0
-        }
+        })
     );
 
     assert_eq!(img.pixel_data.len(), image_data_len as usize);
