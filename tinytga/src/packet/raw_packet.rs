@@ -26,7 +26,7 @@ pub fn raw_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RawPa
     move |input| {
         // 0x00 = raw packet, 0x01 = RLE packet
         let (input, num_pixels) = bits(preceded(tag(0, 1u8), pixel_count))(input)?;
-        let (input, pixel_data) = take(num_pixels * bytes_per_pixel)(input)?;
+        let (input, pixel_data) = take(num_pixels as usize * bytes_per_pixel as usize)(input)?;
 
         Ok((
             input,
