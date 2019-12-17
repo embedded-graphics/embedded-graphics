@@ -5,6 +5,7 @@
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 
+mod check_readme;
 mod header;
 
 use crate::header::parse_header;

@@ -11,6 +11,7 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+mod check_readme;
 mod footer;
 mod header;
 mod packet;
