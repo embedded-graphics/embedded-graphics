@@ -12,33 +12,41 @@ The simulator can be used to test and debug [embedded-graphics](https://crates.i
 
 ## Simulate a 128x64 SSD1306 OLED
 
-```rust
-use embedded_graphics::{icoord, circle, line, text_6x8};
-use embedded_graphics_simulator::{DisplayBuilder, DisplayTheme};
-use std::thread;
-use std::time::Duration;
+```rust,no_run
+use embedded_graphics::{
+    fonts::{Font6x8, Text},
+    pixelcolor::BinaryColor,
+    prelude::*,
+    primitives::{Circle, Line},
+    style::{PrimitiveStyle, TextStyle},
+};
+use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 fn main() {
- let mut display = DisplayBuilder::new()
-     .theme(DisplayTheme::OledBlue)
-     .size(128, 64)
-     .build();
+    let mut display = SimulatorDisplay::new(Size::new(129, 129));
 
- text_6x8!("Hello World!").draw(&mut display);
+    let line_style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
- egcircle!((96, 32), 31, stroke_color = Some(1u8.into())).draw(&mut display);
+    Circle::new(Point::new(64, 64), 64)
+        .into_styled(line_style)
+        .draw(&mut display);
 
- egline!((32, 32), (1, 32), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)).draw(&mut display);
- egline!((32, 32), (40, 40), stroke_color = Some(1u8.into())).translate(icoord!(64, 0)).draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(0, 64))
+        .into_styled(line_style)
+        .draw(&mut display);
+    Line::new(Point::new(64, 64), Point::new(80, 80))
+        .into_styled(line_style)
+        .draw(&mut display);
 
- loop {
-     let end = display.run_once();
+    Text::new("Hello World!", Point::new(5, 50))
+        .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+        .draw(&mut display);
 
-     if end {
-         break;
-     }
+    let mut window = WindowBuilder::new(&display)
+        .title("Hello World")
+        .theme(BinaryColorTheme::OledBlue)
+        .build();
 
-     thread::sleep(Duration::from_millis(200));
- }
+    window.show_static(&display);
 }
 ```
