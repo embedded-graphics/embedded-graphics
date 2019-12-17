@@ -15,7 +15,8 @@ Call `Tga.into_iter()` to get an iterator over individual pixels in the image.
 ```rust
 use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
 
-let data = include_bytes!("./image.tga");
+// Include an image from a local path as bytes
+let data = include_bytes!("../tests/chessboard_4px_rle.tga");
 
 // Create a TGA instance from a byte slice
 let img = Tga::from_slice(data).unwrap();
@@ -26,26 +27,26 @@ assert_eq!(
     TgaHeader {
         id_len: 0,
         has_color_map: false,
-        image_type: ImageType::Truecolor,
+        image_type: ImageType::RleTruecolor,
         color_map_start: 0,
         color_map_len: 0,
         color_map_depth: 0,
         x_origin: 0,
-        y_origin: 8,
-        width: 8,
-        height: 8,
+        y_origin: 4,
+        width: 4,
+        height: 4,
         pixel_depth: 24,
-        image_descriptor: 32
+        image_descriptor: 32,
     }
 );
 
 // Take a look at the footer
 assert_eq!(
     img.footer,
-    TgaFooter {
+    Some(TgaFooter {
         extension_area_offset: 0,
         developer_directory_offset: 0
-    }
+    })
 );
 
 // Collect pixels into a `Vec<u32>`
@@ -56,9 +57,9 @@ let pixels = img.into_iter().collect::<Vec<u32>>();
 
 Licensed under either of
 
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-  http://www.apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+-   Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+    http://www.apache.org/licenses/LICENSE-2.0)
+-   MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 

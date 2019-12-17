@@ -11,29 +11,31 @@ A small BMP parser designed for embedded, no-std environments but usable anywher
 ## Example
 
 ```rust
-use tinybmp::{Bmp, Header, FileType};
+use tinybmp::{Bmp, FileType, Header};
 
-let bmp =
-    Bmp::from_bytes(include_bytes!("./my_image.bmp")).expect("Failed to parse image");
+fn main() {
+    let bmp =
+        Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp")).expect("Failed to parse");
 
-// Metadata extracted from image. Assumes my_image.bmp is 8x8px, 24BPP
-assert_eq!(
-    bmp.header,
-    Header {
-        file_type: FileType::BM,
-        file_size: 314,
-        reserved_1: 0,
-        reserved_2: 0,
-        image_data_start: 122,
-        bpp: 24,
-        image_width: 8,
-        image_height: 8,
-    }
-);
+    assert_eq!(
+        bmp.header,
+        Header {
+            file_type: FileType::BM,
+            file_size: 314,
+            reserved_1: 0,
+            reserved_2: 0,
+            image_data_start: 122,
+            bpp: 24,
+            image_width: 8,
+            image_height: 8,
+            image_data_len: 192
+        }
+    );
 
-let image_data: &[u8] = bmp.image_data();
+    let image_data: &[u8] = bmp.image_data();
 
-// Render, process or iterate on `image_data` here
+    // Render, process or iterate on `image_data` here
+}
 ```
 
 ## License
