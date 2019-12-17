@@ -18,10 +18,35 @@
 //! | `' '`     | `None`                   | No drawing operation changed the pixel  |
 //! | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
 //! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
+//!
+//! # Characters used in `Gray8` patterns
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'0'`     | `Some(Gray8::new(0x00))` | Pixel was changed to `Gray8::new(0x00)` |
+//! | `'1'`     | `Some(Gray8::new(0x11))` | Pixel was changed to `Gray8::new(0x11)` |
+//! | `...`     |                          |                                         |
+//! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
+//! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
+//!
+//! # Characters used in `Rgb888` patterns
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'K'`     | `Some(Rgb888::BLACK)`    | Pixel was changed to `Rgb888::BLACK`    |
+//! | `'R'`     | `Some(Rgb888::RED)`      | Pixel was changed to `Rgb888::RED`      |
+//! | `'G'`     | `Some(Rgb888::GREEN)`    | Pixel was changed to `Rgb888::GREEN`    |
+//! | `'B'`     | `Some(Rgb888::BLUE)`     | Pixel was changed to `Rgb888::BLUE`     |
+//! | `'Y'`     | `Some(Rgb888::YELLOW)`   | Pixel was changed to `Rgb888::YELLOW`   |
+//! | `'M'`     | `Some(Rgb888::MAGENTA)`  | Pixel was changed to `Rgb888::MAGENTA`  |
+//! | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
+//! | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
 
 use crate::drawable::Pixel;
 use crate::geometry::{Point, Size};
-use crate::pixelcolor::{BinaryColor, PixelColor};
+use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, PixelColor, Rgb888, RgbColor};
 use crate::DrawTarget;
 use core::{
     cmp::PartialEq,
@@ -211,6 +236,61 @@ impl ColorMapping<BinaryColor> for BinaryColor {
         match color {
             BinaryColor::Off => '.',
             BinaryColor::On => '#',
+        }
+    }
+}
+
+impl ColorMapping<Gray8> for Gray8 {
+    fn char_to_color(c: char) -> Self {
+        let digit = match c {
+            '0'..='9' | 'A'..='F' => c.to_digit(16).unwrap(),
+            _ => panic!("Invalid char in pattern: '{}'", c),
+        };
+
+        Gray8::new(digit as u8 * 0x11)
+    }
+
+    fn color_to_char(color: Gray8) -> char {
+        let luma = color.luma();
+        let lower = luma & 0xF;
+        let upper = luma >> 4;
+
+        if lower != upper {
+            '?'
+        } else {
+            core::char::from_digit(lower as u32, 16)
+                .unwrap()
+                .to_ascii_uppercase()
+        }
+    }
+}
+
+impl ColorMapping<Rgb888> for Rgb888 {
+    fn char_to_color(c: char) -> Self {
+        match c {
+            'K' => Rgb888::BLACK,
+            'R' => Rgb888::RED,
+            'G' => Rgb888::GREEN,
+            'B' => Rgb888::BLUE,
+            'Y' => Rgb888::YELLOW,
+            'M' => Rgb888::MAGENTA,
+            'C' => Rgb888::CYAN,
+            'W' => Rgb888::WHITE,
+            _ => panic!("Invalid char in pattern: '{}'", c),
+        }
+    }
+
+    fn color_to_char(color: Rgb888) -> char {
+        match color {
+            Rgb888::BLACK => 'K',
+            Rgb888::RED => 'R',
+            Rgb888::GREEN => 'G',
+            Rgb888::BLUE => 'B',
+            Rgb888::YELLOW => 'Y',
+            Rgb888::MAGENTA => 'M',
+            Rgb888::CYAN => 'C',
+            Rgb888::WHITE => 'W',
+            _ => '?',
         }
     }
 }

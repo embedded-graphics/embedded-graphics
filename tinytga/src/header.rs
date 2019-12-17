@@ -1,5 +1,10 @@
 use crate::parse_error::ParseError;
-use nom::*;
+use nom::{
+    bytes::complete::take,
+    combinator::map_res,
+    number::complete::{le_u16, le_u8},
+    IResult,
+};
 
 /// TGA footer length in bytes
 pub const HEADER_LEN: usize = 18;
@@ -77,63 +82,57 @@ pub struct TgaHeader {
     pub image_descriptor: u8,
 }
 
-named!(has_color_map<&[u8], bool>,
-    map_res!(
-        le_u8,
-        |b| match b {
-            0 => Ok(false),
-            1 => Ok(true),
-            other => Err(ParseError::UnknownColorMap(other))
-        }
-    )
-);
+fn has_color_map(input: &[u8]) -> IResult<&[u8], bool> {
+    map_res(le_u8, |b| match b {
+        0 => Ok(false),
+        1 => Ok(true),
+        other => Err(ParseError::UnknownColorMap(other)),
+    })(input)
+}
 
-named!(image_type<&[u8], ImageType>,
-    map_res!(
-        le_u8,
-        |b| match b {
-            0 => Ok(ImageType::Empty),
-            1 => Ok(ImageType::ColorMapped),
-            2 => Ok(ImageType::Truecolor),
-            3 => Ok(ImageType::Monochrome),
-            9 => Ok(ImageType::RleColorMapped),
-            10 => Ok(ImageType::RleTruecolor),
-            11 => Ok(ImageType::RleMonochrome),
-            other => Err(ParseError::UnknownImageType(other))
-        }
-    )
-);
+fn image_type(input: &[u8]) -> IResult<&[u8], ImageType> {
+    map_res(le_u8, |b| match b {
+        0 => Ok(ImageType::Empty),
+        1 => Ok(ImageType::ColorMapped),
+        2 => Ok(ImageType::Truecolor),
+        3 => Ok(ImageType::Monochrome),
+        9 => Ok(ImageType::RleColorMapped),
+        10 => Ok(ImageType::RleTruecolor),
+        11 => Ok(ImageType::RleMonochrome),
+        other => Err(ParseError::UnknownImageType(other)),
+    })(input)
+}
 
-named!(pub header<&[u8], TgaHeader>,
-    do_parse!(
-        id_len: le_u8 >>
-        has_color_map: has_color_map >>
-        image_type: image_type >>
-        color_map_start: le_u16 >>
-        color_map_len: le_u16 >>
-        color_map_depth: le_u8 >>
-        x_origin: le_u16 >>
-        y_origin: le_u16 >>
-        width: le_u16 >>
-        height: le_u16 >>
-        pixel_depth: le_u8 >>
-        image_descriptor: le_u8 >>
-        _image_ident: take!(id_len) >>
-        ({
-            TgaHeader {
-                id_len,
-                has_color_map,
-                image_type,
-                color_map_start,
-                color_map_len,
-                color_map_depth,
-                x_origin,
-                y_origin,
-                width,
-                height,
-                pixel_depth,
-                image_descriptor,
-            }
-        })
-    )
-);
+pub fn header(input: &[u8]) -> IResult<&[u8], TgaHeader> {
+    let (input, id_len) = le_u8(input)?;
+    let (input, has_color_map) = has_color_map(input)?;
+    let (input, image_type) = image_type(input)?;
+    let (input, color_map_start) = le_u16(input)?;
+    let (input, color_map_len) = le_u16(input)?;
+    let (input, color_map_depth) = le_u8(input)?;
+    let (input, x_origin) = le_u16(input)?;
+    let (input, y_origin) = le_u16(input)?;
+    let (input, width) = le_u16(input)?;
+    let (input, height) = le_u16(input)?;
+    let (input, pixel_depth) = le_u8(input)?;
+    let (input, image_descriptor) = le_u8(input)?;
+    let (input, _image_ident) = take(id_len)(input)?;
+
+    Ok((
+        input,
+        TgaHeader {
+            id_len,
+            has_color_map,
+            image_type,
+            color_map_start,
+            color_map_len,
+            color_map_depth,
+            x_origin,
+            y_origin,
+            width,
+            height,
+            pixel_depth,
+            image_descriptor,
+        },
+    ))
+}
