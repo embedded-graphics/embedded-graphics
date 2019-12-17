@@ -2,6 +2,8 @@
 
 set -e
 
+cargo clean --doc
+
 cargo fmt --all -- --check
 cargo test --release
 cargo test --release --all-features
