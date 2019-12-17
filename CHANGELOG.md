@@ -24,6 +24,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #216 tinytga: Fixed integer overflow for some RLE compressed TGA files.
 
+- #218 simulator/tinybmp/tinytga: Test README examples in CI and update them to work with latest crate versions.
+
 ### Changed
 
 - **(breaking)** The `Drawable` trait now has a required trait method `draw()`, which describes how the object will be drawn on the screen. See the docs for more details.
