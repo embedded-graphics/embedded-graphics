@@ -82,29 +82,29 @@ fn main() {
     let mut display = Display::new();
 
     egcircle!(
-        (64, 64),
-        64,
+        center = (64, 64),
+        radius = 64,
         stroke_color = Some(BinaryColor::On)
     ).draw(&mut display);
     egline!(
-        (64, 64),
-        (0, 64),
+        start = (64, 64),
+        end = (0, 64),
         stroke_color = Some(BinaryColor::On)
     ).draw(&mut display);
     egline!(
-        (64, 64),
-        (80, 80),
+        start = (64, 64),
+        end = (80, 80),
         stroke_color = Some(BinaryColor::On)
     ).draw(&mut display);
     egrectangle!(
-        (64, 64),
-        (80, 80),
+        top_left = (64, 64),
+        bottom_right = (80, 80),
         stroke_color = None,
         fill_color = Some(BinaryColor::Off)
     ).draw(&mut display);
     egtext!(
-        "Hello world!",
-        Point::new(5, 50),
+        text = "Hello world!",
+        top_left = Point::new(5, 50),
         font = Font6x8,
         text_color = Some(BinaryColor::On)
     ).draw(&mut display);

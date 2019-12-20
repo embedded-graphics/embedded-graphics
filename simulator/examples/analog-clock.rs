@@ -41,8 +41,8 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
 
     // Use the circle macro to create the outer face
     let face = egcircle!(
-        CENTER,
-        SIZE,
+        center = CENTER,
+        radius = SIZE,
         stroke_color = Some(BinaryColor::On),
         stroke_width = 2
     );

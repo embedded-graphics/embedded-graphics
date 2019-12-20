@@ -25,16 +25,16 @@ fn main() {
     let row_offset = Point::new(0, 44);
 
     egtext!(
-        "123",
-        position,
+        text = "123",
+        top_left = position,
         font = SevenSegmentFont,
         text_color = Some(BinaryColor::On),
     )
     .draw(&mut display);
 
     egtext!(
-        "456",
-        position + row_offset,
+        text = "456",
+        top_left = position + row_offset,
         font = SevenSegmentFont,
         text_color = Some(BinaryColor::On),
     )

@@ -50,11 +50,11 @@
 //! fn main() {
 //!     let mut display = EpdDisplay {};
 //!
-//!     egrectangle!((0, 0), (100, 100), fill_color = Some(EpdColor::White)).draw(&mut display);
+//!     egrectangle!(top_left = (0, 0), bottom_right = (100, 100), fill_color = Some(EpdColor::White)).draw(&mut display);
 //!
-//!     egrectangle!((100, 0), (200, 100), fill_color = Some(EpdColor::Black)).draw(&mut display);
+//!     egrectangle!(top_left = (100, 0), bottom_right = (200, 100), fill_color = Some(EpdColor::Black)).draw(&mut display);
 //!
-//!     egrectangle!((200, 0), (300, 100), fill_color = Some(EpdColor::Red)).draw(&mut display);
+//!     egrectangle!(top_left = (200, 0), bottom_right = (300, 100), fill_color = Some(EpdColor::Red)).draw(&mut display);
 //! }
 //! ```
 //!

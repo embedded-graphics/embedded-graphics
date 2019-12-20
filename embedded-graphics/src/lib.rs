@@ -107,8 +107,8 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
-//! let c = egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED));
-//! let t = egtext!("Hello Rust!", Point::zero(), font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
+//! let c = egcircle!(center = (20, 20), radius = 8, fill_color = Some(Rgb565::RED));
+//! let t = egtext!(text = "Hello Rust!", top_left = Point::zero(), font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16));
 //!
 //! c.draw(&mut display);
 //! t.draw(&mut display);
@@ -126,9 +126,9 @@
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
-//!     egrectangle!((0, 0), (40, 40)).into_iter()
-//!         .chain(&egcircle!((20, 20), 8, fill_color = Some(Rgb565::RED)))
-//!         .chain(&egtext!(text, Point::zero(), font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
+//!     egrectangle!(top_left = (0, 0), bottom_right = (40, 40)).into_iter()
+//!         .chain(&egcircle!(center = (20, 20), radius = 8, fill_color = Some(Rgb565::RED)))
+//!         .chain(&egtext!(text = text, top_left = Point::zero(), font = Font6x8, text_color = Some(Rgb565::GREEN)).translate(Point::new(20, 16)))
 //! }
 //!
 //! fn main() {
@@ -252,7 +252,7 @@ use crate::style::{PrimitiveStyle, Styled};
 ///     };
 ///
 ///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     let circle = egcircle!((32, 32), 10, stroke_color = Some(Gray8::WHITE));
+///     let circle = egcircle!(center = (32, 32), radius = 10, stroke_color = Some(Gray8::WHITE));
 ///     circle.draw(&mut display);
 ///
 ///     // Update the display
@@ -330,7 +330,7 @@ use crate::style::{PrimitiveStyle, Styled};
 ///     };
 ///
 ///     // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
-///     let rect = egrectangle!((10, 20), (30, 40), stroke_color = Some(Gray8::WHITE));
+///     let rect = egrectangle!(top_left = (10, 20), bottom_right = (30, 40), stroke_color = Some(Gray8::WHITE));
 ///     rect.draw(&mut display); // Uses the accelerated draw_rectangle function
 ///
 ///     // Update the display

@@ -11,16 +11,16 @@ fn main() {
     let mut display = SimulatorDisplay::new(Size::new(384, 128));
 
     egcircle!(
-        (CIRCLE_SIZE, CIRCLE_SIZE),
-        CIRCLE_SIZE as u32,
+        center = (CIRCLE_SIZE, CIRCLE_SIZE),
+        radius = CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::On),
         stroke_width = 1,
     )
     .draw(&mut display);
 
     egcircle!(
-        (CIRCLE_SIZE, CIRCLE_SIZE),
-        CIRCLE_SIZE as u32,
+        center = (CIRCLE_SIZE, CIRCLE_SIZE),
+        radius = CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::On),
@@ -29,8 +29,8 @@ fn main() {
     .draw(&mut display);
 
     egcircle!(
-        (CIRCLE_SIZE, CIRCLE_SIZE),
-        CIRCLE_SIZE as u32,
+        center = (CIRCLE_SIZE, CIRCLE_SIZE),
+        radius = CIRCLE_SIZE as u32,
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::Off)
@@ -39,8 +39,8 @@ fn main() {
     .draw(&mut display);
 
     egrectangle!(
-        (0, 0),
-        (64, 64),
+        top_left = (0, 0),
+        bottom_right = (64, 64),
         stroke_color = Some(BinaryColor::On),
         stroke_width = 1,
     )
@@ -48,8 +48,8 @@ fn main() {
     .draw(&mut display);
 
     egrectangle!(
-        (0, 0),
-        (64, 64),
+        top_left = (0, 0),
+        bottom_right = (64, 64),
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::On)
@@ -58,8 +58,8 @@ fn main() {
     .draw(&mut display);
 
     egrectangle!(
-        (0, 0),
-        (64, 64),
+        top_left = (0, 0),
+        bottom_right = (64, 64),
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::Off)
@@ -68,9 +68,9 @@ fn main() {
     .draw(&mut display);
 
     egtriangle!(
-        (32, 0),
-        (0, 64),
-        (64, 64),
+        p1 = (32, 0),
+        p2 = (0, 64),
+        p3 = (64, 64),
         stroke_color = Some(BinaryColor::On),
         stroke_width = 1,
     )
@@ -78,9 +78,9 @@ fn main() {
     .draw(&mut display);
 
     egtriangle!(
-        (32, 0),
-        (0, 64),
-        (64, 64),
+        p1 = (32, 0),
+        p2 = (0, 64),
+        p3 = (64, 64),
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::On),
@@ -89,9 +89,9 @@ fn main() {
     .draw(&mut display);
 
     egtriangle!(
-        (32, 0),
-        (0, 64),
-        (64, 64),
+        p1 = (32, 0),
+        p2 = (0, 64),
+        p3 = (64, 64),
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::Off),

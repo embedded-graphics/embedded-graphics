@@ -55,8 +55,8 @@
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! egtext!(
-//!     "Hello Rust!",
-//!     Point::new(20, 30),
+//!     text = "Hello Rust!",
+//!     top_left = Point::new(20, 30),
 //!     font = Font6x8,
 //!     text_color = Some(Rgb565::YELLOW),
 //!     background_color = Some(Rgb565::BLUE),
@@ -109,8 +109,8 @@
 //! write!(&mut buf, "Value: {:.2}", value).expect("Failed to write to buffer");
 //!
 //! egtext!(
-//!     &buf,
-//!     Point::zero(),
+//!     text = &buf,
+//!     top_left = Point::zero(),
 //!     font = Font6x8,
 //!     text_color = Some(Rgb565::YELLOW),
 //!     background_color = Some(Rgb565::BLUE),
@@ -193,8 +193,8 @@ pub trait Font {
 /// use embedded_graphics::egtext;
 ///
 /// let text = egtext!(
-///     "text",
-///     Point::zero(),
+///     text = "text",
+///     top_left = Point::zero(),
 ///     font = Font6x8, // font needs to be the first styling property
 ///     text_color = Some(Rgb888::RED),
 /// );
@@ -223,46 +223,46 @@ mod tests {
     #[test]
     fn font_macros() {
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x8>> =
-            egtext!("Hello!", Point::zero(), font = Font6x8);
+            egtext!(text = "Hello!", top_left = Point::zero(), font = Font6x8);
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x12>> =
-            egtext!("Hello!", Point::zero(), font = Font6x12);
+            egtext!(text = "Hello!", top_left = Point::zero(), font = Font6x12);
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font8x16>> =
-            egtext!("Hello!", Point::zero(), font = Font8x16);
+            egtext!(text = "Hello!", top_left = Point::zero(), font = Font8x16);
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font12x16>> =
-            egtext!("Hello!", Point::zero(), font = Font12x16);
+            egtext!(text = "Hello!", top_left = Point::zero(), font = Font12x16);
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font24x32>> =
-            egtext!("Hello!", Point::zero(), font = Font24x32);
+            egtext!(text = "Hello!", top_left = Point::zero(), font = Font24x32);
     }
 
     #[test]
     fn styled_text() {
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x8>> = egtext!(
-            "Hello!",
-            Point::zero(),
+            text = "Hello!",
+            top_left = Point::zero(),
             font = Font6x8,
             text_color = Some(Rgb565::RED)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x12>> = egtext!(
-            "Hello!",
-            Point::zero(),
+            text = "Hello!",
+            top_left = Point::zero(),
             font = Font6x12,
             text_color = Some(Rgb565::GREEN)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font8x16>> = egtext!(
-            "Hello!",
-            Point::zero(),
+            text = "Hello!",
+            top_left = Point::zero(),
             font = Font8x16,
             text_color = Some(Rgb565::BLUE)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font12x16>> = egtext!(
-            "Hello!",
-            Point::zero(),
+            text = "Hello!",
+            top_left = Point::zero(),
             font = Font12x16,
             text_color = Some(Rgb565::YELLOW)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font24x32>> = egtext!(
-            "Hello!",
-            Point::zero(),
+            text = "Hello!",
+            top_left = Point::zero(),
             font = Font24x32,
             text_color = Some(Rgb565::MAGENTA)
         );

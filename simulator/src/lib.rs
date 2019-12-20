@@ -49,14 +49,14 @@
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
 //!
-//!     egtext!("Hello World!", Point::zero(), font = Font6x8).draw(&mut display);
+//!     egtext!(text = "Hello World!", top_left = Point::zero(), font = Font6x8).draw(&mut display);
 //!
-//!     egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
+//!     egcircle!(center = (96, 32), radius = 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
 //!
-//!     egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On))
+//!     egline!(start = (32, 32), end = (1, 32), stroke_color = Some(BinaryColor::On))
 //!         .translate(Point::new(64, 0))
 //!         .draw(&mut display);
-//!     egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On))
+//!     egline!(start = (32, 32), end = (40, 40), stroke_color = Some(BinaryColor::On))
 //!         .translate(Point::new(64, 0))
 //!         .draw(&mut display);
 //!

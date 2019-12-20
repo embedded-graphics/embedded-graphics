@@ -70,8 +70,8 @@ where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
-///         egrectangle!(self.top_left, self.bottom_right, fill_color = Some(self.bg_color)).draw(display);
-///         egtext!(self.text, Point::new(20, 20), font = Font6x8, text_color = Some(self.fg_color))
+///         egrectangle!(top_left = self.top_left, bottom_right = self.bottom_right, fill_color = Some(self.bg_color)).draw(display);
+///         egtext!(text = self.text, top_left = Point::new(20, 20), font = Font6x8, text_color = Some(self.fg_color))
 ///             .draw(display);
 ///     }
 /// }
