@@ -14,6 +14,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #217 tinytga: Added support for TGA files with color map.
 
+- #221 Implemented `Drawable` for `Pixel` to draw single pixels.
+
 ### Fixed
 
 - #143, #209 Circles with no stroke are now drawn correctly
