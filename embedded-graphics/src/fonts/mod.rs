@@ -201,7 +201,7 @@ pub trait Font {
 /// ```
 #[macro_export]
 macro_rules! egtext {
-    ($text:expr, $position:expr,
+    (text = $text:expr, top_left = $position:expr,
         font = $font:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
 
         let color = $crate::pixelcolor::BinaryColor::On.into();
