@@ -75,6 +75,36 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - tinybmp: Upgraded to nom 5 internally. No user-facing changes.
 
+- **(breaking)** #224 Embedded Graphics macros now use named instead of positional parameters
+
+  ```rust
+  // OLD
+  egcircle!((CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32);`
+  // NEW
+  egcircle!((CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32);
+
+  // OLD
+  egrectangle!((0, 0), (64, 64));`
+  // NEW
+  egrectangle!((0, 0), (64, 64));
+
+  // OLD
+  egtriangle!((32, 0), (0, 64), (64, 64));`
+  // NEW
+  egtriangle!(p1 = (32, 0), p2 = (0, 64), p3 = (64, 64));
+
+  // OLD
+  egline!((32, 0), (0, 64));`
+  // NEW
+  egline!(start = (32, 0), end = (0, 64));
+
+  // OLD
+  egtext!("456", (10, 10, font = Font6x8);`
+  // NEW
+  egtext!(text = "456", top_left = (10, 10, font = Font6x8);
+  ```
+>>>>>>> Add changelog entry
+
 ### Removed
 
 - **(breaking)** The `SizedDrawing` trait is removed.
