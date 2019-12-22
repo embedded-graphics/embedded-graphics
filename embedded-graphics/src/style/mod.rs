@@ -22,7 +22,7 @@ pub use text_style::TextStyle;
 /// );
 /// ```
 ///
-/// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html
+/// [`PrimitiveStyle`]: ./style/struct.PrimitiveStyle.html
 
 #[macro_export]
 macro_rules! primitivestyle {
