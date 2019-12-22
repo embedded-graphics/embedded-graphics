@@ -1,0 +1,6 @@
+# Run with `cargo +nightly fmt -- --config-path ./rustfmt.nightly.toml`
+# This config only works in nightly. It can be used to clean up doc comments without having to do it
+# manually.
+
+format_code_in_doc_comments = true
+merge_imports = true
