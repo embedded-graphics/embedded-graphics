@@ -225,13 +225,14 @@ macro_rules! egrectangle {
 /// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle};
 /// use embedded_graphics::style::{PrimitiveStyle, Styled};
 ///
-/// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(p1 = (10, 20), p2 = (30, 40), p3 = (50, 60));
+/// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
 /// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
-///     egtriangle!(p1 = Point::new(10, 20), p2 = Point::new(30, 40), p3 = Point::new(50, 60));
+///     egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
+/// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
+///     points = [(10, 20), (30, 40), (50, 60)]
+/// );
 /// let filled_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
-///     p1 = (10, 20),
-///     p2 = (30, 40),
-///     p3 = (50, 60),
+///     points = [(10, 20), (30, 40), (50, 60)],
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
@@ -248,9 +249,7 @@ macro_rules! egrectangle {
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
 /// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
-///     p1 = (10, 20),
-///     p2 = (30, 40),
-///     p3 = (50, 60),
+///     points = [(10, 20), (30, 40), (50, 60)],
 ///     stroke_color = Some(Rgb565::RED),
 ///     fill_color = Some(Rgb565::GREEN)
 /// );
@@ -267,7 +266,7 @@ macro_rules! egrectangle {
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
-    (p1 = $p1:expr, p2 = $p2:expr, p3 = $p3:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
+    (points = [ $p1:expr, $p2:expr, $p3:expr ] $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
         #[allow(unused_mut)]
         let mut style = $crate::style::PrimitiveStyle::default();
         $( style.$style_key = $style_value; )*
@@ -332,17 +331,12 @@ mod tests {
 
     #[test]
     fn triangle() {
-        let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
-            p1 = Point::new(10, 20),
-            p2 = Point::new(30, 40),
-            p3 = Point::new(50, 60)
-        );
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> =
-            egtriangle!(p1 = (10, 20), p2 = (30, 40), p3 = (50, 60));
+            egtriangle!(points = [Point::new(10, 20), Point::new(30, 40), Point::new(50, 60)]);
+        let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> =
+            egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
-            p1 = (10, 20),
-            p2 = (30, 40),
-            p3 = (50, 60),
+            points = [(10, 20), (30, 40), (50, 60)],
             stroke_color = Some(Rgb565::RED),
             fill_color = Some(Rgb565::GREEN)
         );

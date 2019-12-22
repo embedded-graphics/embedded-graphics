@@ -68,9 +68,7 @@ fn main() {
     .draw(&mut display);
 
     egtriangle!(
-        p1 = (32, 0),
-        p2 = (0, 64),
-        p3 = (64, 64),
+        points = [(32, 0), (0, 64), (64, 64)],
         stroke_color = Some(BinaryColor::On),
         stroke_width = 1,
     )
@@ -78,9 +76,7 @@ fn main() {
     .draw(&mut display);
 
     egtriangle!(
-        p1 = (32, 0),
-        p2 = (0, 64),
-        p3 = (64, 64),
+        points = [(32, 0), (0, 64), (64, 64)],
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::On),
@@ -89,9 +85,7 @@ fn main() {
     .draw(&mut display);
 
     egtriangle!(
-        p1 = (32, 0),
-        p2 = (0, 64),
-        p3 = (64, 64),
+        points = [(32, 0), (0, 64), (64, 64)],
         stroke_color = Some(BinaryColor::Off),
         stroke_width = 1,
         fill_color = Some(BinaryColor::Off),
