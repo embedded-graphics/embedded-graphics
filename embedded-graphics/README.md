@@ -68,10 +68,10 @@ fn main() {
 Macros are also supported for text and primitives:
 
 ```rust
+use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::{egcircle, egline, egrectangle, egtriangle, egtext};
+use embedded_graphics::{egcircle, egline, egrectangle, egtext, egtriangle, primitivestyle};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;
@@ -84,31 +84,36 @@ fn main() {
     egcircle!(
         center = (64, 64),
         radius = 64,
-        stroke_color = Some(BinaryColor::On)
-    ).draw(&mut display);
+        style = primitivestyle!(stroke_color = Some(BinaryColor::On))
+    )
+    .draw(&mut display);
     egline!(
         start = (64, 64),
         end = (0, 64),
-        stroke_color = Some(BinaryColor::On)
-    ).draw(&mut display);
+        style = primitivestyle!(stroke_color = Some(BinaryColor::On))
+    )
+    .draw(&mut display);
     egline!(
         start = (64, 64),
         end = (80, 80),
-        stroke_color = Some(BinaryColor::On)
-    ).draw(&mut display);
+        style = primitivestyle!(stroke_color = Some(BinaryColor::On))
+    )
+    .draw(&mut display);
     egrectangle!(
         top_left = (64, 64),
         bottom_right = (80, 80),
-        stroke_color = None,
-        fill_color = Some(BinaryColor::Off)
-    ).draw(&mut display);
+        style = primitivestyle!(stroke_color = None, fill_color = Some(BinaryColor::Off))
+    )
+    .draw(&mut display);
     egtext!(
         text = "Hello world!",
         top_left = Point::new(5, 50),
         font = Font6x8,
         text_color = Some(BinaryColor::On)
-    ).draw(&mut display);
+    )
+    .draw(&mut display);
 }
+
 ```
 
 ## Cargo Features

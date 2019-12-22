@@ -32,16 +32,18 @@ pub trait Primitive: Dimensions {
 /// ```rust
 /// use embedded_graphics::pixelcolor::Rgb565;
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egcircle, primitives::Circle};
 /// use embedded_graphics::style::{PrimitiveStyle, Styled};
+/// use embedded_graphics::{primitivestyle, egcircle,  primitives::Circle};
 ///
-/// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(center = (10, 20), radius = 30);
-/// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(center = Point::new(10, 20), radius = 30);
+/// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
+///     egcircle!(center = (10, 20), radius = 30);
+/// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
+///     egcircle!(center = Point::new(10, 20), radius = 30);
 /// let filled_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = (10, 20),
 ///     radius = 30,
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 /// ```
 ///
@@ -52,20 +54,21 @@ pub trait Primitive: Dimensions {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
+/// use embedded_graphics::primitivestyle;
 /// use embedded_graphics::{egcircle, pixelcolor::Rgb565, primitives::Circle};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
 /// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = (10, 20),
 ///     radius = 30,
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 /// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = Point::new(10, 20),
 ///     radius = 30,
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 ///
 /// let style = PrimitiveStyleBuilder::new()
@@ -74,18 +77,18 @@ pub trait Primitive: Dimensions {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = Circle::new(Point::new(10, 20), 30)
-///     .into_styled(style);
+/// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
+///     Circle::new(Point::new(10, 20), 30).into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egcircle {
-    (center = $center:expr, radius = $r:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_mut)]
-        let mut style = $crate::style::PrimitiveStyle::default();
-        $( style.$style_key = $style_value; )*
-
+    (center = $center:expr, radius = $r:expr $(,)?) => {{
         $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
-            .into_styled(style)
+            .into_styled($crate::style::PrimitiveStyle::default())
+    }};
+    (center = $center:expr, radius = $r:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
+            .into_styled($style)
     }};
 }
 
@@ -96,12 +99,17 @@ macro_rules! egcircle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egline, pixelcolor::Rgb565, primitives::Line};
 /// use embedded_graphics::style::{PrimitiveStyle, Styled};
+/// use embedded_graphics::{primitivestyle, egline, pixelcolor::Rgb565, primitives::Line};
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(start = (10, 20), end = (30, 40));
-/// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(start = Point::new(10, 20), end = Point::new(30, 40));
-/// let stroke_line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(start = (10, 20), end = (30, 40), stroke_color = Some(Rgb565::BLUE));
+/// let line: Styled<Line, PrimitiveStyle<Rgb565>> =
+///     egline!(start = Point::new(10, 20), end = Point::new(30, 40));
+/// let stroke_line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
+///     start = (10, 20),
+///     end = (30, 40),
+///     style = primitivestyle!(stroke_color = Some(Rgb565::BLUE))
+/// );
 /// ```
 ///
 /// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
@@ -111,20 +119,20 @@ macro_rules! egcircle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egline, pixelcolor::Rgb565, primitives::Line};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
+/// use embedded_graphics::{primitivestyle, egline, pixelcolor::Rgb565, primitives::Line};
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = Point::new(10, 20),
 ///     end = Point::new(30, 40),
-///     stroke_color = Some(Rgb565::BLUE),
-///     fill_color = Some(Rgb565::YELLOW)
+///    style = primitivestyle!( stroke_color = Some(Rgb565::BLUE),
+///     fill_color = Some(Rgb565::YELLOW))
 /// );
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = (10, 20),
 ///     end = (30, 40),
-///     stroke_color = Some(Rgb565::BLUE),
-///     fill_color = Some(Rgb565::YELLOW)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::BLUE),
+///     fill_color = Some(Rgb565::YELLOW))
 /// );
 ///
 /// let style = PrimitiveStyleBuilder::new()
@@ -134,21 +142,23 @@ macro_rules! egcircle {
 ///     .build();
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> =
-///     Line::new(Point::new(10, 20), Point::new(30, 40))
-///     .into_styled(style);
+///     Line::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egline {
-    (start = $start:expr, end = $end:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_mut)]
-        let mut style = $crate::style::PrimitiveStyle::default();
-        $( style.$style_key = $style_value; )*
-
+    (start = $start:expr, end = $end:expr $(,)?) => {{
         $crate::primitives::Line::new(
             $crate::geometry::Point::from($start),
-            $crate::geometry::Point::from($end)
+            $crate::geometry::Point::from($end),
         )
-            .into_styled(style)
+        .into_styled($crate::style::PrimitiveStyle::default())
+    }};
+    (start = $start:expr, end = $end:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Line::new(
+            $crate::geometry::Point::from($start),
+            $crate::geometry::Point::from($end),
+        )
+        .into_styled($style)
     }};
 }
 
@@ -157,16 +167,20 @@ macro_rules! egline {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
 /// use embedded_graphics::style::{PrimitiveStyle, Styled};
+/// use embedded_graphics::{primitivestyle, egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
 ///
-/// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(top_left = (10, 20), bottom_right = (30, 40));
-/// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(top_left = Point::new(10, 20), bottom_right = Point::new(30, 40));
+/// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
+///     egrectangle!(top_left = (10, 20), bottom_right = (30, 40));
+/// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
+///     top_left = Point::new(10, 20),
+///     bottom_right = Point::new(30, 40)
+/// );
 /// let filled_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///    style = primitivestyle!( stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 /// ```
 ///
@@ -177,20 +191,20 @@ macro_rules! egline {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
+/// use embedded_graphics::{primitivestyle, egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
 /// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 /// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = Point::new(10, 20),
 ///     bottom_right = Point::new(30, 40),
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///    style = primitivestyle!( stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 ///
 /// let style = PrimitiveStyleBuilder::new()
@@ -199,21 +213,24 @@ macro_rules! egline {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = Rectangle::new(Point::new(10, 20), Point::new(30, 40))
-///     .into_styled(style);
+/// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
+///     Rectangle::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
-    (top_left = $top_left:expr, bottom_right = $bottom_right:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_mut)]
-        let mut style = $crate::style::PrimitiveStyle::default();
-        $( style.$style_key = $style_value; )*
-
+    (top_left = $top_left:expr, bottom_right = $bottom_right:expr $(,)?) => {{
         $crate::primitives::Rectangle::new(
             $crate::geometry::Point::from($top_left),
-            $crate::geometry::Point::from($bottom_right)
+            $crate::geometry::Point::from($bottom_right),
         )
-            .into_styled(style)
+        .into_styled($crate::style::PrimitiveStyle::default())
+    }};
+    (top_left = $top_left:expr, bottom_right = $bottom_right:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Rectangle::new(
+            $crate::geometry::Point::from($top_left),
+            $crate::geometry::Point::from($bottom_right),
+        )
+        .into_styled($style)
     }};
 }
 
@@ -222,10 +239,9 @@ macro_rules! egrectangle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle};
 /// use embedded_graphics::style::{PrimitiveStyle, Styled};
+/// use embedded_graphics::{primitivestyle, egtriangle, pixelcolor::Rgb565, primitives::Triangle};
 ///
-/// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
 /// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
 ///     egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
 /// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
@@ -233,8 +249,8 @@ macro_rules! egrectangle {
 /// );
 /// let filled_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     points = [(10, 20), (30, 40), (50, 60)],
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 /// ```
 ///
@@ -245,13 +261,13 @@ macro_rules! egrectangle {
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egtriangle, pixelcolor::Rgb565, primitives::Triangle};
+/// use embedded_graphics::{egtriangle, primitivestyle, pixelcolor::Rgb565, primitives::Triangle};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
 /// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     points = [(10, 20), (30, 40), (50, 60)],
-///     stroke_color = Some(Rgb565::RED),
-///     fill_color = Some(Rgb565::GREEN)
+///     style = primitivestyle!(stroke_color = Some(Rgb565::RED),
+///     fill_color = Some(Rgb565::GREEN))
 /// );
 ///
 /// let style = PrimitiveStyleBuilder::new()
@@ -266,17 +282,21 @@ macro_rules! egrectangle {
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
-    (points = [ $p1:expr, $p2:expr, $p3:expr ] $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-        #[allow(unused_mut)]
-        let mut style = $crate::style::PrimitiveStyle::default();
-        $( style.$style_key = $style_value; )*
-
+    (points = [ $p1:expr, $p2:expr, $p3:expr ] $(,)?) => {{
         $crate::primitives::Triangle::new(
             $crate::geometry::Point::from($p1),
             $crate::geometry::Point::from($p2),
-            $crate::geometry::Point::from($p3)
+            $crate::geometry::Point::from($p3),
         )
-            .into_styled(style)
+        .into_styled($crate::style::PrimitiveStyle::default())
+    }};
+    (points = [ $p1:expr, $p2:expr, $p3:expr ], style = $style:expr $(,)?) => {{
+        $crate::primitives::Triangle::new(
+            $crate::geometry::Point::from($p1),
+            $crate::geometry::Point::from($p2),
+            $crate::geometry::Point::from($p3),
+        )
+        .into_styled($style)
     }};
 }
 
@@ -285,6 +305,7 @@ mod tests {
     use super::*;
     use crate::geometry::Point;
     use crate::pixelcolor::{Rgb565, RgbColor};
+    use crate::primitivestyle;
     use crate::style::PrimitiveStyle;
 
     #[test]
@@ -295,21 +316,25 @@ mod tests {
         let _c: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
             center = (10, 20),
             radius = 30,
-            stroke_color = Some(Rgb565::RED),
-            fill_color = Some(Rgb565::GREEN)
+            style = primitivestyle!(
+                stroke_color = Some(Rgb565::RED),
+                fill_color = Some(Rgb565::GREEN)
+            ),
         );
     }
 
     #[test]
     fn line() {
         let _l: Styled<Line, PrimitiveStyle<Rgb565>> =
-            egline!(start = Point::new(10, 20), end = Point::new(30, 40));
+            egline!(start = Point::new(10, 20), end = Point::new(30, 40),);
         let _l: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(start = (10, 20), end = (30, 40));
         let _l: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
             start = (10, 20),
             end = (30, 40),
-            stroke_color = Some(Rgb565::RED),
-            fill_color = Some(Rgb565::GREEN)
+            style = primitivestyle!(
+                stroke_color = Some(Rgb565::RED),
+                fill_color = Some(Rgb565::GREEN),
+            ),
         );
     }
 
@@ -317,28 +342,32 @@ mod tests {
     fn rectangle() {
         let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
             top_left = Point::new(10, 20),
-            bottom_right = Point::new(30, 40)
+            bottom_right = Point::new(30, 40),
         );
         let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
-            egrectangle!(top_left = (10, 20), bottom_right = (30, 40));
+            egrectangle!(top_left = (10, 20), bottom_right = (30, 40),);
         let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
             top_left = (10, 20),
             bottom_right = (30, 40),
-            stroke_color = Some(Rgb565::RED),
-            fill_color = Some(Rgb565::GREEN)
+            style = primitivestyle!(
+                stroke_color = Some(Rgb565::RED),
+                fill_color = Some(Rgb565::GREEN)
+            )
         );
     }
 
     #[test]
     fn triangle() {
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> =
-            egtriangle!(points = [Point::new(10, 20), Point::new(30, 40), Point::new(50, 60)]);
+            egtriangle!(points = [Point::new(10, 20), Point::new(30, 40), Point::new(50, 60)],);
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> =
             egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
             points = [(10, 20), (30, 40), (50, 60)],
-            stroke_color = Some(Rgb565::RED),
-            fill_color = Some(Rgb565::GREEN)
+            style = primitivestyle!(
+                stroke_color = Some(Rgb565::RED),
+                fill_color = Some(Rgb565::GREEN)
+            )
         );
     }
 }

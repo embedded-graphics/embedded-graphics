@@ -8,12 +8,12 @@
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
-use embedded_graphics::egcircle;
 use embedded_graphics::fonts::{Font12x16, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled, TextStyle};
+use embedded_graphics::{egcircle, primitivestyle};
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use std::thread;
 use std::time::Duration;
@@ -43,8 +43,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     let face = egcircle!(
         center = CENTER,
         radius = SIZE,
-        stroke_color = Some(BinaryColor::On),
-        stroke_width = 2
+        style = primitivestyle!(stroke_color = Some(BinaryColor::On), stroke_width = 2)
     );
 
     // Create 12 `Line`s starting from the outer edge and drawing inwards by `tic_len` pixels
