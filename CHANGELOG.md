@@ -79,19 +79,19 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
   ```rust
   // OLD
-  egcircle!((CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32);`
+  egcircle!((15, 20), 10u32);
   // NEW
-  egcircle!((CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32);
+  egcircle!(center = (15, 20), radius = 10u32);
 
   // OLD
-  egrectangle!((0, 0), (64, 64));`
-  // NEW
   egrectangle!((0, 0), (64, 64));
+  // NEW
+  egrectangle!(top_left = (0, 0), bottom_right = (64, 64));
 
   // OLD
-  egtriangle!((32, 0), (0, 64), (64, 64));`
+  egtriangle!((32, 0), (0, 64), (64, 64));
   // NEW
-  egtriangle!(p1 = (32, 0), p2 = (0, 64), p3 = (64, 64));
+  egtriangle!(points = [(32, 0), (0, 64), (64, 64)]);
 
   // OLD
   egline!((32, 0), (0, 64));`
@@ -99,9 +99,9 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   egline!(start = (32, 0), end = (0, 64));
 
   // OLD
-  egtext!("456", (10, 10, font = Font6x8);`
+  egtext!("456", (10, 10), font = Font6x8);`
   // NEW
-  egtext!(text = "456", top_left = (10, 10, font = Font6x8);
+  egtext!(text = "456", top_left = (10, 10), font = Font6x8);
   ```
 >>>>>>> Add changelog entry
 
