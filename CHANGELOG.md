@@ -52,7 +52,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
   // Or for macros:
 
-  let circle = egcircle!((20, 20), 5,
+  let circle = egcircle!(center = (20, 20), radius = 5,
     stroke_width = 10,
     stroke_color = Some(BinaryColor::On),
     fill_color = Some(BinaryColor::Off)
