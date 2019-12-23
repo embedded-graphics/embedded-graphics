@@ -16,6 +16,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #221 Implemented `Drawable` for `Pixel` to draw single pixels.
 
+- #215 Added `PrimitiveStyleBuilder`.
+
 ### Fixed
 
 - #143, #209 Circles with no stroke are now drawn correctly
