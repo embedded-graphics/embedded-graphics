@@ -8,6 +8,7 @@ use core::convert::TryFrom;
 ///
 /// [primitive]: ../primitives/index.html
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct PrimitiveStyle<C>
 where
     C: PixelColor,
@@ -25,9 +26,6 @@ where
 
     /// Stroke width in pixels.
     pub stroke_width: u32,
-
-    /// Private dummy field to prevent external initialization using a struct literal.
-    dummy: (),
 }
 
 impl<C> PrimitiveStyle<C>
@@ -40,7 +38,6 @@ where
             fill_color: None,
             stroke_color: None,
             stroke_width: 0,
-            dummy: (),
         }
     }
 
