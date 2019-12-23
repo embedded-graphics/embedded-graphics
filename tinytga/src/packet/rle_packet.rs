@@ -1,4 +1,10 @@
-use nom::*;
+use super::pixel_count;
+use nom::{
+    bits::{bits, complete::tag},
+    bytes::complete::take,
+    sequence::preceded,
+    IResult,
+};
 
 #[derive(Debug, PartialEq)]
 pub struct RlePacket<'a> {
@@ -16,26 +22,21 @@ impl<'a> RlePacket<'a> {
     }
 }
 
-named_args!(pub rle_packet(bytes_per_pixel: u8)<&[u8], RlePacket>,
-    do_parse!(
-        run_length: bits!(
-            preceded!(
-                // 0x00 = raw packet, 0x01 = RLE packet
-                tag_bits!(u8, 1, 0x01),
-                // Run length is encoded as 0 = 1 pixel, 1 = 2 pixels, etc, hence this offset
-                map!(take_bits!(u8, 7), |len| len + 1)
-            )
-        ) >>
-        pixel_data: take!(bytes_per_pixel) >>
-        (
+pub fn rle_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RlePacket> {
+    move |input| {
+        // 0x00 = raw packet, 0x01 = RLE packet
+        let (input, run_length) = bits(preceded(tag(1, 1u8), pixel_count))(input)?;
+        let (input, pixel_data) = take(bytes_per_pixel)(input)?;
+
+        Ok((
+            input,
             RlePacket {
-                // Run length is encoded as 0 = 1 pixel, 1 = 2 pixels, etc, hence this offset
                 run_length,
-                pixel_data
-            }
-        )
-    )
-);
+                pixel_data,
+            },
+        ))
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -53,7 +54,7 @@ mod tests {
             0xDD,
         ];
 
-        let (remaining, packet) = rle_packet(&input, 4).unwrap();
+        let (remaining, packet) = rle_packet(4)(&input).unwrap();
 
         assert_eq!(remaining, &[]);
         assert_eq!(
@@ -77,7 +78,7 @@ mod tests {
             0xDD,
         ];
 
-        let result = rle_packet(&input, 4);
+        let result = rle_packet(4)(&input);
 
         assert!(result.is_err());
     }
@@ -99,7 +100,7 @@ mod tests {
             0x44,
         ];
 
-        let (remaining, packet) = rle_packet(&input, 4).unwrap();
+        let (remaining, packet) = rle_packet(4)(&input).unwrap();
 
         assert_eq!(remaining, &[0x11, 0x22, 0x33, 0x44]);
         assert_eq!(

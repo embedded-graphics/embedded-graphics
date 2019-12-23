@@ -31,10 +31,10 @@ fn chessboard_4px_raw() {
 
     assert_eq!(
         img.footer,
-        TgaFooter {
+        Some(TgaFooter {
             extension_area_offset: 0,
             developer_directory_offset: 0
-        }
+        })
     );
 
     let pixels = img.into_iter().collect::<Vec<u32>>();

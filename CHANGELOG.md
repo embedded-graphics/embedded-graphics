@@ -12,11 +12,21 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #170 Added a `24x32` font based on the existing `12x16` font.
 
+- #217 tinytga: Added support for TGA files with color map.
+
+- #221 Implemented `Drawable` for `Pixel` to draw single pixels.
+
 ### Fixed
 
 - #143, #209 Circles with no stroke are now drawn correctly
 
 - #192 Performance of drawing in the simulator is increased.
+
+- #217 tinytga: Images without a TGA footer are now parsed correctly.
+
+- #216 tinytga: Fixed integer overflow for some RLE compressed TGA files.
+
+- #218 simulator/tinybmp/tinytga: Test README examples in CI and update them to work with latest crate versions.
 
 ### Changed
 

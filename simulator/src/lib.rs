@@ -80,6 +80,7 @@
 
 #![deny(missing_docs)]
 
+mod check_readme;
 mod display;
 mod theme;
 mod window;

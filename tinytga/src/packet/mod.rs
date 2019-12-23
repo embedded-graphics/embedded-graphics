@@ -3,7 +3,7 @@ mod rle_packet;
 
 pub use self::raw_packet::{raw_packet, RawPacket};
 pub use self::rle_packet::{rle_packet, RlePacket};
-use nom::*;
+use nom::{bits::complete::take, branch::alt, combinator::map, IResult};
 
 /// A Run Length Encoded (RLE) packet
 #[derive(Debug)]
@@ -34,9 +34,20 @@ impl<'a> Packet<'a> {
     }
 }
 
-named_args!(pub next_rle_packet(bytes_per_pixel: u8)<&[u8], Packet>,
-    alt_complete!(
-        map!(call!(rle_packet, bytes_per_pixel), |p| Packet::RlePacket(p)) |
-        map!(call!(raw_packet, bytes_per_pixel), |p| Packet::RawPacket(p))
-    )
-);
+pub fn next_rle_packet(input: &[u8], bytes_per_pixel: u8) -> IResult<&[u8], Packet> {
+    alt((
+        map(rle_packet(bytes_per_pixel), |p| Packet::RlePacket(p)),
+        map(raw_packet(bytes_per_pixel), |p| Packet::RawPacket(p)),
+    ))(input)
+}
+
+/// Parse pixel count in raw and RLE packets.
+///
+/// This parser expects bits as input!
+fn pixel_count(input: (&[u8], usize)) -> IResult<(&[u8], usize), u8> {
+    map(
+        take(7u8),
+        // Run length is encoded as 0 = 1 pixel, 1 = 2 pixels, etc, hence this offset
+        |count: u8| count + 1,
+    )(input)
+}

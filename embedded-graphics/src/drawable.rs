@@ -3,9 +3,46 @@ use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
 use crate::DrawTarget;
 
-/// A single pixel
+/// A single pixel.
+///
+/// `Pixel` objects are used to specify the position and color of drawn pixels.
+///
+/// # Examples
+///
+/// The [`Drawable`] trait is implemented for `Pixel` which allows single pixels
+/// to be drawn to a [`DrawTarget`]:
+/// ```
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::new();
+///
+/// Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
+/// ```
+///
+/// Iterators with `Pixel` items can also be drawn:
+/// ```
+/// use embedded_graphics::prelude::*;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::new();
+///
+/// (0..100).map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On)).draw(&mut display);
+/// ```
+///
+/// [`Drawable`]: trait.Drawable.html
+/// [`DrawTarget`]: ../trait.DrawTarget.html
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Pixel<C: PixelColor>(pub Point, pub C);
+
+impl<C> Drawable<C> for Pixel<C>
+where
+    C: PixelColor,
+{
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
+        display.draw_pixel(self);
+    }
+}
 
 /// Marks an object as "drawable". Must be implemented for all graphics objects
 ///
@@ -71,5 +108,30 @@ where
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
         display.draw_iter(self);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::mock_display::MockDisplay;
+    use crate::pixelcolor::BinaryColor;
+
+    #[test]
+    fn draw_pixel() {
+        let mut display = MockDisplay::new();
+        Pixel(Point::new(0, 0), BinaryColor::On).draw(&mut display);
+        Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display);
+        Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
+
+        #[rustfmt::skip]
+        assert_eq!(
+            MockDisplay::from_pattern(&[
+                "#  ",
+                "  #",
+                " # ",
+            ]),
+            display
+        );
     }
 }

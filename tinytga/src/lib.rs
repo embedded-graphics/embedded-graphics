@@ -11,6 +11,7 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+mod check_readme;
 mod footer;
 mod header;
 mod packet;
@@ -31,7 +32,10 @@ pub struct Tga<'a> {
     pub header: TgaHeader,
 
     /// TGA footer (last 26 bytes of file)
-    pub footer: TgaFooter,
+    pub footer: Option<TgaFooter>,
+
+    /// Color map
+    pub color_map: Option<&'a [u8]>,
 
     /// Image pixel data
     pub pixel_data: &'a [u8],
@@ -43,29 +47,42 @@ impl<'a> Tga<'a> {
         let (_remaining, header) = header(bytes).map_err(|_| ParseError::Header)?;
 
         // Read last 26 bytes as TGA footer
-        let (_remaining, footer) =
-            footer(&bytes[bytes.len() - FOOTER_LEN..]).map_err(|_| ParseError::Footer)?;
+        let footer = footer(&bytes[bytes.len() - FOOTER_LEN..])
+            .map(|(_remaining, footer)| footer)
+            .ok();
 
         let header_len = HEADER_LEN + header.id_len as usize;
 
-        // TODO: Support color maps with by color map size with
-        // (header.color_map_len * header.color_map_entry_size)
-        let image_data_start = header_len;
+        let color_map = if header.has_color_map {
+            let len =
+                usize::from(header.color_map_len) * (usize::from(header.color_map_depth + 7) / 8);
 
-        let image_data_end = [
-            footer.extension_area_offset as usize,
-            footer.developer_directory_offset as usize,
-        ]
-        .iter()
-        .filter_map(|v| if *v > 0 { Some(*v) } else { None })
-        .min()
-        .unwrap_or(bytes.len() - FOOTER_LEN);
+            Some(&bytes[header_len..header_len + len])
+        } else {
+            None
+        };
+
+        let image_data_start = header_len + color_map.map_or(0, |map| map.len());
+
+        let image_data_end = if let Some(footer) = footer {
+            [
+                footer.extension_area_offset as usize,
+                footer.developer_directory_offset as usize,
+            ]
+            .iter()
+            .filter_map(|v| if *v > 0 { Some(*v) } else { None })
+            .min()
+            .unwrap_or(bytes.len() - FOOTER_LEN)
+        } else {
+            bytes.len()
+        };
 
         let pixel_data = &bytes[image_data_start..image_data_end];
 
         Ok(Self {
             header,
             footer,
+            color_map,
             pixel_data,
         })
     }
@@ -97,12 +114,12 @@ impl<'a> IntoIterator for &'a Tga<'a> {
 
     fn into_iter(self) -> Self::IntoIter {
         let (bytes_to_consume, current_packet) = match self.header.image_type {
-            ImageType::Monochrome | ImageType::Truecolor => {
+            ImageType::Monochrome | ImageType::Truecolor | ImageType::ColorMapped => {
                 let data = Packet::from_slice(self.image_data());
 
                 (Some(self.image_data()), data)
             }
-            ImageType::RleMonochrome | ImageType::RleTruecolor => {
+            ImageType::RleMonochrome | ImageType::RleTruecolor | ImageType::RleColorMapped => {
                 next_rle_packet(self.image_data(), self.bpp() / 8)
                     .map(|(remaining, packet)| (Some(remaining), packet))
                     .expect("Failed to parse first image RLE data packet")
@@ -163,10 +180,10 @@ impl<'a> Iterator for TgaIterator<'a> {
         if self.current_packet_position >= self.current_packet_pixel_length {
             // Parse next packet from remaining bytes
             match self.tga.header.image_type {
-                ImageType::Monochrome | ImageType::Truecolor => {
+                ImageType::Monochrome | ImageType::Truecolor | ImageType::ColorMapped => {
                     return None;
                 }
-                ImageType::RleMonochrome | ImageType::RleTruecolor => {
+                ImageType::RleMonochrome | ImageType::RleTruecolor | ImageType::RleColorMapped => {
                     if self.bytes_to_consume.is_none() {
                         return None;
                     } else {
@@ -216,7 +233,7 @@ impl<'a> Iterator for TgaIterator<'a> {
             }
         };
 
-        let pixel_value = {
+        let mut pixel_value = {
             let out = match self.stride {
                 1 => u32::from(px[start]),
                 2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
@@ -229,6 +246,29 @@ impl<'a> Iterator for TgaIterator<'a> {
 
             out
         };
+
+        if let Some(color_map) = self.tga.color_map {
+            let entry_size = usize::from(self.tga.header.color_map_depth + 7) / 8;
+            let start = pixel_value as usize * entry_size;
+
+            pixel_value = match entry_size {
+                1 => color_map[start] as u32,
+                2 => u32::from_le_bytes([color_map[start], color_map[start + 1], 0, 0]),
+                3 => u32::from_le_bytes([
+                    color_map[start],
+                    color_map[start + 1],
+                    color_map[start + 2],
+                    0,
+                ]),
+                4 => u32::from_le_bytes([
+                    color_map[start],
+                    color_map[start + 1],
+                    color_map[start + 2],
+                    color_map[start + 3],
+                ]),
+                depth => unreachable!("Depth {} is not supported", depth),
+            };
+        }
 
         Some(pixel_value)
     }

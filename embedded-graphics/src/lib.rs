@@ -146,7 +146,7 @@
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
-//! [`Font6x8`]: ./fonts/type.Font6x8.html
+//! [`Font6x8`]: ./fonts/struct.Font6x8.html
 //! [`DrawTarget`]: ./trait.DrawTarget.html
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 
