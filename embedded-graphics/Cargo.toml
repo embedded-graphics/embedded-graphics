@@ -20,17 +20,6 @@ edition = "2018"
 [package.metadata.docs.rs]
 all-features = true
 
-[[bench]]
-harness = false
-name = "primitives"
-[[bench]]
-harness = false
-name = "fonts"
-[[bench]]
-harness = false
-name = "image"
-required-features = ["bmp"]
-
 [badges]
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
@@ -47,5 +36,4 @@ bmp = [ "tinybmp" ]
 tga = [ "tinytga" ]
 
 [dev-dependencies]
-criterion = { version = "0.2.11", default-features = false }
 arrayvec = "0.4.11"

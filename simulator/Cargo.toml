@@ -20,6 +20,17 @@ exclude = [
 [badges]
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
+[[bench]]
+harness = false
+name = "primitives"
+[[bench]]
+harness = false
+name = "fonts"
+[[bench]]
+harness = false
+name = "image"
+required-features = ["bmp"]
+
 [dependencies]
 sdl2 = "0.32.2"
 
@@ -29,3 +40,4 @@ features = [ "bmp", "tga" ]
 
 [dev-dependencies]
 chrono = "0.4.9"
+criterion = { version = "0.2.11", default-features = false }
