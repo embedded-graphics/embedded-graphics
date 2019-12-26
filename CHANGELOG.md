@@ -71,7 +71,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** Text rendering is now implemented using `Text`, `TextStyle` and `Font` objects instead of using `Font::render_str`.
 
-- tinybmp: Upgraded to Nom 5 internally. No user-facing changes.
+- tinybmp: Upgraded to nom 5 internally. No user-facing changes.
 
 ### Removed
 
