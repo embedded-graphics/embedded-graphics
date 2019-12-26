@@ -3,8 +3,15 @@
 [![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/embedded-graphics.svg)](https://crates.io/crates/embedded-graphics)
 [![Docs.rs](https://docs.rs/embedded-graphics/badge.svg)](https://docs.rs/embedded-graphics)
+[![embedded-graphics on Discord](https://img.shields.io/matrix/rust-embedded-graphics:matrix.org)](https://matrix.to/#/#rust-embedded-graphics:matrix.org)
 
 ![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
+
+## Getting help/reporting an issue
+
+If you think you've found a bug, or would like to suggest a new feature to add to embedded-graphics, please [open an issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
+
+If you need more deeper/more personalised help, please check out the [embedded-graphics Matrix channel](https://matrix.to/#/#rust-embedded-graphics:matrix.org).
 
 ## [Documentation](https://docs.rs/embedded-graphics)
 
