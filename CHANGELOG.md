@@ -18,6 +18,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #215 Added `PrimitiveStyleBuilder`.
 
+- #224 Added `Triangle::from_points` which accepts either `[Point; 3]`, or an array of length 3 containing any item that implements `Into<Point>`.
+
 ### Fixed
 
 - #143, #209 Circles with no stroke are now drawn correctly
@@ -103,7 +105,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   // NEW
   egtext!(text = "456", top_left = (10, 10), font = Font6x8);
   ```
->>>>>>> Add changelog entry
+
+  > > > > > > > Add changelog entry
 
 ### Removed
 

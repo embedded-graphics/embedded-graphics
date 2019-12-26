@@ -1,13 +1,20 @@
 //! The triangle primitive.
 
-use super::super::drawable::{Drawable, Pixel};
-use super::super::transform::Transform;
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::primitives::line::{Line, StyledLineIterator};
-use crate::primitives::Primitive;
-use crate::style::{PrimitiveStyle, Styled};
-use crate::DrawTarget;
+use super::super::{
+    drawable::{Drawable, Pixel},
+    transform::Transform,
+};
+use crate::{
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
+    primitives::{
+        line::{Line, StyledLineIterator},
+        Primitive,
+    },
+    style::{PrimitiveStyle, Styled},
+    DrawTarget,
+};
+use core::borrow::Borrow;
 
 /// Triangle primitive
 ///
@@ -18,10 +25,9 @@ use crate::DrawTarget;
 /// ## Create some triangles with different styles
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::primitives::Triangle;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// use embedded_graphics::style::PrimitiveStyle;
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565, prelude::*, primitives::Triangle, style::PrimitiveStyle,
+/// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
@@ -36,7 +42,29 @@ use crate::DrawTarget;
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
-#[derive(Debug, Clone, Copy)]
+///
+/// ## Create a triangle from an array of points
+///
+/// ```rust
+/// use embedded_graphics::{
+///     geometry::Point,
+///     primitives::Triangle,
+/// };
+///
+/// let p1 = Point::new(5, 10);
+/// let p2 = Point::new(15, 25);
+/// let p3 = Point::new(5, 25);
+///
+/// // Owned
+/// let tri = Triangle::from_points([p1, p2, p3]);
+///
+/// // Or borrowed
+/// let tri_ref = Triangle::from_points(&[p1, p2, p3]);
+/// #
+/// # assert_eq!(tri, Triangle::new(p1, p2, p3));
+/// # assert_eq!(tri_ref, Triangle::new(p1, p2, p3));
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Triangle {
     /// First point of the triangle
     pub p1: Point,
@@ -74,6 +102,26 @@ impl Triangle {
     /// Create a new triangle with a given style
     pub const fn new(p1: Point, p2: Point, p3: Point) -> Self {
         Triangle { p1, p2, p3 }
+    }
+
+    /// Create a new triangle from an array of points
+    ///
+    /// This supports both [`Point`]s, as well as anything that implements `Into<Point>` like
+    /// `(i32, i32)`.
+    ///
+    /// [`Point`]: ../../geometry/struct.Point.html
+    pub fn from_points<P, I>(points: P) -> Self
+    where
+        I: Into<Point> + Copy,
+        P: Borrow<[I; 3]>,
+    {
+        let points = points.borrow();
+
+        Triangle {
+            p1: points[0].into(),
+            p2: points[1].into(),
+            p3: points[2].into(),
+        }
     }
 }
 

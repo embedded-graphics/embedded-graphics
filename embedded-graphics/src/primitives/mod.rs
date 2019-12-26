@@ -316,21 +316,12 @@ macro_rules! egrectangle {
 /// ```
 #[macro_export]
 macro_rules! egtriangle {
-    (points = [ $p1:expr, $p2:expr, $p3:expr ] $(,)?) => {{
-        $crate::primitives::Triangle::new(
-            $crate::geometry::Point::from($p1),
-            $crate::geometry::Point::from($p2),
-            $crate::geometry::Point::from($p3),
-        )
-        .into_styled($crate::style::PrimitiveStyle::default())
+    (points = $points:expr $(,)?) => {{
+        $crate::primitives::Triangle::from_points($points)
+            .into_styled($crate::style::PrimitiveStyle::default())
     }};
-    (points = [ $p1:expr, $p2:expr, $p3:expr ], style = $style:expr $(,)?) => {{
-        $crate::primitives::Triangle::new(
-            $crate::geometry::Point::from($p1),
-            $crate::geometry::Point::from($p2),
-            $crate::geometry::Point::from($p3),
-        )
-        .into_styled($style)
+    (points = $points:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Triangle::from_points($points).into_styled($style)
     }};
 }
 
