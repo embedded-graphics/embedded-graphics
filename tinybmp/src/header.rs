@@ -3,7 +3,11 @@
 //! Information gleaned from [wikipedia](https://en.wikipedia.org/wiki/BMP_file_format) and
 //! [this website](http://paulbourke.net/dataformats/bmp/)
 
-use nom::*;
+use nom::{
+    bytes::complete::tag,
+    number::complete::{le_u16, le_u32},
+    IResult,
+};
 
 /// Bitmap file type
 #[derive(Debug, Clone, PartialEq)]
@@ -43,25 +47,23 @@ pub struct Header {
     pub image_data_len: u32,
 }
 
-named!(pub(crate) parse_header<&[u8], Header>,
-    do_parse!(
-        tag!("BM") >>
-        file_size: le_u32 >>
-        reserved_1: le_u16 >>
-        reserved_2: le_u16 >>
-        image_data_start: le_u32 >>
-        // Remaining header length in bytes
-        le_u32 >>
-        image_width: le_u32 >>
-        image_height: le_u32 >>
-        // Number of color planes
-        le_u16 >>
-        bpp: le_u16 >>
-        // Compression method used
-        le_u32 >>
-        image_data_len: le_u32 >>
-        // Omitted: extraneous, unused fields
-        (Header{
+pub fn parse_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = tag("BM")(input)?;
+    let (input, file_size) = le_u32(input)?;
+    let (input, reserved_1) = le_u16(input)?;
+    let (input, reserved_2) = le_u16(input)?;
+    let (input, image_data_start) = le_u32(input)?;
+    let (input, _) = le_u32(input)?;
+    let (input, image_width) = le_u32(input)?;
+    let (input, image_height) = le_u32(input)?;
+    let (input, _) = le_u16(input)?;
+    let (input, bpp) = le_u16(input)?;
+    let (input, _) = le_u32(input)?;
+    let (input, image_data_len) = le_u32(input)?;
+
+    Ok((
+        input,
+        Header {
             file_type: FileType::BM,
             file_size,
             reserved_1,
@@ -70,7 +72,7 @@ named!(pub(crate) parse_header<&[u8], Header>,
             image_width,
             image_height,
             image_data_len,
-            bpp
-        })
-    )
-);
+            bpp,
+        },
+    ))
+}
