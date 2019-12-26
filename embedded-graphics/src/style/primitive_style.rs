@@ -7,7 +7,8 @@ use core::convert::TryFrom;
 /// is drawn.
 ///
 /// [primitive]: ../primitives/index.html
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct PrimitiveStyle<C>
 where
     C: PixelColor,
@@ -77,6 +78,53 @@ where
     }
 }
 
+/// Primitive style builder.
+#[derive(Debug, PartialEq, Eq)]
+pub struct PrimitiveStyleBuilder<C>
+where
+    C: PixelColor,
+{
+    style: PrimitiveStyle<C>,
+}
+
+impl<C> PrimitiveStyleBuilder<C>
+where
+    C: PixelColor,
+{
+    /// Creates a new primitive style builder.
+    pub fn new() -> Self {
+        Self {
+            style: PrimitiveStyle::default(),
+        }
+    }
+
+    /// Sets the fill color.
+    pub fn fill_color(&mut self, fill_color: C) -> &mut Self {
+        self.style.fill_color = Some(fill_color);
+
+        self
+    }
+
+    /// Sets the stroke color.
+    pub fn stroke_color(&mut self, stroke_color: C) -> &mut Self {
+        self.style.stroke_color = Some(stroke_color);
+
+        self
+    }
+
+    /// Sets the stroke width.
+    pub fn stroke_width(&mut self, stroke_width: u32) -> &mut Self {
+        self.style.stroke_width = stroke_width;
+
+        self
+    }
+
+    /// Builds the primitive style.
+    pub fn build(&self) -> PrimitiveStyle<C> {
+        self.style
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -108,5 +156,34 @@ mod tests {
 
         style.stroke_width = 0xFFFFFFFF;
         assert_eq!(style.stroke_width_i32(), 0x7FFFFFFF);
+    }
+
+    #[test]
+    fn builder_default() {
+        assert_eq!(
+            PrimitiveStyleBuilder::<BinaryColor>::new().build(),
+            PrimitiveStyle::<BinaryColor>::default()
+        );
+    }
+
+    #[test]
+    fn builder_stroke() {
+        assert_eq!(
+            PrimitiveStyleBuilder::new()
+                .stroke_color(BinaryColor::On)
+                .stroke_width(10)
+                .build(),
+            PrimitiveStyle::with_stroke(BinaryColor::On, 10)
+        );
+    }
+
+    #[test]
+    fn builder_fill() {
+        assert_eq!(
+            PrimitiveStyleBuilder::new()
+                .fill_color(BinaryColor::On)
+                .build(),
+            PrimitiveStyle::with_fill(BinaryColor::On)
+        );
     }
 }

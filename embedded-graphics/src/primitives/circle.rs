@@ -21,7 +21,7 @@ use crate::DrawTarget;
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::primitives::Circle;
 /// use embedded_graphics::pixelcolor::Rgb565;
-/// use embedded_graphics::style::PrimitiveStyle;
+/// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
@@ -31,11 +31,11 @@ use crate::DrawTarget;
 ///     .draw(&mut display);
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
-/// let style = PrimitiveStyle {
-///     stroke_color: Some(Rgb565::RED),
-///     stroke_width: 3,
-///     fill_color: Some(Rgb565::GREEN),
-/// };
+/// let style = PrimitiveStyleBuilder::new()
+///     .stroke_color(Rgb565::RED)
+///     .stroke_width(3)
+///     .fill_color(Rgb565::GREEN)
+///     .build();
 ///
 /// Circle::new(Point::new(50, 20), 30)
 ///     .into_styled(style)
@@ -228,6 +228,7 @@ mod tests {
     use super::*;
     use crate::mock_display::MockDisplay;
     use crate::pixelcolor::BinaryColor;
+    use crate::style::PrimitiveStyleBuilder;
 
     #[test]
     fn stroke_width_doesnt_affect_fill() {
@@ -294,11 +295,11 @@ mod tests {
                 Circle::new(Point::new(10, 16), size)
                     .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-            let style = PrimitiveStyle {
-                fill_color: Some(BinaryColor::On),
-                stroke_color: Some(BinaryColor::On),
-                stroke_width: 1,
-            };
+            let style = PrimitiveStyleBuilder::new()
+                .fill_color(BinaryColor::On)
+                .stroke_color(BinaryColor::On)
+                .stroke_width(1)
+                .build();
             let circle_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
                 Circle::new(Point::new(10, 16), size).into_styled(style);
 

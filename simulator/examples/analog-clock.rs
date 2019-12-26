@@ -13,7 +13,7 @@ use embedded_graphics::fonts::{Font12x16, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
-use embedded_graphics::style::{PrimitiveStyle, Styled, TextStyle};
+use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled, TextStyle};
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
 use std::thread;
 use std::time::Duration;
@@ -82,11 +82,11 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
     let decoration_position = polar(seconds_radians, SIZE as f32 - 20.0);
 
     // Decoration style
-    let decoration_style = PrimitiveStyle {
-        fill_color: Some(BinaryColor::Off),
-        stroke_color: Some(BinaryColor::On),
-        stroke_width: 1,
-    };
+    let decoration_style = PrimitiveStyleBuilder::new()
+        .fill_color(BinaryColor::Off)
+        .stroke_color(BinaryColor::On)
+        .stroke_width(1)
+        .build();
 
     // Add a fancy circle near the end of the hand
     let decoration = Circle::new(decoration_position, 5).into_styled(decoration_style);
