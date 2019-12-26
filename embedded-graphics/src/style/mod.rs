@@ -15,19 +15,20 @@ pub use text_style::TextStyle;
 ///
 ///
 /// ```rust
-/// use embedded_graphics::{primitivestyle, pixelcolor::{RgbColor, Rgb565}};
+/// use embedded_graphics::{
+///     pixelcolor::{Rgb565, RgbColor},
+///     primitive_style,
+/// };
 ///
-/// let style = primitivestyle!(
-///     fill_color = Some(Rgb565::RED),
-/// );
+/// let style = primitive_style!(fill_color = Some(Rgb565::RED),);
 /// ```
 ///
 /// [`PrimitiveStyle`]: ./style/struct.PrimitiveStyle.html
 
 #[macro_export]
-macro_rules! primitivestyle {
+macro_rules! primitive_style {
     ($($style_key:ident = $style_value:expr ),* $(,)?) => {{
-    	#[allow(unused_mut)]
+        #[allow(unused_mut)]
         let mut style = $crate::style::PrimitiveStyle::default();
 
         $( style.$style_key = $style_value; )*

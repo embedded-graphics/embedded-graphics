@@ -79,11 +79,13 @@
 //! This example uses the [`Circle`] primitive and the [`Font6x8`] font to draw a filled circle and  some text over it on the screen.
 //!
 //! ```rust
-//! use embedded_graphics::fonts::{Font6x8, Text};
-//! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::primitives::Circle;
-//! use embedded_graphics::style::{PrimitiveStyle, TextStyle};
+//! use embedded_graphics::{
+//!     fonts::{Font6x8, Text},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     primitives::Circle,
+//!     style::{PrimitiveStyle, TextStyle},
+//! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
@@ -101,17 +103,16 @@
 //! primitives and text. Converting the example above, we get this:
 //!
 //! ```rust
-//! use embedded_graphics::fonts::Font6x8;
-//! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{egcircle, egtext, primitivestyle};
+//! use embedded_graphics::{
+//!     egcircle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
+//! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!(
 //!     center = (20, 20),
 //!     radius = 8,
-//!     style = primitivestyle!(fill_color = Some(Rgb565::RED))
+//!     style = primitive_style!(fill_color = Some(Rgb565::RED))
 //! );
 //! let t = egtext!(
 //!     text = "Hello Rust!",
@@ -129,10 +130,10 @@
 //! Items can be chained to build more complex graphics objects.
 //!
 //! ```rust
-//! use embedded_graphics::fonts::Font6x8;
-//! use embedded_graphics::pixelcolor::Rgb565;
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{egcircle, egrectangle, egtext, primitivestyle};
+//! use embedded_graphics::{
+//!     egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*,
+//!     primitive_style,
+//! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
@@ -141,16 +142,14 @@
 //!         .chain(&egcircle!(
 //!             center = (20, 20),
 //!             radius = 8,
-//!             style = primitivestyle!(fill_color = Some(Rgb565::RED))
+//!             style = primitive_style!(fill_color = Some(Rgb565::RED))
 //!         ))
-//!         .chain(
-//!             &egtext!(
-//!                 text = text,
-//!                 top_left = Point::new(20, 16),
-//!                 font = Font6x8,
-//!                 text_color = Some(Rgb565::GREEN)
-//!             )
-//!         )
+//!         .chain(&egtext!(
+//!             text = text,
+//!             top_left = Point::new(20, 16),
+//!             font = Font6x8,
+//!             text_color = Some(Rgb565::GREEN)
+//!         ))
 //! }
 //!
 //! fn main() {
@@ -202,11 +201,13 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-use crate::drawable::Drawable;
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::primitives::Primitive;
-use crate::style::{PrimitiveStyle, Styled};
+use crate::{
+    drawable::Drawable,
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
+    primitives::Primitive,
+    style::{PrimitiveStyle, Styled},
+};
 
 /// Defines a display that can be used to render [`Drawable`] objects.
 ///
@@ -225,12 +226,14 @@ use crate::style::{PrimitiveStyle, Styled};
 /// communicates over a (simplified) SPI interface:
 ///
 /// ```rust
-/// use embedded_graphics::drawable::Pixel;
-/// use embedded_graphics::{egcircle, primitivestyle};
-/// use embedded_graphics::geometry::Size;
-/// use embedded_graphics::pixelcolor::{Gray8, GrayColor};
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::DrawTarget;
+/// use embedded_graphics::{
+///     drawable::Pixel,
+///     egcircle,
+///     geometry::Size,
+///     pixelcolor::{Gray8, GrayColor},
+///     prelude::*,
+///     primitive_style, DrawTarget,
+/// };
 ///
 /// # struct SPI1;
 /// #
@@ -277,7 +280,7 @@ use crate::style::{PrimitiveStyle, Styled};
 ///     let circle = egcircle!(
 ///         center = (32, 32),
 ///         radius = 10,
-///         style = primitivestyle!(stroke_color = Some(Gray8::WHITE))
+///         style = primitive_style!(stroke_color = Some(Gray8::WHITE))
 ///     );
 ///     circle.draw(&mut display);
 ///
@@ -298,7 +301,7 @@ use crate::style::{PrimitiveStyle, Styled};
 /// ```rust
 /// # use embedded_graphics::prelude::*;
 /// # use embedded_graphics::DrawTarget;
-/// # use embedded_graphics::{egrectangle, primitivestyle};
+/// # use embedded_graphics::{egrectangle, primitive_style};
 /// # use embedded_graphics::primitives::rectangle::Rectangle;
 /// # use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// # use embedded_graphics::drawable::Pixel;
@@ -359,7 +362,7 @@ use crate::style::{PrimitiveStyle, Styled};
 ///     let rect = egrectangle!(
 ///         top_left = (10, 20),
 ///         bottom_right = (30, 40),
-///         style = primitivestyle!(stroke_color = Some(Gray8::WHITE))
+///         style = primitive_style!(stroke_color = Some(Gray8::WHITE))
 ///     );
 ///     rect.draw(&mut display); // Uses the accelerated draw_rectangle function
 ///

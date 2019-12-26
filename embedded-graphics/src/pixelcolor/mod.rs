@@ -11,9 +11,7 @@
 //! 3 color EPD display.
 //!
 //! ```
-//! use embedded_graphics::{egrectangle, primitivestyle};
-//! use embedded_graphics::geometry::Size;
-//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::{egrectangle, geometry::Size, prelude::*, primitive_style};
 //!
 //! /// Color with 3 states.
 //! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,21 +51,21 @@
 //!     egrectangle!(
 //!         top_left = (0, 0),
 //!         bottom_right = (100, 100),
-//!         style = primitivestyle!(fill_color = Some(EpdColor::White))
+//!         style = primitive_style!(fill_color = Some(EpdColor::White))
 //!     )
 //!     .draw(&mut display);
 //!
 //!     egrectangle!(
 //!         top_left = (100, 0),
 //!         bottom_right = (200, 100),
-//!         style = primitivestyle!(fill_color = Some(EpdColor::Black))
+//!         style = primitive_style!(fill_color = Some(EpdColor::Black))
 //!     )
 //!     .draw(&mut display);
 //!
 //!     egrectangle!(
 //!         top_left = (200, 0),
 //!         bottom_right = (300, 100),
-//!         style = primitivestyle!(fill_color = Some(EpdColor::Red))
+//!         style = primitive_style!(fill_color = Some(EpdColor::Red))
 //!     )
 //!     .draw(&mut display);
 //! }

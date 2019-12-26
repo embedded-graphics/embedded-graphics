@@ -1,7 +1,5 @@
 //! `Drawable` trait and helpers
-use crate::geometry::Point;
-use crate::pixelcolor::PixelColor;
-use crate::DrawTarget;
+use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 
 /// A single pixel.
 ///
@@ -12,8 +10,7 @@ use crate::DrawTarget;
 /// The [`Drawable`] trait is implemented for `Pixel` which allows single pixels
 /// to be drawn to a [`DrawTarget`]:
 /// ```
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
@@ -22,12 +19,13 @@ use crate::DrawTarget;
 ///
 /// Iterators with `Pixel` items can also be drawn:
 /// ```
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
-/// (0..100).map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On)).draw(&mut display);
+/// (0..100)
+///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
+///     .draw(&mut display);
 /// ```
 ///
 /// [`Drawable`]: trait.Drawable.html
@@ -51,11 +49,14 @@ where
 /// over pixels being rendered with [`DrawTarget`]'s [`draw_iter`] method.
 ///
 /// ```rust
-/// use embedded_graphics::fonts::Font6x8;
-/// use embedded_graphics::geometry::Point;
-/// use embedded_graphics::pixelcolor::{BinaryColor, PixelColor, Rgb888};
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, egtext, primitivestyle};
+/// use embedded_graphics::{
+///     egrectangle, egtext,
+///     fonts::Font6x8,
+///     geometry::Point,
+///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
+///     prelude::*,
+///     primitive_style,
+/// };
 ///
 /// struct Button<'a, C: PixelColor> {
 ///     top_left: Point,
@@ -73,7 +74,7 @@ where
 ///         egrectangle!(
 ///             top_left = self.top_left,
 ///             bottom_right = self.bottom_right,
-///             style = primitivestyle!(fill_color = Some(self.bg_color))
+///             style = primitive_style!(fill_color = Some(self.bg_color))
 ///         )
 ///         .draw(display);
 ///         egtext!(
@@ -123,8 +124,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::BinaryColor;
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[test]
     fn draw_pixel() {
