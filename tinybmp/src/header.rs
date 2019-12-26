@@ -53,12 +53,12 @@ pub fn parse_header(input: &[u8]) -> IResult<&[u8], Header> {
     let (input, reserved_1) = le_u16(input)?;
     let (input, reserved_2) = le_u16(input)?;
     let (input, image_data_start) = le_u32(input)?;
-    let (input, _) = le_u32(input)?;
+    let (input, _header_size) = le_u32(input)?;
     let (input, image_width) = le_u32(input)?;
     let (input, image_height) = le_u32(input)?;
-    let (input, _) = le_u16(input)?;
+    let (input, _color_planes) = le_u16(input)?;
     let (input, bpp) = le_u16(input)?;
-    let (input, _) = le_u32(input)?;
+    let (input, _compression_method) = le_u32(input)?;
     let (input, image_data_len) = le_u32(input)?;
 
     Ok((
