@@ -6,7 +6,7 @@ use crate::pixelcolor::PixelColor;
 /// `TextStyle` can be applied to a [`Text`] object to define how a text is drawn.
 ///
 /// [`Text`]: ../fonts/struct.Text.html
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct TextStyle<C, F>
 where
     C: PixelColor,
