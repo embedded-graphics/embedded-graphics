@@ -89,8 +89,11 @@ pub trait Primitive: Dimensions {
 #[macro_export]
 macro_rules! egcircle {
     (center = $center:expr, radius = $r:expr $(,)?) => {{
-        $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
-            .into_styled($crate::style::PrimitiveStyle::default())
+        $crate::egcircle!(
+            center = $center,
+            radius = $r,
+            style = $crate::style::PrimitiveStyle::default()
+        )
     }};
     (center = $center:expr, radius = $r:expr, style = $style:expr $(,)?) => {{
         $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
@@ -162,11 +165,11 @@ macro_rules! egcircle {
 #[macro_export]
 macro_rules! egline {
     (start = $start:expr, end = $end:expr $(,)?) => {{
-        $crate::primitives::Line::new(
-            $crate::geometry::Point::from($start),
-            $crate::geometry::Point::from($end),
+        $crate::egline!(
+            start = $start,
+            end = $end,
+            style = $crate::style::PrimitiveStyle::default()
         )
-        .into_styled($crate::style::PrimitiveStyle::default())
     }};
     (start = $start:expr, end = $end:expr, style = $style:expr $(,)?) => {{
         $crate::primitives::Line::new(
@@ -245,11 +248,11 @@ macro_rules! egline {
 #[macro_export]
 macro_rules! egrectangle {
     (top_left = $top_left:expr, bottom_right = $bottom_right:expr $(,)?) => {{
-        $crate::primitives::Rectangle::new(
-            $crate::geometry::Point::from($top_left),
-            $crate::geometry::Point::from($bottom_right),
+        $crate::egrectangle!(
+            top_left = $top_left,
+            bottom_right = $bottom_right,
+            style = $crate::style::PrimitiveStyle::default()
         )
-        .into_styled($crate::style::PrimitiveStyle::default())
     }};
     (top_left = $top_left:expr, bottom_right = $bottom_right:expr, style = $style:expr $(,)?) => {{
         $crate::primitives::Rectangle::new(
@@ -317,8 +320,10 @@ macro_rules! egrectangle {
 #[macro_export]
 macro_rules! egtriangle {
     (points = $points:expr $(,)?) => {{
-        $crate::primitives::Triangle::from_points($points)
-            .into_styled($crate::style::PrimitiveStyle::default())
+        $crate::egtriangle!(
+            points = $points,
+            style = $crate::style::PrimitiveStyle::default()
+        )
     }};
     (points = $points:expr, style = $style:expr $(,)?) => {{
         $crate::primitives::Triangle::from_points($points).into_styled($style)
