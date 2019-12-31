@@ -71,7 +71,9 @@ Macros are also supported for text and primitives:
 use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egline, egrectangle, egtext, egtriangle, primitive_style};
+use embedded_graphics::{
+    egcircle, egline, egrectangle, egtext, egtriangle, primitive_style, text_style,
+};
 
 // Only used for examples - this would be replaced by the driver for your chosen display
 use embedded_graphics::mock_display::MockDisplay as Display;
@@ -108,11 +110,11 @@ fn main() {
     egtext!(
         text = "Hello world!",
         top_left = Point::new(5, 50),
-        font = Font6x8,
-        text_color = Some(BinaryColor::On)
+        style = text_style!(font = Font6x8, text_color = Some(BinaryColor::On))
     )
     .draw(&mut display);
 }
+
 
 ```
 

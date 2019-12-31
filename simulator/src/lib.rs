@@ -35,7 +35,7 @@
 //! ```rust,no_run
 //! use embedded_graphics::pixelcolor::BinaryColor;
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{egcircle, egline, egtext, primitive_style};
+//! use embedded_graphics::{egcircle, egline, egtext, primitive_style, text_style};
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics_simulator::{
 //!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, WindowBuilder,
@@ -49,7 +49,7 @@
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
 //!
-//!     egtext!(text = "Hello World!", top_left = Point::zero(), font = Font6x8).draw(&mut display);
+//!     egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8)).draw(&mut display);
 //!
 //!     egcircle!(center = (96, 32), radius = 31, style = primitive_style!(stroke_color = Some(BinaryColor::On))).draw(&mut display);
 //!

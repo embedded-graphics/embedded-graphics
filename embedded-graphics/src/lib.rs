@@ -104,7 +104,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     egcircle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
+//!     egcircle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style, text_style
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
@@ -117,8 +117,8 @@
 //! let t = egtext!(
 //!     text = "Hello Rust!",
 //!     top_left = Point::new(20, 16),
-//!     font = Font6x8,
-//!     text_color = Some(Rgb565::GREEN)
+//!     style = text_style!(font = Font6x8,
+//!     text_color = Some(Rgb565::GREEN))
 //! );
 //!
 //! c.draw(&mut display);
@@ -132,7 +132,7 @@
 //! ```rust
 //! use embedded_graphics::{
 //!     egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*,
-//!     primitive_style,
+//!     primitive_style, text_style
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //!
@@ -147,8 +147,9 @@
 //!         .chain(&egtext!(
 //!             text = text,
 //!             top_left = Point::new(20, 16),
+//! style = text_style!(
 //!             font = Font6x8,
-//!             text_color = Some(Rgb565::GREEN)
+//!             text_color = Some(Rgb565::GREEN))
 //!         ))
 //! }
 //!

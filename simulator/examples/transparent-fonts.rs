@@ -1,7 +1,7 @@
 use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egrectangle, egtext, primitive_style};
+use embedded_graphics::{egcircle, egrectangle, egtext, primitive_style, text_style};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() {
@@ -23,26 +23,29 @@ fn main() {
     egtext!(
         text = "Hello world! - no background",
         top_left = Point::new(15, 15),
-        font = Font6x8,
-        text_color = Some(Rgb565::WHITE),
+        style = text_style!(font = Font6x8, text_color = Some(Rgb565::WHITE),)
     )
     .draw(&mut display);
 
     egtext!(
         text = "Hello world! - filled background",
         top_left = Point::new(15, 30),
-        font = Font6x8,
-        text_color = Some(Rgb565::YELLOW),
-        background_color = Some(Rgb565::BLUE)
+        style = text_style!(
+            font = Font6x8,
+            text_color = Some(Rgb565::YELLOW),
+            background_color = Some(Rgb565::BLUE)
+        )
     )
     .draw(&mut display);
 
     egtext!(
         text = "Hello world! - inverse background",
         top_left = Point::new(15, 45),
-        font = Font6x8,
-        text_color = Some(Rgb565::BLUE),
-        background_color = Some(Rgb565::YELLOW)
+        style = text_style!(
+            font = Font6x8,
+            text_color = Some(Rgb565::BLUE),
+            background_color = Some(Rgb565::YELLOW)
+        )
     )
     .draw(&mut display);
 

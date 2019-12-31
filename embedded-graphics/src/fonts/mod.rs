@@ -18,10 +18,10 @@
 //! without using the [`egtext`] macro, it can be reused to style multiple text objects.
 //!
 //! ```rust
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::fonts::{Text, Font6x8};
-//! use embedded_graphics::style::TextStyle;
+//! use embedded_graphics::fonts::{Font6x8, Text};
 //! use embedded_graphics::pixelcolor::Rgb565;
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
@@ -37,38 +37,63 @@
 //!     .into_styled(style)
 //!     .draw(&mut display);
 //! ```
+//!
 //! ## Draw text using the `egtext` macro
 //!
-//! Creating styled texts can be simplified by using the [`egtext`] macro.
+//! Creating styled text can be simplified by using the [`egtext`] and [`text_style`] macros.
 //! All style properties in [`TextStyle`] can be set by using assignments inside
-//! the [`egtext`] macro call.
+//! the [`text_style`] macro call.
 //!
 //! The following example draws the same text as the previous example but uses
-//! the [`egtext`] macro to build the necessary styled text objects.
+//! the [`egtext`] macro to build the necessary styled text objects, and the [`text_style`] macro to style it.
 //!
 //! ```rust
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::egtext;
+//! use embedded_graphics::text_style;
+//! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::pixelcolor::Rgb565;
+//! use embedded_graphics::prelude::*;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! egtext!(
 //!     text = "Hello Rust!",
 //!     top_left = Point::new(20, 30),
+//! style = text_style!(
 //!     font = Font6x8,
 //!     text_color = Some(Rgb565::YELLOW),
 //!     background_color = Some(Rgb565::BLUE),
-//! ).draw(&mut display);
+//! )
+//! )
+//! .draw(&mut display);
 //! ```
+//!
+//! It is also possible to provide a style created without using the [`text_style`] macro.
+//!
+//! ```rust
+//! use embedded_graphics::{egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, style::TextStyle};
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//!
+//! egtext!(
+//!     text = "Hello Rust!",
+//!     top_left = Point::new(20, 30),
+//! style = TextStyle {
+//!     font: Font6x8,
+//!     text_color: Some(Rgb565::YELLOW),
+//!     background_color: Some(Rgb565::BLUE),
+//! }
+//! )
+//! .draw(&mut display);
+//! ```
+//!
 //! ## Translate text by (20px, 30px)
 //!
 //! ```rust
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::fonts::{Text, Font6x8};
-//! use embedded_graphics::style::TextStyle;
+//! use embedded_graphics::fonts::{Font6x8, Text};
 //! use embedded_graphics::pixelcolor::BinaryColor;
+//! use embedded_graphics::prelude::*;
+//! use embedded_graphics::style::TextStyle;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //!
@@ -93,10 +118,11 @@
 //! ```rust
 //! use arrayvec::ArrayString;
 //! use core::fmt::Write;
+//! use embedded_graphics::egtext;
+//! use embedded_graphics::text_style;
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::egtext;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
 //!
@@ -111,10 +137,13 @@
 //! egtext!(
 //!     text = &buf,
 //!     top_left = Point::zero(),
+//!     style = text_style!(
 //!     font = Font6x8,
 //!     text_color = Some(Rgb565::YELLOW),
 //!     background_color = Some(Rgb565::BLUE),
-//! ).draw(&mut display);
+//! )
+//! )
+//! .draw(&mut display);
 //! ```
 //!
 //! # Built-in fonts
@@ -129,6 +158,7 @@
 //!
 //! [built-in fonts]: #built-in-fonts
 //! [`egtext`]: ../macro.egtext.html
+//! [`text_style`]: ../macro.text_style.html
 //! [`Font6x8`]: struct.Font6x8.html
 //! [`Font6x12`]: struct.Font6x12.html
 //! [`Font8x16`]: struct.Font8x16.html
@@ -184,32 +214,35 @@ pub trait Font {
 ///
 /// The `egtext` macro expects the text, the position and styling properties as arguments.
 ///
+/// The `style` property accepts anything that creates a [`TextStyle`] object. This can be an object
+/// literal, usage of the [`text_style`] macro, or something else like a function call.
+///
 /// # Examples
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::pixelcolor::Rgb888;
-/// use embedded_graphics::fonts::Font6x8;
 /// use embedded_graphics::egtext;
+/// use embedded_graphics::text_style;
+/// use embedded_graphics::fonts::Font6x8;
+/// use embedded_graphics::pixelcolor::Rgb888;
+/// use embedded_graphics::prelude::*;
 ///
 /// let text = egtext!(
 ///     text = "text",
 ///     top_left = Point::zero(),
-///     font = Font6x8, // font needs to be the first styling property
+/// style = text_style!(
+///     font = Font6x8, // Font must to be the first styling property
 ///     text_color = Some(Rgb888::RED),
+/// )
 /// );
 /// ```
+///
+/// [`TextStyle`]: ../style/struct.TextStyle.html
+/// [`text_style`]: ../macro.text_style.html
 #[macro_export]
 macro_rules! egtext {
     (text = $text:expr, top_left = $position:expr,
-        font = $font:expr $(, $style_key:ident = $style_value:expr )* $(,)?) => {{
-
-        let color = $crate::pixelcolor::BinaryColor::On.into();
-        #[allow(unused_mut)]
-        let mut style = $crate::style::TextStyle::new($font, color);
-        $( style.$style_key = $style_value; )*
-
-        $crate::fonts::Text::new($text, $position).into_styled(style)
+        style = $style:expr $(,)?) => {{
+        $crate::fonts::Text::new($text, $position).into_styled($style)
     }};
 }
 
@@ -219,19 +252,35 @@ mod tests {
     use crate::geometry::Point;
     use crate::pixelcolor::{BinaryColor, Rgb565, RgbColor};
     use crate::style::{Styled, TextStyle};
+    use crate::text_style;
 
     #[test]
     fn font_macros() {
-        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x8>> =
-            egtext!(text = "Hello!", top_left = Point::zero(), font = Font6x8);
-        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x12>> =
-            egtext!(text = "Hello!", top_left = Point::zero(), font = Font6x12);
-        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font8x16>> =
-            egtext!(text = "Hello!", top_left = Point::zero(), font = Font8x16);
-        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font12x16>> =
-            egtext!(text = "Hello!", top_left = Point::zero(), font = Font12x16);
-        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font24x32>> =
-            egtext!(text = "Hello!", top_left = Point::zero(), font = Font24x32);
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x8>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font6x8)
+        );
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x12>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font6x12)
+        );
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font8x16>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font8x16)
+        );
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font12x16>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font12x16)
+        );
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font24x32>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font24x32)
+        );
     }
 
     #[test]
@@ -239,32 +288,27 @@ mod tests {
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x8>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            font = Font6x8,
-            text_color = Some(Rgb565::RED)
+            style = text_style!(font = Font6x8, text_color = Some(Rgb565::RED))
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x12>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            font = Font6x12,
-            text_color = Some(Rgb565::GREEN)
+            style = text_style!(font = Font6x12, text_color = Some(Rgb565::GREEN))
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font8x16>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            font = Font8x16,
-            text_color = Some(Rgb565::BLUE)
+            style = text_style!(font = Font8x16, text_color = Some(Rgb565::BLUE))
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font12x16>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            font = Font12x16,
-            text_color = Some(Rgb565::YELLOW)
+            style = text_style!(font = Font12x16, text_color = Some(Rgb565::YELLOW))
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font24x32>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            font = Font24x32,
-            text_color = Some(Rgb565::MAGENTA)
+            style = text_style!(font = Font24x32, text_color = Some(Rgb565::MAGENTA))
         );
     }
 }

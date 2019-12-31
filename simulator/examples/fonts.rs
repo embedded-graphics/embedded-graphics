@@ -1,8 +1,8 @@
-use embedded_graphics::egtext;
 use embedded_graphics::fonts::{Font12x16, Font6x12, Font6x8, Font8x16, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::style::TextStyle;
+use embedded_graphics::{egtext, text_style};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() {
@@ -28,9 +28,11 @@ fn main() {
     egtext!(
         text = "Hello world! - inverse 6x8 with macro",
         top_left = Point::new(15, 40),
-        font = Font6x8,
-        text_color = Some(BinaryColor::On),
-        background_color = Some(BinaryColor::Off),
+        style = text_style!(
+            font = Font6x8,
+            text_color = Some(BinaryColor::On),
+            background_color = Some(BinaryColor::Off)
+        )
     )
     .draw(&mut display);
 
@@ -48,7 +50,7 @@ fn main() {
     egtext!(
         text = "Hello 12x16!",
         top_left = Point::new(15, 105),
-        font = Font12x16
+        style = text_style!(font = Font12x16)
     )
     .draw(&mut display);
 

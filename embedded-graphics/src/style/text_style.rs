@@ -35,6 +35,15 @@ where
             background_color: None,
         }
     }
+
+    /// Create a text style with only the font defined
+    pub fn with_font(font: F) -> Self {
+        Self {
+            font,
+            text_color: None,
+            background_color: None,
+        }
+    }
 }
 
 #[cfg(test)]
