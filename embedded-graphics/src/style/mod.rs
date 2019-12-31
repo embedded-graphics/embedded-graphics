@@ -6,7 +6,7 @@ mod text_style;
 
 pub use primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder};
 pub use styled::Styled;
-pub use text_style::TextStyle;
+pub use text_style::{TextStyle, TextStyleBuilder};
 
 /// Create a [`PrimitiveStyle`]
 ///
@@ -50,20 +50,16 @@ macro_rules! primitive_style {
 /// This will result in a white font with transparent background.
 ///
 /// ```rust
-/// use embedded_graphics::fonts::Font6x12;
+/// use embedded_graphics::fonts::Font8x16;
 /// use embedded_graphics::pixelcolor::{Rgb565, RgbColor};
 /// use embedded_graphics::style::TextStyle;
 /// use embedded_graphics::text_style;
 ///
-/// let style: TextStyle<Rgb565, _> = text_style!(font = Font6x12);
+/// let style: TextStyle<Rgb565, _> = text_style!(font = Font8x16);
 /// #
 /// # assert_eq!(
 /// #     style,
-/// #     TextStyle {
-/// #         font: Font6x12,
-/// #         text_color: None,
-/// #         background_color: None
-/// #     }
+/// #     TextStyle::with_font(Font8x16)
 /// # );
 /// ```
 ///
@@ -75,22 +71,21 @@ macro_rules! primitive_style {
 /// ```rust
 /// use embedded_graphics::fonts::Font6x8;
 /// use embedded_graphics::pixelcolor::{Rgb565, RgbColor};
-/// use embedded_graphics::style::{TextStyle};
+/// use embedded_graphics::style::{TextStyle, TextStyleBuilder};
 /// use embedded_graphics::text_style;
 ///
 /// let style = text_style!(font = Font6x8, text_color = Some(Rgb565::RED), background_color = Some(Rgb565::GREEN));
 /// #
 /// # assert_eq!(
 /// #     style,
-/// #     TextStyle {
-/// #         font: Font6x8,
-/// #         text_color: Some(Rgb565::RED),
-/// #         background_color: Some(Rgb565::GREEN),
-/// #     }
+/// #     TextStyleBuilder::new(Font6x8)
+/// #         .text_color(Rgb565::RED)
+/// #         .background_color(Rgb565::GREEN)
+/// #         .build()
 /// # );
 /// ```
 ///
-/// [`TextStyle`]: ./struct.TextStyle.html
+/// [`TextStyle`]: ./style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_style {
 

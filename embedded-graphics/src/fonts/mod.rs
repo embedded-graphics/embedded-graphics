@@ -21,16 +21,15 @@
 //! use embedded_graphics::fonts::{Font6x8, Text};
 //! use embedded_graphics::pixelcolor::Rgb565;
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::style::TextStyle;
+//! use embedded_graphics::style::{TextStyle, TextStyleBuilder};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! // Create a new text style
-//! let style = TextStyle {
-//!     font: Font6x8,
-//!     text_color: Some(Rgb565::YELLOW),
-//!     background_color: Some(Rgb565::BLUE),
-//! };
+//! let style = TextStyleBuilder::new(Font6x8)
+//!     .text_color(Rgb565::YELLOW)
+//!     .background_color(Rgb565::BLUE)
+//!     .build();
 //!
 //! // Create a text at position (20, 30) and draw it using the previously defined style
 //! Text::new("Hello Rust!", Point::new(20, 30))
@@ -68,21 +67,20 @@
 //! .draw(&mut display);
 //! ```
 //!
-//! It is also possible to provide a style created without using the [`text_style`] macro.
+//! It is also possible to provide a style created without using the [`text_style`] macro. In this example, [`TextStyleBuilder`] is used.
 //!
 //! ```rust
-//! use embedded_graphics::{egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, style::TextStyle};
+//! use embedded_graphics::{egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, style::{TextStyle, TextStyleBuilder}};
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! egtext!(
 //!     text = "Hello Rust!",
 //!     top_left = Point::new(20, 30),
-//! style = TextStyle {
-//!     font: Font6x8,
-//!     text_color: Some(Rgb565::YELLOW),
-//!     background_color: Some(Rgb565::BLUE),
-//! }
+//! style = TextStyleBuilder::new(Font6x8)
+//!     .text_color(Rgb565::YELLOW)
+//!     .background_color(Rgb565::BLUE)
+//!     .build()
 //! )
 //! .draw(&mut display);
 //! ```
@@ -188,7 +186,7 @@ pub use font8x16::Font8x16;
 use crate::geometry::Size;
 
 /// Monospaced bitmap font.
-pub trait Font {
+pub trait Font: Copy {
     /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
 

@@ -1,7 +1,7 @@
 use embedded_graphics::fonts::{Font12x16, Font6x12, Font6x8, Font8x16, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::style::TextStyle;
+use embedded_graphics::style::{TextStyle, TextStyleBuilder};
 use embedded_graphics::{egtext, text_style};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
@@ -14,11 +14,10 @@ fn main() {
         .draw(&mut display);
 
     // Show smallest font with white font on black background
-    let style = TextStyle {
-        font: Font6x8,
-        text_color: Some(BinaryColor::Off),
-        background_color: Some(BinaryColor::On),
-    };
+    let style = TextStyleBuilder::new(Font6x8)
+        .text_color(BinaryColor::Off)
+        .background_color(BinaryColor::On)
+        .build();
 
     Text::new("Hello World! - inverse 6x8", Point::new(15, 30))
         .into_styled(style)
