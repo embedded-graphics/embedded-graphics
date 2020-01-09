@@ -60,8 +60,8 @@
 //!     top_left = Point::new(20, 30),
 //! style = text_style!(
 //!     font = Font6x8,
-//!     text_color = Some(Rgb565::YELLOW),
-//!     background_color = Some(Rgb565::BLUE),
+//!     text_color = Rgb565::YELLOW,
+//!     background_color = Rgb565::BLUE,
 //! )
 //! )
 //! .draw(&mut display);
@@ -137,8 +137,8 @@
 //!     top_left = Point::zero(),
 //!     style = text_style!(
 //!     font = Font6x8,
-//!     text_color = Some(Rgb565::YELLOW),
-//!     background_color = Some(Rgb565::BLUE),
+//!     text_color = Rgb565::YELLOW,
+//!     background_color = Rgb565::BLUE,
 //! )
 //! )
 //! .draw(&mut display);
@@ -229,7 +229,7 @@ pub trait Font: Copy {
 ///     top_left = Point::zero(),
 /// style = text_style!(
 ///     font = Font6x8, // Font must to be the first styling property
-///     text_color = Some(Rgb888::RED),
+///     text_color = Rgb888::RED,
 /// )
 /// );
 /// ```
@@ -286,27 +286,27 @@ mod tests {
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x8>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            style = text_style!(font = Font6x8, text_color = Some(Rgb565::RED))
+            style = text_style!(font = Font6x8, text_color = Rgb565::RED)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x12>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            style = text_style!(font = Font6x12, text_color = Some(Rgb565::GREEN))
+            style = text_style!(font = Font6x12, text_color = Rgb565::GREEN)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font8x16>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            style = text_style!(font = Font8x16, text_color = Some(Rgb565::BLUE))
+            style = text_style!(font = Font8x16, text_color = Rgb565::BLUE)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font12x16>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            style = text_style!(font = Font12x16, text_color = Some(Rgb565::YELLOW))
+            style = text_style!(font = Font12x16, text_color = Rgb565::YELLOW)
         );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font24x32>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
-            style = text_style!(font = Font24x32, text_color = Some(Rgb565::MAGENTA))
+            style = text_style!(font = Font24x32, text_color = Rgb565::MAGENTA)
         );
     }
 }

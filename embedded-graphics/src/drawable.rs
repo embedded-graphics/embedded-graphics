@@ -75,7 +75,7 @@ where
 ///         egrectangle!(
 ///             top_left = self.top_left,
 ///             bottom_right = self.bottom_right,
-///             style = primitive_style!(fill_color = Some(self.bg_color))
+///             style = primitive_style!(fill_color = self.bg_color)
 ///         )
 ///         .draw(display);
 ///         egtext!(
@@ -83,7 +83,7 @@ where
 ///             top_left = Point::new(20, 20),
 /// style = text_style!(
 ///             font = Font6x8,
-///             text_color = Some(self.fg_color)
+///             text_color = self.fg_color
 /// )
 ///         )
 ///         .draw(display);

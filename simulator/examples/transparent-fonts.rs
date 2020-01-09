@@ -10,20 +10,20 @@ fn main() {
     egcircle!(
         center = (20, 20),
         radius = 20 as u32,
-        style = primitive_style!(fill_color = Some(Rgb565::RED))
+        style = primitive_style!(fill_color = Rgb565::RED)
     )
     .into_iter()
     .chain(&egrectangle!(
         top_left = (20, 20),
         bottom_right = (100, 80),
-        style = primitive_style!(fill_color = Some(Rgb565::RED))
+        style = primitive_style!(fill_color = Rgb565::RED)
     ))
     .draw(&mut display);
 
     egtext!(
         text = "Hello world! - no background",
         top_left = Point::new(15, 15),
-        style = text_style!(font = Font6x8, text_color = Some(Rgb565::WHITE),)
+        style = text_style!(font = Font6x8, text_color = Rgb565::WHITE,)
     )
     .draw(&mut display);
 
@@ -32,8 +32,8 @@ fn main() {
         top_left = Point::new(15, 30),
         style = text_style!(
             font = Font6x8,
-            text_color = Some(Rgb565::YELLOW),
-            background_color = Some(Rgb565::BLUE)
+            text_color = Rgb565::YELLOW,
+            background_color = Rgb565::BLUE
         )
     )
     .draw(&mut display);
@@ -43,8 +43,8 @@ fn main() {
         top_left = Point::new(15, 45),
         style = text_style!(
             font = Font6x8,
-            text_color = Some(Rgb565::BLUE),
-            background_color = Some(Rgb565::YELLOW)
+            text_color = Rgb565::BLUE,
+            background_color = Rgb565::YELLOW
         )
     )
     .draw(&mut display);

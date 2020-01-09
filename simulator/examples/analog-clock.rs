@@ -43,7 +43,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     let face = egcircle!(
         center = CENTER,
         radius = SIZE,
-        style = primitive_style!(stroke_color = Some(BinaryColor::On), stroke_width = 2)
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 2)
     );
 
     // Create 12 `Line`s starting from the outer edge and drawing inwards by `tic_len` pixels

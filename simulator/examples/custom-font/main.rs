@@ -28,14 +28,14 @@ fn main() {
     egtext!(
         text = "123",
         top_left = position,
-        style = text_style!(font = SevenSegmentFont, text_color = Some(BinaryColor::On),)
+        style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
     .draw(&mut display);
 
     egtext!(
         text = "456",
         top_left = position + row_offset,
-        style = text_style!(font = SevenSegmentFont, text_color = Some(BinaryColor::On),)
+        style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
     .draw(&mut display);
 

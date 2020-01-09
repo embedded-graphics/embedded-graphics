@@ -19,7 +19,7 @@ pub use text_style::{TextStyle, TextStyleBuilder};
 ///     primitive_style,
 /// };
 ///
-/// let style = primitive_style!(fill_color = Some(Rgb565::RED),);
+/// let style = primitive_style!(fill_color = Rgb565::RED);
 /// ```
 ///
 /// [`PrimitiveStyle`]: ./style/struct.PrimitiveStyle.html
@@ -28,11 +28,11 @@ pub use text_style::{TextStyle, TextStyleBuilder};
 macro_rules! primitive_style {
     ($($style_key:ident = $style_value:expr ),* $(,)?) => {{
         #[allow(unused_mut)]
-        let mut style = $crate::style::PrimitiveStyle::default();
+        let mut builder = $crate::style::PrimitiveStyleBuilder::new();
 
-        $( style.$style_key = $style_value; )*
+        $( builder.$style_key($style_value); )*
 
-        style
+        builder.build()
 
     }};
 }
@@ -74,7 +74,7 @@ macro_rules! primitive_style {
 /// use embedded_graphics::style::{TextStyle, TextStyleBuilder};
 /// use embedded_graphics::text_style;
 ///
-/// let style = text_style!(font = Font6x8, text_color = Some(Rgb565::RED), background_color = Some(Rgb565::GREEN));
+/// let style = text_style!(font = Font6x8, text_color = Rgb565::RED, background_color = Rgb565::GREEN);
 /// #
 /// # assert_eq!(
 /// #     style,
@@ -90,12 +90,11 @@ macro_rules! primitive_style {
 macro_rules! text_style {
 
     (font = $font:expr, $( $style_key:ident = $style_value:expr ),* $(,)?) => {{
-        #[allow(unused_mut)]
-        let mut style = $crate::style::TextStyle::with_font($font);
+        let mut builder = $crate::style::TextStyleBuilder::new($font);
 
-        $( style.$style_key = $style_value; )*
+        $( builder.$style_key($style_value); )*
 
-        style
+        builder.build()
     }};
     (font = $font:expr $(,)?) => {{
         $crate::style::TextStyle::with_font($font)

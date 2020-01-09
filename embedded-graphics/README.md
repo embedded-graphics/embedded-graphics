@@ -86,36 +86,35 @@ fn main() {
     egcircle!(
         center = (64, 64),
         radius = 64,
-        style = primitive_style!(stroke_color = Some(BinaryColor::On))
+        style = primitive_style!(stroke_color = BinaryColor::On)
     )
     .draw(&mut display);
     egline!(
         start = (64, 64),
         end = (0, 64),
-        style = primitive_style!(stroke_color = Some(BinaryColor::On))
+        style = primitive_style!(stroke_color = BinaryColor::On)
     )
     .draw(&mut display);
     egline!(
         start = (64, 64),
         end = (80, 80),
-        style = primitive_style!(stroke_color = Some(BinaryColor::On))
+        style = primitive_style!(stroke_color = BinaryColor::On)
     )
     .draw(&mut display);
     egrectangle!(
         top_left = (64, 64),
         bottom_right = (80, 80),
-        style = primitive_style!(stroke_color = None, fill_color = Some(BinaryColor::Off))
+        // No stroke, black fill
+        style = primitive_style!(fill_color = BinaryColor::Off)
     )
     .draw(&mut display);
     egtext!(
         text = "Hello world!",
         top_left = Point::new(5, 50),
-        style = text_style!(font = Font6x8, text_color = Some(BinaryColor::On))
+        style = text_style!(font = Font6x8, text_color = BinaryColor::On)
     )
     .draw(&mut display);
 }
-
-
 ```
 
 ## Cargo Features

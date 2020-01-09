@@ -112,13 +112,13 @@
 //! let c = egcircle!(
 //!     center = (20, 20),
 //!     radius = 8,
-//!     style = primitive_style!(fill_color = Some(Rgb565::RED))
+//!     style = primitive_style!(fill_color = Rgb565::RED)
 //! );
 //! let t = egtext!(
 //!     text = "Hello Rust!",
 //!     top_left = Point::new(20, 16),
 //!     style = text_style!(font = Font6x8,
-//!     text_color = Some(Rgb565::GREEN))
+//!     text_color = Rgb565::GREEN)
 //! );
 //!
 //! c.draw(&mut display);
@@ -142,14 +142,14 @@
 //!         .chain(&egcircle!(
 //!             center = (20, 20),
 //!             radius = 8,
-//!             style = primitive_style!(fill_color = Some(Rgb565::RED))
+//!             style = primitive_style!(fill_color = Rgb565::RED)
 //!         ))
 //!         .chain(&egtext!(
 //!             text = text,
 //!             top_left = Point::new(20, 16),
 //! style = text_style!(
 //!             font = Font6x8,
-//!             text_color = Some(Rgb565::GREEN))
+//!             text_color = Rgb565::GREEN)
 //!         ))
 //! }
 //!
@@ -281,7 +281,7 @@ use crate::{
 ///     let circle = egcircle!(
 ///         center = (32, 32),
 ///         radius = 10,
-///         style = primitive_style!(stroke_color = Some(Gray8::WHITE))
+///         style = primitive_style!(stroke_color = Gray8::WHITE)
 ///     );
 ///     circle.draw(&mut display);
 ///
@@ -363,7 +363,7 @@ use crate::{
 ///     let rect = egrectangle!(
 ///         top_left = (10, 20),
 ///         bottom_right = (30, 40),
-///         style = primitive_style!(stroke_color = Some(Gray8::WHITE))
+///         style = primitive_style!(stroke_color = Gray8::WHITE)
 ///     );
 ///     rect.draw(&mut display); // Uses the accelerated draw_rectangle function
 ///

@@ -13,7 +13,7 @@ fn main() {
     egcircle!(
         center = (CIRCLE_SIZE, CIRCLE_SIZE),
         radius = CIRCLE_SIZE as u32,
-        style = primitive_style!(stroke_color = Some(BinaryColor::On), stroke_width = 1,)
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .draw(&mut display);
 
@@ -21,9 +21,9 @@ fn main() {
         center = (CIRCLE_SIZE, CIRCLE_SIZE),
         radius = CIRCLE_SIZE as u32,
         style = primitive_style!(
-            stroke_color = Some(BinaryColor::Off),
+            stroke_color = BinaryColor::Off,
             stroke_width = 1,
-            fill_color = Some(BinaryColor::On),
+            fill_color = BinaryColor::On,
         )
     )
     .translate(Point::new(16, 16))
@@ -33,9 +33,9 @@ fn main() {
         center = (CIRCLE_SIZE, CIRCLE_SIZE),
         radius = CIRCLE_SIZE as u32,
         style = primitive_style!(
-            stroke_color = Some(BinaryColor::Off),
+            stroke_color = BinaryColor::Off,
             stroke_width = 1,
-            fill_color = Some(BinaryColor::Off)
+            fill_color = BinaryColor::Off
         )
     )
     .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
@@ -44,7 +44,7 @@ fn main() {
     egrectangle!(
         top_left = (0, 0),
         bottom_right = (64, 64),
-        style = primitive_style!(stroke_color = Some(BinaryColor::On), stroke_width = 1,)
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96, 0))
     .draw(&mut display);
@@ -53,9 +53,9 @@ fn main() {
         top_left = (0, 0),
         bottom_right = (64, 64),
         style = primitive_style!(
-            stroke_color = Some(BinaryColor::Off),
+            stroke_color = BinaryColor::Off,
             stroke_width = 1,
-            fill_color = Some(BinaryColor::On)
+            fill_color = BinaryColor::On
         )
     )
     .translate(Point::new(96 + 16, 16))
@@ -65,9 +65,9 @@ fn main() {
         top_left = (0, 0),
         bottom_right = (64, 64),
         style = primitive_style!(
-            stroke_color = Some(BinaryColor::Off),
+            stroke_color = BinaryColor::Off,
             stroke_width = 1,
-            fill_color = Some(BinaryColor::Off)
+            fill_color = BinaryColor::Off
         )
     )
     .translate(Point::new(96 + 32, 32))
@@ -75,7 +75,7 @@ fn main() {
 
     egtriangle!(
         points = [(32, 0), (0, 64), (64, 64)],
-        style = primitive_style!(stroke_color = Some(BinaryColor::On), stroke_width = 1,)
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96 * 2, 0))
     .draw(&mut display);
@@ -83,9 +83,9 @@ fn main() {
     egtriangle!(
         points = [(32, 0), (0, 64), (64, 64)],
         style = primitive_style!(
-            stroke_color = Some(BinaryColor::Off),
+            stroke_color = BinaryColor::Off,
             stroke_width = 1,
-            fill_color = Some(BinaryColor::On),
+            fill_color = BinaryColor::On,
         )
     )
     .translate(Point::new(96 * 2 + 16, 16))
@@ -94,9 +94,9 @@ fn main() {
     egtriangle!(
         points = [(32, 0), (0, 64), (64, 64)],
         style = primitive_style!(
-            stroke_color = Some(BinaryColor::Off),
+            stroke_color = BinaryColor::Off,
             stroke_width = 1,
-            fill_color = Some(BinaryColor::Off),
+            fill_color = BinaryColor::Off,
         )
     )
     .translate(Point::new(96 * 2 + 32, 32))

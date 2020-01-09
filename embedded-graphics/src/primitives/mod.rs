@@ -43,8 +43,8 @@ pub trait Primitive: Dimensions {
 ///     center = (10, 20),
 ///     radius = 30,
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 /// ```
@@ -64,16 +64,16 @@ pub trait Primitive: Dimensions {
 ///     center = (10, 20),
 ///     radius = 30,
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 /// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = Point::new(10, 20),
 ///     radius = 30,
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 ///
@@ -122,7 +122,7 @@ macro_rules! egcircle {
 /// let stroke_line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = (10, 20),
 ///     end = (30, 40),
-///     style = primitive_style!(stroke_color = Some(Rgb565::BLUE))
+///     style = primitive_style!(stroke_color = Rgb565::BLUE)
 /// );
 /// ```
 ///
@@ -140,16 +140,16 @@ macro_rules! egcircle {
 ///     start = Point::new(10, 20),
 ///     end = Point::new(30, 40),
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::BLUE),
-///         fill_color = Some(Rgb565::YELLOW)
+///         stroke_color = Rgb565::BLUE,
+///         fill_color = Rgb565::YELLOW
 ///     )
 /// );
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = (10, 20),
 ///     end = (30, 40),
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::BLUE),
-///         fill_color = Some(Rgb565::YELLOW)
+///         stroke_color = Rgb565::BLUE,
+///         fill_color = Rgb565::YELLOW
 ///     )
 /// );
 ///
@@ -203,8 +203,8 @@ macro_rules! egline {
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 /// ```
@@ -223,16 +223,16 @@ macro_rules! egline {
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 /// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = Point::new(10, 20),
 ///     bottom_right = Point::new(30, 40),
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 ///
@@ -283,8 +283,8 @@ macro_rules! egrectangle {
 /// let filled_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     points = [(10, 20), (30, 40), (50, 60)],
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 /// ```
@@ -302,8 +302,8 @@ macro_rules! egrectangle {
 /// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     points = [(10, 20), (30, 40), (50, 60)],
 ///     style = primitive_style!(
-///         stroke_color = Some(Rgb565::RED),
-///         fill_color = Some(Rgb565::GREEN)
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN
 ///     )
 /// );
 ///
@@ -348,10 +348,7 @@ mod tests {
         let _c: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
             center = (10, 20),
             radius = 30,
-            style = primitive_style!(
-                stroke_color = Some(Rgb565::RED),
-                fill_color = Some(Rgb565::GREEN)
-            ),
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
         );
     }
 
@@ -363,10 +360,7 @@ mod tests {
         let _l: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
             start = (10, 20),
             end = (30, 40),
-            style = primitive_style!(
-                stroke_color = Some(Rgb565::RED),
-                fill_color = Some(Rgb565::GREEN),
-            ),
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
         );
     }
 
@@ -381,10 +375,7 @@ mod tests {
         let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
             top_left = (10, 20),
             bottom_right = (30, 40),
-            style = primitive_style!(
-                stroke_color = Some(Rgb565::RED),
-                fill_color = Some(Rgb565::GREEN)
-            )
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
         );
     }
 
@@ -396,10 +387,7 @@ mod tests {
             egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
             points = [(10, 20), (30, 40), (50, 60)],
-            style = primitive_style!(
-                stroke_color = Some(Rgb565::RED),
-                fill_color = Some(Rgb565::GREEN)
-            )
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
         );
     }
 }

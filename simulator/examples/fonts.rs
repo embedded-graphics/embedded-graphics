@@ -29,8 +29,8 @@ fn main() {
         top_left = Point::new(15, 40),
         style = text_style!(
             font = Font6x8,
-            text_color = Some(BinaryColor::On),
-            background_color = Some(BinaryColor::Off)
+            text_color = BinaryColor::On,
+            background_color = BinaryColor::Off
         )
     )
     .draw(&mut display);
