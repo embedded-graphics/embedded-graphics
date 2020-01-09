@@ -16,9 +16,7 @@
 //! an additional intensity bit.
 //!
 //! ```rust
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::image::Image;
-//! use embedded_graphics::pixelcolor::raw::RawU4;
+//! use embedded_graphics::{image::Image, pixelcolor::raw::RawU4, prelude::*};
 //!
 //! /// RGBI color
 //! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,10 +57,7 @@
 //! }
 //!
 //! /// Raw image data with 2 pixels per byte.
-//! const IMAGE_DATA: &[u8] = &[
-//!     0b0001_0010,
-//!     0b0100_1111,
-//! ];
+//! const IMAGE_DATA: &[u8] = &[0b0001_0010, 0b0100_1111];
 //!
 //! fn main() {
 //!     // Create new image with RGBI colors.

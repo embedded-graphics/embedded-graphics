@@ -1,10 +1,14 @@
 use super::ImageFile;
-use crate::drawable::{Drawable, Pixel};
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::raw::{LittleEndian, RawData, RawDataIter};
-use crate::pixelcolor::PixelColor;
-use crate::transform::Transform;
-use crate::DrawTarget;
+use crate::{
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::{
+        raw::{LittleEndian, RawData, RawDataIter},
+        PixelColor,
+    },
+    transform::Transform,
+    DrawTarget,
+};
 use core::marker::PhantomData;
 use tinybmp::Bmp;
 
@@ -17,8 +21,7 @@ use tinybmp::Bmp;
 /// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::image::ImageBmp;
+/// use embedded_graphics::{image::ImageBmp, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # use embedded_graphics::pixelcolor::Rgb565;
 /// # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
@@ -196,8 +199,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor};
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor},
+    };
 
     #[test]
     fn negative_top_left() {

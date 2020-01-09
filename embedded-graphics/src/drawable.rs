@@ -55,8 +55,7 @@ where
 ///     geometry::Point,
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
-///     primitive_style,
-/// text_style
+///     primitive_style, text_style,
 /// };
 ///
 /// struct Button<'a, C: PixelColor> {
@@ -81,10 +80,7 @@ where
 ///         egtext!(
 ///             text = self.text,
 ///             top_left = Point::new(20, 20),
-/// style = text_style!(
-///             font = Font6x8,
-///             text_color = self.fg_color
-/// )
+///             style = text_style!(font = Font6x8, text_color = self.fg_color)
 ///         )
 ///         .draw(display);
 ///     }

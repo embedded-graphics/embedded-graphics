@@ -1,13 +1,16 @@
 //! The circle primitive
 
-use super::super::drawable::{Drawable, Pixel};
-use super::super::transform::Transform;
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::primitives::Primitive;
-use crate::primitives::Styled;
-use crate::style::PrimitiveStyle;
-use crate::DrawTarget;
+use super::super::{
+    drawable::{Drawable, Pixel},
+    transform::Transform,
+};
+use crate::{
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
+    primitives::{Primitive, Styled},
+    style::PrimitiveStyle,
+    DrawTarget,
+};
 
 /// Circle primitive
 ///
@@ -18,10 +21,12 @@ use crate::DrawTarget;
 /// ## Create some circles with different styles
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::primitives::Circle;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder};
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitives::Circle,
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+/// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
@@ -226,9 +231,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::BinaryColor;
-    use crate::style::PrimitiveStyleBuilder;
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, style::PrimitiveStyleBuilder};
 
     #[test]
     fn stroke_width_doesnt_affect_fill() {

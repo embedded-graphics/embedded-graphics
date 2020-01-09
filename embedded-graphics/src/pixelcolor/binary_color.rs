@@ -32,7 +32,11 @@ use crate::pixelcolor::{
 ///
 /// // this is equivalent to:
 /// let bool_value = true;
-/// let color = if bool_value { BinaryColor::On } else { BinaryColor::Off };
+/// let color = if bool_value {
+///     BinaryColor::On
+/// } else {
+///     BinaryColor::Off
+/// };
 /// assert_eq!(color, BinaryColor::On);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]

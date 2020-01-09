@@ -1,10 +1,12 @@
-use crate::drawable::{Drawable, Pixel};
-use crate::fonts::Font;
-use crate::geometry::{Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::style::{Styled, TextStyle};
-use crate::transform::Transform;
-use crate::{Dimensions, DrawTarget};
+use crate::{
+    drawable::{Drawable, Pixel},
+    fonts::Font,
+    geometry::{Point, Size},
+    pixelcolor::PixelColor,
+    style::{Styled, TextStyle},
+    transform::Transform,
+    Dimensions, DrawTarget,
+};
 
 /// A text object.
 ///
@@ -218,8 +220,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::BinaryColor;
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[derive(Debug, Clone, Copy)]
     struct SpacedFont;

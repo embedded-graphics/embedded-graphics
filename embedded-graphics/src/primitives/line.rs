@@ -1,12 +1,16 @@
 //! The line primitive
 
-use super::super::drawable::{Drawable, Pixel};
-use super::super::transform::Transform;
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::primitives::Primitive;
-use crate::style::{PrimitiveStyle, Styled};
-use crate::DrawTarget;
+use super::super::{
+    drawable::{Drawable, Pixel},
+    transform::Transform,
+};
+use crate::{
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
+    primitives::Primitive,
+    style::{PrimitiveStyle, Styled},
+    DrawTarget,
+};
 
 /// Line primitive
 ///
@@ -17,10 +21,9 @@ use crate::DrawTarget;
 /// ## Create some lines with different styles
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::primitives::Line;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// use embedded_graphics::style::PrimitiveStyle;
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565, prelude::*, primitives::Line, style::PrimitiveStyle,
+/// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
@@ -141,7 +144,7 @@ where
             delta,
             direction,
             err: delta.x + delta.y,
-            stop: self.primitive.start == self.primitive.end, // if line length is zero, draw nothing
+            stop: self.primitive.start == self.primitive.end, /* if line length is zero, draw nothing */
         }
     }
 }
@@ -206,8 +209,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::drawable::Pixel;
-    use crate::pixelcolor::BinaryColor;
+    use crate::{drawable::Pixel, pixelcolor::BinaryColor};
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
         let line =

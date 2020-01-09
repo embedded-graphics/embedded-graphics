@@ -1,5 +1,7 @@
-use crate::geometry::{Dimensions, Point, Size};
-use crate::transform::Transform;
+use crate::{
+    geometry::{Dimensions, Point, Size},
+    transform::Transform,
+};
 
 /// Styled.
 #[derive(Debug, Clone, PartialEq)]

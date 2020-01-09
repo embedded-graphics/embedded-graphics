@@ -46,10 +46,7 @@ use core::borrow::Borrow;
 /// ## Create a triangle from an array of points
 ///
 /// ```rust
-/// use embedded_graphics::{
-///     geometry::Point,
-///     primitives::Triangle,
-/// };
+/// use embedded_graphics::{geometry::Point, primitives::Triangle};
 ///
 /// let p1 = Point::new(5, 10);
 /// let p2 = Point::new(15, 25);

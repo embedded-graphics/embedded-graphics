@@ -50,10 +50,12 @@ macro_rules! primitive_style {
 /// This will result in a white font with transparent background.
 ///
 /// ```rust
-/// use embedded_graphics::fonts::Font8x16;
-/// use embedded_graphics::pixelcolor::{Rgb565, RgbColor};
-/// use embedded_graphics::style::TextStyle;
-/// use embedded_graphics::text_style;
+/// use embedded_graphics::{
+///     fonts::Font8x16,
+///     pixelcolor::{Rgb565, RgbColor},
+///     style::TextStyle,
+///     text_style,
+/// };
 ///
 /// let style: TextStyle<Rgb565, _> = text_style!(font = Font8x16);
 /// #
@@ -69,12 +71,18 @@ macro_rules! primitive_style {
 /// text on a green background.
 ///
 /// ```rust
-/// use embedded_graphics::fonts::Font6x8;
-/// use embedded_graphics::pixelcolor::{Rgb565, RgbColor};
-/// use embedded_graphics::style::{TextStyle, TextStyleBuilder};
-/// use embedded_graphics::text_style;
+/// use embedded_graphics::{
+///     fonts::Font6x8,
+///     pixelcolor::{Rgb565, RgbColor},
+///     style::{TextStyle, TextStyleBuilder},
+///     text_style,
+/// };
 ///
-/// let style = text_style!(font = Font6x8, text_color = Rgb565::RED, background_color = Rgb565::GREEN);
+/// let style = text_style!(
+///     font = Font6x8,
+///     text_color = Rgb565::RED,
+///     background_color = Rgb565::GREEN
+/// );
 /// #
 /// # assert_eq!(
 /// #     style,

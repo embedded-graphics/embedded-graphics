@@ -1,5 +1,4 @@
-use crate::fonts::Font;
-use crate::pixelcolor::PixelColor;
+use crate::{fonts::Font, pixelcolor::PixelColor};
 
 /// Style properties for texts.
 ///
@@ -99,8 +98,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fonts::Font12x16;
-    use crate::pixelcolor::BinaryColor;
+    use crate::{fonts::Font12x16, pixelcolor::BinaryColor};
 
     #[test]
     fn builder_default() {
