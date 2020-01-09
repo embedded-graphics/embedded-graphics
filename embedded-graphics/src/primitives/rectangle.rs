@@ -41,7 +41,7 @@ use crate::DrawTarget;
 ///     .into_styled(style)
 ///     .draw(&mut display);
 /// ```
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rectangle {
     /// Top left point of the rect
     pub top_left: Point,

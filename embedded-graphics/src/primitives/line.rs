@@ -35,7 +35,7 @@ use crate::DrawTarget;
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display);
 /// ```
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Line {
     /// Start point
     pub start: Point,

@@ -49,10 +49,10 @@ pub trait Primitive: Dimensions {
 /// );
 /// ```
 ///
-/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
 /// For example, the following code makes two identical circles:
 ///
-/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
+/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
@@ -60,20 +60,23 @@ pub trait Primitive: Dimensions {
 /// use embedded_graphics::{egcircle, pixelcolor::Rgb565, primitives::Circle};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
-/// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
+/// let circle_1: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = (10, 20),
 ///     radius = 30,
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
 ///     )
 /// );
-/// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
+///
+/// let circle_2: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = Point::new(10, 20),
 ///     radius = 30,
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
 ///     )
 /// );
 ///
@@ -83,8 +86,11 @@ pub trait Primitive: Dimensions {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
+/// let circle_3: Styled<Circle, PrimitiveStyle<Rgb565>> =
 ///     Circle::new(Point::new(10, 20), 30).into_styled(style);
+///
+/// assert_eq!(circle_1, circle_2);
+/// assert_eq!(circle_2, circle_3);
 /// ```
 #[macro_export]
 macro_rules! egcircle {
@@ -126,30 +132,32 @@ macro_rules! egcircle {
 /// );
 /// ```
 ///
-/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
 /// For example, the following code makes two identical lines:
 ///
-/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
+/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 /// use embedded_graphics::{primitive_style, egline, pixelcolor::Rgb565, primitives::Line};
 ///
-/// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
+/// let line_1: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = Point::new(10, 20),
 ///     end = Point::new(30, 40),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::BLUE,
-///         fill_color = Rgb565::YELLOW
+///         fill_color = Rgb565::YELLOW,
+///         stroke_width = 1
 ///     )
 /// );
-/// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
+/// let line_2: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = (10, 20),
 ///     end = (30, 40),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::BLUE,
-///         fill_color = Rgb565::YELLOW
+///         fill_color = Rgb565::YELLOW,
+///         stroke_width = 1
 ///     )
 /// );
 ///
@@ -159,8 +167,11 @@ macro_rules! egcircle {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let line: Styled<Line, PrimitiveStyle<Rgb565>> =
+/// let line_3: Styled<Line, PrimitiveStyle<Rgb565>> =
 ///     Line::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
+///
+/// assert_eq!(line_1, line_2);
+/// assert_eq!(line_2, line_3);
 /// ```
 #[macro_export]
 macro_rules! egline {
@@ -209,30 +220,33 @@ macro_rules! egline {
 /// );
 /// ```
 ///
-/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
 /// For example, the following code makes two identical rectangles:
 ///
-/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
+/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{primitive_style, egrectangle, pixelcolor::Rgb565, primitives::Rectangle};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
-/// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
+/// let rectangle_1: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
 ///     )
 /// );
-/// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
+///
+/// let rectangle_2: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = Point::new(10, 20),
 ///     bottom_right = Point::new(30, 40),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
 ///     )
 /// );
 ///
@@ -242,8 +256,11 @@ macro_rules! egline {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let rectangle: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
+/// let rectangle_3: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
 ///     Rectangle::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
+///
+/// assert_eq!(rectangle_1, rectangle_2);
+/// assert_eq!(rectangle_2, rectangle_3);
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
@@ -289,21 +306,22 @@ macro_rules! egrectangle {
 /// );
 /// ```
 ///
-/// Style properties like `stroke_color` map to the properties in the [`PrimitiveStyle`] struct.
+/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
 /// For example, the following code makes two identical triangles:
 ///
-/// [`PrimitiveStyle`]: style/struct.PrimitiveStyle.html
+/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
 ///
 /// ```rust
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::{egtriangle, primitive_style, pixelcolor::Rgb565, primitives::Triangle};
 /// use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled};
 ///
-/// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
+/// let triangle_1: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     points = [(10, 20), (30, 40), (50, 60)],
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
 ///     )
 /// );
 ///
@@ -313,9 +331,11 @@ macro_rules! egrectangle {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
+/// let triangle_2: Styled<Triangle, PrimitiveStyle<Rgb565>> =
 ///     Triangle::new(Point::new(10, 20), Point::new(30, 40), Point::new(50, 60))
 ///         .into_styled(style);
+///
+/// assert_eq!(triangle_1, triangle_2);
 /// ```
 #[macro_export]
 macro_rules! egtriangle {

@@ -47,7 +47,7 @@ use crate::DrawTarget;
 ///     .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
 ///     .draw(&mut display);
 /// ```
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Circle {
     /// Center point of circle
     pub center: Point,
