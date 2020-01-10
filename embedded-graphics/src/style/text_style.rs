@@ -49,7 +49,7 @@ where
 pub struct TextStyleBuilder<C, F>
 where
     C: PixelColor,
-    F: Font,
+    F: Font + Copy,
 {
     style: TextStyle<C, F>,
 }
@@ -57,7 +57,7 @@ where
 impl<C, F> TextStyleBuilder<C, F>
 where
     C: PixelColor,
-    F: Font,
+    F: Font + Copy,
 {
     /// Creates a new text style builder with a given font.
     pub fn new(font: F) -> Self {
