@@ -26,7 +26,7 @@ fn main() {
     // Show smallest font with white font on black background using a macro
     egtext!(
         text = "Hello world! - inverse 6x8 with macro",
-        top_left = Point::new(15, 40),
+        top_left = (15, 40),
         style = text_style!(
             font = Font6x8,
             text_color = BinaryColor::On,
@@ -48,7 +48,7 @@ fn main() {
     // Show 12x16 Font using a macro
     egtext!(
         text = "Hello 12x16!",
-        top_left = Point::new(15, 105),
+        top_left = (15, 105),
         style = text_style!(font = Font12x16)
     )
     .draw(&mut display);

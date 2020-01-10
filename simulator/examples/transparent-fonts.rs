@@ -22,14 +22,14 @@ fn main() {
 
     egtext!(
         text = "Hello world! - no background",
-        top_left = Point::new(15, 15),
+        top_left = (15, 15),
         style = text_style!(font = Font6x8, text_color = Rgb565::WHITE,)
     )
     .draw(&mut display);
 
     egtext!(
         text = "Hello world! - filled background",
-        top_left = Point::new(15, 30),
+        top_left = (15, 30),
         style = text_style!(
             font = Font6x8,
             text_color = Rgb565::YELLOW,
@@ -40,7 +40,7 @@ fn main() {
 
     egtext!(
         text = "Hello world! - inverse background",
-        top_left = Point::new(15, 45),
+        top_left = (15, 45),
         style = text_style!(
             font = Font6x8,
             text_color = Rgb565::BLUE,

@@ -37,10 +37,6 @@ pub trait Primitive: Dimensions {
 /// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
 ///     egcircle!(center = (10, 20), radius = 30);
 ///
-/// // Points can also be declared using `Point::new(x, y)` directly
-/// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
-///     egcircle!(center = Point::new(10, 20), radius = 30);
-///
 /// let filled_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = (10, 20),
 ///     radius = 30,
@@ -139,8 +135,8 @@ macro_rules! egcircle {
 /// };
 ///
 /// let line_1: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
-///     start = Point::new(10, 20),
-///     end = Point::new(30, 40),
+///     start = (10, 20),
+///     end = (30, 40),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::BLUE,
 ///         fill_color = Rgb565::YELLOW,
