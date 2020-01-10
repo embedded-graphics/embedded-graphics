@@ -1,10 +1,7 @@
 //! The triangle primitive.
 
-use super::super::{
-    drawable::{Drawable, Pixel},
-    transform::Transform,
-};
 use crate::{
+    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{
@@ -12,6 +9,7 @@ use crate::{
         Primitive,
     },
     style::{PrimitiveStyle, Styled},
+    transform::Transform,
     DrawTarget,
 };
 use core::borrow::Borrow;
@@ -101,7 +99,7 @@ impl Triangle {
         Triangle { p1, p2, p3 }
     }
 
-    /// Create a new triangle from an array of points
+    /// Create sa new triangle from an array of points.
     ///
     /// This supports both [`Point`]s, as well as anything that implements `Into<Point>` like
     /// `(i32, i32)`.

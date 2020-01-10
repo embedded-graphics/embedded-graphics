@@ -57,7 +57,11 @@
 //! }
 //!
 //! /// Raw image data with 2 pixels per byte.
-//! const IMAGE_DATA: &[u8] = &[0b0001_0010, 0b0100_1111];
+//! #[rustfmt::skip]
+//! const IMAGE_DATA: &[u8] = &[
+//!     0b0001_0010,
+//!     0b0100_1111,
+//! ];
 //!
 //! fn main() {
 //!     // Create new image with RGBI colors.

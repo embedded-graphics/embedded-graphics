@@ -79,7 +79,7 @@ where
 ///         .draw(display);
 ///         egtext!(
 ///             text = self.text,
-///             top_left = Point::new(20, 20),
+///             top_left = (20, 20),
 ///             style = text_style!(font = Font6x8, text_color = self.fg_color)
 ///         )
 ///         .draw(display);

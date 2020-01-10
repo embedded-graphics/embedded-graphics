@@ -10,8 +10,8 @@ pub use text_style::{TextStyle, TextStyleBuilder};
 
 /// Create a [`PrimitiveStyle`]
 ///
-/// Any properties not specified in the macro call will use the values provided by
-/// `PrimitiveStyle::default()`.
+/// All properties on [`PrimitiveStyle`] are supported. Any properties not specified in the macro
+/// call will use the values provided by `PrimitiveStyle::default()`.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -54,6 +54,7 @@ macro_rules! primitive_style {
 ///     fonts::Font8x16,
 ///     pixelcolor::{Rgb565, RgbColor},
 ///     style::TextStyle,
+///     # style::TextStyleBuilder,
 ///     text_style,
 /// };
 ///
@@ -61,7 +62,7 @@ macro_rules! primitive_style {
 /// #
 /// # assert_eq!(
 /// #     style,
-/// #     TextStyle::with_font(Font8x16)
+/// #     TextStyleBuilder::new(Font8x16).build()
 /// # );
 /// ```
 ///
@@ -74,7 +75,8 @@ macro_rules! primitive_style {
 /// use embedded_graphics::{
 ///     fonts::Font6x8,
 ///     pixelcolor::{Rgb565, RgbColor},
-///     style::{TextStyle, TextStyleBuilder},
+///     style::TextStyle,
+///     # style::TextStyleBuilder,
 ///     text_style,
 /// };
 ///
@@ -96,7 +98,6 @@ macro_rules! primitive_style {
 /// [`TextStyle`]: ./style/struct.TextStyle.html
 #[macro_export]
 macro_rules! text_style {
-
     (font = $font:expr, $( $style_key:ident = $style_value:expr ),* $(,)?) => {{
         let mut builder = $crate::style::TextStyleBuilder::new($font);
 
@@ -105,7 +106,7 @@ macro_rules! text_style {
         builder.build()
     }};
     (font = $font:expr $(,)?) => {{
-        $crate::style::TextStyle::with_font($font)
+        $crate::style::TextStyleBuilder::new($font).build()
     }};
 
 }

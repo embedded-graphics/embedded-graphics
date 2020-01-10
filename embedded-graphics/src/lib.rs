@@ -117,7 +117,7 @@
 //! );
 //! let t = egtext!(
 //!     text = "Hello Rust!",
-//!     top_left = Point::new(20, 16),
+//!     top_left = (20, 16),
 //!     style = text_style!(font = Font6x8, text_color = Rgb565::GREEN)
 //! );
 //!
@@ -146,7 +146,7 @@
 //!         ))
 //!         .chain(&egtext!(
 //!             text = text,
-//!             top_left = Point::new(20, 16),
+//!             top_left = (20, 16),
 //!             style = text_style!(font = Font6x8, text_color = Rgb565::GREEN)
 //!         ))
 //! }

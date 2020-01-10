@@ -1,7 +1,7 @@
-use super::ImageFile;
 use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
+    image::ImageFile,
     pixelcolor::{
         raw::{LittleEndian, RawData, RawDataIter},
         PixelColor,

@@ -1,6 +1,6 @@
 //! Prelude
 
-pub use super::{
+pub use crate::{
     drawable::{Drawable, Pixel},
     fonts::Font,
     geometry::{Dimensions, Point, Size},

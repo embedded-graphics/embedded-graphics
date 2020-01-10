@@ -132,7 +132,7 @@ fn main() {
     // Print "Hello world!" in a 6x8 pixel font with the top left corner positioned at (5, 50)
     egtext!(
         text = "Hello world!",
-        top_left = Point::new(5, 50),
+        top_left = (5, 50),
         style = text_style!(font = Font6x8, text_color = BinaryColor::On)
     )
     .draw(&mut display);

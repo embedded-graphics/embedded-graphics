@@ -1,14 +1,12 @@
 //! The circle primitive
 
-use super::super::{
-    drawable::{Drawable, Pixel},
-    transform::Transform,
-};
 use crate::{
+    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{Primitive, Styled},
     style::PrimitiveStyle,
+    transform::Transform,
     DrawTarget,
 };
 

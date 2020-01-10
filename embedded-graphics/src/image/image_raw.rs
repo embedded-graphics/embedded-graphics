@@ -40,17 +40,13 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 /// /// Image data with 12 x 5 pixels.
 /// /// The data for each row is 12 bits long and is padded with zeros on the
 /// /// end because each row needs to contain a whole number of bytes.
+/// #[rustfmt::skip]
 /// const DATA: &[u8] = &[
-///     0b11101111,
-///     0b0101_0000,
-///     0b10001000,
-///     0b0101_0000,
-///     0b11101011,
-///     0b0101_0000,
-///     0b10001001,
-///     0b0101_0000,
-///     0b11101111,
-///     0b0101_0000,
+///     0b11101111, 0b0101_0000,
+///     0b10001000, 0b0101_0000,
+///     0b11101011, 0b0101_0000,
+///     0b10001001, 0b0101_0000,
+///     0b11101111, 0b0101_0000,
 /// ];
 ///
 /// fn main() {

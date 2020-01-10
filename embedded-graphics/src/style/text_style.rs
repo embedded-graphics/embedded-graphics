@@ -4,9 +4,9 @@ use crate::{fonts::Font, pixelcolor::PixelColor};
 ///
 /// `TextStyle` can be applied to a [`Text`] object to define how a text is drawn.
 ///
-/// Because `TextStyle` has the [`non_exhaustive` attribute], it cannot be created using a struct
-/// expression. To create a `TextStyle`, the [`text_style!()` macro] or [`TextStyleBuilder` builder]
-/// can be used instead.
+/// Because `TextStyle` has the [`non_exhaustive`] attribute, it cannot be created using a struct
+/// literal. To create a `TextStyle`, the [`text_style!`] macro or [`TextStyleBuilder`] can be
+/// used instead.
 ///
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`non_exhaustive` attribute]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
@@ -42,18 +42,9 @@ where
             background_color: None,
         }
     }
-
-    /// Create a text style with only the font defined
-    pub fn with_font(font: F) -> Self {
-        Self {
-            font,
-            text_color: None,
-            background_color: None,
-        }
-    }
 }
 
-/// Primitive style builder.
+/// Text style builder.
 #[derive(Debug, PartialEq, Eq)]
 pub struct TextStyleBuilder<C, F>
 where
@@ -68,10 +59,14 @@ where
     C: PixelColor,
     F: Font,
 {
-    /// Creates a new primitive style builder with a given font.
+    /// Creates a new text style builder with a given font.
     pub fn new(font: F) -> Self {
         Self {
-            style: TextStyle::with_font(font),
+            style: TextStyle {
+                font,
+                background_color: None,
+                text_color: None,
+            },
         }
     }
 
@@ -89,7 +84,7 @@ where
         self
     }
 
-    /// Builds the primitive style.
+    /// Builds the text style.
     pub fn build(&self) -> TextStyle<C, F> {
         self.style
     }
@@ -123,13 +118,13 @@ mod tests {
     }
 
     #[test]
-    fn builder_fill() {
+    fn builder_background_color() {
         assert_eq!(
             TextStyleBuilder::new(Font12x16)
                 .background_color(BinaryColor::On)
                 .build(),
             {
-                let mut style = TextStyle::with_font(Font12x16);
+                let mut style = TextStyleBuilder::new(Font12x16).build();
 
                 style.text_color = None;
                 style.background_color = Some(BinaryColor::On);

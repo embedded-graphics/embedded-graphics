@@ -1,13 +1,9 @@
-use super::{
-    super::{
-        drawable::{Drawable, Pixel},
-        transform::Transform,
-    },
-    ImageFile,
-};
 use crate::{
+    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
+    image::ImageFile,
     pixelcolor::{raw::RawData, PixelColor},
+    transform::Transform,
     DrawTarget,
 };
 use core::marker::PhantomData;

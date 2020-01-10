@@ -1,14 +1,12 @@
 //! Graphics primitives
 
-use crate::{geometry::Dimensions, pixelcolor::PixelColor};
-
 pub mod circle;
 pub mod line;
 pub mod rectangle;
 pub mod triangle;
 
 pub use self::{circle::Circle, line::Line, rectangle::Rectangle, triangle::Triangle};
-use crate::style::{PrimitiveStyle, Styled};
+use crate::{geometry::Dimensions, pixelcolor::PixelColor, PrimitiveStyle, Styled};
 
 /// Primitive trait
 pub trait Primitive: Dimensions {
@@ -35,10 +33,14 @@ pub trait Primitive: Dimensions {
 ///     style::{PrimitiveStyle, Styled},
 /// };
 ///
+/// // Coordinates can be defined as any type that implements `Into<Point>`
 /// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
 ///     egcircle!(center = (10, 20), radius = 30);
+///
+/// // Points can also be declared using `Point::new(x, y)` directly
 /// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
 ///     egcircle!(center = Point::new(10, 20), radius = 30);
+///
 /// let filled_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = (10, 20),
 ///     radius = 30,
@@ -71,27 +73,16 @@ pub trait Primitive: Dimensions {
 ///     )
 /// );
 ///
-/// let circle_2: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
-///     center = Point::new(10, 20),
-///     radius = 30,
-///     style = primitive_style!(
-///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN,
-///         stroke_width = 1
-///     )
-/// );
-///
 /// let style = PrimitiveStyleBuilder::new()
 ///     .fill_color(Rgb565::GREEN)
 ///     .stroke_color(Rgb565::RED)
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let circle_3: Styled<Circle, PrimitiveStyle<Rgb565>> =
+/// let circle_2: Styled<Circle, PrimitiveStyle<Rgb565>> =
 ///     Circle::new(Point::new(10, 20), 30).into_styled(style);
 ///
 /// assert_eq!(circle_1, circle_2);
-/// assert_eq!(circle_2, circle_3);
 /// ```
 #[macro_export]
 macro_rules! egcircle {
@@ -124,8 +115,7 @@ macro_rules! egcircle {
 /// };
 ///
 /// let line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(start = (10, 20), end = (30, 40));
-/// let line: Styled<Line, PrimitiveStyle<Rgb565>> =
-///     egline!(start = Point::new(10, 20), end = Point::new(30, 40));
+///
 /// let stroke_line: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
 ///     start = (10, 20),
 ///     end = (30, 40),
@@ -157,15 +147,6 @@ macro_rules! egcircle {
 ///         stroke_width = 1
 ///     )
 /// );
-/// let line_2: Styled<Line, PrimitiveStyle<Rgb565>> = egline!(
-///     start = (10, 20),
-///     end = (30, 40),
-///     style = primitive_style!(
-///         stroke_color = Rgb565::BLUE,
-///         fill_color = Rgb565::YELLOW,
-///         stroke_width = 1
-///     )
-/// );
 ///
 /// let style = PrimitiveStyleBuilder::new()
 ///     .fill_color(Rgb565::YELLOW)
@@ -173,11 +154,10 @@ macro_rules! egcircle {
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let line_3: Styled<Line, PrimitiveStyle<Rgb565>> =
+/// let line_2: Styled<Line, PrimitiveStyle<Rgb565>> =
 ///     Line::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
 ///
 /// assert_eq!(line_1, line_2);
-/// assert_eq!(line_2, line_3);
 /// ```
 #[macro_export]
 macro_rules! egline {
@@ -212,10 +192,7 @@ macro_rules! egline {
 ///
 /// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
 ///     egrectangle!(top_left = (10, 20), bottom_right = (30, 40));
-/// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
-///     top_left = Point::new(10, 20),
-///     bottom_right = Point::new(30, 40)
-/// );
+///
 /// let filled_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
@@ -248,27 +225,16 @@ macro_rules! egline {
 ///     )
 /// );
 ///
-/// let rectangle_2: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
-///     top_left = Point::new(10, 20),
-///     bottom_right = Point::new(30, 40),
-///     style = primitive_style!(
-///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN,
-///         stroke_width = 1
-///     )
-/// );
-///
 /// let style = PrimitiveStyleBuilder::new()
 ///     .fill_color(Rgb565::GREEN)
 ///     .stroke_color(Rgb565::RED)
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let rectangle_3: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
+/// let rectangle_2: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
 ///     Rectangle::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
 ///
 /// assert_eq!(rectangle_1, rectangle_2);
-/// assert_eq!(rectangle_2, rectangle_3);
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
@@ -303,8 +269,7 @@ macro_rules! egrectangle {
 ///
 /// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
 ///     egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
-/// let empty_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> =
-///     egtriangle!(points = [(10, 20), (30, 40), (50, 60)]);
+///
 /// let filled_triangle: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
 ///     points = [(10, 20), (30, 40), (50, 60)],
 ///     style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)

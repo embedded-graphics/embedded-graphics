@@ -55,7 +55,7 @@
 //!
 //! egtext!(
 //!     text = "Hello Rust!",
-//!     top_left = Point::new(20, 30),
+//!     top_left = (20, 30),
 //!     style = text_style!(
 //!         font = Font6x8,
 //!         text_color = Rgb565::YELLOW,
@@ -80,7 +80,7 @@
 //!
 //! egtext!(
 //!     text = "Hello Rust!",
-//!     top_left = Point::new(20, 30),
+//!     top_left = (20, 30),
 //!     style = TextStyleBuilder::new(Font6x8)
 //!         .text_color(Rgb565::YELLOW)
 //!         .background_color(Rgb565::BLUE)
@@ -214,8 +214,8 @@ pub trait Font: Copy {
 ///
 /// The `egtext` macro expects the text, the position and styling properties as arguments.
 ///
-/// The `style` property accepts anything that creates a [`TextStyle`] object. This can be an object
-/// literal, usage of the [`text_style`] macro, or something else like a function call.
+/// The `style` property accepts a [`TextStyle`] object. This can be an object literal, usage of the
+/// [`text_style`] macro, or something else like a function call that returns [`TextStyle`].
 ///
 /// # Examples
 ///
@@ -238,7 +238,8 @@ pub trait Font: Copy {
 macro_rules! egtext {
     (text = $text:expr, top_left = $position:expr,
         style = $style:expr $(,)?) => {{
-        $crate::fonts::Text::new($text, $position).into_styled($style)
+        $crate::fonts::Text::new($text, $crate::geometry::Point::from($position))
+            .into_styled($style)
     }};
 }
 
