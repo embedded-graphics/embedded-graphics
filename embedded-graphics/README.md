@@ -57,16 +57,22 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
+    // Draw a circle centered at (64, 64) with a radius of 64 and a 1px stroke
     Circle::new(Point::new(64, 64), 64)
         .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .draw(&mut display);
+
+    // Draw a 1px thick line from (64, 64) to (0, 64)
     Line::new(Point::new(64, 64), Point::new(0, 64))
         .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .draw(&mut display);
+
+    // Draw another 1px line from (64, 64) to (80, 80)
     Line::new(Point::new(64, 64), Point::new(80, 80))
         .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .draw(&mut display);
 
+    // Print "Hello world!" in a 6x8 pixel font with the top left corner positioned at (5, 50)
     Text::new("Hello World!", Point::new(5, 50))
         .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
         .draw(&mut display);
@@ -91,31 +97,39 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
+    // Draw a circle centered at (64, 64) with a radius of 64 and a 1px stroke
     egcircle!(
         center = (64, 64),
         radius = 64,
         style = primitive_style!(stroke_color = BinaryColor::On)
     )
     .draw(&mut display);
+
+    // Draw a 1px thick line from (64, 64) to (0, 64)
     egline!(
         start = (64, 64),
         end = (0, 64),
         style = primitive_style!(stroke_color = BinaryColor::On)
     )
     .draw(&mut display);
+
+    // Draw another 1px line from (64, 64) to (80, 80)
     egline!(
         start = (64, 64),
         end = (80, 80),
         style = primitive_style!(stroke_color = BinaryColor::On)
     )
     .draw(&mut display);
+
+    // Draw a rectangle from (64, 64) to (80, 80) with a black fill
     egrectangle!(
         top_left = (64, 64),
         bottom_right = (80, 80),
-        // No stroke, black fill
         style = primitive_style!(fill_color = BinaryColor::Off)
     )
     .draw(&mut display);
+
+    // Print "Hello world!" in a 6x8 pixel font with the top left corner positioned at (5, 50)
     egtext!(
         text = "Hello world!",
         top_left = Point::new(5, 50),
