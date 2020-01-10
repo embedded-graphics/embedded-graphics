@@ -79,6 +79,63 @@ where
 }
 
 /// Primitive style builder.
+///
+/// Use this builder to create styles for [primitives]. For convenience, the [`primitive_style!`]
+/// macro is also provided.
+///
+/// If any properties on the builder are ommitted, the value will default to `None` (transparent).
+///
+/// # Examples
+///
+/// ## Build a style with customised stroke and fill
+///
+/// This example builds a style for a circle with a 3px red stroke and a solid green fill. The
+/// circle is centered at (20, 20) with a radius of 10px.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egtext,
+///     pixelcolor::Rgb565,
+///     primitives::Circle,
+///     prelude::*,
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+/// };
+///
+/// let style: PrimitiveStyle<Rgb565> = PrimitiveStyleBuilder::new()
+///     .stroke_color(Rgb565::RED)
+///     .stroke_width(3)
+///     .fill_color(Rgb565::GREEN)
+///     .build();
+///
+/// let circle = Circle::new(Point::new(20, 20), 10)
+///     .into_styled(style);
+/// ```
+///
+/// ## Build a style with ommitted (transparent) values
+///
+/// This example builds a style for a rectangle with a 1px red stroke. Because `.fill_color()` is
+/// not called, the fill is defaulted to `None` (i.e. transparent).
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egtext,
+///     pixelcolor::Rgb565,
+///     primitives::Rectangle,
+///     prelude::*,
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+/// };
+///
+/// let style: PrimitiveStyle<Rgb565> = PrimitiveStyleBuilder::new()
+///     .stroke_color(Rgb565::RED)
+///     .stroke_width(1)
+///     .build();
+///
+/// let rectangle = Rectangle::new(Point::new(20, 20), Point::new(40, 30))
+///     .into_styled(style);
+/// ```
+///
+/// [primitives]: ../primitives/index.html
+/// [`primitive_style!`]: ../macro.primitive_style.html
 #[derive(Debug, PartialEq, Eq)]
 pub struct PrimitiveStyleBuilder<C>
 where
