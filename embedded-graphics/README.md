@@ -44,7 +44,7 @@ Example usage can be found [in the simulator](./simulator/examples):
 
 ```rust
 use embedded_graphics::fonts::{Font6x8, Text};
-use embedded_graphics::pixelcolor::BinaryColor;
+use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
 use embedded_graphics::style::{PrimitiveStyle, TextStyle};
@@ -57,24 +57,24 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    // Draw a circle centered at (64, 64) with a radius of 64 and a 1px stroke
+    // Draw a circle centered at (64, 64) with a radius of 64 and a white 1px stroke
     Circle::new(Point::new(64, 64), 64)
-        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+        .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
         .draw(&mut display);
 
-    // Draw a 1px thick line from (64, 64) to (0, 64)
+    // Draw a white 1px thick line from (64, 64) to (0, 64)
     Line::new(Point::new(64, 64), Point::new(0, 64))
-        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+        .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
         .draw(&mut display);
 
-    // Draw another 1px line from (64, 64) to (80, 80)
+    // Draw a red 1px line from (64, 64) to (80, 80)
     Line::new(Point::new(64, 64), Point::new(80, 80))
-        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+        .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
         .draw(&mut display);
 
-    // Print "Hello world!" in a 6x8 pixel font with the top left corner positioned at (5, 50)
+    // Print "Hello world!" in a white 6x8 pixel font with the top left corner positioned at (5, 50)
     Text::new("Hello World!", Point::new(5, 50))
-        .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+        .into_styled(TextStyle::new(Font6x8, Rgb565::WHITE))
         .draw(&mut display);
 }
 ```
@@ -83,7 +83,7 @@ Macros are also supported for text and primitives:
 
 ```rust
 use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::pixelcolor::BinaryColor;
+use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{
     egcircle, egline, egrectangle, egtext, egtriangle, primitive_style, text_style,
@@ -97,27 +97,27 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    // Draw a circle centered at (64, 64) with a radius of 64 and a 1px stroke
+    // Draw a circle centered at (64, 64) with a radius of 64 and a white 1px stroke
     egcircle!(
         center = (64, 64),
         radius = 64,
-        style = primitive_style!(stroke_color = BinaryColor::On)
+        style = primitive_style!(stroke_color = Rgb565::WHITE)
     )
     .draw(&mut display);
 
-    // Draw a 1px thick line from (64, 64) to (0, 64)
+    // Draw a 1px thick white line from (64, 64) to (0, 64)
     egline!(
         start = (64, 64),
         end = (0, 64),
-        style = primitive_style!(stroke_color = BinaryColor::On)
+        style = primitive_style!(stroke_color = Rgb565::WHITE)
     )
     .draw(&mut display);
 
-    // Draw another 1px line from (64, 64) to (80, 80)
+    // Draw a 1px red line from (64, 64) to (80, 80)
     egline!(
         start = (64, 64),
         end = (80, 80),
-        style = primitive_style!(stroke_color = BinaryColor::On)
+        style = primitive_style!(stroke_color = Rgb565::RED)
     )
     .draw(&mut display);
 
@@ -125,15 +125,15 @@ fn main() {
     egrectangle!(
         top_left = (64, 64),
         bottom_right = (80, 80),
-        style = primitive_style!(fill_color = BinaryColor::Off)
+        style = primitive_style!(fill_color = Rgb565::BLACK)
     )
     .draw(&mut display);
 
-    // Print "Hello world!" in a 6x8 pixel font with the top left corner positioned at (5, 50)
+    // Print "Hello world!" in a white 6x8 pixel font with the top left corner positioned at (5, 50)
     egtext!(
         text = "Hello world!",
         top_left = (5, 50),
-        style = text_style!(font = Font6x8, text_color = BinaryColor::On)
+        style = text_style!(font = Font6x8, text_color = Rgb565::WHITE)
     )
     .draw(&mut display);
 }
