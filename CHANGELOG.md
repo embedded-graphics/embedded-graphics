@@ -74,45 +74,61 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** #224 Embedded Graphics macros now use named instead of positional parameters. Styling is now achieved using the `style` property which receives a `PrimitiveStyle` for primitives, and a `TextStyle`. There are convenience macros (`primitive_style!()` and `text_style!()` respectively) to make styling objects easier.
 
   ```rust
-  use embedded_graphics::{egcircle, egrectangle, egline, egtriangle, egtext, text_style};
+  use embedded_graphics::{egcircle, egline, egrectangle, egtext, egtriangle, text_style};
 
   // OLD
-  egcircle!((15, 20), 10u32, stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+  egcircle!(
+      (15, 20),
+      10,
+      stroke = Some(Rgb565::RED),
+      fill = Some(Rgb565::GREEN)
+  );
   // NEW
-  egcircle!(center = (15, 20), radius = 10u32, style = primitive_style!(
-    stroke = Rgb565::RED,
-    fill = Rgb565::GREEN
-  ));
+  egcircle!(
+      center = (15, 20),
+      radius = 10,
+      style = primitive_style!(stroke = Rgb565::RED, fill = Rgb565::GREEN)
+  );
 
   // OLD
-  egrectangle!((0, 0), (64, 64), stroke = Some(Rgb565::RED), fill = Some(Rgb565::GREEN));
+  egrectangle!(
+      (0, 0),
+      (64, 64),
+      stroke = Some(Rgb565::RED),
+      fill = Some(Rgb565::GREEN)
+  );
   // NEW
-  egrectangle!(top_left = (0, 0), bottom_right = (64, 64), style = primitive_style!(
-    stroke = Rgb565::RED,
-    fill = Rgb565::GREEN
-  ));
+  egrectangle!(
+      top_left = (0, 0),
+      bottom_right = (64, 64),
+      style = primitive_style!(stroke = Rgb565::RED, fill = Rgb565::GREEN)
+  );
 
   // OLD
   egtriangle!((32, 0), (0, 64), (64, 64));
   // NEW
-  egtriangle!(points = [(32, 0), (0, 64), (64, 64)], style = primitive_style!(
-    stroke = Rgb565::RED,
-    fill = Rgb565::GREEN
-  ));
+  egtriangle!(
+      points = [(32, 0), (0, 64), (64, 64)],
+      style = primitive_style!(stroke = Rgb565::RED, fill = Rgb565::GREEN)
+  );
 
   // OLD
-  egline!((32, 0), (0, 64));`
+  egline!((32, 0), (0, 64));
   // NEW
-  egline!(start = (32, 0), end = (0, 64), style = primitive_style!(
-    stroke = Rgb565::RED,
-  ));
+  egline!(
+      start = (32, 0),
+      end = (0, 64),
+      style = primitive_style!(stroke = Rgb565::RED,)
+  );
 
   // OLD
   egtext!("456", (10, 10), font = Font6x8, stroke = Some(Rgb565::RED));
   // NEW
-  egtext!(text = "456", top_left = (10, 10), style = text_style!(
-    font = Font6x8, text_color = Rgb565::RED
-  ));
+  egtext!(
+      text = "456",
+      top_left = (10, 10),
+      style = text_style!(font = Font6x8, text_color = Rgb565::RED)
+  );
   ```
 
 ### Removed
