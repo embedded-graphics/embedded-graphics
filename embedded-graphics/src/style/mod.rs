@@ -46,7 +46,7 @@ macro_rules! primitive_style {
 ///
 /// ### Create a default text style
 ///
-/// This example uses [`Font8x16`] and the [`Rgb565`] colour space to create a default text style.
+/// This example uses [`Font8x16`] and the [`Rgb565`] color space to create a default text style.
 /// This will result in a white font with transparent background.
 ///
 /// ```rust
@@ -66,9 +66,9 @@ macro_rules! primitive_style {
 /// # );
 /// ```
 ///
-/// ### Create coloured text with background
+/// ### Create colored text with background
 ///
-/// This example uses [`Font6x8`] and the [`Rgb565`] colour space to create a text style with red
+/// This example uses [`Font6x8`] and the [`Rgb565`] color space to create a text style with red
 /// text on a green background.
 ///
 /// ```rust

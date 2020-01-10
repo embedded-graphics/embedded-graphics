@@ -214,7 +214,7 @@ impl<'a> Iterator for TgaIterator<'a> {
         }
 
         let (start, px): (usize, &[u8]) = match self.current_packet {
-            // RLE packets use the same 4 bytes for the colour of every pixel in the packet, so
+            // RLE packets use the same 4 bytes for the color of every pixel in the packet, so
             // there is no start offet like `RawPacket`s have
             Packet::RlePacket(ref p) => (0, p.pixel_data),
             // Raw packets need to look within the byte array to find the correct bytes to

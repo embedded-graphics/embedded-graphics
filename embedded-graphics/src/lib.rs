@@ -333,7 +333,7 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget<Gray8> for FastExampleDisplay {
-///     /// Draw a `pixel` that has a colour defined as `Gray8`
+///     /// Draw a `pixel` that has a color defined as `Gray8`
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) {
 ///         let Pixel(coord, color) = pixel;
 ///         // Place an (x, y) pixel at the right index in the framebuffer

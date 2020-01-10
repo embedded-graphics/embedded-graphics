@@ -206,11 +206,10 @@ mod tests {
 
     #[test]
     fn negative_top_left() {
-        let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!(
-            "../../tests/chessboard-4px-colour-16bit.bmp"
-        ))
-        .unwrap()
-        .translate(Point::new(-1, -1));
+        let image: ImageBmp<Rgb565> =
+            ImageBmp::new(include_bytes!("../../tests/chessboard-4px-color-16bit.bmp"))
+                .unwrap()
+                .translate(Point::new(-1, -1));
 
         assert_eq!(image.top_left(), Point::new(-1, -1));
         assert_eq!(image.bottom_right(), Point::new(3, 3));
@@ -219,11 +218,10 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!(
-            "../../tests/chessboard-4px-colour-16bit.bmp"
-        ))
-        .unwrap()
-        .translate(Point::new(100, 200));
+        let image: ImageBmp<Rgb565> =
+            ImageBmp::new(include_bytes!("../../tests/chessboard-4px-color-16bit.bmp"))
+                .unwrap()
+                .translate(Point::new(100, 200));
 
         assert_eq!(image.top_left(), Point::new(100, 200));
         assert_eq!(image.bottom_right(), Point::new(104, 204));
@@ -233,11 +231,10 @@ mod tests {
     #[test]
     #[ignore]
     fn it_can_have_negative_offsets() {
-        let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!(
-            "../../tests/chessboard-4px-colour-16bit.bmp"
-        ))
-        .unwrap()
-        .translate(Point::new(-1, -1));
+        let image: ImageBmp<Rgb565> =
+            ImageBmp::new(include_bytes!("../../tests/chessboard-4px-color-16bit.bmp"))
+                .unwrap()
+                .translate(Point::new(-1, -1));
 
         assert_eq!(image.into_iter().count(), 9);
 

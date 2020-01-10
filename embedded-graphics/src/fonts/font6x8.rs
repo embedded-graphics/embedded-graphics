@@ -106,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn correct_inverse_coloured_m() {
+    fn correct_inverse_colored_m() {
         let mut display = MockDisplay::new();
         let style = TextStyle {
             font: Font6x8,
@@ -134,7 +134,7 @@ mod tests {
 
     // tests if black on white has really the same behavior as white on black
     #[test]
-    fn compare_inverse_coloured_m() {
+    fn compare_inverse_colored_m() {
         let mut display_inverse = MockDisplay::new();
         let style_inverse = TextStyle {
             font: Font6x8,
