@@ -1,6 +1,6 @@
 use crate::{fonts::Font, pixelcolor::PixelColor};
 
-/// Style properties for texts.
+/// Style properties for text.
 ///
 /// `TextStyle` can be applied to a [`Text`] object to define how a text is drawn.
 ///
@@ -9,9 +9,9 @@ use crate::{fonts::Font, pixelcolor::PixelColor};
 /// used instead.
 ///
 /// [`Text`]: ../fonts/struct.Text.html
-/// [`non_exhaustive` attribute]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
-/// [`text_style!()` macro]: ../macro.text_style.html
-/// [`TextStyleBuilder` builder]: ./struct.TextStyleBuilder.html
+/// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
+/// [`text_style!`]: ../macro.text_style.html
+/// [`TextStyleBuilder`]: ./struct.TextStyleBuilder.html
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct TextStyle<C, F>
@@ -45,6 +45,85 @@ where
 }
 
 /// Text style builder.
+///
+/// Use this builder to create styles for [`Font`]s. For convenience, the [`text_style!`] macro is
+/// also provided.
+///
+/// # Examples
+///
+/// ## Render some text with a blue background and yellow text color
+///
+/// This uses the [`Font6x8`] font, but [other fonts] can also be used.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     fonts::{Font6x8, Text},
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     style::{TextStyle, TextStyleBuilder},
+/// };
+///
+/// let style: TextStyle<Rgb565, Font6x8> = TextStyleBuilder::new(Font6x8)
+///     .text_color(Rgb565::YELLOW)
+///     .background_color(Rgb565::BLUE)
+///     .build();
+///
+/// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
+/// ```
+///
+/// ## Render black text on white background using macros
+///
+/// This uses the [`Font8x16`] font with the [`egtext!`] and [`text_style!`] macros for shorter
+/// code.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egtext,
+///     fonts::{Font8x16, Text},
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     style::TextStyle,
+///     text_style,
+/// };
+///
+/// let style = text_style!(
+///     font = Font8x16,
+///     text_color = Rgb565::WHITE,
+///     background_color = Rgb565::BLACK
+/// );
+///
+/// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
+/// ```
+///
+/// ## Transparent background
+///
+/// If a property is ommitted, it will default to `None` in the resulting `TextStyle` returned by
+/// `.build()`. This example draws white text with no background at all.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egtext,
+///     fonts::{Font6x8, Text},
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     style::{TextStyle, TextStyleBuilder},
+///     text_style,
+/// };
+///
+/// let style: TextStyle<Rgb565, Font6x8> = TextStyleBuilder::new(Font6x8)
+///     .text_color(Rgb565::YELLOW)
+///     .build();
+///
+/// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
+/// ```
+///
+/// [`Font`]: ../fonts/trait.Font.html
+/// [`Font6x8`]: ../fonts/struct.Font6x8.html
+/// [`Font8x16`]: ../fonts/struct.Font8x16.html
+/// [other fonts]: ../fonts/index.html
+/// [`text_style!`]: ../macro.text_style.html
+/// [`egtext!`]: ../macro.egtext.html
+/// [`TextStyle`]: ./struct.TextStyle.html
 #[derive(Debug, PartialEq, Eq)]
 pub struct TextStyleBuilder<C, F>
 where
