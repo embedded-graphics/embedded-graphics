@@ -11,9 +11,7 @@
 //! 3 color EPD display.
 //!
 //! ```
-//! use embedded_graphics::prelude::*;
-//! use embedded_graphics::egrectangle;
-//! use embedded_graphics::geometry::Size;
+//! use embedded_graphics::{egrectangle, geometry::Size, prelude::*, primitive_style};
 //!
 //! /// Color with 3 states.
 //! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,7 +36,7 @@
 //!         match color {
 //!             EpdColor::White => {} // draw white pixel at `point`
 //!             EpdColor::Black => {} // draw black pixel at `point`
-//!             EpdColor::Red => {} // draw red pixel at `point`
+//!             EpdColor::Red => {}   // draw red pixel at `point`
 //!         }
 //!     }
 //!
@@ -50,11 +48,26 @@
 //! fn main() {
 //!     let mut display = EpdDisplay {};
 //!
-//!     egrectangle!((0, 0), (100, 100), fill_color = Some(EpdColor::White)).draw(&mut display);
+//!     egrectangle!(
+//!         top_left = (0, 0),
+//!         bottom_right = (100, 100),
+//!         style = primitive_style!(fill_color = EpdColor::White)
+//!     )
+//!     .draw(&mut display);
 //!
-//!     egrectangle!((100, 0), (200, 100), fill_color = Some(EpdColor::Black)).draw(&mut display);
+//!     egrectangle!(
+//!         top_left = (100, 0),
+//!         bottom_right = (200, 100),
+//!         style = primitive_style!(fill_color = EpdColor::Black)
+//!     )
+//!     .draw(&mut display);
 //!
-//!     egrectangle!((200, 0), (300, 100), fill_color = Some(EpdColor::Red)).draw(&mut display);
+//!     egrectangle!(
+//!         top_left = (200, 0),
+//!         bottom_right = (300, 100),
+//!         style = primitive_style!(fill_color = EpdColor::Red)
+//!     )
+//!     .draw(&mut display);
 //! }
 //! ```
 //!

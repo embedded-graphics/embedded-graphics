@@ -1,6 +1,7 @@
 use embedded_graphics::egtext;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
+use embedded_graphics::text_style;
 use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -25,18 +26,16 @@ fn main() {
     let row_offset = Point::new(0, 44);
 
     egtext!(
-        "123",
-        position,
-        font = SevenSegmentFont,
-        text_color = Some(BinaryColor::On),
+        text = "123",
+        top_left = position,
+        style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
     .draw(&mut display);
 
     egtext!(
-        "456",
-        position + row_offset,
-        font = SevenSegmentFont,
-        text_color = Some(BinaryColor::On),
+        text = "456",
+        top_left = position + row_offset,
+        style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
     .draw(&mut display);
 

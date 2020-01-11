@@ -30,8 +30,8 @@ use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 ///
 /// ```rust
 /// # #[cfg(feature = "nalgebra_support")] {
-/// use nalgebra::Vector2;
 /// use embedded_graphics::geometry::Size;
+/// use nalgebra::Vector2;
 ///
 /// assert_eq!(Size::from(Vector2::new(10u32, 20)), Size::new(10u32, 20));
 /// assert_eq!(Size::from(Vector2::new(10u16, 20)), Size::new(10u32, 20));
@@ -43,8 +43,8 @@ use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 ///
 /// ```rust
 /// # #[cfg(feature = "nalgebra_support")] {
-/// use nalgebra::Vector2;
 /// use embedded_graphics::geometry::Size;
+/// use nalgebra::Vector2;
 ///
 /// let c: Size = Vector2::new(10u32, 20).into();
 ///

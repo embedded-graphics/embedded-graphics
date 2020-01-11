@@ -2,7 +2,7 @@
 
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egrectangle, egtriangle};
+use embedded_graphics::{egcircle, egrectangle, egtriangle, primitive_style};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 static CIRCLE_SIZE: i32 = 32;
@@ -11,90 +11,93 @@ fn main() {
     let mut display = SimulatorDisplay::new(Size::new(384, 128));
 
     egcircle!(
-        (CIRCLE_SIZE, CIRCLE_SIZE),
-        CIRCLE_SIZE as u32,
-        stroke_color = Some(BinaryColor::On),
-        stroke_width = 1,
+        center = (CIRCLE_SIZE, CIRCLE_SIZE),
+        radius = CIRCLE_SIZE as u32,
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .draw(&mut display);
 
     egcircle!(
-        (CIRCLE_SIZE, CIRCLE_SIZE),
-        CIRCLE_SIZE as u32,
-        stroke_color = Some(BinaryColor::Off),
-        stroke_width = 1,
-        fill_color = Some(BinaryColor::On),
+        center = (CIRCLE_SIZE, CIRCLE_SIZE),
+        radius = CIRCLE_SIZE as u32,
+        style = primitive_style!(
+            stroke_color = BinaryColor::Off,
+            stroke_width = 1,
+            fill_color = BinaryColor::On,
+        )
     )
     .translate(Point::new(16, 16))
     .draw(&mut display);
 
     egcircle!(
-        (CIRCLE_SIZE, CIRCLE_SIZE),
-        CIRCLE_SIZE as u32,
-        stroke_color = Some(BinaryColor::Off),
-        stroke_width = 1,
-        fill_color = Some(BinaryColor::Off)
+        center = (CIRCLE_SIZE, CIRCLE_SIZE),
+        radius = CIRCLE_SIZE as u32,
+        style = primitive_style!(
+            stroke_color = BinaryColor::Off,
+            stroke_width = 1,
+            fill_color = BinaryColor::Off
+        )
     )
     .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
     .draw(&mut display);
 
     egrectangle!(
-        (0, 0),
-        (64, 64),
-        stroke_color = Some(BinaryColor::On),
-        stroke_width = 1,
+        top_left = (0, 0),
+        bottom_right = (64, 64),
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96, 0))
     .draw(&mut display);
 
     egrectangle!(
-        (0, 0),
-        (64, 64),
-        stroke_color = Some(BinaryColor::Off),
-        stroke_width = 1,
-        fill_color = Some(BinaryColor::On)
+        top_left = (0, 0),
+        bottom_right = (64, 64),
+        style = primitive_style!(
+            stroke_color = BinaryColor::Off,
+            stroke_width = 1,
+            fill_color = BinaryColor::On
+        )
     )
     .translate(Point::new(96 + 16, 16))
     .draw(&mut display);
 
     egrectangle!(
-        (0, 0),
-        (64, 64),
-        stroke_color = Some(BinaryColor::Off),
-        stroke_width = 1,
-        fill_color = Some(BinaryColor::Off)
+        top_left = (0, 0),
+        bottom_right = (64, 64),
+        style = primitive_style!(
+            stroke_color = BinaryColor::Off,
+            stroke_width = 1,
+            fill_color = BinaryColor::Off
+        )
     )
     .translate(Point::new(96 + 32, 32))
     .draw(&mut display);
 
     egtriangle!(
-        (32, 0),
-        (0, 64),
-        (64, 64),
-        stroke_color = Some(BinaryColor::On),
-        stroke_width = 1,
+        points = [(32, 0), (0, 64), (64, 64)],
+        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96 * 2, 0))
     .draw(&mut display);
 
     egtriangle!(
-        (32, 0),
-        (0, 64),
-        (64, 64),
-        stroke_color = Some(BinaryColor::Off),
-        stroke_width = 1,
-        fill_color = Some(BinaryColor::On),
+        points = [(32, 0), (0, 64), (64, 64)],
+        style = primitive_style!(
+            stroke_color = BinaryColor::Off,
+            stroke_width = 1,
+            fill_color = BinaryColor::On,
+        )
     )
     .translate(Point::new(96 * 2 + 16, 16))
     .draw(&mut display);
 
     egtriangle!(
-        (32, 0),
-        (0, 64),
-        (64, 64),
-        stroke_color = Some(BinaryColor::Off),
-        stroke_width = 1,
-        fill_color = Some(BinaryColor::Off),
+        points = [(32, 0), (0, 64), (64, 64)],
+        style = primitive_style!(
+            stroke_color = BinaryColor::Off,
+            stroke_width = 1,
+            fill_color = BinaryColor::Off,
+        )
     )
     .translate(Point::new(96 * 2 + 32, 32))
     .draw(&mut display);

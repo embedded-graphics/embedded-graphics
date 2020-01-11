@@ -1,8 +1,8 @@
-use embedded_graphics::egtext;
 use embedded_graphics::fonts::{Font12x16, Font6x12, Font6x8, Font8x16, Text};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::style::TextStyle;
+use embedded_graphics::style::{TextStyle, TextStyleBuilder};
+use embedded_graphics::{egtext, text_style};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() {
@@ -14,11 +14,10 @@ fn main() {
         .draw(&mut display);
 
     // Show smallest font with white font on black background
-    let style = TextStyle {
-        font: Font6x8,
-        text_color: Some(BinaryColor::Off),
-        background_color: Some(BinaryColor::On),
-    };
+    let style = TextStyleBuilder::new(Font6x8)
+        .text_color(BinaryColor::Off)
+        .background_color(BinaryColor::On)
+        .build();
 
     Text::new("Hello World! - inverse 6x8", Point::new(15, 30))
         .into_styled(style)
@@ -26,11 +25,13 @@ fn main() {
 
     // Show smallest font with white font on black background using a macro
     egtext!(
-        "Hello world! - inverse 6x8 with macro",
-        Point::new(15, 40),
-        font = Font6x8,
-        text_color = Some(BinaryColor::On),
-        background_color = Some(BinaryColor::Off),
+        text = "Hello world! - inverse 6x8 with macro",
+        top_left = (15, 40),
+        style = text_style!(
+            font = Font6x8,
+            text_color = BinaryColor::On,
+            background_color = BinaryColor::Off
+        )
     )
     .draw(&mut display);
 
@@ -45,7 +46,12 @@ fn main() {
         .draw(&mut display);
 
     // Show 12x16 Font using a macro
-    egtext!("Hello 12x16!", Point::new(15, 105), font = Font12x16).draw(&mut display);
+    egtext!(
+        text = "Hello 12x16!",
+        top_left = (15, 105),
+        style = text_style!(font = Font12x16)
+    )
+    .draw(&mut display);
 
     let mut window = WindowBuilder::new(&display).title("Fonts").build();
     window.show_static(&display);

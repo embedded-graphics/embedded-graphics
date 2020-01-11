@@ -1,6 +1,4 @@
-use super::binary_color::*;
-use super::gray_color::*;
-use super::rgb_color::*;
+use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*};
 
 /// Convert color channel values from one bit depth to another.
 const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {

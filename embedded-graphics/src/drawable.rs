@@ -1,7 +1,5 @@
 //! `Drawable` trait and helpers
-use crate::geometry::Point;
-use crate::pixelcolor::PixelColor;
-use crate::DrawTarget;
+use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 
 /// A single pixel.
 ///
@@ -12,8 +10,7 @@ use crate::DrawTarget;
 /// The [`Drawable`] trait is implemented for `Pixel` which allows single pixels
 /// to be drawn to a [`DrawTarget`]:
 /// ```
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
@@ -22,12 +19,13 @@ use crate::DrawTarget;
 ///
 /// Iterators with `Pixel` items can also be drawn:
 /// ```
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
-/// (0..100).map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On)).draw(&mut display);
+/// (0..100)
+///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
+///     .draw(&mut display);
 /// ```
 ///
 /// [`Drawable`]: trait.Drawable.html
@@ -51,18 +49,21 @@ where
 /// over pixels being rendered with [`DrawTarget`]'s [`draw_iter`] method.
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::{egrectangle, egtext};
-/// use embedded_graphics::fonts::Font6x8;
-/// use embedded_graphics::geometry::Point;
-/// use embedded_graphics::pixelcolor::{PixelColor, BinaryColor, Rgb888};
+/// use embedded_graphics::{
+///     egrectangle, egtext,
+///     fonts::Font6x8,
+///     geometry::Point,
+///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
+///     prelude::*,
+///     primitive_style, text_style,
+/// };
 ///
 /// struct Button<'a, C: PixelColor> {
 ///     top_left: Point,
 ///     bottom_right: Point,
 ///     bg_color: C,
 ///     fg_color: C,
-///     text: &'a str
+///     text: &'a str,
 /// }
 ///
 /// impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
@@ -70,9 +71,18 @@ where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) {
-///         egrectangle!(self.top_left, self.bottom_right, fill_color = Some(self.bg_color)).draw(display);
-///         egtext!(self.text, Point::new(20, 20), font = Font6x8, text_color = Some(self.fg_color))
-///             .draw(display);
+///         egrectangle!(
+///             top_left = self.top_left,
+///             bottom_right = self.bottom_right,
+///             style = primitive_style!(fill_color = self.bg_color)
+///         )
+///         .draw(display);
+///         egtext!(
+///             text = self.text,
+///             top_left = (20, 20),
+///             style = text_style!(font = Font6x8, text_color = self.fg_color)
+///         )
+///         .draw(display);
 ///     }
 /// }
 ///
@@ -88,7 +98,6 @@ where
 ///     # let mut display = MockDisplay::default();
 ///     button.draw(&mut display);
 /// }
-///
 /// ```
 ///
 /// [`DrawTarget`]: ../trait.DrawTarget.html
@@ -114,8 +123,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::BinaryColor;
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[test]
     fn draw_pixel() {

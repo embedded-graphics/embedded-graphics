@@ -35,7 +35,7 @@
 //! ```rust,no_run
 //! use embedded_graphics::pixelcolor::BinaryColor;
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{egcircle, egline, egtext};
+//! use embedded_graphics::{egcircle, egline, egtext, primitive_style, text_style};
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics_simulator::{
 //!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, WindowBuilder,
@@ -49,14 +49,14 @@
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
 //!
-//!     egtext!("Hello World!", Point::zero(), font = Font6x8).draw(&mut display);
+//!     egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8)).draw(&mut display);
 //!
-//!     egcircle!((96, 32), 31, stroke_color = Some(BinaryColor::On)).draw(&mut display);
+//!     egcircle!(center = (96, 32), radius = 31, style = primitive_style!(stroke_color = BinaryColor::On)).draw(&mut display);
 //!
-//!     egline!((32, 32), (1, 32), stroke_color = Some(BinaryColor::On))
+//!     egline!(start = (32, 32), end = (1, 32), style = primitive_style!(stroke_color = BinaryColor::On))
 //!         .translate(Point::new(64, 0))
 //!         .draw(&mut display);
-//!     egline!((32, 32), (40, 40), stroke_color = Some(BinaryColor::On))
+//!     egline!(start = (32, 32), end = (40, 40), style = primitive_style!(stroke_color = BinaryColor::On))
 //!         .translate(Point::new(64, 0))
 //!         .draw(&mut display);
 //!

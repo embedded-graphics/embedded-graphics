@@ -1,5 +1,4 @@
-use crate::fonts::Font;
-use crate::geometry::Size;
+use crate::{fonts::Font, geometry::Size};
 
 /// 24x32 pixel monospace font.
 ///
@@ -38,13 +37,15 @@ impl Font for Font24x32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::drawable::Drawable;
-    use crate::fonts::{Font, Text};
-    use crate::geometry::{Dimensions, Point, Size};
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::BinaryColor;
-    use crate::style::TextStyle;
-    use crate::transform::Transform;
+    use crate::{
+        drawable::Drawable,
+        fonts::{Font, Text},
+        geometry::{Dimensions, Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        style::TextStyle,
+        transform::Transform,
+    };
 
     const WIDTH: usize = Font24x32::CHARACTER_SIZE.width as usize;
     const HEIGHT: usize = Font24x32::CHARACTER_SIZE.height as usize;

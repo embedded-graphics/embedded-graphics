@@ -18,6 +18,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #215 Added `PrimitiveStyleBuilder`.
 
+- #215 Added `TextStyleBuilder`.
+
+- #224 Added `Triangle::from_points` which accepts either `[Point; 3]`, or an array of length 3 containing any item that implements `Into<Point>`.
+
 ### Fixed
 
 - #143, #209 Circles with no stroke are now drawn correctly
@@ -34,7 +38,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** The `Drawable` trait now has a required trait method `draw()`, which describes how the object will be drawn on the screen. See the docs for more details.
 
-- **(breaking)** The `Drawing` trait has been renamed `DrawTarget`. The required trait method to implement has changed from `draw()` to `draw_pixel()`, and optional trait methods have been added to allow an implementing display driver to specify hardware-accelerated methods for drawing graphics primitives.
+- **(breaking)** The `Drawing` trait has been renamed to `DrawTarget`. The required trait method to implement has changed from `draw()` to `draw_pixel()`, and optional trait methods have been added to allow an implementing display driver to specify hardware-accelerated methods for drawing graphics primitives.
 
 - **(breaking)** #161 The `.fill()` and `.stroke()` style methods are renamed to `.fill_color()` and `.stroke_color()` respectively. This is to reduce confusion between names like `.stroke()` and `.stroke_width()`. Example:
 
@@ -49,14 +53,6 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
       .stroke_width(10)
       .stroke_color(Some(BinaryColor::On))
       .fill_color(Some(BinaryColor::Off));
-
-  // Or for macros:
-
-  let circle = egcircle!((20, 20), 5,
-    stroke_width = 10,
-    stroke_color = Some(BinaryColor::On),
-    fill_color = Some(BinaryColor::Off)
-  );
   ```
 
 - **(breaking)** The simulator API changed.
@@ -74,6 +70,66 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** Text rendering is now implemented using `Text`, `TextStyle` and `Font` objects instead of using `Font::render_str`.
 
 - tinybmp: Upgraded to nom 5 internally. No user-facing changes.
+
+- **(breaking)** #224 Embedded Graphics macros now use named instead of positional parameters. Styling is now achieved using the `style` property which receives a `PrimitiveStyle` for primitives, and a `TextStyle`. There are convenience macros (`primitive_style!()` and `text_style!()` respectively) to make styling objects easier.
+
+  ```rust
+  use embedded_graphics::{egcircle, egline, egrectangle, egtext, egtriangle, text_style};
+
+  // OLD
+  egcircle!(
+      (15, 20),
+      10,
+      stroke = Some(Rgb565::RED),
+      fill = Some(Rgb565::GREEN)
+  );
+  // NEW
+  egcircle!(
+      center = (15, 20),
+      radius = 10,
+      style = primitive_style!(stroke = Rgb565::RED, fill = Rgb565::GREEN)
+  );
+
+  // OLD
+  egrectangle!(
+      (0, 0),
+      (64, 64),
+      stroke = Some(Rgb565::RED),
+      fill = Some(Rgb565::GREEN)
+  );
+  // NEW
+  egrectangle!(
+      top_left = (0, 0),
+      bottom_right = (64, 64),
+      style = primitive_style!(stroke = Rgb565::RED, fill = Rgb565::GREEN)
+  );
+
+  // OLD
+  egtriangle!((32, 0), (0, 64), (64, 64));
+  // NEW
+  egtriangle!(
+      points = [(32, 0), (0, 64), (64, 64)],
+      style = primitive_style!(stroke = Rgb565::RED, fill = Rgb565::GREEN)
+  );
+
+  // OLD
+  egline!((32, 0), (0, 64));
+  // NEW
+  egline!(
+      start = (32, 0),
+      end = (0, 64),
+      style = primitive_style!(stroke = Rgb565::RED,)
+  );
+
+  // OLD
+  egtext!("456", (10, 10), font = Font6x8, stroke = Some(Rgb565::RED));
+  // NEW
+  egtext!(
+      text = "456",
+      top_left = (10, 10),
+      style = text_style!(font = Font6x8, text_color = Rgb565::RED)
+  );
+  ```
 
 ### Removed
 

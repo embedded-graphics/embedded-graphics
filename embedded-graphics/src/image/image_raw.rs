@@ -1,9 +1,13 @@
-use crate::drawable::{Drawable, Pixel};
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter};
-use crate::pixelcolor::PixelColor;
-use crate::transform::Transform;
-use crate::DrawTarget;
+use crate::{
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::{
+        raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
+        PixelColor,
+    },
+    transform::Transform,
+    DrawTarget,
+};
 use core::marker::PhantomData;
 
 /// Image with little endian data.
@@ -30,14 +34,13 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 /// This example creates an image from 1 bit per pixel data:
 ///
 /// ```
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::image::Image;
-/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::{image::Image, pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay as Display;
 ///
 /// /// Image data with 12 x 5 pixels.
 /// /// The data for each row is 12 bits long and is padded with zeros on the
 /// /// end because each row needs to contain a whole number of bytes.
+/// #[rustfmt::skip]
 /// const DATA: &[u8] = &[
 ///     0b11101111, 0b0101_0000,
 ///     0b10001000, 0b0101_0000,
@@ -62,10 +65,14 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 /// to abbreviate the type.
 ///
 /// ```
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::image::{ImageLE, ImageBE, Image};
-/// use embedded_graphics::pixelcolor::{Rgb565, Rgb888};
-/// use embedded_graphics::pixelcolor::raw::{BigEndian, LittleEndian};
+/// use embedded_graphics::{
+///     image::{Image, ImageBE, ImageLE},
+///     pixelcolor::{
+///         raw::{BigEndian, LittleEndian},
+///         Rgb565, Rgb888,
+///     },
+///     prelude::*,
+/// };
 /// # const DATA: &[u8] = &[0x55; 8 * 8 * 3];
 ///
 /// // Rgb888 image with 24 bits per pixel and big endian byte order
@@ -173,7 +180,7 @@ where
     /// # use embedded_graphics::geometry::Point;
     /// #
     /// // 8px x 1px test image
-    /// let image: Image<BinaryColor> = Image::new(&[ 0xff ], 8, 1);
+    /// let image: Image<BinaryColor> = Image::new(&[0xff], 8, 1);
     /// let moved = image.translate(Point::new(25, 30));
     ///
     /// assert_eq!(image.offset(), Point::new(0, 0));
@@ -195,7 +202,7 @@ where
     /// # use embedded_graphics::transform::Transform;
     /// # use embedded_graphics::geometry::Point;
     /// #
-    /// let mut image: Image<BinaryColor> = Image::new(&[ 0xff ], 8, 1);
+    /// let mut image: Image<BinaryColor> = Image::new(&[0xff], 8, 1);
     /// image.translate_mut(Point::new(25, 30));
     ///
     /// assert_eq!(image.offset(), Point::new(25, 30));
@@ -283,9 +290,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::drawable::Pixel;
-    use crate::pixelcolor::{raw::RawU32, *};
-    use crate::transform::Transform;
+    use crate::{
+        drawable::Pixel,
+        pixelcolor::{raw::RawU32, *},
+        transform::Transform,
+    };
 
     #[derive(Debug, PartialEq, Clone, Copy)]
     struct TestColorU32(RawU32);

@@ -44,10 +44,12 @@
 //! | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
 //! | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
 
-use crate::drawable::Pixel;
-use crate::geometry::{Point, Size};
-use crate::pixelcolor::{BinaryColor, Gray8, GrayColor, PixelColor, Rgb888, RgbColor};
-use crate::DrawTarget;
+use crate::{
+    drawable::Pixel,
+    geometry::{Point, Size},
+    pixelcolor::{BinaryColor, Gray8, GrayColor, PixelColor, Rgb888, RgbColor},
+    DrawTarget,
+};
 use core::{
     cmp::PartialEq,
     fmt::{self, Write},

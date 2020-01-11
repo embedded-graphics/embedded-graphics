@@ -1,7 +1,7 @@
 //! Draw a 16BPP BMP image onto a monochrome display
 //!
 //! This example uses `impl From<Rgb565> for SimPixelColor` from `src/lib` to convert the image into
-//! a colour pixel iterator. The simulator uses the `ColorOled` theme to display the image in colour
+//! a color pixel iterator. The simulator uses the `ColorOled` theme to display the image in color
 //!
 //! Note that this requires the `bmp` feature to be turned on for `embedded-graphics`. Turn it on
 //! with the following in `Cargo.toml`:

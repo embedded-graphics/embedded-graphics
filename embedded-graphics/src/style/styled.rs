@@ -1,8 +1,10 @@
-use crate::geometry::{Dimensions, Point, Size};
-use crate::transform::Transform;
+use crate::{
+    geometry::{Dimensions, Point, Size},
+    transform::Transform,
+};
 
 /// Styled.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Styled<T, S> {
     /// Primitive.
     pub primitive: T,

@@ -1,10 +1,11 @@
-use super::super::drawable::{Drawable, Pixel};
-use super::super::transform::Transform;
-use super::ImageFile;
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::raw::RawData;
-use crate::pixelcolor::PixelColor;
-use crate::DrawTarget;
+use crate::{
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point, Size},
+    image::ImageFile,
+    pixelcolor::{raw::RawData, PixelColor},
+    transform::Transform,
+    DrawTarget,
+};
 use core::marker::PhantomData;
 use tinytga::{Tga, TgaIterator};
 
@@ -17,8 +18,7 @@ use tinytga::{Tga, TgaIterator};
 /// ## Load a 16 bit per pixel image from a raw byte slice and draw it to a display
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::image::ImageTga;
+/// use embedded_graphics::{image::ImageTga, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # use embedded_graphics::pixelcolor::Rgb888;
 /// # let mut display: MockDisplay<Rgb888> = MockDisplay::default();
@@ -170,8 +170,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock_display::MockDisplay;
-    use crate::pixelcolor::{Gray8, Rgb888, RgbColor};
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::{Gray8, Rgb888, RgbColor},
+    };
 
     const PIXEL_COLORS: [(i32, i32, Rgb888); 16] = [
         (0, 0, Rgb888::WHITE),

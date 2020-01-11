@@ -1,12 +1,14 @@
 //! The rectangle primitive. Also good for drawing squares.
 
-use super::super::drawable::{Drawable, Pixel};
-use super::super::transform::Transform;
-use crate::geometry::{Dimensions, Point, Size};
-use crate::pixelcolor::PixelColor;
-use crate::primitives::Primitive;
-use crate::style::{PrimitiveStyle, Styled};
-use crate::DrawTarget;
+use crate::{
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
+    primitives::Primitive,
+    style::{PrimitiveStyle, Styled},
+    transform::Transform,
+    DrawTarget,
+};
 
 /// Rectangle primitive
 ///
@@ -17,10 +19,9 @@ use crate::DrawTarget;
 /// ## Create some rectangles with different styles
 ///
 /// ```rust
-/// use embedded_graphics::prelude::*;
-/// use embedded_graphics::primitives::Rectangle;
-/// use embedded_graphics::pixelcolor::Rgb565;
-/// use embedded_graphics::style::PrimitiveStyleBuilder;
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+/// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
@@ -41,7 +42,7 @@ use crate::DrawTarget;
 ///     .into_styled(style)
 ///     .draw(&mut display);
 /// ```
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rectangle {
     /// Top left point of the rect
     pub top_left: Point,
