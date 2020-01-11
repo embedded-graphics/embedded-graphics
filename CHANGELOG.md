@@ -8,7 +8,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- None
+- Added [hub75](https://crates.io/crates/hub75) driver to list of known supported drivers.
 
 ### Changed
 
