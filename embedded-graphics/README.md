@@ -148,6 +148,7 @@ fn main() {
 
 ## Display drivers with embedded-graphics support
 
+- [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
 - [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
 - [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
 - [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
