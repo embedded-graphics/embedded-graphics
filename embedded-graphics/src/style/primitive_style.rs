@@ -6,7 +6,14 @@ use core::convert::TryFrom;
 /// `PrimitiveStyle` can be applied to a [primitive] to define how the primitive
 /// is drawn.
 ///
+/// Because `PrimitiveStyle` has the [`non_exhaustive`] attribute, it cannot be created using a
+/// struct literal. To create a `PrimitiveStyle`, use the [`primitive_style!`] macro or
+/// [`PrimitiveStyleBuilder`].
+///
 /// [primitive]: ../primitives/index.html
+/// [`PrimitiveStyleBuilder`]: ../style/struct.PrimitiveStyleBuilder.html
+/// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
+/// [`primitive_style!`]: ../macro.primitive_style.html
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PrimitiveStyle<C>
@@ -80,14 +87,15 @@ where
 
 /// Primitive style builder.
 ///
-/// Use this builder to create styles for [primitives]. For convenience, the [`primitive_style!`]
-/// macro is also provided.
+/// Use this builder to create [`PrimitiveStyle`]s. If any properties on the builder are omitted,
+/// the value will remain at its default value.
 ///
-/// If any properties on the builder are ommitted, the value will default to `None` (transparent).
+/// The [`primitive_style!`] macro can also be used to create [`PrimitiveStyle`]s, but with a
+/// shorter syntax. See the [`primitive_style!`] documentation for examples.
 ///
 /// # Examples
 ///
-/// ## Build a style with customised stroke and fill
+/// ## Build a style with configured stroke and fill
 ///
 /// This example builds a style for a circle with a 3px red stroke and a solid green fill. The
 /// circle is centered at (20, 20) with a radius of 10px.
@@ -111,10 +119,10 @@ where
 ///     .into_styled(style);
 /// ```
 ///
-/// ## Build a style with ommitted (transparent) values
+/// ## Build a style with stroke and no fill
 ///
 /// This example builds a style for a rectangle with a 1px red stroke. Because `.fill_color()` is
-/// not called, the fill is defaulted to `None` (i.e. transparent).
+/// not called, the fill color remains the default value of `None` (i.e. transparent).
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -134,7 +142,7 @@ where
 ///     .into_styled(style);
 /// ```
 ///
-/// [primitives]: ../primitives/index.html
+/// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html
 /// [`primitive_style!`]: ../macro.primitive_style.html
 #[derive(Debug, PartialEq, Eq)]
 pub struct PrimitiveStyleBuilder<C>

@@ -2,11 +2,10 @@ use crate::{fonts::Font, pixelcolor::PixelColor};
 
 /// Style properties for text.
 ///
-/// `TextStyle` can be applied to a [`Text`] object to define how a text is drawn.
+/// A `TextStyle` can be applied to a [`Text`] object to define how the text is drawn.
 ///
 /// Because `TextStyle` has the [`non_exhaustive`] attribute, it cannot be created using a struct
-/// literal. To create a `TextStyle`, the [`text_style!`] macro or [`TextStyleBuilder`] can be
-/// used instead.
+/// literal. To create a `TextStyle`, use the [`text_style!`] macro or [`TextStyleBuilder`].
 ///
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
@@ -46,12 +45,14 @@ where
 
 /// Text style builder.
 ///
-/// Use this builder to create styles for [`Font`]s. For convenience, the [`text_style!`] macro is
-/// also provided.
+/// Use this builder to create [`TextStyle`]s for [`Text`].
+///
+/// The [`text_style!`] macro can also be used to create [`TextStyle`]s, but with a shorter syntax.
+/// See the [`text_style!`] documentation for examples.
 ///
 /// # Examples
 ///
-/// ## Render some text with a blue background and yellow text color
+/// ## Render yellow text on a blue background
 ///
 /// This uses the [`Font6x8`] font, but [other fonts] can also be used.
 ///
@@ -97,8 +98,8 @@ where
 ///
 /// ## Transparent background
 ///
-/// If a property is ommitted, it will default to `None` in the resulting `TextStyle` returned by
-/// `.build()`. This example draws white text with no background at all.
+/// If a property is ommitted, it will remain at its default value in the resulting `TextStyle`
+/// returned by `.build()`. This example draws white text with no background at all.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -111,7 +112,7 @@ where
 /// };
 ///
 /// let style: TextStyle<Rgb565, Font6x8> = TextStyleBuilder::new(Font6x8)
-///     .text_color(Rgb565::YELLOW)
+///     .text_color(Rgb565::WHITE)
 ///     .build();
 ///
 /// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
@@ -123,6 +124,7 @@ where
 /// [other fonts]: ../fonts/index.html
 /// [`text_style!`]: ../macro.text_style.html
 /// [`egtext!`]: ../macro.egtext.html
+/// [`Text`]: ../fonts/struct.Text.html
 /// [`TextStyle`]: ./struct.TextStyle.html
 #[derive(Debug, PartialEq, Eq)]
 pub struct TextStyleBuilder<C, F>
