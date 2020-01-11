@@ -148,17 +148,17 @@ fn main() {
 
 ## Display drivers with embedded-graphics support
 
-- [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
-- [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
-- [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
-- [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
-- [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
-- [ssd1322](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
-- [ssd1331](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
-- [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
-- [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
-- [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
-- [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
+- [hub75 ![Crates.io badge](https://img.shields.io/crates/v/hub75.svg)](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
+- [ili9341 ![Crates.io badge](https://img.shields.io/crates/v/ili9341.svg)](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
+- [ls010b7dh01 ![Crates.io badge](https://img.shields.io/crates/v/ls010b7dh01.svg)](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
+- [sh1106 ![Crates.io badge](https://img.shields.io/crates/v/sh1106.svg)](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
+- [ssd1306 ![Crates.io badge](https://img.shields.io/crates/v/ssd1306.svg)](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
+- [ssd1322 ![Crates.io badge](https://img.shields.io/crates/v/ssd1322.svg)](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
+- [ssd1331 ![Crates.io badge](https://img.shields.io/crates/v/ssd1331.svg)](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
+- [ssd1351 ![Crates.io badge](https://img.shields.io/crates/v/ssd1351.svg)](https://crates.io/crates/ssd1351): SSD1351 driver
+- [ssd1675 ![Crates.io badge](https://img.shields.io/crates/v/ssd1675.svg)](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
+- [st7735-lcd ![Crates.io badge](https://img.shields.io/crates/v/st7735-lcd.svg)](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
+- [st7920 ![Crates.io badge](https://img.shields.io/crates/v/st7920.svg)](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
 
 There may be other drivers out there we don't know about yet. If you know of a driver to add to this list, please open [an issue](https://github.com/jamwaffles/embedded-graphics/issues/new)!
 
