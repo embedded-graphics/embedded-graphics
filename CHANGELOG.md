@@ -4,6 +4,26 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## Unreleased
 
+- None
+
+### Added
+
+- None
+
+### Changed
+
+- None
+
+### Fixed
+
+- None
+
+### Security
+
+- None
+
+## 0.6.0-alpha.3
+
 ### Added
 
 - #183 Added limited mouse and keyboard event handling to the simulator in order to simulate input devices such as touch screens, buttons, or rotary encoders.
