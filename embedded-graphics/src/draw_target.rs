@@ -183,7 +183,11 @@ pub trait DrawTarget<C>
 where
     C: PixelColor,
 {
-    /// TODO: Docs
+    /// Error type to return when a draw or display change operation fails.
+    ///
+    /// This error is returned when a drawing operation fails, or when an error updating/clearing
+    /// the display occurs. The examples in this crate use `core::convert::Infallible`, however a
+    /// more descriptive error type should be used with real hardware.
     type Error;
 
     /// Draws a pixel on the display.
