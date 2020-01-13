@@ -31,7 +31,7 @@
 //! pub struct EpdDisplay {}
 //!
 //! impl DrawTarget<EpdColor> for EpdDisplay {
-//!     type Error = ();
+//!     type Error = core::convert::Infallible;
 //!
 //!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) -> Result<(), Self::Error> {
 //!         let Pixel(point, color) = item;

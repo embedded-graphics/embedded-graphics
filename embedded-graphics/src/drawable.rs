@@ -86,6 +86,7 @@ where
 /// ```
 ///
 /// Iterators with `Pixel` items can also be drawn:
+///
 /// ```
 /// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay;
@@ -126,7 +127,7 @@ mod tests {
     use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[test]
-    fn draw_pixel() -> Result<(), ()> {
+    fn draw_pixel() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
         Pixel(Point::new(0, 0), BinaryColor::On).draw(&mut display)?;
         Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display)?;

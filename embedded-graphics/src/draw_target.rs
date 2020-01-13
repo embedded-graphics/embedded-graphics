@@ -51,7 +51,7 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget<Gray8> for ExampleDisplay {
-///     type Error = ();
+///     type Error = core::convert::Infallible;
 ///
 ///     /// Draw a `Pixel` that has a color defined as `Gray8`.
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
@@ -129,7 +129,7 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget<Gray8> for FastExampleDisplay {
-///     type Error = ();
+///     type Error = core::convert::Infallible;
 ///
 ///     /// Draw a `pixel` that has a color defined as `Gray8`
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {

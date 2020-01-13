@@ -262,7 +262,7 @@ impl<C> DrawTarget<C> for MockDisplay<C>
 where
     C: PixelColor,
 {
-    type Error = ();
+    type Error = core::convert::Infallible;
 
     fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
         let Pixel(Point { x, y }, color) = pixel;

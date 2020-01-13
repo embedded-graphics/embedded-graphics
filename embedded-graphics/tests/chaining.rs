@@ -25,7 +25,7 @@ impl From<u8> for TestPixelColor {
 }
 
 impl DrawTarget<TestPixelColor> for FakeDisplay {
-    type Error = ();
+    type Error = core::convert::Infallible;
 
     fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>) -> Result<(), Self::Error> {
         Ok(())
@@ -37,7 +37,7 @@ impl DrawTarget<TestPixelColor> for FakeDisplay {
 }
 
 #[test]
-fn it_supports_chaining() -> Result<(), ()> {
+fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
     let mut disp = FakeDisplay {};
 
     let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
@@ -65,7 +65,7 @@ fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
 }
 
 #[test]
-fn return_from_fn() -> Result<(), ()> {
+fn return_from_fn() -> Result<(), core::convert::Infallible> {
     let mut disp = FakeDisplay {};
 
     let mut chained = multi();
@@ -74,7 +74,7 @@ fn return_from_fn() -> Result<(), ()> {
 }
 
 #[test]
-fn implicit_into_iter() -> Result<(), ()> {
+fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
     let mut disp = FakeDisplay {};
 
     let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
