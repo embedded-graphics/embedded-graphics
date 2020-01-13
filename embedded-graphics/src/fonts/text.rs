@@ -1,11 +1,11 @@
 use crate::{
     drawable::{Drawable, Pixel},
     fonts::Font,
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     style::{Styled, TextStyle},
     transform::Transform,
-    Dimensions, DrawTarget,
+    DrawTarget,
 };
 
 /// A text object.

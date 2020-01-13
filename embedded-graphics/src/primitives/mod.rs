@@ -6,7 +6,11 @@ pub mod rectangle;
 pub mod triangle;
 
 pub use self::{circle::Circle, line::Line, rectangle::Rectangle, triangle::Triangle};
-use crate::{geometry::Dimensions, pixelcolor::PixelColor, PrimitiveStyle, Styled};
+use crate::{
+    geometry::Dimensions,
+    pixelcolor::PixelColor,
+    style::{PrimitiveStyle, Styled},
+};
 
 /// Primitive trait
 pub trait Primitive: Dimensions {

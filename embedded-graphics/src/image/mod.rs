@@ -17,7 +17,7 @@ pub use self::image_bmp::ImageBmp;
 pub use self::image_tga::ImageTga;
 
 /// Image file trait.
-pub trait ImageFile<'a>: crate::Dimensions + Sized {
+pub trait ImageFile<'a>: crate::geometry::Dimensions + Sized {
     /// Create a new image with given input file
     ///
     /// The input file is expected to be of a particular format (BMP, TGA, etc) and contain file
