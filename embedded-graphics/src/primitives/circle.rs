@@ -181,8 +181,8 @@ impl<'a, C: 'a> Drawable<C> for &Styled<Circle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_circle(self);
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error> {
+        display.draw_circle(self)
     }
 }
 

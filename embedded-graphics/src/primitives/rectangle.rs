@@ -211,8 +211,8 @@ impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_rectangle(self);
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error> {
+        display.draw_rectangle(self)
     }
 }
 

@@ -68,8 +68,8 @@ where
     C: PixelColor,
     F: Font + Copy,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_iter(self.into_iter());
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error> {
+        display.draw_iter(self.into_iter())
     }
 }
 

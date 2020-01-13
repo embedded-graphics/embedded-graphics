@@ -167,8 +167,8 @@ impl<'a, C: 'a> Drawable<C> for &ImageBmp<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
-        display.draw_iter(self.into_iter());
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self.into_iter())
     }
 }
 

@@ -31,13 +31,17 @@
 //! pub struct EpdDisplay {}
 //!
 //! impl DrawTarget<EpdColor> for EpdDisplay {
-//!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) {
+//!     type Error = ();
+//!
+//!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) -> Result<(), Self::Error> {
 //!         let Pixel(point, color) = item;
 //!         match color {
 //!             EpdColor::White => {} // draw white pixel at `point`
 //!             EpdColor::Black => {} // draw black pixel at `point`
 //!             EpdColor::Red => {}   // draw red pixel at `point`
 //!         }
+//!
+//!         Ok(())
 //!     }
 //!
 //!     fn size(&self) -> Size {

@@ -199,8 +199,8 @@ impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_line(self);
+    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error> {
+        display.draw_line(self)
     }
 }
 

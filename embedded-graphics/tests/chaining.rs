@@ -25,7 +25,10 @@ impl From<u8> for TestPixelColor {
 }
 
 impl DrawTarget<TestPixelColor> for FakeDisplay {
-    fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>) { // Noop
+    type Error = ();
+
+    fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>) -> Result<(), Self::Error> {
+        Ok(())
     }
 
     fn size(&self) -> Size {
@@ -34,7 +37,7 @@ impl DrawTarget<TestPixelColor> for FakeDisplay {
 }
 
 #[test]
-fn it_supports_chaining() {
+fn it_supports_chaining() -> Result<(), ()> {
     let mut disp = FakeDisplay {};
 
     let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
@@ -46,7 +49,7 @@ fn it_supports_chaining() {
                 .into_iter(),
         );
 
-    chained.draw(&mut disp);
+    chained.draw(&mut disp)
 }
 
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
@@ -62,16 +65,16 @@ fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
 }
 
 #[test]
-fn return_from_fn() {
+fn return_from_fn() -> Result<(), ()> {
     let mut disp = FakeDisplay {};
 
     let mut chained = multi();
 
-    chained.draw(&mut disp);
+    chained.draw(&mut disp)
 }
 
 #[test]
-fn implicit_into_iter() {
+fn implicit_into_iter() -> Result<(), ()> {
     let mut disp = FakeDisplay {};
 
     let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
@@ -83,5 +86,5 @@ fn implicit_into_iter() {
                 .into_iter(),
         );
 
-    chained.draw(&mut disp);
+    chained.draw(&mut disp)
 }

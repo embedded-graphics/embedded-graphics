@@ -64,12 +64,16 @@ impl<C> DrawTarget<C> for SimulatorDisplay<C>
 where
     C: PixelColor,
 {
-    fn draw_pixel(&mut self, pixel: Pixel<C>) {
+    type Error = ();
+
+    fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
         let Pixel(point, color) = pixel;
 
         if let Some(index) = self.point_to_index(point) {
             self.pixels[index] = color;
         }
+
+        Ok(())
     }
 
     fn size(&self) -> Size {

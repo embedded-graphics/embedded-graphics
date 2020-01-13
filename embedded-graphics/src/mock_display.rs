@@ -262,14 +262,18 @@ impl<C> DrawTarget<C> for MockDisplay<C>
 where
     C: PixelColor,
 {
-    fn draw_pixel(&mut self, pixel: Pixel<C>) {
+    type Error = ();
+
+    fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
         let Pixel(Point { x, y }, color) = pixel;
         if !(0..SIZE).contains(&(x as usize)) || !(0..SIZE).contains(&(y as usize)) {
-            return;
+            return Ok(());
         }
 
         let i = x + y * SIZE as i32;
         self.0[i as usize] = Some(color);
+
+        Ok(())
     }
 
     fn size(&self) -> Size {

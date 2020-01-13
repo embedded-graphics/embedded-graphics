@@ -51,12 +51,16 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget<Gray8> for ExampleDisplay {
+///     type Error = ();
+///
 ///     /// Draw a `Pixel` that has a color defined as `Gray8`.
-///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) {
+///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
 ///         let Pixel(coord, color) = pixel;
 ///         // Place an (x, y) pixel at the right index in the framebuffer
 ///         let index = coord.x + coord.y * 64;
 ///         self.framebuffer[index as usize] = color.luma();
+///
+///         Ok(())
 ///     }
 ///
 ///     fn size(&self) -> Size {
@@ -125,12 +129,16 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget<Gray8> for FastExampleDisplay {
+///     type Error = ();
+///
 ///     /// Draw a `pixel` that has a color defined as `Gray8`
-///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) {
+///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
 ///         let Pixel(coord, color) = pixel;
 ///         // Place an (x, y) pixel at the right index in the framebuffer
 ///         let index = coord.x + coord.y * 64;
 ///         self.framebuffer[index as usize] = color.luma();
+///
+///         Ok(())
 ///     }
 ///
 ///     fn size(&self) -> Size {
@@ -138,8 +146,10 @@ use crate::{
 ///     }
 ///
 ///     /// Use the accelerated method when drawing rectangles
-///     fn draw_rectangle(&mut self, item: &Styled<Rectangle, PrimitiveStyle<Gray8>>) {
+///     fn draw_rectangle(&mut self, item: &Styled<Rectangle, PrimitiveStyle<Gray8>>)  -> Result<(), Self::Error>{
 ///         self.fast_rectangle(item);
+///
+///         Ok(())
 ///     }
 /// }
 ///
@@ -170,20 +180,25 @@ pub trait DrawTarget<C>
 where
     C: PixelColor,
 {
+    /// TODO: Docs
+    type Error;
+
     /// Draws a pixel on the display.
     ///
     /// Note that some displays require a "flush" operation to actually write changes to the
     /// framebuffer.
-    fn draw_pixel(&mut self, item: drawable::Pixel<C>);
+    fn draw_pixel(&mut self, item: drawable::Pixel<C>) -> Result<(), Self::Error>;
 
     /// Draws an object from an iterator over its pixels.
-    fn draw_iter<T>(&mut self, item: T)
+    fn draw_iter<T>(&mut self, item: T) -> Result<(), Self::Error>
     where
         T: IntoIterator<Item = drawable::Pixel<C>>,
     {
         for pixel in item {
-            self.draw_pixel(pixel);
+            self.draw_pixel(pixel)?;
         }
+
+        Ok(())
     }
 
     /// Returns the dimensions of the `DrawTarget` in pixels.
@@ -193,13 +208,13 @@ where
     ///
     /// This default implementation should be replaced if the implementing driver provides an
     /// accelerated clearing method.
-    fn clear(&mut self, color: C)
+    fn clear(&mut self, color: C) -> Result<(), Self::Error>
     where
         Self: Sized,
     {
         primitives::Rectangle::new(Point::zero(), Point::zero() + self.size())
             .into_styled(PrimitiveStyle::with_fill(color))
-            .draw(self);
+            .draw(self)
     }
 
     /// Flushes changes to the framebuffer.
@@ -207,7 +222,9 @@ where
     /// Note that some displays operate in "immediate mode", which does not require any flushing.
     /// Because of this, the default implementation of this method is a noop. If the implementing
     /// display requires flushing, this method should be overriden in the trait impl.
-    fn flush(&mut self) {}
+    fn flush(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
 
     /// Draws a line primitive.
     ///
@@ -222,8 +239,11 @@ where
     ///
     /// [`Line`]: ../primitives/line/struct.Line.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_line(&mut self, item: &Styled<primitives::Line, PrimitiveStyle<C>>) {
-        self.draw_iter(item);
+    fn draw_line(
+        &mut self,
+        item: &Styled<primitives::Line, PrimitiveStyle<C>>,
+    ) -> Result<(), Self::Error> {
+        self.draw_iter(item)
     }
 
     /// Draws a triangle primitive.
@@ -239,8 +259,11 @@ where
     ///
     /// [`Triangle`]: ../primitives/triangle/struct.Triangle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_triangle(&mut self, item: &Styled<primitives::Triangle, PrimitiveStyle<C>>) {
-        self.draw_iter(item);
+    fn draw_triangle(
+        &mut self,
+        item: &Styled<primitives::Triangle, PrimitiveStyle<C>>,
+    ) -> Result<(), Self::Error> {
+        self.draw_iter(item)
     }
 
     /// Draws a rectangle primitive.
@@ -256,8 +279,11 @@ where
     ///
     /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_rectangle(&mut self, item: &Styled<primitives::Rectangle, PrimitiveStyle<C>>) {
-        self.draw_iter(item);
+    fn draw_rectangle(
+        &mut self,
+        item: &Styled<primitives::Rectangle, PrimitiveStyle<C>>,
+    ) -> Result<(), Self::Error> {
+        self.draw_iter(item)
     }
 
     /// Draws a circle primitive.
@@ -273,7 +299,10 @@ where
     ///
     /// [`Circle`]: ../primitives/circle/struct.Circle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_circle(&mut self, item: &Styled<primitives::Circle, PrimitiveStyle<C>>) {
-        self.draw_iter(item);
+    fn draw_circle(
+        &mut self,
+        item: &Styled<primitives::Circle, PrimitiveStyle<C>>,
+    ) -> Result<(), Self::Error> {
+        self.draw_iter(item)
     }
 }
