@@ -80,7 +80,7 @@ use crate::{
 ///         radius = 10,
 ///         style = primitive_style!(stroke_color = Gray8::WHITE)
 ///     );
-///     circle.draw(&mut display);
+///     circle.draw(&mut display).unwrap();
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");
@@ -146,7 +146,10 @@ use crate::{
 ///     }
 ///
 ///     /// Use the accelerated method when drawing rectangles
-///     fn draw_rectangle(&mut self, item: &Styled<Rectangle, PrimitiveStyle<Gray8>>)  -> Result<(), Self::Error>{
+///     fn draw_rectangle(
+///         &mut self,
+///         item: &Styled<Rectangle, PrimitiveStyle<Gray8>>,
+///     ) -> Result<(), Self::Error> {
 ///         self.fast_rectangle(item);
 ///
 ///         Ok(())
@@ -165,7 +168,7 @@ use crate::{
 ///         bottom_right = (30, 40),
 ///         style = primitive_style!(stroke_color = Gray8::WHITE)
 ///     );
-///     rect.draw(&mut display); // Uses the accelerated draw_rectangle function
+///     rect.draw(&mut display).unwrap(); // Uses the accelerated draw_rectangle function
 ///
 ///     // Update the display
 ///     display.flush().expect("Failed to send data to display");

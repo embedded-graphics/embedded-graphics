@@ -11,7 +11,8 @@ fn main() {
     // Show smallest font with black font on white background (default value for fonts)
     Text::new("Hello World! - default style 6x8", Point::new(15, 15))
         .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     // Show smallest font with white font on black background
     let style = TextStyleBuilder::new(Font6x8)
@@ -21,7 +22,8 @@ fn main() {
 
     Text::new("Hello World! - inverse 6x8", Point::new(15, 30))
         .into_styled(style)
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     // Show smallest font with white font on black background using a macro
     egtext!(
@@ -33,17 +35,20 @@ fn main() {
             background_color = BinaryColor::Off
         )
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     // Show 6x12 Font
     Text::new("Hello 6x12!", Point::new(15, 55))
         .into_styled(TextStyle::new(Font6x12, BinaryColor::On))
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     // Show 8x16 Font
     Text::new("Hello 8x16!", Point::new(15, 80))
         .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     // Show 12x16 Font using a macro
     egtext!(
@@ -51,7 +56,8 @@ fn main() {
         top_left = (15, 105),
         style = text_style!(font = Font12x16)
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     let mut window = WindowBuilder::new(&display).title("Fonts").build();
     window.show_static(&display);

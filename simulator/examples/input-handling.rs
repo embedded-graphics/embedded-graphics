@@ -22,12 +22,14 @@ fn move_circle(display: &mut SimulatorDisplay<Rgb888>, old_center: Point, new_ce
     // Clear old circle
     Circle::new(old_center, 100)
         .into_styled(PrimitiveStyle::with_fill(BACKGROUND_COLOR))
-        .draw(display);
+        .draw(display)
+        .unwrap();
 
     // Draw circle at new location
     Circle::new(new_center, 100)
         .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
-        .draw(display);
+        .draw(display)
+        .unwrap();
 }
 
 fn main() {
@@ -39,7 +41,8 @@ fn main() {
     let mut position = Point::new(200, 200);
     Circle::new(position, 100)
         .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     'running: loop {
         window.update(&display);

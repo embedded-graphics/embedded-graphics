@@ -15,7 +15,8 @@ fn main() {
         radius = CIRCLE_SIZE as u32,
         style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egcircle!(
         center = (CIRCLE_SIZE, CIRCLE_SIZE),
@@ -27,7 +28,8 @@ fn main() {
         )
     )
     .translate(Point::new(16, 16))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egcircle!(
         center = (CIRCLE_SIZE, CIRCLE_SIZE),
@@ -39,7 +41,8 @@ fn main() {
         )
     )
     .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egrectangle!(
         top_left = (0, 0),
@@ -47,7 +50,8 @@ fn main() {
         style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96, 0))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egrectangle!(
         top_left = (0, 0),
@@ -59,7 +63,8 @@ fn main() {
         )
     )
     .translate(Point::new(96 + 16, 16))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egrectangle!(
         top_left = (0, 0),
@@ -71,14 +76,16 @@ fn main() {
         )
     )
     .translate(Point::new(96 + 32, 32))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtriangle!(
         points = [(32, 0), (0, 64), (64, 64)],
         style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96 * 2, 0))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtriangle!(
         points = [(32, 0), (0, 64), (64, 64)],
@@ -89,7 +96,8 @@ fn main() {
         )
     )
     .translate(Point::new(96 * 2 + 16, 16))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtriangle!(
         points = [(32, 0), (0, 64), (64, 64)],
@@ -100,7 +108,8 @@ fn main() {
         )
     )
     .translate(Point::new(96 * 2 + 32, 32))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("Filled primitives using macros")

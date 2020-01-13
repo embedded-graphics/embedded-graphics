@@ -54,7 +54,7 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// assert_eq!(Point::from(n_coord), Point::new(10, 20));
 /// # }
 /// ```
-///
+/// 
 /// [`Size`]: struct.Size.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html

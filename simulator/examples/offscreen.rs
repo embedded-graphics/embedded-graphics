@@ -11,11 +11,13 @@ fn main() {
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))
         .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .translate(Point::new(-8, -8))
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("Offscreen")
         .scale(4)
         .build();
+
     window.show_static(&display);
 }

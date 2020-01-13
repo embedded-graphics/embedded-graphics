@@ -54,7 +54,6 @@ macro_rules! primitive_style {
 ///     fonts::Font8x16,
 ///     pixelcolor::{Rgb565, RgbColor},
 ///     style::TextStyle,
-///     # style::TextStyleBuilder,
 ///     text_style,
 /// };
 ///
@@ -76,7 +75,6 @@ macro_rules! primitive_style {
 ///     fonts::Font6x8,
 ///     pixelcolor::{Rgb565, RgbColor},
 ///     style::TextStyle,
-///     # style::TextStyleBuilder,
 ///     text_style,
 /// };
 ///

@@ -86,7 +86,8 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new("Mm", Point::zero())
             .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         assert_eq!(
             display,
@@ -116,7 +117,8 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new(" ~", Point::zero())
             .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         assert_eq!(
             display,
@@ -146,7 +148,8 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new("$y", Point::zero())
             .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         assert_eq!(
             display,
@@ -197,25 +200,29 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new("\0\n", Point::zero())
             .into_styled(style)
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
         Text::new("\x7F\u{A0}", Point::zero())
             .into_styled(style)
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
         Text::new("¡ÿ", Point::zero())
             .into_styled(style)
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
         Text::new("Ā💣", Point::zero())
             .into_styled(style)
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
         assert_eq!(display, two_question_marks);
     }
 }

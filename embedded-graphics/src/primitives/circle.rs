@@ -31,7 +31,8 @@ use crate::{
 /// // Circle with 1 pixel wide white stroke centered around (10, 20) with a radius of 30
 /// Circle::new(Point::new(10, 20), 30)
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)
+///     .unwrap();
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
 /// let style = PrimitiveStyleBuilder::new()
@@ -42,13 +43,15 @@ use crate::{
 ///
 /// Circle::new(Point::new(50, 20), 30)
 ///     .into_styled(style)
-///     .draw(&mut display);
+///     .draw(&mut display)
+///     .unwrap();
 ///
 /// // Circle with blue fill and no stroke with a translation applied
 /// Circle::new(Point::new(10, 20), 30)
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
-///     .draw(&mut display);
+///     .draw(&mut display)
+///     .unwrap();
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Circle {
@@ -232,20 +235,22 @@ mod tests {
     use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, style::PrimitiveStyleBuilder};
 
     #[test]
-    fn stroke_width_doesnt_affect_fill() {
+    fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
         let mut expected = MockDisplay::new();
         let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
         Circle::new(Point::new(5, 5), 4)
             .into_styled(style)
-            .draw(&mut expected);
+            .draw(&mut expected)?;
 
         let mut with_stroke_width = MockDisplay::new();
         style.stroke_width = 1;
         Circle::new(Point::new(5, 5), 4)
             .into_styled(style)
-            .draw(&mut with_stroke_width);
+            .draw(&mut with_stroke_width)?;
 
         assert_eq!(expected, with_stroke_width);
+
+        Ok(())
     }
 
     // Check that tiny circles render as a "+" shape with a hole in the center
@@ -255,7 +260,8 @@ mod tests {
 
         Circle::new(Point::new(1, 1), 1)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         #[rustfmt::skip]
         assert_eq!(
@@ -275,7 +281,8 @@ mod tests {
 
         Circle::new(Point::new(1, 1), 1)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         #[rustfmt::skip]
         assert_eq!(

@@ -26,7 +26,7 @@ use tinytga::{Tga, TgaIterator};
 /// // Load `patch.tga`, a 32BPP 4x4px image
 /// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
 ///
-/// image.draw(&mut display);
+/// image.draw(&mut display).unwrap();
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C>
@@ -240,7 +240,7 @@ mod tests {
         let image: ImageTga<Rgb888> = ImageTga::new(data).unwrap();
 
         let mut display = MockDisplay::new();
-        image.draw(&mut display);
+        image.draw(&mut display).unwrap();
 
         assert_eq!(
             display,
@@ -258,7 +258,7 @@ mod tests {
         let image: ImageTga<Gray8> = ImageTga::new(data).unwrap();
 
         let mut display = MockDisplay::new();
-        image.draw(&mut display);
+        image.draw(&mut display).unwrap();
 
         assert_eq!(
             display,

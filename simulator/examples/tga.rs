@@ -18,11 +18,15 @@ fn main() {
     let mut display = SimulatorDisplay::new(Size::new(128, 128));
 
     let image: ImageTga<Rgb888> = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
-    image.translate(Point::new(32, 32)).draw(&mut display);
+    image
+        .translate(Point::new(32, 32))
+        .draw(&mut display)
+        .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("TGA image")
         .scale(2)
         .build();
+
     window.show_static(&display);
 }

@@ -29,18 +29,23 @@ fn main() {
 
     Circle::new(Point::new(64, 64), 64)
         .into_styled(line_style)
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     Line::new(Point::new(64, 64), Point::new(0, 64))
         .into_styled(line_style)
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
+
     Line::new(Point::new(64, 64), Point::new(80, 80))
         .into_styled(line_style)
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     Text::new("Hello World!", Point::new(5, 50))
         .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("Hello World")

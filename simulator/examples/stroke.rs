@@ -26,7 +26,8 @@ fn main() {
         .chain(rectangle.into_styled(thin_stroke).into_iter())
         .chain(line.into_styled(thin_stroke).into_iter())
         .chain(triangle.into_styled(thin_stroke).into_iter())
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     let offset = Point::new(0, 64 + PADDING);
     circle
@@ -50,7 +51,8 @@ fn main() {
                 .into_styled(medium_stroke)
                 .into_iter(),
         )
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     let offset = Point::new(0, (64 + PADDING) * 2);
     circle
@@ -70,7 +72,8 @@ fn main() {
                 .into_styled(thick_stroke)
                 .into_iter(),
         )
-        .draw(&mut display);
+        .draw(&mut display)
+        .unwrap();
 
     let mut window = WindowBuilder::new(&display).title("Strokes").build();
     window.show_static(&display);

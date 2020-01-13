@@ -56,7 +56,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///     let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
 ///
 ///     let mut display = Display::default();
-///     image.draw(&mut display);
+///     image.draw(&mut display).unwrap();
 /// }
 /// ```
 ///

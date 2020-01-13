@@ -57,21 +57,24 @@
 //!         bottom_right = (100, 100),
 //!         style = primitive_style!(fill_color = EpdColor::White)
 //!     )
-//!     .draw(&mut display);
+//!     .draw(&mut display)
+//!     .unwrap();
 //!
 //!     egrectangle!(
 //!         top_left = (100, 0),
 //!         bottom_right = (200, 100),
 //!         style = primitive_style!(fill_color = EpdColor::Black)
 //!     )
-//!     .draw(&mut display);
+//!     .draw(&mut display)
+//!     .unwrap();
 //!
 //!     egrectangle!(
 //!         top_left = (200, 0),
 //!         bottom_right = (300, 100),
 //!         style = primitive_style!(fill_color = EpdColor::Red)
 //!     )
-//!     .draw(&mut display);
+//!     .draw(&mut display)
+//!     .unwrap();
 //! }
 //! ```
 //!

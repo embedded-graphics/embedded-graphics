@@ -96,8 +96,8 @@
 //! let t = Text::new("Hello Rust!", Point::new(20, 16))
 //!     .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
 //!
-//! c.draw(&mut display);
-//! t.draw(&mut display);
+//! c.draw(&mut display).unwrap();
+//! t.draw(&mut display).unwrap();
 //! ```
 //!
 //! ## Draw a circle and some text
@@ -124,8 +124,8 @@
 //!     style = text_style!(font = Font6x8, text_color = Rgb565::GREEN)
 //! );
 //!
-//! c.draw(&mut display);
-//! t.draw(&mut display);
+//! c.draw(&mut display).unwrap();
+//! t.draw(&mut display).unwrap();
 //! ```
 //!
 //! ## Chaining
@@ -156,7 +156,7 @@
 //!
 //! fn main() {
 //!     # let mut display = MockDisplay::default();
-//!     build_thing("Hello Rust!").draw(&mut display);
+//!     build_thing("Hello Rust!").draw(&mut display).unwrap();
 //! }
 //! ```
 //!

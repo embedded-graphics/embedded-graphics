@@ -104,8 +104,8 @@ where
 /// use embedded_graphics::{
 ///     egtext,
 ///     pixelcolor::Rgb565,
-///     primitives::Circle,
 ///     prelude::*,
+///     primitives::Circle,
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 ///
@@ -115,8 +115,7 @@ where
 ///     .fill_color(Rgb565::GREEN)
 ///     .build();
 ///
-/// let circle = Circle::new(Point::new(20, 20), 10)
-///     .into_styled(style);
+/// let circle = Circle::new(Point::new(20, 20), 10).into_styled(style);
 /// ```
 ///
 /// ## Build a style with stroke and no fill
@@ -128,8 +127,8 @@ where
 /// use embedded_graphics::{
 ///     egtext,
 ///     pixelcolor::Rgb565,
-///     primitives::Rectangle,
 ///     prelude::*,
+///     primitives::Rectangle,
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 ///
@@ -138,8 +137,7 @@ where
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let rectangle = Rectangle::new(Point::new(20, 20), Point::new(40, 30))
-///     .into_styled(style);
+/// let rectangle = Rectangle::new(Point::new(20, 20), Point::new(40, 30)).into_styled(style);
 /// ```
 ///
 /// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html

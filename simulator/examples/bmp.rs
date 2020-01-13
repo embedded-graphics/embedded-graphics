@@ -18,11 +18,15 @@ fn main() {
     let mut display = SimulatorDisplay::new(Size::new(128, 128));
 
     let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
-    image.translate(Point::new(32, 32)).draw(&mut display);
+    image
+        .translate(Point::new(32, 32))
+        .draw(&mut display)
+        .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("BMP image")
         .scale(2)
         .build();
+
     window.show_static(&display);
 }

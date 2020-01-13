@@ -25,11 +25,12 @@ fn main() {
                 .into_styled(TextStyle::new(Font6x8, BinaryColor::On)),
         );
 
-    objects.draw(&mut display);
+    objects.draw(&mut display).unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("Chained drawing")
         .theme(BinaryColorTheme::OledBlue)
         .build();
+
     window.show_static(&display);
 }

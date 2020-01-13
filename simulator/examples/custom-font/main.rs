@@ -30,14 +30,16 @@ fn main() {
         top_left = position,
         style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtext!(
         text = "456",
         top_left = position + row_offset,
         style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("Custom font")

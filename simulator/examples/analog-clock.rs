@@ -152,21 +152,24 @@ fn main() {
             time.second()
         );
 
-        display.clear(BinaryColor::Off);
+        display.clear(BinaryColor::Off).unwrap();
 
-        draw_face().draw(&mut display);
-        draw_hour_hand(time.hour()).draw(&mut display);
-        draw_minute_hand(time.minute()).draw(&mut display);
-        draw_seconds_hand(time.second()).draw(&mut display);
+        draw_face().draw(&mut display).unwrap();
+        draw_hour_hand(time.hour()).draw(&mut display).unwrap();
+        draw_minute_hand(time.minute()).draw(&mut display).unwrap();
+        draw_seconds_hand(time.second()).draw(&mut display).unwrap();
 
         // Draw digital clock just above center
-        draw_digital_clock(&digital_clock_text).draw(&mut display);
+        draw_digital_clock(&digital_clock_text)
+            .draw(&mut display)
+            .unwrap();
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
         Circle::new(CENTER, 4)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         window.update(&display);
 

@@ -18,14 +18,16 @@ fn main() {
         bottom_right = (100, 80),
         style = primitive_style!(fill_color = Rgb565::RED)
     ))
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtext!(
         text = "Hello world! - no background",
         top_left = (15, 15),
         style = text_style!(font = Font6x8, text_color = Rgb565::WHITE,)
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtext!(
         text = "Hello world! - filled background",
@@ -36,7 +38,8 @@ fn main() {
             background_color = Rgb565::BLUE
         )
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     egtext!(
         text = "Hello world! - inverse background",
@@ -47,7 +50,8 @@ fn main() {
             background_color = Rgb565::YELLOW
         )
     )
-    .draw(&mut display);
+    .draw(&mut display)
+    .unwrap();
 
     let mut window = WindowBuilder::new(&display)
         .title("Fonts with transparent background")

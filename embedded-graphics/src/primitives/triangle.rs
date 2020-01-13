@@ -32,13 +32,15 @@ use core::borrow::Borrow;
 /// // Triangle with red 1 px wide stroke
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)
+///     .unwrap();
 ///
 /// // Triangle with translation applied
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)
+///     .unwrap();
 /// ```
 ///
 /// ## Create a triangle from an array of points

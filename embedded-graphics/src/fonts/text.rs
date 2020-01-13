@@ -255,7 +255,8 @@ mod tests {
 
         Text::new("##", Point::zero())
             .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[

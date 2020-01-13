@@ -55,7 +55,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///     };
 ///     # use embedded_graphics::mock_display::MockDisplay;
 ///     # let mut display = MockDisplay::default();
-///     button.draw(&mut display);
+///     button.draw(&mut display).unwrap();
 /// }
 /// ```
 ///
@@ -82,7 +82,9 @@ where
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
-/// Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
+/// Pixel(Point::new(1, 2), BinaryColor::On)
+///     .draw(&mut display)
+///     .unwrap();
 /// ```
 ///
 /// Iterators with `Pixel` items can also be drawn:
@@ -94,7 +96,8 @@ where
 ///
 /// (0..100)
 ///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
-///     .draw(&mut display);
+///     .draw(&mut display)
+///     .unwrap();
 /// ```
 ///
 /// [`Drawable`]: trait.Drawable.html
