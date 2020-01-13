@@ -38,7 +38,7 @@ impl DrawTarget<TestPixelColor> for FakeDisplay {
 
 #[test]
 fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
-    let mut disp = FakeDisplay {};
+    let mut display = FakeDisplay {};
 
     let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
         .into_styled(PrimitiveStyle::default())
@@ -49,7 +49,7 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
                 .into_iter(),
         );
 
-    chained.draw(&mut disp)
+    chained.draw(&mut display)
 }
 
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
@@ -66,16 +66,16 @@ fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
 
 #[test]
 fn return_from_fn() -> Result<(), core::convert::Infallible> {
-    let mut disp = FakeDisplay {};
+    let mut display = FakeDisplay {};
 
     let mut chained = multi();
 
-    chained.draw(&mut disp)
+    chained.draw(&mut display)
 }
 
 #[test]
 fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
-    let mut disp = FakeDisplay {};
+    let mut display = FakeDisplay {};
 
     let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
         .into_styled(PrimitiveStyle::default())
@@ -86,5 +86,5 @@ fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
                 .into_iter(),
         );
 
-    chained.draw(&mut disp)
+    chained.draw(&mut display)
 }
