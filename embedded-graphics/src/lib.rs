@@ -195,7 +195,6 @@ pub mod drawable;
 pub mod fonts;
 pub mod geometry;
 pub mod image;
-#[doc(hidden)]
 pub mod mock_display;
 pub mod pixelcolor;
 pub mod prelude;
