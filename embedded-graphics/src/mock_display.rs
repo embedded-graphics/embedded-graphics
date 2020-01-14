@@ -1,48 +1,4 @@
-//! Mock display for use in tests.
-//!
-//! [`MockDisplay`] can be used to replace a real display in tests. The internal
-//! framebuffer wraps the color values in `Option` to be able to test which
-//! pixels were modified by drawing operations.
-//!
-//! The [`from_pattern`] method provides a convenient way of creating expected
-//! test results. The same patterns are used by the implementation of `Debug`
-//! and will be shown in failing tests.
-//!
-//! [`MockDisplay`]: struct.MockDisplay.html
-//! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
-//!
-//! # Characters used in `BinaryColor` patterns
-//!
-//! | Character | Color                    | Description                             |
-//! |-----------|--------------------------|-----------------------------------------|
-//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
-//! | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
-//! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
-//!
-//! # Characters used in `Gray8` patterns
-//!
-//! | Character | Color                    | Description                             |
-//! |-----------|--------------------------|-----------------------------------------|
-//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
-//! | `'0'`     | `Some(Gray8::new(0x00))` | Pixel was changed to `Gray8::new(0x00)` |
-//! | `'1'`     | `Some(Gray8::new(0x11))` | Pixel was changed to `Gray8::new(0x11)` |
-//! | `...`     |                          |                                         |
-//! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
-//! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
-//!
-//! # Characters used in `Rgb888` patterns
-//!
-//! | Character | Color                    | Description                             |
-//! |-----------|--------------------------|-----------------------------------------|
-//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
-//! | `'K'`     | `Some(Rgb888::BLACK)`    | Pixel was changed to `Rgb888::BLACK`    |
-//! | `'R'`     | `Some(Rgb888::RED)`      | Pixel was changed to `Rgb888::RED`      |
-//! | `'G'`     | `Some(Rgb888::GREEN)`    | Pixel was changed to `Rgb888::GREEN`    |
-//! | `'B'`     | `Some(Rgb888::BLUE)`     | Pixel was changed to `Rgb888::BLUE`     |
-//! | `'Y'`     | `Some(Rgb888::YELLOW)`   | Pixel was changed to `Rgb888::YELLOW`   |
-//! | `'M'`     | `Some(Rgb888::MAGENTA)`  | Pixel was changed to `Rgb888::MAGENTA`  |
-//! | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
-//! | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
+//! Mock display for use in tests
 
 use crate::{
     drawable::Pixel,
@@ -58,7 +14,50 @@ use core::{
 
 const SIZE: usize = 64;
 
-/// Mock display for use in tests and some doc examples. Do not use directly!
+/// Mock display for use in tests.
+///
+/// `MockDisplay` can be used to replace a real display in tests. The internal
+/// framebuffer wraps the color values in `Option` to be able to test which
+/// pixels were modified by drawing operations.
+///
+/// The [`from_pattern`] method provides a convenient way of creating expected
+/// test results. The same patterns are used by the implementation of `Debug`
+/// and will be shown in failing tests.
+///
+/// [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
+///
+/// # Characters used in `BinaryColor` patterns
+///
+/// | Character | Color                    | Description                             |
+/// |-----------|--------------------------|-----------------------------------------|
+/// | `' '`     | `None`                   | No drawing operation changed the pixel  |
+/// | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
+/// | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
+///
+/// # Characters used in `Gray8` patterns
+///
+/// | Character | Color                    | Description                             |
+/// |-----------|--------------------------|-----------------------------------------|
+/// | `' '`     | `None`                   | No drawing operation changed the pixel  |
+/// | `'0'`     | `Some(Gray8::new(0x00))` | Pixel was changed to `Gray8::new(0x00)` |
+/// | `'1'`     | `Some(Gray8::new(0x11))` | Pixel was changed to `Gray8::new(0x11)` |
+/// | ⋮        |                          |                                         |
+/// | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
+/// | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
+///
+/// # Characters used in `Rgb888` patterns
+///
+/// | Character | Color                    | Description                             |
+/// |-----------|--------------------------|-----------------------------------------|
+/// | `' '`     | `None`                   | No drawing operation changed the pixel  |
+/// | `'K'`     | `Some(Rgb888::BLACK)`    | Pixel was changed to `Rgb888::BLACK`    |
+/// | `'R'`     | `Some(Rgb888::RED)`      | Pixel was changed to `Rgb888::RED`      |
+/// | `'G'`     | `Some(Rgb888::GREEN)`    | Pixel was changed to `Rgb888::GREEN`    |
+/// | `'B'`     | `Some(Rgb888::BLUE)`     | Pixel was changed to `Rgb888::BLUE`     |
+/// | `'Y'`     | `Some(Rgb888::YELLOW)`   | Pixel was changed to `Rgb888::YELLOW`   |
+/// | `'M'`     | `Some(Rgb888::MAGENTA)`  | Pixel was changed to `Rgb888::MAGENTA`  |
+/// | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
+/// | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
 #[derive(Clone)]
 pub struct MockDisplay<C>([Option<C>; SIZE * SIZE])
 where
