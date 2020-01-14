@@ -40,20 +40,6 @@ where
     pixel_type: PhantomData<C>,
 }
 
-impl<'a, C> ImageBmp<'a, C>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    /// Returns the row length in bytes.
-    ///
-    /// Each row in a BMP file is a multiple of 4 bytes long.
-    fn bytes_per_row(&self) -> usize {
-        let bits_per_row = self.bmp.width() as usize * self.bmp.bpp() as usize;
-
-        (bits_per_row + 31) / 32 * (32 / 8)
-    }
-}
-
 impl<'a, C> ImageFile<'a> for ImageBmp<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
