@@ -1,4 +1,5 @@
 use crate::geometry::Size;
+use core::convert::{TryFrom, TryInto};
 use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 
 /// 2D point.
@@ -249,6 +250,25 @@ impl From<Point> for (i32, i32) {
 impl From<&Point> for (i32, i32) {
     fn from(other: &Point) -> (i32, i32) {
         (other.x, other.y)
+    }
+}
+
+impl TryFrom<Point> for (u32, u32) {
+    type Error = core::num::TryFromIntError;
+
+    fn try_from(point: Point) -> Result<Self, Self::Error> {
+        Ok((point.x.try_into()?, point.y.try_into()?))
+    }
+}
+
+impl TryFrom<(u32, u32)> for Point {
+    type Error = core::num::TryFromIntError;
+
+    fn try_from(point: (u32, u32)) -> Result<Self, Self::Error> {
+        let x = point.0.try_into()?;
+        let y = point.1.try_into()?;
+
+        Ok(Point::new(x, y))
     }
 }
 

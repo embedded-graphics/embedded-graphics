@@ -11,6 +11,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - Added [hub75](https://crates.io/crates/hub75) driver to list of known supported drivers.
 - tinbmp: Added `.into_iter()` support to the `Bmp` struct to get an iterator over every pixel in the image.
 - Added as many `#[derive()]`s as possible to all embedded-graphics, tinybmp and tinytga items.
+- Added `TryFrom<Point> for (u32, u32)` and `TryFrom<(u32, u32)> for Point` fallible conversions for `Point`.
 
 ### Changed
 
