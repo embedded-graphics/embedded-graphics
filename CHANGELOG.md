@@ -15,6 +15,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - Expose `mock_display::MockDisplay` for use in tests, examples, etc in crates that pull embedded-graphics in as a dependency.
 - **(breaking)** #243 All methods on `DrawTarget` that handle drawing to/updating the display are now fallible and return `Result<(), Self::Error>` to allow for easier error handling than a simple `panic!()`. This also affects `Drawable::draw()`, which now also returns a `Result<(), Self::Error>`.
+- **(breaking)** #243 `DrawTarget::flush()` is removed. The display driver itself should handle updating the display if required.
 
 ### Fixed
 
