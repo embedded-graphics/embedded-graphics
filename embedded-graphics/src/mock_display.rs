@@ -94,10 +94,10 @@ const SIZE: usize = 64;
 ///
 /// ```rust
 /// use embedded_graphics::{
+///     image::ImageTga,
 ///     mock_display::MockDisplay,
 ///     pixelcolor::{Rgb888, RgbColor},
-///     image::ImageTga,
-///     prelude::*
+///     prelude::*,
 /// };
 ///
 /// let data = include_bytes!("../../tinytga/tests/type1_tl.tga");
