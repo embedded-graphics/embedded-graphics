@@ -300,6 +300,41 @@ mod tests {
     use super::*;
 
     #[test]
+    fn convert_positive_to_u32_tuple() {
+        let p = Point::new(10, 20);
+
+        let tuple: (u32, u32) = p.try_into().unwrap();
+
+        assert_eq!(tuple, (10u32, 20u32));
+    }
+
+    #[test]
+    fn convert_i32_max_to_u32_tuple() {
+        let p = Point::new(i32::max_value(), i32::max_value());
+
+        let tuple: (u32, u32) = p.try_into().unwrap();
+
+        // Literal value taken from [here](https://doc.rust-lang.org/std/primitive.i32.html#method.max_value)
+        assert_eq!(tuple, (2147483647, 2147483647));
+    }
+
+    #[test]
+    #[should_panic]
+    fn negative_u32_tuple() {
+        let p = Point::new(-50, -10);
+
+        let _tuple: (u32, u32) = p.try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn max_negative_u32_tuple() {
+        let p = Point::new(i32::min_value(), i32::min_value());
+
+        let _tuple: (u32, u32) = p.try_into().unwrap();
+    }
+
+    #[test]
     fn points_can_be_added() {
         let mut left = Point::new(10, 20);
         let right = Point::new(30, 40);
