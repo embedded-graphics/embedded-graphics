@@ -7,7 +7,7 @@ use crate::{fonts::Font, geometry::Size};
 /// # Examples
 ///
 /// See the [module-level documentation](./index.html) for examples.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Font12x16;
 
 /// Config for 12x16 font

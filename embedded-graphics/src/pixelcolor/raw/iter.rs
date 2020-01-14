@@ -5,7 +5,7 @@ use byteorder::{ByteOrder, BE, LE};
 use core::marker::PhantomData;
 
 /// Iterator over a slice of raw pixel data.
-#[derive(Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct RawDataIter<'a, R, BO> {
     /// Pixel data.
     data: &'a [u8],

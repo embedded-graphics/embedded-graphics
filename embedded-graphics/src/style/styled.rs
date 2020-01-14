@@ -4,7 +4,7 @@ use crate::{
 };
 
 /// Styled.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Styled<T, S> {
     /// Primitive.
     pub primitive: T,

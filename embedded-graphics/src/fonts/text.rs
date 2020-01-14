@@ -21,7 +21,7 @@ use crate::{
 /// [`into_styled`]: #method.into_styled
 /// [`Styled`]: ../style/struct.Styled.html
 /// [module-level documentation]: index.html
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Text<'a> {
     /// The string.
     pub text: &'a str,
@@ -133,7 +133,7 @@ where
 }
 
 /// Pixel iterator for styled text.
-#[derive(Debug, Clone, Copy)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct StyledTextIterator<'a, C, F>
 where
     C: PixelColor,
@@ -222,7 +222,7 @@ mod tests {
     use super::*;
     use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
 
-    #[derive(Debug, Clone, Copy)]
+    #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct SpacedFont;
 
     impl Font for SpacedFont {

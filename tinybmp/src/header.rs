@@ -10,14 +10,14 @@ use nom::{
 };
 
 /// Bitmap file type
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum FileType {
     /// Default "BM" magic bytes marker for most commonly encountered bitmaps
     BM,
 }
 
 /// BMP header information
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Header {
     /// Bitmap file type
     pub file_type: FileType,

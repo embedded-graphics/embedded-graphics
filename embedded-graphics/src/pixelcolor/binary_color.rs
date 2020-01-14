@@ -39,7 +39,7 @@ use crate::pixelcolor::{
 /// };
 /// assert_eq!(color, BinaryColor::On);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum BinaryColor {
     /// Inactive pixel.
     Off,

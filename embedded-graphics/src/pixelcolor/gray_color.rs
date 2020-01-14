@@ -19,7 +19,7 @@ macro_rules! gray_color {
     ($type:ident, $raw_type:ident, $bpp_str:expr) => {
         #[doc = $bpp_str]
         #[doc = "grayscale color."]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
         pub struct $type($raw_type);
 
         impl $type {

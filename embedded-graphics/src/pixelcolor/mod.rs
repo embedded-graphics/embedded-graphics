@@ -14,7 +14,7 @@
 //! use embedded_graphics::{egrectangle, geometry::Size, prelude::*, primitive_style};
 //!
 //! /// Color with 3 states.
-//! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+//! #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 //! pub enum EpdColor {
 //!     White,
 //!     Black,

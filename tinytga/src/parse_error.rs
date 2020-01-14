@@ -1,5 +1,5 @@
 /// Possible parse errors
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum ParseError {
     /// An invalid color map value was encountered. Valid values are `0` (no color map) or `1`
     /// (color map included)

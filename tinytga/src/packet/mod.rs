@@ -6,7 +6,7 @@ pub use self::rle_packet::{rle_packet, RlePacket};
 use nom::{bits::complete::take, branch::alt, combinator::map, IResult};
 
 /// A Run Length Encoded (RLE) packet
-#[derive(Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum Packet<'a> {
     /// Data in this packet is Run Length Encoded
     RlePacket(RlePacket<'a>),

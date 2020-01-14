@@ -6,7 +6,7 @@ use nom::{
     IResult,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct RawPacket<'a> {
     /// Number of pixels of this packet
     pub num_pixels: u8,

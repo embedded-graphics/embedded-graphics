@@ -14,7 +14,7 @@ use core::convert::TryFrom;
 /// [`PrimitiveStyleBuilder`]: ../style/struct.PrimitiveStyleBuilder.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 /// [`primitive_style!`]: ../macro.primitive_style.html
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
 pub struct PrimitiveStyle<C>
 where
@@ -142,7 +142,7 @@ where
 ///
 /// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html
 /// [`primitive_style!`]: ../macro.primitive_style.html
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct PrimitiveStyleBuilder<C>
 where
     C: PixelColor,
