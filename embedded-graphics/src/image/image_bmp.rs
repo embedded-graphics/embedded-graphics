@@ -2,15 +2,12 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     image::ImageFile,
-    pixelcolor::{
-        raw::{LittleEndian, RawData, RawDataIter},
-        PixelColor,
-    },
+    pixelcolor::{raw::RawData, PixelColor},
     transform::Transform,
     DrawTarget,
 };
 use core::marker::PhantomData;
-use tinybmp::Bmp;
+use tinybmp::{Bmp, BmpIterator};
 
 /// BMP format image
 ///
@@ -41,20 +38,6 @@ where
     pub offset: Point,
 
     pixel_type: PhantomData<C>,
-}
-
-impl<'a, C> ImageBmp<'a, C>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    /// Returns the row length in bytes.
-    ///
-    /// Each row in a BMP file is a multiple of 4 bytes long.
-    fn bytes_per_row(&self) -> usize {
-        let bits_per_row = self.bmp.width() as usize * self.bmp.bpp() as usize;
-
-        (bits_per_row + 31) / 32 * (32 / 8)
-    }
 }
 
 impl<'a, C> ImageFile<'a> for ImageBmp<'a, C>
@@ -127,7 +110,6 @@ where
     type Item = Pixel<C>;
     type IntoIter = ImageBmpIterator<'a, C>;
 
-    // NOTE: `self` is a reference already, no copies here!
     fn into_iter(self) -> Self::IntoIter {
         // Check that image bpp is equal to required bpp for `C`.
         if self.bmp.bpp() as usize != C::Raw::BITS_PER_PIXEL {
@@ -135,7 +117,7 @@ where
         }
 
         ImageBmpIterator {
-            data: RawDataIter::new(self.bmp.image_data()),
+            image_data: self.bmp.into_iter(),
             x: 0,
             y: 0,
             image: self,
@@ -148,7 +130,7 @@ pub struct ImageBmpIterator<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    data: RawDataIter<'a, C::Raw, LittleEndian>,
+    image_data: BmpIterator<'a>,
 
     x: u32,
     y: u32,
@@ -163,27 +145,21 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y < self.image.bmp.height() {
-            if self.x == 0 {
-                let row_index = (self.image.height() - 1) - self.y;
-                let row_start = self.image.bytes_per_row() * row_index as usize;
-                self.data.set_byte_position(row_start);
-            }
+        self.image_data.next().map(|color| {
+            let pos = self.image.offset + Point::new(self.x as i32, self.y as i32);
 
-            let data = self.data.next()?;
-            let mut point = Point::new(self.x as i32, self.y as i32);
-            point += self.image.offset;
+            let raw = C::Raw::from_u32(color);
+            let out = Pixel(pos, raw.into());
 
             self.x += 1;
-            if self.x >= self.image.bmp.width() {
+
+            if self.x >= self.image.width() {
                 self.y += 1;
                 self.x = 0;
             }
 
-            Some(Pixel(point, data.into()))
-        } else {
-            None
-        }
+            out
+        })
     }
 }
 
