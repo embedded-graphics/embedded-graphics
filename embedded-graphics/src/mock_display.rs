@@ -1,4 +1,110 @@
-//! Mock display for use in tests
+//! Mock display for use in tests.
+//!
+//! `MockDisplay` can be used to replace a real display in tests. The internal
+//! framebuffer wraps the color values in `Option` to be able to test which
+//! pixels were modified by drawing operations.
+//!
+//! The [`from_pattern`] method provides a convenient way of creating expected
+//! test results. The same patterns are used by the implementation of `Debug`
+//! and will be shown in failing tests.
+//!
+//! The display is internally capped at 64x64px.
+//!
+//! # Characters used in `BinaryColor` patterns
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
+//! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
+//!
+//! # Characters used in `Gray8` patterns
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'0'`     | `Some(Gray8::new(0x00))` | Pixel was changed to `Gray8::new(0x00)` |
+//! | `'1'`     | `Some(Gray8::new(0x11))` | Pixel was changed to `Gray8::new(0x11)` |
+//! | ⋮        | ⋮                        | ⋮                                      |
+//! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
+//! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
+//!
+//! # Characters used in `Rgb888` patterns
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'K'`     | `Some(Rgb888::BLACK)`    | Pixel was changed to `Rgb888::BLACK`    |
+//! | `'R'`     | `Some(Rgb888::RED)`      | Pixel was changed to `Rgb888::RED`      |
+//! | `'G'`     | `Some(Rgb888::GREEN)`    | Pixel was changed to `Rgb888::GREEN`    |
+//! | `'B'`     | `Some(Rgb888::BLUE)`     | Pixel was changed to `Rgb888::BLUE`     |
+//! | `'Y'`     | `Some(Rgb888::YELLOW)`   | Pixel was changed to `Rgb888::YELLOW`   |
+//! | `'M'`     | `Some(Rgb888::MAGENTA)`  | Pixel was changed to `Rgb888::MAGENTA`  |
+//! | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
+//! | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
+//!
+//! # Examples
+//!
+//! ## Assert that a modified display matches the expected value
+//!
+//! This example sets three pixels on the display and checks that they're turned on.
+//!
+//! ```rust
+//! use embedded_graphics::{mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*};
+//!
+//! let mut display = MockDisplay::new();
+//!
+//! Pixel(Point::new(0, 0), BinaryColor::On).draw(&mut display);
+//! Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display);
+//! Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
+//!
+//! #[rustfmt::skip]
+//! assert_eq!(
+//!     display,
+//!     MockDisplay::from_pattern(&[
+//!         "#  ",
+//!         "  #",
+//!         " # ",
+//!     ])
+//! );
+//! ```
+//!
+//! ## Load and validate a 24BPP TGA image
+//!
+//! This example loads the following test image (scaled 10x to make it visible) and tests the
+//! returned pixels against an expected pattern.
+//!
+//! ![TGA test image, scaled 1000%]( data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAAyBAMAAAAuIdEGAAAAGFBMVEUAAAD/AAAA/wD//wAAAP//AP8A//////8V3DX3AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5AEODTI3wavPmgAAAEtJREFUSMdjKAcBBhAQBAElEHABAWMQCAWBNBCAqBtVPZhVI8Co6qGuejR9D8d8OQqGOkDEKJgFjmVwfINjHpwGwKkBnC5GVQ9m1QAE0rmq9y8gWgAAAABJRU5ErkJggg==)
+//!
+//! ```rust
+//! use embedded_graphics::{
+//!     image::ImageTga,
+//!     mock_display::MockDisplay,
+//!     pixelcolor::{Rgb888, RgbColor},
+//!     prelude::*,
+//! };
+//!
+//! let data = include_bytes!("../../tinytga/tests/type1_tl.tga");
+//!
+//! let image: ImageTga<Rgb888> = ImageTga::new(data).unwrap();
+//!
+//! let mut display = MockDisplay::new();
+//!
+//! image.draw(&mut display);
+//!
+//! assert_eq!(
+//!     display,
+//!     MockDisplay::from_pattern(&[
+//!         "WKRGBYMCW",
+//!         "KKRGBYMCW",
+//!         "WKRGBYMCW",
+//!         "KKKKKKKKK",
+//!         "WKWCMYBGR",
+//!     ])
+//! );
+//! ```
+//!
+//! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
 
 use crate::{
     drawable::Pixel,
@@ -14,113 +120,9 @@ use core::{
 
 const SIZE: usize = 64;
 
-/// Mock display for use in tests.
+/// Mock display struct
 ///
-/// `MockDisplay` can be used to replace a real display in tests. The internal
-/// framebuffer wraps the color values in `Option` to be able to test which
-/// pixels were modified by drawing operations.
-///
-/// The [`from_pattern`] method provides a convenient way of creating expected
-/// test results. The same patterns are used by the implementation of `Debug`
-/// and will be shown in failing tests.
-///
-/// The display is internally capped at 64x64px.
-///
-/// # Characters used in `BinaryColor` patterns
-///
-/// | Character | Color                    | Description                             |
-/// |-----------|--------------------------|-----------------------------------------|
-/// | `' '`     | `None`                   | No drawing operation changed the pixel  |
-/// | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
-/// | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
-///
-/// # Characters used in `Gray8` patterns
-///
-/// | Character | Color                    | Description                             |
-/// |-----------|--------------------------|-----------------------------------------|
-/// | `' '`     | `None`                   | No drawing operation changed the pixel  |
-/// | `'0'`     | `Some(Gray8::new(0x00))` | Pixel was changed to `Gray8::new(0x00)` |
-/// | `'1'`     | `Some(Gray8::new(0x11))` | Pixel was changed to `Gray8::new(0x11)` |
-/// | ⋮        | ⋮                        | ⋮                                      |
-/// | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
-/// | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
-///
-/// # Characters used in `Rgb888` patterns
-///
-/// | Character | Color                    | Description                             |
-/// |-----------|--------------------------|-----------------------------------------|
-/// | `' '`     | `None`                   | No drawing operation changed the pixel  |
-/// | `'K'`     | `Some(Rgb888::BLACK)`    | Pixel was changed to `Rgb888::BLACK`    |
-/// | `'R'`     | `Some(Rgb888::RED)`      | Pixel was changed to `Rgb888::RED`      |
-/// | `'G'`     | `Some(Rgb888::GREEN)`    | Pixel was changed to `Rgb888::GREEN`    |
-/// | `'B'`     | `Some(Rgb888::BLUE)`     | Pixel was changed to `Rgb888::BLUE`     |
-/// | `'Y'`     | `Some(Rgb888::YELLOW)`   | Pixel was changed to `Rgb888::YELLOW`   |
-/// | `'M'`     | `Some(Rgb888::MAGENTA)`  | Pixel was changed to `Rgb888::MAGENTA`  |
-/// | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
-/// | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
-///
-/// # Examples
-///
-/// ## Assert that a modified display matches the expected value
-///
-/// This example sets three pixels on the display and checks that they're turned on.
-///
-/// ```rust
-/// use embedded_graphics::{mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*};
-///
-/// let mut display = MockDisplay::new();
-///
-/// Pixel(Point::new(0, 0), BinaryColor::On).draw(&mut display);
-/// Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display);
-/// Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
-///
-/// #[rustfmt::skip]
-/// assert_eq!(
-///     display,
-///     MockDisplay::from_pattern(&[
-///         "#  ",
-///         "  #",
-///         " # ",
-///     ])
-/// );
-/// ```
-///
-/// ## Load and validate a 24BPP TGA image
-///
-/// This example loads the following test image (scaled 10x to make it visible) and tests the
-/// returned pixels against an expected pattern.
-///
-/// ![TGA test image, scaled 1000%]( data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAAyBAMAAAAuIdEGAAAAGFBMVEUAAAD/AAAA/wD//wAAAP//AP8A//////8V3DX3AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5AEODTI3wavPmgAAAEtJREFUSMdjKAcBBhAQBAElEHABAWMQCAWBNBCAqBtVPZhVI8Co6qGuejR9D8d8OQqGOkDEKJgFjmVwfINjHpwGwKkBnC5GVQ9m1QAE0rmq9y8gWgAAAABJRU5ErkJggg==)
-///
-/// ```rust
-/// use embedded_graphics::{
-///     image::ImageTga,
-///     mock_display::MockDisplay,
-///     pixelcolor::{Rgb888, RgbColor},
-///     prelude::*,
-/// };
-///
-/// let data = include_bytes!("../../tinytga/tests/type1_tl.tga");
-///
-/// let image: ImageTga<Rgb888> = ImageTga::new(data).unwrap();
-///
-/// let mut display = MockDisplay::new();
-///
-/// image.draw(&mut display);
-///
-/// assert_eq!(
-///     display,
-///     MockDisplay::from_pattern(&[
-///         "WKRGBYMCW",
-///         "KKRGBYMCW",
-///         "WKRGBYMCW",
-///         "KKKKKKKKK",
-///         "WKWCMYBGR",
-///     ])
-/// );
-/// ```
-///
-/// [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
+/// See the [module documentation](./index.html) for usage and examples.
 #[derive(Clone)]
 pub struct MockDisplay<C>([Option<C>; SIZE * SIZE])
 where
