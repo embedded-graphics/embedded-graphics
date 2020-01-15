@@ -1,6 +1,6 @@
 //! Mock display for use in tests.
 //!
-//! `MockDisplay` can be used to replace a real display in tests. The internal
+//! [`MockDisplay`] can be used to replace a real display in tests. The internal
 //! framebuffer wraps the color values in `Option` to be able to test which
 //! pixels were modified by drawing operations.
 //!
@@ -105,6 +105,7 @@
 //! ```
 //!
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
+//! [`MockDIsplay`]: struct.MockDisplay.html
 
 use crate::{
     drawable::Pixel,
