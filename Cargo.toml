@@ -6,9 +6,3 @@ members = [
     "tinybmp",
     "tinytga",
 ]
-
-[patch.crates-io]
-embedded-graphics = { path = "embedded-graphics" }
-embedded-graphics-simulator = { path = "simulator" }
-tinytga = { path = "tinytga" }
-tinybmp = { path = "tinybmp" }
