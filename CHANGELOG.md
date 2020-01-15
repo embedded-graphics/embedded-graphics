@@ -13,7 +13,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
-- None
+- Expose `mock_display::MockDisplay` for use in tests, examples, etc in crates that pull embedded-graphics in as a dependency.
 
 ### Fixed
 
