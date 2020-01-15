@@ -14,14 +14,11 @@ use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
-fn main() {
+fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::new(Size::new(128, 128));
 
     let image: ImageTga<Rgb888> = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
-    image
-        .translate(Point::new(32, 32))
-        .draw(&mut display)
-        .unwrap();
+    image.translate(Point::new(32, 32)).draw(&mut display)?;
 
     let mut window = WindowBuilder::new(&display)
         .title("TGA image")
@@ -29,4 +26,6 @@ fn main() {
         .build();
 
     window.show_static(&display);
+
+    Ok(())
 }

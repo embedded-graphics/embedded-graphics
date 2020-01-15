@@ -14,14 +14,11 @@ use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
-fn main() {
+fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::new(Size::new(128, 128));
 
     let image: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
-    image
-        .translate(Point::new(32, 32))
-        .draw(&mut display)
-        .unwrap();
+    image.translate(Point::new(32, 32)).draw(&mut display)?;
 
     let mut window = WindowBuilder::new(&display)
         .title("BMP image")
@@ -29,4 +26,6 @@ fn main() {
         .build();
 
     window.show_static(&display);
+
+    Ok(())
 }

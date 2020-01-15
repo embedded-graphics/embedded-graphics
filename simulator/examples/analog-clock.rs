@@ -136,7 +136,7 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
     background.into_iter().chain(&text)
 }
 
-fn main() {
+fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::new(Size::new(DISP_SIZE as u32, DISP_SIZE as u32));
     let mut window = WindowBuilder::new(&display).title("Clock").scale(2).build();
 
@@ -152,29 +152,26 @@ fn main() {
             time.second()
         );
 
-        display.clear(BinaryColor::Off).unwrap();
+        display.clear(BinaryColor::Off)?;
 
-        draw_face().draw(&mut display).unwrap();
-        draw_hour_hand(time.hour()).draw(&mut display).unwrap();
-        draw_minute_hand(time.minute()).draw(&mut display).unwrap();
-        draw_seconds_hand(time.second()).draw(&mut display).unwrap();
+        draw_face().draw(&mut display)?;
+        draw_hour_hand(time.hour()).draw(&mut display)?;
+        draw_minute_hand(time.minute()).draw(&mut display)?;
+        draw_seconds_hand(time.second()).draw(&mut display)?;
 
         // Draw digital clock just above center
-        draw_digital_clock(&digital_clock_text)
-            .draw(&mut display)
-            .unwrap();
+        draw_digital_clock(&digital_clock_text).draw(&mut display)?;
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
         Circle::new(CENTER, 4)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         window.update(&display);
 
         if window.events().any(|e| e == SimulatorEvent::Quit) {
-            break 'running;
+            break 'running Ok(());
         }
         thread::sleep(Duration::from_millis(50));
     }

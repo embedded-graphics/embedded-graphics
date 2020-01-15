@@ -6,7 +6,7 @@ use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 const PADDING: i32 = 16;
 
-fn main() {
+fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::new(Size::new(320, 256));
 
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
@@ -26,8 +26,7 @@ fn main() {
         .chain(rectangle.into_styled(thin_stroke).into_iter())
         .chain(line.into_styled(thin_stroke).into_iter())
         .chain(triangle.into_styled(thin_stroke).into_iter())
-        .draw(&mut display)
-        .unwrap();
+        .draw(&mut display)?;
 
     let offset = Point::new(0, 64 + PADDING);
     circle
@@ -51,8 +50,7 @@ fn main() {
                 .into_styled(medium_stroke)
                 .into_iter(),
         )
-        .draw(&mut display)
-        .unwrap();
+        .draw(&mut display)?;
 
     let offset = Point::new(0, (64 + PADDING) * 2);
     circle
@@ -72,9 +70,10 @@ fn main() {
                 .into_styled(thick_stroke)
                 .into_iter(),
         )
-        .draw(&mut display)
-        .unwrap();
+        .draw(&mut display)?;
 
     let mut window = WindowBuilder::new(&display).title("Strokes").build();
     window.show_static(&display);
+
+    Ok(())
 }

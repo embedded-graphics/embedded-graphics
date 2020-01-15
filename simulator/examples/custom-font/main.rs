@@ -19,7 +19,7 @@ impl Font for SevenSegmentFont {
     }
 }
 
-fn main() {
+fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::new(Size::new(128, 128));
 
     let position = Point::new(27, 22);
@@ -30,20 +30,20 @@ fn main() {
         top_left = position,
         style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
-    .draw(&mut display)
-    .unwrap();
+    .draw(&mut display)?;
 
     egtext!(
         text = "456",
         top_left = position + row_offset,
         style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
     )
-    .draw(&mut display)
-    .unwrap();
+    .draw(&mut display)?;
 
     let mut window = WindowBuilder::new(&display)
         .title("Custom font")
         .theme(BinaryColorTheme::OledBlue)
         .build();
     window.show_static(&display);
+
+    Ok(())
 }

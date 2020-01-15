@@ -4,7 +4,7 @@ use embedded_graphics::prelude::*;
 use embedded_graphics::{egcircle, egrectangle, egtext, primitive_style, text_style};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
-fn main() {
+fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::new(Size::new(256, 128));
 
     egcircle!(
@@ -50,12 +50,13 @@ fn main() {
             background_color = Rgb565::YELLOW
         )
     )
-    .draw(&mut display)
-    .unwrap();
+    .draw(&mut display)?;
 
     let mut window = WindowBuilder::new(&display)
         .title("Fonts with transparent background")
         .scale(3)
         .build();
     window.show_static(&display);
+
+    Ok(())
 }
