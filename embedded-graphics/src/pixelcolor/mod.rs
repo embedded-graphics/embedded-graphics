@@ -49,33 +49,29 @@
 //!     }
 //! }
 //!
-//! fn main() {
-//!     let mut display = EpdDisplay {};
+//! let mut display = EpdDisplay {};
 //!
-//!     egrectangle!(
-//!         top_left = (0, 0),
-//!         bottom_right = (100, 100),
-//!         style = primitive_style!(fill_color = EpdColor::White)
-//!     )
-//!     .draw(&mut display)
-//!     .unwrap();
+//! egrectangle!(
+//!     top_left = (0, 0),
+//!     bottom_right = (100, 100),
+//!     style = primitive_style!(fill_color = EpdColor::White)
+//! )
+//! .draw(&mut display)?;
 //!
-//!     egrectangle!(
-//!         top_left = (100, 0),
-//!         bottom_right = (200, 100),
-//!         style = primitive_style!(fill_color = EpdColor::Black)
-//!     )
-//!     .draw(&mut display)
-//!     .unwrap();
+//! egrectangle!(
+//!     top_left = (100, 0),
+//!     bottom_right = (200, 100),
+//!     style = primitive_style!(fill_color = EpdColor::Black)
+//! )
+//! .draw(&mut display)?;
 //!
-//!     egrectangle!(
-//!         top_left = (200, 0),
-//!         bottom_right = (300, 100),
-//!         style = primitive_style!(fill_color = EpdColor::Red)
-//!     )
-//!     .draw(&mut display)
-//!     .unwrap();
-//! }
+//! egrectangle!(
+//!     top_left = (200, 0),
+//!     bottom_right = (300, 100),
+//!     style = primitive_style!(fill_color = EpdColor::Red)
+//! )
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! The implementation of the [`DrawTarget`] trait uses a `match` statement to

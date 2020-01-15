@@ -84,12 +84,11 @@ mod tests {
     }
 
     #[test]
-    fn correct_m() {
+    fn correct_m() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
         Text::new("Mm", Point::zero())
             .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         assert_eq!(
             display,
@@ -112,15 +111,16 @@ mod tests {
                 "                ",
             ])
         );
+
+        Ok(())
     }
 
     #[test]
-    fn correct_ascii_borders() {
+    fn correct_ascii_borders() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
         Text::new(" ~", Point::zero())
             .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         assert_eq!(
             display,
@@ -143,15 +143,16 @@ mod tests {
                 "                ",
             ])
         );
+
+        Ok(())
     }
 
     #[test]
-    fn correct_dollar_y() {
+    fn correct_dollar_y() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
         Text::new("$y", Point::zero())
             .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         assert_eq!(
             display,
@@ -174,15 +175,16 @@ mod tests {
                 "                        ",
             ])
         );
+
+        Ok(())
     }
 
     #[test]
-    fn correct_latin1() {
+    fn correct_latin1() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
         Text::new("¡ÿ", Point::zero())
             .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         assert_eq!(
             display,
@@ -205,10 +207,12 @@ mod tests {
                 "                        ",
             ])
         );
+
+        Ok(())
     }
 
     #[test]
-    fn dont_panic() {
+    fn dont_panic() -> Result<(), core::convert::Infallible> {
         let two_question_marks = MockDisplay::from_pattern(&[
             "                        ",
             "                        ",
@@ -233,22 +237,21 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new("\0\n", Point::zero())
             .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
         Text::new("\x7F\u{A0}", Point::zero())
             .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
         Text::new("Ā💣", Point::zero())
             .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
         assert_eq!(display, two_question_marks);
+
+        Ok(())
     }
 }

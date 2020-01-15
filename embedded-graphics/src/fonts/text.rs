@@ -250,13 +250,13 @@ mod tests {
     }
 
     #[test]
-    fn character_spacing() {
+    fn character_spacing() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
         Text::new("##", Point::zero())
             .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
+
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
@@ -285,5 +285,7 @@ mod tests {
                 .size(),
             Size::new(4 * 3 + 5 * 2, 4)
         );
+
+        Ok(())
     }
 }

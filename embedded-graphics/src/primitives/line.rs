@@ -28,15 +28,14 @@ use crate::{
 /// // Red 1 pixel wide line from (50, 20) to (60, 35)
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
 ///
 /// // Green 1 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Line {

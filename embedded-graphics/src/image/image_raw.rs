@@ -49,15 +49,15 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 ///     0b11101111, 0b0101_0000,
 /// ];
 ///
-/// fn main() {
-///     // The type annotation `Image<BinaryColor>` is used to specify the format
-///     // of the stored raw data (`PixelColor::Raw`) and which color type the
-///     // raw data gets converted into.
-///     let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
+/// // The type annotation `Image<BinaryColor>` is used to specify the format
+/// // of the stored raw data (`PixelColor::Raw`) and which color type the
+/// // raw data gets converted into.
+/// let image: Image<BinaryColor> = Image::new(DATA, 12, 5);
 ///
-///     let mut display = Display::default();
-///     image.draw(&mut display).unwrap();
-/// }
+/// let mut display = Display::default();
+///
+/// image.draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// Colors with more than one byte per pixel need an additional type annotation

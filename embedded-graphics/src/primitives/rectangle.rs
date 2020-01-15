@@ -34,15 +34,14 @@ use crate::{
 ///
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .into_styled(style)
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
 ///
 /// // Rectangle with translation applied
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(style)
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rectangle {

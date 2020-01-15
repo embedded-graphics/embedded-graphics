@@ -68,23 +68,22 @@ use crate::{
 ///     }
 /// }
 ///
-/// fn main() {
-///     let mut display = ExampleDisplay {
-///         framebuffer: [0; 4096],
-///         iface: SPI1,
-///     };
+/// let mut display = ExampleDisplay {
+///     framebuffer: [0; 4096],
+///     iface: SPI1,
+/// };
 ///
-///     // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
-///     let circle = egcircle!(
-///         center = (32, 32),
-///         radius = 10,
-///         style = primitive_style!(stroke_color = Gray8::WHITE)
-///     );
-///     circle.draw(&mut display).unwrap();
+/// // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
+/// let circle = egcircle!(
+///     center = (32, 32),
+///     radius = 10,
+///     style = primitive_style!(stroke_color = Gray8::WHITE)
+/// );
+/// circle.draw(&mut display)?;
 ///
-///     // Update the display
-///     display.flush().expect("Failed to send data to display");
-/// }
+/// // Update the display
+/// display.flush().expect("Failed to send data to display");
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// ## Hardware Acceleration
@@ -156,23 +155,22 @@ use crate::{
 ///     }
 /// }
 ///
-/// fn main() {
-///     let mut display = FastExampleDisplay {
-///         framebuffer: [0; 4096],
-///         iface: SPI1,
-///     };
+/// let mut display = FastExampleDisplay {
+///     framebuffer: [0; 4096],
+///     iface: SPI1,
+/// };
 ///
-///     // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
-///     let rect = egrectangle!(
-///         top_left = (10, 20),
-///         bottom_right = (30, 40),
-///         style = primitive_style!(stroke_color = Gray8::WHITE)
-///     );
-///     rect.draw(&mut display).unwrap(); // Uses the accelerated draw_rectangle function
+/// // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
+/// let rect = egrectangle!(
+///     top_left = (10, 20),
+///     bottom_right = (30, 40),
+///     style = primitive_style!(stroke_color = Gray8::WHITE)
+/// );
+/// rect.draw(&mut display)?; // Uses the accelerated draw_rectangle function
 ///
-///     // Update the display
-///     display.flush().expect("Failed to send data to display");
-/// }
+/// // Update the display
+/// display.flush().expect("Failed to send data to display");
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// [`Drawable`]: ../drawable/trait.Drawable.html

@@ -31,8 +31,7 @@ use crate::{
 /// // Circle with 1 pixel wide white stroke centered around (10, 20) with a radius of 30
 /// Circle::new(Point::new(10, 20), 30)
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
 ///
 /// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
 /// let style = PrimitiveStyleBuilder::new()
@@ -43,15 +42,14 @@ use crate::{
 ///
 /// Circle::new(Point::new(50, 20), 30)
 ///     .into_styled(style)
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
 ///
 /// // Circle with blue fill and no stroke with a translation applied
 /// Circle::new(Point::new(10, 20), 30)
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Circle {
@@ -255,13 +253,12 @@ mod tests {
 
     // Check that tiny circles render as a "+" shape with a hole in the center
     #[test]
-    fn tiny_circle() {
+    fn tiny_circle() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
         Circle::new(Point::new(1, 1), 1)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         #[rustfmt::skip]
         assert_eq!(
@@ -272,17 +269,18 @@ mod tests {
                 " # "
             ])
         );
+
+        Ok(())
     }
 
     // Check that tiny filled circle render as a "+" shape with NO hole in the center
     #[test]
-    fn tiny_circle_filled() {
+    fn tiny_circle_filled() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
         Circle::new(Point::new(1, 1), 1)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+            .draw(&mut display)?;
 
         #[rustfmt::skip]
         assert_eq!(
@@ -293,6 +291,8 @@ mod tests {
                 " # "
             ])
         );
+
+        Ok(())
     }
 
     /// Test for issue #143

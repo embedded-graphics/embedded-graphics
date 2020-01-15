@@ -96,8 +96,9 @@
 //! let t = Text::new("Hello Rust!", Point::new(20, 16))
 //!     .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
 //!
-//! c.draw(&mut display).unwrap();
-//! t.draw(&mut display).unwrap();
+//! c.draw(&mut display)?;
+//! t.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! ## Draw a circle and some text
@@ -124,8 +125,9 @@
 //!     style = text_style!(font = Font6x8, text_color = Rgb565::GREEN)
 //! );
 //!
-//! c.draw(&mut display).unwrap();
-//! t.draw(&mut display).unwrap();
+//! c.draw(&mut display)?;
+//! t.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! ## Chaining
@@ -154,10 +156,9 @@
 //!         ))
 //! }
 //!
-//! fn main() {
 //!     # let mut display = MockDisplay::default();
-//!     build_thing("Hello Rust!").draw(&mut display).unwrap();
-//! }
+//! build_thing("Hello Rust!").draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! # Implementing `embedded_graphics` in a driver

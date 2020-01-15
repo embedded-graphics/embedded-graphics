@@ -45,18 +45,18 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///     }
 /// }
 ///
-/// fn main() {
-///     let mut button = Button {
-///         top_left: Point::zero(),
-///         bottom_right: Point::new(100, 50),
-///         bg_color: Rgb888::RED,
-///         fg_color: Rgb888::BLUE,
-///         text: "Click me!",
-///     };
-///     # use embedded_graphics::mock_display::MockDisplay;
-///     # let mut display = MockDisplay::default();
-///     button.draw(&mut display).unwrap();
-/// }
+/// let mut button = Button {
+///     top_left: Point::zero(),
+///     bottom_right: Point::new(100, 50),
+///     bg_color: Rgb888::RED,
+///     fg_color: Rgb888::BLUE,
+///     text: "Click me!",
+/// };
+///
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
+/// button.draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// [`DrawTarget`]: ../trait.DrawTarget.html
@@ -82,9 +82,8 @@ where
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
-/// Pixel(Point::new(1, 2), BinaryColor::On)
-///     .draw(&mut display)
-///     .unwrap();
+/// Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// Iterators with `Pixel` items can also be drawn:
@@ -96,8 +95,8 @@ where
 ///
 /// (0..100)
 ///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
-///     .draw(&mut display)
-///     .unwrap();
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// [`Drawable`]: trait.Drawable.html
