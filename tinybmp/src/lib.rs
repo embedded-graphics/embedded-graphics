@@ -1,5 +1,37 @@
 //! Small BMP format image parser supporting no-std environments. Specifically designed to work with
 //! [embedded-graphics](https://crates.io/crates/embedded-graphics)
+//!
+//! ```rust
+//! use tinybmp::{Bmp, FileType, Header};
+//!
+//! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+//!     .expect("Failed to parse BMP image");
+//!
+//! // Read the BMP header
+//! assert_eq!(
+//!     bmp.header,
+//!     Header {
+//!         file_type: FileType::BM,
+//!         file_size: 314,
+//!         reserved_1: 0,
+//!         reserved_2: 0,
+//!         image_data_start: 122,
+//!         bpp: 24,
+//!         image_width: 8,
+//!         image_height: 8,
+//!         image_data_len: 192
+//!     }
+//! );
+//!
+//! // Check that raw image data slice is the correct length (according to parsed header)
+//! assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
+//!
+//! // Get an iterator over the pixels in this image and load into a vec
+//! let pixels: Vec<u32> = bmp.into_iter().collect();
+//!
+//! // Loaded example image is 8x8px
+//! assert_eq!(pixels.len(), 8 * 8);
+//! ```
 
 #![no_std]
 #![deny(missing_docs)]

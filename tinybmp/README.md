@@ -1,6 +1,6 @@
 # TinyBMP
 
-[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=svg)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
+[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/tinybmp.svg)](https://crates.io/crates/tinybmp)
 [![Docs.rs](https://docs.rs/tinybmp/badge.svg)](https://docs.rs/tinybmp)
 
@@ -13,29 +13,33 @@ A small BMP parser designed for embedded, no-std environments but usable anywher
 ```rust
 use tinybmp::{Bmp, FileType, Header};
 
-fn main() {
-    let bmp =
-        Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp")).expect("Failed to parse");
+let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+    .expect("Failed to parse BMP image");
 
-    assert_eq!(
-        bmp.header,
-        Header {
-            file_type: FileType::BM,
-            file_size: 314,
-            reserved_1: 0,
-            reserved_2: 0,
-            image_data_start: 122,
-            bpp: 24,
-            image_width: 8,
-            image_height: 8,
-            image_data_len: 192
-        }
-    );
+// Read the BMP header
+assert_eq!(
+    bmp.header,
+    Header {
+        file_type: FileType::BM,
+        file_size: 314,
+        reserved_1: 0,
+        reserved_2: 0,
+        image_data_start: 122,
+        bpp: 24,
+        image_width: 8,
+        image_height: 8,
+        image_data_len: 192
+    }
+);
 
-    let image_data: &[u8] = bmp.image_data();
+// Check that raw image data slice is the correct length (according to parsed header)
+assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
 
-    // Render, process or iterate on `image_data` here
-}
+// Get an iterator over the pixels in this image and collect into a vec
+let pixels: Vec<u32> = bmp.into_iter().collect();
+
+// Loaded example image is 8x8px
+assert_eq!(pixels.len(), 8 * 8);
 ```
 
 ## License
