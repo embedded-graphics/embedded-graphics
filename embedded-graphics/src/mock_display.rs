@@ -25,7 +25,7 @@
 //! | `' '`     | `None`                   | No drawing operation changed the pixel  |
 //! | `'0'`     | `Some(Gray8::new(0x00))` | Pixel was changed to `Gray8::new(0x00)` |
 //! | `'1'`     | `Some(Gray8::new(0x11))` | Pixel was changed to `Gray8::new(0x11)` |
-//! | ⋮        | ⋮                        | ⋮                                      |
+//! | ⋮         | ⋮                        | ⋮                                      |
 //! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
 //! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
 //!
