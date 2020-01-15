@@ -32,7 +32,7 @@ fn chessboard_8px_24bit_iter() {
 
     assert_eq!(pixels.len(), 8 * 8);
 
-    // 24BPP black/white checquerboard
+    // 24BPP black/white chessboard
     let expected = vec![
         0xffffff, 0xffffff, 0x000000, 0x000000, 0xffffff, 0xffffff, 0x000000, 0x000000, //
         0xffffff, 0xffffff, 0x000000, 0x000000, 0xffffff, 0xffffff, 0x000000, 0x000000, //
