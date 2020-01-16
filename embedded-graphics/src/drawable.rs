@@ -108,7 +108,7 @@ impl<C> Drawable<C> for Pixel<C>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error> {
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
         display.draw_pixel(self)
     }
 }
