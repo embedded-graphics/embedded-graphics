@@ -8,16 +8,26 @@ use crate::{
 
 /// Defines a display that can be used to render [`Drawable`] objects.
 ///
-/// To use this crate in a driver, `DrawTarget` must be implemented. This trait defines how a
-/// display draws pixels, and optionally provides a way to define accelerated drawing methods for
-/// graphical primitives such as lines, rectangles, triangles, and circles.
+/// To to add embedded-graphics support to a display driver, `DrawTarget` must be implemented. Once
+/// a `DrawTarget` is defined, it can be used to render [`Drawable`]s. Note that any iterator over
+/// [`Pixel`]s can be drawn as [`Drawable`] is implemented for `Iterator<Item = Pixel<C:
+/// PixelColor>>`. See the [`Drawable`] trait documentation for more details.
 ///
-/// Once a `DrawTarget` is defined, it can be used to render [`Drawable`]s. Note that any iterator
-/// over [`Pixel`]s has a default implementation for the [`Drawable`] trait. See the [`Drawable`]
-/// trait documentation for more details.
+/// `DrawTarget` provides default implementations of methods to draw [`primitive`]s and clear the
+/// display which delegate to [`DrawTarget::draw_iter`]. If the target display supports accelerated
+/// drawing commands, these methods can be overridden with specialised implementations that take
+/// advantage of the hardware to speed up drawing operations.
 ///
-/// Here's an example for an imaginary display that has a 64x64px framebuffer of 8 bit values that
-/// communicates over a (simplified) SPI interface:
+/// Note that some displays require a "flush" operation to write changes from a framebuffer to the
+/// display. See docs associated with the chosen display driver for details on how to update the
+/// display.
+///
+/// # Examples
+///
+/// ## Implement `DrawTarget` for an 8 bit grayscale display
+///
+/// This example uses an imaginary display that has a 64x64px framebuffer of 8 bit values that
+/// is sent to the display over a (simplified) SPI interface.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -77,7 +87,7 @@ use crate::{
 /// let circle = egcircle!(
 ///     center = (32, 32),
 ///     radius = 10,
-///     style = primitive_style!(stroke_color = Gray8::WHITE)
+///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
 /// );
 /// circle.draw(&mut display)?;
 ///
@@ -89,8 +99,9 @@ use crate::{
 /// ## Hardware Acceleration
 ///
 /// In addition to defining [`draw_pixel`], an implementation of [`DrawTarget`] can also provide
-/// alternative implementations of drawing methods for graphical primitives. Here is an example of
-/// how a display with accelerated methods can implement [`DrawTarget`]:
+/// alternative implementations for hardware accelerated drawing operations. This example implements
+/// `DrawTarget` for a display that supports drawing hardware accelerated styled [`Rectangle`]s. The
+/// `draw_rectangle()` method overrides the default implementation.
 ///
 /// ```rust
 /// # use embedded_graphics::prelude::*;
@@ -145,6 +156,8 @@ use crate::{
 ///     }
 ///
 ///     /// Use the accelerated method when drawing rectangles
+///     ///
+///     /// This method overrides the default implementation
 ///     fn draw_rectangle(
 ///         &mut self,
 ///         item: &Styled<Rectangle, PrimitiveStyle<Gray8>>,
@@ -164,7 +177,7 @@ use crate::{
 /// let rect = egrectangle!(
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
-///     style = primitive_style!(stroke_color = Gray8::WHITE)
+///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
 /// );
 /// rect.draw(&mut display)?; // Uses the accelerated draw_rectangle function
 ///
@@ -176,22 +189,26 @@ use crate::{
 /// [`Drawable`]: ../drawable/trait.Drawable.html
 /// [`Pixel`]: ../drawable/struct.Pixel.html
 /// [`draw_pixel`]: ./trait.DrawTarget.html#method.draw_pixel
+/// [`DrawTarget::draw_iter`]: ./trait.DrawTarget.html#method.draw_iter
 /// [`DrawTarget`]: ./trait.DrawTarget.html
+/// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
+/// [`primitive`]: ../primitives/index.html
 pub trait DrawTarget<C>
 where
     C: PixelColor,
 {
-    /// Error type to return when a draw or display change operation fails.
+    /// Error type to return when a drawing operation fails.
     ///
-    /// This error is returned when a drawing operation fails, or when an error updating/clearing
-    /// the display occurs. The examples in this crate use `core::convert::Infallible`, however a
-    /// more descriptive error type should be used with real hardware.
+    /// This error is returned if an error occurred during a drawing operation. This mainly applies
+    /// to drivers that need to communicate with the display for each drawing operation, where a
+    /// communication error can occur. For drivers that use an internal framebuffer where drawing
+    /// operations can never fail, [`core::convert::Infallible`] can instead be used as the `Error`
+    /// type.
+    ///
+    /// [`core::convert::Infallible`]: https://doc.rust-lang.org/stable/core/convert/enum.Infallible.html
     type Error;
 
     /// Draws a pixel on the display.
-    ///
-    /// Note that some displays require a "flush" operation to actually write changes to the
-    /// framebuffer.
     fn draw_pixel(&mut self, item: drawable::Pixel<C>) -> Result<(), Self::Error>;
 
     /// Draws an object from an iterator over its pixels.
@@ -211,7 +228,7 @@ where
 
     /// Clears the display with the supplied color.
     ///
-    /// This default implementation should be replaced if the implementing driver provides an
+    /// This default implementation can be replaced if the implementing driver provides an
     /// accelerated clearing method.
     fn clear(&mut self, color: C) -> Result<(), Self::Error>
     where
@@ -222,19 +239,20 @@ where
             .draw(self)
     }
 
-    /// Draws a line primitive.
+    /// Draws a styled line primitive.
     ///
-    /// This default trait method should be overridden if a display provides hardware-accelerated
+    /// This default trait method can be overridden if a display provides hardware-accelerated
     /// methods for drawing lines.
     ///
     /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Line`] primitive. To draw a line, call
-    /// [`draw`] on a [`Line`] primitive object.
+    /// internals of the [`draw`] method used for the [`Styled`] [`Line`] primitive. To draw a line,
+    /// call [`draw`] on a `Styled<Line>` object.
     ///
     /// [`Line`]: ../primitives/line/struct.Line.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
+    /// [`Styled`]: ../style/struct.Styled.html
     fn draw_line(
         &mut self,
         item: &Styled<primitives::Line, PrimitiveStyle<C>>,
@@ -242,19 +260,20 @@ where
         self.draw_iter(item)
     }
 
-    /// Draws a triangle primitive.
+    /// Draws a styled triangle primitive.
     ///
-    /// This default trait method should be overridden if a display provides hardware-accelerated
+    /// This default trait method can be overridden if a display provides hardware-accelerated
     /// methods for drawing triangles.
     ///
     /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Triangle`] primitive. To draw a triangle,
-    /// call [`draw`] on a [`Triangle`] primitive object.
+    /// internals of the [`draw`] method used for the [`Styled`] [`Triangle`] primitive. To draw a
+    /// triangle, call [`draw`] on a `Styled<Triangle>` object.
     ///
     /// [`Triangle`]: ../primitives/triangle/struct.Triangle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
+    /// [`Styled`]: ../style/struct.Styled.html
     fn draw_triangle(
         &mut self,
         item: &Styled<primitives::Triangle, PrimitiveStyle<C>>,
@@ -262,19 +281,20 @@ where
         self.draw_iter(item)
     }
 
-    /// Draws a rectangle primitive.
+    /// Draws a styled rectangle primitive.
     ///
-    /// This default trait method should be overridden if a display provides hardware-accelerated
+    /// This default trait method can be overridden if a display provides hardware-accelerated
     /// methods for drawing rectangle.
     ///
     /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Rectangle`] primitive. To draw a rectangle,
-    /// call [`draw`] on a [`Rectangle`] primitive object.
+    /// internals of the [`draw`] method used for the [`Styled`] [`Rectangle`] primitive. To draw a
+    /// rectangle, call [`draw`] on a `Styled<Rectangle>` object.
     ///
     /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
+    /// [`Styled`]: ../style/struct.Styled.html
     fn draw_rectangle(
         &mut self,
         item: &Styled<primitives::Rectangle, PrimitiveStyle<C>>,
@@ -282,19 +302,20 @@ where
         self.draw_iter(item)
     }
 
-    /// Draws a circle primitive.
+    /// Draws a styled circle primitive.
     ///
-    /// This default trait method should be overridden if a display provides hardware-accelerated
+    /// This default trait method can be overridden if a display provides hardware-accelerated
     /// methods for drawing circles.
     ///
     /// # Caution
     ///
     /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Circle`] primitive. To draw a circle, call
-    /// [`draw`] on a [`Circle`] primitive object.
+    /// internals of the [`draw`] method used for the [`Styled`] [`Circle`] primitive. To draw a
+    /// circle, call [`draw`] on a `Styled<Circle>` object.
     ///
     /// [`Circle`]: ../primitives/circle/struct.Circle.html
     /// [`draw`]: ./trait.DrawTarget.html#method.draw
+    /// [`Styled`]: ../style/struct.Styled.html
     fn draw_circle(
         &mut self,
         item: &Styled<primitives::Circle, PrimitiveStyle<C>>,
