@@ -31,13 +31,17 @@
 //! pub struct EpdDisplay {}
 //!
 //! impl DrawTarget<EpdColor> for EpdDisplay {
-//!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) {
+//!     type Error = core::convert::Infallible;
+//!
+//!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) -> Result<(), Self::Error> {
 //!         let Pixel(point, color) = item;
 //!         match color {
 //!             EpdColor::White => {} // draw white pixel at `point`
 //!             EpdColor::Black => {} // draw black pixel at `point`
 //!             EpdColor::Red => {}   // draw red pixel at `point`
 //!         }
+//!
+//!         Ok(())
 //!     }
 //!
 //!     fn size(&self) -> Size {
@@ -45,30 +49,29 @@
 //!     }
 //! }
 //!
-//! fn main() {
-//!     let mut display = EpdDisplay {};
+//! let mut display = EpdDisplay {};
 //!
-//!     egrectangle!(
-//!         top_left = (0, 0),
-//!         bottom_right = (100, 100),
-//!         style = primitive_style!(fill_color = EpdColor::White)
-//!     )
-//!     .draw(&mut display);
+//! egrectangle!(
+//!     top_left = (0, 0),
+//!     bottom_right = (100, 100),
+//!     style = primitive_style!(fill_color = EpdColor::White)
+//! )
+//! .draw(&mut display)?;
 //!
-//!     egrectangle!(
-//!         top_left = (100, 0),
-//!         bottom_right = (200, 100),
-//!         style = primitive_style!(fill_color = EpdColor::Black)
-//!     )
-//!     .draw(&mut display);
+//! egrectangle!(
+//!     top_left = (100, 0),
+//!     bottom_right = (200, 100),
+//!     style = primitive_style!(fill_color = EpdColor::Black)
+//! )
+//! .draw(&mut display)?;
 //!
-//!     egrectangle!(
-//!         top_left = (200, 0),
-//!         bottom_right = (300, 100),
-//!         style = primitive_style!(fill_color = EpdColor::Red)
-//!     )
-//!     .draw(&mut display);
-//! }
+//! egrectangle!(
+//!     top_left = (200, 0),
+//!     bottom_right = (300, 100),
+//!     style = primitive_style!(fill_color = EpdColor::Red)
+//! )
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! The implementation of the [`DrawTarget`] trait uses a `match` statement to

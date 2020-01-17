@@ -1,11 +1,11 @@
 use crate::{
     drawable::{Drawable, Pixel},
     fonts::Font,
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     style::{Styled, TextStyle},
     transform::Transform,
-    Dimensions, DrawTarget,
+    DrawTarget,
 };
 
 /// A text object.
@@ -68,8 +68,8 @@ where
     C: PixelColor,
     F: Font + Copy,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_iter(self.into_iter());
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self.into_iter())
     }
 }
 
@@ -250,12 +250,13 @@ mod tests {
     }
 
     #[test]
-    fn character_spacing() {
+    fn character_spacing() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
         Text::new("##", Point::zero())
             .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-            .draw(&mut display);
+            .draw(&mut display)?;
+
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
@@ -284,5 +285,7 @@ mod tests {
                 .size(),
             Size::new(4 * 3 + 5 * 2, 4)
         );
+
+        Ok(())
     }
 }

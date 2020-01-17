@@ -25,7 +25,8 @@ use tinybmp::{Bmp, BmpIterator};
 ///
 /// // Load `patch_16bpp.bmp`, a 16BPP 4x4px image
 /// let mut image = ImageBmp::new(include_bytes!("../../../assets/patch_16bpp.bmp")).unwrap();
-/// image.draw(&mut display);
+/// image.draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageBmp<'a, C>
@@ -167,8 +168,8 @@ impl<'a, C: 'a> Drawable<C> for &ImageBmp<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
-        display.draw_iter(self.into_iter());
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self.into_iter())
     }
 }
 
@@ -337,7 +338,8 @@ mod tests {
                     },
                 )
             })
-            .draw(&mut display);
+            .draw(&mut display)
+            .unwrap();
 
         assert_eq!(
             display,

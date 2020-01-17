@@ -54,7 +54,6 @@ macro_rules! primitive_style {
 ///     fonts::Font8x16,
 ///     pixelcolor::{Rgb565, RgbColor},
 ///     style::TextStyle,
-///     # style::TextStyleBuilder,
 ///     text_style,
 /// };
 ///
@@ -62,7 +61,7 @@ macro_rules! primitive_style {
 /// #
 /// # assert_eq!(
 /// #     style,
-/// #     TextStyleBuilder::new(Font8x16).build()
+/// #     embedded_graphics::style::TextStyleBuilder::new(Font8x16).build()
 /// # );
 /// ```
 ///
@@ -76,7 +75,6 @@ macro_rules! primitive_style {
 ///     fonts::Font6x8,
 ///     pixelcolor::{Rgb565, RgbColor},
 ///     style::TextStyle,
-///     # style::TextStyleBuilder,
 ///     text_style,
 /// };
 ///
@@ -88,7 +86,7 @@ macro_rules! primitive_style {
 /// #
 /// # assert_eq!(
 /// #     style,
-/// #     TextStyleBuilder::new(Font6x8)
+/// #     embedded_graphics::style::TextStyleBuilder::new(Font6x8)
 /// #         .text_color(Rgb565::RED)
 /// #         .background_color(Rgb565::GREEN)
 /// #         .build()

@@ -28,13 +28,14 @@ use crate::{
 /// // Red 1 pixel wide line from (50, 20) to (60, 35)
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)?;
 ///
 /// // Green 1 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Line {
@@ -199,8 +200,8 @@ impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_line(self);
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_line(self)
     }
 }
 

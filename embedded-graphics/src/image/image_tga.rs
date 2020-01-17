@@ -26,7 +26,8 @@ use tinytga::{Tga, TgaIterator};
 /// // Load `patch.tga`, a 32BPP 4x4px image
 /// let image = ImageTga::new(include_bytes!("../../../assets/patch.tga")).unwrap();
 ///
-/// image.draw(&mut display);
+/// image.draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Clone)]
 pub struct ImageTga<'a, C>
@@ -141,8 +142,8 @@ impl<'a, C: 'a> Drawable<C> for &'a ImageTga<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) {
-        display.draw_iter(self.into_iter());
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self.into_iter())
     }
 }
 
@@ -240,7 +241,7 @@ mod tests {
         let image: ImageTga<Rgb888> = ImageTga::new(data).unwrap();
 
         let mut display = MockDisplay::new();
-        image.draw(&mut display);
+        image.draw(&mut display).unwrap();
 
         assert_eq!(
             display,
@@ -258,7 +259,7 @@ mod tests {
         let image: ImageTga<Gray8> = ImageTga::new(data).unwrap();
 
         let mut display = MockDisplay::new();
-        image.draw(&mut display);
+        image.draw(&mut display).unwrap();
 
         assert_eq!(
             display,

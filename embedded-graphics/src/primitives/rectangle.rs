@@ -34,13 +34,14 @@ use crate::{
 ///
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .into_styled(style)
-///     .draw(&mut display);
+///     .draw(&mut display)?;
 ///
 /// // Rectangle with translation applied
 /// Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(style)
-///     .draw(&mut display);
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rectangle {
@@ -211,8 +212,8 @@ impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_rectangle(self);
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_rectangle(self)
     }
 }
 

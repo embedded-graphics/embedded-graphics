@@ -32,13 +32,14 @@ use core::borrow::Borrow;
 /// // Triangle with red 1 px wide stroke
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)?;
 ///
 /// // Triangle with translation applied
 /// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
 ///     .translate(Point::new(65, 35))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
-///     .draw(&mut display);
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
 /// ## Create a triangle from an array of points
@@ -349,8 +350,8 @@ impl<'a, C: 'a> Drawable<C> for &Styled<Triangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) {
-        display.draw_triangle(self);
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_triangle(self)
     }
 }
 

@@ -48,7 +48,7 @@ use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
 /// # #[cfg(feature = "nalgebra_support")] {
 /// use embedded_graphics::geometry::Point;
 /// use nalgebra::Vector2;
-
+///
 /// let n_coord = Vector2::new(10u8, 20);
 ///
 /// assert_eq!(Point::from(n_coord), Point::new(10, 20));

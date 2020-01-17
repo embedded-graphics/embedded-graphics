@@ -36,7 +36,8 @@
 //! // Create a text at position (20, 30) and draw it using the previously defined style
 //! Text::new("Hello Rust!", Point::new(20, 30))
 //!     .into_styled(style)
-//!     .draw(&mut display);
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! ## Draw text using the `egtext` macro
@@ -62,7 +63,8 @@
 //!         background_color = Rgb565::BLUE,
 //!     )
 //! )
-//! .draw(&mut display);
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! It is also possible to provide a style created without using the [`text_style`] macro. In this example, [`TextStyleBuilder`] is used.
@@ -86,7 +88,8 @@
 //!         .background_color(Rgb565::BLUE)
 //!         .build()
 //! )
-//! .draw(&mut display);
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! ## Translate text by (20px, 30px)
@@ -104,13 +107,14 @@
 //! Text::new("Hello Rust!", Point::zero())
 //!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
 //!     .translate(Point::new(20, 30))
-//!     .draw(&mut display);
+//!     .draw(&mut display)?;
 //!
 //! // this is equivalent to:
 //!
 //! Text::new("Hello Rust!", Point::new(20, 30))
 //!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
-//!     .draw(&mut display);
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! ## Use `write!()` and arrayvec to render a formatted string
@@ -143,7 +147,8 @@
 //!         background_color = Rgb565::BLUE,
 //!     )
 //! )
-//! .draw(&mut display);
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! # Built-in fonts
