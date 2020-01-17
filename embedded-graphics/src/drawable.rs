@@ -66,7 +66,7 @@ where
     C: PixelColor,
 {
     /// Draw the graphics object using the supplied DrawTarget.
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error>;
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error>;
 }
 
 /// A single pixel.
