@@ -30,6 +30,7 @@ use crate::{
 /// is sent to the display over a (simplified) SPI interface.
 ///
 /// ```rust
+/// use core::convert::TryInto;
 /// use embedded_graphics::{
 ///     drawable::Pixel,
 ///     egcircle,
@@ -38,7 +39,7 @@ use crate::{
 ///     prelude::*,
 ///     primitive_style, DrawTarget,
 /// };
-///
+/// #
 /// # struct SPI1;
 /// #
 /// # impl SPI1 {
@@ -47,7 +48,8 @@ use crate::{
 /// #     }
 /// # }
 /// #
-/// /// A fake display 64px x 64px where each pixel is stored as a single `u8`
+///
+/// /// A fake 64px x 64px display where each pixel is stored as a single `u8`
 /// struct ExampleDisplay {
 ///     framebuffer: [u8; 64 * 64],
 ///     iface: SPI1,
@@ -66,9 +68,14 @@ use crate::{
 ///     /// Draw a `Pixel` that has a color defined as `Gray8`.
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
 ///         let Pixel(coord, color) = pixel;
-///         // Place an (x, y) pixel at the right index in the framebuffer
-///         let index = coord.x + coord.y * 64;
-///         self.framebuffer[index as usize] = color.luma();
+///
+///         // Place an (x, y) pixel at the right index in the framebuffer. If the pixel coordinates
+///         // are out of bounds (negative or greater than `(63, 63)`), this operation will be a
+///         // noop.
+///         if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
+///             let index: u32 = x + y * 64;
+///             self.framebuffer[index as usize] = color.luma();
+///         }
 ///
 ///         Ok(())
 ///     }
@@ -100,8 +107,12 @@ use crate::{
 ///
 /// In addition to defining [`draw_pixel`], an implementation of [`DrawTarget`] can also provide
 /// alternative implementations for hardware accelerated drawing operations. This example implements
-/// `DrawTarget` for a display that supports drawing hardware accelerated styled [`Rectangle`]s. The
-/// `draw_rectangle()` method overrides the default implementation.
+/// `DrawTarget` for a display without a framebuffer that supports drawing hardware accelerated
+/// styled [`Rectangle`]s. The `draw_rectangle()` method overrides the default implementation.
+///
+/// As this example doesn't use a framebuffer, a `flush()` method is not required. All draw
+/// operations are performed in "immediate mode" directly on the display. As drawing operations are
+/// now fallible due to hardware issues, a custom error type `CommError` is introduced.
 ///
 /// ```rust
 /// # use embedded_graphics::prelude::*;
@@ -111,6 +122,7 @@ use crate::{
 /// # use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// # use embedded_graphics::drawable::Pixel;
 /// # use embedded_graphics::style::{PrimitiveStyle, Styled};
+/// # use core::convert::TryFrom;
 /// #
 /// # struct SPI1;
 /// #
@@ -120,33 +132,35 @@ use crate::{
 /// #     }
 /// # }
 /// #
-/// /// A fake display 64px x 64px where each pixel is stored as a single `u8`
+/// /// SPI communication error
+/// #[derive(Debug)]
+/// struct CommError;
+///
+/// /// A fake display which uses hardware drawing commands instead of a framebuffer
 /// struct FastExampleDisplay {
-///     framebuffer: [u8; 64 * 64],
 ///     iface: SPI1,
 /// }
 ///
 /// impl FastExampleDisplay {
-///     /// Send buffer to the display
-///     pub fn flush(&self) -> Result<(), ()> {
-///         self.iface.send_bytes(&self.framebuffer)
-///     }
+///     /// Draw a rectangle using hardware accelerated commands
+///     pub fn fast_rectangle(
+///         &self,
+///         rect: &Styled<Rectangle, PrimitiveStyle<Gray8>>,
+///     ) -> Result<(), CommError> {
+///         // Send rectangle drawing commands to the display
 ///
-///     /// A HW-accelerated method for drawing rectangles
-///     pub fn fast_rectangle(&self, rect: &Styled<Rectangle, PrimitiveStyle<Gray8>>) {
-///         // Does some speedy drawing
+///         Ok(())
 ///     }
 /// }
 ///
 /// impl DrawTarget<Gray8> for FastExampleDisplay {
-///     type Error = core::convert::Infallible;
+///     type Error = CommError;
 ///
 ///     /// Draw a `pixel` that has a color defined as `Gray8`
 ///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
 ///         let Pixel(coord, color) = pixel;
-///         // Place an (x, y) pixel at the right index in the framebuffer
-///         let index = coord.x + coord.y * 64;
-///         self.framebuffer[index as usize] = color.luma();
+///
+///         // Send commands directly to the display to set an individual pixel to the given color
 ///
 ///         Ok(())
 ///     }
@@ -157,21 +171,17 @@ use crate::{
 ///
 ///     /// Use the accelerated method when drawing rectangles
 ///     ///
-///     /// This method overrides the default implementation
+///     /// This method overrides the default implementation. If `fast_rectangle()` fails, the error
+///     /// will be propagated through this method.
 ///     fn draw_rectangle(
 ///         &mut self,
 ///         item: &Styled<Rectangle, PrimitiveStyle<Gray8>>,
 ///     ) -> Result<(), Self::Error> {
-///         self.fast_rectangle(item);
-///
-///         Ok(())
+///         self.fast_rectangle(item)
 ///     }
 /// }
 ///
-/// let mut display = FastExampleDisplay {
-///     framebuffer: [0; 4096],
-///     iface: SPI1,
-/// };
+/// let mut display = FastExampleDisplay { iface: SPI1 };
 ///
 /// // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
 /// let rect = egrectangle!(
@@ -179,11 +189,9 @@ use crate::{
 ///     bottom_right = (30, 40),
 ///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
 /// );
-/// rect.draw(&mut display)?; // Uses the accelerated draw_rectangle function
 ///
-/// // Update the display
-/// display.flush().expect("Failed to send data to display");
-/// # Ok::<(), core::convert::Infallible>(())
+/// // Draw a rectangle on the display using accelerated `draw_rectangle()` function
+/// # Ok::<(), CommError>(())
 /// ```
 ///
 /// [`Drawable`]: ../drawable/trait.Drawable.html
