@@ -305,7 +305,7 @@ mod tests {
 
         let tuple: (u32, u32) = p.try_into().unwrap();
 
-        assert_eq!(tuple, (10u32, 20u32));
+        assert_eq!(tuple, (10, 20));
     }
 
     #[test]
@@ -314,24 +314,26 @@ mod tests {
 
         let tuple: (u32, u32) = p.try_into().unwrap();
 
-        // Literal value taken from [here](https://doc.rust-lang.org/std/primitive.i32.html#method.max_value)
+        // Literal value taken from https://doc.rust-lang.org/std/primitive.i32.html#method.max_value
         assert_eq!(tuple, (2147483647, 2147483647));
     }
 
     #[test]
-    #[should_panic]
     fn negative_u32_tuple() {
         let p = Point::new(-50, -10);
 
-        let _tuple: (u32, u32) = p.try_into().unwrap();
+        let tuple: Result<(u32, u32), _> = p.try_into();
+
+        assert!(tuple.is_err());
     }
 
     #[test]
-    #[should_panic]
     fn max_negative_u32_tuple() {
         let p = Point::new(i32::min_value(), i32::min_value());
 
-        let _tuple: (u32, u32) = p.try_into().unwrap();
+        let tuple: Result<(u32, u32), _> = p.try_into();
+
+        assert!(tuple.is_err());
     }
 
     #[test]
