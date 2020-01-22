@@ -247,6 +247,12 @@ impl From<Point> for (i32, i32) {
     }
 }
 
+impl From<Point> for [i32; 2] {
+    fn from(other: Point) -> [i32; 2] {
+        [other.x, other.y]
+    }
+}
+
 impl From<&Point> for (i32, i32) {
     fn from(other: &Point) -> (i32, i32) {
         (other.x, other.y)
@@ -267,6 +273,36 @@ impl TryFrom<(u32, u32)> for Point {
     fn try_from(point: (u32, u32)) -> Result<Self, Self::Error> {
         let x = point.0.try_into()?;
         let y = point.1.try_into()?;
+
+        Ok(Point::new(x, y))
+    }
+}
+
+impl TryFrom<Point> for [u32; 2] {
+    type Error = core::num::TryFromIntError;
+
+    fn try_from(point: Point) -> Result<Self, Self::Error> {
+        Ok([point.x.try_into()?, point.y.try_into()?])
+    }
+}
+
+impl TryFrom<[u32; 2]> for Point {
+    type Error = core::num::TryFromIntError;
+
+    fn try_from(point: [u32; 2]) -> Result<Self, Self::Error> {
+        let x = point[0].try_into()?;
+        let y = point[1].try_into()?;
+
+        Ok(Point::new(x, y))
+    }
+}
+
+impl TryFrom<&[u32; 2]> for Point {
+    type Error = core::num::TryFromIntError;
+
+    fn try_from(point: &[u32; 2]) -> Result<Self, Self::Error> {
+        let x = point[0].try_into()?;
+        let y = point[1].try_into()?;
 
         Ok(Point::new(x, y))
     }
@@ -304,8 +340,10 @@ mod tests {
         let p = Point::new(10, 20);
 
         let tuple: (u32, u32) = p.try_into().unwrap();
+        let array: [u32; 2] = p.try_into().unwrap();
 
         assert_eq!(tuple, (10, 20));
+        assert_eq!(array, [10, 20]);
     }
 
     #[test]
@@ -313,9 +351,11 @@ mod tests {
         let p = Point::new(i32::max_value(), i32::max_value());
 
         let tuple: (u32, u32) = p.try_into().unwrap();
+        let array: [u32; 2] = p.try_into().unwrap();
 
         // Literal value taken from https://doc.rust-lang.org/std/primitive.i32.html#method.max_value
         assert_eq!(tuple, (2147483647, 2147483647));
+        assert_eq!(array, [2147483647, 2147483647]);
     }
 
     #[test]
@@ -323,8 +363,10 @@ mod tests {
         let p = Point::new(-50, -10);
 
         let tuple: Result<(u32, u32), _> = p.try_into();
+        let array: Result<[u32; 2], _> = p.try_into();
 
         assert!(tuple.is_err());
+        assert!(array.is_err());
     }
 
     #[test]
@@ -332,8 +374,10 @@ mod tests {
         let p = Point::new(i32::min_value(), i32::min_value());
 
         let tuple: Result<(u32, u32), _> = p.try_into();
+        let array: Result<[u32; 2], _> = p.try_into();
 
         assert!(tuple.is_err());
+        assert!(array.is_err());
     }
 
     #[test]
