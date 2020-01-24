@@ -102,7 +102,7 @@ impl<'a> Bmp<'a> {
 }
 
 impl<'a> IntoIterator for &'a Bmp<'a> {
-    type Item = u32;
+    type Item = ((u32, u32), u32);
     type IntoIter = BmpIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -152,7 +152,7 @@ pub struct BmpIterator<'a> {
 }
 
 impl<'a> Iterator for BmpIterator<'a> {
-    type Item = u32;
+    type Item = ((u32, u32), u32);
 
     fn next(&mut self) -> Option<Self::Item> {
         let px = self.pixel_data;
@@ -184,7 +184,7 @@ impl<'a> Iterator for BmpIterator<'a> {
 
             self.start_idx += self.pixel_stride;
 
-            Some(pixel_value)
+            Some(((self.x, self.y), pixel_value))
         } else {
             None
         }
