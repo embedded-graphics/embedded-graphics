@@ -18,6 +18,12 @@ exclude = [
 [badges]
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
+[dependencies]
+embedded-graphics = { version = "0.6.0-alpha.3", optional = true }
+
 [dependencies.nom]
 version = "5.1.0"
 default-features = false
+
+[features]
+graphics = ["embedded-graphics"]

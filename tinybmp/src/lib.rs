@@ -190,3 +190,23 @@ impl<'a> Iterator for BmpIterator<'a> {
         }
     }
 }
+
+#[cfg(feature = "graphics")]
+use embedded_graphics::{
+    drawable::{Drawable, Pixel},
+    pixelcolor::PixelColor,
+    DrawTarget,
+};
+
+#[cfg(feature = "graphics")]
+impl<'a, C> Drawable<C> for Bmp<'a>
+where
+    C: PixelColor + From<u32>,
+{
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(
+            self.into_iter()
+                .map(|((x, y), color)| Pixel((x as i32, y as i32).into(), color.into())),
+        )
+    }
+}
