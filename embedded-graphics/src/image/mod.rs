@@ -10,6 +10,10 @@ mod image_raw;
 mod image_tga;
 
 pub use self::image_raw::{Image, ImageBE, ImageLE};
+use crate::drawable::Drawable;
+use crate::geometry::Dimensions;
+use crate::pixelcolor::PixelColor;
+use crate::transform::Transform;
 
 #[cfg(feature = "bmp")]
 pub use self::image_bmp::ImageBmp;
@@ -17,13 +21,19 @@ pub use self::image_bmp::ImageBmp;
 pub use self::image_tga::ImageTga;
 
 /// Image file trait.
-pub trait ImageFile<'a>: crate::geometry::Dimensions + Sized {
+pub trait ImageFile<'a, C>: Dimensions + Sized + Drawable<C> + Transform
+where
+    C: PixelColor,
+{
+    /// Error type to return when loading of the image data failed
+    type LoadError;
+
     /// Create a new image with given input file
     ///
     /// The input file is expected to be of a particular format (BMP, TGA, etc) and contain file
     /// metadata like width/height and pixel data. Because parsing may fail, this returns a
     /// `Result<Self, ()>`.
-    fn new(filedata: &'a [u8]) -> Result<Self, ()>;
+    fn new(filedata: &'a [u8]) -> Result<Self, Self::LoadError>;
 
     /// Get the width in pixels of an image
     fn width(&self) -> u32;
