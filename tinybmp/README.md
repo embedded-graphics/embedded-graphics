@@ -35,8 +35,8 @@ assert_eq!(
 // Check that raw image data slice is the correct length (according to parsed header)
 assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
 
-// Get an iterator over the pixels in this image and collect into a vec
-let pixels: Vec<u32> = bmp.into_iter().collect();
+// Get an iterator over the pixel coordinates and colors in this image and collect into a vec
+let pixels: Vec<((u32, u32), u32)> = bmp.into_iter().collect();
 
 // Loaded example image is 8x8px
 assert_eq!(pixels.len(), 8 * 8);

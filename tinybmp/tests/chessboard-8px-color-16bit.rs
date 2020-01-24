@@ -28,7 +28,7 @@ fn chessboard_8px_color_16bit_iter() {
     let bmp = Bmp::from_slice(include_bytes!("./chessboard-8px-color-16bit.bmp"))
         .expect("Failed to parse");
 
-    let pixels: Vec<u32> = bmp.into_iter().collect();
+    let pixels: Vec<u32> = bmp.into_iter().map(|(_coord, color)| color).collect();
 
     // 8px x 8px image. Check that iterator returns all pixels in it
     assert_eq!(pixels.len(), 8 * 8);

@@ -1,5 +1,9 @@
 //! Small BMP format image parser supporting no-std environments. Specifically designed to work with
-//! [embedded-graphics](https://crates.io/crates/embedded-graphics)
+//! [embedded-graphics]
+//!
+//! # Examples
+//!
+//! ## Load a BMP image and check its [`Header`] and returned pixels.
 //!
 //! ```rust
 //! use tinybmp::{Bmp, FileType, Header};
@@ -26,12 +30,37 @@
 //! // Check that raw image data slice is the correct length (according to parsed header)
 //! assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
 //!
-//! // Get an iterator over the pixels in this image and load into a vec
-//! let pixels: Vec<u32> = bmp.into_iter().collect();
+//! // Get an iterator over the pixel coordinates and values in this image and load into a vec
+//! let pixels: Vec<((u32, u32), u32)> = bmp.into_iter().collect();
 //!
 //! // Loaded example image is 8x8px
 //! assert_eq!(pixels.len(), 8 * 8);
 //! ```
+//!
+//! ## Integrate with `embedded-graphics`
+//!
+//! This example loads a 16BPP image and draws it to an [embedded-graphics] compatible display.
+//!
+//! The `graphics` feature must be enabled for embedded-graphics support.
+//!
+//! ```rust
+//! # #[cfg(feature = "graphics")] fn main() -> Result<(), core::convert::Infallible> {
+//! use tinybmp::Bmp;
+//! use embedded_graphics::prelude::*;
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # use embedded_graphics::pixelcolor::Rgb565;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//!
+//! // Load 16BPP 8x8px image
+//! let mut image = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+//!
+//! image.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! # }
+//! ```
+//!
+//! [embedded-graphics]: https://crates.io/crates/embedded-graphics
+//! [`Header`]: ./header/struct.Header.html
 
 #![no_std]
 #![deny(missing_docs)]
@@ -194,19 +223,20 @@ impl<'a> Iterator for BmpIterator<'a> {
 #[cfg(feature = "graphics")]
 use embedded_graphics::{
     drawable::{Drawable, Pixel},
-    pixelcolor::PixelColor,
+    pixelcolor::{raw::RawData, PixelColor},
     DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
 impl<'a, C> Drawable<C> for Bmp<'a>
 where
-    C: PixelColor + From<u32>,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(
-            self.into_iter()
-                .map(|((x, y), color)| Pixel((x as i32, y as i32).into(), color.into())),
-        )
+        display.draw_iter(self.into_iter().map(|((x, y), color)| {
+            let raw = C::Raw::from_u32(color);
+
+            Pixel((x as i32, y as i32).into(), raw.into())
+        }))
     }
 }
