@@ -11,7 +11,7 @@ A small BMP parser designed for embedded, no-std environments but usable anywher
 ## Example
 
 ```rust
-use tinybmp::{Bmp, FileType, Header};
+use tinybmp::{Bmp, FileType, Header, Pixel};
 
 let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
     .expect("Failed to parse BMP image");
@@ -36,7 +36,7 @@ assert_eq!(
 assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
 
 // Get an iterator over the pixel coordinates and colors in this image and collect into a vec
-let pixels: Vec<((u32, u32), u32)> = bmp.into_iter().collect();
+let pixels: Vec<Pixel> = bmp.into_iter().collect();
 
 // Loaded example image is 8x8px
 assert_eq!(pixels.len(), 8 * 8);

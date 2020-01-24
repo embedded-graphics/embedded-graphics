@@ -6,7 +6,7 @@
 //! ## Load a BMP image and check its [`Header`] and returned pixels.
 //!
 //! ```rust
-//! use tinybmp::{Bmp, FileType, Header};
+//! use tinybmp::{Bmp, FileType, Header, Pixel};
 //!
 //! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
 //!     .expect("Failed to parse BMP image");
@@ -31,7 +31,7 @@
 //! assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
 //!
 //! // Get an iterator over the pixel coordinates and values in this image and load into a vec
-//! let pixels: Vec<((u32, u32), u32)> = bmp.into_iter().collect();
+//! let pixels: Vec<Pixel> = bmp.into_iter().collect();
 //!
 //! // Loaded example image is 8x8px
 //! assert_eq!(pixels.len(), 8 * 8);
@@ -44,7 +44,7 @@
 //! The `graphics` feature must be enabled for embedded-graphics support.
 //!
 //! ```rust
-//! # #[cfg(feature = "graphics")] fn main() -> Result<(), core::convert::Infallible> {
+//! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
 //! use tinybmp::Bmp;
 //! use embedded_graphics::prelude::*;
 //! # use embedded_graphics::mock_display::MockDisplay;
@@ -56,7 +56,7 @@
 //!
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
-//! # }
+//! # } }
 //! ```
 //!
 //! [embedded-graphics]: https://crates.io/crates/embedded-graphics
@@ -68,9 +68,11 @@
 
 mod check_readme;
 mod header;
+mod pixel;
 
 use crate::header::parse_header;
 pub use crate::header::{FileType, Header};
+pub use crate::pixel::Pixel;
 
 /// A BMP-format bitmap
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -139,7 +141,7 @@ impl<'a> Bmp<'a> {
 }
 
 impl<'a> IntoIterator for &'a Bmp<'a> {
-    type Item = ((u32, u32), u32);
+    type Item = Pixel;
     type IntoIter = BmpIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -189,7 +191,7 @@ pub struct BmpIterator<'a> {
 }
 
 impl<'a> Iterator for BmpIterator<'a> {
-    type Item = ((u32, u32), u32);
+    type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
         let px = self.pixel_data;
@@ -221,7 +223,11 @@ impl<'a> Iterator for BmpIterator<'a> {
 
             self.start_idx += self.pixel_stride;
 
-            Some(((self.x, self.y), pixel_value))
+            Some(Pixel {
+                x: self.x,
+                y: self.y,
+                color: pixel_value,
+            })
         } else {
             None
         }

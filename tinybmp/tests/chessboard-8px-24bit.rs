@@ -1,4 +1,4 @@
-use tinybmp::{Bmp, FileType, Header};
+use tinybmp::{Bmp, FileType, Header, Pixel};
 
 #[test]
 fn chessboard_8px_24bit() {
@@ -28,7 +28,7 @@ fn chessboard_8px_24bit_iter() {
     let bmp =
         Bmp::from_slice(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
 
-    let pixels: Vec<u32> = bmp.into_iter().map(|(_coord, color)| color).collect();
+    let pixels: Vec<u32> = bmp.into_iter().map(|Pixel { color, .. }| color).collect();
 
     assert_eq!(pixels.len(), 8 * 8);
 
