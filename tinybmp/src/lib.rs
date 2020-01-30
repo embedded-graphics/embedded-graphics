@@ -45,14 +45,15 @@
 //!
 //! ```rust
 //! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
-//! use tinybmp::Bmp;
 //! use embedded_graphics::prelude::*;
+//! use tinybmp::Bmp;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::Rgb565;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! // Load 16BPP 8x8px image
-//! let mut image = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+//! let mut image =
+//!     Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 //!
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
@@ -71,8 +72,10 @@ mod header;
 mod pixel;
 
 use crate::header::parse_header;
-pub use crate::header::{FileType, Header};
-pub use crate::pixel::Pixel;
+pub use crate::{
+    header::{FileType, Header},
+    pixel::Pixel,
+};
 
 /// A BMP-format bitmap
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -81,8 +84,8 @@ pub struct Bmp<'a> {
     pub header: Header,
 
     image_data: &'a [u8],
-    // #[cfg(feature = "graphics")]
-    // offset: embedded_graphics::geometry::Point,
+    /* #[cfg(feature = "graphics")]
+     * offset: embedded_graphics::geometry::Point, */
 }
 
 impl<'a> Bmp<'a> {
@@ -98,8 +101,8 @@ impl<'a> Bmp<'a> {
         Ok(Bmp {
             header,
             image_data,
-            // #[cfg(feature = "graphics")]
-            // offset: embedded_graphics::geometry::Point::zero(),
+            /* #[cfg(feature = "graphics")]
+             * offset: embedded_graphics::geometry::Point::zero(), */
         })
     }
 
