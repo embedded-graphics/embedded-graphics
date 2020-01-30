@@ -81,9 +81,8 @@ pub struct Bmp<'a> {
     pub header: Header,
 
     image_data: &'a [u8],
-
-    #[cfg(feature = "graphics")]
-    offset: embedded_graphics::geometry::Point,
+    // #[cfg(feature = "graphics")]
+    // offset: embedded_graphics::geometry::Point,
 }
 
 impl<'a> Bmp<'a> {
@@ -99,8 +98,8 @@ impl<'a> Bmp<'a> {
         Ok(Bmp {
             header,
             image_data,
-            #[cfg(feature = "graphics")]
-            offset: embedded_graphics::geometry::Point::zero(),
+            // #[cfg(feature = "graphics")]
+            // offset: embedded_graphics::geometry::Point::zero(),
         })
     }
 
@@ -235,26 +234,48 @@ impl<'a> Iterator for BmpIterator<'a> {
 }
 
 #[cfg(feature = "graphics")]
+use core::marker::PhantomData;
+#[cfg(feature = "graphics")]
 use embedded_graphics::{
-    drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
-    image::ImageFile,
+    drawable::Pixel as EgPixel,
+    geometry::Point,
+    image::ImageData,
     pixelcolor::{raw::RawData, PixelColor},
-    transform::Transform,
-    DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
-impl<'a, C> ImageFile<'a, C> for Bmp<'a>
+/// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration
+///
+/// [`BmpIterator`]: ./struct.BmpIterator.html
+/// [`embedded-graphics`]: https://docs.rs/embedded-graphics
+#[derive(Debug)]
+pub struct EgPixelIterator<'a, C> {
+    it: BmpIterator<'a>,
+    c: PhantomData<C>,
+}
+
+#[cfg(feature = "graphics")]
+impl<'a, C> Iterator for EgPixelIterator<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    type LoadError = ();
+    type Item = EgPixel<C>;
 
-    /// Create a new BMP from a byte slice
-    fn new(image_data: &'a [u8]) -> Result<Bmp, Self::LoadError> {
-        Bmp::from_slice(image_data)
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next().map(|p| {
+            let raw = C::Raw::from_u32(p.color);
+            EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
+        })
     }
+}
+
+/// TODO: Docs
+#[cfg(feature = "graphics")]
+impl<'a, C> ImageData<'a, C> for Bmp<'a>
+where
+    C: PixelColor,
+{
+    type PixelIterator = EgPixelIterator<'a, C>;
 
     fn width(&self) -> u32 {
         self.width()
@@ -263,52 +284,11 @@ where
     fn height(&self) -> u32 {
         self.height()
     }
-}
 
-#[cfg(feature = "graphics")]
-impl<'a> Dimensions for Bmp<'a> {
-    fn top_left(&self) -> Point {
-        self.offset
-    }
-
-    fn bottom_right(&self) -> Point {
-        self.top_left() + self.size()
-    }
-
-    fn size(&self) -> Size {
-        Size::new(self.width(), self.height())
-    }
-}
-
-#[cfg(feature = "graphics")]
-impl<'a> Transform for Bmp<'a> {
-    /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `ImageBmp`. For a mutating transform, see `translate_mut`.
-    fn translate(&self, by: Point) -> Self {
-        Self {
-            offset: self.offset + by,
-            ..self.clone()
+    fn pixel_iter(&'a self) -> Self::PixelIterator {
+        EgPixelIterator {
+            it: self.into_iter(),
+            c: PhantomData,
         }
-    }
-
-    /// Translate the image from its current position to a new position by (x, y) pixels.
-    fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.offset += by;
-
-        self
-    }
-}
-
-#[cfg(feature = "graphics")]
-impl<'a, C> Drawable<C> for Bmp<'a>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self.into_iter().map(|((x, y), color)| {
-            let raw = C::Raw::from_u32(color);
-
-            Pixel((x as i32, y as i32).into(), raw.into())
-        }))
     }
 }

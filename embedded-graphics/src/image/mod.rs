@@ -41,3 +41,21 @@ where
     /// Get the height in pixels of an image
     fn height(&self) -> u32;
 }
+
+/// TODO: Docs
+pub trait ImageData<'a, C>
+where
+    C: PixelColor,
+{
+    /// Iterator over pixels in the image
+    type PixelIterator;
+
+    /// Get the width in pixels of an image
+    fn width(&self) -> u32;
+
+    /// Get the height in pixels of an image
+    fn height(&self) -> u32;
+
+    /// Get an iterator over the pixels of the image
+    fn pixel_iter(&'a self) -> Self::PixelIterator;
+}
