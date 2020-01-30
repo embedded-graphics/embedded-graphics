@@ -45,15 +45,14 @@
 //!
 //! ```rust
 //! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
-//! use embedded_graphics::{prelude::*, image::Image};
+//! use embedded_graphics::{image::Image, prelude::*};
 //! use tinybmp::Bmp;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::Rgb565;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! // Load 16BPP 8x8px image
-//! let bmp =
-//!     Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+//! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 //!
 //! let image = Image::new(&bmp);
 //!
