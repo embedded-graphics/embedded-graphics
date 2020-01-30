@@ -199,6 +199,9 @@ impl<'a> Iterator for BmpIterator<'a> {
         let px = self.pixel_data;
 
         if self.y < self.bmp.height() {
+            let x = self.x;
+            let y = self.y;
+
             if self.x == 0 {
                 let row_index = (self.bmp.height() - 1) - self.y;
                 let row_start = self.bmp.bytes_per_row() * row_index as usize;
@@ -226,8 +229,8 @@ impl<'a> Iterator for BmpIterator<'a> {
             self.start_idx += self.pixel_stride;
 
             Some(Pixel {
-                x: self.x,
-                y: self.y,
+                x,
+                y,
                 color: pixel_value,
             })
         } else {
