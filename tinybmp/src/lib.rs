@@ -86,8 +86,6 @@ pub struct Bmp<'a> {
     pub header: Header,
 
     image_data: &'a [u8],
-    /* #[cfg(feature = "graphics")]
-     * offset: embedded_graphics::geometry::Point, */
 }
 
 impl<'a> Bmp<'a> {
@@ -100,12 +98,7 @@ impl<'a> Bmp<'a> {
 
         let image_data = &bytes[header.image_data_start..];
 
-        Ok(Bmp {
-            header,
-            image_data,
-            /* #[cfg(feature = "graphics")]
-             * offset: embedded_graphics::geometry::Point::zero(), */
-        })
+        Ok(Bmp { header, image_data })
     }
 
     /// Get a reference to the range of bytes that represents the pixel data in the image
@@ -129,7 +122,6 @@ impl<'a> Bmp<'a> {
     }
 
     /// Get the BPP (bits per pixel) for this image
-    // TODO: Should this return an enum?
     pub fn bpp(&self) -> u32 {
         u32::from(self.header.bpp)
     }
