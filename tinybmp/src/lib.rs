@@ -284,11 +284,11 @@ mod e_g {
         type PixelIterator = EgPixelIterator<'a, C>;
 
         fn width(&self) -> u32 {
-            self.header.image_width
+            Bmp::width(&self)
         }
 
         fn height(&self) -> u32 {
-            self.header.image_height
+            Bmp::height(&self)
         }
 
         fn pixel_iter(&self) -> Self::PixelIterator {
