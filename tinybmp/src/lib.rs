@@ -272,21 +272,21 @@ mod e_g {
     }
 
     /// TODO: Docs
-    impl<'a, C> ImageData<'a, C> for Bmp<'a>
+    impl<'a, C> ImageData<C> for &'a Bmp<'a>
     where
-        C: PixelColor,
+        C: PixelColor + From<<C as PixelColor>::Raw>,
     {
         type PixelIterator = EgPixelIterator<'a, C>;
 
         fn width(&self) -> u32 {
-            self.width()
+            self.header.image_width
         }
 
         fn height(&self) -> u32 {
-            self.height()
+            self.header.image_height
         }
 
-        fn pixel_iter(&'a self) -> Self::PixelIterator {
+        fn pixel_iter(&self) -> Self::PixelIterator {
             EgPixelIterator {
                 it: self.into_iter(),
                 c: PhantomData,
