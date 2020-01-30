@@ -16,8 +16,32 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `TryFrom<Point>` for `[u32; 2]`
   - `TryFrom<[u32; 2]>` for `Point`
   - `TryFrom<&[u32; 2]>` for `Point`
+- #247 Added the `ImageData` trait. This trait should be implemented if adding embedded-graphics support to an image format crate.
+- #247 Added `Image` wrapper struct. This should be used to wrap image types that implement `ImageData`, e.g. from `tinytga`, `tinybmp`.
 
 ### Changed
+
+- **(breaking)** #247 The raw data `Image` struct is renamed to `RawImage`. The `Image` name is reused as a wrapper for other image types that implement the `ImageData` trait.
+- **(breaking)** #247 `ImageTga` and `ImageTga` are removed, along with their respective enabling features `bmp` and `tga`. To use BMP or TGA images, add `tinybmp` or `tinytga` to your dependencies with the `graphics` feature enabled. This allows usage of `Bmp` and `Tga` in embedded-graphics contexts. Tinybmp or tinytga usage now looks like this:
+
+  `Cargo.toml`:
+
+  ```toml
+  [dependencies]
+  embedded-graphics = "0.6.0"
+  tinybmp = { version = "0.2.0", features = [ "graphics" ]}
+  ```
+
+  Your code:
+
+  ```rust
+  use embedded_graphics::{prelude::*, image::Image};
+  use tinybmp::Bmp;
+
+  let image = Bmp::new(include_bytes!("../../../assets/patch.bmp")).unwrap();
+  let image = Image::new(&image);
+  display.draw(&image);
+  ```
 
 - Expose `mock_display::MockDisplay` for use in tests, examples, etc in crates that pull embedded-graphics in as a dependency.
 - **(breaking)** #243 All methods on `DrawTarget` that handle drawing to/updating the display are now fallible and return `Result<(), Self::Error>` to allow for error handling in user code. This also affects `Drawable::draw()`, which now propagates any errors that occur while drawing.
