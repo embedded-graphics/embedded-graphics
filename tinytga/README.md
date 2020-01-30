@@ -13,7 +13,7 @@ Call `Tga.into_iter()` to get an iterator over individual pixels in the image.
 ## Example
 
 ```rust
-use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageType, Pixel, Tga, TgaFooter, TgaHeader};
 
 // Include an image from a local path as bytes
 let data = include_bytes!("../tests/chessboard_4px_rle.tga");
@@ -49,17 +49,16 @@ assert_eq!(
     })
 );
 
-// Collect pixels into a `Vec<u32>`
-let pixels = img.into_iter().collect::<Vec<u32>>();
+// Collect pixels into a `Vec<Pixel>`
+let pixels = img.into_iter().collect::<Vec<Pixel>>();
 ```
 
 ## License
 
 Licensed under either of
 
--   Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-    http://www.apache.org/licenses/LICENSE-2.0)
--   MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 

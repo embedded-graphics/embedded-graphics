@@ -21,3 +21,10 @@ circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 [dependencies.nom]
 version = "5.1.0"
 default-features = false
+
+[dependencies.embedded-graphics]
+version = "0.6.0-alpha.3"
+optional = true
+
+[features]
+graphics = ["embedded-graphics"]

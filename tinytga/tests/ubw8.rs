@@ -1,4 +1,4 @@
-use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageType, Pixel, Tga, TgaFooter, TgaHeader};
 
 #[test]
 #[ignore]
@@ -37,7 +37,7 @@ fn ubw8() {
         })
     );
 
-    let pixels = img.into_iter().collect::<Vec<u32>>();
+    let pixels = img.into_iter().collect::<Vec<Pixel>>();
 
     assert_eq!(pixels.len(), 128 * 128);
 }

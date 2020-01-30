@@ -16,6 +16,7 @@ mod footer;
 mod header;
 mod packet;
 mod parse_error;
+mod pixel;
 
 use crate::footer::*;
 use crate::header::*;
@@ -24,6 +25,7 @@ use crate::parse_error::ParseError;
 
 pub use crate::footer::TgaFooter;
 pub use crate::header::{ImageType, TgaHeader};
+pub use crate::pixel::Pixel;
 
 /// TGA image
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -109,7 +111,7 @@ impl<'a> Tga<'a> {
 }
 
 impl<'a> IntoIterator for &'a Tga<'a> {
-    type Item = u32;
+    type Item = Pixel;
     type IntoIter = TgaIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -145,6 +147,8 @@ impl<'a> IntoIterator for &'a Tga<'a> {
             current_packet_position: 0,
             current_packet_pixel_length: current_packet_len / stride,
             stride,
+            x: 0,
+            y: 0,
         }
     }
 }
@@ -171,10 +175,16 @@ pub struct TgaIterator<'a> {
 
     /// Number of bytes contained within each pixel
     stride: usize,
+
+    /// Current X coordinate from top-left of image
+    x: u32,
+
+    /// Current Y coordinate from top-left of image
+    y: u32,
 }
 
 impl<'a> Iterator for TgaIterator<'a> {
-    type Item = u32;
+    type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current_packet_position >= self.current_packet_pixel_length {
@@ -270,6 +280,82 @@ impl<'a> Iterator for TgaIterator<'a> {
             };
         }
 
-        Some(pixel_value)
+        let x = self.x;
+        let y = self.y;
+
+        self.x += 1;
+
+        if self.x >= self.tga.width().into() {
+            self.x = 0;
+            self.y += 1;
+        }
+
+        Some(Pixel {
+            x,
+            y,
+            color: pixel_value,
+        })
     }
 }
+
+#[cfg(feature = "graphics")]
+mod e_g {
+    use super::*;
+    use core::marker::PhantomData;
+    use embedded_graphics::{
+        drawable::Pixel as EgPixel,
+        geometry::Point,
+        image::ImageData,
+        pixelcolor::{raw::RawData, PixelColor},
+    };
+
+    /// A thin wrapper over [`TgaIterator`] to support [`embedded-graphics`] integration
+    ///
+    /// [`TgaIterator`]: ./struct.TgaIterator.html
+    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
+    #[derive(Debug)]
+    pub struct EgPixelIterator<'a, C> {
+        it: TgaIterator<'a>,
+        c: PhantomData<C>,
+    }
+
+    impl<'a, C> Iterator for EgPixelIterator<'a, C>
+    where
+        C: PixelColor + From<<C as PixelColor>::Raw>,
+    {
+        type Item = EgPixel<C>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.it.next().map(|p| {
+                let raw = C::Raw::from_u32(p.color);
+                EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
+            })
+        }
+    }
+
+    /// TODO: Docs
+    impl<'a, C> ImageData<C> for &'a Tga<'a>
+    where
+        C: PixelColor + From<<C as PixelColor>::Raw>,
+    {
+        type PixelIterator = EgPixelIterator<'a, C>;
+
+        fn width(&self) -> u32 {
+            self.header.width.into()
+        }
+
+        fn height(&self) -> u32 {
+            self.header.height.into()
+        }
+
+        fn pixel_iter(&self) -> Self::PixelIterator {
+            EgPixelIterator {
+                it: self.into_iter(),
+                c: PhantomData,
+            }
+        }
+    }
+}
+
+#[cfg(feature = "graphics")]
+pub use e_g::*;
