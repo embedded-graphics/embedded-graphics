@@ -3,9 +3,7 @@
 //! This example uses `impl From<u16> for SimPixelColor` from `src/lib` to convert the image into
 //! a black and white pixel iterator. The simulator doesn't currently support drawing with color.
 
-use embedded_graphics::image::Image;
-use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics::prelude::*;
+use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 use tinytga::Tga;
 

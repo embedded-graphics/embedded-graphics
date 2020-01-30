@@ -1,7 +1,7 @@
-use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::pixelcolor::Rgb565;
-use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egrectangle, egtext, primitive_style, text_style};
+use embedded_graphics::{
+    egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
+    text_style,
+};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {

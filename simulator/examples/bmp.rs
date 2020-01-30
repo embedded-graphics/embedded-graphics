@@ -3,9 +3,7 @@
 //! This example uses `impl From<Rgb565> for SimPixelColor` from `src/lib` to convert the image into
 //! a color pixel iterator. The simulator uses the `ColorOled` theme to display the image in color
 
-use embedded_graphics::image::Image;
-use embedded_graphics::pixelcolor::Rgb565;
-use embedded_graphics::prelude::*;
+use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 use tinybmp::Bmp;
 

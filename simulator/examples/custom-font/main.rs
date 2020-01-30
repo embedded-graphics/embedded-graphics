@@ -1,7 +1,4 @@
-use embedded_graphics::egtext;
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::text_style;
+use embedded_graphics::{egtext, pixelcolor::BinaryColor, prelude::*, text_style};
 use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

@@ -1,7 +1,6 @@
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::Triangle;
-use embedded_graphics::style::PrimitiveStyle;
+use embedded_graphics::{
+    pixelcolor::BinaryColor, prelude::*, primitives::Triangle, style::PrimitiveStyle,
+};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 const PAD: i32 = 10;

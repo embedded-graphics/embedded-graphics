@@ -1,13 +1,15 @@
-use crate::display::SimulatorDisplay;
-use crate::theme::BinaryColorTheme;
-use embedded_graphics::geometry::{Point, Size};
-use embedded_graphics::pixelcolor::{PixelColor, Rgb888, RgbColor};
-use sdl2::event::Event;
-use sdl2::keyboard::{Keycode, Mod};
-use sdl2::mouse::{MouseButton, MouseWheelDirection};
-use sdl2::render;
-use std::thread;
-use std::time::Duration;
+use crate::{display::SimulatorDisplay, theme::BinaryColorTheme};
+use embedded_graphics::{
+    geometry::{Point, Size},
+    pixelcolor::{PixelColor, Rgb888, RgbColor},
+};
+use sdl2::{
+    event::Event,
+    keyboard::{Keycode, Mod},
+    mouse::{MouseButton, MouseWheelDirection},
+    render,
+};
+use std::{thread, time::Duration};
 
 /// A derivation of sdl2::event::Event mapped to embedded-graphics coordinates
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

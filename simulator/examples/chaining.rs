@@ -1,10 +1,12 @@
 //! Demonstrate the chaining abilities of embedded graphics iterators
 
-use embedded_graphics::fonts::{Font6x8, Text};
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics::style::{PrimitiveStyle, TextStyle};
+use embedded_graphics::{
+    fonts::{Font6x8, Text},
+    pixelcolor::BinaryColor,
+    prelude::*,
+    primitives::{Circle, Line},
+    style::{PrimitiveStyle, TextStyle},
+};
 use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {
