@@ -1,7 +1,7 @@
-use crate::image::ImageData;
 use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
+    image::ImageData,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
         PixelColor,
@@ -33,7 +33,11 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// This example creates an image from 1 bit per pixel data:
 ///
 /// ```
-/// use embedded_graphics::{image::{Image, ImageRaw}, pixelcolor::BinaryColor, prelude::*};
+/// use embedded_graphics::{
+///     image::{Image, ImageRaw},
+///     pixelcolor::BinaryColor,
+///     prelude::*,
+/// };
 /// # use embedded_graphics::mock_display::MockDisplay as Display;
 ///
 /// /// Image data with 12 x 5 pixels.
@@ -67,7 +71,7 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::{
-///     image::{Image, ImageRaw, ImageBE, ImageLE},
+///     image::{Image, ImageBE, ImageLE, ImageRaw},
 ///     pixelcolor::{
 ///         raw::{BigEndian, LittleEndian},
 ///         Rgb565, Rgb888,

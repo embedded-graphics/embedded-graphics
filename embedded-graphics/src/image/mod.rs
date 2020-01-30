@@ -4,14 +4,13 @@ mod image_raw;
 
 pub use self::image_raw::{ImageBE, ImageLE, ImageRaw};
 
-use crate::draw_target::DrawTarget;
-use crate::drawable::Drawable;
-use crate::drawable::Pixel;
-use crate::geometry::Dimensions;
-use crate::geometry::Point;
-use crate::geometry::Size;
-use crate::pixelcolor::PixelColor;
-use crate::transform::Transform;
+use crate::{
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
+    transform::Transform,
+};
 use core::marker::PhantomData;
 
 /// Image data trait
@@ -88,13 +87,18 @@ where
     /// original image
     ///
     /// ```rust
-    ///    use embedded_graphics::{image::{Image,ImageRaw}, prelude::*, geometry::Point, pixelcolor::BinaryColor};
+    /// use embedded_graphics::{
+    ///     geometry::Point,
+    ///     image::{Image, ImageRaw},
+    ///     pixelcolor::BinaryColor,
+    ///     prelude::*,
+    /// };
     ///
-    ///    let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    ///    let image = Image::new(&image).translate(Point::new(10, 20));
+    /// let image = Image::new(&image).translate(Point::new(10, 20));
     ///
-    ///    assert_eq!(image.top_left(), Point::new(10, 20));
+    /// assert_eq!(image.top_left(), Point::new(10, 20));
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
@@ -113,15 +117,20 @@ where
     /// original image
     ///
     /// ```rust
-    ///    use embedded_graphics::{image::{Image,ImageRaw}, prelude::*, geometry::Point, pixelcolor::BinaryColor};
+    /// use embedded_graphics::{
+    ///     geometry::Point,
+    ///     image::{Image, ImageRaw},
+    ///     pixelcolor::BinaryColor,
+    ///     prelude::*,
+    /// };
     ///
-    ///    let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    ///    let mut image = Image::new(&image);
+    /// let mut image = Image::new(&image);
     ///
     /// image.translate_mut(Point::new(10, 20));
     ///
-    ///    assert_eq!(image.top_left(), Point::new(10, 20));
+    /// assert_eq!(image.top_left(), Point::new(10, 20));
     /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.offset += by;

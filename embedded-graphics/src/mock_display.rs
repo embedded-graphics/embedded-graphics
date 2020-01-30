@@ -78,10 +78,10 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
+//!     image::Image,
 //!     mock_display::MockDisplay,
 //!     pixelcolor::{Rgb888, RgbColor},
 //!     prelude::*,
-//! image::Image
 //! };
 //! use tinytga::Tga;
 //!
