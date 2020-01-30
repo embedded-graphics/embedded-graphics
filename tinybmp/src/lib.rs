@@ -234,61 +234,63 @@ impl<'a> Iterator for BmpIterator<'a> {
 }
 
 #[cfg(feature = "graphics")]
-use core::marker::PhantomData;
-#[cfg(feature = "graphics")]
-use embedded_graphics::{
-    drawable::Pixel as EgPixel,
-    geometry::Point,
-    image::ImageData,
-    pixelcolor::{raw::RawData, PixelColor},
-};
+mod e_g {
+    use super::*;
+    use core::marker::PhantomData;
+    use embedded_graphics::{
+        drawable::Pixel as EgPixel,
+        geometry::Point,
+        image::ImageData,
+        pixelcolor::{raw::RawData, PixelColor},
+    };
 
-#[cfg(feature = "graphics")]
-/// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration
-///
-/// [`BmpIterator`]: ./struct.BmpIterator.html
-/// [`embedded-graphics`]: https://docs.rs/embedded-graphics
-#[derive(Debug)]
-pub struct EgPixelIterator<'a, C> {
-    it: BmpIterator<'a>,
-    c: PhantomData<C>,
-}
-
-#[cfg(feature = "graphics")]
-impl<'a, C> Iterator for EgPixelIterator<'a, C>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    type Item = EgPixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.it.next().map(|p| {
-            let raw = C::Raw::from_u32(p.color);
-            EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
-        })
-    }
-}
-
-/// TODO: Docs
-#[cfg(feature = "graphics")]
-impl<'a, C> ImageData<'a, C> for Bmp<'a>
-where
-    C: PixelColor,
-{
-    type PixelIterator = EgPixelIterator<'a, C>;
-
-    fn width(&self) -> u32 {
-        self.width()
+    /// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration
+    ///
+    /// [`BmpIterator`]: ./struct.BmpIterator.html
+    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
+    #[derive(Debug)]
+    pub struct EgPixelIterator<'a, C> {
+        it: BmpIterator<'a>,
+        c: PhantomData<C>,
     }
 
-    fn height(&self) -> u32 {
-        self.height()
+    impl<'a, C> Iterator for EgPixelIterator<'a, C>
+    where
+        C: PixelColor + From<<C as PixelColor>::Raw>,
+    {
+        type Item = EgPixel<C>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.it.next().map(|p| {
+                let raw = C::Raw::from_u32(p.color);
+                EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
+            })
+        }
     }
 
-    fn pixel_iter(&'a self) -> Self::PixelIterator {
-        EgPixelIterator {
-            it: self.into_iter(),
-            c: PhantomData,
+    /// TODO: Docs
+    impl<'a, C> ImageData<'a, C> for Bmp<'a>
+    where
+        C: PixelColor,
+    {
+        type PixelIterator = EgPixelIterator<'a, C>;
+
+        fn width(&self) -> u32 {
+            self.width()
+        }
+
+        fn height(&self) -> u32 {
+            self.height()
+        }
+
+        fn pixel_iter(&'a self) -> Self::PixelIterator {
+            EgPixelIterator {
+                it: self.into_iter(),
+                c: PhantomData,
+            }
         }
     }
 }
+
+#[cfg(feature = "graphics")]
+pub use e_g::*;
