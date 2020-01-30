@@ -3,8 +3,7 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     image::Image,
     mock_display::MockDisplay,
-    pixelcolor::{raw::RawData, PixelColor},
-    pixelcolor::{Gray8, Rgb888, RgbColor},
+    pixelcolor::{raw::RawData, Gray8, PixelColor, Rgb888, RgbColor},
     transform::Transform,
     DrawTarget,
 };

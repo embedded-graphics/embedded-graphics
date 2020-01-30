@@ -1,8 +1,10 @@
 mod raw_packet;
 mod rle_packet;
 
-pub use self::raw_packet::{raw_packet, RawPacket};
-pub use self::rle_packet::{rle_packet, RlePacket};
+pub use self::{
+    raw_packet::{raw_packet, RawPacket},
+    rle_packet::{rle_packet, RlePacket},
+};
 use nom::{bits::complete::take, branch::alt, combinator::map, IResult};
 
 /// A Run Length Encoded (RLE) packet

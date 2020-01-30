@@ -18,14 +18,18 @@ mod packet;
 mod parse_error;
 mod pixel;
 
-use crate::footer::*;
-use crate::header::*;
-use crate::packet::{next_rle_packet, Packet};
-use crate::parse_error::ParseError;
+use crate::{
+    footer::*,
+    header::*,
+    packet::{next_rle_packet, Packet},
+    parse_error::ParseError,
+};
 
-pub use crate::footer::TgaFooter;
-pub use crate::header::{ImageType, TgaHeader};
-pub use crate::pixel::Pixel;
+pub use crate::{
+    footer::TgaFooter,
+    header::{ImageType, TgaHeader},
+    pixel::Pixel,
+};
 
 /// TGA image
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
