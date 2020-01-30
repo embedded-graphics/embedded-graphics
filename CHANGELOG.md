@@ -38,13 +38,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- #183 Added limited mouse and keyboard event handling to the simulator in order to simulate input devices such as touch screens, buttons, or rotary encoders.
+- simulator: #183 Added limited mouse and keyboard event handling to the simulator in order to simulate input devices such as touch screens, buttons, or rotary encoders.
 
-- #171 Added a more complex `analog-clock` example to the simulator - [check it out](https://github.com/jamwaffles/embedded-graphics/tree/embedded-graphics-v0.6.0-alpha.3/simulator/examples/analog-clock.rs) for some more in-depth usage of Embedded Graphics.
+- simulator: #171 Added a more complex `analog-clock` example to the simulator - [check it out](https://github.com/jamwaffles/embedded-graphics/tree/embedded-graphics-v0.6.0-alpha.3/simulator/examples/analog-clock.rs) for some more in-depth usage of Embedded Graphics.
 
 - #170 Added a `24x32` font based on the existing `12x16` font.
 
-- #217 tinytga: Added support for TGA files with color map.
+- tinytga: #217 Added support for TGA files with color map.
 
 - #221 Implemented `Drawable` for `Pixel` to draw single pixels.
 
@@ -58,13 +58,15 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - #143, #209 Circles with no stroke are now drawn correctly
 
-- #192 Performance of drawing in the simulator is increased.
+- simulator: #192 Performance of drawing in the simulator is increased.
 
-- #217 tinytga: Images without a TGA footer are now parsed correctly.
+- tinytga: #217 Images without a TGA footer are now parsed correctly.
 
-- #216 tinytga: Fixed integer overflow for some RLE compressed TGA files.
+- tinytga: #216 Fixed integer overflow for some RLE compressed TGA files.
 
-- #218 simulator/tinybmp/tinytga: Test README examples in CI and update them to work with latest crate versions.
+- tinytga: #218 Test README examples in CI and update them to work with latest crate versions.
+- tinybmp: #218 Test README examples in CI and update them to work with latest crate versions.
+- simulator: #218 Test README examples in CI and update them to work with latest crate versions.
 
 ### Changed
 
@@ -87,7 +89,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
       .fill_color(Some(BinaryColor::Off));
   ```
 
-- **(breaking)** The simulator API changed.
+- simulator: **(breaking)** The simulator API changed.
 
 - **(breaking)** The type of `Style::stroke_width` changed from `u8` to `u32`.
 
@@ -97,7 +99,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** The `Style` struct was replaced by `PrimitiveStyle` and `TextStyle`.
 
-- #203 updated simulator screenshots and added them to README
+- simulator: #203 updated simulator screenshots and added them to README
 
 - **(breaking)** Text rendering is now implemented using `Text`, `TextStyle` and `Font` objects instead of using `Font::render_str`.
 
@@ -258,7 +260,7 @@ A couple of breaking changes around naming, mostly polish around public APIs
 
 ### Added
 
-- The simulator is now [available on crates.io](https://crates.io/crates/embedded-graphics-simulator) as a standalone crate. You can now create simulated displays for testing out embedded_graphics code or showing off cool examples.
+- simulator: The simulator is now [available on crates.io](https://crates.io/crates/embedded-graphics-simulator) as a standalone crate. You can now create simulated displays for testing out embedded_graphics code or showing off cool examples.
 
 ### Changed
 
@@ -390,7 +392,7 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 - Added a bunch of examples and docs. I hope it makes the crate easier to use! Please open an issue if anything is missing or hard to understand.
-- The builtin simulator now supports colour pixel types, like `RGB565`.
+- simulator: The builtin simulator now supports colour pixel types, like `RGB565`.
 - `From` is implemented for a few more types for `Coord` and `UnsignedCoord`. Among other things, they can now be converted to tuples by calling `.into()`.
 
 ### Deprecated
