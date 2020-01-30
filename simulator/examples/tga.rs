@@ -2,22 +2,20 @@
 //!
 //! This example uses `impl From<u16> for SimPixelColor` from `src/lib` to convert the image into
 //! a black and white pixel iterator. The simulator doesn't currently support drawing with color.
-//!
-//! Note that this requires the `tga` feature to be turned on for `embedded-graphics`. Turn it on
-//! with the following in `Cargo.toml`:
-//!
-//! [dependencies]
-//! embedded-graphics = { version = "*", features = [ "tga" ] }
 
-use embedded_graphics::image::ImageTga;
+use embedded_graphics::image::Image;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use tinytga::Tga;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(128, 128));
+    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(128, 128));
 
-    let image: ImageTga<Rgb888> = ImageTga::new(include_bytes!("./rust-pride.tga")).unwrap();
+    let tga = Tga::from_slice(include_bytes!("./rust-pride.tga")).unwrap();
+
+    let image = Image::new(&tga);
+
     image.translate(Point::new(32, 32)).draw(&mut display)?;
 
     let mut window = WindowBuilder::new(&display)

@@ -1,3 +1,4 @@
+use crate::image::ImageData;
 use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
@@ -34,7 +35,7 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// This example creates an image from 1 bit per pixel data:
 ///
 /// ```
-/// use embedded_graphics::{image::Image, pixelcolor::BinaryColor, prelude::*};
+/// use embedded_graphics::{image::{Image, ImageRaw}, pixelcolor::BinaryColor, prelude::*};
 /// # use embedded_graphics::mock_display::MockDisplay as Display;
 ///
 /// /// Image data with 12 x 5 pixels.
@@ -52,7 +53,9 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// // The type annotation `ImageRaw<BinaryColor>` is used to specify the format
 /// // of the stored raw data (`PixelColor::Raw`) and which color type the
 /// // raw data gets converted into.
-/// let image: ImageRaw<BinaryColor> = ImageRaw::new(DATA, 12, 5);
+/// let raw_image: ImageRaw<BinaryColor> = ImageRaw::new(DATA, 12, 5);
+///
+/// let image = Image::new(&raw_image);
 ///
 /// let mut display = Display::default();
 ///
@@ -66,7 +69,7 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::{
-///     image::{Image, ImageBE, ImageLE},
+///     image::{Image, ImageRaw, ImageBE, ImageLE},
 ///     pixelcolor::{
 ///         raw::{BigEndian, LittleEndian},
 ///         Rgb565, Rgb888,
@@ -147,72 +150,93 @@ where
     }
 }
 
-impl<'a, C, BO> Dimensions for ImageRaw<'a, C, BO>
+impl<'a, C, BO> ImageData<C> for &'a ImageRaw<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
+    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
-    fn top_left(&self) -> Point {
-        self.offset
+    type PixelIterator = ImageIterator<'a, C, BO>;
+
+    fn width(&self) -> u32 {
+        self.size.width
     }
 
-    fn bottom_right(&self) -> Point {
-        self.top_left() + self.size()
+    fn height(&self) -> u32 {
+        self.size.height
     }
 
-    fn size(&self) -> Size {
-        self.size
+    fn pixel_iter(&self) -> Self::PixelIterator {
+        self.into_iter()
     }
 }
 
-impl<'a, C, BO> Transform for ImageRaw<'a, C, BO>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    BO: ByteOrder,
-{
-    /// Translate the image from its current position to a new position by (x, y) pixels, returning
-    /// a new `Image`. For a mutating transform, see `translate_mut`.
-    ///
-    /// ```
-    /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// # use embedded_graphics::image::Image;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::geometry::Point;
-    /// #
-    /// // 8px x 1px test image
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff], 8, 1);
-    /// let moved = image.translate(Point::new(25, 30));
-    ///
-    /// assert_eq!(image.offset(), Point::new(0, 0));
-    /// assert_eq!(moved.offset(), Point::new(25, 30));
-    /// ```
-    fn translate(&self, by: Point) -> Self {
-        Self {
-            data: self.data,
-            offset: self.offset + by,
-            ..*self
-        }
-    }
+// impl<'a, C, BO> Dimensions for ImageRaw<'a, C, BO>
+// where
+//     C: PixelColor + From<<C as PixelColor>::Raw>,
+//     BO: ByteOrder,
+// {
+//     fn top_left(&self) -> Point {
+//         self.offset
+//     }
 
-    /// Translate the image from its current position to a new position by (x, y) pixels.
-    ///
-    /// ```
-    /// # use embedded_graphics::pixelcolor::BinaryColor;
-    /// # use embedded_graphics::image::Image;
-    /// # use embedded_graphics::transform::Transform;
-    /// # use embedded_graphics::geometry::Point;
-    /// #
-    /// let mut image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff], 8, 1);
-    /// image.translate_mut(Point::new(25, 30));
-    ///
-    /// assert_eq!(image.offset(), Point::new(25, 30));
-    /// ```
-    fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.offset += by;
+//     fn bottom_right(&self) -> Point {
+//         self.top_left() + self.size()
+//     }
 
-        self
-    }
-}
+//     fn size(&self) -> Size {
+//         self.size
+//     }
+// }
+
+// impl<'a, C, BO> Transform for ImageRaw<'a, C, BO>
+// where
+//     C: PixelColor + From<<C as PixelColor>::Raw>,
+//     BO: ByteOrder,
+// {
+//     /// Translate the image from its current position to a new position by (x, y) pixels, returning
+//     /// a new `Image`. For a mutating transform, see `translate_mut`.
+//     ///
+//     /// ```
+//     /// # use embedded_graphics::pixelcolor::BinaryColor;
+//     /// # use embedded_graphics::image::Image;
+//     /// # use embedded_graphics::transform::Transform;
+//     /// # use embedded_graphics::geometry::Point;
+//     /// #
+//     /// // 8px x 1px test image
+//     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff], 8, 1);
+//     /// let moved = image.translate(Point::new(25, 30));
+//     ///
+//     /// assert_eq!(image.offset(), Point::new(0, 0));
+//     /// assert_eq!(moved.offset(), Point::new(25, 30));
+//     /// ```
+//     fn translate(&self, by: Point) -> Self {
+//         Self {
+//             data: self.data,
+//             offset: self.offset + by,
+//             ..*self
+//         }
+//     }
+
+//     /// Translate the image from its current position to a new position by (x, y) pixels.
+//     ///
+//     /// ```
+//     /// # use embedded_graphics::pixelcolor::BinaryColor;
+//     /// # use embedded_graphics::image::Image;
+//     /// # use embedded_graphics::transform::Transform;
+//     /// # use embedded_graphics::geometry::Point;
+//     /// #
+//     /// let mut image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff], 8, 1);
+//     /// image.translate_mut(Point::new(25, 30));
+//     ///
+//     /// assert_eq!(image.offset(), Point::new(25, 30));
+//     /// ```
+//     fn translate_mut(&mut self, by: Point) -> &mut Self {
+//         self.offset += by;
+
+//         self
+//     }
+// }
 
 impl<'a, 'b: 'a, C: 'a, BO: 'a> IntoIterator for &'b ImageRaw<'a, C, BO>
 where
@@ -233,16 +257,16 @@ where
     }
 }
 
-impl<'a, C: 'a, BO: 'a> Drawable<C> for &'a ImageRaw<'a, C, BO>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    BO: ByteOrder,
-    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
-{
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self.into_iter())
-    }
-}
+// impl<'a, C: 'a, BO: 'a> Drawable<C> for &'a ImageRaw<'a, C, BO>
+// where
+//     C: PixelColor + From<<C as PixelColor>::Raw>,
+//     BO: ByteOrder,
+//     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
+// {
+//     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+//         display.draw_iter(self.into_iter())
+//     }
+// }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ImageIterator<'a, C, BO>
@@ -292,6 +316,7 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Pixel,
+        image::Image,
         pixelcolor::{raw::RawU32, *},
         transform::Transform,
     };
@@ -320,8 +345,9 @@ mod tests {
 
     #[test]
     fn negative_top_left() {
-        let image: ImageRaw<BinaryColor> =
-            ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4).translate(Point::new(-1, -1));
+        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+
+        let image = Image::new(&image).translate(Point::new(-1, -1));
 
         assert_eq!(image.top_left(), Point::new(-1, -1));
         assert_eq!(image.bottom_right(), Point::new(3, 3));
@@ -330,8 +356,9 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageRaw<BinaryColor> =
-            ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4).translate(Point::new(100, 200));
+        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4);
+
+        let image = Image::new(&image).translate(Point::new(100, 200));
 
         assert_eq!(image.top_left(), Point::new(100, 200));
         assert_eq!(image.bottom_right(), Point::new(104, 204));
@@ -344,10 +371,12 @@ mod tests {
             &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
             3,
             3,
-        )
-        .translate(Point::new(-1, -1));
+        );
+
+        let image = Image::new(&image).translate(Point::new(-1, -1));
 
         let mut iter = image.into_iter();
+
         assert_next(&mut iter, -1, -1, Gray8::WHITE);
         assert_next(&mut iter, 0, -1, Gray8::BLACK);
         assert_next(&mut iter, 1, -1, Gray8::new(0xbb));

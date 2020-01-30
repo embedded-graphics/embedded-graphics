@@ -5,46 +5,21 @@
 
 // #[cfg(feature = "bmp")]
 // mod image_bmp;
-// mod image_raw;
+mod image_raw;
 // #[cfg(feature = "tga")]
 // mod image_tga;
 
-// pub use self::image_raw::{ImageBE, ImageLE, ImageRaw};
+pub use self::image_raw::{ImageBE, ImageLE, ImageRaw};
 
 use crate::draw_target::DrawTarget;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
+use crate::geometry::Dimensions;
 use crate::geometry::Point;
+use crate::geometry::Size;
 use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
 use core::marker::PhantomData;
-
-// #[cfg(feature = "bmp")]
-// pub use self::image_bmp::ImageBmp;
-// #[cfg(feature = "tga")]
-// pub use self::image_tga::ImageTga;
-
-// /// Image file trait.
-// pub trait ImageFile<'a, C>: Dimensions + Sized + Drawable<C> + Transform
-// where
-//     C: PixelColor,
-// {
-//     /// Error type to return when loading of the image data failed
-//     type LoadError;
-
-//     /// Create a new image with given input file
-//     ///
-//     /// The input file is expected to be of a particular format (BMP, TGA, etc) and contain file
-//     /// metadata like width/height and pixel data. Because parsing may fail, this returns a
-//     /// `Result<Self, ()>`.
-//     fn new(filedata: &'a [u8]) -> Result<Self, Self::LoadError>;
-
-//     /// Get the width in pixels of an image
-//     fn width(&self) -> u32;
-
-//     /// Get the height in pixels of an image
-//     fn height(&self) -> u32;
-// }
 
 /// TODO: Docs
 pub trait ImageData<C>
@@ -114,6 +89,65 @@ where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(&mut self.image.pixel_iter())
+        display.draw_iter(
+            &mut self
+                .image
+                .pixel_iter()
+                .map(|p| Pixel(p.0 + self.offset, p.1)),
+        )
+    }
+}
+
+impl<I, C> Dimensions for Image<I, C>
+where
+    I: ImageData<C> + Clone,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+{
+    fn top_left(&self) -> Point {
+        self.offset
+    }
+
+    fn bottom_right(&self) -> Point {
+        self.top_left() + self.size()
+    }
+
+    fn size(&self) -> Size {
+        Size::new(self.image.width(), self.image.height())
+    }
+}
+
+impl<'a, I, C> IntoIterator for &'a Image<I, C>
+where
+    I: ImageData<C> + Clone,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+{
+    type Item = Pixel<C>;
+    type IntoIter = ImageIterator<'a, I, C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        ImageIterator {
+            it: self.image.pixel_iter(),
+            image: self,
+        }
+    }
+}
+
+/// Pixel iterator over `Image` objects
+#[derive(Debug)]
+pub struct ImageIterator<'a, I: ImageData<C> + Clone, C: PixelColor + From<<C as PixelColor>::Raw>>
+{
+    image: &'a Image<I, C>,
+    it: I::PixelIterator,
+}
+
+impl<'a, I, C> Iterator for ImageIterator<'a, I, C>
+where
+    I: ImageData<C> + Clone,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+{
+    type Item = Pixel<C>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next().map(|p| Pixel(p.0 + self.image.offset, p.1))
     }
 }

@@ -43,4 +43,4 @@ criterion = { version = "0.3.0", default-features = false }
 # tinybmp = "0.1.1"
 # tinytga = "0.2.0"
 tinybmp = { path = "../tinybmp", features = [ "graphics" ] }
-# tinytga = { path = "../tinytga", features = [ "graphics" ] }
+tinytga = { path = "../tinytga", features = [ "graphics" ] }
