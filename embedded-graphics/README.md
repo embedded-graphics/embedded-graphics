@@ -18,25 +18,36 @@ If you need more deeper/more personalised help, please check out the [embedded-g
 A small 2D graphics library to draw things on embedded graphical LCDs, like the SSD1306 OLED display.
 
 This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
-following:
+following built in items:
 
-- 1 bit-per-pixel images
-- 8 bit-per-pixel images
-- 16 bit-per-pixel images
-- [BMP format (`.bmp`)](https://en.wikipedia.org/wiki/BMP_file_format) images at 1, 8 or 16BPP (requires `bmp` feature)
-- [TGA format (`.tga`)](https://en.wikipedia.org/wiki/Truevision_TGA) images (requires `tga` feature)
+- Raw data images
 - Primitives
   - Lines
   - Rectangles (and squares)
   - Circles
   - Triangles
-- Text with [multiple bitmap fonts](src/fonts)
+- Text with multiple fonts
 
-A core goal is to do the above without using any buffers; the crate should work without a
-dynamic memory allocator and without pre-allocating large chunks of memory. To achieve this, it
-takes an `Iterator` based approach, where pixel values and positions are calculated on the fly,
-with the minimum of saved state. This allows the consuming application to use far less RAM at
-little to no performance penalty.
+Additional functionality provided by external crates:
+
+- [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
+- [TGA images - `tinytga`](https://crates.io/crates/tinytga)
+- [ProFont monospace font - `profont`](https://crates.io/crates/profont)
+
+If you know of a crate that is not in this list, please [open an
+issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
+
+Note that some of these crates may not support the latest version of embedded-graphics.
+
+You can also add your own objects by implementing [`Drawable`] on them. Additionally, all
+iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default [`Drawable`] implementation
+already created.
+
+A core goal of embedded-graphics is to draw graphics without using any buffers; the crate should
+work without a dynamic memory allocator and without pre-allocating large chunks of memory. To
+achieve this, it takes an `Iterator` based approach, where pixel values and positions are
+calculated on the fly, with the minimum of saved state. This allows the consuming application to
+use far less RAM at little to no performance penalty.
 
 More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
 
