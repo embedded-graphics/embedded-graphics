@@ -1,7 +1,4 @@
-//! Image drawables.
-//!
-//! Image drawables can be created for raw bitmap data and images in BMP and TGA
-//! format.
+//! Image support for embedded-graphics
 
 mod image_raw;
 
@@ -17,7 +14,16 @@ use crate::pixelcolor::PixelColor;
 use crate::transform::Transform;
 use core::marker::PhantomData;
 
-/// TODO: Docs
+/// Image data trait
+///
+/// This trait is the main integration point for image loading crates. Images are made drawable
+/// through use of the [`Image`] struct which accepts an `ImageData`. `Image` implements
+/// [`Drawable`], allowing it to be drawn on any display that supports embedded-graphcis via the
+/// [`DrawTarget`] trait.
+///
+/// [`DrawTarget`]: ../trait.DrawTarget.html
+/// [`Drawable`]: ../drawable/trait.Drawable.html
+/// [`Image`]: ./struct.Image.html
 pub trait ImageData<C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -35,7 +41,12 @@ where
     fn pixel_iter(&self) -> Self::PixelIterator;
 }
 
-/// TODO: Docs
+/// A wrapper for any image type
+///
+/// This is a wrapper around [`ImageData`] implementations to better integrate into
+/// embedded-graphics.
+///
+/// [`ImageData`]: ./trait.ImageData.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<I: Clone, C> {
     image: I,
@@ -48,7 +59,11 @@ where
     I: ImageData<C> + Clone,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// TODO: Docs
+    /// Create a new `Image` with a given [`ImageData`]
+    ///
+    /// The passed [`ImageData`] provides a source of pixel data from the original image.
+    ///
+    /// [`ImageData`]: ./trait.ImageData.html
     pub fn new(image: I) -> Self {
         Self {
             image,
@@ -63,7 +78,24 @@ where
     I: ImageData<C> + Clone,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// TODO: Docs and example
+    /// Translate the image by a given delta, returning a new image
+    ///
+    /// # Examples
+    ///
+    /// ## Move an image around
+    ///
+    /// This examples moves a 4x4 black and white image by `(10, 20)` pixels without mutating the
+    /// original image
+    ///
+    /// ```rust
+    ///    use embedded_graphics::{image::{Image,ImageRaw}, prelude::*, geometry::Point, pixelcolor::BinaryColor};
+    ///
+    ///    let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+    ///
+    ///    let image = Image::new(&image).translate(Point::new(10, 20));
+    ///
+    ///    assert_eq!(image.top_left(), Point::new(10, 20));
+    /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
             offset: self.offset + by,
@@ -71,7 +103,26 @@ where
         }
     }
 
-    /// TODO: Docs and example
+    /// Translate the image by a given delta, modifying the original object
+    ///
+    /// # Examples
+    ///
+    /// ## Move an image around
+    ///
+    /// This examples moves a 4x4 black and white image by `(10, 20)` pixels by mutating the
+    /// original image
+    ///
+    /// ```rust
+    ///    use embedded_graphics::{image::{Image,ImageRaw}, prelude::*, geometry::Point, pixelcolor::BinaryColor};
+    ///
+    ///    let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+    ///
+    ///    let mut image = Image::new(&image);
+    ///
+    /// image.translate_mut(Point::new(10, 20));
+    ///
+    ///    assert_eq!(image.top_left(), Point::new(10, 20));
+    /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.offset += by;
 
