@@ -1,13 +1,11 @@
 use crate::image::ImageData;
 use crate::{
-    drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
+    drawable::Pixel,
+    geometry::{Point, Size},
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
         PixelColor,
     },
-    transform::Transform,
-    DrawTarget,
 };
 use core::marker::PhantomData;
 
@@ -316,6 +314,7 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Pixel,
+        geometry::Dimensions,
         image::Image,
         pixelcolor::{raw::RawU32, *},
         transform::Transform,
