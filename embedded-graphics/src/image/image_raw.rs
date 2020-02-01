@@ -110,9 +110,6 @@ where
     /// Image size in pixels
     size: Size,
 
-    /// Image offset in pixels from screen origin (0,0)
-    offset: Point,
-
     pixel_type: PhantomData<C>,
     byte_order: PhantomData<BO>,
 }
@@ -131,7 +128,6 @@ where
         let ret = Self {
             data,
             size: Size::new(width, height),
-            offset: Point::new(0, 0),
             pixel_type: PhantomData,
             byte_order: PhantomData,
         };
@@ -144,11 +140,6 @@ where
     /// Returns the length of each row in bytes.
     fn bytes_per_row(&self) -> usize {
         (self.size.width as usize * C::Raw::BITS_PER_PIXEL + 7) / 8
-    }
-
-    /// Returns the offset.
-    pub fn offset(&self) -> Point {
-        self.offset
     }
 }
 
@@ -217,8 +208,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.y < self.image.size.height {
             let data = self.data.next()?;
-            let mut point = Point::new(self.x as i32, self.y as i32);
-            point += self.image.offset;
+            let point = Point::new(self.x as i32, self.y as i32);
 
             self.x += 1;
             if self.x >= self.image.size.width {
