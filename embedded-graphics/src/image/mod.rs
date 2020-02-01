@@ -193,7 +193,10 @@ where
 
 /// Pixel iterator over `Image` objects
 #[derive(Debug)]
-pub struct ImageIterator<'a, I: ImageData<C> + Clone, C: PixelColor + From<<C as PixelColor>::Raw>>
+pub struct ImageIterator<'a, I, C>
+where
+    I: ImageData<C> + Clone,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     image: &'a Image<I, C>,
     it: I::PixelIterator,
