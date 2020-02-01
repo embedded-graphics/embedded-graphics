@@ -2,7 +2,7 @@
 
 mod image_raw;
 
-pub use self::image_raw::{ImageBE, ImageLE, ImageRaw};
+pub use self::image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
 
 use crate::{
     draw_target::DrawTarget,

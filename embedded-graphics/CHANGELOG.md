@@ -21,7 +21,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
-- **(breaking)** #247 The raw data `Image` struct is renamed to `RawImage`. The `Image` name is reused as a wrapper for other image types that implement the `ImageData` trait.
+- **(breaking)** #247 `ImageLE` and `ImageBE` are renamed to `ImageRawLE` and `ImageRawBE` respectively.
+- **(breaking)** #247 The raw data `Image` struct is renamed to `ImageRaw`. The `Image` name is reused as a wrapper for other image types that implement the `ImageData` trait.
 - **(breaking)** #247 `ImageTga` and `ImageTga` are removed, along with their respective enabling features `bmp` and `tga`. To use BMP or TGA images, add `tinybmp` or `tinytga` to your dependencies with the `graphics` feature enabled. This allows usage of `Bmp` and `Tga` in embedded-graphics contexts. Tinybmp or tinytga usage now looks like this:
 
   `Cargo.toml`:

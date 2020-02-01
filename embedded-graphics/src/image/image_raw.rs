@@ -10,10 +10,10 @@ use crate::{
 use core::marker::PhantomData;
 
 /// Image with little endian data.
-pub type ImageLE<'a, C> = ImageRaw<'a, C, LittleEndian>;
+pub type ImageRawLE<'a, C> = ImageRaw<'a, C, LittleEndian>;
 
 /// Image with big endian data.
-pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
+pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 
 /// An image constructed from a slice.
 ///
@@ -66,12 +66,12 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// ```
 ///
 /// Colors with more than one byte per pixel need an additional type annotation
-/// for the byte order. The [`ImageBE`] and [`ImageLE`] type aliases can be used
+/// for the byte order. The [`ImageRawBE`] and [`ImageRawLE`] type aliases can be used
 /// to abbreviate the type.
 ///
 /// ```
 /// use embedded_graphics::{
-///     image::{Image, ImageBE, ImageLE, ImageRaw},
+///     image::{Image, ImageRawBE, ImageRawLE, ImageRaw},
 ///     pixelcolor::{
 ///         raw::{BigEndian, LittleEndian},
 ///         Rgb565, Rgb888,
@@ -81,21 +81,21 @@ pub type ImageBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// # const DATA: &[u8] = &[0x55; 8 * 8 * 3];
 ///
 /// // Rgb888 image with 24 bits per pixel and big endian byte order
-/// let image1: ImageBE<Rgb888> = ImageRaw::new(DATA, 8, 8);
+/// let image1: ImageRawBE<Rgb888> = ImageRaw::new(DATA, 8, 8);
 /// // or:
 /// let image2: ImageRaw<Rgb888, BigEndian> = ImageRaw::new(DATA, 8, 8);
 /// # assert_eq!(image1, image2);
 ///
 /// // Rgb565 image with 16 bits per pixel and little endian byte order
-/// let image1: ImageLE<Rgb565> = ImageRaw::new(DATA, 16, 6);
+/// let image1: ImageRawLE<Rgb565> = ImageRaw::new(DATA, 16, 6);
 /// // or:
 /// let image2: ImageRaw<Rgb565, LittleEndian> = ImageRaw::new(DATA, 16, 6);
 /// # assert_eq!(image1, image2);
 /// ```
 ///
 /// [`raw` module documentation]: ../pixelcolor/raw/index.html
-/// [`ImageBE`]: type.ImageBE.html
-/// [`ImageLE`]: type.ImageLE.html
+/// [`ImageRawBE`]: type.ImageRawBE.html
+/// [`ImageRawLE`]: type.ImageRawLE.html
 /// [`PixelColor`]: ../pixelcolor/trait.PixelColor.html
 /// [`ByteOrder`]: ../pixelcolor/raw/trait.ByteOrder.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -403,7 +403,7 @@ mod tests {
     #[test]
     fn bpp16_little_endian() {
         let data = [0x00, 0xF8, 0xE0, 0x07, 0x1F, 0x00, 0x00, 0x00];
-        let image: ImageLE<Rgb565> = ImageRaw::new(&data, 1, 4);
+        let image: ImageRawLE<Rgb565> = ImageRaw::new(&data, 1, 4);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Rgb565::RED);
@@ -417,7 +417,7 @@ mod tests {
     #[test]
     fn bpp16_big_endian() {
         let data = [0xF8, 0x00, 0x07, 0xE0, 0x00, 0x1F, 0x00, 0x00];
-        let image: ImageBE<Rgb565> = ImageRaw::new(&data, 2, 2);
+        let image: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2, 2);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Rgb565::RED);
@@ -433,7 +433,7 @@ mod tests {
         let data = [
             0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
         ];
-        let image: ImageLE<Bgr888> = ImageRaw::new(&data, 1, 4);
+        let image: ImageRawLE<Bgr888> = ImageRaw::new(&data, 1, 4);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Bgr888::RED);
@@ -449,7 +449,7 @@ mod tests {
         let data = [
             0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
         ];
-        let image: ImageBE<Rgb888> = ImageRaw::new(&data, 4, 1);
+        let image: ImageRawBE<Rgb888> = ImageRaw::new(&data, 4, 1);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, Rgb888::RED);
@@ -469,7 +469,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF,
         ];
-        let image: ImageLE<TestColorU32> = ImageRaw::new(&data, 2, 2);
+        let image: ImageRawLE<TestColorU32> = ImageRaw::new(&data, 2, 2);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, TestColorU32(RawU32::new(0x78563412)));
@@ -489,7 +489,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF,
         ];
-        let image: ImageBE<TestColorU32> = ImageRaw::new(&data, 4, 1);
+        let image: ImageRawBE<TestColorU32> = ImageRaw::new(&data, 4, 1);
 
         let mut iter = image.into_iter();
         assert_next(&mut iter, 0, 0, TestColorU32(RawU32::new(0x12345678)));
