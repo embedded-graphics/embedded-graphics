@@ -12,7 +12,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let bmp = Bmp::from_slice(include_bytes!("./rust-pride.bmp")).unwrap();
 
-    let image = Image::new(&bmp);
+    let image = Image::new(&bmp, Point::zero());
 
     image.translate(Point::new(32, 32)).draw(&mut display)?;
 

@@ -63,10 +63,10 @@ where
     /// The passed [`ImageData`] provides a source of pixel data from the original image.
     ///
     /// [`ImageData`]: ./trait.ImageData.html
-    pub fn new(image: I) -> Self {
+    pub fn new(image: I, position: Point) -> Self {
         Self {
             image,
-            offset: Point::zero(),
+            offset: position,
             c: PhantomData,
         }
     }
@@ -96,9 +96,12 @@ where
     ///
     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    /// let image = Image::new(&image).translate(Point::new(10, 20));
+    /// let image = Image::new(&image, Point::zero());
     ///
-    /// assert_eq!(image.top_left(), Point::new(10, 20));
+    /// let image_moved = image.translate(Point::new(10, 20));
+    ///
+    /// assert_eq!(image.top_left(), Point::zero());
+    /// assert_eq!(image_moved.top_left(), Point::new(10, 20));
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
@@ -126,7 +129,7 @@ where
     ///
     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    /// let mut image = Image::new(&image);
+    /// let mut image = Image::new(&image, Point::zero());
     ///
     /// image.translate_mut(Point::new(10, 20));
     ///

@@ -57,7 +57,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// // raw data gets converted into.
 /// let raw_image: ImageRaw<BinaryColor> = ImageRaw::new(DATA, 12, 5);
 ///
-/// let image = Image::new(&raw_image);
+/// let image = Image::new(&raw_image, Point::zero());
 ///
 /// let mut display = Display::default();
 ///
@@ -262,7 +262,7 @@ mod tests {
     fn negative_top_left() {
         let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
 
-        let image = Image::new(&image).translate(Point::new(-1, -1));
+        let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
         assert_eq!(image.top_left(), Point::new(-1, -1));
         assert_eq!(image.bottom_right(), Point::new(3, 3));
@@ -273,7 +273,7 @@ mod tests {
     fn dimensions() {
         let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4);
 
-        let image = Image::new(&image).translate(Point::new(100, 200));
+        let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
         assert_eq!(image.top_left(), Point::new(100, 200));
         assert_eq!(image.bottom_right(), Point::new(104, 204));
@@ -288,7 +288,7 @@ mod tests {
             3,
         );
 
-        let image = Image::new(&image).translate(Point::new(-1, -1));
+        let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
         let mut iter = image.into_iter();
 

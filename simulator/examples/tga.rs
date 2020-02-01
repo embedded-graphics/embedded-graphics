@@ -12,7 +12,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let tga = Tga::from_slice(include_bytes!("./rust-pride.tga")).unwrap();
 
-    let image = Image::new(&tga);
+    let image = Image::new(&tga, Point::zero());
 
     image.translate(Point::new(32, 32)).draw(&mut display)?;
 

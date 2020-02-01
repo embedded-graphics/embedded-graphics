@@ -54,7 +54,7 @@
 //! // Load 16BPP 8x8px image
 //! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 //!
-//! let image = Image::new(&bmp);
+//! let image = Image::new(&bmp, Point::zero());
 //!
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())

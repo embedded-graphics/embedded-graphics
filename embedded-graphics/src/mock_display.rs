@@ -89,7 +89,7 @@
 //!
 //! let tga = Tga::from_slice(data).unwrap();
 //!
-//! let image = Image::new(&tga);
+//! let image = Image::new(&tga, Point::zero());
 //!
 //! let mut display: MockDisplay<Rgb888> = MockDisplay::new();
 //!
