@@ -149,7 +149,7 @@ where
     BO: ByteOrder,
     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
-    type PixelIterator = ImageIterator<'a, C, BO>;
+    type PixelIterator = ImageRawIterator<'a, C, BO>;
 
     fn width(&self) -> u32 {
         self.size.width
@@ -171,10 +171,10 @@ where
     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
     type Item = Pixel<C>;
-    type IntoIter = ImageIterator<'a, C, BO>;
+    type IntoIter = ImageRawIterator<'a, C, BO>;
 
     fn into_iter(self) -> Self::IntoIter {
-        ImageIterator {
+        ImageRawIterator {
             data: RawDataIter::new(self.data),
             x: 0,
             y: 0,
@@ -184,7 +184,7 @@ where
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct ImageIterator<'a, C, BO>
+pub struct ImageRawIterator<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
@@ -197,7 +197,7 @@ where
     image: &'a ImageRaw<'a, C, BO>,
 }
 
-impl<'a, C, BO> Iterator for ImageIterator<'a, C, BO>
+impl<'a, C, BO> Iterator for ImageRawIterator<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
