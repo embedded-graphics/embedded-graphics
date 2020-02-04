@@ -359,7 +359,7 @@ mod tests {
     }
 
     #[test]
-    fn negative_u32_tuple() {
+    fn convert_negative_to_u32_tuple() {
         let p = Point::new(-50, -10);
 
         let tuple: Result<(u32, u32), _> = p.try_into();
@@ -370,7 +370,7 @@ mod tests {
     }
 
     #[test]
-    fn max_negative_u32_tuple() {
+    fn convert_i32_min_to_u32_tuple() {
         let p = Point::new(i32::min_value(), i32::min_value());
 
         let tuple: Result<(u32, u32), _> = p.try_into();

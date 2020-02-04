@@ -60,7 +60,7 @@ use core::borrow::Borrow;
 /// # assert_eq!(tri, Triangle::new(p1, p2, p3));
 /// # assert_eq!(tri_ref, Triangle::new(p1, p2, p3));
 /// ```
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Triangle {
     /// First point of the triangle
     pub p1: Point,

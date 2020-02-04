@@ -21,7 +21,7 @@ use crate::{
 /// [`into_styled`]: #method.into_styled
 /// [`Styled`]: ../style/struct.Styled.html
 /// [module-level documentation]: index.html
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Text<'a> {
     /// The string.
     pub text: &'a str,

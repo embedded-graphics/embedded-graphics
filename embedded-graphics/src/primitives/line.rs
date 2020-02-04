@@ -37,7 +37,7 @@ use crate::{
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Line {
     /// Start point
     pub start: Point,

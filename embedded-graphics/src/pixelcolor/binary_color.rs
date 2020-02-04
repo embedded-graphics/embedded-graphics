@@ -48,6 +48,12 @@ pub enum BinaryColor {
     On,
 }
 
+impl Default for BinaryColor {
+    fn default() -> Self {
+        Self::Off
+    }
+}
+
 impl BinaryColor {
     /// Inverts the color.
     ///
@@ -143,6 +149,11 @@ impl From<bool> for BinaryColor {
 mod tests {
     use super::*;
     use crate::pixelcolor::{Rgb565, RgbColor};
+
+    #[test]
+    fn default_color_is_off() {
+        assert_eq!(BinaryColor::default(), BinaryColor::Off);
+    }
 
     #[test]
     fn invert_binary_color() {

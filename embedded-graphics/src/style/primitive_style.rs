@@ -41,11 +41,7 @@ where
 {
     /// Creates a primitive style without fill and stroke.
     pub fn new() -> Self {
-        Self {
-            fill_color: None,
-            stroke_color: None,
-            stroke_width: 0,
-        }
+        Self::default()
     }
 
     /// Creates a stroke primitive style.
@@ -81,7 +77,11 @@ where
     C: PixelColor,
 {
     fn default() -> Self {
-        Self::new()
+        Self {
+            fill_color: None,
+            stroke_color: None,
+            stroke_width: 0,
+        }
     }
 }
 
@@ -192,6 +192,23 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::{BinaryColor, Rgb888, RgbColor};
+
+    #[test]
+    fn default_style() {
+        assert_eq!(
+            PrimitiveStyle::<BinaryColor>::default(),
+            PrimitiveStyle {
+                fill_color: None,
+                stroke_color: None,
+                stroke_width: 0,
+            }
+        );
+
+        assert_eq!(
+            PrimitiveStyle::<BinaryColor>::default(),
+            PrimitiveStyle::new()
+        );
+    }
 
     #[test]
     fn constructors() {

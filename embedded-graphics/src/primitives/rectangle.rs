@@ -43,7 +43,7 @@ use crate::{
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Rectangle {
     /// Top left point of the rect
     pub top_left: Point,

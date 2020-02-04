@@ -93,7 +93,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 /// [`ImageLE`]: type.ImageLE.html
 /// [`PixelColor`]: ../pixelcolor/trait.PixelColor.html
 /// [`ByteOrder`]: ../pixelcolor/raw/trait.ByteOrder.html
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Image<'a, C, BO = BigEndian>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,

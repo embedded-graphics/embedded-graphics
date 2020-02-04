@@ -6,7 +6,7 @@ use nom::{
     IResult,
 };
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct RlePacket<'a> {
     /// Number of pixels in this run
     pub run_length: u8,
