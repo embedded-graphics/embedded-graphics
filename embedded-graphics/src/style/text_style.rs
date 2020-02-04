@@ -11,7 +11,7 @@ use crate::{fonts::Font, pixelcolor::PixelColor};
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 /// [`text_style!`]: ../macro.text_style.html
 /// [`TextStyleBuilder`]: ./struct.TextStyleBuilder.html
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[non_exhaustive]
 pub struct TextStyle<C, F>
 where
@@ -126,7 +126,7 @@ where
 /// [`egtext!`]: ../macro.egtext.html
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`TextStyle`]: ./struct.TextStyle.html
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct TextStyleBuilder<C, F>
 where
     C: PixelColor,

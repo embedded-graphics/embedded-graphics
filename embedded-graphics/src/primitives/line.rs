@@ -37,7 +37,7 @@ use crate::{
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Line {
     /// Start point
     pub start: Point,
@@ -149,7 +149,7 @@ where
 }
 
 /// Pixel iterator for each pixel in the line
-#[derive(Debug, Clone, Copy)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct StyledLineIterator<C>
 where
     C: PixelColor,

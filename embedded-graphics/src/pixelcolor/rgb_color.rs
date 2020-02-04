@@ -70,7 +70,7 @@ macro_rules! impl_rgb_color {
         #[doc = ""]
         #[doc = "[`RgbColor`]: trait.RgbColor.html"]
         #[doc = "[module-level documentation]: index.html"]
-        #[derive(Clone, Copy, PartialEq, Eq)]
+        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
         pub struct $type($storage_type);
 
         impl $type {

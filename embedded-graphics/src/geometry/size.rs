@@ -57,7 +57,7 @@ use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Size {
     /// The width.
     pub width: u32,
@@ -155,6 +155,12 @@ impl From<Size> for (u32, u32) {
     }
 }
 
+impl From<Size> for [u32; 2] {
+    fn from(other: Size) -> [u32; 2] {
+        [other.width, other.height]
+    }
+}
+
 impl From<&Size> for (u32, u32) {
     fn from(other: &Size) -> (u32, u32) {
         (other.width, other.height)
@@ -212,6 +218,13 @@ mod tests {
     #[test]
     fn from_array() {
         assert_eq!(Size::from([20, 30]), Size::new(20, 30));
+    }
+
+    #[test]
+    fn to_array() {
+        let array: [u32; 2] = Size::new(20, 30).into();
+
+        assert_eq!(array, [20, 30]);
     }
 
     #[test]

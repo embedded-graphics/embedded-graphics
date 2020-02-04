@@ -13,7 +13,7 @@ use crate::{fonts::Font, geometry::Size};
 /// See the [module-level documentation](./index.html) for examples.
 ///
 /// [12x16 font]: struct.Font12x16.html
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Font24x32;
 
 impl Font for Font24x32 {

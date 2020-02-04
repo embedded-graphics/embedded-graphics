@@ -66,7 +66,7 @@ where
     C: PixelColor,
 {
     /// Draw the graphics object using the supplied DrawTarget.
-    fn draw<T: DrawTarget<C>>(self, display: &mut T) -> Result<(), T::Error>;
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error>;
 }
 
 /// A single pixel.
@@ -101,7 +101,7 @@ where
 ///
 /// [`Drawable`]: trait.Drawable.html
 /// [`DrawTarget`]: ../trait.DrawTarget.html
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Pixel<C: PixelColor>(pub Point, pub C);
 
 impl<C> Drawable<C> for Pixel<C>

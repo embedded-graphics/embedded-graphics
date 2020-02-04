@@ -19,7 +19,7 @@
 //! use embedded_graphics::{image::Image, pixelcolor::raw::RawU4, prelude::*};
 //!
 //! /// RGBI color
-//! #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+//! #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 //! pub struct RGBI(RawU4);
 //!
 //! impl RGBI {
@@ -147,7 +147,7 @@ macro_rules! impl_raw_data {
         #[doc = "[module-level documentation]: index.html"]
         #[doc = "[`new`]: #method.new"]
         #[doc = "[`into_inner`]: trait.RawData.html#tymethod.into_inner"]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
         pub struct $type($storage_type);
 
         impl $type {
@@ -210,14 +210,14 @@ impl_raw_data!(RawU32: u32, 32, 0xFFFF_FFFF, "32 bits");
 pub trait ByteOrder: private::Sealed {}
 
 /// Little endian byte order marker.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum LittleEndian {}
 
 impl ByteOrder for LittleEndian {}
 impl private::Sealed for LittleEndian {}
 
 /// Big endian byte order marker.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum BigEndian {}
 
 impl ByteOrder for BigEndian {}

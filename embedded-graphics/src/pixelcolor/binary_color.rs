@@ -39,13 +39,19 @@ use crate::pixelcolor::{
 /// };
 /// assert_eq!(color, BinaryColor::On);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum BinaryColor {
     /// Inactive pixel.
     Off,
 
     /// Active pixel.
     On,
+}
+
+impl Default for BinaryColor {
+    fn default() -> Self {
+        Self::Off
+    }
 }
 
 impl BinaryColor {
@@ -143,6 +149,11 @@ impl From<bool> for BinaryColor {
 mod tests {
     use super::*;
     use crate::pixelcolor::{Rgb565, RgbColor};
+
+    #[test]
+    fn default_color_is_off() {
+        assert_eq!(BinaryColor::default(), BinaryColor::Off);
+    }
 
     #[test]
     fn invert_binary_color() {

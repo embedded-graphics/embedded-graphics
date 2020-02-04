@@ -44,7 +44,7 @@ use crate::header::parse_header;
 pub use crate::header::{FileType, Header};
 
 /// A BMP-format bitmap
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Bmp<'a> {
     /// Image header
     pub header: Header,
@@ -128,7 +128,7 @@ impl<'a> IntoIterator for &'a Bmp<'a> {
 /// Iterator over individual BMP pixels
 ///
 /// Each pixel is returned as a `u32` regardless of the bit depth of the source image.
-#[derive(Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct BmpIterator<'a> {
     /// Reference to original BMP image
     bmp: &'a Bmp<'a>,

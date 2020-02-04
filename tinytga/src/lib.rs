@@ -26,7 +26,7 @@ pub use crate::footer::TgaFooter;
 pub use crate::header::{ImageType, TgaHeader};
 
 /// TGA image
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Tga<'a> {
     /// TGA header
     pub header: TgaHeader,
@@ -152,7 +152,7 @@ impl<'a> IntoIterator for &'a Tga<'a> {
 /// Iterator over individual TGA pixels
 ///
 /// This can be used to build a raw image buffer to pass around
-#[derive(Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct TgaIterator<'a> {
     /// Reference to original TGA image
     tga: &'a Tga<'a>,

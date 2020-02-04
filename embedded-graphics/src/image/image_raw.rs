@@ -93,7 +93,7 @@ pub type ImageBE<'a, C> = Image<'a, C, BigEndian>;
 /// [`ImageLE`]: type.ImageLE.html
 /// [`PixelColor`]: ../pixelcolor/trait.PixelColor.html
 /// [`ByteOrder`]: ../pixelcolor/raw/trait.ByteOrder.html
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Image<'a, C, BO = BigEndian>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -244,7 +244,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ImageIterator<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -296,7 +296,7 @@ mod tests {
         transform::Transform,
     };
 
-    #[derive(Debug, PartialEq, Clone, Copy)]
+    #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct TestColorU32(RawU32);
 
     impl PixelColor for TestColorU32 {

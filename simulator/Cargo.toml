@@ -35,7 +35,7 @@ required-features = ["bmp"]
 sdl2 = "0.32.2"
 
 [dependencies.embedded-graphics]
-version = "0.6.0-alpha.2"
+version = "0.6.0-alpha.3"
 features = [ "bmp", "tga" ]
 
 [dev-dependencies]

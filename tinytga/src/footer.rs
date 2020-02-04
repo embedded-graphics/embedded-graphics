@@ -4,7 +4,7 @@ use nom::{bytes::complete::tag, number::complete::le_u32, IResult};
 pub const FOOTER_LEN: usize = 26;
 
 /// TGA footer structure, referenced from <http://tfc.duke.free.fr/coding/tga_specs.pdf>
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct TgaFooter {
     /// Extension area byte offset from beginning of file
     pub extension_area_offset: u32,

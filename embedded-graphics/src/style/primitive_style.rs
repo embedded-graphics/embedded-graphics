@@ -14,7 +14,7 @@ use core::convert::TryFrom;
 /// [`PrimitiveStyleBuilder`]: ../style/struct.PrimitiveStyleBuilder.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 /// [`primitive_style!`]: ../macro.primitive_style.html
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
 pub struct PrimitiveStyle<C>
 where
@@ -41,11 +41,7 @@ where
 {
     /// Creates a primitive style without fill and stroke.
     pub fn new() -> Self {
-        Self {
-            fill_color: None,
-            stroke_color: None,
-            stroke_width: 0,
-        }
+        Self::default()
     }
 
     /// Creates a stroke primitive style.
@@ -81,7 +77,11 @@ where
     C: PixelColor,
 {
     fn default() -> Self {
-        Self::new()
+        Self {
+            fill_color: None,
+            stroke_color: None,
+            stroke_width: 0,
+        }
     }
 }
 
@@ -142,7 +142,7 @@ where
 ///
 /// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html
 /// [`primitive_style!`]: ../macro.primitive_style.html
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct PrimitiveStyleBuilder<C>
 where
     C: PixelColor,
@@ -192,6 +192,23 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::{BinaryColor, Rgb888, RgbColor};
+
+    #[test]
+    fn default_style() {
+        assert_eq!(
+            PrimitiveStyle::<BinaryColor>::default(),
+            PrimitiveStyle {
+                fill_color: None,
+                stroke_color: None,
+                stroke_width: 0,
+            }
+        );
+
+        assert_eq!(
+            PrimitiveStyle::<BinaryColor>::default(),
+            PrimitiveStyle::new()
+        );
+    }
 
     #[test]
     fn constructors() {

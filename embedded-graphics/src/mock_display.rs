@@ -124,7 +124,7 @@ const SIZE: usize = 64;
 /// Mock display struct
 ///
 /// See the [module documentation](./index.html) for usage and examples.
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct MockDisplay<C>([Option<C>; SIZE * SIZE])
 where
     C: PixelColor;

@@ -10,7 +10,7 @@ use nom::{
 pub const HEADER_LEN: usize = 18;
 
 /// Image type
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum ImageType {
     /// Image contains no pixel data
     Empty = 0,
@@ -35,7 +35,7 @@ pub enum ImageType {
 }
 
 /// TGA header structure, referenced from <https://www.fileformat.info/format/tga/egff.htm>
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct TgaHeader {
     /// Image ID field length
     pub id_len: u8,

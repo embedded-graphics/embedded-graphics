@@ -29,7 +29,7 @@ use tinytga::{Tga, TgaIterator};
 /// image.draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ImageTga<'a, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -102,7 +102,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ImageTgaIterator<'a, 'b, C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
