@@ -53,7 +53,7 @@ pub struct Image<I: Clone, C> {
     c: PhantomData<C>,
 }
 
-impl<'a, I, C> Image<I, C>
+impl<I, C> Image<I, C>
 where
     I: ImageData<C> + Clone,
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -72,7 +72,7 @@ where
     }
 }
 
-impl<'a, I, C> Transform for Image<I, C>
+impl<I, C> Transform for Image<I, C>
 where
     I: ImageData<C> + Clone,
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -142,7 +142,7 @@ where
     }
 }
 
-impl<'a, I, C> Drawable<C> for Image<I, C>
+impl<I, C> Drawable<C> for Image<I, C>
 where
     I: ImageData<C> + Clone,
     C: PixelColor + From<<C as PixelColor>::Raw>,

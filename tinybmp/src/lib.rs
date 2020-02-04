@@ -267,7 +267,6 @@ mod e_g {
         }
     }
 
-    /// TODO: Docs
     impl<'a, C> ImageData<C> for &'a Bmp<'a>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
