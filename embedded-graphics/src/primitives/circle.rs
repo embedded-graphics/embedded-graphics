@@ -51,7 +51,7 @@ use crate::{
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Circle {
     /// Center point of circle
     pub center: Point,
@@ -122,7 +122,7 @@ impl Transform for Circle {
 }
 
 /// Pixel iterator for each pixel in the circle border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct StyledCircleIterator<C: PixelColor> {
     center: Point,
     radius: u32,
