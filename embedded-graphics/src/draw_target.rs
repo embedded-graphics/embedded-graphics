@@ -110,12 +110,12 @@ use crate::{
 /// `DrawTarget` for a display without a framebuffer that supports hardware accelerated drawing of
 /// styled [`Rectangle`]s.
 ///
-/// The default implementation of `draw_rectangle()` (as well as `draw_line()`, `draw_circle()` and
-/// `draw_triangle()`) defer to `draw_iter()` internally. In this example, the default
-/// implementation of `draw_rectangle()` is overridden to allow usage of accelerated draw commands
+/// The default implementations of [`draw_rectangle`] as well as other shape drawing methods
+/// ([`draw_circle`], etc) defer to [`draw_iter`] internally. In this example, the default
+/// implementation of [`draw_rectangle`] is overridden to allow usage of accelerated draw commands
 /// specific to the targeted hardware.
 ///
-/// As this example doesn't use a framebuffer, a `flush()` method is not required. All draw
+/// As this example doesn't use a framebuffer, a "flush" operation is not required. All draw
 /// operations are performed in "immediate mode" directly on the display. As each drawing operation
 /// requires communication with the display that may fail, a custom error type `CommError` is
 /// introduced.
@@ -207,6 +207,9 @@ use crate::{
 /// [`DrawTarget`]: ./trait.DrawTarget.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
 /// [`primitive`]: ../primitives/index.html
+/// [`draw_rectangle`]: ./trait.DrawTarget.html#method.draw_rectangle
+/// [`draw_circle`]: ./trait.DrawTarget.html#method.draw_circle
+/// [`draw_iter`]: ./trait.DrawTarget.html#method.draw_iter
 pub trait DrawTarget<C>
 where
     C: PixelColor,
