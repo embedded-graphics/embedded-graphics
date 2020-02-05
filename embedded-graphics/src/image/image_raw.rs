@@ -1,7 +1,7 @@
 use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
-    image::ImageData,
+    image::{ImageData, ImageDimensions},
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
         PixelColor,
@@ -143,14 +143,24 @@ where
     }
 }
 
-impl<'a, C, BO> ImageData<C> for &'a ImageRaw<'a, C, BO>
+impl<'a, 'b, C, BO> ImageData<C> for &'a ImageRaw<'b, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
-    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
+    RawDataIter<'b, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
-    type PixelIterator = ImageRawIterator<'a, C, BO>;
+    type PixelIterator = ImageRawIterator<'a, 'b, C, BO>;
 
+    fn pixel_iter(self) -> Self::PixelIterator {
+        self.into_iter()
+    }
+}
+
+impl<C, BO> ImageDimensions for ImageRaw<'_, C, BO>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    BO: ByteOrder,
+{
     fn width(&self) -> u32 {
         self.size.width
     }
@@ -158,20 +168,16 @@ where
     fn height(&self) -> u32 {
         self.size.height
     }
-
-    fn pixel_iter(&self) -> Self::PixelIterator {
-        self.into_iter()
-    }
 }
 
-impl<'a, 'b: 'a, C: 'a, BO: 'a> IntoIterator for &'b ImageRaw<'a, C, BO>
+impl<'a, 'b, C, BO> IntoIterator for &'a ImageRaw<'b, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
-    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
+    RawDataIter<'b, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
     type Item = Pixel<C>;
-    type IntoIter = ImageRawIterator<'a, C, BO>;
+    type IntoIter = ImageRawIterator<'a, 'b, C, BO>;
 
     fn into_iter(self) -> Self::IntoIter {
         ImageRawIterator {
@@ -184,24 +190,24 @@ where
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct ImageRawIterator<'a, C, BO>
+pub struct ImageRawIterator<'a, 'b, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
 {
-    data: RawDataIter<'a, C::Raw, BO>,
+    data: RawDataIter<'b, C::Raw, BO>,
 
     x: u32,
     y: u32,
 
-    image: &'a ImageRaw<'a, C, BO>,
+    image: &'a ImageRaw<'b, C, BO>,
 }
 
-impl<'a, C, BO> Iterator for ImageRawIterator<'a, C, BO>
+impl<'a, 'b, C, BO> Iterator for ImageRawIterator<'a, 'b, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
-    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
+    RawDataIter<'b, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
     type Item = Pixel<C>;
 

@@ -11,7 +11,7 @@ use crate::{
     pixelcolor::PixelColor,
     transform::Transform,
 };
-use core::marker::PhantomData;
+use core::{fmt, marker::PhantomData};
 
 /// Image data trait
 ///
@@ -30,14 +30,17 @@ where
     /// Iterator over pixels in the image
     type PixelIterator: Iterator<Item = Pixel<C>>;
 
+    /// Get an iterator over the pixels of the image
+    fn pixel_iter(self) -> Self::PixelIterator;
+}
+
+/// TODO: docs
+pub trait ImageDimensions {
     /// Get the width in pixels of an image
     fn width(&self) -> u32;
 
     /// Get the height in pixels of an image
     fn height(&self) -> u32;
-
-    /// Get an iterator over the pixels of the image
-    fn pixel_iter(&self) -> Self::PixelIterator;
 }
 
 /// A wrapper for any image type
@@ -47,15 +50,16 @@ where
 ///
 /// [`ImageData`]: ./trait.ImageData.html
 #[derive(Debug, Clone, Copy)]
-pub struct Image<I: Clone, C> {
-    image: I,
+pub struct Image<'a, I, C> {
+    image_data: &'a I,
     offset: Point,
     c: PhantomData<C>,
 }
 
-impl<I, C> Image<I, C>
+impl<'a, I, C> Image<'a, I, C>
 where
-    I: ImageData<C> + Clone,
+    &'a I: ImageData<C>,
+    I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     /// Create a new `Image` with a given [`ImageData`]
@@ -63,20 +67,16 @@ where
     /// The passed [`ImageData`] provides a source of pixel data from the original image.
     ///
     /// [`ImageData`]: ./trait.ImageData.html
-    pub fn new(image: I, position: Point) -> Self {
+    pub fn new(image_data: &'a I, position: Point) -> Self {
         Self {
-            image,
+            image_data,
             offset: position,
             c: PhantomData,
         }
     }
 }
 
-impl<I, C> Transform for Image<I, C>
-where
-    I: ImageData<C> + Clone,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
+impl<I, C> Transform for Image<'_, I, C> {
     /// Translate the image by a given delta, returning a new image
     ///
     /// # Examples
@@ -105,8 +105,9 @@ where
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
+            image_data: self.image_data,
             offset: self.offset + by,
-            ..self.clone()
+            c: PhantomData,
         }
     }
 
@@ -142,24 +143,23 @@ where
     }
 }
 
-impl<I, C> Drawable<C> for Image<I, C>
+impl<'a, 'b, I, C> Drawable<C> for &'a Image<'b, I, C>
 where
-    I: ImageData<C> + Clone,
+    &'b I: ImageData<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
         display.draw_iter(
-            &mut self
-                .image
+            self.image_data
                 .pixel_iter()
                 .map(|p| Pixel(p.0 + self.offset, p.1)),
         )
     }
 }
 
-impl<I, C> Dimensions for Image<I, C>
+impl<'a, I, C> Dimensions for Image<'a, I, C>
 where
-    I: ImageData<C> + Clone,
+    I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn top_left(&self) -> Point {
@@ -171,40 +171,51 @@ where
     }
 
     fn size(&self) -> Size {
-        Size::new(self.image.width(), self.image.height())
+        Size::new(self.image_data.width(), self.image_data.height())
     }
 }
 
-impl<'a, I, C> IntoIterator for &'a Image<I, C>
+impl<'a, 'b, I, C> IntoIterator for &'a Image<'b, I, C>
 where
-    I: ImageData<C> + Clone,
+    &'b I: ImageData<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
-    type IntoIter = ImageIterator<'a, I, C>;
+    type IntoIter = ImageIterator<'a, 'b, I, C>;
 
     fn into_iter(self) -> Self::IntoIter {
         ImageIterator {
-            it: self.image.pixel_iter(),
+            it: self.image_data.pixel_iter(),
             image: self,
         }
     }
 }
 
 /// Pixel iterator over `Image` objects
-#[derive(Debug)]
-pub struct ImageIterator<'a, I, C>
+pub struct ImageIterator<'a, 'b, I, C>
 where
-    I: ImageData<C> + Clone,
+    &'b I: ImageData<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    image: &'a Image<I, C>,
-    it: I::PixelIterator,
+    image: &'a Image<'b, I, C>,
+    it: <&'b I as ImageData<C>>::PixelIterator,
 }
 
-impl<'a, I, C> Iterator for ImageIterator<'a, I, C>
+impl<'a, 'b, I, C> fmt::Debug for ImageIterator<'a, 'b, I, C>
 where
-    I: ImageData<C> + Clone,
+    &'b I: ImageData<C>,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // The Debug derive didn't work anymore without additional trait bounds
+        // TODO: add fields
+        f.debug_struct("ImageIterator").finish()
+    }
+}
+
+impl<'a, 'b, I, C> Iterator for ImageIterator<'a, 'b, I, C>
+where
+    &'b I: ImageData<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
