@@ -13,15 +13,33 @@ use crate::{
 };
 use core::{fmt, marker::PhantomData};
 
-/// Image data trait
+/// Image data iterator trait
 ///
-/// This trait is the main integration point for image loading crates. Images are made drawable
-/// through use of the [`Image`] struct which accepts an `ImageDataIter`. `Image` implements
-/// [`Drawable`], allowing it to be drawn on any display that supports embedded-graphcis via the
-/// [`DrawTarget`] trait.
+/// # Examples
 ///
-/// [`DrawTarget`]: ../trait.DrawTarget.html
-/// [`Drawable`]: ../drawable/trait.Drawable.html
+/// ## Load an image and draw it to a display
+///
+/// This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display using the [`Image`]
+/// wrapper. The image is positioned at the top left corner of the display.
+///
+/// ```rust
+/// use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
+/// # use embedded_graphics::mock_display::MockDisplay as Display;
+/// use tinytga::Tga;
+///
+/// let mut display: Display<Rgb565> = Display::default();
+///
+/// let tga =
+///     Tga::from_slice(include_bytes!("../../../simulator/examples/rust-pride.tga")).unwrap();
+///
+/// let image = Image::new(&tga, Point::zero());
+///
+/// image.draw(&mut display);
+///
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
+///
+/// [tinytga]: https://crates.io/crates/tinytga
 /// [`Image`]: ./struct.Image.html
 pub trait ImageDataIter<C>
 where
@@ -34,7 +52,10 @@ where
     fn pixel_iter(self) -> Self::PixelIterator;
 }
 
-/// TODO: docs
+/// Image data trait
+///
+/// This trait provides an interface to common image metadata. It should be implemented along with
+/// [`ImageDataIter`] for full embedded-graphics integration.
 pub trait ImageData {
     /// Get the width in pixels of an image
     fn width(&self) -> u32;

@@ -71,7 +71,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 ///
 /// ```
 /// use embedded_graphics::{
-///     image::{Image, ImageRawBE, ImageRawLE, ImageRaw},
+///     image::{Image, ImageRaw, ImageRawBE, ImageRawLE},
 ///     pixelcolor::{
 ///         raw::{BigEndian, LittleEndian},
 ///         Rgb565, Rgb888,
