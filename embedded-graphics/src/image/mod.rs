@@ -1,4 +1,17 @@
 //! Image support for embedded-graphics
+//!
+//! Adding embedded-graphics support to an image format requires the implementation of the
+//! [`ImageData`] and [`ImageDataIter`] traits. These provide a common interface to image metadata
+//! and an iterator over individual pixel values respectively.
+//!
+//! The [`Image`] struct is a wrapper around items that implement [`ImageData`] and allows them to
+//! be drawin to a [`DrawTarget`], reading pixel values from the implementation of
+//! [`ImageDataIter`].
+//!
+//! [`ImageDataIter`]: ./trait.ImageDataIter.html
+//! [`ImageData`]: ./trait.ImageData.html
+//! [`Image`]: ./struct.Image.html
+//! [`DrawTarget`]: ../trait.DrawTarget.html
 
 mod image_raw;
 
@@ -19,8 +32,8 @@ use core::{fmt, marker::PhantomData};
 ///
 /// ## Load an image and draw it to a display
 ///
-/// This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display using the [`Image`]
-/// wrapper. The image is positioned at the top left corner of the display.
+/// This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
+/// using the [`Image`] wrapper. The image is positioned at the top left corner of the display.
 ///
 /// ```rust
 /// use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
