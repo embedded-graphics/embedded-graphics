@@ -309,7 +309,7 @@ mod e_g {
     use embedded_graphics::{
         drawable::Pixel as EgPixel,
         geometry::Point,
-        image::{ImageData, ImageDataIter},
+        image::{ImageDimensions, IntoPixelIter},
         pixelcolor::{raw::RawData, PixelColor},
     };
 
@@ -337,7 +337,7 @@ mod e_g {
         }
     }
 
-    impl ImageData for Tga<'_> {
+    impl ImageDimensions for Tga<'_> {
         fn width(&self) -> u32 {
             Tga::width(&self).into()
         }
@@ -347,7 +347,7 @@ mod e_g {
         }
     }
 
-    impl<'a, C> ImageDataIter<C> for &'a Tga<'_>
+    impl<'a, C> IntoPixelIter<C> for &'a Tga<'_>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {

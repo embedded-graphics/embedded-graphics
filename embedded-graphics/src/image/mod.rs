@@ -1,15 +1,15 @@
 //! Image support for embedded-graphics
 //!
 //! Adding embedded-graphics support to an image format requires the implementation of the
-//! [`ImageData`] and [`ImageDataIter`] traits. These provide a common interface to image metadata
+//! [`ImageDimensions`] and [`IntoPixelIter`] traits. These provide a common interface to image metadata
 //! and an iterator over individual pixel values respectively.
 //!
-//! The [`Image`] struct is a wrapper around items that implement [`ImageData`] and allows them to
+//! The [`Image`] struct is a wrapper around items that implement [`ImageDimensions`] and allows them to
 //! be drawin to a [`DrawTarget`], reading pixel values from the implementation of
-//! [`ImageDataIter`].
+//! [`IntoPixelIter`].
 //!
-//! [`ImageDataIter`]: ./trait.ImageDataIter.html
-//! [`ImageData`]: ./trait.ImageData.html
+//! [`IntoPixelIter`]: ./trait.IntoPixelIter.html
+//! [`ImageDimensions`]: ./trait.ImageDimensions.html
 //! [`Image`]: ./struct.Image.html
 //! [`DrawTarget`]: ../trait.DrawTarget.html
 
@@ -54,7 +54,7 @@ use core::{fmt, marker::PhantomData};
 ///
 /// [tinytga]: https://crates.io/crates/tinytga
 /// [`Image`]: ./struct.Image.html
-pub trait ImageDataIter<C>
+pub trait IntoPixelIter<C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
@@ -68,8 +68,8 @@ where
 /// Image data trait
 ///
 /// This trait provides an interface to common image metadata. It should be implemented along with
-/// [`ImageDataIter`] for full embedded-graphics integration.
-pub trait ImageData {
+/// [`IntoPixelIter`] for full embedded-graphics integration.
+pub trait ImageDimensions {
     /// Get the width in pixels of an image
     fn width(&self) -> u32;
 
@@ -79,10 +79,10 @@ pub trait ImageData {
 
 /// A wrapper for any image type
 ///
-/// This is a wrapper around [`ImageDataIter`] implementations to better integrate into
+/// This is a wrapper around [`IntoPixelIter`] implementations to better integrate into
 /// embedded-graphics.
 ///
-/// [`ImageDataIter`]: ./trait.ImageDataIter.html
+/// [`IntoPixelIter`]: ./trait.IntoPixelIter.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, I, C> {
     image_data: &'a I,
@@ -92,15 +92,15 @@ pub struct Image<'a, I, C> {
 
 impl<'a, I, C> Image<'a, I, C>
 where
-    &'a I: ImageDataIter<C>,
-    I: ImageData,
+    &'a I: IntoPixelIter<C>,
+    I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// Create a new `Image` with a given [`ImageDataIter`]
+    /// Create a new `Image` with a given [`IntoPixelIter`]
     ///
-    /// The passed [`ImageDataIter`] provides a source of pixel data from the original image.
+    /// The passed [`IntoPixelIter`] provides a source of pixel data from the original image.
     ///
-    /// [`ImageDataIter`]: ./trait.ImageDataIter.html
+    /// [`IntoPixelIter`]: ./trait.IntoPixelIter.html
     pub fn new(image_data: &'a I, position: Point) -> Self {
         Self {
             image_data,
@@ -179,7 +179,7 @@ impl<I, C> Transform for Image<'_, I, C> {
 
 impl<'a, 'b, I, C> Drawable<C> for &'a Image<'b, I, C>
 where
-    &'b I: ImageDataIter<C>,
+    &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
@@ -193,7 +193,7 @@ where
 
 impl<'a, I, C> Dimensions for Image<'a, I, C>
 where
-    I: ImageData,
+    I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn top_left(&self) -> Point {
@@ -211,7 +211,7 @@ where
 
 impl<'a, 'b, I, C> IntoIterator for &'a Image<'b, I, C>
 where
-    &'b I: ImageDataIter<C>,
+    &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
@@ -228,16 +228,16 @@ where
 /// Pixel iterator over `Image` objects
 pub struct ImageIterator<'a, 'b, I, C>
 where
-    &'b I: ImageDataIter<C>,
+    &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     image: &'a Image<'b, I, C>,
-    it: <&'b I as ImageDataIter<C>>::PixelIterator,
+    it: <&'b I as IntoPixelIter<C>>::PixelIterator,
 }
 
 impl<'a, 'b, I, C> fmt::Debug for ImageIterator<'a, 'b, I, C>
 where
-    &'b I: ImageDataIter<C>,
+    &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -249,7 +249,7 @@ where
 
 impl<'a, 'b, I, C> Iterator for ImageIterator<'a, 'b, I, C>
 where
-    &'b I: ImageDataIter<C>,
+    &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;

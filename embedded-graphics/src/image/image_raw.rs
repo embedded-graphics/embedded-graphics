@@ -1,7 +1,7 @@
 use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
-    image::{ImageData, ImageDataIter},
+    image::{ImageDimensions, IntoPixelIter},
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
         PixelColor,
@@ -143,7 +143,7 @@ where
     }
 }
 
-impl<'a, 'b, C, BO> ImageDataIter<C> for &'a ImageRaw<'b, C, BO>
+impl<'a, 'b, C, BO> IntoPixelIter<C> for &'a ImageRaw<'b, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
@@ -156,7 +156,7 @@ where
     }
 }
 
-impl<C, BO> ImageData for ImageRaw<'_, C, BO>
+impl<C, BO> ImageDimensions for ImageRaw<'_, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
