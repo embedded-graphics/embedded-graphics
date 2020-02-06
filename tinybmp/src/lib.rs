@@ -239,7 +239,7 @@ mod e_g {
     use embedded_graphics::{
         drawable::Pixel as EgPixel,
         geometry::Point,
-        image::{ImageData, ImageDimensions},
+        image::{ImageData, ImageDataIter},
         pixelcolor::{raw::RawData, PixelColor},
     };
 
@@ -267,7 +267,7 @@ mod e_g {
         }
     }
 
-    impl ImageDimensions for Bmp<'_> {
+    impl ImageData for Bmp<'_> {
         fn width(&self) -> u32 {
             Bmp::width(&self)
         }
@@ -277,7 +277,7 @@ mod e_g {
         }
     }
 
-    impl<'a, C> ImageData<C> for &'a Bmp<'_>
+    impl<'a, C> ImageDataIter<C> for &'a Bmp<'_>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {

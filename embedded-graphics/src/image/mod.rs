@@ -16,14 +16,14 @@ use core::{fmt, marker::PhantomData};
 /// Image data trait
 ///
 /// This trait is the main integration point for image loading crates. Images are made drawable
-/// through use of the [`Image`] struct which accepts an `ImageData`. `Image` implements
+/// through use of the [`Image`] struct which accepts an `ImageDataIter`. `Image` implements
 /// [`Drawable`], allowing it to be drawn on any display that supports embedded-graphcis via the
 /// [`DrawTarget`] trait.
 ///
 /// [`DrawTarget`]: ../trait.DrawTarget.html
 /// [`Drawable`]: ../drawable/trait.Drawable.html
 /// [`Image`]: ./struct.Image.html
-pub trait ImageData<C>
+pub trait ImageDataIter<C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
@@ -35,7 +35,7 @@ where
 }
 
 /// TODO: docs
-pub trait ImageDimensions {
+pub trait ImageData {
     /// Get the width in pixels of an image
     fn width(&self) -> u32;
 
@@ -45,10 +45,10 @@ pub trait ImageDimensions {
 
 /// A wrapper for any image type
 ///
-/// This is a wrapper around [`ImageData`] implementations to better integrate into
+/// This is a wrapper around [`ImageDataIter`] implementations to better integrate into
 /// embedded-graphics.
 ///
-/// [`ImageData`]: ./trait.ImageData.html
+/// [`ImageDataIter`]: ./trait.ImageDataIter.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, I, C> {
     image_data: &'a I,
@@ -58,15 +58,15 @@ pub struct Image<'a, I, C> {
 
 impl<'a, I, C> Image<'a, I, C>
 where
-    &'a I: ImageData<C>,
-    I: ImageDimensions,
+    &'a I: ImageDataIter<C>,
+    I: ImageData,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// Create a new `Image` with a given [`ImageData`]
+    /// Create a new `Image` with a given [`ImageDataIter`]
     ///
-    /// The passed [`ImageData`] provides a source of pixel data from the original image.
+    /// The passed [`ImageDataIter`] provides a source of pixel data from the original image.
     ///
-    /// [`ImageData`]: ./trait.ImageData.html
+    /// [`ImageDataIter`]: ./trait.ImageDataIter.html
     pub fn new(image_data: &'a I, position: Point) -> Self {
         Self {
             image_data,
@@ -145,7 +145,7 @@ impl<I, C> Transform for Image<'_, I, C> {
 
 impl<'a, 'b, I, C> Drawable<C> for &'a Image<'b, I, C>
 where
-    &'b I: ImageData<C>,
+    &'b I: ImageDataIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
@@ -159,7 +159,7 @@ where
 
 impl<'a, I, C> Dimensions for Image<'a, I, C>
 where
-    I: ImageDimensions,
+    I: ImageData,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn top_left(&self) -> Point {
@@ -177,7 +177,7 @@ where
 
 impl<'a, 'b, I, C> IntoIterator for &'a Image<'b, I, C>
 where
-    &'b I: ImageData<C>,
+    &'b I: ImageDataIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
@@ -194,16 +194,16 @@ where
 /// Pixel iterator over `Image` objects
 pub struct ImageIterator<'a, 'b, I, C>
 where
-    &'b I: ImageData<C>,
+    &'b I: ImageDataIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     image: &'a Image<'b, I, C>,
-    it: <&'b I as ImageData<C>>::PixelIterator,
+    it: <&'b I as ImageDataIter<C>>::PixelIterator,
 }
 
 impl<'a, 'b, I, C> fmt::Debug for ImageIterator<'a, 'b, I, C>
 where
-    &'b I: ImageData<C>,
+    &'b I: ImageDataIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -215,7 +215,7 @@ where
 
 impl<'a, 'b, I, C> Iterator for ImageIterator<'a, 'b, I, C>
 where
-    &'b I: ImageData<C>,
+    &'b I: ImageDataIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Item = Pixel<C>;
