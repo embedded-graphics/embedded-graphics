@@ -13,6 +13,7 @@ use crate::{
     DrawTarget,
 };
 use core::borrow::Borrow;
+use core::cmp::{max, min};
 
 /// Triangle primitive
 ///
@@ -76,15 +77,15 @@ impl Primitive for Triangle {}
 
 impl Dimensions for Triangle {
     fn top_left(&self) -> Point {
-        let &x = [self.p1.x, self.p2.x, self.p3.x].iter().min().unwrap();
-        let &y = [self.p1.y, self.p2.y, self.p3.y].iter().min().unwrap();
+        let x = min(min(self.p1.x, self.p2.x), self.p3.x);
+        let y = min(min(self.p1.y, self.p2.y), self.p3.y);
 
         Point::new(x, y)
     }
 
     fn bottom_right(&self) -> Point {
-        let &x = [self.p1.x, self.p2.x, self.p3.x].iter().max().unwrap();
-        let &y = [self.p1.y, self.p2.y, self.p3.y].iter().max().unwrap();
+        let x = max(max(self.p1.x, self.p2.x), self.p3.x);
+        let y = max(max(self.p1.y, self.p2.y), self.p3.y);
 
         Point::new(x, y)
     }
