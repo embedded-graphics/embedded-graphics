@@ -31,7 +31,7 @@ fn map_color(color: Rgb888, color_off: Rgb888, color_on: Rgb888) -> Rgb888 {
 
 impl BinaryColorTheme {
     /// Gets the theme's pixel color for a given pixel state.
-    pub(crate) fn convert(&self, color: Rgb888) -> Rgb888 {
+    pub(crate) fn convert(self, color: Rgb888) -> Rgb888 {
         match self {
             BinaryColorTheme::Default => color,
             BinaryColorTheme::LcdWhite => {

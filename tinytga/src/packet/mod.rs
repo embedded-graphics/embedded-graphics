@@ -36,8 +36,8 @@ impl<'a> Packet<'a> {
 
 pub fn next_rle_packet(input: &[u8], bytes_per_pixel: u8) -> IResult<&[u8], Packet> {
     alt((
-        map(rle_packet(bytes_per_pixel), |p| Packet::RlePacket(p)),
-        map(raw_packet(bytes_per_pixel), |p| Packet::RawPacket(p)),
+        map(rle_packet(bytes_per_pixel), Packet::RlePacket),
+        map(raw_packet(bytes_per_pixel), Packet::RawPacket),
     ))(input)
 }
 
