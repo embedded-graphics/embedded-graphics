@@ -171,7 +171,7 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
 
     fn next(&mut self) -> Option<Self::Item> {
         // return none if stroke color is none
-        self.style.stroke_color?;
+        let stroke_color = self.style.stroke_color?;
 
         if !self.stop {
             let point = self.start;
@@ -189,7 +189,7 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
                 self.start += Point::new(0, self.direction.y);
             }
 
-            Some(Pixel(point, self.style.stroke_color.unwrap()))
+            Some(Pixel(point, stroke_color))
         } else {
             None
         }
