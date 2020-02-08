@@ -114,7 +114,7 @@ where
     ///
     /// [`Size::zero()`]: ../geometry/struct.Size.html#method.zero
     fn size(&self) -> Size {
-        let width = if self.primitive.text.len() > 0 {
+        let width = if !self.primitive.text.is_empty() {
             (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.primitive.text.len() as u32
                 - F::CHARACTER_SPACING
         } else {
