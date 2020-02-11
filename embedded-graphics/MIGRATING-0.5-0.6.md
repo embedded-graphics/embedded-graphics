@@ -14,6 +14,10 @@ An associated error type is also added to `DrawTarget` to allow for better error
 // TODO: Mad example
 ```
 
+## For font authors
+
+TODO: Talk about the `Font` trait changes. Lots of associated consts, provide a char_offset fn to select char start
+
 ## For library consumers
 
 ### General drawing operations
