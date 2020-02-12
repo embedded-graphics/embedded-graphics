@@ -1,6 +1,8 @@
 use crate::geometry::Size;
-use core::convert::{TryFrom, TryInto};
-use core::ops::{Add, AddAssign, Index, Neg, Sub, SubAssign};
+use core::{
+    convert::{TryFrom, TryInto},
+    ops::{Add, AddAssign, Index, Neg, Sub, SubAssign},
+};
 
 /// 2D point.
 ///

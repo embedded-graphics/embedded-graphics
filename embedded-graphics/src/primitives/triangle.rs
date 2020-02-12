@@ -12,8 +12,10 @@ use crate::{
     transform::Transform,
     DrawTarget,
 };
-use core::borrow::Borrow;
-use core::cmp::{max, min};
+use core::{
+    borrow::Borrow,
+    cmp::{max, min},
+};
 
 /// Triangle primitive
 ///

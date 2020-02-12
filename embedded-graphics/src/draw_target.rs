@@ -194,7 +194,8 @@ use crate::{
 ///     top_left = (10, 20),
 ///     bottom_right = (30, 40),
 ///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
-/// ).draw(&mut display)?;
+/// )
+/// .draw(&mut display)?;
 ///
 /// // Draw a rectangle on the display using accelerated `draw_rectangle()` function
 /// # Ok::<(), CommError>(())

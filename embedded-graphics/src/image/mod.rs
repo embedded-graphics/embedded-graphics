@@ -5,9 +5,34 @@
 //! and an iterator over individual pixel values respectively.
 //!
 //! The [`Image`] struct is a wrapper around items that implement [`ImageDimensions`] and allows them to
-//! be drawin to a [`DrawTarget`], reading pixel values from the implementation of
+//! be drawn to a [`DrawTarget`], reading pixel values from the implementation of
 //! [`IntoPixelIter`].
 //!
+//! # Examples
+//!
+//! ## Load a TGA image and draw it to a display
+//!
+//! This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
+//! using the [`Image`] wrapper. The image is positioned at the top left corner of the display.
+//!
+//! ```rust
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
+//! # use embedded_graphics::mock_display::MockDisplay as Display;
+//! use tinytga::Tga;
+//!
+//! let mut display: Display<Rgb565> = Display::default();
+//!
+//! let tga =
+//!     Tga::from_slice(include_bytes!("../../../simulator/examples/rust-pride.tga")).unwrap();
+//!
+//! let image = Image::new(&tga, Point::zero());
+//!
+//! image.draw(&mut display);
+//!
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! [tinytga]: https://crates.io/crates/tinytga
 //! [`IntoPixelIter`]: ./trait.IntoPixelIter.html
 //! [`ImageDimensions`]: ./trait.ImageDimensions.html
 //! [`Image`]: ./struct.Image.html
@@ -27,33 +52,6 @@ use crate::{
 use core::{fmt, marker::PhantomData};
 
 /// Image data iterator trait
-///
-/// # Examples
-///
-/// ## Load an image and draw it to a display
-///
-/// This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
-/// using the [`Image`] wrapper. The image is positioned at the top left corner of the display.
-///
-/// ```rust
-/// use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
-/// # use embedded_graphics::mock_display::MockDisplay as Display;
-/// use tinytga::Tga;
-///
-/// let mut display: Display<Rgb565> = Display::default();
-///
-/// let tga =
-///     Tga::from_slice(include_bytes!("../../../simulator/examples/rust-pride.tga")).unwrap();
-///
-/// let image = Image::new(&tga, Point::zero());
-///
-/// image.draw(&mut display);
-///
-/// # Ok::<(), core::convert::Infallible>(())
-/// ```
-///
-/// [tinytga]: https://crates.io/crates/tinytga
-/// [`Image`]: ./struct.Image.html
 pub trait IntoPixelIter<C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -77,12 +75,16 @@ pub trait ImageDimensions {
     fn height(&self) -> u32;
 }
 
-/// A wrapper for any image type
+/// Image support for embedded-graphics
 ///
-/// This is a wrapper around [`IntoPixelIter`] implementations to better integrate into
-/// embedded-graphics.
+/// The `Image` struct serves as a wrapper around other image types that provide pixel data decoded
+/// from a given format (raw bytes, BMP, TGA, etc).
 ///
-/// [`IntoPixelIter`]: ./trait.IntoPixelIter.html
+/// `Image` accepts any item that implements `ImageDimensions` and `&'_ IntoPixelIter`.
+///
+/// Refer to the [module documentation] for examples.
+///
+/// [module documentation]: ./index.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, I, C> {
     image_data: &'a I,

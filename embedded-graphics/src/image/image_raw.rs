@@ -15,9 +15,9 @@ pub type ImageRawLE<'a, C> = ImageRaw<'a, C, LittleEndian>;
 /// Image with big endian data.
 pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 
-/// An image constructed from a slice.
+/// An image constructed from a slice of raw pixel data.
 ///
-/// The `Image` struct can be used to construct an image drawable from a slice
+/// The `ImageRaw` struct can be used to construct an image from a slice
 /// of raw image data. The storage format is determined by the [`PixelColor`]
 /// type `C` and the [`ByteOrder`] `BO`. The byteorder doesn't need to be
 /// specified for colors which aren't stored in multiple bytes.
@@ -28,9 +28,14 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// Details about the conversion of raw data to color types are explained in the
 /// [`raw` module documentation].
 ///
+/// As `ImageRaw` does not implement [`Drawable`], it cannot be directly drawn to a supported
+/// display. The [`Image`] struct should be used to wrap an `ImageRaw` to make it drawable.
+///
 /// # Examples
 ///
-/// This example creates an image from 1 bit per pixel data:
+/// ## Draw a 1BPP image
+///
+/// This example creates an image from 1 bit per pixel data.
 ///
 /// ```
 /// use embedded_graphics::{
@@ -65,9 +70,11 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// Colors with more than one byte per pixel need an additional type annotation
-/// for the byte order. The [`ImageRawBE`] and [`ImageRawLE`] type aliases can be used
-/// to abbreviate the type.
+/// ## Draw an image that uses multibyte pixel encoding
+///
+/// Colors with more than one byte per pixel need an additional type annotation for the byte order.
+/// For convenience, the [`ImageRawBE`] and [`ImageRawLE`] type aliases can be used to abbreviate
+/// the type.
 ///
 /// ```
 /// use embedded_graphics::{
@@ -96,6 +103,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// [`raw` module documentation]: ../pixelcolor/raw/index.html
 /// [`ImageRawBE`]: type.ImageRawBE.html
 /// [`ImageRawLE`]: type.ImageRawLE.html
+/// [`Image`]: struct.Image.html
 /// [`PixelColor`]: ../pixelcolor/trait.PixelColor.html
 /// [`ByteOrder`]: ../pixelcolor/raw/trait.ByteOrder.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

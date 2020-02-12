@@ -1,7 +1,7 @@
 //! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
 //! following built in items:
 //!
-//! * [Raw data images](./image/struct.Image.html)
+//! * [Raw data images](./image/struct.ImageRaw.html)
 //! * [Primitives](./primitives/index.html)
 //!     * [Lines](./primitives/line/struct.Line.html)
 //!     * [Rectangles (and squares)](./primitives/rectangle/struct.Rectangle.html)
