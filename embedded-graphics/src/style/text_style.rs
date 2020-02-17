@@ -166,8 +166,8 @@ where
     }
 
     /// Builds the text style.
-    pub fn build(&self) -> TextStyle<C, F> {
-        self.style.clone()
+    pub fn build(self) -> TextStyle<C, F> {
+        self.style
     }
 }
 

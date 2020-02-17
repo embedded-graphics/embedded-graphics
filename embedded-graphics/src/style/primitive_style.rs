@@ -183,7 +183,7 @@ where
     }
 
     /// Builds the primitive style.
-    pub fn build(&self) -> PrimitiveStyle<C> {
+    pub fn build(self) -> PrimitiveStyle<C> {
         self.style
     }
 }
