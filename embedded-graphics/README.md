@@ -1,11 +1,46 @@
+<p align="center">
+    <img width="150" src="https://raw.githubusercontent.com/jamwaffles/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true" alt="Embedded graphics logo">
+</p>
+<p align="center">
+    <a href="https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master"><img src="https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield" alt="Build Status"></a>
+    <a href="https://crates.io/crates/embedded-graphics"><img src="https://img.shields.io/crates/v/embedded-graphics.svg" alt="Crates.io"></a>
+    <a href="https://docs.rs/embedded-graphics"><img src="https://docs.rs/embedded-graphics/badge.svg" alt="Docs.rs"></a>
+    <a href="https://matrix.to/#/#rust-embedded-graphics:matrix.org"><img src="https://img.shields.io/matrix/rust-embedded-graphics:matrix.org" alt="embedded-graphics on Matrix"></a>
+</p>
+
 # Embedded graphics
 
-[![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
-[![Crates.io](https://img.shields.io/crates/v/embedded-graphics.svg)](https://crates.io/crates/embedded-graphics)
-[![Docs.rs](https://docs.rs/embedded-graphics/badge.svg)](https://docs.rs/embedded-graphics)
-[![embedded-graphics on Matrix](https://img.shields.io/matrix/rust-embedded-graphics:matrix.org)](https://matrix.to/#/#rust-embedded-graphics:matrix.org)
+Embedded-graphics is a 2D graphics library that is focused on memory constrained embedded devices.
+It contains build in items that make it easy to draw 2D graphics primitives:
 
-![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
+- Primitive shapes with stroke and/or fill
+  - Lines
+  - Rectangles
+  - Circles
+  - Triangles
+- Images from raw data
+- Text with multiple built in monospace fonts
+- additional functions are provided by [external crates](#additional-functions-provided-by-external-crates)
+
+A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
+`no_std` compatible and works without a dynamic memory allocator, and without pre-allocating large
+chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel values and
+positions are calculated on the fly, with the minimum of saved state. This allows the consuming
+application to use far less RAM at little to no performance penalty.
+
+To support many different kinds of display embedded-graphics doesn't include any drivers directly
+but provides an API that can be implemented by external crates. The [display
+drivers](#display-drivers) section contains a list of display drivers with embedded-graphics
+support. In addition to the drivers for real displays the
+[simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
+development.
+
+Other functions of embedded-graphics are also designed to be extended by the application or other
+crates. Examples of this are adding support for different image formats or implementing custom
+`Drawable` items. The [external crates](#additional-functions-provided-by-external-crates) section
+contains a list of crates that provide reusable extensions to embedded-graphics.
+
+More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
 
 ## Getting help/reporting an issue
 
@@ -15,41 +50,41 @@ If you need more deeper/more personalised help, please check out the [embedded-g
 
 ## [Documentation](https://docs.rs/embedded-graphics)
 
-A small 2D graphics library to draw things on embedded graphical LCDs, like the SSD1306 OLED display.
+![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 
-This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
-following built in items:
 
-- Raw data images
-- Primitives
-  - Lines
-  - Rectangles (and squares)
-  - Circles
-  - Triangles
-- Text with multiple fonts
-
-Additional functionality provided by external crates:
+## Additional functions provided by external crates
 
 - [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
 - [TGA images - `tinytga`](https://crates.io/crates/tinytga)
 - [ProFont monospace font - `profont`](https://crates.io/crates/profont)
 - [Picofont Pico8 font - `picofont`](https://crates.io/crates/picofont)
 
+Note that some of these crates may not support the latest version of embedded-graphics.
+
 If you know of a crate that is not in this list, please [open an
 issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 
-Note that some of these crates may not support the latest version of embedded-graphics.
+## Display drivers
 
-You can also add your own items by implementing `Drawable` on them. Additionally, all iterators over
-pixels (`Iterator<Item = Pixel<C>>`) have a default `Drawable` implementation already created.
+- [embedded-graphics-simulator](https://docs.rs/embedded-graphics-simulator/): Simulated display
+- [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
+- [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
+- [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
+- [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
+- [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
+- [ssd1322](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
+- [ssd1331](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
+- [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
+- [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
+- [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
+- [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
 
-A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
-`no_std` compatible and works without a dynamic memory allocator, and without pre-allocating large
-chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel values and
-positions are calculated on the fly, with the minimum of saved state. This allows the consuming
-application to use far less RAM at little to no performance penalty.
+Note that some drivers may not support the latest version of embedded-graphics.
 
-More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
+There may be other drivers out there we don't know about yet. If you know of a driver to add to this list, please open [an issue](https://github.com/jamwaffles/embedded-graphics/issues/new)!
+
+## Example
 
 Example usage can be found [in the simulator](./simulator/examples):
 
@@ -154,26 +189,6 @@ fn main() {
 
 - `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
   support to enable conversions from `nalgebra::Vector2` to `Coord` and `UnsignedCoord`.
-- `bmp` - use the [TinyBMP](https://crates.io/crates/tinybmp) crate for BMP image support.
-- `tga` - use the [TinyTGA](https://crates.io/crates/tinytga) crate for TGA image support.
-
-## Display drivers with embedded-graphics support
-
-Some drivers may not support the latest version of embedded-graphics.
-
-- [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
-- [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
-- [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
-- [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
-- [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
-- [ssd1322](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
-- [ssd1331](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
-- [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
-- [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
-- [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
-- [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
-
-There may be other drivers out there we don't know about yet. If you know of a driver to add to this list, please open [an issue](https://github.com/jamwaffles/embedded-graphics/issues/new)!
 
 ## Development setup
 
