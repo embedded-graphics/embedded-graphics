@@ -191,11 +191,7 @@ where
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(
-            self.image_data
-                .pixel_iter()
-                .map(|p| Pixel(p.0 + self.offset, p.1)),
-        )
+        display.draw_iter(self.into_iter())
     }
 }
 
