@@ -25,7 +25,7 @@
 //! let tga =
 //!     Tga::from_slice(include_bytes!("../../../simulator/examples/rust-pride.tga")).unwrap();
 //!
-//! let image = Image::new(&tga, Point::zero());
+//! let image: Image<Tga, Rgb565> = Image::new(&tga, Point::zero());
 //!
 //! image.draw(&mut display);
 //!
@@ -133,7 +133,7 @@ impl<I, C> Transform for Image<'_, I, C> {
     ///
     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    /// let image = Image::new(&image, Point::zero());
+    /// let image: Image<_, BinaryColor> = Image::new(&image, Point::zero());
     ///
     /// let image_moved = image.translate(Point::new(10, 20));
     ///
@@ -167,7 +167,7 @@ impl<I, C> Transform for Image<'_, I, C> {
     ///
     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    /// let mut image = Image::new(&image, Point::zero());
+    /// let mut image: Image<_, BinaryColor> = Image::new(&image, Point::zero());
     ///
     /// image.translate_mut(Point::new(10, 20));
     ///

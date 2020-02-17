@@ -62,7 +62,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// // raw data gets converted into.
 /// let raw_image: ImageRaw<BinaryColor> = ImageRaw::new(DATA, 12, 5);
 ///
-/// let image = Image::new(&raw_image, Point::zero());
+/// let image: Image<_, BinaryColor> = Image::new(&raw_image, Point::zero());
 ///
 /// let mut display = Display::default();
 ///
