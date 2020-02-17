@@ -78,17 +78,20 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::ImageTga,
+//!     image::Image,
 //!     mock_display::MockDisplay,
 //!     pixelcolor::{Rgb888, RgbColor},
 //!     prelude::*,
 //! };
+//! use tinytga::Tga;
 //!
 //! let data = include_bytes!("../../tinytga/tests/type1_tl.tga");
 //!
-//! let image: ImageTga<Rgb888> = ImageTga::new(data).unwrap();
+//! let tga = Tga::from_slice(data).unwrap();
 //!
-//! let mut display = MockDisplay::new();
+//! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+//!
+//! let mut display: MockDisplay<Rgb888> = MockDisplay::new();
 //!
 //! image.draw(&mut display);
 //!

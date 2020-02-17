@@ -1,9 +1,5 @@
-use crate::display::SimulatorDisplay;
-use crate::theme::BinaryColorTheme;
-use crate::window::Window;
-use embedded_graphics::geometry::Size;
-use embedded_graphics::pixelcolor::PixelColor;
-use embedded_graphics::DrawTarget;
+use crate::{display::SimulatorDisplay, theme::BinaryColorTheme, window::Window};
+use embedded_graphics::{geometry::Size, pixelcolor::PixelColor, DrawTarget};
 
 /// Builder for simulator windows.
 #[derive(Debug)]

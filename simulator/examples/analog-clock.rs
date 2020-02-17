@@ -8,15 +8,17 @@
 
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
-use embedded_graphics::fonts::{Font12x16, Text};
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rectangle};
-use embedded_graphics::style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled, TextStyle};
-use embedded_graphics::{egcircle, primitive_style};
+use embedded_graphics::{
+    egcircle,
+    fonts::{Font12x16, Text},
+    pixelcolor::BinaryColor,
+    prelude::*,
+    primitive_style,
+    primitives::{Circle, Line, Rectangle},
+    style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled, TextStyle},
+};
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
-use std::thread;
-use std::time::Duration;
+use std::{thread, time::Duration};
 
 /// The width and height of the simulated display
 const DISP_SIZE: i32 = 256;

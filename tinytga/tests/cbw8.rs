@@ -38,7 +38,7 @@ fn cbw8() {
         })
     );
 
-    let pixels = img.into_iter().collect::<Vec<u32>>();
+    let pixels = img.into_iter().collect::<Vec<_>>();
 
     assert_eq!(pixels.len(), 128 * 128);
 }

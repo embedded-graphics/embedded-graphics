@@ -1,8 +1,12 @@
 //! Small BMP format image parser supporting no-std environments. Specifically designed to work with
-//! [embedded-graphics](https://crates.io/crates/embedded-graphics)
+//! [embedded-graphics]
+//!
+//! # Examples
+//!
+//! ## Load a BMP image and check its [`Header`] and returned pixels.
 //!
 //! ```rust
-//! use tinybmp::{Bmp, FileType, Header};
+//! use tinybmp::{Bmp, FileType, Header, Pixel};
 //!
 //! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
 //!     .expect("Failed to parse BMP image");
@@ -26,12 +30,39 @@
 //! // Check that raw image data slice is the correct length (according to parsed header)
 //! assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
 //!
-//! // Get an iterator over the pixels in this image and load into a vec
-//! let pixels: Vec<u32> = bmp.into_iter().collect();
+//! // Get an iterator over the pixel coordinates and values in this image and load into a vec
+//! let pixels: Vec<Pixel> = bmp.into_iter().collect();
 //!
 //! // Loaded example image is 8x8px
 //! assert_eq!(pixels.len(), 8 * 8);
 //! ```
+//!
+//! ## Integrate with `embedded-graphics`
+//!
+//! This example loads a 16BPP image and draws it to an [embedded-graphics] compatible display.
+//!
+//! The `graphics` feature must be enabled for embedded-graphics support.
+//!
+//! ```rust
+//! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
+//! use embedded_graphics::{image::Image, prelude::*};
+//! use tinybmp::Bmp;
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # use embedded_graphics::pixelcolor::Rgb565;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//!
+//! // Load 16BPP 8x8px image
+//! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+//!
+//! let image = Image::new(&bmp, Point::zero());
+//!
+//! image.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! # } }
+//! ```
+//!
+//! [embedded-graphics]: https://crates.io/crates/embedded-graphics
+//! [`Header`]: ./header/struct.Header.html
 
 #![no_std]
 #![deny(missing_docs)]
@@ -39,9 +70,13 @@
 
 mod check_readme;
 mod header;
+mod pixel;
 
 use crate::header::parse_header;
-pub use crate::header::{FileType, Header};
+pub use crate::{
+    header::{FileType, Header},
+    pixel::Pixel,
+};
 
 /// A BMP-format bitmap
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -86,7 +121,6 @@ impl<'a> Bmp<'a> {
     }
 
     /// Get the BPP (bits per pixel) for this image
-    // TODO: Should this return an enum?
     pub fn bpp(&self) -> u32 {
         u32::from(self.header.bpp)
     }
@@ -102,7 +136,7 @@ impl<'a> Bmp<'a> {
 }
 
 impl<'a> IntoIterator for &'a Bmp<'a> {
-    type Item = u32;
+    type Item = Pixel;
     type IntoIter = BmpIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -152,12 +186,15 @@ pub struct BmpIterator<'a> {
 }
 
 impl<'a> Iterator for BmpIterator<'a> {
-    type Item = u32;
+    type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
         let px = self.pixel_data;
 
         if self.y < self.bmp.height() {
+            let x = self.x;
+            let y = self.y;
+
             if self.x == 0 {
                 let row_index = (self.bmp.height() - 1) - self.y;
                 let row_start = self.bmp.bytes_per_row() * row_index as usize;
@@ -184,9 +221,76 @@ impl<'a> Iterator for BmpIterator<'a> {
 
             self.start_idx += self.pixel_stride;
 
-            Some(pixel_value)
+            Some(Pixel {
+                x,
+                y,
+                color: pixel_value,
+            })
         } else {
             None
         }
     }
 }
+
+#[cfg(feature = "graphics")]
+mod e_g {
+    use super::*;
+    use core::marker::PhantomData;
+    use embedded_graphics::{
+        drawable::Pixel as EgPixel,
+        geometry::Point,
+        image::{ImageDimensions, IntoPixelIter},
+        pixelcolor::{raw::RawData, PixelColor},
+    };
+
+    /// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration
+    ///
+    /// [`BmpIterator`]: ./struct.BmpIterator.html
+    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
+    #[derive(Debug)]
+    pub struct EgPixelIterator<'a, C> {
+        it: BmpIterator<'a>,
+        c: PhantomData<C>,
+    }
+
+    impl<'a, C> Iterator for EgPixelIterator<'a, C>
+    where
+        C: PixelColor + From<<C as PixelColor>::Raw>,
+    {
+        type Item = EgPixel<C>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.it.next().map(|p| {
+                let raw = C::Raw::from_u32(p.color);
+                EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
+            })
+        }
+    }
+
+    impl ImageDimensions for Bmp<'_> {
+        fn width(&self) -> u32 {
+            Bmp::width(&self)
+        }
+
+        fn height(&self) -> u32 {
+            Bmp::height(&self)
+        }
+    }
+
+    impl<'a, C> IntoPixelIter<C> for &'a Bmp<'_>
+    where
+        C: PixelColor + From<<C as PixelColor>::Raw>,
+    {
+        type PixelIterator = EgPixelIterator<'a, C>;
+
+        fn pixel_iter(self) -> Self::PixelIterator {
+            EgPixelIterator {
+                it: self.into_iter(),
+                c: PhantomData,
+            }
+        }
+    }
+}
+
+#[cfg(feature = "graphics")]
+pub use e_g::*;

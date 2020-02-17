@@ -37,7 +37,7 @@ fn chessboard_rle() {
         })
     );
 
-    let pixels = img.into_iter().collect::<Vec<u32>>();
+    let pixels = img.into_iter().map(|p| p.color).collect::<Vec<u32>>();
 
     dbg!(&pixels);
 

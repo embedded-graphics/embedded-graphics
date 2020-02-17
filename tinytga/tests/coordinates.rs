@@ -1,8 +1,8 @@
 use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
 
 #[test]
-fn chessboard_4px_rle() {
-    let data = include_bytes!("./chessboard_4px_rle.tga");
+fn coordinates() {
+    let data = include_bytes!("./chessboard_4px_raw.tga");
 
     let img = Tga::from_slice(data).unwrap();
 
@@ -16,7 +16,7 @@ fn chessboard_4px_rle() {
         TgaHeader {
             id_len: 0,
             has_color_map: false,
-            image_type: ImageType::RleTruecolor,
+            image_type: ImageType::Truecolor,
             color_map_start: 0,
             color_map_len: 0,
             color_map_depth: 0,
@@ -37,30 +37,31 @@ fn chessboard_4px_rle() {
         })
     );
 
-    let pixels = img.into_iter().map(|p| p.color).collect::<Vec<u32>>();
+    let coords = img
+        .into_iter()
+        .map(|p| (p.x, p.y))
+        .collect::<Vec<(u32, u32)>>();
 
-    // dbg!(&pixels);
-
-    assert_eq!(pixels.len(), 4 * 4);
+    assert_eq!(coords.len(), 4 * 4);
     assert_eq!(
-        pixels,
+        coords,
         vec![
-            0x00ffffffu32,
-            0x00000000,
-            0x00ffffff,
-            0x00000000,
-            0x00000000,
-            0x00ff0000,
-            0x00000000,
-            0x0000ff00,
-            0x00ffffff,
-            0x00000000,
-            0x000000ff,
-            0x00000000,
-            0x00000000,
-            0x00ffffff,
-            0x00000000,
-            0x00ffffff,
+            (0, 0),
+            (1, 0),
+            (2, 0),
+            (3, 0),
+            (0, 1),
+            (1, 1),
+            (2, 1),
+            (3, 1),
+            (0, 2),
+            (1, 2),
+            (2, 2),
+            (3, 2),
+            (0, 3),
+            (1, 3),
+            (2, 3),
+            (3, 3),
         ]
     );
 }

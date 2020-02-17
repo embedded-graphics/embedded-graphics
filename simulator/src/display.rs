@@ -1,7 +1,9 @@
-use embedded_graphics::drawable::Pixel;
-use embedded_graphics::geometry::{Point, Size};
-use embedded_graphics::pixelcolor::{BinaryColor, PixelColor};
-use embedded_graphics::DrawTarget;
+use embedded_graphics::{
+    drawable::Pixel,
+    geometry::{Point, Size},
+    pixelcolor::{BinaryColor, PixelColor},
+    DrawTarget,
+};
 
 /// Display
 pub struct SimulatorDisplay<C> {

@@ -1,8 +1,8 @@
 //! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
 
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::{egcircle, egrectangle, egtriangle, primitive_style};
+use embedded_graphics::{
+    egcircle, egrectangle, egtriangle, pixelcolor::BinaryColor, prelude::*, primitive_style,
+};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 static CIRCLE_SIZE: i32 = 32;

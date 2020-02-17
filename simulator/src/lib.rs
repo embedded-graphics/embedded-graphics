@@ -86,7 +86,9 @@ mod theme;
 mod window;
 mod window_builder;
 
-pub use crate::display::SimulatorDisplay;
-pub use crate::theme::BinaryColorTheme;
-pub use crate::window::{SimulatorEvent, Window};
-pub use crate::window_builder::WindowBuilder;
+pub use crate::{
+    display::SimulatorDisplay,
+    theme::BinaryColorTheme,
+    window::{SimulatorEvent, Window},
+    window_builder::WindowBuilder,
+};

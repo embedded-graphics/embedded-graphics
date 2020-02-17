@@ -1,8 +1,11 @@
-use embedded_graphics::fonts::{Font12x16, Font6x12, Font6x8, Font8x16, Text};
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::style::{TextStyle, TextStyleBuilder};
-use embedded_graphics::{egtext, text_style};
+use embedded_graphics::{
+    egtext,
+    fonts::{Font12x16, Font6x12, Font6x8, Font8x16, Text},
+    pixelcolor::BinaryColor,
+    prelude::*,
+    style::{TextStyle, TextStyleBuilder},
+    text_style,
+};
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {
