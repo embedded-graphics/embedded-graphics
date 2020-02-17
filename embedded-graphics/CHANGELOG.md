@@ -6,7 +6,6 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- Added [hub75](https://crates.io/crates/hub75) driver to list of known supported drivers.
 - Added as many `#[derive()]`s as possible to all embedded-graphics, tinybmp and tinytga types.
 - Added `From<Point> for [i32; 2]`
 - Added `From<Size> for [u32; 2]`
@@ -16,13 +15,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `TryFrom<Point>` for `[u32; 2]`
   - `TryFrom<[u32; 2]>` for `Point`
   - `TryFrom<&[u32; 2]>` for `Point`
-- #247 Added the `ImageData` trait. This trait should be implemented if adding embedded-graphics support to an image format crate.
-- #247 Added `Image` wrapper struct. This should be used to wrap image types that implement `ImageData`, e.g. from `tinytga`, `tinybmp`.
+- #247 Added the `ImageData` trait. This trait can be implemented in an image format crate to add embedded-graphics support.
+- #247 Added `Image` drawable. The `Image` drawable is used to make an implementation of `ImageData`, e.g. from `tinytga` or `tinybmp`, drawable to a `DrawTarget`, like a display.
 
 ### Changed
 
-- **(breaking)** #247 `ImageLE` and `ImageBE` are renamed to `ImageRawLE` and `ImageRawBE` respectively.
 - **(breaking)** #247 The raw data `Image` struct is renamed to `ImageRaw`. The `Image` name is reused as a wrapper for other image types that implement the `ImageData` trait.
+- **(breaking)** #247 `ImageLE` and `ImageBE` are renamed to `ImageRawLE` and `ImageRawBE` respectively.
 - **(breaking)** #247 `ImageTga` and `ImageTga` are removed, along with their respective enabling features `bmp` and `tga`. To use BMP or TGA images, add `tinybmp` or `tinytga` to your dependencies with the `graphics` feature enabled. This allows usage of `Bmp` and `Tga` in embedded-graphics contexts. Tinybmp or tinytga usage now looks like this:
 
   `Cargo.toml`:
@@ -44,9 +43,9 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   display.draw(&image);
   ```
 
-- Expose `mock_display::MockDisplay` for use in tests, examples, etc in crates that pull embedded-graphics in as a dependency.
 - **(breaking)** #243 All methods on `DrawTarget` that handle drawing to/updating the display are now fallible and return `Result<(), Self::Error>` to allow for error handling in user code. This also affects `Drawable::draw()`, which now propagates any errors that occur while drawing.
 - **(breaking)** #243 `DrawTarget::flush()` is removed. The display driver itself should provide this method if required.
+- Expose `mock_display::MockDisplay` for use in tests, examples, etc in crates that pull embedded-graphics in as a dependency.
 
 ## 0.6.0-alpha.3
 
