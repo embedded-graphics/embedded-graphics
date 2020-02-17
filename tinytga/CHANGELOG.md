@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.0] - 2020-02-17
+
 - **(breaking)** #247 "reverse" integration of tinytga into [`embedded-graphics`](https://crates.io/crates/embedded-graphics). tinytga now has a `graphics` feature that must be turned on to enable embedded-graphics support. The `tga` feature from embedded-graphics is removed.
 
   **Before**
@@ -61,5 +63,6 @@
 - #218 Test README examples in CI and update them to work with latest crate versions.
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/tinytga/compare/tinytga-v0.3.0...HEAD
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/tinytga-v0.2.0...HEAD
+[0.3.0]: https://github.com/jamwaffles/embedded-graphics/compare/tinytga-v0.2.0...tinytga-v0.3.0
