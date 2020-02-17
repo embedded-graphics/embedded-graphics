@@ -16,7 +16,7 @@
 //! an additional intensity bit.
 //!
 //! ```rust
-//! use embedded_graphics::{image::ImageRawLE, pixelcolor::raw::RawU4, prelude::*};
+//! use embedded_graphics::{image::ImageRaw, pixelcolor::raw::RawU4, prelude::*};
 //!
 //! /// RGBI color
 //! #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -65,7 +65,7 @@
 //!
 //! fn main() {
 //!     // Create new image with RGBI colors.
-//!     let image: ImageRawLE<RGBI> = ImageRawLE::new(IMAGE_DATA, 2, 2);
+//!     let image: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
 //!
 //!     // In a real application the image could now be drawn to a display:
 //!     // display.draw(&image);

@@ -4,9 +4,9 @@
 //! [`ImageDimensions`] and [`IntoPixelIter`] traits. These provide a common interface to image metadata
 //! and an iterator over individual pixel values respectively.
 //!
-//! The [`Image`] struct is a wrapper around items that implement [`ImageDimensions`] and allows them to
-//! be drawn to a [`DrawTarget`], reading pixel values from the implementation of
-//! [`IntoPixelIter`].
+//! The [`Image`] struct is a wrapper around items that implement both [`ImageDimensions`] and
+//! [`IntoPixelIter`] and allows them to be drawn to a [`DrawTarget`], reading pixel values from the
+//! implementation of [`IntoPixelIter`].
 //!
 //! # Examples
 //!
@@ -52,7 +52,7 @@ use crate::{
 use core::fmt::Debug;
 use core::{fmt, marker::PhantomData};
 
-/// Image data iterator trait
+/// Conversion into an iterator over the pixels of the image.
 pub trait IntoPixelIter<C>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -64,10 +64,10 @@ where
     fn pixel_iter(self) -> Self::PixelIterator;
 }
 
-/// Image data trait
+/// A trait to get the dimensions of an image.
 ///
-/// This trait provides an interface to common image metadata. It should be implemented along with
-/// [`IntoPixelIter`] for full embedded-graphics integration.
+/// This trait provides an interface to get the width and height of an image. It should be
+/// implemented along with [`IntoPixelIter`] for full embedded-graphics integration.
 pub trait ImageDimensions {
     /// Get the width in pixels of an image
     fn width(&self) -> u32;
@@ -76,16 +76,21 @@ pub trait ImageDimensions {
     fn height(&self) -> u32;
 }
 
-/// Image support for embedded-graphics
+/// Image drawable.
 ///
 /// The `Image` struct serves as a wrapper around other image types that provide pixel data decoded
-/// from a given format (raw bytes, BMP, TGA, etc).
+/// from a given format (raw bytes, BMP, TGA, etc). It allows an image to be repositioned using
+/// [`Transform::translate()`] or [`Transform::translate_mut()`] and drawn to a display that
+/// implements the [`DrawTarget`] trait.
 ///
 /// `Image` accepts any item that implements `ImageDimensions` and `&'_ IntoPixelIter`.
 ///
 /// Refer to the [module documentation] for examples.
 ///
 /// [module documentation]: ./index.html
+/// [`Transform::translate()`]: ../transform/trait.Transform.html#tymethod.translate
+/// [`Transform::translate_mut()`]: ../transform/trait.Transform.html#tymethod.translate_mut
+/// [`DrawTarget`]: ../trait.DrawTarget.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, I, C> {
     image_data: &'a I,
@@ -99,7 +104,7 @@ where
     I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// Create a new `Image` with a given [`IntoPixelIter`]
+    /// Create a new `Image` with the given image pixel data.
     ///
     /// The passed [`IntoPixelIter`] provides a source of pixel data from the original image.
     ///

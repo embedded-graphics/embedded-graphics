@@ -25,11 +25,11 @@
 //! iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default [`Drawable`] implementation
 //! already created.
 //!
-//! A core goal of embedded-graphics is to draw graphics without using any buffers; the crate should
-//! work without a dynamic memory allocator and without pre-allocating large chunks of memory. To
-//! achieve this, it takes an `Iterator` based approach, where pixel values and positions are
-//! calculated on the fly, with the minimum of saved state. This allows the consuming application to
-//! use far less RAM at little to no performance penalty.
+//! A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
+//! `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating
+//! large chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel
+//! values and positions are calculated on the fly, with the minimum of saved state. This allows the
+//! consuming application to use far less RAM at little to no performance penalty.
 //!
 //! # Supported displays
 //!
