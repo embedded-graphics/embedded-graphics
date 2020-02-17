@@ -6,7 +6,7 @@
 
 ## [Unreleased] - ReleaseDate
 
-## [0.2.0] - 2020-02-17
+## [0.2.1] - 2020-02-17
 
 ### Added
 
@@ -75,4 +75,4 @@
 <!-- next-url -->
 [unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.0...HEAD
 
-[0.2.0]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...tinybmp-v0.2.0
+[0.2.1]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...tinybmp-v0.2.1
