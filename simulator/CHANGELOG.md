@@ -2,7 +2,9 @@
 
 [`embedded-graphics-simulator`](https://crates.io/crates/embedded-graphics-simulator) is an SDL-based simulator for testing, debugging and developing [`embedded-graphics`](https://crates.io/crates/embedded-graphics) applications.
 
-## Unreleased
+<!-- next-header -->
+
+## [Unreleased] - ReleaseDate
 
 ### Added
 
@@ -31,3 +33,7 @@
 
 - The simulator is now [available on crates.io](https://crates.io/crates/embedded-graphics-simulator) as a standalone crate. You can now create simulated displays for testing out embedded_graphics code or showing off cool examples.
 - The builtin simulator now supports colour pixel types, like `RGB565`.
+
+<!-- next-url -->
+
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-simulator-v0.2.0-alpha.1...HEAD

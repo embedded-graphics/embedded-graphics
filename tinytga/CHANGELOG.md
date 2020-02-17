@@ -2,7 +2,9 @@
 
 [`tinytga`](https://crates.io/crates/tinytga) is a no_std, low memory footprint TGA loading library for embedded applications.
 
-## Unreleased
+<!-- next-header -->
+
+## [Unreleased] - ReleaseDate
 
 - **(breaking)** #247 "reverse" integration of tinytga into [`embedded-graphics`](https://crates.io/crates/embedded-graphics). tinytga now has a `graphics` feature that must be turned on to enable embedded-graphics support. The `tga` feature from embedded-graphics is removed.
 
@@ -57,3 +59,7 @@
 - #217 Images without a TGA footer are now parsed correctly.
 - #216 Fixed integer overflow for some RLE compressed TGA files.
 - #218 Test README examples in CI and update them to work with latest crate versions.
+
+<!-- next-url -->
+
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/tinytga-v0.2.0...HEAD

@@ -2,7 +2,9 @@
 
 [`tinybmp`](https://crates.io/crates/tinybmp) is a no_std, low memory footprint BMP loading library for embedded applications.
 
-## Unreleased
+<!-- next-header -->
+
+## [Unreleased] - ReleaseDate
 
 ### Added
 
@@ -67,3 +69,7 @@
 ### Added
 
 - Release `tinybmp` crate to crates.io
+
+<!-- next-url -->
+
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...HEAD
