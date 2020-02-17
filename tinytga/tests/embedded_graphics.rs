@@ -1,11 +1,9 @@
-use crate::{
+use embedded_graphics::{
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
+    geometry::Point,
     image::Image,
     mock_display::MockDisplay,
-    pixelcolor::{raw::RawData, Gray8, PixelColor, Rgb888, RgbColor},
-    transform::Transform,
-    DrawTarget,
+    pixelcolor::{Gray8, Rgb888, RgbColor},
 };
 use tinytga::Tga;
 
@@ -29,9 +27,9 @@ const PIXEL_COLORS: [(i32, i32, Rgb888); 16] = [
 ];
 
 #[test]
-fn chessboard_compressed() -> Result<(), ()> {
-    let im = Tga::from_slice(include_bytes!("../../tests/chessboard_rle.tga"))?;
-    let im: ImageTga<Rgb888> = Image::new(&im);
+fn chessboard_compressed() {
+    let im = Tga::from_slice(include_bytes!("./chessboard_4px_rle.tga")).unwrap();
+    let im: Image<_, Rgb888> = Image::new(&im, Point::zero());
 
     let mut pixels = im.into_iter();
 
@@ -46,14 +44,12 @@ fn chessboard_compressed() -> Result<(), ()> {
 
     // 17th iteration should have no pixels from 4x4px image
     assert_eq!(pixels.next(), None);
-
-    Ok(())
 }
 
 #[test]
-fn chessboard_uncompressed() -> Result<(), ()> {
-    let im = Tga::from_slice(include_bytes!("../../tests/chessboard_raw.tga"))?;
-    let im: ImageTga<Rgb888> = Image::new(&im);
+fn chessboard_uncompressed() {
+    let im = Tga::from_slice(include_bytes!("./chessboard_raw.tga")).unwrap();
+    let im: Image<_, Rgb888> = Image::new(&im, Point::zero());
 
     let mut pixels = im.into_iter();
 
@@ -68,13 +64,11 @@ fn chessboard_uncompressed() -> Result<(), ()> {
 
     // 17th iteration should have no pixels from 4x4px image
     assert_eq!(pixels.next(), None);
-
-    Ok(())
 }
 
 fn test_color_tga(data: &[u8]) {
     let im = Tga::from_slice(data).unwrap();
-    let image: ImageTga<Rgb888> = Image::new(&im);
+    let image: Image<_, Rgb888> = Image::new(&im, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -93,7 +87,7 @@ fn test_color_tga(data: &[u8]) {
 
 fn test_gray_tga(data: &[u8]) {
     let im = Tga::from_slice(data).unwrap();
-    let image: ImageTga<Gray8> = Image::new(&im);
+    let image: Image<_, Gray8> = Image::new(&im, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -114,76 +108,76 @@ fn test_gray_tga(data: &[u8]) {
 #[test]
 #[ignore]
 fn type1_bl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type1_bl.tga"));
+    test_color_tga(include_bytes!("./type1_bl.tga"));
 }
 
 /// Tests color mapped, uncompressed, top left origin TGA file.
 #[test]
 fn type1_tl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type1_tl.tga"));
+    test_color_tga(include_bytes!("./type1_tl.tga"));
 }
 
 /// Tests true color, uncompressed, bottom left origin TGA file.
 #[test]
 #[ignore]
 fn type2_bl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type2_bl.tga"));
+    test_color_tga(include_bytes!("./type2_bl.tga"));
 }
 
 /// Tests true color, uncompressed, top left origin TGA file.
 #[test]
 fn type2_tl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type2_tl.tga"));
+    test_color_tga(include_bytes!("./type2_tl.tga"));
 }
 
 /// Tests grayscale, uncompressed, bottom left origin TGA file.
 #[test]
 #[ignore]
 fn type3_bl() {
-    test_gray_tga(include_bytes!("../../../tinytga/tests/type3_bl.tga"));
+    test_gray_tga(include_bytes!("./type3_bl.tga"));
 }
 
 /// Tests grayscale, uncompressed, top left origin TGA file.
 #[test]
 fn type3_tl() {
-    test_gray_tga(include_bytes!("../../../tinytga/tests/type3_tl.tga"));
+    test_gray_tga(include_bytes!("./type3_tl.tga"));
 }
 
 /// Tests color mapped, RLE compressed, bottom left origin TGA file.
 #[test]
 #[ignore]
 fn type9_bl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type9_bl.tga"));
+    test_color_tga(include_bytes!("./type9_bl.tga"));
 }
 
 /// Tests color mapped, RLE compressed, top left origin TGA file.
 #[test]
 fn type9_tl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type9_tl.tga"));
+    test_color_tga(include_bytes!("./type9_tl.tga"));
 }
 
 /// Tests true color, RLE compressed, bottom left origin TGA file.
 #[test]
 #[ignore]
 fn type10_bl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type10_bl.tga"));
+    test_color_tga(include_bytes!("./type10_bl.tga"));
 }
 
 /// Tests true color, RLE compressed, top left origin TGA file.
 #[test]
 fn type10_tl() {
-    test_color_tga(include_bytes!("../../../tinytga/tests/type10_tl.tga"));
+    test_color_tga(include_bytes!("./type10_tl.tga"));
 }
 
 /// Tests grayscale, RLE compressed, bottom left origin TGA file.
 #[test]
 #[ignore]
 fn type11_bl() {
-    test_gray_tga(include_bytes!("../../../tinytga/tests/type11_bl.tga"));
+    test_gray_tga(include_bytes!("./type11_bl.tga"));
 }
 
 /// Tests grayscale, RLE compressed, top left origin TGA file.
 #[test]
 fn type11_tl() {
-    test_gray_tga(include_bytes!("../../../tinytga/tests/type11_tl.tga"));
+    test_gray_tga(include_bytes!("./type11_tl.tga"));
 }

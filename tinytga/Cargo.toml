@@ -20,7 +20,7 @@ circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
 [[test]]
 name = "embedded_graphics"
-required-features = ["postgres", "tools"]
+required-features = ["graphics"]
 
 [dependencies.nom]
 version = "5.1.0"

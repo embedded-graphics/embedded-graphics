@@ -4,13 +4,14 @@ use embedded_graphics::{
     image::Image,
     mock_display::MockDisplay,
     pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor},
+    transform::Transform,
 };
 use tinybmp::Bmp;
 
 #[test]
 fn negative_top_left() {
     let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image).translate(Point::new(-1, -1));
+    let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
     assert_eq!(image.top_left(), Point::new(-1, -1));
     assert_eq!(image.bottom_right(), Point::new(3, 3));
@@ -20,7 +21,7 @@ fn negative_top_left() {
 #[test]
 fn dimensions() {
     let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image).translate(Point::new(100, 200));
+    let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
     assert_eq!(image.top_left(), Point::new(100, 200));
     assert_eq!(image.bottom_right(), Point::new(104, 204));
@@ -31,7 +32,7 @@ fn dimensions() {
 #[ignore]
 fn it_can_have_negative_offsets() {
     let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image).translate(Point::new(-1, -1));
+    let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
     assert_eq!(image.into_iter().count(), 9);
 
@@ -69,7 +70,7 @@ where
 macro_rules! test_pattern {
     ($color_type:ident, $image_data:expr) => {
         let image = Bmp::from_slice($image_data).unwrap();
-        let image: Image<_, $color_type> = Image::new(&image);
+        let image: Image<_, $color_type> = Image::new(&image, Point::zero());
 
         let pattern = create_color_pattern();
 
@@ -113,7 +114,7 @@ fn colors_rgb888_32bit() {
 #[test]
 fn colors_grey8() {
     let image = Bmp::from_slice(include_bytes!("./colors_grey8.bmp")).unwrap();
-    let image: Image<_, Gray8> = Image::new(&image);
+    let image: Image<_, Gray8> = Image::new(&image, Point::zero());
 
     assert_eq!(image.size(), Size::new(3, 1));
 
@@ -138,7 +139,7 @@ fn colors_grey8() {
 #[test]
 fn issue_136_row_size_is_multiple_of_4_bytes() {
     let image = Bmp::from_slice(include_bytes!("./issue_136.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image);
+    let image: Image<_, Rgb565> = Image::new(&image, Point::zero());
 
     let mut display = MockDisplay::new();
     image
