@@ -1,4 +1,4 @@
-# Migrating from 0.5.x to 0.6.0
+# Migrating from embedded-graphics 0.5.x to 0.6.0
 
 ## Pixel colours
 
