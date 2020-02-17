@@ -152,14 +152,14 @@ where
     }
 
     /// Sets the text color.
-    pub fn text_color(&mut self, text_color: C) -> &mut Self {
+    pub fn text_color(mut self, text_color: C) -> Self {
         self.style.text_color = Some(text_color);
 
         self
     }
 
     /// Sets the background color.
-    pub fn background_color(&mut self, background_color: C) -> &mut Self {
+    pub fn background_color(mut self, background_color: C) -> Self {
         self.style.background_color = Some(background_color);
 
         self
