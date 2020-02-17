@@ -28,7 +28,7 @@ pub use text_style::{TextStyle, TextStyleBuilder};
 macro_rules! primitive_style {
     ($($style_key:ident = $style_value:expr ),* $(,)?) => {{
         #[allow(unused_mut)]
-        let  builder = $crate::style::PrimitiveStyleBuilder::new();
+        let builder = $crate::style::PrimitiveStyleBuilder::new();
 
         $( let builder = builder.$style_key($style_value); )*
 
