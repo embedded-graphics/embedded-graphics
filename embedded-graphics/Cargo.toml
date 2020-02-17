@@ -33,4 +33,4 @@ nalgebra_support = [ "nalgebra" ]
 
 [dev-dependencies]
 arrayvec = "0.5.1"
-tinytga = { version = "0.2.0", features = [ "graphics" ] }
+tinytga = { version = "0.3.0", features = [ "graphics" ] }
