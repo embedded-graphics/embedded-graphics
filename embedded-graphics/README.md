@@ -40,9 +40,8 @@ issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
-You can also add your own items by implementing [`Drawable`] on them. Additionally, all
-iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default [`Drawable`] implementation
-already created.
+You can also add your own items by implementing `Drawable` on them. Additionally, all iterators over
+pixels (`Iterator<Item = Pixel<C>>`) have a default `Drawable` implementation already created.
 
 A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
 `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating large
