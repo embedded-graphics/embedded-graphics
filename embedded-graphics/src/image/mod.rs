@@ -49,6 +49,7 @@ use crate::{
     pixelcolor::PixelColor,
     transform::Transform,
 };
+use core::fmt::Debug;
 use core::{fmt, marker::PhantomData};
 
 /// Image data iterator trait
@@ -237,15 +238,18 @@ where
     it: <&'b I as IntoPixelIter<C>>::PixelIterator,
 }
 
-impl<'a, 'b, I, C> fmt::Debug for ImageIterator<'a, 'b, I, C>
+impl<'a, 'b, I, C> Debug for ImageIterator<'a, 'b, I, C>
 where
-    &'b I: IntoPixelIter<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    &'b I: IntoPixelIter<C> + Debug,
+    <&'b I as IntoPixelIter<C>>::PixelIterator: Debug,
+    I: Debug,
+    C: PixelColor + From<<C as PixelColor>::Raw> + Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // The Debug derive didn't work anymore without additional trait bounds
-        // TODO: add fields
-        f.debug_struct("ImageIterator").finish()
+        f.debug_struct("ImageIterator")
+            .field("image", &self.image)
+            .field("it", &self.it)
+            .finish()
     }
 }
 
