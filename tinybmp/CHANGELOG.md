@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.0] - 2020-02-17
+
 ### Added
 
 - #244 Added `.into_iter()` support to the `Bmp` struct to get an iterator over every pixel in the image.
@@ -71,5 +73,6 @@
 - Release `tinybmp` crate to crates.io
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.0...HEAD
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...HEAD
+[0.2.0]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...tinybmp-v0.2.0
