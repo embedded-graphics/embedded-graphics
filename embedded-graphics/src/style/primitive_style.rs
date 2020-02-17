@@ -162,28 +162,28 @@ where
     }
 
     /// Sets the fill color.
-    pub fn fill_color(&mut self, fill_color: C) -> &mut Self {
+    pub fn fill_color(mut self, fill_color: C) -> Self {
         self.style.fill_color = Some(fill_color);
 
         self
     }
 
     /// Sets the stroke color.
-    pub fn stroke_color(&mut self, stroke_color: C) -> &mut Self {
+    pub fn stroke_color(mut self, stroke_color: C) -> Self {
         self.style.stroke_color = Some(stroke_color);
 
         self
     }
 
     /// Sets the stroke width.
-    pub fn stroke_width(&mut self, stroke_width: u32) -> &mut Self {
+    pub fn stroke_width(mut self, stroke_width: u32) -> Self {
         self.style.stroke_width = stroke_width;
 
         self
     }
 
     /// Builds the primitive style.
-    pub fn build(&self) -> PrimitiveStyle<C> {
+    pub fn build(self) -> PrimitiveStyle<C> {
         self.style
     }
 }
