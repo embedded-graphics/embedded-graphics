@@ -1,0 +1,9 @@
+no-dev-version = true
+pre-release-replacements = [
+  {file="CHANGELOG.md", search="[Uu]nreleased", replace="{{version}}"},
+  {file="CHANGELOG.md", search="\\.\\.\\.HEAD", replace="...{{tag_name}}"},
+  {file="CHANGELOG.md", search="ReleaseDate", replace="{{date}}"},
+  {file="CHANGELOG.md", search="<!-- next-header -->", replace="<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"},
+  {file="CHANGELOG.md", search="<!-- next-url -->", replace="<!-- next-url -->\n[unreleased]: https://github.com/jamwaffles/{{crate_name}}/compare/{{tag_name}}...HEAD"},
+]
+tag-message = "Release {{crate_name}} {{version}}"
