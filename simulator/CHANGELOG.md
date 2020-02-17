@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.0-beta.2] - 2020-02-17
+
 ### Added
 
 - #183 Added limited mouse and keyboard event handling to the simulator in order to simulate input devices such as touch screens, buttons, or rotary encoders.
@@ -35,5 +37,6 @@
 - The builtin simulator now supports colour pixel types, like `RGB565`.
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0-beta.2...HEAD
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-simulator-v0.2.0-alpha.1...HEAD
+[0.2.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-simulator-v0.2.0-alpha.1...embedded-graphics-simulator-v0.2.0-beta.2
