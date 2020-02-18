@@ -248,10 +248,7 @@ rustup update
 rustup component add rustfmt
 
 # Install SDL2 for simulator and PIP to install linkchecker
-sudo apt install libsdl2-dev python-pip
-
-# Install linkchecker so doc links can be checked
-sudo pip install linkchecker
+sudo apt install libsdl2-dev linkchecker
 ```
 
 ## Attribution
