@@ -105,4 +105,11 @@ mod tests {
         assert_eq!(RawU4::from(Gray4::new(0x6)), RawU4::new(0x6));
         assert_eq!(RawU8::from(Gray8::new(0x7E)), RawU8::new(0x7E));
     }
+
+    #[test]
+    fn convert_to_raw() {
+        let color = Gray8::new(0xaa);
+
+        assert_eq!(color.into_raw(), 0xaau8);
+    }
 }

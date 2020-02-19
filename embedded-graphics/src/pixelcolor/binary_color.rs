@@ -203,4 +203,10 @@ mod tests {
         assert!(!BinaryColor::Off.is_on());
         assert!(BinaryColor::On.is_on());
     }
+
+    #[test]
+    fn into_raw() {
+        assert_eq!(BinaryColor::Off.into_raw(), 0u8);
+        assert_eq!(BinaryColor::On.into_raw(), 1u8);
+    }
 }
