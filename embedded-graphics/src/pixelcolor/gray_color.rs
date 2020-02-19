@@ -34,6 +34,10 @@ macro_rules! gray_color {
 
         impl PixelColor for $type {
             type Raw = $raw_type;
+
+            fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
+                self.luma()
+            }
         }
 
         impl GrayColor for $type {

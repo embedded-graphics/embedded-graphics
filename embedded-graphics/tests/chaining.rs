@@ -3,7 +3,7 @@ extern crate embedded_graphics;
 use embedded_graphics::{
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
-    pixelcolor::PixelColor,
+    pixelcolor::{raw::RawData, PixelColor},
     primitives::{Circle, Line, Primitive, Rectangle},
     style::PrimitiveStyle,
     DrawTarget,
@@ -16,6 +16,10 @@ pub struct TestPixelColor(pub bool);
 
 impl PixelColor for TestPixelColor {
     type Raw = ();
+
+    fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
+        ()
+    }
 }
 
 impl From<u8> for TestPixelColor {

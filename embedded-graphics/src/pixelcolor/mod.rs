@@ -25,6 +25,10 @@
 //! /// converted to raw data for the display and isn't stored in images.
 //! impl PixelColor for EpdColor {
 //!     type Raw = ();
+//!
+//!     fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
+//!         ()
+//!     }
 //! }
 //!
 //! /// Mock EPD display.
@@ -109,4 +113,7 @@ pub trait PixelColor: Copy + PartialEq {
     ///
     /// [`raw` module documentation]: raw/index.html
     type Raw: raw::RawData;
+
+    /// TODO: Docs
+    fn into_raw(&self) -> <Self::Raw as raw::RawData>::Storage;
 }

@@ -146,6 +146,10 @@ macro_rules! impl_rgb_color {
 
         impl PixelColor for $type {
             type Raw = $data_type;
+
+            fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
+                self.0
+            }
         }
 
         impl From<$data_type> for $type {
@@ -294,5 +298,12 @@ mod tests {
 
         let color: Bgr555 = RawU16::from(0xFFFF).into();
         assert_eq!(RawU16::from(color).into_inner(), 0x7FFF);
+    }
+
+    #[test]
+    fn convert_to_raw() {
+        let color = Rgb888::new(0xaa, 0xbb, 0xcc);
+
+        assert_eq!(color.into_raw(), 0x00aabbcc);
     }
 }

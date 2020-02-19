@@ -117,6 +117,10 @@ impl BinaryColor {
 
 impl PixelColor for BinaryColor {
     type Raw = RawU1;
+
+    fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
+        self.map_color(0, 1)
+    }
 }
 
 impl From<RawU1> for BinaryColor {
