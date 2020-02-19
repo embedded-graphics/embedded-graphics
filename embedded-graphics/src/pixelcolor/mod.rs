@@ -114,6 +114,22 @@ pub trait PixelColor: Copy + PartialEq {
     /// [`raw` module documentation]: raw/index.html
     type Raw: raw::RawData;
 
-    /// TODO: Docs
+    /// Convert the `PixelColor` into its raw storage form
+    ///
+    /// # Examples
+    ///
+    /// ## Get the `u16` representing an `Rgb565` color
+    ///
+    /// This example converts an [`Rgb565`] color into its underlying `u16` represenation.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{prelude::*, pixelcolor::Rgb565};
+    ///
+    /// let color = Rgb565::new(0xff, 0x00, 0xaa);
+    ///
+    /// let raw: u16 = color.into_raw();
+    ///
+    /// assert_eq!(raw, 0b11111_000000_01010);
+    /// ```
     fn into_raw(&self) -> <Self::Raw as raw::RawData>::Storage;
 }
