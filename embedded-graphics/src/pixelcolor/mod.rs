@@ -91,6 +91,7 @@ mod rgb_color;
 
 pub use binary_color::*;
 pub use gray_color::*;
+use raw::RawData;
 pub use rgb_color::*;
 
 /// Pixel color trait.
@@ -108,5 +109,48 @@ pub trait PixelColor: Copy + PartialEq {
     /// See the [`raw` module documentation] for more details.
     ///
     /// [`raw` module documentation]: raw/index.html
-    type Raw: raw::RawData;
+    type Raw: RawData;
+}
+
+/// Convert a [`PixelColor`] into its underlying storage type
+///
+/// This trait provides the `into_storage` method for implementors of [`PixelColor`]. This method
+/// exposes the underlying storage value of a pixel color type.
+///
+/// # Examples
+///
+/// ## Get the `u16` representing an `Rgb565` color
+///
+/// This example converts an [`Rgb565`] color into its underlying `u16` represenation.
+///
+/// ```rust
+/// use embedded_graphics::{prelude::*, pixelcolor::Rgb565};
+///
+/// let color = Rgb565::new(0x1f, 0x00, 0x0a);
+///
+/// let raw = color.into_storage();
+///
+/// assert_eq!(raw, 0b11111_000000_01010u16);
+/// ```
+///
+/// [`PixelColor`]: ./trait.PixelColor.html
+/// [`Rgb565`]: ./struct.Rgb565.html
+pub trait IntoStorage {
+    /// The underlying storage type for the pixel color
+    type Storage;
+
+    /// Convert the `PixelColor` into its raw storage form
+    fn into_storage(self) -> Self::Storage;
+}
+
+impl<C> IntoStorage for C
+where
+    C: PixelColor,
+    C::Raw: From<C>,
+{
+    type Storage = <<C as PixelColor>::Raw as RawData>::Storage;
+
+    fn into_storage(self) -> Self::Storage {
+        C::Raw::from(self).into_inner()
+    }
 }
