@@ -114,24 +114,23 @@ pub trait PixelColor: Copy + PartialEq {
 
 /// Convert a [`PixelColor`] into its underlying storage type
 ///
-/// This trait provides the `into_storage()` method for implementors of [`PixelColor`]. This method
+/// This trait provides the `into_storage` method for implementors of [`PixelColor`]. This method
 /// exposes the underlying storage value of a pixel color type.
 ///
 /// # Examples
 ///
 /// ## Get the `u16` representing an `Rgb565` color
 ///
-/// The [`Rgb565`] color type is stored in a `u16` internally. This example converts an [`Rgb565`]
-/// color into its underlying `u16` represenation.
+/// This example converts an [`Rgb565`] color into its underlying `u16` represenation.
 ///
 /// ```rust
 /// use embedded_graphics::{prelude::*, pixelcolor::Rgb565};
 ///
-/// let color = Rgb565::new(0xff, 0x00, 0xaa);
+/// let color = Rgb565::new(0x1f, 0x00, 0x0a);
 ///
-/// let raw: u16 = color.into_storage();
+/// let raw = color.into_storage();
 ///
-/// assert_eq!(raw, 0b11111_000000_01010);
+/// assert_eq!(raw, 0b11111_000000_01010u16);
 /// ```
 ///
 /// [`PixelColor`]: ./trait.PixelColor.html

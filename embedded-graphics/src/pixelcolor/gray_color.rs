@@ -105,8 +105,8 @@ mod tests {
 
     #[test]
     fn convert_to_raw() {
-        let color = Gray8::new(0xaa);
+        let color = Gray8::new(0xAA);
 
-        assert_eq!(color.into_storage(), 0xaau8);
+        assert_eq!(color.into_storage(), 0xAAu8);
     }
 }

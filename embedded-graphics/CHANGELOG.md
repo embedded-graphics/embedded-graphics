@@ -10,7 +10,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- [#257](https://github.com/jamwaffles/embedded-graphics/pull/257) added the `.into_storage()` method on `PixelColor`s via the `IntoStorage` trait to allow for more ergonomic conversion from a colour to its raw storage type.
+- [#257](https://github.com/jamwaffles/embedded-graphics/pull/257) added the `.into_storage()` method on `PixelColor`s via the `IntoStorage` trait to allow for more ergonomic conversion from a color to its raw storage type.
 
   ```diff
   // IntoStorage is included in the prelude.

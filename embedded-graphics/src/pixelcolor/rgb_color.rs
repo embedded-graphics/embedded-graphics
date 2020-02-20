@@ -299,8 +299,8 @@ mod tests {
 
     #[test]
     fn convert_to_raw() {
-        let color = Rgb888::new(0xaa, 0xbb, 0xcc);
+        let color = Rgb888::new(0xAA, 0xBB, 0xCC);
 
-        assert_eq!(color.into_storage(), 0x00aabbcc);
+        assert_eq!(color.into_storage(), 0x00AABBCC);
     }
 }
