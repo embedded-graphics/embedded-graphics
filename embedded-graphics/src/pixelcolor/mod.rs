@@ -25,10 +25,6 @@
 //! /// converted to raw data for the display and isn't stored in images.
 //! impl PixelColor for EpdColor {
 //!     type Raw = ();
-//!
-//!     fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
-//!         ()
-//!     }
 //! }
 //!
 //! /// Mock EPD display.
@@ -95,6 +91,7 @@ mod rgb_color;
 
 pub use binary_color::*;
 pub use gray_color::*;
+use raw::RawData;
 pub use rgb_color::*;
 
 /// Pixel color trait.
@@ -112,7 +109,13 @@ pub trait PixelColor: Copy + PartialEq {
     /// See the [`raw` module documentation] for more details.
     ///
     /// [`raw` module documentation]: raw/index.html
-    type Raw: raw::RawData;
+    type Raw: RawData;
+}
+
+/// Additional methods for `PixelColor`
+pub trait PixelColorExt {
+    /// The underlying storage type for the pixel color
+    type Storage;
 
     /// Convert the `PixelColor` into its raw storage form
     ///
@@ -131,5 +134,17 @@ pub trait PixelColor: Copy + PartialEq {
     ///
     /// assert_eq!(raw, 0b11111_000000_01010);
     /// ```
-    fn into_raw(&self) -> <Self::Raw as raw::RawData>::Storage;
+    fn into_raw(self) -> Self::Storage;
+}
+
+impl<C> PixelColorExt for C
+where
+    C: PixelColor,
+    C::Raw: From<C>,
+{
+    type Storage = <<C as PixelColor>::Raw as RawData>::Storage;
+
+    fn into_raw(self) -> Self::Storage {
+        C::Raw::from(self).into_inner()
+    }
 }

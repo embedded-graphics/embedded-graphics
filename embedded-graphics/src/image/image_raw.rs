@@ -255,10 +255,6 @@ mod tests {
 
     impl PixelColor for TestColorU32 {
         type Raw = RawU32;
-
-        fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
-            self.0.into_inner()
-        }
     }
 
     impl From<RawU32> for TestColorU32 {

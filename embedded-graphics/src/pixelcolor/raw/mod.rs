@@ -47,10 +47,6 @@
 //! /// Implement `PixelColor` to associate a raw data type with the `RGBI` struct.
 //! impl PixelColor for RGBI {
 //!     type Raw = RawU4;
-//!
-//!     fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
-//!         self.0.into_inner()
-//!     }
 //! }
 //!
 //! /// `From<RawU4>` is used by `Image` to construct RGBI colors.

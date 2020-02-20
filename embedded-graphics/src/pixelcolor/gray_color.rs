@@ -34,10 +34,6 @@ macro_rules! gray_color {
 
         impl PixelColor for $type {
             type Raw = $raw_type;
-
-            fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
-                self.luma()
-            }
         }
 
         impl GrayColor for $type {
@@ -73,6 +69,7 @@ gray_color!(Gray8, RawU8, "8 bit");
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::PixelColorExt;
 
     #[test]
     pub fn new_masks_luma() {

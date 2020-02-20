@@ -146,10 +146,6 @@ macro_rules! impl_rgb_color {
 
         impl PixelColor for $type {
             type Raw = $data_type;
-
-            fn into_raw(&self) -> <Self::Raw as RawData>::Storage {
-                self.0
-            }
         }
 
         impl From<$data_type> for $type {
@@ -226,6 +222,7 @@ rgb_color!(Bgr888, RawU24, u32, Bgr = (8, 8, 8));
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixelcolor::PixelColorExt;
 
     /// Convert color to integer and back again to test bit positions
     fn test_bpp16<C>(color: C, value: u16)

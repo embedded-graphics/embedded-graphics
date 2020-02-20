@@ -10,9 +10,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- [#257](https://github.com/jamwaffles/embedded-graphics/pull/257) added `.into_raw()` method on `PixelColor`s to allow for easier conversion from a colour to its raw storage type.
+- [#257](https://github.com/jamwaffles/embedded-graphics/pull/257) added the `.into_raw()` method on `PixelColor`s via the `PixelColorExt` trait to allow for easier conversion from a colour to its raw storage type.
 
   ```diff
+  // PixelColorExt is included in the prelude.
+  // You can also import it with use embedded_graphics::pixelcolor::PixelColorExt.
+  + use embedded_graphics::prelude::*;
+
   - RawU1::from(color).into_inner()
   + color.into_raw()
   ```
@@ -417,6 +421,6 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...HEAD
 
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...HEAD
 [0.6.0-beta.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-alpha.3...embedded-graphics-v0.6.0-beta.1
