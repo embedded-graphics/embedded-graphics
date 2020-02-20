@@ -188,10 +188,11 @@ impl<I, C> Transform for Image<'_, I, C> {
 impl<'a, 'b, I, C> Drawable<C> for &'a Image<'b, I, C>
 where
     &'b I: IntoPixelIter<C>,
+    I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self.into_iter())
+        display.draw_image(self)
     }
 }
 
