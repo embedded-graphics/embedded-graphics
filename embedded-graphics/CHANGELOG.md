@@ -10,15 +10,15 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
-- [#257](https://github.com/jamwaffles/embedded-graphics/pull/257) added the `.into_raw()` method on `PixelColor`s via the `PixelColorExt` trait to allow for easier conversion from a colour to its raw storage type.
+- [#257](https://github.com/jamwaffles/embedded-graphics/pull/257) added the `.into_storage()` method on `PixelColor`s via the `IntoStorage` trait to allow for more ergonomic conversion from a colour to its raw storage type.
 
   ```diff
-  // PixelColorExt is included in the prelude.
-  // You can also import it with use embedded_graphics::pixelcolor::PixelColorExt.
+  // IntoStorage is included in the prelude.
+  // You can also import it with use embedded_graphics::pixelcolor::IntoStorage.
   + use embedded_graphics::prelude::*;
 
   - RawU1::from(color).into_inner()
-  + color.into_raw()
+  + color.into_storage()
   ```
 
 - Added as many `#[derive()]`s as possible to all embedded-graphics, tinybmp and tinytga types.

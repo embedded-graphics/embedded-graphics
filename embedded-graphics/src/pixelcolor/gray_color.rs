@@ -69,7 +69,7 @@ gray_color!(Gray8, RawU8, "8 bit");
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorExt;
+    use crate::pixelcolor::IntoStorage;
 
     #[test]
     pub fn new_masks_luma() {
@@ -107,6 +107,6 @@ mod tests {
     fn convert_to_raw() {
         let color = Gray8::new(0xaa);
 
-        assert_eq!(color.into_raw(), 0xaau8);
+        assert_eq!(color.into_storage(), 0xaau8);
     }
 }

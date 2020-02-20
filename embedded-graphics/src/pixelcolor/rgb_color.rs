@@ -222,7 +222,7 @@ rgb_color!(Bgr888, RawU24, u32, Bgr = (8, 8, 8));
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::PixelColorExt;
+    use crate::pixelcolor::IntoStorage;
 
     /// Convert color to integer and back again to test bit positions
     fn test_bpp16<C>(color: C, value: u16)
@@ -301,6 +301,6 @@ mod tests {
     fn convert_to_raw() {
         let color = Rgb888::new(0xaa, 0xbb, 0xcc);
 
-        assert_eq!(color.into_raw(), 0x00aabbcc);
+        assert_eq!(color.into_storage(), 0x00aabbcc);
     }
 }

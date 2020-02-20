@@ -148,7 +148,7 @@ impl From<bool> for BinaryColor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{PixelColorExt, Rgb565, RgbColor};
+    use crate::pixelcolor::{IntoStorage, Rgb565, RgbColor};
 
     #[test]
     fn default_color_is_off() {
@@ -201,8 +201,8 @@ mod tests {
     }
 
     #[test]
-    fn into_raw() {
-        assert_eq!(BinaryColor::Off.into_raw(), 0u8);
-        assert_eq!(BinaryColor::On.into_raw(), 1u8);
+    fn into_storage() {
+        assert_eq!(BinaryColor::Off.into_storage(), 0u8);
+        assert_eq!(BinaryColor::On.into_storage(), 1u8);
     }
 }
