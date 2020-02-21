@@ -1,6 +1,6 @@
 use crate::{
     drawable::{self, Drawable},
-    geometry::{Dimensions, Point, Size},
+    geometry::{Point, Size},
     image::{Image, ImageDimensions, IntoPixelIter},
     pixelcolor::PixelColor,
     primitives::{self, Primitive},
