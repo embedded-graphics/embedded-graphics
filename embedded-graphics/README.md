@@ -90,42 +90,72 @@ There may be other drivers out there we don't know about yet. If you know of a d
 
 Example usage can be found [in the simulator](./simulator/examples):
 
-```rust
-use embedded_graphics::fonts::{Font6x8, Text};
-use embedded_graphics::pixelcolor::Rgb565;
-use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line};
-use embedded_graphics::style::{PrimitiveStyle, TextStyle};
+```rust,no_run
+use embedded_graphics::{
+    fonts::{Font6x8, Text},
+    pixelcolor::BinaryColor,
+    prelude::*,
+    primitives::{Circle, Rectangle, Triangle},
+    style::{PrimitiveStyle, TextStyle},
+};
+use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
-// Only used for examples - this would be replaced by the driver for your chosen display
-use embedded_graphics::mock_display::MockDisplay as Display;
+fn main() -> Result<(), std::convert::Infallible> {
+    // Create a new simulator display with 128x64 pixels.
+    let mut display = SimulatorDisplay::new(Size::new(128, 64));
 
-fn main() {
-    // Create a display object to draw into
-    // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
-    let mut display = Display::new();
+    // Create styles used by the drawing operations.
+    let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
+    let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+    let fill = PrimitiveStyle::with_fill(BinaryColor::On);
+    let text_style = TextStyle::new(Font6x8, BinaryColor::On);
 
-    // Draw a circle centered at (64, 64) with a radius of 64 and a white 1px stroke
-    Circle::new(Point::new(64, 64), 64)
-        .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
-        .draw(&mut display);
+    let yoffset = 10;
 
-    // Draw a white 1px thick line from (64, 64) to (0, 64)
-    Line::new(Point::new(64, 64), Point::new(0, 64))
-        .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
-        .draw(&mut display);
+    // Draw an 3px wide outline around the display.
+    let bottom_right = Point::zero() + display.size() - Point::new(1, 1);
+    Rectangle::new(Point::zero(), bottom_right)
+        .into_styled(thick_stroke)
+        .draw(&mut display)?;
 
-    // Draw a red 1px line from (64, 64) to (80, 80)
-    Line::new(Point::new(64, 64), Point::new(80, 80))
-        .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-        .draw(&mut display);
+    // Draw a triangle.
+    Triangle::new(
+        Point::new(16, 16 + yoffset),
+        Point::new(16 + 16, 16 + yoffset),
+        Point::new(16 + 8, yoffset),
+    )
+    .into_styled(thin_stroke)
+    .draw(&mut display)?;
 
-    // Print "Hello world!" in a white 6x8 pixel font with the top left corner positioned at (5, 50)
-    Text::new("Hello World!", Point::new(5, 50))
-        .into_styled(TextStyle::new(Font6x8, Rgb565::WHITE))
-        .draw(&mut display);
+    // Draw a filled square
+    Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+        .into_styled(fill)
+        .draw(&mut display)?;
+
+    // Draw a square with a 3px wide stroke.
+    Circle::new(Point::new(96, yoffset + 8), 8)
+        .into_styled(thick_stroke)
+        .draw(&mut display)?;
+
+    // Draw centered text.
+    let text = "embedded-graphics";
+    let width = text.len() as i32 * 6;
+    Text::new(text, Point::new(64 - width / 2, 40))
+        .into_styled(text_style)
+        .draw(&mut display)?;
+
+    let mut window = WindowBuilder::new(&display)
+        .title("Hello World")
+        .theme(BinaryColorTheme::OledBlue)
+        .build();
+    window.show_static(&display);
+
+    Ok(())
 }
+
 ```
+
+![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/hello-world-simulator.png)
 
 Macros are also supported for text and primitives:
 

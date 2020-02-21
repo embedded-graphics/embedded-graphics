@@ -34,3 +34,4 @@ nalgebra_support = [ "nalgebra" ]
 [dev-dependencies]
 arrayvec = "0.5.1"
 tinytga = { version = "0.3.1", features = [ "graphics" ] }
+embedded-graphics-simulator = "0.2.0-beta.2"
