@@ -11,16 +11,19 @@
 # Embedded graphics
 
 Embedded-graphics is a 2D graphics library that is focused on memory constrained embedded devices.
-It contains build in items that make it easy to draw 2D graphics primitives:
+It contains built in items that make it easy to draw 2D graphics primitives:
 
 - Primitive shapes with stroke and/or fill
   - Lines
   - Rectangles
   - Circles
   - Triangles
-- Images from raw data
-- Text with multiple built in monospace fonts
-- additional functions are provided by [external crates](#additional-functions-provided-by-external-crates)
+- Images
+  - Built in support for images from raw data
+  - Other image formats, like BMP and TGA images, are supported using an [external crate](#additional-functions-provided-by-external-crates)
+- Text
+  - Built in fonts
+  - Additional fonts can be added by [external crates](#additional-functions-provided-by-external-crates)
 
 A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
 `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating large
@@ -46,12 +49,11 @@ More information and up to date docs can be found on [docs.rs](https://docs.rs/e
 
 If you think you've found a bug, or would like to suggest a new feature to add to embedded-graphics, please [open an issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 
-If you need more deeper/more personalised help, please check out the [embedded-graphics Matrix channel](https://matrix.to/#/#rust-embedded-graphics:matrix.org).
+If you need more deeper/more personalized help, please check out the [embedded-graphics Matrix channel](https://matrix.to/#/#rust-embedded-graphics:matrix.org).
 
 ## [Documentation](https://docs.rs/embedded-graphics)
 
 ![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
-
 
 ## Additional functions provided by external crates
 
