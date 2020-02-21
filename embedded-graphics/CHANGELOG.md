@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- Added `draw_image` to `DrawTarget` trait with default implementation.
+
 ## [0.6.0-beta.1] - 2020-02-17
 
 ### Added
