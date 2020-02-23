@@ -34,4 +34,10 @@ nalgebra_support = [ "nalgebra" ]
 [dev-dependencies]
 arrayvec = "0.5.1"
 tinytga = { version = "0.3.1", features = [ "graphics" ] }
+
+# The code examples in README.md use the simulator. To test these examples a
+# dev-dependency to the simulator is added for the x86_64 target. Other no_std
+# targets don't support running the simulator and adding this dependency for all
+# targets would break CI.
+[target.'cfg(target_arch = "x86_64")'.dev-dependencies]
 embedded-graphics-simulator = "0.2.0-beta.2"
