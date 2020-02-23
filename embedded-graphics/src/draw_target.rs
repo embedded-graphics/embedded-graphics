@@ -1,6 +1,7 @@
 use crate::{
     drawable::{self, Drawable},
     geometry::{Point, Size},
+    image::{Image, ImageDimensions, IntoPixelIter},
     pixelcolor::PixelColor,
     primitives::{self, Primitive},
     style::{PrimitiveStyle, Styled},
@@ -339,5 +340,27 @@ where
         item: &Styled<primitives::Circle, PrimitiveStyle<C>>,
     ) -> Result<(), Self::Error> {
         self.draw_iter(item)
+    }
+
+    /// Draws an image with known size
+    ///
+    /// This default trait method can be overridden if a display provides hardware-accelerated
+    /// methods for drawing an image with known size.
+    ///
+    /// # Caution
+    ///
+    /// This method should not be called directly from application code. It is used to define the
+    /// internals of the [`draw`] method used for the [`Image`] primitive. To draw an
+    /// image, call [`draw`] on a `Image` object.
+    ///
+    /// [`Image`]: ../image/struct.Image.html
+    /// [`draw`]: ./trait.DrawTarget.html#method.draw
+    fn draw_image<'a, 'b, I>(&mut self, item: &'a Image<'b, I, C>) -> Result<(), Self::Error>
+    where
+        &'b I: IntoPixelIter<C>,
+        I: ImageDimensions,
+        C: PixelColor + From<<C as PixelColor>::Raw>,
+    {
+        self.draw_iter(item.into_iter())
     }
 }
