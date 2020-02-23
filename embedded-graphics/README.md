@@ -53,7 +53,7 @@ If you need more deeper/more personalized help, please check out the [embedded-g
 
 ## [Documentation](https://docs.rs/embedded-graphics)
 
-![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/readme-images/assets/banner-photo.png)
+![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/banner-photo.jpg)
 
 ## Additional functions provided by external crates
 
