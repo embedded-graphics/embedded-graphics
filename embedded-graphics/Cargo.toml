@@ -32,7 +32,7 @@ default = []
 nalgebra_support = [ "nalgebra" ]
 
 [dev-dependencies]
-arrayvec = "0.5.1"
+arrayvec = { version = "0.5.1", default-features = false }
 tinytga = { version = "0.3.1", features = [ "graphics" ] }
 
 # The code examples in README.md use the simulator. To test these examples a
