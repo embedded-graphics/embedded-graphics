@@ -5,7 +5,7 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{
-        line::{Line, StyledLineIterator},
+        line::{Line, LineIterator},
         Primitive,
     },
     style::{PrimitiveStyle, Styled},
@@ -194,12 +194,12 @@ where
     fn into_iter(self) -> Self::IntoIter {
         let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
 
-        let mut line_a = Line::new(v1, v2).into_styled(self.style).into_iter();
-        let mut line_b = Line::new(v1, v3).into_styled(self.style).into_iter();
-        let mut line_c = Line::new(v2, v3).into_styled(self.style).into_iter();
+        let mut line_a = Line::new(v1, v2).into_iter();
+        let mut line_b = Line::new(v1, v3).into_iter();
+        let mut line_c = Line::new(v2, v3).into_iter();
 
-        let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0);
-        let next_b = line_b.next().map(|p| p.0);
+        let next_ac = line_a.next().or_else(|| line_c.next());
+        let next_b = line_b.next();
 
         StyledTriangleIterator {
             line_a,
@@ -229,9 +229,9 @@ pub struct StyledTriangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    line_a: StyledLineIterator<C>,
-    line_b: StyledLineIterator<C>,
-    line_c: StyledLineIterator<C>,
+    line_a: LineIterator,
+    line_b: LineIterator,
+    line_c: LineIterator,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
     next_ac: Option<Point>,
@@ -249,11 +249,7 @@ where
     fn update_ac(&mut self) -> IterState {
         if let Some(ac) = self.next_ac {
             self.cur_ac = Some(ac);
-            self.next_ac = self
-                .line_a
-                .next()
-                .or_else(|| self.line_c.next())
-                .map(|p| p.0);
+            self.next_ac = self.line_a.next().or_else(|| self.line_c.next());
             self.x = 0;
             IterState::Border(ac)
         } else {
@@ -264,7 +260,7 @@ where
     fn update_b(&mut self) -> IterState {
         if let Some(b) = self.next_b {
             self.cur_b = Some(b);
-            self.next_b = self.line_b.next().map(|p| p.0);
+            self.next_b = self.line_b.next();
             self.x = 0;
             IterState::Border(b)
         } else {
