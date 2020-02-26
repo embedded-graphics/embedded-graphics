@@ -10,13 +10,80 @@ Adding embedded-graphics support to a display driver has changed somewhat. The `
 
 An associated error type is also added to `DrawTarget` to allow for better error handling than a `panic!()`.
 
-```diff
-// TODO: Mad example
+Implementations for display drivers should now at minimum look something like the following:
+
+```rust
+use embedded_graphics::{
+    drawable,
+    geometry::Size,
+    pixelcolor::{
+        raw::{RawData, RawU1},
+        BinaryColor,
+    },
+    DrawTarget,
+};
+
+#[cfg(feature = "graphics")]
+impl DrawTarget<BinaryColor> for DisplayDriver
+{
+    type Error = core::convert::Infallible;
+
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) -> Result<(), Self::Error> {
+        let drawable::Pixel(pos, color) = pixel;
+
+        // Guard against negative values. All positive i32 values from `pos` can be represented in
+        // the `u32`s that `set_pixel()` accepts...
+        if pos.x < 0 || pos.y < 0 {
+            return Ok(());
+        }
+
+        // ... which makes the `as` coercions here safe.
+        self.set_pixel(pos.x as u32, pos.y as u32, RawU1::from(color).into_inner());
+
+        Ok(())
+    }
+
+    fn size(&self) -> Size {
+        let (w, h) = self.get_dimensions();
+
+        Size::new(w as u32, h as u32)
+    }
+}
 ```
+
+This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as the SSD1306 can only be on or off.
+
+Some notes on the above:
+
+- The `Drawing` trait is renamed to `DrawTarget`.
+- The `draw()` method is replaced by `draw_pixel()`. This method should handle setting of individual pixels on the display. How it does this is at the descretion of the display driver (pixel buffer, immediate mode, etc).
+- A new `size()` method is now a required item. This should return the width and height of the display as a `Size`.
+- The implementation of `DrawTarget` must now provide an associated `Error` type. In the above example `core::convert::Infallible` is used, however a better error type should be used to communicate hardware failures, etc to the user.
+- Any pixels that are offscreen (negative coordinates or greater than display dimensions) should result in a noop. In the example above, `self.set_pixel()` (defined by the SSD1306 driver) will not attempt to set any pixels beyond the positive screen limits.
+- `draw_pixel()` now returns `Result<(), Self::Error>` to account for driver error handling.
 
 ## For font authors
 
-TODO: Talk about the `Font` trait changes. Lots of associated consts, provide a char_offset fn to select char start
+- The `embedded_graphics::fonts::font_builder` module along with its exported `FontBuilderConf` and `FontBuilder` is removed. Now only `Font` needs to be implemented.
+- The `Font` trait (used to be `FontBuilderConf`) implementation has changed slightly, replacing `CHART_WIDTH` and `CHAR_HEIGHT` with a single `CHARACTER_SIZE` constant, using the `Size` struct:
+
+  ```diff
+  - use embedded_graphics::fonts::font_builder::{FontBuilder, FontBuilderConf};
+  + use embedded_graphics::fonts::Font;
+
+  + use embedded_graphics::geometry::Size;
+
+    #[derive(Debug, Copy, Clone)]
+    pub enum MyFont {}
+
+    impl Font for MyFont {
+        const FONT_IMAGE: &'static [u8] = include_bytes!("../data/my_font.raw");
+  -     const CHAR_WIDTH: u32 = 12;
+  -     const CHAR_HEIGHT: u32 = 22;
+  +     const CHARACTER_SIZE: Size = Size::new(12, 22);
+        const FONT_IMAGE_WIDTH: u32 = 480;
+    }
+  ```
 
 ## For library consumers
 
