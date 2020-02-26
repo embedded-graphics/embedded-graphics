@@ -362,6 +362,7 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::BinaryColor;
+    use crate::style::PrimitiveStyleBuilder;
 
     #[test]
     fn dimensions() {
@@ -393,6 +394,27 @@ mod tests {
     fn it_draws_unfilled_tri_line_y() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter();
+
+        // Nodes are returned twice. first line a and b yield the same point.
+        // After that line a ends where line c starts.
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
+        assert_eq!(tri.next(), None);
+    }
+
+    #[test]
+    fn it_draws_filled_strokeless_tri() {
+        let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(BinaryColor::On)
+                    .build(),
+            )
             .into_iter();
 
         // Nodes are returned twice. first line a and b yield the same point.
