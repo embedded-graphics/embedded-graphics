@@ -194,9 +194,9 @@ where
     fn into_iter(self) -> Self::IntoIter {
         let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
 
-        let mut line_a = Line::new(v1, v2).into_iter();
-        let mut line_b = Line::new(v1, v3).into_iter();
-        let mut line_c = Line::new(v2, v3).into_iter();
+        let mut line_a = LineIterator::new(&Line::new(v1, v2));
+        let mut line_b = LineIterator::new(&Line::new(v1, v3));
+        let mut line_c = LineIterator::new(&Line::new(v2, v3));
 
         let next_ac = line_a.next().or_else(|| line_c.next());
         let next_b = line_b.next();

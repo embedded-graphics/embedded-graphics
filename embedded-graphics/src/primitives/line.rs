@@ -37,21 +37,6 @@ use crate::{
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-///
-/// ## Get an iterator over all points on the line
-///
-/// Call `.into_iter()` on a `Line` to get an iterator over all points along it.
-///
-/// ```rust
-/// use embedded_graphics::{prelude::*, primitives::Line};
-///
-/// let line = Line::new(Point::new(10, 10), Point::new(20, 20));
-///
-/// let mut line_it = line.into_iter();
-///
-/// // Diagonal line length is 14.141... according to Pythagoras' theorem
-/// assert_eq!(line_it.next(), Some(Point::new(10, 10)));
-/// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Line {
     /// Start point
@@ -84,12 +69,22 @@ impl Line {
     }
 }
 
-impl<'a> IntoIterator for &'a Line {
-    type Item = Point;
-    type IntoIter = LineIterator;
+/// Pixel iterator for each pixel in the line
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(crate) struct LineIterator {
+    start: Point,
+    end: Point,
+    delta: Point,
+    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
+    direction: Point,
+    err: i32,
+    stop: bool,
+}
 
-    fn into_iter(self) -> Self::IntoIter {
-        let mut delta = self.end - self.start;
+impl LineIterator {
+    /// Create a new line iterator from a `Line`
+    pub(crate) fn new(line: &Line) -> Self {
+        let mut delta = line.end - line.start;
 
         if delta.x < 0 {
             delta = Point::new(-delta.x, delta.y);
@@ -98,34 +93,22 @@ impl<'a> IntoIterator for &'a Line {
             delta = Point::new(delta.x, -delta.y);
         }
 
-        let direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+        let direction = match (line.start.x >= line.end.x, line.start.y >= line.end.y) {
             (false, false) => Point::new(1, 1),
             (false, true) => Point::new(1, -1),
             (true, false) => Point::new(-1, 1),
             (true, true) => Point::new(-1, -1),
         };
 
-        LineIterator {
-            start: self.start,
-            end: self.end,
+        Self {
+            start: line.start,
+            end: line.end,
             delta,
             direction,
             err: delta.x + delta.y,
-            stop: self.start == self.end, /* if line length is zero, draw nothing */
+            stop: line.start == line.end, /* if line length is zero, draw nothing */
         }
     }
-}
-
-/// Pixel iterator for each pixel in the line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct LineIterator {
-    start: Point,
-    end: Point,
-    delta: Point,
-    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
-    direction: Point,
-    err: i32,
-    stop: bool,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -207,7 +190,7 @@ where
         StyledLineIterator {
             style: self.style,
 
-            line_iter: self.primitive.into_iter(),
+            line_iter: LineIterator::new(&self.primitive),
         }
     }
 }
