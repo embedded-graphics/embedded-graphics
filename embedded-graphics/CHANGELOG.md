@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- [#262](https://github.com/jamwaffles/embedded-graphics/pull/262) `Triangle`s with a fill color but no stroke color are now rendered instead of not rendered at all.
+
 ### Added
 
 - Added `draw_image` to `DrawTarget` trait with default implementation.
