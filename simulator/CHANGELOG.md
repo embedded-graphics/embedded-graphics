@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** Change `DrawTarget` implementation for `SimulatorDisplay` to automatically convert colors which implement `Into<C>`.
+
 ## [0.2.0-beta.2] - 2020-02-17
 
 ### Added

@@ -17,7 +17,7 @@ impl Font for SevenSegmentFont {
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(128, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 128));
 
     let position = Point::new(27, 22);
     let row_offset = Point::new(0, 44);

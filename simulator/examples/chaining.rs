@@ -10,7 +10,7 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(129, 129));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(129, 129));
     let mut objects = Circle::new(Point::new(64, 64), 64)
         .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .into_iter()

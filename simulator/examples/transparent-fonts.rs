@@ -5,7 +5,7 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(256, 128));
+    let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(256, 128));
 
     egcircle!(
         center = (20, 20),

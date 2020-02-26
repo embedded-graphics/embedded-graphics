@@ -9,7 +9,7 @@ use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(304, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(304, 128));
 
     let stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
