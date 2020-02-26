@@ -51,7 +51,7 @@ impl DrawTarget<BinaryColor> for DisplayDriver
 }
 ```
 
-This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as the SSD1306 can only be on or off.
+This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as pixels on the SSD1306 can only be on or off.
 
 Some notes on the above:
 
