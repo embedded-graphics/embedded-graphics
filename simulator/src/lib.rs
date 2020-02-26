@@ -44,12 +44,12 @@
 //! use std::time::Duration;
 //!
 //! fn main() {
-//!     let mut display = SimulatorDisplay::new(Size::new(128, 64));
+//!     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 //!     let mut window = WindowBuilder::new(&display)
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
 //!
-//!     egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8)).draw(&mut display);
+//!     egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8, text_color = BinaryColor::On)).draw(&mut display);
 //!
 //!     egcircle!(center = (96, 32), radius = 31, style = primitive_style!(stroke_color = BinaryColor::On)).draw(&mut display);
 //!
