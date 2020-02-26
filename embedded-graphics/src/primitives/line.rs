@@ -37,6 +37,23 @@ use crate::{
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
+///
+/// ## Get an iterator over all points on the line
+///
+/// Call `.into_iter()` on a `Line` to get an iterator over all points along it.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     primitives::Line, prelude::*
+/// };
+///
+/// let line = Line::new(Point::new(10, 10), Point::new(20, 20));
+///
+/// let mut line_it = line.into_iter();
+///
+/// // Diagonal line length is 14.141... according to Pythagoras' theorem
+/// assert_eq!(line_it.next(), Some(Point::new(10, 10)));
+/// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Line {
     /// Start point
@@ -66,6 +83,78 @@ impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
         Line { start, end }
+    }
+}
+
+impl<'a> IntoIterator for &'a Line {
+    type Item = Point;
+    type IntoIter = LineIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut delta = self.end - self.start;
+
+        if delta.x < 0 {
+            delta = Point::new(-delta.x, delta.y);
+        }
+        if delta.y > 0 {
+            delta = Point::new(delta.x, -delta.y);
+        }
+
+        let direction = match (self.start.x >= self.end.x, self.start.y >= self.end.y) {
+            (false, false) => Point::new(1, 1),
+            (false, true) => Point::new(1, -1),
+            (true, false) => Point::new(-1, 1),
+            (true, true) => Point::new(-1, -1),
+        };
+
+        LineIterator {
+            start: self.start,
+            end: self.end,
+            delta,
+            direction,
+            err: delta.x + delta.y,
+            stop: self.start == self.end, /* if line length is zero, draw nothing */
+        }
+    }
+}
+
+/// Pixel iterator for each pixel in the line
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct LineIterator {
+    start: Point,
+    end: Point,
+    delta: Point,
+    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
+    direction: Point,
+    err: i32,
+    stop: bool,
+}
+
+// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+impl Iterator for LineIterator {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if !self.stop {
+            let point = self.start;
+
+            if self.start == self.end {
+                self.stop = true;
+            }
+            let err_double = 2 * self.err;
+            if err_double > self.delta.y {
+                self.err += self.delta.y;
+                self.start += Point::new(self.direction.x, 0);
+            }
+            if err_double < self.delta.x {
+                self.err += self.delta.x;
+                self.start += Point::new(0, self.direction.y);
+            }
+
+            Some(point)
+        } else {
+            None
+        }
     }
 }
 
@@ -117,33 +206,10 @@ where
     type IntoIter = StyledLineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let mut delta = self.primitive.end - self.primitive.start;
-        if delta.x < 0 {
-            delta = Point::new(-delta.x, delta.y);
-        }
-        if delta.y > 0 {
-            delta = Point::new(delta.x, -delta.y);
-        }
-
-        let direction = match (
-            self.primitive.start.x >= self.primitive.end.x,
-            self.primitive.start.y >= self.primitive.end.y,
-        ) {
-            (false, false) => Point::new(1, 1),
-            (false, true) => Point::new(1, -1),
-            (true, false) => Point::new(-1, 1),
-            (true, true) => Point::new(-1, -1),
-        };
-
         StyledLineIterator {
             style: self.style,
 
-            start: self.primitive.start,
-            end: self.primitive.end,
-            delta,
-            direction,
-            err: delta.x + delta.y,
-            stop: self.primitive.start == self.primitive.end, /* if line length is zero, draw nothing */
+            line_iter: self.primitive.into_iter(),
         }
     }
 }
@@ -156,13 +222,7 @@ where
 {
     style: PrimitiveStyle<C>,
 
-    start: Point,
-    end: Point,
-    delta: Point,
-    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
-    direction: Point,
-    err: i32,
-    stop: bool,
+    line_iter: LineIterator,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -170,29 +230,12 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // return none if stroke color is none
+        // Return none if stroke color is none
         let stroke_color = self.style.stroke_color?;
 
-        if !self.stop {
-            let point = self.start;
-
-            if self.start == self.end {
-                self.stop = true;
-            }
-            let err_double = 2 * self.err;
-            if err_double > self.delta.y {
-                self.err += self.delta.y;
-                self.start += Point::new(self.direction.x, 0);
-            }
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
-                self.start += Point::new(0, self.direction.y);
-            }
-
-            Some(Pixel(point, stroke_color))
-        } else {
-            None
-        }
+        self.line_iter
+            .next()
+            .map(|point| Pixel(point, stroke_color))
     }
 }
 
