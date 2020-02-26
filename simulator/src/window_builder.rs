@@ -18,6 +18,7 @@ impl WindowBuilder {
     pub fn new<C>(display: &SimulatorDisplay<C>) -> Self
     where
         C: PixelColor,
+        SimulatorDisplay<C>: DrawTarget<C>,
     {
         Self {
             display_size: display.size(),

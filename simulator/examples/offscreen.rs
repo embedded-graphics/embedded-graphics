@@ -4,7 +4,7 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(32, 32));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(32, 32));
 
     // Outline
     Rectangle::new(Point::new(0, 0), Point::new(16, 16))

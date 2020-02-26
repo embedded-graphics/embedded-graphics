@@ -139,7 +139,8 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(DISP_SIZE as u32, DISP_SIZE as u32));
+    let mut display: SimulatorDisplay<BinaryColor> =
+        SimulatorDisplay::new(Size::new(DISP_SIZE as u32, DISP_SIZE as u32));
     let mut window = WindowBuilder::new(&display).title("Clock").scale(2).build();
 
     'running: loop {

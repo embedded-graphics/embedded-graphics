@@ -62,17 +62,18 @@ where
     }
 }
 
-impl<C> DrawTarget<C> for SimulatorDisplay<C>
+impl<PixelC, DisplayC> DrawTarget<PixelC> for SimulatorDisplay<DisplayC>
 where
-    C: PixelColor,
+    PixelC: PixelColor + Into<DisplayC>,
+    DisplayC: PixelColor,
 {
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
+    fn draw_pixel(&mut self, pixel: Pixel<PixelC>) -> Result<(), Self::Error> {
         let Pixel(point, color) = pixel;
 
         if let Some(index) = self.point_to_index(point) {
-            self.pixels[index] = color;
+            self.pixels[index] = color.into();
         }
 
         Ok(())

@@ -9,7 +9,7 @@ use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 const PADDING: i32 = 16;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(320, 256));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(320, 256));
 
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
     let medium_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);

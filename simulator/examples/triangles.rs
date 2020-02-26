@@ -6,7 +6,7 @@ use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 const PAD: i32 = 10;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(512, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(512, 128));
 
     let style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 

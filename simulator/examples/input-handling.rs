@@ -36,7 +36,7 @@ fn move_circle(
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(800, 480));
+    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(800, 480));
     let mut window = WindowBuilder::new(&display)
         .title("Click to move circle")
         .build();

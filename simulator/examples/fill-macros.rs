@@ -8,7 +8,7 @@ use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
 static CIRCLE_SIZE: i32 = 32;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display = SimulatorDisplay::new(Size::new(384, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(384, 128));
 
     egcircle!(
         center = (CIRCLE_SIZE, CIRCLE_SIZE),
