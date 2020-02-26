@@ -357,8 +357,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::BinaryColor;
-    use crate::style::PrimitiveStyleBuilder;
+    use crate::{pixelcolor::BinaryColor, style::PrimitiveStyleBuilder};
 
     #[test]
     fn dimensions() {

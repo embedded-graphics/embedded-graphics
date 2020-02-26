@@ -43,9 +43,7 @@ use crate::{
 /// Call `.into_iter()` on a `Line` to get an iterator over all points along it.
 ///
 /// ```rust
-/// use embedded_graphics::{
-///     primitives::Line, prelude::*
-/// };
+/// use embedded_graphics::{prelude::*, primitives::Line};
 ///
 /// let line = Line::new(Point::new(10, 10), Point::new(20, 20));
 ///
