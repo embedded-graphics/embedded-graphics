@@ -110,11 +110,11 @@ Drawing operations are "reversed" in 0.6.0. Instead of calling `display.draw(thi
 +     .draw(&mut display)?;
 ```
 
-Drawing operations are now fallible, with `.draw()` calls returning a `Result`. This allows for error handling if an error occurs during a drawing operation.
+Drawing operations are now fallible, with `.draw()` calls returning a `Result`. This allows for error handling if an error occurs during a drawing operation. The error type of this `Result` is dependent on the associated `Error` type as defined by the display driver.
 
 ### Coordinates and positioning
 
-The `Coord` and `UnsignedCoord` have been renamed to `Point` and `Size` respectively. Both items are no longer tuple structs, but structs with the named fields `x` and `y`. `Point`s can store negative coordinates, whereas `Size`s must be positive up to `u32::MAX_VALUE` as with `Coord` and `UnsignedCoord` before.
+The `Coord` and `UnsignedCoord` have been renamed to `Point` and `Size` respectively. Both items are no longer tuple structs, but structs with the named fields `x` and `y` for `Point` and `width` and `height` for `Size`. `Point`s can store negative coordinates, whereas `Size`s must be positive up to `u32::MAX_VALUE`.
 
 The `icoord` and `ucoord` macros have been removed. Instead, use `Point::new(x, y)` and `Size::new(x, y)` respectively.
 
@@ -131,7 +131,7 @@ The `icoord` and `ucoord` macros have been removed. Instead, use `Point::new(x, 
 + let p = Size::new(5, 15);
 
 - println!("X: {}, Y: {}", p.0, p.1);
-+ println!("X: {}, Y: {}", p.x, p.y);
++ println!("X: {}, Y: {}", p.width, p.height);
 ```
 
 ### Text
@@ -170,6 +170,10 @@ Text is now drawn with the `Text` struct. A `TextStyle` must be provided which s
 +     .draw(&mut display)?;
 ```
 
+- A new `Text` struct is introduced. Instead of `YourFont::render_str("text")`, use `Text::new("text")`.
+- Text must be given a `TextStyle` for it to be drawn on a display. Create a style with `TextStyleBuilder` and add it with `.into_styled(style)`.
+- The chosen font is now part of the `TextStyleBuilder` creation process. Set it with `TextStyleBuilder::new(<your font here>)`.
+
 Macro usage has also changed:
 
 ```diff
@@ -197,6 +201,9 @@ Macro usage has also changed:
 + )
 + .draw(&mut display)?;
 ```
+
+- All built in `text_*!()` macros are removed and replaced with the `egtext!()` macro.
+- `egtext!()` should be coupled with the `text_style!()` macro to create styled texts with a chosen font.
 
 ### Primitives
 
