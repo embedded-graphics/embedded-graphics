@@ -55,7 +55,7 @@ impl Primitive for Line {
     {
         // ensure fill color is honored if stroke color is not set
         // this is important for fillables that use lines to fill (e.g. triangle)
-        let mut new_style = style.clone();
+        let mut new_style = style;
         new_style.stroke_color = style.stroke_color.or(style.fill_color);
 
         Styled::new(self, new_style)
