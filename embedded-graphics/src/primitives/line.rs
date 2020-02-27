@@ -46,7 +46,20 @@ pub struct Line {
     pub end: Point,
 }
 
-impl Primitive for Line {}
+impl Primitive for Line {
+    /// Converts this primitive into a `Styled`.
+    fn into_styled<C>(self, style: PrimitiveStyle<C>) -> Styled<Self, PrimitiveStyle<C>>
+    where
+        C: PixelColor,
+        Self: Sized,
+    {
+        // ensure fill color is honored if stroke is not set
+        let mut new_style = style.clone();
+        new_style.stroke_color = style.stroke_color.or(style.fill_color);
+
+        Styled::new(self, new_style)
+    }
+}
 
 impl Dimensions for Line {
     fn top_left(&self) -> Point {
