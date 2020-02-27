@@ -363,7 +363,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{pixelcolor::BinaryColor, style::PrimitiveStyleBuilder};
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        style::PrimitiveStyleBuilder,
+    };
 
     #[test]
     fn dimensions() {
@@ -383,11 +387,42 @@ mod tests {
 
     #[test]
     fn unfilled_no_stroke_width_no_triangle() {
-        let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
+        let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(2, 4))
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0))
             .into_iter();
 
         assert_eq!(tri.next(), None);
+    }
+
+    #[test]
+    fn stroke_fill_colors() {
+        let mut display: MockDisplay<Rgb888> = MockDisplay::new();
+
+        Triangle::new(Point::new(2, 2), Point::new(8, 2), Point::new(2, 8))
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .stroke_width(1)
+                    .stroke_color(Rgb888::RED)
+                    .fill_color(Rgb888::GREEN)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "          ",
+                "          ",
+                "  RRRRRRR ",
+                "  RGGGGR  ",
+                "  RGGGR   ",
+                "  RGGR    ",
+                "  RGR     ",
+                "  RR      ",
+                "  R       ",
+            ])
+        );
     }
 
     #[test]
