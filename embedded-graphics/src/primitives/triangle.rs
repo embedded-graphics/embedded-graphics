@@ -315,8 +315,13 @@ where
             match self.points() {
                 IterState::Border(point) => {
                     // Draw edges of the triangle
-                    if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
-                        if point.x >= 0 && point.y >= 0 {
+                    if point.x >= 0 && point.y >= 0 {
+                        if self.style.stroke_width > 0 {
+                            if let Some(color) = self.style.stroke_color {
+                                self.x += 1;
+                                return Some(Pixel(point, color));
+                            }
+                        } else if let Some(color) = self.style.fill_color {
                             self.x += 1;
                             return Some(Pixel(point, color));
                         }
@@ -374,6 +379,15 @@ mod tests {
         assert_eq!(moved.p2, Point::new(5, 14));
         assert_eq!(moved.p3, Point::new(-5, 14));
         assert_eq!(moved.size(), Size::new(10, 15));
+    }
+
+    #[test]
+    fn unfilled_no_stroke_width_no_triangle() {
+        let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0))
+            .into_iter();
+
+        assert_eq!(tri.next(), None);
     }
 
     #[test]
