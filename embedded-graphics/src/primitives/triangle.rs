@@ -317,6 +317,7 @@ where
                     // Draw edges of the triangle
                     if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
                         if point.x >= 0 && point.y >= 0 {
+                            self.x += 1;
                             return Some(Pixel(point, color));
                         }
                     }
