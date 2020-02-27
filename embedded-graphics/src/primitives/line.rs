@@ -211,6 +211,11 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // Break if stroke width is zero
+        if self.style.stroke_width == 0 {
+            return None;
+        }
+
         // Return none if stroke color is none
         let stroke_color = self.style.stroke_color?;
 
@@ -272,6 +277,17 @@ mod tests {
         let end = Point::new(10, 10);
         let expected = [];
         test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn no_stroke_width_no_line() {
+        let start = Point::new(2, 3);
+        let end = Point::new(3, 2);
+
+        let line =
+            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
+
+        assert_eq!(line.into_iter().next(), None);
     }
 
     #[test]
