@@ -10,6 +10,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - Added `draw_image` to `DrawTarget` trait with default implementation.
 
+### Fixed
+
+- #260 - triangle fill now works as expected
+
 ## [0.6.0-beta.1] - 2020-02-17
 
 ### Added

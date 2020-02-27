@@ -53,7 +53,8 @@ impl Primitive for Line {
         C: PixelColor,
         Self: Sized,
     {
-        // ensure fill color is honored if stroke is not set
+        // ensure fill color is honored if stroke color is not set
+        // this is important for fillables that use lines to fill (e.g. triangle)
         let mut new_style = style.clone();
         new_style.stroke_color = style.stroke_color.or(style.fill_color);
 
@@ -224,8 +225,21 @@ mod tests {
     use crate::{drawable::Pixel, pixelcolor::BinaryColor};
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line =
-            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
+        test_expected_line_styled(
+            start,
+            end,
+            expected,
+            PrimitiveStyle::with_stroke(BinaryColor::On, 1),
+        )
+    }
+
+    fn test_expected_line_styled(
+        start: Point,
+        end: Point,
+        expected: &[(i32, i32)],
+        style: PrimitiveStyle<BinaryColor>,
+    ) {
+        let line = Line::new(start, end).into_styled(style);
         let mut expected_iter = expected.iter();
         for Pixel(coord, _) in line.into_iter() {
             match expected_iter.next() {
@@ -269,6 +283,19 @@ mod tests {
         let end = Point::new(3, 2);
         let expected = [(2, 3), (3, 2)];
         test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn draws_short_with_fill_only_correctly() {
+        let start = Point::new(2, 3);
+        let end = Point::new(3, 2);
+        let expected = [(2, 3), (3, 2)];
+        test_expected_line_styled(
+            start,
+            end,
+            &expected,
+            PrimitiveStyle::with_fill(BinaryColor::On),
+        );
     }
 
     #[test]
