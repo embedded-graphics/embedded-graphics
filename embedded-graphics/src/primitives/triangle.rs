@@ -5,7 +5,7 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{
-        line::{Line, StyledLineIterator},
+        line::{Line, LineIterator},
         Primitive,
     },
     style::{PrimitiveStyle, Styled},
@@ -103,7 +103,7 @@ impl Triangle {
         Triangle { p1, p2, p3 }
     }
 
-    /// Create sa new triangle from an array of points.
+    /// Creates a new triangle from an array of points.
     ///
     /// This supports both [`Point`]s, as well as anything that implements `Into<Point>` like
     /// `(i32, i32)`.
@@ -194,12 +194,12 @@ where
     fn into_iter(self) -> Self::IntoIter {
         let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
 
-        let mut line_a = Line::new(v1, v2).into_styled(self.style).into_iter();
-        let mut line_b = Line::new(v1, v3).into_styled(self.style).into_iter();
-        let mut line_c = Line::new(v2, v3).into_styled(self.style).into_iter();
+        let mut line_a = LineIterator::new(&Line::new(v1, v2));
+        let mut line_b = LineIterator::new(&Line::new(v1, v3));
+        let mut line_c = LineIterator::new(&Line::new(v2, v3));
 
-        let next_ac = line_a.next().or_else(|| line_c.next()).map(|p| p.0);
-        let next_b = line_b.next().map(|p| p.0);
+        let next_ac = line_a.next().or_else(|| line_c.next());
+        let next_b = line_b.next();
 
         StyledTriangleIterator {
             line_a,
@@ -229,9 +229,9 @@ pub struct StyledTriangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    line_a: StyledLineIterator<C>,
-    line_b: StyledLineIterator<C>,
-    line_c: StyledLineIterator<C>,
+    line_a: LineIterator,
+    line_b: LineIterator,
+    line_c: LineIterator,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
     next_ac: Option<Point>,
@@ -249,11 +249,7 @@ where
     fn update_ac(&mut self) -> IterState {
         if let Some(ac) = self.next_ac {
             self.cur_ac = Some(ac);
-            self.next_ac = self
-                .line_a
-                .next()
-                .or_else(|| self.line_c.next())
-                .map(|p| p.0);
+            self.next_ac = self.line_a.next().or_else(|| self.line_c.next());
             self.x = 0;
             IterState::Border(ac)
         } else {
@@ -264,7 +260,7 @@ where
     fn update_b(&mut self) -> IterState {
         if let Some(b) = self.next_b {
             self.cur_b = Some(b);
-            self.next_b = self.line_b.next().map(|p| p.0);
+            self.next_b = self.line_b.next();
             self.x = 0;
             IterState::Border(b)
         } else {
@@ -288,7 +284,7 @@ where
                         } else if n_ac.y > n_b.y {
                             self.update_b()
                         } else {
-                            let (l, r) = sort_two_yx(ac, b);
+                            let (l, r) = sort_two_yx(n_ac, n_b);
                             IterState::LeftRight(l, r)
                         }
                     }
@@ -319,9 +315,15 @@ where
             match self.points() {
                 IterState::Border(point) => {
                     // Draw edges of the triangle
-                    if let Some(color) = self.style.stroke_color.or_else(|| self.style.fill_color) {
-                        if point.x >= 0 && point.y >= 0 {
-                            return Some(Pixel(point, color));
+                    if point.x >= 0 && point.y >= 0 {
+                        if self.style.stroke_width > 0 {
+                            if let Some(stroke_color) = self.style.stroke_color {
+                                self.x += 1;
+                                return Some(Pixel(point, stroke_color));
+                            }
+                        } else if let Some(fill_color) = self.style.fill_color {
+                            self.x += 1;
+                            return Some(Pixel(point, fill_color));
                         }
                     }
                 }
@@ -361,7 +363,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::BinaryColor;
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        style::PrimitiveStyleBuilder,
+    };
 
     #[test]
     fn dimensions() {
@@ -377,6 +383,46 @@ mod tests {
         assert_eq!(moved.p2, Point::new(5, 14));
         assert_eq!(moved.p3, Point::new(-5, 14));
         assert_eq!(moved.size(), Size::new(10, 15));
+    }
+
+    #[test]
+    fn unfilled_no_stroke_width_no_triangle() {
+        let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(2, 4))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0))
+            .into_iter();
+
+        assert_eq!(tri.next(), None);
+    }
+
+    #[test]
+    fn stroke_fill_colors() {
+        let mut display: MockDisplay<Rgb888> = MockDisplay::new();
+
+        Triangle::new(Point::new(2, 2), Point::new(8, 2), Point::new(2, 8))
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .stroke_width(1)
+                    .stroke_color(Rgb888::RED)
+                    .fill_color(Rgb888::GREEN)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "          ",
+                "          ",
+                "  RRRRRRR ",
+                "  RGGGGR  ",
+                "  RGGGR   ",
+                "  RGGR    ",
+                "  RGR     ",
+                "  RR      ",
+                "  R       ",
+            ])
+        );
     }
 
     #[test]
@@ -404,6 +450,28 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
         assert_eq!(tri.next(), None);
+    }
+
+    #[test]
+    fn it_draws_filled_strokeless_tri() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(4, 2))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     ",
+                "     ",
+                "  ###",
+                "  ## ",
+                "  #  ",
+            ])
+        );
     }
 
     #[test]

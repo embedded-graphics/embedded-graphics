@@ -69,6 +69,76 @@ impl Line {
     }
 }
 
+/// Pixel iterator for each pixel in the line
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(crate) struct LineIterator {
+    start: Point,
+    end: Point,
+    delta: Point,
+    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
+    direction: Point,
+    err: i32,
+    stop: bool,
+}
+
+impl LineIterator {
+    /// Create a new line iterator from a `Line`
+    pub(crate) fn new(line: &Line) -> Self {
+        let mut delta = line.end - line.start;
+
+        if delta.x < 0 {
+            delta = Point::new(-delta.x, delta.y);
+        }
+        if delta.y > 0 {
+            delta = Point::new(delta.x, -delta.y);
+        }
+
+        let direction = match (line.start.x >= line.end.x, line.start.y >= line.end.y) {
+            (false, false) => Point::new(1, 1),
+            (false, true) => Point::new(1, -1),
+            (true, false) => Point::new(-1, 1),
+            (true, true) => Point::new(-1, -1),
+        };
+
+        Self {
+            start: line.start,
+            end: line.end,
+            delta,
+            direction,
+            err: delta.x + delta.y,
+            stop: line.start == line.end, /* if line length is zero, draw nothing */
+        }
+    }
+}
+
+// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+impl Iterator for LineIterator {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if !self.stop {
+            let point = self.start;
+
+            if self.start == self.end {
+                self.stop = true;
+            }
+            let err_double = 2 * self.err;
+            if err_double > self.delta.y {
+                self.err += self.delta.y;
+                self.start += Point::new(self.direction.x, 0);
+            }
+            if err_double < self.delta.x {
+                self.err += self.delta.x;
+                self.start += Point::new(0, self.direction.y);
+            }
+
+            Some(point)
+        } else {
+            None
+        }
+    }
+}
+
 impl Transform for Line {
     /// Translate the line from its current position to a new position by (x, y) pixels, returning
     /// a new `Line`. For a mutating transform, see `translate_mut`.
@@ -117,33 +187,10 @@ where
     type IntoIter = StyledLineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let mut delta = self.primitive.end - self.primitive.start;
-        if delta.x < 0 {
-            delta = Point::new(-delta.x, delta.y);
-        }
-        if delta.y > 0 {
-            delta = Point::new(delta.x, -delta.y);
-        }
-
-        let direction = match (
-            self.primitive.start.x >= self.primitive.end.x,
-            self.primitive.start.y >= self.primitive.end.y,
-        ) {
-            (false, false) => Point::new(1, 1),
-            (false, true) => Point::new(1, -1),
-            (true, false) => Point::new(-1, 1),
-            (true, true) => Point::new(-1, -1),
-        };
-
         StyledLineIterator {
             style: self.style,
 
-            start: self.primitive.start,
-            end: self.primitive.end,
-            delta,
-            direction,
-            err: delta.x + delta.y,
-            stop: self.primitive.start == self.primitive.end, /* if line length is zero, draw nothing */
+            line_iter: LineIterator::new(&self.primitive),
         }
     }
 }
@@ -156,13 +203,7 @@ where
 {
     style: PrimitiveStyle<C>,
 
-    start: Point,
-    end: Point,
-    delta: Point,
-    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
-    direction: Point,
-    err: i32,
-    stop: bool,
+    line_iter: LineIterator,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -170,29 +211,17 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // return none if stroke color is none
+        // Break if stroke width is zero
+        if self.style.stroke_width == 0 {
+            return None;
+        }
+
+        // Return none if stroke color is none
         let stroke_color = self.style.stroke_color?;
 
-        if !self.stop {
-            let point = self.start;
-
-            if self.start == self.end {
-                self.stop = true;
-            }
-            let err_double = 2 * self.err;
-            if err_double > self.delta.y {
-                self.err += self.delta.y;
-                self.start += Point::new(self.direction.x, 0);
-            }
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
-                self.start += Point::new(0, self.direction.y);
-            }
-
-            Some(Pixel(point, stroke_color))
-        } else {
-            None
-        }
+        self.line_iter
+            .next()
+            .map(|point| Pixel(point, stroke_color))
     }
 }
 
@@ -248,6 +277,17 @@ mod tests {
         let end = Point::new(10, 10);
         let expected = [];
         test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn no_stroke_width_no_line() {
+        let start = Point::new(2, 3);
+        let end = Point::new(3, 2);
+
+        let line =
+            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
+
+        assert!(line.into_iter().eq(core::iter::empty()));
     }
 
     #[test]
