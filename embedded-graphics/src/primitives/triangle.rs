@@ -454,23 +454,24 @@ mod tests {
 
     #[test]
     fn it_draws_filled_strokeless_tri() {
-        let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
-            .into_styled(
-                PrimitiveStyleBuilder::new()
-                    .fill_color(BinaryColor::On)
-                    .build(),
-            )
-            .into_iter();
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
-        // Nodes are returned twice. first line a and b yield the same point.
-        // After that line a ends where line c starts.
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
-        assert_eq!(tri.next(), None);
+        Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(4, 2))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     ",
+                "     ",
+                "  ###",
+                "  ## ",
+                "  #  ",
+            ])
+        );
     }
 
     #[test]
