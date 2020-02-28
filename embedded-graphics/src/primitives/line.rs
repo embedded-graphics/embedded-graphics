@@ -287,7 +287,7 @@ mod tests {
         let line =
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
 
-        assert_eq!(line.into_iter().next(), None);
+        assert!(line.into_iter().eq(core::iter::empty()));
     }
 
     #[test]
