@@ -103,7 +103,7 @@ impl Triangle {
         Triangle { p1, p2, p3 }
     }
 
-    /// Create sa new triangle from an array of points.
+    /// Creates a new triangle from an array of points.
     ///
     /// This supports both [`Point`]s, as well as anything that implements `Into<Point>` like
     /// `(i32, i32)`.
@@ -284,7 +284,7 @@ where
                         } else if n_ac.y > n_b.y {
                             self.update_b()
                         } else {
-                            let (l, r) = sort_two_yx(ac, b);
+                            let (l, r) = sort_two_yx(n_ac, n_b);
                             IterState::LeftRight(l, r)
                         }
                     }
