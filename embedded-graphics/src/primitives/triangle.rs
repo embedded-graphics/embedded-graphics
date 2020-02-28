@@ -317,13 +317,13 @@ where
                     // Draw edges of the triangle
                     if point.x >= 0 && point.y >= 0 {
                         if self.style.stroke_width > 0 {
-                            if let Some(color) = self.style.stroke_color {
+                            if let Some(stroke_color) = self.style.stroke_color {
                                 self.x += 1;
-                                return Some(Pixel(point, color));
+                                return Some(Pixel(point, stroke_color));
                             }
-                        } else if let Some(color) = self.style.fill_color {
+                        } else if let Some(fill_color) = self.style.fill_color {
                             self.x += 1;
-                            return Some(Pixel(point, color));
+                            return Some(Pixel(point, fill_color));
                         }
                     }
                 }
