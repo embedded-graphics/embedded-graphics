@@ -1,7 +1,8 @@
-use crate::{display::SimulatorDisplay, theme::BinaryColorTheme};
+use crate::{display::SimulatorDisplay, framebuffer::Framebuffer, output_settings::OutputSettings};
 use embedded_graphics::{
     geometry::{Point, Size},
-    pixelcolor::{PixelColor, Rgb888, RgbColor},
+    pixelcolor::{PixelColor, Rgb888},
+    DrawTarget,
 };
 use sdl2::{
     event::Event,
@@ -58,47 +59,22 @@ pub enum SimulatorEvent {
 }
 
 /// Simulator window
+#[allow(dead_code)]
 pub struct Window {
-    scale: usize,
-    pixel_spacing: usize,
-    theme: BinaryColorTheme,
-
-    canvas: render::Canvas<sdl2::video::Window>,
-    event_pump: sdl2::EventPump,
+    framebuffer: Option<Framebuffer>,
+    sdl_window: Option<SdlWindow>,
+    title: String,
+    output_settings: OutputSettings,
 }
 
 impl Window {
     /// Creates a new simulator window.
-    pub(crate) fn new(
-        display_size: Size,
-        scale: usize,
-        pixel_spacing: usize,
-        theme: BinaryColorTheme,
-        title: &str,
-    ) -> Self {
-        let sdl_context = sdl2::init().unwrap();
-        let video_subsystem = sdl_context.video().unwrap();
-
-        let width = display_size.width as usize;
-        let height = display_size.height as usize;
-        let window_width = width * scale + (width - 1) * pixel_spacing;
-        let window_height = height * scale + (height - 1) * pixel_spacing;
-
-        let window = video_subsystem
-            .window(title, window_width as u32, window_height as u32)
-            .position_centered()
-            .build()
-            .unwrap();
-
-        let canvas = window.into_canvas().build().unwrap();
-        let event_pump = sdl_context.event_pump().unwrap();
-
+    pub fn new(title: &str, output_settings: &OutputSettings) -> Self {
         Self {
-            scale,
-            pixel_spacing,
-            theme,
-            canvas,
-            event_pump,
+            framebuffer: None,
+            sdl_window: None,
+            title: String::from(title),
+            output_settings: output_settings.clone(),
         }
     }
 
@@ -107,43 +83,28 @@ impl Window {
     where
         C: PixelColor + Into<Rgb888>,
     {
-        let (width, height) = self.canvas.window().size();
+        #[cfg(feature = "dump-png")]
+        {
+            display.to_image_buffer(&self.output_settings).save("dump.png").unwrap();
+            std::process::exit(0);
+        }
 
-        let texture_creator = self.canvas.texture_creator();
-        let mut texture = texture_creator
-            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, width, height)
-            .unwrap();
+        #[cfg(not(feature = "dump-png"))]
+        {
+            if self.framebuffer.is_none() {
+                self.framebuffer = Some(Framebuffer::new(display, &self.output_settings));
+            }
 
-        texture
-            .with_lock(None, |data: &mut [u8], pitch: usize| {
-                let pixel_pitch = (self.scale + self.pixel_spacing) as i32;
+            if self.sdl_window.is_none() {
+                self.sdl_window = Some(SdlWindow::new(display, &self.title, &self.output_settings));
+            }
 
-                for y in 0..height {
-                    for x in 0..width {
-                        let source_point = Point {
-                            x: x as i32 / pixel_pitch,
-                            y: y as i32 / pixel_pitch,
-                        };
-                        let color = if x as i32 % pixel_pitch < self.scale as i32
-                            && y as i32 % pixel_pitch < self.scale as i32
-                        {
-                            display.get_pixel(source_point).into()
-                        } else {
-                            Rgb888::BLACK
-                        };
-                        let color = self.theme.convert(color);
+            let framebuffer = self.framebuffer.as_mut().unwrap();
+            let sdl_window = self.sdl_window.as_mut().unwrap();
 
-                        let index = x as usize * 3 + y as usize * pitch;
-                        data[index] = color.r();
-                        data[index + 1] = color.g();
-                        data[index + 2] = color.b();
-                    }
-                }
-            })
-            .unwrap();
-
-        self.canvas.copy(&texture, None, None).unwrap();
-        self.canvas.present();
+            framebuffer.update(display);
+            sdl_window.update(&framebuffer);
+        }
     }
 
     /// Shows a static display.
@@ -164,11 +125,76 @@ impl Window {
         }
     }
 
+    /// Returns an iterator of all captured SimulatorEvents.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called before `update` is called at least once.
+    pub fn events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
+        self.sdl_window
+            .as_mut()
+            .unwrap()
+            .events(&self.output_settings)
+    }
+}
+
+#[allow(dead_code)]
+struct SdlWindow {
+    canvas: render::Canvas<sdl2::video::Window>,
+    event_pump: sdl2::EventPump,
+}
+
+impl SdlWindow {
+    #[allow(dead_code)]
+    pub fn new<C>(
+        display: &SimulatorDisplay<C>,
+        title: &str,
+        output_settings: &OutputSettings,
+    ) -> Self
+    where
+        C: PixelColor + Into<Rgb888>,
+    {
+        let sdl_context = sdl2::init().unwrap();
+        let video_subsystem = sdl_context.video().unwrap();
+
+        let size = output_settings.framebuffer_size(display);
+
+        let window = video_subsystem
+            .window(title, size.width, size.height)
+            .position_centered()
+            .build()
+            .unwrap();
+
+        let canvas = window.into_canvas().build().unwrap();
+        let event_pump = sdl_context.event_pump().unwrap();
+
+        Self { canvas, event_pump }
+    }
+
+    #[allow(dead_code)]
+    pub fn update(&mut self, framebuffer: &Framebuffer) {
+        let Size { width, height } = framebuffer.size();
+
+        let texture_creator = self.canvas.texture_creator();
+        let mut texture = texture_creator
+            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, width, height)
+            .unwrap();
+
+        texture
+            .update(None, framebuffer.data.as_ref(), width as usize * 3)
+            .unwrap();
+
+        self.canvas.copy(&texture, None, None).unwrap();
+        self.canvas.present();
+    }
+
     /// Handle events
     /// Return an iterator of all captured SimulatorEvent
-    pub fn events(&mut self) -> impl Iterator<Item = SimulatorEvent> + '_ {
-        let scale = self.scale;
-        let pixel_spacing = self.pixel_spacing;
+    pub fn events(
+        &mut self,
+        output_settings: &OutputSettings,
+    ) -> impl Iterator<Item = SimulatorEvent> + '_ {
+        let output_settings = output_settings.clone();
         self.event_pump
             .poll_iter()
             .filter_map(move |event| match event {
@@ -212,13 +238,13 @@ impl Window {
                 Event::MouseButtonUp {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = map_input_to_point((x, y), scale, pixel_spacing);
+                    let point = output_settings.output_to_display(Point::new(x, y));
                     Some(SimulatorEvent::MouseButtonUp { point, mouse_btn })
                 }
                 Event::MouseButtonDown {
                     x, y, mouse_btn, ..
                 } => {
-                    let point = map_input_to_point((x, y), scale, pixel_spacing);
+                    let point = output_settings.output_to_display(Point::new(x, y));
                     Some(SimulatorEvent::MouseButtonDown { point, mouse_btn })
                 }
                 Event::MouseWheel {
@@ -230,10 +256,4 @@ impl Window {
                 _ => None,
             })
     }
-}
-
-/// Convert SDL2 input event coordinates into a point on the simulator coordinate system
-fn map_input_to_point(coords: (i32, i32), scale: usize, pixel_spacing: usize) -> Point {
-    let pitch = (scale + pixel_spacing) as i32;
-    Point::new(coords.0 / pitch, coords.1 / pitch)
 }

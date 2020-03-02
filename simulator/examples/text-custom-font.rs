@@ -1,5 +1,7 @@
 use embedded_graphics::{egtext, pixelcolor::BinaryColor, prelude::*, text_style};
-use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{
+    BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
+};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct SevenSegmentFont;
@@ -36,11 +38,10 @@ fn main() -> Result<(), core::convert::Infallible> {
     )
     .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Custom font")
+    let output_settings = OutputSettingsBuilder::new()
         .theme(BinaryColorTheme::OledBlue)
         .build();
-    window.show_static(&display);
+    Window::new("Custom font", &output_settings).show_static(&display);
 
     Ok(())
 }

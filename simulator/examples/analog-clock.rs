@@ -17,7 +17,9 @@ use embedded_graphics::{
     primitives::{Circle, Line, Rectangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled, TextStyle},
 };
-use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
+use embedded_graphics_simulator::{
+    OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
+};
 use std::{thread, time::Duration};
 
 /// The width and height of the simulated display
@@ -141,7 +143,9 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> =
         SimulatorDisplay::new(Size::new(DISP_SIZE as u32, DISP_SIZE as u32));
-    let mut window = WindowBuilder::new(&display).title("Clock").scale(2).build();
+
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    let mut window = Window::new("Clock", &output_settings);
 
     'running: loop {
         let time = Local::now();

@@ -99,7 +99,9 @@ use embedded_graphics::{
     primitives::{Circle, Rectangle, Triangle},
     style::{PrimitiveStyle, TextStyle},
 };
-use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{
+    BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
+};
 
 fn main() -> Result<(), std::convert::Infallible> {
     // Create a new monochrome simulator display with 128x64 pixels.
@@ -145,11 +147,10 @@ fn main() -> Result<(), std::convert::Infallible> {
         .into_styled(text_style)
         .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Hello World")
+    let output_settings = OutputSettingsBuilder::new()
         .theme(BinaryColorTheme::OledBlue)
         .build();
-    window.show_static(&display);
+    Window::new("Hello World", &output_settings).show_static(&display);
 
     Ok(())
 }

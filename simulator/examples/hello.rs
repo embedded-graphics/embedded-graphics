@@ -5,7 +5,9 @@ use embedded_graphics::{
     primitives::{Circle, Line},
     style::{PrimitiveStyle, TextStyle},
 };
-use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{
+    BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
+};
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(129, 129));
@@ -29,11 +31,10 @@ fn main() -> Result<(), core::convert::Infallible> {
         .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
         .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Hello World")
+    let output_settings = OutputSettingsBuilder::new()
         .theme(BinaryColorTheme::OledBlue)
         .build();
-    window.show_static(&display);
+    Window::new("Hello World", &output_settings).show_static(&display);
 
     Ok(())
 }
