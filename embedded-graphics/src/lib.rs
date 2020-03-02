@@ -197,7 +197,6 @@
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
 
-mod check_readme;
 mod draw_target;
 pub mod drawable;
 pub mod fonts;
