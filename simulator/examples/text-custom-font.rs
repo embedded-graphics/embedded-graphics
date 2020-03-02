@@ -5,7 +5,7 @@ use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuil
 struct SevenSegmentFont;
 
 impl Font for SevenSegmentFont {
-    const FONT_IMAGE: &'static [u8] = include_bytes!("seven-segment.raw");
+    const FONT_IMAGE: &'static [u8] = include_bytes!("assets/seven-segment-font.raw");
     const FONT_IMAGE_WIDTH: u32 = 224;
 
     const CHARACTER_SIZE: Size = Size::new(22, 40);

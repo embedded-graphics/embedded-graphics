@@ -10,7 +10,7 @@ use tinybmp::Bmp;
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(128, 128));
 
-    let bmp = Bmp::from_slice(include_bytes!("./rust-pride.bmp")).unwrap();
+    let bmp = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
 
     let image: Image<Bmp, Rgb565> = Image::new(&bmp, Point::zero());
 

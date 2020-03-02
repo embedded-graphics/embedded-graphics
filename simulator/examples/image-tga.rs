@@ -10,7 +10,7 @@ use tinytga::Tga;
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(128, 128));
 
-    let tga = Tga::from_slice(include_bytes!("./rust-pride.tga")).unwrap();
+    let tga = Tga::from_slice(include_bytes!("./assets/rust-pride.tga")).unwrap();
 
     let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
 

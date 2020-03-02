@@ -23,7 +23,7 @@
 //! let mut display: Display<Rgb565> = Display::default();
 //!
 //! let tga =
-//!     Tga::from_slice(include_bytes!("../../../simulator/examples/rust-pride.tga")).unwrap();
+//!     Tga::from_slice(include_bytes!("../../../simulator/examples/assets/rust-pride.tga")).unwrap();
 //!
 //! let image: Image<Tga, Rgb565> = Image::new(&tga, Point::zero());
 //!
