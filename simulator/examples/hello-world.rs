@@ -9,7 +9,7 @@ use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuil
 
 fn main() -> Result<(), std::convert::Infallible> {
     // Create a new simulator display with 128x64 pixels.
-    let mut display = SimulatorDisplay::new(Size::new(128, 64));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
