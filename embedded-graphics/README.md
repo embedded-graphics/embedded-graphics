@@ -43,7 +43,7 @@ crates. Examples of this are adding support for different image formats or imple
 `Drawable` items. The [external crates](#additional-functions-provided-by-external-crates) section
 contains a list of crates that provide reusable extensions to embedded-graphics.
 
-![Embedded graphics on real hardware](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/banner-photo.jpg)
+![Embedded graphics on real hardware](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/banner-photo.jpg)
 
 ## Documentation
 
@@ -159,7 +159,7 @@ fn main() -> Result<(), std::convert::Infallible> {
 This example is also included in the [simulator](./simulator/examples) crate and
 can be run using ```cargo run --example hello-world```.
 
-![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/hello-world-simulator.png)
+![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
 
 Additional examples can be found in the [simulator](./simulator/examples) crate.
 
