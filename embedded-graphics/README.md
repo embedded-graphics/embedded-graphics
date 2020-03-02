@@ -43,6 +43,10 @@ crates. Examples of this are adding support for different image formats or imple
 `Drawable` items. The [external crates](#additional-functions-provided-by-external-crates) section
 contains a list of crates that provide reusable extensions to embedded-graphics.
 
+![Embedded graphics on real hardware](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/banner-photo.jpg)
+
+## Documentation
+
 More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
 
 ## Getting help/reporting an issue
@@ -50,10 +54,6 @@ More information and up to date docs can be found on [docs.rs](https://docs.rs/e
 If you think you've found a bug, or would like to suggest a new feature to add to embedded-graphics, please [open an issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 
 If you need more deeper/more personalized help, please check out the [embedded-graphics Matrix channel](https://matrix.to/#/#rust-embedded-graphics:matrix.org).
-
-## [Documentation](https://docs.rs/embedded-graphics)
-
-![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/banner-photo.jpg)
 
 ## Additional functions provided by external crates
 
@@ -88,7 +88,8 @@ There may be other drivers out there we don't know about yet. If you know of a d
 
 ## Example
 
-Example usage can be found [in the simulator](./simulator/examples):
+The following example uses the [simulator](https://docs.rs/embedded-graphics-simulator/) to
+demonstrate some of the built in drawing functions:
 
 ```rust,no_run
 use embedded_graphics::{
@@ -101,8 +102,8 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, WindowBuilder};
 
 fn main() -> Result<(), std::convert::Infallible> {
-    // Create a new simulator display with 128x64 pixels.
-    let mut display = SimulatorDisplay::new(Size::new(128, 64));
+    // Create a new monochrome simulator display with 128x64 pixels.
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
@@ -155,9 +156,16 @@ fn main() -> Result<(), std::convert::Infallible> {
 
 ```
 
-![Embedded Graphics Simulator example screenshots](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/hello-world-simulator.png)
+This example is also included in the [simulator](./simulator/examples) crate and
+can be run using ```cargo run --example hello-world```.
 
-Macros are also supported for text and primitives:
+![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/rfuest/embedded-graphics/readme_logo/assets/hello-world-simulator.png)
+
+Additional examples can be found in the [simulator](./simulator/examples) crate.
+
+## Using macros
+
+Embedded graphics defines macros to easily build drawables and styles for primitives and texts:
 
 ```rust
 use embedded_graphics::fonts::Font6x8;
