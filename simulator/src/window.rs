@@ -85,7 +85,10 @@ impl Window {
     {
         #[cfg(feature = "dump-png")]
         {
-            display.to_image_buffer(&self.output_settings).save("dump.png").unwrap();
+            display
+                .to_image_buffer(&self.output_settings)
+                .save("dump.png")
+                .unwrap();
             std::process::exit(0);
         }
 

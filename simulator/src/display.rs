@@ -111,7 +111,10 @@ mod image_rs {
         /// // use image buffer
         /// // example: image_buffer.save
         /// ```
-        pub fn to_image_buffer(&self, output_settings: &OutputSettings) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
+        pub fn to_image_buffer(
+            &self,
+            output_settings: &OutputSettings,
+        ) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
             let framebuffer = Framebuffer::new(self, output_settings);
             framebuffer.into_image_buffer()
         }
