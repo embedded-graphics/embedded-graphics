@@ -1,6 +1,5 @@
 //! TODO: Docs
 
-use super::ThickLine;
 use crate::geometry::Point;
 
 /// TODO: Docs
@@ -11,30 +10,6 @@ pub enum Side {
     /// TODO: Docs
     Right,
 }
-
-// /// TODO: Docs
-// #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-// pub struct PerpLine {
-//     start: Point,
-//     end: Point,
-//     width: i32,
-// }
-
-// impl PerpLine {
-//     /// TODO: Docs
-//     pub fn new(start: Point, end: Point, width: i32) -> Self {
-//         Self { start, end, width }
-//     }
-// }
-
-// impl IntoIterator for PerpLine {
-//     type Item = Point;
-//     type IntoIter = PerpLineIterator;
-
-//     fn into_iter(self) -> Self::IntoIter {
-//         PerpLineIterator::new(&self, self.width)
-//     }
-// }
 
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -99,7 +74,6 @@ impl Iterator for PerpLineIterator {
             match self.side {
                 Side::Right => {
                     if self.error > self.threshold {
-                        // self.point -= Point::new(self.direction.x, 0);
                         if self.x_major {
                             self.point -= Point::new(self.direction.x, 0);
                         } else {
@@ -113,7 +87,6 @@ impl Iterator for PerpLineIterator {
 
                     self.error += self.e_square;
 
-                    // self.point += Point::new(0, self.direction.y);
                     if self.x_major {
                         self.point += Point::new(0, self.direction.y);
                     } else {
@@ -124,7 +97,6 @@ impl Iterator for PerpLineIterator {
                 }
                 Side::Left => {
                     if self.error < -self.threshold {
-                        // self.point += Point::new(self.direction.x, 0);
                         if self.x_major {
                             self.point += Point::new(self.direction.x, 0);
                         } else {
@@ -138,7 +110,6 @@ impl Iterator for PerpLineIterator {
 
                     self.error -= self.e_square;
 
-                    // self.point -= Point::new(0, self.direction.y);
                     if self.x_major {
                         self.point -= Point::new(0, self.direction.y);
                     } else {
