@@ -2,7 +2,7 @@ extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
 use embedded_graphics::{
-    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitives::ThickLine,
+    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitive_style, primitives::ThickLine,
     style::PrimitiveStyle, text_style,
 };
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
@@ -31,7 +31,12 @@ fn draw(
             display.size().height as i32 / 2,
         ),
         position,
-        PrimitiveStyle::with_stroke(FOREGROUND_COLOR, stroke_width),
+        primitive_style!(
+            stroke_width = stroke_width,
+            stroke_color = FOREGROUND_COLOR,
+            // For debugging - right side of line uses this colour
+            fill_color = Rgb888::GREEN
+        ),
     )
     .into_iter()
     .draw(display)?;
@@ -46,7 +51,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         .title("Click to move circle")
         .build();
 
-    let mut position = Point::new(50, 50);
+    let mut position = Point::new(150, 120);
     let mut stroke_width = 1;
 
     draw(&mut display, position, stroke_width)?;
