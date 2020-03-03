@@ -15,6 +15,7 @@ fn draw(
     display: &mut SimulatorDisplay<Rgb888>,
     position: Point,
     stroke_width: u32,
+    draw_extra: bool,
 ) -> Result<(), core::convert::Infallible> {
     display.clear(BACKGROUND_COLOR)?;
 
@@ -37,6 +38,7 @@ fn draw(
             // For debugging - right side of line uses this colour
             fill_color = Rgb888::GREEN
         ),
+        draw_extra,
     )
     .into_iter()
     .draw(display)?;
@@ -52,9 +54,10 @@ fn main() -> Result<(), core::convert::Infallible> {
         .build();
 
     let mut position = Point::new(150, 120);
-    let mut stroke_width = 1;
+    let mut stroke_width = 5;
+    let mut draw_extra = true;
 
-    draw(&mut display, position, stroke_width)?;
+    draw(&mut display, position, stroke_width, draw_extra)?;
 
     'running: loop {
         window.update(&display);
@@ -66,14 +69,15 @@ fn main() -> Result<(), core::convert::Infallible> {
                     match keycode {
                         Keycode::Up => stroke_width += 1,
                         Keycode::Down => stroke_width = (stroke_width as i32 - 1).max(0) as u32,
+                        Keycode::Space => draw_extra = !draw_extra,
                         _ => (),
                     }
 
-                    draw(&mut display, position, stroke_width)?;
+                    draw(&mut display, position, stroke_width, draw_extra)?;
                 }
                 SimulatorEvent::MouseButtonUp { point, .. } => {
                     position = point;
-                    draw(&mut display, position, stroke_width)?;
+                    draw(&mut display, position, stroke_width, draw_extra)?;
                 }
                 _ => {}
             }
