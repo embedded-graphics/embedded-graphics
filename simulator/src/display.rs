@@ -98,13 +98,16 @@ mod image_rs {
         /// # Examples
         ///
         /// ```rust
+        /// use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+        /// use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
+        ///
         /// let output_settings = OutputSettingsBuilder::new().scale(2).build();
         ///
         /// let display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(128, 64));
         ///
         /// // draw something to the display
         ///
-        /// let image_buffer = display.to_image_buffer();
+        /// let image_buffer = display.to_image_buffer(&output_settings);
         /// assert_eq!(image_buffer.width(), 256);
         /// assert_eq!(image_buffer.height(), 128);
         ///
