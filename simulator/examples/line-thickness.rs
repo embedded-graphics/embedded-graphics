@@ -2,7 +2,7 @@ extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
 use embedded_graphics::{
-    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitives::Line,
+    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitives::ThickLine,
     style::PrimitiveStyle, text_style,
 };
 use embedded_graphics_simulator::{SimulatorDisplay, SimulatorEvent, WindowBuilder};
@@ -25,14 +25,15 @@ fn draw(
     )
     .draw(display)?;
 
-    Line::new(
+    ThickLine::new(
         Point::new(
             display.size().width as i32 / 2,
             display.size().height as i32 / 2,
         ),
         position,
+        PrimitiveStyle::with_stroke(FOREGROUND_COLOR, stroke_width),
     )
-    .into_styled(PrimitiveStyle::with_stroke(FOREGROUND_COLOR, stroke_width))
+    .into_iter()
     .draw(display)?;
 
     Ok(())
