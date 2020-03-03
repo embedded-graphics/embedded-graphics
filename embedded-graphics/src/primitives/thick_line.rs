@@ -63,6 +63,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     p_error: i32,
     draw_extra: bool,
     direction: Point,
+    perp_direction: Point,
     point: Point,
 }
 
@@ -74,8 +75,27 @@ where
     pub fn new(line: &ThickLine<C>, style: PrimitiveStyle<C>) -> Self {
         use integer_sqrt::IntegerSquareRoot;
 
-        let dx = (line.end.x - line.start.x).abs();
-        let dy = (line.end.y - line.start.y).abs();
+        let dx = line.end.x - line.start.x;
+        let dy = line.end.y - line.start.y;
+
+        let direction = match (dx >= 0, dy >= 0) {
+            (true, true) => Point::new(1, 1),
+            (true, false) => Point::new(1, -1),
+            (false, true) => Point::new(-1, 1),
+            (false, false) => Point::new(-1, -1),
+        };
+
+        // Perpendicular direction. Note that some octants swap their sides, so this can be the left
+        // OR right perpendicular for the line
+        let perp_direction = match (dx >= 0, dy >= 0) {
+            (true, true) => Point::new(1, 1),
+            (true, false) => Point::new(1, -1),
+            (false, true) => Point::new(-1, 1),
+            (false, false) => Point::new(-1, -1),
+        };
+
+        let dx = dx.abs();
+        let dy = dy.abs();
 
         // let side_thickness = style.stroke_width_i32() / 2;
         let side_thickness =
@@ -83,13 +103,6 @@ where
 
         let error = 0;
         let p_error = 0;
-
-        let direction = match (line.start.x >= line.end.x, line.start.y >= line.end.y) {
-            (false, false) => Point::new(1, 1),
-            (false, true) => Point::new(1, -1),
-            (true, false) => Point::new(-1, 1),
-            (true, true) => Point::new(-1, -1),
-        };
 
         Self {
             error,
@@ -112,6 +125,7 @@ where
                 side_thickness,
                 p_error,
                 error,
+                perp_direction,
             ),
             perp_right: PerpLineIterator::new(
                 line.start,
@@ -121,12 +135,32 @@ where
                 side_thickness,
                 p_error,
                 error,
+                perp_direction,
             ),
-            extra_perp_left: PerpLineIterator::new(line.start, 1, 1, Side::Left, 0, p_error, 0),
-            extra_perp_right: PerpLineIterator::new(line.start, 1, 1, Side::Right, 0, p_error, 0),
+            extra_perp_left: PerpLineIterator::new(
+                line.start,
+                1,
+                1,
+                Side::Left,
+                0,
+                p_error,
+                0,
+                perp_direction,
+            ),
+            extra_perp_right: PerpLineIterator::new(
+                line.start,
+                1,
+                1,
+                Side::Right,
+                0,
+                p_error,
+                0,
+                perp_direction,
+            ),
             side_thickness,
             p_error,
             direction,
+            perp_direction,
         }
     }
 }
@@ -171,6 +205,7 @@ where
                             self.side_thickness,
                             self.p_error + self.e_square,
                             self.error,
+                            self.perp_direction,
                         );
 
                         self.extra_perp_right = PerpLineIterator::new(
@@ -181,6 +216,7 @@ where
                             self.side_thickness,
                             self.p_error + self.e_square,
                             self.error,
+                            self.perp_direction,
                         );
 
                         extra = true;
@@ -202,6 +238,7 @@ where
                 self.side_thickness,
                 self.p_error,
                 self.error,
+                self.perp_direction,
             )
             .into_iter();
 
@@ -213,6 +250,7 @@ where
                 self.side_thickness,
                 self.p_error,
                 self.error,
+                self.perp_direction,
             )
             .into_iter();
 

@@ -50,6 +50,7 @@ pub struct PerpLineIterator {
     tk: i32,
     dx: i32,
     dy: i32,
+    direction: Point,
 }
 
 impl PerpLineIterator {
@@ -62,9 +63,11 @@ impl PerpLineIterator {
         width: u32,
         error: i32,
         winit: i32,
+        direction: Point,
     ) -> Self {
         Self {
             error,
+            direction,
             dx,
             dy,
             point: start,
@@ -97,7 +100,7 @@ impl Iterator for PerpLineIterator {
                     self.count += 1;
 
                     if self.error > self.threshold {
-                        self.point -= Point::new(1, 0);
+                        self.point -= Point::new(self.direction.x, 0);
 
                         self.error += self.e_diag;
 
@@ -105,7 +108,7 @@ impl Iterator for PerpLineIterator {
                     }
 
                     self.error += self.e_square;
-                    self.point += Point::new(0, 1);
+                    self.point += Point::new(0, self.direction.y);
 
                     self.tk += 2 * self.dx;
                 }
@@ -113,7 +116,7 @@ impl Iterator for PerpLineIterator {
                     self.count += 1;
 
                     if self.error < -self.threshold {
-                        self.point += Point::new(1, 0);
+                        self.point += Point::new(self.direction.x, 0);
 
                         self.error -= self.e_diag;
 
@@ -121,7 +124,7 @@ impl Iterator for PerpLineIterator {
                     }
 
                     self.error -= self.e_square;
-                    self.point -= Point::new(0, 1);
+                    self.point -= Point::new(0, self.direction.y);
 
                     self.tk += 2 * self.dx;
                 }
