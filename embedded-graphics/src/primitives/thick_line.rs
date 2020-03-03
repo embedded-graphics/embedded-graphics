@@ -65,6 +65,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     direction: Point,
     perp_direction: Point,
     point: Point,
+    x_major: bool,
 }
 
 impl<C> ThickLineIterator<C>
@@ -94,9 +95,6 @@ where
             (false, false) => Point::new(-1, -1),
         };
 
-        let dx = dx.abs();
-        let dy = dy.abs();
-
         // let side_thickness = style.stroke_width_i32() / 2;
         let side_thickness =
             2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
@@ -104,7 +102,18 @@ where
         let error = 0;
         let p_error = 0;
 
+        let mut dx = dx.abs();
+        let mut dy = dy.abs();
+
+        let mut x_major = true;
+
+        if dy > dx {
+            core::mem::swap(&mut dx, &mut dy);
+            x_major = false;
+        }
+
         Self {
+            x_major,
             error,
             point: line.start,
             dx,
@@ -126,6 +135,7 @@ where
                 p_error,
                 error,
                 perp_direction,
+                x_major,
             ),
             perp_right: PerpLineIterator::new(
                 line.start,
@@ -136,6 +146,7 @@ where
                 p_error,
                 error,
                 perp_direction,
+                x_major,
             ),
             extra_perp_left: PerpLineIterator::new(
                 line.start,
@@ -146,6 +157,7 @@ where
                 p_error,
                 0,
                 perp_direction,
+                x_major,
             ),
             extra_perp_right: PerpLineIterator::new(
                 line.start,
@@ -156,6 +168,7 @@ where
                 p_error,
                 0,
                 perp_direction,
+                x_major,
             ),
             side_thickness,
             p_error,
@@ -189,7 +202,12 @@ where
             let mut extra = false;
 
             if self.error > self.threshold {
-                self.point += Point::new(0, self.direction.y);
+                // self.point += Point::new(0, self.direction.y);
+                if self.x_major {
+                    self.point += Point::new(0, self.direction.y);
+                } else {
+                    self.point += Point::new(self.direction.x, 0);
+                }
 
                 self.error += self.e_diag;
 
@@ -206,6 +224,7 @@ where
                             self.p_error + self.e_square,
                             self.error,
                             self.perp_direction,
+                            self.x_major,
                         );
 
                         self.extra_perp_right = PerpLineIterator::new(
@@ -217,6 +236,7 @@ where
                             self.p_error + self.e_square,
                             self.error,
                             self.perp_direction,
+                            self.x_major,
                         );
 
                         extra = true;
@@ -228,7 +248,12 @@ where
 
             self.error += self.e_square;
 
-            self.point += Point::new(self.direction.x, 0);
+            // self.point += Point::new(self.direction.x, 0);
+            if self.x_major {
+                self.point += Point::new(self.direction.x, 0);
+            } else {
+                self.point += Point::new(0, self.direction.y);
+            }
 
             self.perp_left = PerpLineIterator::new(
                 self.point,
@@ -239,6 +264,7 @@ where
                 self.p_error,
                 self.error,
                 self.perp_direction,
+                self.x_major,
             )
             .into_iter();
 
@@ -251,6 +277,7 @@ where
                 self.p_error,
                 self.error,
                 self.perp_direction,
+                self.x_major,
             )
             .into_iter();
 

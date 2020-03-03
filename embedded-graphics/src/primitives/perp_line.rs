@@ -50,6 +50,7 @@ pub struct PerpLineIterator {
     dx: i32,
     dy: i32,
     direction: Point,
+    x_major: bool,
 }
 
 impl PerpLineIterator {
@@ -63,6 +64,7 @@ impl PerpLineIterator {
         error: i32,
         winit: i32,
         direction: Point,
+        x_major: bool,
     ) -> Self {
         Self {
             error,
@@ -79,6 +81,7 @@ impl PerpLineIterator {
                 Side::Right => dx + dy - winit,
                 Side::Left => dx + dy + winit,
             },
+            x_major,
         }
     }
 }
@@ -96,7 +99,12 @@ impl Iterator for PerpLineIterator {
             match self.side {
                 Side::Right => {
                     if self.error > self.threshold {
-                        self.point -= Point::new(self.direction.x, 0);
+                        // self.point -= Point::new(self.direction.x, 0);
+                        if self.x_major {
+                            self.point -= Point::new(self.direction.x, 0);
+                        } else {
+                            self.point -= Point::new(0, self.direction.y);
+                        }
 
                         self.error += self.e_diag;
 
@@ -104,13 +112,24 @@ impl Iterator for PerpLineIterator {
                     }
 
                     self.error += self.e_square;
-                    self.point += Point::new(0, self.direction.y);
+
+                    // self.point += Point::new(0, self.direction.y);
+                    if self.x_major {
+                        self.point += Point::new(0, self.direction.y);
+                    } else {
+                        self.point += Point::new(self.direction.x, 0);
+                    }
 
                     self.tk += 2 * self.dx;
                 }
                 Side::Left => {
                     if self.error < -self.threshold {
-                        self.point += Point::new(self.direction.x, 0);
+                        // self.point += Point::new(self.direction.x, 0);
+                        if self.x_major {
+                            self.point += Point::new(self.direction.x, 0);
+                        } else {
+                            self.point += Point::new(0, self.direction.y);
+                        }
 
                         self.error -= self.e_diag;
 
@@ -118,7 +137,13 @@ impl Iterator for PerpLineIterator {
                     }
 
                     self.error -= self.e_square;
-                    self.point -= Point::new(0, self.direction.y);
+
+                    // self.point -= Point::new(0, self.direction.y);
+                    if self.x_major {
+                        self.point -= Point::new(0, self.direction.y);
+                    } else {
+                        self.point -= Point::new(self.direction.x, 0);
+                    }
 
                     self.tk += 2 * self.dx;
                 }
