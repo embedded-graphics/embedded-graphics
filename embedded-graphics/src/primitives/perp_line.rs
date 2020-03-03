@@ -45,7 +45,6 @@ pub struct PerpLineIterator {
     e_diag: i32,
     e_square: i32,
     width: u32,
-    count: u32,
     side: Side,
     tk: i32,
     dx: i32,
@@ -75,7 +74,6 @@ impl PerpLineIterator {
             e_diag: -2 * dx,
             e_square: 2 * dy,
             width,
-            count: 0,
             side,
             tk: match side {
                 Side::Right => dx + dy - winit,
@@ -97,8 +95,6 @@ impl Iterator for PerpLineIterator {
 
             match self.side {
                 Side::Right => {
-                    self.count += 1;
-
                     if self.error > self.threshold {
                         self.point -= Point::new(self.direction.x, 0);
 
@@ -113,8 +109,6 @@ impl Iterator for PerpLineIterator {
                     self.tk += 2 * self.dx;
                 }
                 Side::Left => {
-                    self.count += 1;
-
                     if self.error < -self.threshold {
                         self.point += Point::new(self.direction.x, 0);
 
