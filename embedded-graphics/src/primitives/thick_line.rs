@@ -61,7 +61,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     perp_right: PerpLineIterator,
     extra_perp_left: PerpLineIterator,
     extra_perp_right: PerpLineIterator,
-    side_thickness: i32,
+    side_thickness: u32,
     p_error: i32,
     draw_extra: bool,
 }
@@ -72,14 +72,20 @@ where
 {
     /// TODO: Docs
     pub fn new(line: &ThickLine<C>, style: PrimitiveStyle<C>) -> Self {
+        use integer_sqrt::IntegerSquareRoot;
+
         let dx = line.end.x - line.start.x;
         let dy = line.end.y - line.start.y;
 
-        let side_thickness = style.stroke_width_i32() / 2;
+        // let side_thickness = style.stroke_width_i32() / 2;
+        let side_thickness =
+            2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
+
+        let error = 0;
         let p_error = 0;
 
         Self {
-            error: 0,
+            error,
             x: line.start.x,
             y: line.start.y,
             dx,
@@ -88,7 +94,7 @@ where
             threshold: dx - 2 * dy,
             e_diag: -2 * dx,
             e_square: 2 * dy,
-            length: dx,
+            length: dx + 1,
             style,
             count: 0,
             draw_extra: line.draw_extra,
@@ -99,6 +105,7 @@ where
                 Side::Left,
                 side_thickness,
                 p_error,
+                error,
             ),
             perp_right: PerpLineIterator::new(
                 line.start,
@@ -107,9 +114,10 @@ where
                 Side::Right,
                 side_thickness,
                 p_error,
+                error,
             ),
-            extra_perp_left: PerpLineIterator::new(line.start, 0, 0, Side::Left, 0, p_error),
-            extra_perp_right: PerpLineIterator::new(line.start, 0, 0, Side::Right, 0, p_error),
+            extra_perp_left: PerpLineIterator::new(line.start, 1, 1, Side::Left, 0, p_error, 0),
+            extra_perp_right: PerpLineIterator::new(line.start, 1, 1, Side::Right, 0, p_error, 0),
             side_thickness,
             p_error,
         }
@@ -155,6 +163,7 @@ where
                             Side::Left,
                             self.side_thickness,
                             self.p_error + self.e_square,
+                            self.error,
                         );
 
                         self.extra_perp_right = PerpLineIterator::new(
@@ -164,6 +173,7 @@ where
                             Side::Right,
                             self.side_thickness,
                             self.p_error + self.e_square,
+                            self.error,
                         );
 
                         extra = true;
@@ -184,6 +194,7 @@ where
                 Side::Left,
                 self.side_thickness,
                 self.p_error,
+                self.error,
             )
             .into_iter();
 
@@ -194,6 +205,7 @@ where
                 Side::Right,
                 self.side_thickness,
                 self.p_error,
+                self.error,
             )
             .into_iter();
 

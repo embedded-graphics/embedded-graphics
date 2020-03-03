@@ -45,24 +45,41 @@ pub struct PerpLineIterator {
     threshold: i32,
     e_diag: i32,
     e_square: i32,
-    length: i32,
-    count: i32,
+    width: u32,
+    count: u32,
     side: Side,
+    tk: i32,
+    dx: i32,
+    dy: i32,
 }
 
 impl PerpLineIterator {
     /// TODO: Docs
-    pub fn new(start: Point, dx: i32, dy: i32, side: Side, width: i32, error: i32) -> Self {
+    pub fn new(
+        start: Point,
+        dx: i32,
+        dy: i32,
+        side: Side,
+        width: u32,
+        error: i32,
+        winit: i32,
+    ) -> Self {
         Self {
             error,
+            dx,
+            dy,
             x: start.x,
             y: start.y,
             threshold: dx - 2 * dy,
             e_diag: -2 * dx,
             e_square: 2 * dy,
-            length: width,
+            width,
             count: 0,
             side,
+            tk: match side {
+                Side::Right => dx + dy - winit,
+                Side::Left => dx + dy + winit,
+            },
         }
     }
 }
@@ -72,7 +89,7 @@ impl Iterator for PerpLineIterator {
 
     // Octant 1 only
     fn next(&mut self) -> Option<Self::Item> {
-        if self.count > self.length {
+        if self.tk > self.width as i32 {
             None
         } else {
             let point = Point::new(self.x, self.y);
@@ -84,12 +101,15 @@ impl Iterator for PerpLineIterator {
                     if self.error > self.threshold {
                         self.x -= 1;
 
-                        self.error += self.e_diag
+                        self.error += self.e_diag;
+
+                        self.tk += 2 * self.dy;
                     }
 
                     self.error += self.e_square;
-
                     self.y += 1;
+
+                    self.tk += 2 * self.dx;
                 }
                 Side::Left => {
                     self.count += 1;
@@ -97,12 +117,15 @@ impl Iterator for PerpLineIterator {
                     if self.error < -self.threshold {
                         self.x += 1;
 
-                        self.error -= self.e_diag
+                        self.error -= self.e_diag;
+
+                        self.tk += 2 * self.dy;
                     }
 
                     self.error -= self.e_square;
-
                     self.y -= 1;
+
+                    self.tk += 2 * self.dx;
                 }
             }
 
