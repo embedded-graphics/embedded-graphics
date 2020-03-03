@@ -46,8 +46,6 @@ where
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ThickLineIterator<C: PixelColor> {
     error: i32,
-    x: i32,
-    y: i32,
     threshold: i32,
     e_diag: i32,
     e_square: i32,
@@ -64,6 +62,8 @@ pub struct ThickLineIterator<C: PixelColor> {
     side_thickness: u32,
     p_error: i32,
     draw_extra: bool,
+    direction: Point,
+    point: Point,
 }
 
 impl<C> ThickLineIterator<C>
@@ -74,8 +74,8 @@ where
     pub fn new(line: &ThickLine<C>, style: PrimitiveStyle<C>) -> Self {
         use integer_sqrt::IntegerSquareRoot;
 
-        let dx = line.end.x - line.start.x;
-        let dy = line.end.y - line.start.y;
+        let dx = (line.end.x - line.start.x).abs();
+        let dy = (line.end.y - line.start.y).abs();
 
         // let side_thickness = style.stroke_width_i32() / 2;
         let side_thickness =
@@ -84,10 +84,16 @@ where
         let error = 0;
         let p_error = 0;
 
+        let direction = match (line.start.x >= line.end.x, line.start.y >= line.end.y) {
+            (false, false) => Point::new(1, 1),
+            (false, true) => Point::new(1, -1),
+            (true, false) => Point::new(-1, 1),
+            (true, true) => Point::new(-1, -1),
+        };
+
         Self {
             error,
-            x: line.start.x,
-            y: line.start.y,
+            point: line.start,
             dx,
             dy,
             line: line.clone(),
@@ -120,6 +126,7 @@ where
             extra_perp_right: PerpLineIterator::new(line.start, 1, 1, Side::Right, 0, p_error, 0),
             side_thickness,
             p_error,
+            direction,
         }
     }
 }
@@ -148,7 +155,7 @@ where
             let mut extra = false;
 
             if self.error > self.threshold {
-                self.y += 1;
+                self.point += Point::new(0, self.direction.y);
 
                 self.error += self.e_diag;
 
@@ -157,7 +164,7 @@ where
 
                     if self.draw_extra {
                         self.extra_perp_left = PerpLineIterator::new(
-                            Point::new(self.x, self.y),
+                            self.point,
                             self.dx,
                             self.dy,
                             Side::Left,
@@ -167,7 +174,7 @@ where
                         );
 
                         self.extra_perp_right = PerpLineIterator::new(
-                            Point::new(self.x, self.y),
+                            self.point,
                             self.dx,
                             self.dy,
                             Side::Right,
@@ -185,10 +192,10 @@ where
 
             self.error += self.e_square;
 
-            self.x += 1;
+            self.point += Point::new(self.direction.x, 0);
 
             self.perp_left = PerpLineIterator::new(
-                Point::new(self.x, self.y),
+                self.point,
                 self.dx,
                 self.dy,
                 Side::Left,
@@ -199,7 +206,7 @@ where
             .into_iter();
 
             self.perp_right = PerpLineIterator::new(
-                Point::new(self.x, self.y),
+                self.point,
                 self.dx,
                 self.dy,
                 Side::Right,

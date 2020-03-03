@@ -40,8 +40,7 @@ pub enum Side {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct PerpLineIterator {
     error: i32,
-    x: i32,
-    y: i32,
+    point: Point,
     threshold: i32,
     e_diag: i32,
     e_square: i32,
@@ -68,8 +67,7 @@ impl PerpLineIterator {
             error,
             dx,
             dy,
-            x: start.x,
-            y: start.y,
+            point: start,
             threshold: dx - 2 * dy,
             e_diag: -2 * dx,
             e_square: 2 * dy,
@@ -92,14 +90,14 @@ impl Iterator for PerpLineIterator {
         if self.tk > self.width as i32 {
             None
         } else {
-            let point = Point::new(self.x, self.y);
+            let point = self.point;
 
             match self.side {
                 Side::Right => {
                     self.count += 1;
 
                     if self.error > self.threshold {
-                        self.x -= 1;
+                        self.point -= Point::new(1, 0);
 
                         self.error += self.e_diag;
 
@@ -107,7 +105,7 @@ impl Iterator for PerpLineIterator {
                     }
 
                     self.error += self.e_square;
-                    self.y += 1;
+                    self.point += Point::new(0, 1);
 
                     self.tk += 2 * self.dx;
                 }
@@ -115,7 +113,7 @@ impl Iterator for PerpLineIterator {
                     self.count += 1;
 
                     if self.error < -self.threshold {
-                        self.x += 1;
+                        self.point += Point::new(1, 0);
 
                         self.error -= self.e_diag;
 
@@ -123,7 +121,7 @@ impl Iterator for PerpLineIterator {
                     }
 
                     self.error -= self.e_square;
-                    self.y -= 1;
+                    self.point -= Point::new(0, 1);
 
                     self.tk += 2 * self.dx;
                 }
