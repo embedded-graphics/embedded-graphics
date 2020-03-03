@@ -56,6 +56,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut position = Point::new(150, 120);
     let mut stroke_width = 5;
     let mut draw_extra = true;
+    let mut mouse_down = false;
 
     draw(&mut display, position, stroke_width, draw_extra)?;
 
@@ -75,9 +76,18 @@ fn main() -> Result<(), core::convert::Infallible> {
 
                     draw(&mut display, position, stroke_width, draw_extra)?;
                 }
-                SimulatorEvent::MouseButtonUp { point, .. } => {
+                SimulatorEvent::MouseButtonDown { point, .. } => {
+                    mouse_down = true;
                     position = point;
+
                     draw(&mut display, position, stroke_width, draw_extra)?;
+                }
+                SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
+                SimulatorEvent::MouseMove { point, .. } => {
+                    if mouse_down {
+                        position = point;
+                        draw(&mut display, position, stroke_width, draw_extra)?;
+                    }
                 }
                 _ => {}
             }
