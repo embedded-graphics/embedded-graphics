@@ -59,6 +59,8 @@ pub struct ThickLineIterator<C: PixelColor> {
     count: i32,
     perp_left: PerpLineIterator,
     perp_right: PerpLineIterator,
+    extra_perp_left: PerpLineIterator,
+    extra_perp_right: PerpLineIterator,
     side_thickness: i32,
     p_error: i32,
     draw_extra: bool,
@@ -97,8 +99,7 @@ where
                 Side::Left,
                 side_thickness,
                 p_error,
-            )
-            .into_iter(),
+            ),
             perp_right: PerpLineIterator::new(
                 line.start,
                 dx,
@@ -106,8 +107,9 @@ where
                 Side::Right,
                 side_thickness,
                 p_error,
-            )
-            .into_iter(),
+            ),
+            extra_perp_left: PerpLineIterator::new(line.start, 0, 0, Side::Left, 0, p_error),
+            extra_perp_right: PerpLineIterator::new(line.start, 0, 0, Side::Right, 0, p_error),
             side_thickness,
             p_error,
         }
@@ -124,12 +126,18 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.count > self.length {
             None
+        } else if let Some(point) = self.extra_perp_left.next() {
+            Some(Pixel(point, self.style.fill_color.unwrap()))
+        } else if let Some(point) = self.extra_perp_right.next() {
+            Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else if let Some(point) = self.perp_left.next() {
             Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else if let Some(point) = self.perp_right.next() {
             Some(Pixel(point, self.style.fill_color.unwrap()))
         } else {
             self.count += 1;
+
+            let mut extra = false;
 
             if self.error > self.threshold {
                 self.y += 1;
@@ -138,6 +146,28 @@ where
 
                 if self.p_error > self.threshold {
                     self.p_error += self.e_diag;
+
+                    if self.draw_extra {
+                        self.extra_perp_left = PerpLineIterator::new(
+                            Point::new(self.x, self.y),
+                            self.dx,
+                            self.dy,
+                            Side::Left,
+                            self.side_thickness,
+                            self.p_error + self.e_square,
+                        );
+
+                        self.extra_perp_right = PerpLineIterator::new(
+                            Point::new(self.x, self.y),
+                            self.dx,
+                            self.dy,
+                            Side::Right,
+                            self.side_thickness,
+                            self.p_error + self.e_square,
+                        );
+
+                        extra = true;
+                    }
                 }
 
                 self.p_error += self.e_square;
@@ -167,9 +197,15 @@ where
             )
             .into_iter();
 
-            self.perp_left
-                .next()
-                .map(|point| Pixel(point, self.style.stroke_color.unwrap()))
+            if extra {
+                self.extra_perp_left
+                    .next()
+                    .map(|point| Pixel(point, self.style.fill_color.unwrap()))
+            } else {
+                self.perp_left
+                    .next()
+                    .map(|point| Pixel(point, self.style.stroke_color.unwrap()))
+            }
         }
     }
 }
