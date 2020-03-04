@@ -83,7 +83,7 @@ where
         };
 
         let side_thickness =
-            2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
+            line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
 
         let error = 0;
         let p_error = 0;
