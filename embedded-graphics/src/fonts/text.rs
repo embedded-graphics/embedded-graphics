@@ -86,6 +86,7 @@ where
             current_char: self.primitive.text.chars().next(),
             idx: 0,
             text: self.primitive.text,
+            char_width: 0,
             char_walk_x: 0,
             char_walk_y: 0,
             pos: self.primitive.position,
@@ -115,7 +116,11 @@ where
     /// [`Size::zero()`]: ../geometry/struct.Size.html#method.zero
     fn size(&self) -> Size {
         let width = if !self.primitive.text.is_empty() {
-            (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.primitive.text.len() as u32
+            self.primitive
+                .text
+                .chars()
+                .map(|c| F::char_width(c) + F::CHARACTER_SPACING)
+                .sum::<u32>()
                 - F::CHARACTER_SPACING
         } else {
             0
@@ -139,6 +144,7 @@ where
     C: PixelColor,
     F: Font,
 {
+    char_width: u32,
     char_walk_x: i32,
     char_walk_y: i32,
     current_char: Option<char>,
@@ -172,6 +178,10 @@ where
                     break Some(Pixel(Point::new(x, y), color));
                 }
             } else if let Some(current_char) = self.current_char {
+                if self.char_width == 0 {
+                    self.char_width = F::char_width(current_char);
+                }
+
                 let color = if F::character_pixel(
                     current_char,
                     self.char_walk_x as u32,
@@ -182,19 +192,19 @@ where
                     self.style.background_color
                 };
 
-                let x = self.pos.x
-                    + ((F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.idx as u32) as i32
-                    + self.char_walk_x;
+                let x = self.pos.x + self.char_walk_x;
                 let y = self.pos.y + self.char_walk_y;
 
                 self.char_walk_x += 1;
 
-                if self.char_walk_x >= F::CHARACTER_SIZE.width as i32 {
+                if self.char_walk_x >= self.char_width as i32 {
                     self.char_walk_x = 0;
                     self.char_walk_y += 1;
 
                     // Done with this char, move on to the next one
                     if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
+                        self.pos.x += (self.char_width + F::CHARACTER_SPACING) as i32;
+                        self.char_width = 0;
                         self.char_walk_y = 0;
                         self.char_walk_x -= F::CHARACTER_SPACING as i32;
                         self.idx += 1;

@@ -211,8 +211,32 @@ pub trait Font {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
+    /// Whether characters have a variable width or not.
+    ///
+    /// Variable width characters have a maximum width of CHARACTER_SIZE.x, but the empty columns at
+    /// the right of each characters are ignored, allowing some characters to be smaller than others.
+    const VARIABLE_WIDTH: bool = false;
+
     /// Returns the position a character in the font.
     fn char_offset(_: char) -> u32;
+
+    /// Returns the actual width of a character in the font.
+    fn char_width(c: char) -> u32 {
+        if Self::VARIABLE_WIDTH {
+            let mut x_max = 0;
+            for y in 0..Self::CHARACTER_SIZE.height {
+                for x in (x_max..Self::CHARACTER_SIZE.width).rev() {
+                    if Self::character_pixel(c, x, y) {
+                        x_max = x;
+                        break;
+                    }
+                }
+            }
+            x_max + 1
+        } else {
+            Self::CHARACTER_SIZE.width
+        }
+    }
 
     /// Returns the value of a pixel in a character in the font.
     fn character_pixel(c: char, x: u32, y: u32) -> bool {
