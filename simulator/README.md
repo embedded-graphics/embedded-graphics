@@ -8,6 +8,11 @@
 
 The simulator can be used to test and debug [embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce snazzy examples for people to try drivers out without needing physical hardware to run on.
 
+# Cargo Features
+
+* `image-rs` - Enables support for converting a `SimulatorDisplay` to an `image` crate `ImageBuffer`.
+* `dump-png` - Changes the behavior of the `Window` struct to export the first rendered frame to a `dump.png` file instead of displaying a window.
+
 # Examples
 
 ## Simulate a 128x64 SSD1306 OLED
