@@ -155,6 +155,7 @@
 //!
 //! | Type | Screenshot |
 //! |------|------------|
+//! | [`Font6x6`] | ![6x6 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x6.png) |
 //! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x8.png) |
 //! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x12.png) |
 //! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png) |
@@ -164,6 +165,7 @@
 //! [built-in fonts]: #built-in-fonts
 //! [`egtext`]: ../macro.egtext.html
 //! [`text_style`]: ../macro.text_style.html
+//! [`Font6x6`]: struct.Font6x6.html
 //! [`Font6x8`]: struct.Font6x8.html
 //! [`Font6x12`]: struct.Font6x12.html
 //! [`Font8x16`]: struct.Font8x16.html
@@ -178,6 +180,7 @@
 mod font12x16;
 mod font24x32;
 mod font6x12;
+mod font6x6;
 mod font6x8;
 mod font8x16;
 mod text;
@@ -187,6 +190,7 @@ pub use text::{StyledTextIterator, Text};
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
 pub use font6x12::Font6x12;
+pub use font6x6::Font6x6;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
 
@@ -310,6 +314,11 @@ mod tests {
 
     #[test]
     fn font_macros() {
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x6>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font6x6)
+        );
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x8>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
@@ -339,6 +348,11 @@ mod tests {
 
     #[test]
     fn styled_text() {
+        let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x6>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font6x6, text_color = Rgb565::RED)
+        );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x8>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
