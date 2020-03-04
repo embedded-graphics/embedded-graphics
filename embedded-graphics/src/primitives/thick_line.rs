@@ -194,6 +194,10 @@ where
                 self.step_major,
             );
 
+            if self.start == self.end {
+                return None;
+            }
+
             if extra {
                 self.extra_perp
                     .next()
