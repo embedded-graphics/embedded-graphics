@@ -213,6 +213,32 @@ pub trait Font {
 
     /// Returns the position a character in the font.
     fn char_offset(_: char) -> u32;
+
+    /// Returns the value of a pixel in a character in the font.
+    fn character_pixel(c: char, x: u32, y: u32) -> bool {
+        let char_per_row = Self::FONT_IMAGE_WIDTH / Self::CHARACTER_SIZE.width;
+
+        // Char _code_ offset from first char, most often a space
+        // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
+        let char_offset = Self::char_offset(c);
+        let row = char_offset / char_per_row;
+
+        // Top left corner of character, in pixels
+        let char_x = (char_offset - (row * char_per_row)) * Self::CHARACTER_SIZE.width;
+        let char_y = row * Self::CHARACTER_SIZE.height;
+
+        // Bit index
+        // = X pixel offset for char
+        // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
+        // + X offset for the pixel block that comprises this char
+        // + Y offset for pixel block
+        let bitmap_bit_index = char_x + x + ((char_y + y) * Self::FONT_IMAGE_WIDTH);
+
+        let bitmap_byte = bitmap_bit_index / 8;
+        let bitmap_bit = 7 - (bitmap_bit_index % 8);
+
+        Self::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0
+    }
 }
 
 /// Creates a styled text.

@@ -156,33 +156,10 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let char_per_row = F::FONT_IMAGE_WIDTH / F::CHARACTER_SIZE.width;
-
         loop {
             if let Some(current_char) = self.current_char {
-                // Char _code_ offset from first char, most often a space
-                // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
-                let char_offset = F::char_offset(current_char);
-                let row = char_offset / char_per_row;
-
-                // Top left corner of character, in pixels
-                let char_x = (char_offset - (row * char_per_row)) * F::CHARACTER_SIZE.width;
-                let char_y = row * F::CHARACTER_SIZE.height;
-
-                // Bit index
-                // = X pixel offset for char
-                // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
-                // + X offset for the pixel block that comprises this char
-                // + Y offset for pixel block
-                let bitmap_bit_index = char_x
-                    + (F::FONT_IMAGE_WIDTH * char_y)
-                    + self.char_walk_x
-                    + (self.char_walk_y * F::FONT_IMAGE_WIDTH);
-
-                let bitmap_byte = bitmap_bit_index / 8;
-                let bitmap_bit = 7 - (bitmap_bit_index % 8);
-
-                let color = if F::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0 {
+                let color = if F::character_pixel(current_char, self.char_walk_x, self.char_walk_y)
+                {
                     self.style.text_color.or(self.style.background_color)
                 } else {
                     self.style.background_color
