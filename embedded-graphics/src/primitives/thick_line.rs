@@ -71,8 +71,6 @@ where
 {
     /// TODO: Docs
     pub fn new(line: &ThickLine<C>, style: PrimitiveStyle<C>) -> Self {
-        use integer_sqrt::IntegerSquareRoot;
-
         let dx = line.end.x - line.start.x;
         let dy = line.end.y - line.start.y;
 
@@ -84,7 +82,7 @@ where
         };
 
         let side_thickness =
-            2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
+            4 * line.style.stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
 
         let error = 0;
         let p_error = 0;
