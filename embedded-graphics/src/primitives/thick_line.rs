@@ -53,7 +53,6 @@ pub struct ThickLineIterator<C: PixelColor> {
     dy: i32,
     length: i32,
     style: PrimitiveStyle<C>,
-    count: i32,
     perp: PerpLineIterator,
     extra_perp: PerpLineIterator,
     side_thickness: u32,
@@ -64,7 +63,6 @@ pub struct ThickLineIterator<C: PixelColor> {
     end: Point,
     step_major: Point,
     step_minor: Point,
-    x_major: bool,
 }
 
 impl<C> ThickLineIterator<C>
@@ -94,22 +92,16 @@ where
         let mut dx = dx.abs();
         let mut dy = dy.abs();
 
-        let mut x_major = true;
-
-        // Swap components if line is Y-major
-        if dy > dx {
+        let (step_major, step_minor) = if dy > dx {
+            // Swap components if line is Y-major
             core::mem::swap(&mut dx, &mut dy);
-            x_major = false;
-        }
 
-        let (step_major, step_minor) = if x_major {
-            (Point::new(0, direction.y), Point::new(direction.x, 0))
-        } else {
             (Point::new(direction.x, 0), Point::new(0, direction.y))
+        } else {
+            (Point::new(0, direction.y), Point::new(direction.x, 0))
         };
 
         Self {
-            x_major,
             step_major,
             step_minor,
             error,
@@ -122,7 +114,6 @@ where
             e_square: 2 * dy,
             length: dx,
             style,
-            count: 0,
             draw_extra: line.draw_extra,
             perp: PerpLineIterator::new(
                 line.start,
@@ -136,7 +127,7 @@ where
                 step_major,
             ),
             extra_perp: PerpLineIterator::new(
-                line.start, 1, 1, 0, p_error, 0, direction, step_minor, step_major,
+                line.start, 1, 1, 0, p_error, error, direction, step_minor, step_major,
             ),
             side_thickness,
             p_error,
@@ -151,7 +142,6 @@ where
 {
     type Item = Pixel<C>;
 
-    // Octant 1 only
     fn next(&mut self) -> Option<Self::Item> {
         if self.start == self.end {
             None
@@ -160,8 +150,6 @@ where
         } else if let Some(point) = self.perp.next() {
             Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else {
-            self.count += 1;
-
             let mut extra = false;
 
             if self.error > self.threshold {
