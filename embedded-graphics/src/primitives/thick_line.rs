@@ -5,6 +5,7 @@ use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
 use crate::primitives::perp_line::PerpLineIterator;
 use crate::style::PrimitiveStyle;
+use integer_sqrt::IntegerSquareRoot;
 
 /// TODO: Docs
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -82,7 +83,7 @@ where
         };
 
         let side_thickness =
-            4 * line.style.stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
+            2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
 
         let error = 0;
         let p_error = 0;

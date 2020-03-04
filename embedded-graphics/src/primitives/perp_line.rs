@@ -67,7 +67,7 @@ impl Iterator for PerpLineIterator {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.tk.pow(2) > self.width as i32 {
+        if self.tk > self.width as i32 {
             match self.side {
                 // Left side is complete, swap to right side now
                 Side::Left => {
