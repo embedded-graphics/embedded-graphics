@@ -3,7 +3,7 @@
 use crate::drawable::Pixel;
 use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
-use crate::primitives::perp_line::{PerpLineIterator, Side};
+use crate::primitives::perp_line::PerpLineIterator;
 use crate::style::PrimitiveStyle;
 
 /// TODO: Docs
@@ -54,10 +54,8 @@ pub struct ThickLineIterator<C: PixelColor> {
     length: i32,
     style: PrimitiveStyle<C>,
     count: i32,
-    perp_left: PerpLineIterator,
-    perp_right: PerpLineIterator,
-    extra_perp_left: PerpLineIterator,
-    extra_perp_right: PerpLineIterator,
+    perp: PerpLineIterator,
+    extra_perp: PerpLineIterator,
     side_thickness: u32,
     p_error: i32,
     draw_extra: bool,
@@ -126,11 +124,10 @@ where
             style,
             count: 0,
             draw_extra: line.draw_extra,
-            perp_left: PerpLineIterator::new(
+            perp: PerpLineIterator::new(
                 line.start,
                 dx,
                 dy,
-                Side::Left,
                 side_thickness,
                 p_error,
                 error,
@@ -138,41 +135,8 @@ where
                 step_minor,
                 step_major,
             ),
-            perp_right: PerpLineIterator::new(
-                line.start,
-                dx,
-                dy,
-                Side::Right,
-                side_thickness,
-                p_error,
-                error,
-                direction,
-                step_minor,
-                step_major,
-            ),
-            extra_perp_left: PerpLineIterator::new(
-                line.start,
-                1,
-                1,
-                Side::Left,
-                0,
-                p_error,
-                0,
-                direction,
-                step_minor,
-                step_major,
-            ),
-            extra_perp_right: PerpLineIterator::new(
-                line.start,
-                1,
-                1,
-                Side::Right,
-                0,
-                p_error,
-                0,
-                direction,
-                step_minor,
-                step_major,
+            extra_perp: PerpLineIterator::new(
+                line.start, 1, 1, 0, p_error, 0, direction, step_minor, step_major,
             ),
             side_thickness,
             p_error,
@@ -191,14 +155,10 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.start == self.end {
             None
-        } else if let Some(point) = self.extra_perp_left.next() {
+        } else if let Some(point) = self.extra_perp.next() {
             Some(Pixel(point, self.style.fill_color.unwrap()))
-        } else if let Some(point) = self.extra_perp_right.next() {
+        } else if let Some(point) = self.perp.next() {
             Some(Pixel(point, self.style.stroke_color.unwrap()))
-        } else if let Some(point) = self.perp_left.next() {
-            Some(Pixel(point, self.style.stroke_color.unwrap()))
-        } else if let Some(point) = self.perp_right.next() {
-            Some(Pixel(point, self.style.fill_color.unwrap()))
         } else {
             self.count += 1;
 
@@ -213,24 +173,10 @@ where
                     self.p_error += self.e_diag;
 
                     if self.draw_extra {
-                        self.extra_perp_left = PerpLineIterator::new(
+                        self.extra_perp = PerpLineIterator::new(
                             self.start,
                             self.dx,
                             self.dy,
-                            Side::Left,
-                            self.side_thickness,
-                            self.p_error + self.e_square,
-                            self.error,
-                            self.direction,
-                            self.step_minor,
-                            self.step_major,
-                        );
-
-                        self.extra_perp_right = PerpLineIterator::new(
-                            self.start,
-                            self.dx,
-                            self.dy,
-                            Side::Right,
                             self.side_thickness,
                             self.p_error + self.e_square,
                             self.error,
@@ -250,40 +196,24 @@ where
 
             self.start += self.step_minor;
 
-            self.perp_left = PerpLineIterator::new(
+            self.perp = PerpLineIterator::new(
                 self.start,
                 self.dx,
                 self.dy,
-                Side::Left,
                 self.side_thickness,
                 self.p_error,
                 self.error,
                 self.direction,
                 self.step_minor,
                 self.step_major,
-            )
-            .into_iter();
-
-            self.perp_right = PerpLineIterator::new(
-                self.start,
-                self.dx,
-                self.dy,
-                Side::Right,
-                self.side_thickness,
-                self.p_error,
-                self.error,
-                self.direction,
-                self.step_minor,
-                self.step_major,
-            )
-            .into_iter();
+            );
 
             if extra {
-                self.extra_perp_left
+                self.extra_perp
                     .next()
                     .map(|point| Pixel(point, self.style.fill_color.unwrap()))
             } else {
-                self.perp_left
+                self.perp
                     .next()
                     .map(|point| Pixel(point, self.style.stroke_color.unwrap()))
             }

@@ -2,12 +2,9 @@
 
 use crate::geometry::Point;
 
-/// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum Side {
-    /// TODO: Docs
+enum Side {
     Left,
-    /// TODO: Docs
     Right,
 }
 
@@ -15,18 +12,21 @@ pub enum Side {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct PerpLineIterator {
     error: i32,
+    start: Point,
     point: Point,
     threshold: i32,
     e_diag: i32,
     e_square: i32,
     width: u32,
-    side: Side,
     tk: i32,
     dx: i32,
     dy: i32,
     direction: Point,
     step_major: Point,
     step_minor: Point,
+    side: Side,
+    winit: i32,
+    initial_error: i32,
 }
 
 impl PerpLineIterator {
@@ -35,7 +35,6 @@ impl PerpLineIterator {
         start: Point,
         dx: i32,
         dy: i32,
-        side: Side,
         width: u32,
         error: i32,
         winit: i32,
@@ -44,7 +43,9 @@ impl PerpLineIterator {
         step_major: Point,
     ) -> Self {
         Self {
+            start,
             error,
+            initial_error: error,
             direction,
             dx,
             dy,
@@ -53,11 +54,9 @@ impl PerpLineIterator {
             e_diag: -2 * dx,
             e_square: 2 * dy,
             width,
-            side,
-            tk: match side {
-                Side::Right => dx + dy - winit,
-                Side::Left => dx + dy + winit,
-            },
+            winit,
+            tk: dx + dy + winit,
+            side: Side::Left,
             step_major,
             step_minor,
         }
@@ -67,10 +66,21 @@ impl PerpLineIterator {
 impl Iterator for PerpLineIterator {
     type Item = Point;
 
-    // Octant 1 only
     fn next(&mut self) -> Option<Self::Item> {
         if self.tk > self.width as i32 {
-            None
+            match self.side {
+                // Left side is complete, swap to right side now
+                Side::Left => {
+                    self.tk = self.dx + self.dy - self.winit;
+                    self.point = self.start;
+                    self.error = self.initial_error;
+                    self.side = Side::Right;
+
+                    Self::next(self)
+                }
+                // Right side is complete, we're done
+                Side::Right => None,
+            }
         } else {
             let point = self.point;
 
@@ -78,31 +88,23 @@ impl Iterator for PerpLineIterator {
                 Side::Right => {
                     if self.error > self.threshold {
                         self.point -= self.step_minor;
-
                         self.error += self.e_diag;
-
                         self.tk += 2 * self.dy;
                     }
 
                     self.error += self.e_square;
-
                     self.point += self.step_major;
-
                     self.tk += 2 * self.dx;
                 }
                 Side::Left => {
                     if self.error < -self.threshold {
                         self.point += self.step_minor;
-
                         self.error -= self.e_diag;
-
                         self.tk += 2 * self.dy;
                     }
 
                     self.error -= self.e_square;
-
                     self.point -= self.step_major;
-
                     self.tk += 2 * self.dx;
                 }
             }
