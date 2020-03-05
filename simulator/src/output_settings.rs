@@ -43,11 +43,7 @@ impl OutputSettings {
 
 impl Default for OutputSettings {
     fn default() -> Self {
-        Self {
-            scale: 1,
-            pixel_spacing: 0,
-            theme: BinaryColorTheme::Default,
-        }
+        OutputSettingsBuilder::new().build()
     }
 }
 
@@ -71,6 +67,10 @@ impl OutputSettingsBuilder {
     /// Sets the pixel scale.
     ///
     /// A scale of `2` or higher is useful for viewing the simulator on high DPI displays.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the scale is set to `0`.
     pub fn scale(mut self, scale: u32) -> Self {
         if scale == 0 {
             panic!("scale must be >= 0");
@@ -81,27 +81,42 @@ impl OutputSettingsBuilder {
         self
     }
 
-    /// Sets the binary color theme for the display to use.
+    /// Sets the binary color theme.
+    ///
+    /// The binary color theme defines the mapping between the two display colors
+    /// and the output. The variants provided by the [`BinaryColorTheme`] enum
+    /// simulate the color scheme of commonly used display types.
+    ///
+    /// Most binary color displays are relatively small individual pixels
+    /// are hard to recognize on higher resolution screens. Because of this
+    /// some scaling is automatically applied to the output when a theme is
+    /// set and no scaling was specified explicitly.
+    ///
+    /// Note that a theme should only be set when an monochrome display is used.
+    /// Setting a theme when using a color display will cause an corrupted output.
+    ///
+    /// [`BinaryColorTheme`]: enum.BinaryColorTheme.html
     pub fn theme(mut self, theme: BinaryColorTheme) -> Self {
         self.theme = theme;
 
-        // Most binary color displays are small and individual pixels are hard to recognize
-        // on higher resolution screens. So apply some default scaling when no scaling was explicitly
-        // set.
         self.scale.get_or_insert(3);
         self.pixel_spacing.get_or_insert(1);
 
         self
     }
 
-    /// Adds a gap between pixels, simulating the same effect of a physical display
+    /// Sets the gap between pixels.
+    ///
+    /// Most lower resolution displays have visible gaps between individual pixels.
+    /// This effect can be simulated by setting the pixel spacing to a value greater
+    /// than `0`.
     pub fn pixel_spacing(mut self, pixel_spacing: u32) -> Self {
         self.pixel_spacing = Some(pixel_spacing);
 
         self
     }
 
-    /// Builds the window.
+    /// Builds the output settings.
     pub fn build(self) -> OutputSettings {
         OutputSettings {
             scale: self.scale.unwrap_or(1),
