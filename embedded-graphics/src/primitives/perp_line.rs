@@ -87,17 +87,6 @@ impl Iterator for PerpLineIterator {
             let point = self.point;
 
             match self.side {
-                Side::Right => {
-                    if self.error > self.threshold {
-                        self.point -= self.step_major;
-                        self.error += self.e_diag;
-                        self.tk += 2 * self.dy;
-                    }
-
-                    self.error += self.e_square;
-                    self.point += self.step_minor;
-                    self.tk += 2 * self.dx;
-                }
                 Side::Left => {
                     if self.error < -self.threshold {
                         self.point += self.step_major;
@@ -107,6 +96,17 @@ impl Iterator for PerpLineIterator {
 
                     self.error -= self.e_square;
                     self.point -= self.step_minor;
+                    self.tk += 2 * self.dx;
+                }
+                Side::Right => {
+                    if self.error > self.threshold {
+                        self.point -= self.step_major;
+                        self.error += self.e_diag;
+                        self.tk += 2 * self.dy;
+                    }
+
+                    self.error += self.e_square;
+                    self.point += self.step_minor;
                     self.tk += 2 * self.dx;
                 }
             }
