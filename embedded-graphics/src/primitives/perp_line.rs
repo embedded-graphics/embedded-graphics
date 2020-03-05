@@ -27,6 +27,8 @@ pub struct PerpLineIterator {
     side: Side,
     winit: i32,
     initial_error: i32,
+    q: u32,
+    p: u32,
 }
 
 impl PerpLineIterator {
@@ -59,6 +61,8 @@ impl PerpLineIterator {
             side: Side::Left,
             step_major,
             step_minor,
+            q: 0,
+            p: 0,
         }
     }
 }
@@ -79,9 +83,23 @@ impl Iterator for PerpLineIterator {
                     // Skip first pixel on right side
                     Self::next(self);
                     Self::next(self)
+                    // None
                 }
-                // Right side is complete, we're done
-                Side::Right => None,
+
+                Side::Right => {
+                    // Handle 1px thick lines
+                    if self.q == 0 && self.p < 2 {
+                        // Crappily set some exit conditions or we get an infinite loop next time we
+                        // hit this branch.
+                        self.q = 1;
+                        self.p = 2;
+
+                        Some(self.start)
+                    } else {
+                        // Right side is complete, we're done
+                        None
+                    }
+                }
             }
         } else {
             let point = self.point;
@@ -97,6 +115,8 @@ impl Iterator for PerpLineIterator {
                     self.error -= self.e_square;
                     self.point -= self.step_minor;
                     self.tk += 2 * self.dx;
+
+                    self.q += 1;
                 }
                 Side::Right => {
                     if self.error > self.threshold {
@@ -108,6 +128,8 @@ impl Iterator for PerpLineIterator {
                     self.error += self.e_square;
                     self.point += self.step_minor;
                     self.tk += 2 * self.dx;
+
+                    self.p += 1;
                 }
             }
 

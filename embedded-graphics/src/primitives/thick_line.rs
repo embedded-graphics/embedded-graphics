@@ -167,7 +167,7 @@ where
                 if self.p_error >= self.threshold {
                     self.p_error += self.e_diag;
 
-                    if self.draw_extra {
+                    if self.draw_extra && self.style.stroke_width > 1 {
                         self.extra_perp = Some(PerpLineIterator::new(
                             self.start,
                             self.dx,
