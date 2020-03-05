@@ -150,7 +150,10 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.start == self.end {
+        if self.start == self.end
+            || self.style.stroke_width == 0
+            || self.style.stroke_color.is_none()
+        {
             None
         } else if let Some(point) = self.extra_perp.as_mut().and_then(|it| it.next()) {
             Some(Pixel(point, self.style.fill_color.unwrap()))
