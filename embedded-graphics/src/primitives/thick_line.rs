@@ -55,7 +55,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     length: i32,
     style: PrimitiveStyle<C>,
     perp: PerpLineIterator,
-    extra_perp: PerpLineIterator,
+    extra_perp: Option<PerpLineIterator>,
     side_thickness: u32,
     p_error: i32,
     draw_extra: bool,
@@ -93,7 +93,7 @@ where
         };
 
         let side_thickness =
-            line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
+            2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
 
         let error = 0;
         let p_error = 0;
@@ -135,9 +135,7 @@ where
                 step_minor,
                 step_major,
             ),
-            extra_perp: PerpLineIterator::new(
-                line.start, 1, 1, 0, p_error, error, direction, step_minor, step_major,
-            ),
+            extra_perp: None,
             side_thickness,
             p_error,
             direction,
@@ -154,23 +152,23 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.start == self.end {
             None
-        } else if let Some(point) = self.extra_perp.next() {
+        } else if let Some(point) = self.extra_perp.as_mut().and_then(|it| it.next()) {
             Some(Pixel(point, self.style.fill_color.unwrap()))
         } else if let Some(point) = self.perp.next() {
+            self.extra_perp = None;
+
             Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else {
-            let mut extra = false;
-
             if self.error > self.threshold {
                 self.start += self.step_minor;
 
                 self.error += self.e_diag;
 
-                if self.p_error > self.threshold {
+                if self.p_error >= self.threshold {
                     self.p_error += self.e_diag;
 
                     if self.draw_extra {
-                        self.extra_perp = PerpLineIterator::new(
+                        self.extra_perp = Some(PerpLineIterator::new(
                             self.start,
                             self.dx,
                             self.dy,
@@ -180,9 +178,7 @@ where
                             self.direction,
                             self.step_minor,
                             self.step_major,
-                        );
-
-                        extra = true;
+                        ));
                     }
                 }
 
@@ -209,15 +205,7 @@ where
                 return None;
             }
 
-            if extra {
-                self.extra_perp
-                    .next()
-                    .map(|point| Pixel(point, self.style.fill_color.unwrap()))
-            } else {
-                self.perp
-                    .next()
-                    .map(|point| Pixel(point, self.style.stroke_color.unwrap()))
-            }
+            Self::next(self)
         }
     }
 }
