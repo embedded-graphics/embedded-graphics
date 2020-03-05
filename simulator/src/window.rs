@@ -83,31 +83,27 @@ impl Window {
     where
         C: PixelColor + Into<Rgb888>,
     {
-        #[cfg(feature = "dump-png")]
-        {
+        if let Ok(path) = std::env::var("EG_SIMULATOR_DUMP") {
             display
                 .to_image_buffer(&self.output_settings)
-                .save("dump.png")
+                .save(path)
                 .unwrap();
             std::process::exit(0);
         }
 
-        #[cfg(not(feature = "dump-png"))]
-        {
-            if self.framebuffer.is_none() {
-                self.framebuffer = Some(Framebuffer::new(display, &self.output_settings));
-            }
-
-            if self.sdl_window.is_none() {
-                self.sdl_window = Some(SdlWindow::new(display, &self.title, &self.output_settings));
-            }
-
-            let framebuffer = self.framebuffer.as_mut().unwrap();
-            let sdl_window = self.sdl_window.as_mut().unwrap();
-
-            framebuffer.update(display);
-            sdl_window.update(&framebuffer);
+        if self.framebuffer.is_none() {
+            self.framebuffer = Some(Framebuffer::new(display, &self.output_settings));
         }
+
+        if self.sdl_window.is_none() {
+            self.sdl_window = Some(SdlWindow::new(display, &self.title, &self.output_settings));
+        }
+
+        let framebuffer = self.framebuffer.as_mut().unwrap();
+        let sdl_window = self.sdl_window.as_mut().unwrap();
+
+        framebuffer.update(display);
+        sdl_window.update(&framebuffer);
     }
 
     /// Shows a static display.

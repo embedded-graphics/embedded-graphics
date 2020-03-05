@@ -7,6 +7,7 @@ use embedded_graphics::{
     style::{PrimitiveStyle, Styled},
     DrawTarget,
 };
+use image::{ImageBuffer, Rgb};
 use std::convert::TryFrom;
 
 /// Rgb888 framebuffer
@@ -83,6 +84,11 @@ impl Framebuffer {
 
         None
     }
+
+    /// Converts the framebuffer into an image.rs `ImageBuffer`.
+    pub fn into_image_buffer(self) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
+        ImageBuffer::from_raw(self.size.width, self.size.height, self.data).unwrap()
+    }
 }
 
 impl DrawTarget<Rgb888> for Framebuffer {
@@ -126,18 +132,5 @@ impl DrawTarget<Rgb888> for Framebuffer {
 
     fn size(&self) -> Size {
         self.size
-    }
-}
-
-#[cfg(feature = "image-rs")]
-mod image_rs {
-    use super::*;
-    use image::{ImageBuffer, Rgb};
-
-    impl Framebuffer {
-        /// Converts the framebuffer into an image.rs `ImageBuffer`.
-        pub fn into_image_buffer(self) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
-            ImageBuffer::from_raw(self.size.width, self.size.height, self.data).unwrap()
-        }
     }
 }

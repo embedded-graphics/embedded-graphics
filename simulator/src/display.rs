@@ -1,9 +1,11 @@
+use crate::{framebuffer::Framebuffer, output_settings::OutputSettings};
 use embedded_graphics::{
     drawable::Pixel,
     geometry::{Point, Size},
-    pixelcolor::{BinaryColor, PixelColor},
+    pixelcolor::{BinaryColor, PixelColor, Rgb888},
     DrawTarget,
 };
+use image::{ImageBuffer, Rgb};
 use std::convert::TryFrom;
 
 /// Simulator display.
@@ -61,6 +63,40 @@ where
     }
 }
 
+impl<C> SimulatorDisplay<C>
+where
+    C: PixelColor + Into<Rgb888>,
+{
+    /// Converts the display contents into an image.rs `ImageBuffer`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+    /// use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
+    ///
+    /// let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    ///
+    /// let display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(128, 64));
+    ///
+    /// // draw something to the display
+    ///
+    /// let image_buffer = display.to_image_buffer(&output_settings);
+    /// assert_eq!(image_buffer.width(), 256);
+    /// assert_eq!(image_buffer.height(), 128);
+    ///
+    /// // use image buffer
+    /// // example: image_buffer.save
+    /// ```
+    pub fn to_image_buffer(
+        &self,
+        output_settings: &OutputSettings,
+    ) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
+        let framebuffer = Framebuffer::new(self, output_settings);
+        framebuffer.into_image_buffer()
+    }
+}
+
 impl<C> DrawTarget<C> for SimulatorDisplay<C>
 where
     C: PixelColor,
@@ -79,47 +115,5 @@ where
 
     fn size(&self) -> Size {
         self.size
-    }
-}
-
-#[cfg(feature = "image-rs")]
-mod image_rs {
-    use super::*;
-    use crate::{framebuffer::Framebuffer, output_settings::OutputSettings};
-    use embedded_graphics::pixelcolor::Rgb888;
-    use image::{ImageBuffer, Rgb};
-
-    impl<C> SimulatorDisplay<C>
-    where
-        C: PixelColor + Into<Rgb888>,
-    {
-        /// Converts the display contents into an image.rs `ImageBuffer`.
-        ///
-        /// # Examples
-        ///
-        /// ```rust
-        /// use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
-        /// use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
-        ///
-        /// let output_settings = OutputSettingsBuilder::new().scale(2).build();
-        ///
-        /// let display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(128, 64));
-        ///
-        /// // draw something to the display
-        ///
-        /// let image_buffer = display.to_image_buffer(&output_settings);
-        /// assert_eq!(image_buffer.width(), 256);
-        /// assert_eq!(image_buffer.height(), 128);
-        ///
-        /// // use image buffer
-        /// // example: image_buffer.save
-        /// ```
-        pub fn to_image_buffer(
-            &self,
-            output_settings: &OutputSettings,
-        ) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
-            let framebuffer = Framebuffer::new(self, output_settings);
-            framebuffer.into_image_buffer()
-        }
     }
 }
