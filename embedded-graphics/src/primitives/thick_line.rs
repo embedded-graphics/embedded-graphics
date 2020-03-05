@@ -62,7 +62,17 @@ pub struct ThickLineIterator<C: PixelColor> {
     direction: Point,
     start: Point,
     end: Point,
+
+    /// The "major" step
+    ///
+    /// The X or Y component with the larger delta is considered "major". This is the most common
+    /// direction to move in.
     step_major: Point,
+
+    /// The "minor" step
+    ///
+    /// The X or Y component with the smaller delta is considered "minor". This is the less common
+    /// direction to move in.
     step_minor: Point,
 }
 
@@ -95,9 +105,9 @@ where
             // Swap components if line is Y-major
             core::mem::swap(&mut dx, &mut dy);
 
-            (Point::new(direction.x, 0), Point::new(0, direction.y))
-        } else {
             (Point::new(0, direction.y), Point::new(direction.x, 0))
+        } else {
+            (Point::new(direction.x, 0), Point::new(0, direction.y))
         };
 
         Self {
@@ -152,7 +162,7 @@ where
             let mut extra = false;
 
             if self.error > self.threshold {
-                self.start += self.step_major;
+                self.start += self.step_minor;
 
                 self.error += self.e_diag;
 
@@ -181,7 +191,7 @@ where
 
             self.error += self.e_square;
 
-            self.start += self.step_minor;
+            self.start += self.step_major;
 
             self.perp = PerpLineIterator::new(
                 self.start,
