@@ -51,3 +51,22 @@ fn main() -> Result<(), core::convert::Infallible> {
     Ok(())
 }
 ```
+
+# Creating screenshots
+
+Screenshots of programs, that use `Window` to display a simulated display, can be created by
+setting the `EG_SIMULATOR_DUMP` environment variable:
+
+```bash
+EG_SIMULATOR_DUMP=screenshot.png cargo run
+```
+
+By setting the variable the display passed to the first `Window::update` call gets exported as a
+PNG file to the specified path. After the file is exported the process is terminated.
+
+# Exporting images
+
+If a program doesn't require to display a window and only needs to export one or more images, a
+`SimulatorDisplay` can also be converted to an `image` crate `ImageBuffer` by using the
+`to_image_buffer` method. The resulting buffer can then be used to save the display content to
+any format supported by `image`.
