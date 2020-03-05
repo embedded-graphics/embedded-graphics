@@ -76,6 +76,8 @@ impl Iterator for PerpLineIterator {
                     self.error = self.initial_error;
                     self.side = Side::Right;
 
+                    // Skip first pixel on right side
+                    Self::next(self);
                     Self::next(self)
                 }
                 // Right side is complete, we're done
