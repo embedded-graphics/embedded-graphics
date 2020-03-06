@@ -170,6 +170,9 @@ where
                 if self.p_error >= self.threshold {
                     self.p_error += self.e_diag;
 
+                    // Draw an extra perpendicular only if required. Lines with a stroke width of 1
+                    // don't have any "double square" moves to compensate for, so the extra
+                    // perpendicular is not required.
                     if self.draw_extra && self.style.stroke_width > 1 {
                         self.extra_perp = Some(PerpLineIterator::new(
                             self.start,
