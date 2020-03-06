@@ -1,7 +1,7 @@
 use embedded_graphics::{
     pixelcolor::BinaryColor, prelude::*, primitives::Triangle, style::PrimitiveStyle,
 };
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 const PAD: i32 = 10;
 
@@ -51,11 +51,8 @@ fn main() -> Result<(), core::convert::Infallible> {
         .into_styled(style)
         .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Triangles")
-        .scale(2)
-        .build();
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    Window::new("Triangles", &output_settings).show_static(&display);
 
     Ok(())
 }

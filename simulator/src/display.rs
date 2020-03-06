@@ -1,11 +1,14 @@
+use crate::{framebuffer::Framebuffer, output_settings::OutputSettings};
 use embedded_graphics::{
     drawable::Pixel,
     geometry::{Point, Size},
-    pixelcolor::{BinaryColor, PixelColor},
+    pixelcolor::{BinaryColor, PixelColor, Rgb888},
     DrawTarget,
 };
+use image::{ImageBuffer, Rgb};
+use std::convert::TryFrom;
 
-/// Display
+/// Simulator display.
 pub struct SimulatorDisplay<C> {
     size: Size,
     pixels: Box<[C]>,
@@ -32,21 +35,19 @@ where
     ///
     /// Panics if `point` is outside the display.
     pub fn get_pixel(&self, point: Point) -> C {
-        let index = self
-            .point_to_index(point)
-            .expect("can't get point outside of display");
-
-        self.pixels[index]
+        self.point_to_index(point)
+            .and_then(|index| self.pixels.get(index).copied())
+            .expect("can't get point outside of display")
     }
 
     fn point_to_index(&self, point: Point) -> Option<usize> {
-        let Point { x, y } = point;
-
-        if x >= 0 && y >= 0 && (x as u32) < self.size.width && (y as u32) < self.size.height {
-            Some(x as usize + y as usize * self.size.width as usize)
-        } else {
-            None
+        if let Ok((x, y)) = <(u32, u32)>::try_from(point) {
+            if x < self.size.width && y < self.size.height {
+                return Some((x + y * self.size.width) as usize);
+            }
         }
+
+        None
     }
 }
 
@@ -59,6 +60,40 @@ where
     /// The display is filled with `C::from(BinaryColor::Off)`.
     pub fn new(size: Size) -> Self {
         Self::with_default_color(size, C::from(BinaryColor::Off))
+    }
+}
+
+impl<C> SimulatorDisplay<C>
+where
+    C: PixelColor + Into<Rgb888>,
+{
+    /// Converts the display contents into an image.rs `ImageBuffer`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+    /// use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
+    ///
+    /// let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    ///
+    /// let display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(128, 64));
+    ///
+    /// // draw something to the display
+    ///
+    /// let image_buffer = display.to_image_buffer(&output_settings);
+    /// assert_eq!(image_buffer.width(), 256);
+    /// assert_eq!(image_buffer.height(), 128);
+    ///
+    /// // use image buffer
+    /// // example: image_buffer.save
+    /// ```
+    pub fn to_image_buffer(
+        &self,
+        output_settings: &OutputSettings,
+    ) -> ImageBuffer<Rgb<u8>, Box<[u8]>> {
+        let framebuffer = Framebuffer::new(self, output_settings);
+        framebuffer.into_image_buffer()
     }
 }
 

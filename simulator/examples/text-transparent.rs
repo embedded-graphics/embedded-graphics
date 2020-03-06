@@ -2,7 +2,7 @@ use embedded_graphics::{
     egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
     text_style,
 };
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(256, 128));
@@ -52,11 +52,8 @@ fn main() -> Result<(), core::convert::Infallible> {
     )
     .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Fonts with transparent background")
-        .scale(3)
-        .build();
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(3).build();
+    Window::new("Fonts with transparent background", &output_settings).show_static(&display);
 
     Ok(())
 }

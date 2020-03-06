@@ -4,7 +4,7 @@
 //! a black and white pixel iterator. The simulator doesn't currently support drawing with color.
 
 use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 use tinytga::Tga;
 
 fn main() -> Result<(), core::convert::Infallible> {
@@ -16,12 +16,8 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     image.translate(Point::new(32, 32)).draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("TGA image")
-        .scale(2)
-        .build();
-
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    Window::new("TGA image", &output_settings).show_static(&display);
 
     Ok(())
 }

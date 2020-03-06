@@ -3,7 +3,7 @@
 use embedded_graphics::{
     egcircle, egrectangle, egtriangle, pixelcolor::BinaryColor, prelude::*, primitive_style,
 };
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 static CIRCLE_SIZE: i32 = 32;
 
@@ -102,11 +102,8 @@ fn main() -> Result<(), core::convert::Infallible> {
     .translate(Point::new(96 * 2 + 32, 32))
     .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Filled primitives using macros")
-        .scale(2)
-        .build();
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    Window::new("Filled primitives using macros", &output_settings).show_static(&display);
 
     Ok(())
 }

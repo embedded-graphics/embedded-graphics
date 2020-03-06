@@ -6,7 +6,7 @@ use embedded_graphics::{
     style::{TextStyle, TextStyleBuilder},
     text_style,
 };
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(256, 128));
@@ -56,8 +56,8 @@ fn main() -> Result<(), core::convert::Infallible> {
     )
     .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display).title("Fonts").build();
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    Window::new("Fonts", &output_settings).show_static(&display);
 
     Ok(())
 }

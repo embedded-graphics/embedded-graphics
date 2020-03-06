@@ -4,7 +4,7 @@ use embedded_graphics::{
     primitives::{Circle, Line, Rectangle, Triangle},
     style::PrimitiveStyle,
 };
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettings, SimulatorDisplay, Window};
 
 const PADDING: i32 = 16;
 
@@ -74,8 +74,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         )
         .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display).title("Strokes").build();
-    window.show_static(&display);
+    Window::new("Strokes", &OutputSettings::default()).show_static(&display);
 
     Ok(())
 }

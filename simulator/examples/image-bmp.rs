@@ -4,7 +4,7 @@
 //! a color pixel iterator. The simulator uses the `ColorOled` theme to display the image in color
 
 use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 use tinybmp::Bmp;
 
 fn main() -> Result<(), core::convert::Infallible> {
@@ -16,12 +16,8 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     image.translate(Point::new(32, 32)).draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("BMP image")
-        .scale(2)
-        .build();
-
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    Window::new("BMP image", &output_settings).show_static(&display);
 
     Ok(())
 }

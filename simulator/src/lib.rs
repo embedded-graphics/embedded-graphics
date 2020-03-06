@@ -38,16 +38,17 @@
 //! use embedded_graphics::{egcircle, egline, egtext, primitive_style, text_style};
 //! use embedded_graphics::fonts::Font6x8;
 //! use embedded_graphics_simulator::{
-//!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, WindowBuilder,
+//!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, Window, OutputSettingsBuilder,
 //! };
 //! use std::thread;
 //! use std::time::Duration;
 //!
 //! fn main() {
 //!     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
-//!     let mut window = WindowBuilder::new(&display)
+//!     let output_settings = OutputSettingsBuilder::new()
 //!         .theme(BinaryColorTheme::OledBlue)
 //!         .build();
+//!     let mut window = Window::new("Example", &output_settings);
 //!
 //!     egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8, text_color = BinaryColor::On)).draw(&mut display);
 //!
@@ -82,13 +83,14 @@
 
 mod check_readme;
 mod display;
+mod framebuffer;
+mod output_settings;
 mod theme;
 mod window;
-mod window_builder;
 
 pub use crate::{
     display::SimulatorDisplay,
+    output_settings::{OutputSettings, OutputSettingsBuilder},
     theme::BinaryColorTheme,
     window::{SimulatorEvent, Window},
-    window_builder::WindowBuilder,
 };

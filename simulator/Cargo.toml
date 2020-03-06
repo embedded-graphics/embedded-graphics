@@ -33,6 +33,7 @@ required-features = ["bmp"]
 
 [dependencies]
 sdl2 = "0.32.2"
+image = "0.23.0"
 
 [dependencies.embedded-graphics]
 version = "0.6.0-beta.1"

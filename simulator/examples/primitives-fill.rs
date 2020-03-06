@@ -4,7 +4,7 @@ use embedded_graphics::{
     primitives::{Circle, Rectangle, Triangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 };
-use embedded_graphics_simulator::{SimulatorDisplay, WindowBuilder};
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 static CIRCLE_SIZE: i32 = 32;
 
@@ -69,11 +69,8 @@ fn main() -> Result<(), core::convert::Infallible> {
         .into_styled(stroke_off_fill_off)
         .draw(&mut display)?;
 
-    let mut window = WindowBuilder::new(&display)
-        .title("Filled primitives")
-        .scale(2)
-        .build();
-    window.show_static(&display);
+    let output_settings = OutputSettingsBuilder::new().scale(2).build();
+    Window::new("Filled primitives", &output_settings).show_static(&display);
 
     Ok(())
 }
