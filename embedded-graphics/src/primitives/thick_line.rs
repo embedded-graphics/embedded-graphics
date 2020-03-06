@@ -150,17 +150,17 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.start == self.end
-            || self.style.stroke_width == 0
-            || self.style.stroke_color.is_none()
-        {
-            None
-        } else if let Some(point) = self.extra_perp.as_mut().and_then(|it| it.next()) {
+        if let Some(point) = self.extra_perp.as_mut().and_then(|it| it.next()) {
             Some(Pixel(point, self.style.fill_color.unwrap()))
         } else if let Some(point) = self.perp.next() {
             self.extra_perp = None;
 
             Some(Pixel(point, self.style.stroke_color.unwrap()))
+        } else if self.start == self.end
+            || self.style.stroke_width == 0
+            || self.style.stroke_color.is_none()
+        {
+            None
         } else {
             if self.error > self.threshold {
                 self.start += self.step_minor;
@@ -203,10 +203,6 @@ where
                 self.step_minor,
                 self.step_major,
             );
-
-            if self.start == self.end {
-                return None;
-            }
 
             Self::next(self)
         }
