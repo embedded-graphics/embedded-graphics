@@ -6,6 +6,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.0-beta.2] - 2020-03-06
+
 ### Fixed
 
 - [#262](https://github.com/jamwaffles/embedded-graphics/pull/262) `Triangle`s with a fill color but no stroke color are now rendered instead of not rendered at all.
@@ -431,6 +433,7 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.2...HEAD
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...HEAD
+[0.6.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...embedded-graphics-v0.6.0-beta.2
 [0.6.0-beta.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-alpha.3...embedded-graphics-v0.6.0-beta.1
