@@ -38,7 +38,7 @@ impl PerpLineIterator {
         dx: i32,
         dy: i32,
         width: u32,
-        error: i32,
+        initial_error: i32,
         winit: i32,
         direction: Point,
         step_minor: Point,
@@ -46,8 +46,8 @@ impl PerpLineIterator {
     ) -> Self {
         Self {
             start,
-            error,
-            initial_error: error,
+            error: -initial_error,
+            initial_error,
             direction,
             dx,
             dy,
@@ -106,13 +106,13 @@ impl Iterator for PerpLineIterator {
 
             match self.side {
                 Side::Left => {
-                    if self.error < -self.threshold {
+                    if self.error > self.threshold {
                         self.point += self.step_major;
-                        self.error -= self.e_diag;
+                        self.error += self.e_diag;
                         self.tk += 2 * self.dy;
                     }
 
-                    self.error -= self.e_square;
+                    self.error += self.e_square;
                     self.point -= self.step_minor;
                     self.tk += 2 * self.dx;
 
