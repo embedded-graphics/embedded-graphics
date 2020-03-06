@@ -139,8 +139,8 @@ where
     C: PixelColor,
     F: Font,
 {
-    char_walk_x: u32,
-    char_walk_y: u32,
+    char_walk_x: i32,
+    char_walk_y: i32,
     current_char: Option<char>,
     idx: usize,
     pos: Point,
@@ -157,9 +157,26 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if let Some(current_char) = self.current_char {
-                let color = if F::character_pixel(current_char, self.char_walk_x, self.char_walk_y)
-                {
+            if self.char_walk_x < 0 {
+                let x = self.pos.x + self.char_walk_x;
+                let y = self.pos.y + self.char_walk_y;
+
+                self.char_walk_y += 1;
+
+                if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
+                    self.char_walk_y = 0;
+                    self.char_walk_x += 1;
+                }
+
+                if let Some(color) = self.style.background_color {
+                    break Some(Pixel(Point::new(x, y), color));
+                }
+            } else if let Some(current_char) = self.current_char {
+                let color = if F::character_pixel(
+                    current_char,
+                    self.char_walk_x as u32,
+                    self.char_walk_y as u32,
+                ) {
                     self.style.text_color.or(self.style.background_color)
                 } else {
                     self.style.background_color
@@ -167,18 +184,19 @@ where
 
                 let x = self.pos.x
                     + ((F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) * self.idx as u32) as i32
-                    + self.char_walk_x as i32;
-                let y = self.pos.y + self.char_walk_y as i32;
+                    + self.char_walk_x;
+                let y = self.pos.y + self.char_walk_y;
 
                 self.char_walk_x += 1;
 
-                if self.char_walk_x >= F::CHARACTER_SIZE.width {
+                if self.char_walk_x >= F::CHARACTER_SIZE.width as i32 {
                     self.char_walk_x = 0;
                     self.char_walk_y += 1;
 
                     // Done with this char, move on to the next one
-                    if self.char_walk_y >= F::CHARACTER_SIZE.height {
+                    if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
                         self.char_walk_y = 0;
+                        self.char_walk_x -= F::CHARACTER_SPACING as i32;
                         self.idx += 1;
                         self.current_char = self.text.chars().nth(self.idx);
                     }
