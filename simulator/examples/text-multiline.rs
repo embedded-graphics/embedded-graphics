@@ -3,13 +3,13 @@ use embedded_graphics::{
     fonts::{Font6x8, Text},
     pixelcolor::BinaryColor,
     prelude::*,
-    style::{AlignH, TextStyleBuilder},
+    style::{AlignH, AlignV, TextStyleBuilder},
     text_style,
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(256, 384));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(256, 512));
 
     // Show multiline text example
     let style = TextStyleBuilder::new(Font6x8)
@@ -87,6 +87,93 @@ fn main() -> Result<(), core::convert::Infallible> {
             text_color = BinaryColor::On,
             background_color = BinaryColor::Off,
             horizontal_alignment = AlignH::RIGHT
+        )
+    )
+    .draw(&mut display)?;
+
+    // Show top aligned multiline text example
+    let style = TextStyleBuilder::new(Font6x8)
+        .text_color(BinaryColor::On)
+        .background_color(BinaryColor::Off)
+        .vertical_alignment(AlignV::TOP)
+        .build();
+
+    Text::new(
+        "This is a\ntop aligned\nmultiline\nHello World!",
+        Point::new(15, 384),
+    )
+    .sized(Size::new(75, 64))
+    .into_styled(style)
+    .draw(&mut display)?;
+
+    // Show top aligned multiline text example using a macro
+    egtext!(
+        text = "This is a\ntop aligned\nmultiline\nHello World!\nwith macro",
+        top_left = (15, 448),
+        size = (75, 64),
+        style = text_style!(
+            font = Font6x8,
+            text_color = BinaryColor::On,
+            background_color = BinaryColor::Off,
+            vertical_alignment = AlignV::TOP
+        )
+    )
+    .draw(&mut display)?;
+
+    // Show centered multiline text example
+    let style = TextStyleBuilder::new(Font6x8)
+        .text_color(BinaryColor::On)
+        .background_color(BinaryColor::Off)
+        .vertical_alignment(AlignV::CENTER)
+        .build();
+
+    Text::new(
+        "This is a\ncentered\nmultiline\nHello World!",
+        Point::new(90, 384),
+    )
+    .sized(Size::new(75, 64))
+    .into_styled(style)
+    .draw(&mut display)?;
+
+    // Show centered multiline text example using a macro
+    egtext!(
+        text = "This is a\ncentered\nmultiline\nHello World!\nwith macro",
+        top_left = (90, 448),
+        size = (75, 64),
+        style = text_style!(
+            font = Font6x8,
+            text_color = BinaryColor::On,
+            background_color = BinaryColor::Off,
+            vertical_alignment = AlignV::CENTER
+        )
+    )
+    .draw(&mut display)?;
+
+    // Show bottom aligned multiline text example
+    let style = TextStyleBuilder::new(Font6x8)
+        .text_color(BinaryColor::On)
+        .background_color(BinaryColor::Off)
+        .vertical_alignment(AlignV::BOTTOM)
+        .build();
+
+    Text::new(
+        "This is a\nbottom aligned\nmultiline\nHello World!",
+        Point::new(165, 384),
+    )
+    .sized(Size::new(75, 64))
+    .into_styled(style)
+    .draw(&mut display)?;
+
+    // Show bottom aligned multiline text example using a macro
+    egtext!(
+        text = "This is a\nbottom aligned\nmultiline\nHello World!\nwith macro",
+        top_left = (165, 448),
+        size = (75, 64),
+        style = text_style!(
+            font = Font6x8,
+            text_color = BinaryColor::On,
+            background_color = BinaryColor::Off,
+            vertical_alignment = AlignV::BOTTOM
         )
     )
     .draw(&mut display)?;

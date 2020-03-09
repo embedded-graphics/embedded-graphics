@@ -3,7 +3,7 @@ use crate::{
     fonts::Font,
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    style::{AlignH, Styled, TextStyle},
+    style::{AlignH, AlignV, Styled, TextStyle},
     transform::Transform,
     DrawTarget,
 };
@@ -123,6 +123,13 @@ where
         - F::CHARACTER_SPACING
 }
 
+fn text_height<F>(text: &str) -> u32
+where
+    F: Font,
+{
+    F::CHARACTER_SIZE.height * text.lines().count() as u32
+}
+
 impl<C, F> Dimensions for Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
@@ -159,7 +166,7 @@ where
         let height = if self.primitive.size.is_some() {
             self.primitive.size.unwrap().height
         } else if width > 0 {
-            F::CHARACTER_SIZE.height * self.primitive.text.lines().count() as u32
+            text_height::<F>(self.primitive.text)
         } else {
             0
         };
@@ -200,6 +207,14 @@ where
             if self.current_char == Some('\n') || self.first {
                 if self.first {
                     self.first = false;
+                    let height = text_height::<F>(self.text);
+                    self.pos.y = match self.style.vertical_alignment {
+                        AlignV::TOP => self.top_left.y,
+                        AlignV::CENTER => {
+                            self.top_left.y + (self.size.height as i32 - height as i32) / 2
+                        }
+                        AlignV::BOTTOM => self.top_left.y + self.size.height as i32 - height as i32,
+                    }
                 } else {
                     self.pos.y += F::CHARACTER_SIZE.height as i32;
                     self.idx += 1;
@@ -490,6 +505,101 @@ mod tests {
                 .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
                 .size(),
             Size::new(20, 4)
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn text_vertical_alignment() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+
+        Text::new("AB", Point::zero())
+            .sized(Size::new(20, 12))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .vertical_alignment(AlignV::TOP)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " ###  ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "##### ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "#   # ####          ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+            ])
+        );
+
+        let mut display = MockDisplay::new();
+
+        Text::new("AB", Point::zero())
+            .sized(Size::new(20, 12))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .vertical_alignment(AlignV::CENTER)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "                    ",
+                "                    ",
+                " ###  ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "##### ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "#   # ####          ",
+                "                    ",
+                "                    ",
+                "                    ",
+            ])
+        );
+
+        let mut display = MockDisplay::new();
+
+        Text::new("AB", Point::zero())
+            .sized(Size::new(20, 12))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .vertical_alignment(AlignV::BOTTOM)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                " ###  ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "##### ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "#   # ####          ",
+                "                    ",
+            ])
         );
 
         Ok(())

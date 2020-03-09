@@ -1,4 +1,4 @@
-use crate::style::AlignH;
+use crate::style::{AlignH, AlignV};
 use crate::{fonts::Font, pixelcolor::PixelColor};
 
 /// Style properties for text.
@@ -30,6 +30,9 @@ where
 
     /// Horizontal alignment.
     pub horizontal_alignment: AlignH,
+
+    /// Vertical alignment.
+    pub vertical_alignment: AlignV,
 }
 
 impl<C, F> TextStyle<C, F>
@@ -44,6 +47,7 @@ where
             text_color: Some(text_color),
             background_color: None,
             horizontal_alignment: AlignH::default(),
+            vertical_alignment: AlignV::default(),
         }
     }
 }
@@ -153,6 +157,7 @@ where
                 background_color: None,
                 text_color: None,
                 horizontal_alignment: AlignH::default(),
+                vertical_alignment: AlignV::default(),
             },
         }
     }
@@ -178,6 +183,13 @@ where
         self
     }
 
+    /// Sets the vertical alignment.
+    pub fn vertical_alignment(mut self, vertical_alignment: AlignV) -> Self {
+        self.style.vertical_alignment = vertical_alignment;
+
+        self
+    }
+
     /// Builds the text style.
     pub fn build(self) -> TextStyle<C, F> {
         self.style
@@ -198,6 +210,7 @@ mod tests {
                 text_color: None,
                 background_color: None,
                 horizontal_alignment: AlignH::default(),
+                vertical_alignment: AlignV::default(),
             }
         );
     }
@@ -239,6 +252,22 @@ mod tests {
                 let mut style = TextStyleBuilder::new(Font12x16).build();
 
                 style.horizontal_alignment = AlignH::CENTER;
+
+                style
+            }
+        );
+    }
+
+    #[test]
+    fn builder_vertical_alignment() {
+        assert_eq!(
+            TextStyleBuilder::<BinaryColor, _>::new(Font12x16)
+                .vertical_alignment(AlignV::CENTER)
+                .build(),
+            {
+                let mut style = TextStyleBuilder::new(Font12x16).build();
+
+                style.vertical_alignment = AlignV::CENTER;
 
                 style
             }
