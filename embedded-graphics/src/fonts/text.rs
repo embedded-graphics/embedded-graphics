@@ -3,7 +3,7 @@ use crate::{
     fonts::Font,
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    style::{Styled, TextStyle},
+    style::{AlignH, Styled, TextStyle},
     transform::Transform,
     DrawTarget,
 };
@@ -98,6 +98,7 @@ where
 
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter {
+            first: true,
             current_char: self.primitive.text.chars().next(),
             idx: 0,
             text: self.primitive.text,
@@ -110,6 +111,16 @@ where
             style: self.style,
         }
     }
+}
+
+fn line_width<F>(line: &str) -> u32
+where
+    F: Font,
+{
+    line.chars()
+        .map(|c| F::char_width(c) + F::CHARACTER_SPACING)
+        .sum::<u32>()
+        - F::CHARACTER_SPACING
 }
 
 impl<C, F> Dimensions for Styled<Text<'_>, TextStyle<C, F>>
@@ -138,12 +149,7 @@ where
             self.primitive
                 .text
                 .lines()
-                .map(|l| {
-                    l.chars()
-                        .map(|c| F::char_width(c) + F::CHARACTER_SPACING)
-                        .sum::<u32>()
-                        - F::CHARACTER_SPACING
-                })
+                .map(|l| line_width::<F>(l))
                 .max()
                 .unwrap_or(0)
         } else {
@@ -169,6 +175,7 @@ where
     C: PixelColor,
     F: Font,
 {
+    first: bool,
     char_width: u32,
     char_walk_x: i32,
     char_walk_y: i32,
@@ -190,11 +197,21 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.current_char == Some('\n') {
-                self.pos.x = self.top_left.x;
-                self.pos.y += F::CHARACTER_SIZE.height as i32;
-                self.idx += 1;
-                self.current_char = self.text.chars().nth(self.idx);
+            if self.current_char == Some('\n') || self.first {
+                if self.first {
+                    self.first = false;
+                } else {
+                    self.pos.y += F::CHARACTER_SIZE.height as i32;
+                    self.idx += 1;
+                    self.current_char = self.text.chars().nth(self.idx);
+                }
+                let len = self.text[self.idx..].lines().next().map_or(0, |l| l.len());
+                let width = line_width::<F>(&self.text[self.idx..self.idx + len]);
+                self.pos.x = match self.style.horizontal_alignment {
+                    AlignH::LEFT => self.top_left.x,
+                    AlignH::CENTER => self.top_left.x + (self.size.width as i32 - width as i32) / 2,
+                    AlignH::RIGHT => self.top_left.x + self.size.width as i32 - width as i32,
+                }
             } else if self.char_walk_x < 0 {
                 let x = self.pos.x + self.char_walk_x;
                 let y = self.pos.y + self.char_walk_y;
@@ -257,7 +274,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{fonts::Font6x8, mock_display::MockDisplay, pixelcolor::BinaryColor};
+    use crate::{
+        fonts::Font6x8, mock_display::MockDisplay, pixelcolor::BinaryColor, style::TextStyleBuilder,
+    };
 
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct SpacedFont;
@@ -373,6 +392,104 @@ mod tests {
                 .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
                 .size(),
             Size::new(2 * 6, 2 * 8)
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn text_horizontal_alignment() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+
+        Text::new("AB", Point::zero())
+            .sized(Size::new(20, 8))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .horizontal_alignment(AlignH::LEFT)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " ###  ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "##### ####          ",
+                "#   # #   #         ",
+                "#   # #   #         ",
+                "#   # ####          ",
+                "                    ",
+            ])
+        );
+
+        let mut display = MockDisplay::new();
+
+        Text::new("AB", Point::zero())
+            .sized(Size::new(20, 8))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .horizontal_alignment(AlignH::CENTER)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     ###  ####      ",
+                "    #   # #   #     ",
+                "    #   # #   #     ",
+                "    ##### ####      ",
+                "    #   # #   #     ",
+                "    #   # #   #     ",
+                "    #   # ####      ",
+                "                    ",
+            ])
+        );
+
+        let mut display = MockDisplay::new();
+
+        Text::new("AB", Point::zero())
+            .sized(Size::new(20, 8))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .horizontal_alignment(AlignH::RIGHT)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "         ###  ####  ",
+                "        #   # #   # ",
+                "        #   # #   # ",
+                "        ##### ####  ",
+                "        #   # #   # ",
+                "        #   # #   # ",
+                "        #   # ####  ",
+                "                    ",
+            ])
+        );
+
+        assert_eq!(
+            Text::new("AB", Point::zero())
+                .sized(Size::new(20, 4))
+                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
+                .size(),
+            Size::new(20, 4)
+        );
+        assert_eq!(
+            Text::new("ABCD", Point::zero())
+                .sized(Size::new(20, 4))
+                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
+                .size(),
+            Size::new(20, 4)
         );
 
         Ok(())

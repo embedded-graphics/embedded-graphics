@@ -1,3 +1,4 @@
+use crate::style::AlignH;
 use crate::{fonts::Font, pixelcolor::PixelColor};
 
 /// Style properties for text.
@@ -26,6 +27,9 @@ where
 
     /// Font.
     pub font: F,
+
+    /// Horizontal alignment.
+    pub horizontal_alignment: AlignH,
 }
 
 impl<C, F> TextStyle<C, F>
@@ -39,6 +43,7 @@ where
             font,
             text_color: Some(text_color),
             background_color: None,
+            horizontal_alignment: AlignH::default(),
         }
     }
 }
@@ -147,6 +152,7 @@ where
                 font,
                 background_color: None,
                 text_color: None,
+                horizontal_alignment: AlignH::default(),
             },
         }
     }
@@ -161,6 +167,13 @@ where
     /// Sets the background color.
     pub fn background_color(mut self, background_color: C) -> Self {
         self.style.background_color = Some(background_color);
+
+        self
+    }
+
+    /// Sets the horizontal alignment.
+    pub fn horizontal_alignment(mut self, horizontal_alignment: AlignH) -> Self {
+        self.style.horizontal_alignment = horizontal_alignment;
 
         self
     }
@@ -183,7 +196,8 @@ mod tests {
             TextStyle {
                 font: Font12x16,
                 text_color: None,
-                background_color: None
+                background_color: None,
+                horizontal_alignment: AlignH::default(),
             }
         );
     }
@@ -209,6 +223,22 @@ mod tests {
 
                 style.text_color = None;
                 style.background_color = Some(BinaryColor::On);
+
+                style
+            }
+        );
+    }
+
+    #[test]
+    fn builder_horizontal_alignment() {
+        assert_eq!(
+            TextStyleBuilder::<BinaryColor, _>::new(Font12x16)
+                .horizontal_alignment(AlignH::CENTER)
+                .build(),
+            {
+                let mut style = TextStyleBuilder::new(Font12x16).build();
+
+                style.horizontal_alignment = AlignH::CENTER;
 
                 style
             }

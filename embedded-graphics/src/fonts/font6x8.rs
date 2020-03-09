@@ -40,7 +40,7 @@ mod tests {
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        style::TextStyle,
+        style::{AlignH, TextStyle},
         transform::Transform,
     };
 
@@ -114,6 +114,7 @@ mod tests {
             font: Font6x8,
             text_color: Some(BinaryColor::Off),
             background_color: Some(BinaryColor::On),
+            horizontal_alignment: AlignH::LEFT,
         };
         Text::new("Mm", Point::zero())
             .into_styled(style)
@@ -144,6 +145,7 @@ mod tests {
             font: Font6x8,
             text_color: Some(BinaryColor::Off),
             background_color: Some(BinaryColor::On),
+            horizontal_alignment: AlignH::LEFT,
         };
         Text::new("Mm", Point::zero())
             .into_styled(style_inverse)
@@ -154,6 +156,7 @@ mod tests {
             font: Font6x8,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
+            horizontal_alignment: AlignH::LEFT,
         };
         Text::new("Mm", Point::zero())
             .into_styled(style_normal)

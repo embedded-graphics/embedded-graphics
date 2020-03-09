@@ -37,7 +37,7 @@ mod tests {
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        style::TextStyle,
+        style::{AlignH, TextStyle},
         transform::Transform,
     };
 
@@ -216,6 +216,7 @@ mod tests {
             font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
+            horizontal_alignment: AlignH::LEFT,
         };
 
         let mut text = Text::new("Testing string", Point::zero()).into_styled(style);
@@ -230,6 +231,7 @@ mod tests {
             font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
+            horizontal_alignment: AlignH::LEFT,
         };
 
         let mut text = Text::new("A", Point::zero()).into_styled(style);
