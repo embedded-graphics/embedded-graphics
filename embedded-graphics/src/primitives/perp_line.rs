@@ -11,7 +11,8 @@ enum Side {
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct PerpLineIterator {
-    error: i32,
+    error_l: i32,
+    error_r: i32,
     start: Point,
     point_l: Point,
     point_r: Point,
@@ -46,7 +47,8 @@ impl PerpLineIterator {
     ) -> Self {
         Self {
             start,
-            error: -initial_error,
+            error_l: -initial_error,
+            error_r: initial_error,
             initial_error,
             direction,
             dx,
@@ -90,14 +92,14 @@ impl Iterator for PerpLineIterator {
                 Side::Left => {
                     let point = self.point_l;
 
-                    if self.error > self.threshold {
+                    if self.error_l > self.threshold {
                         self.point_l += self.step_major;
-                        self.error += self.e_diag;
+                        self.error_l += self.e_diag;
                         self.tk += 2 * self.dy;
                     }
 
-                    self.error += self.e_square;
                     self.point_l -= self.step_minor;
+                    self.error_l += self.e_square;
                     self.tk += 2 * self.dx;
 
                     self.side = Side::Right;
@@ -105,14 +107,14 @@ impl Iterator for PerpLineIterator {
                     Some(point)
                 }
                 Side::Right => {
-                    if self.error > self.threshold {
+                    if self.error_r > self.threshold {
                         self.point_r -= self.step_major;
-                        self.error += self.e_diag;
+                        self.error_r += self.e_diag;
                         self.tk += 2 * self.dy;
                     }
 
-                    self.error += self.e_square;
                     self.point_r += self.step_minor;
+                    self.error_r += self.e_square;
                     self.tk += 2 * self.dx;
 
                     self.side = Side::Left;
