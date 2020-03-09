@@ -272,6 +272,7 @@ pub trait Font {
 /// Creates a styled text.
 ///
 /// The `egtext` macro expects the text, the position and styling properties as arguments.
+/// It also optionally support specifying the bounding box size as argument.
 ///
 /// The `style` property accepts a [`TextStyle`] object. This can be an object literal, usage of the
 /// [`text_style`] macro, or something else like a function call that returns [`TextStyle`].
@@ -284,6 +285,7 @@ pub trait Font {
 /// let text = egtext!(
 ///     text = "text",
 ///     top_left = Point::zero(),
+///     size = (30, 10),
 ///     style = text_style!(
 ///         font = Font6x8, // Font must to be the first styling property
 ///         text_color = Rgb888::RED,
@@ -298,6 +300,12 @@ macro_rules! egtext {
     (text = $text:expr, top_left = $position:expr,
         style = $style:expr $(,)?) => {{
         $crate::fonts::Text::new($text, $crate::geometry::Point::from($position))
+            .into_styled($style)
+    }};
+    (text = $text:expr, top_left = $position:expr, size = $size:expr,
+        style = $style:expr $(,)?) => {{
+        $crate::fonts::Text::new($text, $crate::geometry::Point::from($position))
+            .sized($crate::geometry::Size::from($size))
             .into_styled($style)
     }};
 }

@@ -30,12 +30,27 @@ pub struct Text<'a> {
     ///
     /// Defines the top-left starting pixel of the text object.
     pub position: Point,
+
+    /// The box size that the text should fit in.
+    ///
+    /// Defines the width and height of the text object.
+    pub size: Option<Size>,
 }
 
 impl<'a> Text<'a> {
     /// Creates a text.
     pub const fn new(text: &'a str, position: Point) -> Self {
-        Self { text, position }
+        Self {
+            text,
+            position,
+            size: None,
+        }
+    }
+
+    /// Specify a box size for the text.
+    pub const fn sized(mut self, size: Size) -> Self {
+        self.size = Some(size);
+        self
     }
 
     /// Attaches a text style to the text object.
@@ -91,6 +106,7 @@ where
             char_walk_y: 0,
             top_left: self.primitive.position,
             pos: self.primitive.position,
+            size: self.size(),
             style: self.style,
         }
     }
@@ -116,7 +132,9 @@ where
     ///
     /// [`Size::zero()`]: ../geometry/struct.Size.html#method.zero
     fn size(&self) -> Size {
-        let width = if !self.primitive.text.is_empty() {
+        let width = if self.primitive.size.is_some() {
+            self.primitive.size.unwrap().width
+        } else if !self.primitive.text.is_empty() {
             self.primitive
                 .text
                 .lines()
@@ -132,7 +150,9 @@ where
             0
         };
 
-        let height = if width > 0 {
+        let height = if self.primitive.size.is_some() {
+            self.primitive.size.unwrap().height
+        } else if width > 0 {
             F::CHARACTER_SIZE.height * self.primitive.text.lines().count() as u32
         } else {
             0
@@ -156,6 +176,7 @@ where
     idx: usize,
     top_left: Point,
     pos: Point,
+    size: Size,
     text: &'a str,
     style: TextStyle<C, F>,
 }
@@ -261,6 +282,18 @@ mod tests {
             Text {
                 text: "Hello e-g",
                 position: Point::new(10, 11),
+                size: None
+            }
+        );
+
+        let sized_text = text.sized(Size::new(42, 8));
+
+        assert_eq!(
+            sized_text,
+            Text {
+                text: "Hello e-g",
+                position: Point::new(10, 11),
+                size: Some(Size::new(42, 8))
             }
         );
     }
