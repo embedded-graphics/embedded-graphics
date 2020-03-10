@@ -3,6 +3,7 @@
 use crate::drawable::Pixel;
 use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
+use crate::primitives::line::{Line, LineIterator};
 use crate::primitives::perp_line::PerpLineIterator;
 use crate::style::PrimitiveStyle;
 use integer_sqrt::IntegerSquareRoot;
@@ -70,8 +71,10 @@ pub struct ThickLineIterator<C: PixelColor> {
     start: Point,
     end: Point,
 
-    point_l: Point,
-    point_r: Point,
+    start_l: Point,
+    start_r: Point,
+    end_l: Point,
+    end_r: Point,
 
     /// The "major" step
     ///
@@ -87,6 +90,8 @@ pub struct ThickLineIterator<C: PixelColor> {
 
     tk: u32,
     side: Side,
+
+    joiner: LineIterator,
 }
 
 impl<C> ThickLineIterator<C>
@@ -162,8 +167,11 @@ where
             direction,
             tk: (dx + dy) as u32,
             side: Side::Left,
-            point_l: line.start,
-            point_r: line.start,
+            start_l: line.start,
+            start_r: line.start,
+            end_l: line.end,
+            end_r: line.end,
+            joiner: LineIterator::new(&Line::new(line.start, line.end)),
         }
     }
 }
@@ -175,40 +183,50 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.side {
-            Side::Left if self.tk > self.side_thickness => None,
-            Side::Right if self.tk > self.side_thickness => None,
-            Side::Left => {
-                let point = self.point_l;
+        if let Some(point) = self.joiner.next() {
+            Some(Pixel(point, self.style.stroke_color.unwrap()))
+        } else {
+            match self.side {
+                Side::Left if self.tk > self.side_thickness => None,
+                Side::Right if self.tk > self.side_thickness => None,
+                Side::Left => {
+                    if self.error_l > self.threshold {
+                        self.start_l += self.step_major;
+                        self.end_l += self.step_major;
+                        self.error_l += self.e_diag;
+                        self.tk += 2 * self.dy as u32;
+                    }
 
-                if self.error_l > self.threshold {
-                    self.point_l += self.step_major;
-                    self.error_l += self.e_diag;
-                    self.tk += 2 * self.dy as u32;
+                    self.start_l -= self.step_minor;
+                    self.end_l -= self.step_minor;
+                    self.error_l += self.e_square;
+                    self.tk += 2 * self.dx as u32;
+
+                    self.side = Side::Right;
+
+                    self.joiner = LineIterator::new(&Line::new(self.start_l, self.end_l));
+
+                    Self::next(self)
                 }
+                Side::Right => {
+                    if self.error_r >= self.threshold {
+                        self.start_r -= self.step_major;
+                        self.end_r -= self.step_major;
+                        self.error_r += self.e_diag;
+                        self.tk += 2 * self.dy as u32;
+                    }
 
-                self.point_l -= self.step_minor;
-                self.error_l += self.e_square;
-                self.tk += 2 * self.dx as u32;
+                    self.start_r += self.step_minor;
+                    self.end_r += self.step_minor;
+                    self.error_r += self.e_square;
+                    self.tk += 2 * self.dx as u32;
 
-                self.side = Side::Right;
+                    self.side = Side::Left;
 
-                Some(Pixel(point, self.style.stroke_color.unwrap()))
-            }
-            Side::Right => {
-                if self.error_r >= self.threshold {
-                    self.point_r -= self.step_major;
-                    self.error_r += self.e_diag;
-                    self.tk += 2 * self.dy as u32;
+                    self.joiner = LineIterator::new(&Line::new(self.start_r, self.end_r));
+
+                    Self::next(self)
                 }
-
-                self.point_r += self.step_minor;
-                self.error_r += self.e_square;
-                self.tk += 2 * self.dx as u32;
-
-                self.side = Side::Left;
-
-                Some(Pixel(self.point_r, self.style.stroke_color.unwrap()))
             }
         }
     }
