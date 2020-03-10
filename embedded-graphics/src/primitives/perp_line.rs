@@ -8,116 +8,86 @@ enum Side {
     Right,
 }
 
-/// TODO: Docs
+/// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct PerpLineIterator {
-    error_l: i32,
-    error_r: i32,
+pub(crate) struct JoinerIterator {
     start: Point,
-    point_l: Point,
-    point_r: Point,
+    end: Point,
+    // delta: Point,
+    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
+    direction: Point,
+    // err: i32,
+    stop: bool,
+    iters: u32,
+
     threshold: i32,
     e_diag: i32,
     e_square: i32,
-    width: u32,
-    tk: i32,
     dx: i32,
     dy: i32,
-    direction: Point,
+    error: i32,
     step_major: Point,
     step_minor: Point,
-    side: Side,
-    winit: i32,
-    initial_error: i32,
-    pixel_count: u32,
-    stop: bool,
 }
 
-impl PerpLineIterator {
-    /// TODO: Docs
-    pub fn new(
+impl JoinerIterator {
+    /// Create a new line iterator from a `Line`
+    pub(crate) fn new(
         start: Point,
+        end: Point,
         dx: i32,
         dy: i32,
-        width: u32,
-        initial_error: i32,
-        winit: i32,
         direction: Point,
-        step_minor: Point,
         step_major: Point,
+        step_minor: Point,
+        initial_error: i32,
     ) -> Self {
         Self {
             start,
-            error_l: -initial_error,
-            error_r: initial_error,
-            initial_error,
-            direction,
+            end,
+            // delta,
+            // direction,
+            // err: initial_error,
+            // stop: start == end, // If line length is zero, draw nothing
+            // iters: 0,
             dx,
             dy,
-            point_l: start,
-            point_r: start,
+            error: initial_error,
             threshold: dx - 2 * dy,
             e_diag: -2 * dx,
             e_square: 2 * dy,
-            width,
-            winit,
-            tk: dx + dy,
-            side: Side::Left,
+            direction,
+            iters: 0,
+            stop: false,
             step_major,
             step_minor,
-            pixel_count: 0,
-            stop: false,
         }
     }
 }
 
-impl Iterator for PerpLineIterator {
+// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+impl Iterator for JoinerIterator {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.side {
-            Side::Left if self.tk + self.winit > self.width as i32 => {
-                if !self.stop && self.pixel_count == 0 && self.width > 0 {
-                    self.stop = true;
+        self.iters += 1;
 
-                    Some(self.start)
-                } else {
-                    None
-                }
+        if !self.stop && self.iters < 100 {
+            if self.error > self.threshold {
+                self.start += self.step_minor;
+                self.error += self.e_diag;
             }
-            Side::Right if self.tk - self.winit > self.width as i32 => None,
-            Side::Left => {
-                let point = self.point_l;
 
-                if self.error_l > self.threshold {
-                    self.point_l += self.step_major;
-                    self.error_l += self.e_diag;
-                    self.tk += 2 * self.dy;
-                }
+            self.start += self.step_major;
+            self.error += self.e_square;
 
-                self.point_l -= self.step_minor;
-                self.error_l += self.e_square;
-                self.tk += 2 * self.dx;
-
-                self.side = Side::Right;
-
-                Some(point)
+            if self.start == self.end {
+                self.stop = true;
             }
-            Side::Right => {
-                if self.error_r >= self.threshold {
-                    self.point_r -= self.step_major;
-                    self.error_r += self.e_diag;
-                    self.tk += 2 * self.dy;
-                }
 
-                self.point_r += self.step_minor;
-                self.error_r += self.e_square;
-                self.tk += 2 * self.dx;
-
-                self.side = Side::Left;
-
-                Some(self.point_r)
-            }
+            Some(self.start)
+        } else {
+            None
         }
     }
 }
