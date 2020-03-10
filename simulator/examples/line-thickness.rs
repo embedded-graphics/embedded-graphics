@@ -21,24 +21,35 @@ fn draw(
 ) -> Result<(), core::convert::Infallible> {
     display.clear(BACKGROUND_COLOR)?;
 
+    let start = Point::new(
+        display.size().width as i32 / 2,
+        display.size().height as i32 / 2,
+    );
+
     egtext!(
         text = &format!("W: {}", stroke_width),
         top_left = Point::zero(),
         style = text_style!(font = Font6x8, text_color = Rgb888::MAGENTA)
     )
+    .into_iter()
+    .chain(
+        egtext!(
+            text = &format!("DX {}, DY {}", position.x - start.x, position.y - start.y),
+            top_left = Point::new(0, 8),
+            style = text_style!(font = Font6x8, text_color = Rgb888::MAGENTA)
+        )
+        .into_iter(),
+    )
     .draw(display)?;
 
     ThickLine::new(
-        Point::new(
-            display.size().width as i32 / 2,
-            display.size().height as i32 / 2,
-        ),
+        start,
         position,
         primitive_style!(
             stroke_width = stroke_width,
-            stroke_color = FOREGROUND_COLOR,
+            stroke_color = Rgb888::new(0x80, 0xf2, 0x91),
             // For debugging - right side of line uses this colour
-            fill_color = Rgb888::GREEN
+            fill_color = Rgb888::new(0x91, 0x80, 0xf2),
         ),
         draw_extra,
     )
@@ -59,10 +70,11 @@ fn draw(
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(200, 200));
-    let mut window = WindowBuilder::new(&display)
+    let output_settings = OutputSettingsBuilder::new()
         .scale(4)
-        .title("Click to move circle")
+        .pixel_spacing(1)
         .build();
+    let mut window = Window::new("Line thickness", &output_settings);
 
     let mut position = Point::new(150, 120);
     let mut stroke_width = 5;
