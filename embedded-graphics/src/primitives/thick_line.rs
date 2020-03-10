@@ -95,6 +95,13 @@ where
         let side_thickness =
             2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
 
+        let f_side_thickness =
+            2.0 * line.style.stroke_width as f32 * (dx.pow(2) as f32 + dy.pow(2) as f32).sqrt();
+
+        dbg!((side_thickness, f_side_thickness));
+
+        let side_thickness = f_side_thickness.round() as u32;
+
         let error = 0;
         let p_error = 0;
 
