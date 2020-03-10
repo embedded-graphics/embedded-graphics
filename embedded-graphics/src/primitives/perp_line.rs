@@ -29,6 +29,8 @@ pub struct PerpLineIterator {
     side: Side,
     winit: i32,
     initial_error: i32,
+    pixel_count: u32,
+    stop: bool,
 }
 
 impl PerpLineIterator {
@@ -43,7 +45,6 @@ impl PerpLineIterator {
         direction: Point,
         step_minor: Point,
         step_major: Point,
-        is_extra: bool,
     ) -> Self {
         Self {
             start,
@@ -58,12 +59,14 @@ impl PerpLineIterator {
             threshold: dx - 2 * dy,
             e_diag: -2 * dx,
             e_square: 2 * dy,
-            width: width,
+            width,
             winit,
             tk: dx + dy,
             side: Side::Left,
             step_major,
             step_minor,
+            pixel_count: 0,
+            stop: false,
         }
     }
 }
@@ -73,94 +76,48 @@ impl Iterator for PerpLineIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.side {
-            Side::Left if self.tk + self.winit > self.width as i32 => None,
+            Side::Left if self.tk + self.winit > self.width as i32 => {
+                if !self.stop && self.pixel_count == 0 && self.width > 0 {
+                    self.stop = true;
+
+                    Some(self.start)
+                } else {
+                    None
+                }
+            }
             Side::Right if self.tk - self.winit > self.width as i32 => None,
-            _ => match self.side {
-                Side::Left => {
-                    let point = self.point_l;
+            Side::Left => {
+                let point = self.point_l;
 
-                    if self.error_l > self.threshold {
-                        self.point_l += self.step_major;
-                        self.error_l += self.e_diag;
-                        self.tk += 2 * self.dy;
-                    }
-
-                    self.point_l -= self.step_minor;
-                    self.error_l += self.e_square;
-                    self.tk += 2 * self.dx;
-
-                    self.side = Side::Right;
-
-                    Some(point)
+                if self.error_l > self.threshold {
+                    self.point_l += self.step_major;
+                    self.error_l += self.e_diag;
+                    self.tk += 2 * self.dy;
                 }
-                Side::Right => {
-                    if self.error_r >= self.threshold {
-                        self.point_r -= self.step_major;
-                        self.error_r += self.e_diag;
-                        self.tk += 2 * self.dy;
-                    }
 
-                    self.point_r += self.step_minor;
-                    self.error_r += self.e_square;
-                    self.tk += 2 * self.dx;
+                self.point_l -= self.step_minor;
+                self.error_l += self.e_square;
+                self.tk += 2 * self.dx;
 
-                    self.side = Side::Left;
+                self.side = Side::Right;
 
-                    Some(self.point_r)
+                Some(point)
+            }
+            Side::Right => {
+                if self.error_r >= self.threshold {
+                    self.point_r -= self.step_major;
+                    self.error_r += self.e_diag;
+                    self.tk += 2 * self.dy;
                 }
-            },
+
+                self.point_r += self.step_minor;
+                self.error_r += self.e_square;
+                self.tk += 2 * self.dx;
+
+                self.side = Side::Left;
+
+                Some(self.point_r)
+            }
         }
-
-        // if self.tk > self.width as i32 {
-        //     // match self.side {
-        //     //     // Left side is complete, swap to right side now
-        //     //     Side::Left => {
-        //     //         // self.tk = self.dx + self.dy - self.winit;
-        //     //         self.point_l = self.start;
-        //     //         self.error_l = self.initial_error;
-        //     //         self.side = Side::Right;
-
-        //     //         Self::next(self)
-        //     //     }
-
-        //     //     Side::Right => None,
-        //     // }
-        //     None
-        // } else {
-        //     match self.side {
-        //         Side::Left => {
-        //             let point = self.point_l;
-
-        //             if self.error_l > self.threshold {
-        //                 self.point_l += self.step_major;
-        //                 self.error_l += self.e_diag;
-        //                 self.tk += 2 * self.dy;
-        //             }
-
-        //             self.point_l -= self.step_minor;
-        //             self.error_l += self.e_square;
-        //             self.tk += 2 * self.dx;
-
-        //             self.side = Side::Right;
-
-        //             Some(point)
-        //         }
-        //         Side::Right => {
-        //             if self.error_r >= self.threshold {
-        //                 self.point_r -= self.step_major;
-        //                 self.error_r += self.e_diag;
-        //                 self.tk += 2 * self.dy;
-        //             }
-
-        //             self.point_r += self.step_minor;
-        //             self.error_r += self.e_square;
-        //             self.tk += 2 * self.dx;
-
-        //             self.side = Side::Left;
-
-        //             Some(self.point_r)
-        //         }
-        //     }
-        // }
     }
 }
