@@ -43,10 +43,17 @@ where
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+enum Side {
+    Left,
+    Right,
+}
+
 /// TODO: Docs
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ThickLineIterator<C: PixelColor> {
-    error: i32,
+    error_l: i32,
+    error_r: i32,
     threshold: i32,
     e_diag: i32,
     e_square: i32,
@@ -63,6 +70,9 @@ pub struct ThickLineIterator<C: PixelColor> {
     start: Point,
     end: Point,
 
+    point_l: Point,
+    point_r: Point,
+
     /// The "major" step
     ///
     /// The X or Y component with the larger delta is considered "major". This is the most common
@@ -74,6 +84,9 @@ pub struct ThickLineIterator<C: PixelColor> {
     /// The X or Y component with the smaller delta is considered "minor". This is the less common
     /// direction to move in.
     step_minor: Point,
+
+    tk: u32,
+    side: Side,
 }
 
 impl<C> ThickLineIterator<C>
@@ -120,7 +133,8 @@ where
         Self {
             step_major,
             step_minor,
-            error,
+            error_l: 0,
+            error_r: 0,
             dx,
             dy,
             start: line.start,
@@ -146,6 +160,10 @@ where
             side_thickness,
             p_error,
             direction,
+            tk: (dx + dy) as u32,
+            side: Side::Left,
+            point_l: line.start,
+            point_r: line.start,
         }
     }
 }
@@ -157,64 +175,41 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(point) = self.extra_perp.as_mut().and_then(|it| it.next()) {
-            Some(Pixel(point, self.style.fill_color.unwrap()))
-        } else if let Some(point) = self.perp.next() {
-            self.extra_perp = None;
+        match self.side {
+            Side::Left if self.tk > self.side_thickness => None,
+            Side::Right if self.tk > self.side_thickness => None,
+            Side::Left => {
+                let point = self.point_l;
 
-            Some(Pixel(point, self.style.stroke_color.unwrap()))
-        } else if self.start == self.end
-            || self.style.stroke_width == 0
-            || self.style.stroke_color.is_none()
-        {
-            None
-        } else {
-            if self.error > self.threshold {
-                self.start += self.step_minor;
-
-                self.error += self.e_diag;
-
-                if self.p_error >= self.threshold {
-                    self.p_error += self.e_diag;
-
-                    // Draw an extra perpendicular only if required. Lines with a stroke width of 1
-                    // don't have any "double square" moves to compensate for, so the extra
-                    // perpendicular is not required.
-                    if self.draw_extra && self.style.stroke_width > 1 {
-                        self.extra_perp = Some(PerpLineIterator::new(
-                            self.start,
-                            self.dx,
-                            self.dy,
-                            self.side_thickness,
-                            self.p_error + self.e_square,
-                            self.error,
-                            self.direction,
-                            self.step_minor,
-                            self.step_major,
-                        ));
-                    }
+                if self.error_l > self.threshold {
+                    self.point_l += self.step_major;
+                    self.error_l += self.e_diag;
+                    self.tk += 2 * self.dy as u32;
                 }
 
-                self.p_error += self.e_square;
+                self.point_l -= self.step_minor;
+                self.error_l += self.e_square;
+                self.tk += 2 * self.dx as u32;
+
+                self.side = Side::Right;
+
+                Some(Pixel(point, self.style.stroke_color.unwrap()))
             }
+            Side::Right => {
+                if self.error_r >= self.threshold {
+                    self.point_r -= self.step_major;
+                    self.error_r += self.e_diag;
+                    self.tk += 2 * self.dy as u32;
+                }
 
-            self.error += self.e_square;
+                self.point_r += self.step_minor;
+                self.error_r += self.e_square;
+                self.tk += 2 * self.dx as u32;
 
-            self.start += self.step_major;
+                self.side = Side::Left;
 
-            self.perp = PerpLineIterator::new(
-                self.start,
-                self.dx,
-                self.dy,
-                self.side_thickness,
-                self.p_error,
-                self.error,
-                self.direction,
-                self.step_minor,
-                self.step_major,
-            );
-
-            Self::next(self)
+                Some(Pixel(self.point_r, self.style.stroke_color.unwrap()))
+            }
         }
     }
 }
