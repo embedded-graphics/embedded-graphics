@@ -71,10 +71,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     dy: i32,
     length: i32,
     style: PrimitiveStyle<C>,
-    // perp: PerpLineIterator,
-    // extra_perp: Option<PerpLineIterator>,
     side_thickness: u32,
-
     draw_extra: bool,
     direction: Point,
     start: Point,
@@ -104,10 +101,6 @@ pub struct ThickLineIterator<C: PixelColor> {
 
     joiner: JoinerIterator,
     extra_joiner: Option<JoinerIterator>,
-
-    color: C,
-
-    offs: i32,
 }
 
 impl<C> ThickLineIterator<C>
@@ -161,18 +154,6 @@ where
             length: dx,
             style,
             draw_extra: line.draw_extra,
-            // perp: PerpLineIterator::new(
-            //     line.start,
-            //     dx,
-            //     dy,
-            //     side_thickness,
-            //     p_error,
-            //     error,
-            //     direction,
-            //     step_minor,
-            //     step_major,
-            // ),
-            // extra_perp: None,
             side_thickness,
             p_error_l: 0,
             p_error_r: 0,
@@ -184,8 +165,7 @@ where
             start_r: line.start,
             end_l: line.end,
             end_r: line.end,
-            color: style.stroke_color.unwrap(),
-            // Draw center line first
+            // Initialise joiner iter to draw center line first
             joiner: JoinerIterator::new(
                 line.start,
                 line.end,
@@ -198,12 +178,9 @@ where
                 step_major,
                 step_minor,
                 0,
-                false,
                 Side::Left,
             ),
             extra_joiner: None,
-
-            offs: line.offs,
         }
     }
 }
@@ -232,8 +209,6 @@ where
         } else if let Some(point) = self.joiner.next() {
             Some(Pixel(point, color))
         } else {
-            self.color = self.style.fill_color.unwrap();
-
             match self.side {
                 Side::Left => {
                     let start = self.start_l;
@@ -246,23 +221,20 @@ where
                         self.tk += 2 * self.dy as u32;
 
                         if self.p_error_l > self.threshold {
-                            if self.draw_extra {
-                                self.extra_joiner = Some(JoinerIterator::new(
-                                    start,
-                                    end,
-                                    self.dx,
-                                    self.dy,
-                                    self.e_square,
-                                    self.e_diag,
-                                    self.threshold,
-                                    self.direction,
-                                    self.step_major,
-                                    self.step_minor,
-                                    self.p_error_l + self.e_diag,
-                                    true,
-                                    Side::Left,
-                                ));
-                            }
+                            self.extra_joiner = Some(JoinerIterator::new(
+                                start,
+                                end,
+                                self.dx,
+                                self.dy,
+                                self.e_square,
+                                self.e_diag,
+                                self.threshold,
+                                self.direction,
+                                self.step_major,
+                                self.step_minor,
+                                self.p_error_l + self.e_diag,
+                                Side::Left,
+                            ));
 
                             self.p_error_l += self.e_diag;
                         }
@@ -289,7 +261,6 @@ where
                         self.step_major,
                         self.step_minor,
                         self.p_error_l,
-                        false,
                         Side::Left,
                     );
 
@@ -306,23 +277,20 @@ where
                         self.tk += 2 * self.dy as u32;
 
                         if self.p_error_r > self.threshold {
-                            if self.draw_extra {
-                                self.extra_joiner = Some(JoinerIterator::new(
-                                    start - self.step_major,
-                                    end,
-                                    self.dx,
-                                    self.dy,
-                                    self.e_square,
-                                    self.e_diag,
-                                    self.threshold,
-                                    self.direction,
-                                    self.step_major,
-                                    self.step_minor,
-                                    self.p_error_r + self.e_diag + self.e_square,
-                                    true,
-                                    Side::Right,
-                                ));
-                            }
+                            self.extra_joiner = Some(JoinerIterator::new(
+                                start - self.step_major,
+                                end,
+                                self.dx,
+                                self.dy,
+                                self.e_square,
+                                self.e_diag,
+                                self.threshold,
+                                self.direction,
+                                self.step_major,
+                                self.step_minor,
+                                self.p_error_r + self.e_diag + self.e_square,
+                                Side::Right,
+                            ));
 
                             self.p_error_r += self.e_diag;
                         }
@@ -349,7 +317,6 @@ where
                         self.step_major,
                         self.step_minor,
                         self.p_error_r,
-                        false,
                         Side::Right,
                     );
 

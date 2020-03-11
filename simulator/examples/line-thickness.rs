@@ -3,10 +3,10 @@ extern crate embedded_graphics_simulator;
 
 use embedded_graphics::{
     egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitive_style, primitives::ThickLine,
-    style::PrimitiveStyle, text_style,
+    text_style,
 };
 use embedded_graphics_simulator::{
-    thick_c::draw_varthick_line, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
+    OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
 use sdl2::keyboard::Keycode;
 
@@ -49,23 +49,12 @@ fn draw(
         primitive_style!(
             stroke_width = stroke_width,
             stroke_color = Rgb888::new(0x80, 0xf2, 0x91),
-            // For debugging - right side of line uses this colour
-            fill_color = Rgb888::new(0x91, 0x80, 0xf2),
         ),
         draw_extra,
         offs,
     )
     .into_iter()
     .draw(display)?;
-
-    // draw_varthick_line(
-    //     display,
-    //     display.size().width as i32 / 2,
-    //     display.size().height as i32 / 2,
-    //     position.x,
-    //     position.y,
-    //     stroke_width as f32,
-    // );
 
     Ok(())
 }

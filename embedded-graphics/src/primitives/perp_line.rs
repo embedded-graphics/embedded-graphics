@@ -8,13 +8,8 @@ use crate::geometry::Point;
 pub(crate) struct JoinerIterator {
     start: Point,
     end: Point,
-    // delta: Point,
-    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
     direction: Point,
-    // err: i32,
-    stop: bool,
     iters: u32,
-
     threshold: i32,
     e_diag: i32,
     e_square: i32,
@@ -23,7 +18,6 @@ pub(crate) struct JoinerIterator {
     error: i32,
     step_major: Point,
     step_minor: Point,
-    is_extra: bool,
     side: Side,
 }
 
@@ -41,7 +35,6 @@ impl JoinerIterator {
         step_major: Point,
         step_minor: Point,
         initial_error: i32,
-        is_extra: bool,
         side: Side,
     ) -> Self {
         Self {
@@ -55,10 +48,8 @@ impl JoinerIterator {
             e_square,
             direction,
             iters: 0,
-            stop: false,
             step_major,
             step_minor,
-            is_extra,
             side,
         }
     }
@@ -71,7 +62,7 @@ impl Iterator for JoinerIterator {
     fn next(&mut self) -> Option<Self::Item> {
         self.iters += 1;
 
-        if !self.stop && self.iters <= self.dx as u32 {
+        if self.iters <= self.dx as u32 {
             match self.side {
                 Side::Left => {
                     if self.error > self.threshold {
@@ -91,10 +82,6 @@ impl Iterator for JoinerIterator {
                     self.start += self.step_major;
                     self.error -= self.e_square;
                 }
-            }
-
-            if self.start == self.end {
-                self.stop = true;
             }
 
             Some(self.start)
