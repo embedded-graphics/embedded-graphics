@@ -3,7 +3,6 @@
 use crate::drawable::Pixel;
 use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
-use crate::primitives::line::{Line, LineIterator};
 use crate::primitives::perp_line::JoinerIterator;
 use crate::style::PrimitiveStyle;
 use integer_sqrt::IntegerSquareRoot;
@@ -136,9 +135,6 @@ where
 
         let side_thickness = f_side_thickness.round() as u32;
 
-        let error = 0;
-        let p_error = 0;
-
         let mut dx = dx.abs();
         let mut dy = dy.abs();
 
@@ -154,8 +150,6 @@ where
         let threshold = dx - 2 * dy;
         let e_diag = -2 * dx;
         let e_square = 2 * dy;
-
-        dbg!((threshold, e_diag, e_square, line.offs));
 
         Self {
             step_major,
@@ -311,7 +305,7 @@ where
                         if self.p_error_r > self.threshold {
                             if self.draw_extra {
                                 self.extra_joiner = Some(JoinerIterator::new(
-                                    start,
+                                    start - self.step_major,
                                     end,
                                     self.dx,
                                     self.dy,
@@ -321,7 +315,7 @@ where
                                     self.direction,
                                     self.step_major,
                                     self.step_minor,
-                                    self.p_error_r + self.e_diag,
+                                    self.p_error_r + self.e_diag + self.e_square,
                                     true,
                                     Side::Right,
                                 ));

@@ -44,16 +44,9 @@ impl JoinerIterator {
         is_extra: bool,
         side: Side,
     ) -> Self {
-        // dbg!((side, start, is_extra));
-
         Self {
             start,
             end,
-            // delta,
-            // direction,
-            // err: initial_error,
-            // stop: start == end, // If line length is zero, draw nothing
-            // iters: 0,
             dx,
             dy,
             error: initial_error,
