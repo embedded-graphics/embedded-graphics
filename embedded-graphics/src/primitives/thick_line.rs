@@ -15,6 +15,7 @@ pub struct ThickLine<C: PixelColor> {
     end: Point,
     style: PrimitiveStyle<C>,
     draw_extra: bool,
+    offs: i32,
 }
 
 impl<C> ThickLine<C>
@@ -22,12 +23,19 @@ where
     C: PixelColor,
 {
     /// TODO: Docs
-    pub fn new(start: Point, end: Point, style: PrimitiveStyle<C>, draw_extra: bool) -> Self {
+    pub fn new(
+        start: Point,
+        end: Point,
+        style: PrimitiveStyle<C>,
+        draw_extra: bool,
+        offs: i32,
+    ) -> Self {
         Self {
             start,
             end,
             style,
             draw_extra,
+            offs,
         }
     }
 }
@@ -100,6 +108,8 @@ pub struct ThickLineIterator<C: PixelColor> {
     extra_joiner: Option<JoinerIterator>,
 
     color: C,
+
+    offs: i32,
 }
 
 impl<C> ThickLineIterator<C>
@@ -145,7 +155,7 @@ where
         let e_diag = -2 * dx;
         let e_square = 2 * dy;
 
-        dbg!(step_major, step_minor);
+        dbg!((threshold, e_diag, e_square, line.offs));
 
         Self {
             step_major,
@@ -203,6 +213,8 @@ where
                 Side::Left,
             ),
             extra_joiner: None,
+
+            offs: line.offs,
         }
     }
 }

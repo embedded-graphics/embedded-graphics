@@ -18,6 +18,7 @@ fn draw(
     position: Point,
     stroke_width: u32,
     draw_extra: bool,
+    offs: i32,
 ) -> Result<(), core::convert::Infallible> {
     display.clear(BACKGROUND_COLOR)?;
 
@@ -52,6 +53,7 @@ fn draw(
             fill_color = Rgb888::new(0x91, 0x80, 0xf2),
         ),
         draw_extra,
+        offs,
     )
     .into_iter()
     .draw(display)?;
@@ -71,7 +73,7 @@ fn draw(
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(200, 200));
     let output_settings = OutputSettingsBuilder::new()
-        .scale(4)
+        .scale(8)
         .pixel_spacing(1)
         .build();
     let mut window = Window::new("Line thickness", &output_settings);
@@ -80,8 +82,9 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut stroke_width = 5;
     let mut draw_extra = true;
     let mut mouse_down = false;
+    let mut offs = 0;
 
-    draw(&mut display, position, stroke_width, draw_extra)?;
+    draw(&mut display, position, stroke_width, draw_extra, offs)?;
 
     'running: loop {
         window.update(&display);
@@ -94,22 +97,24 @@ fn main() -> Result<(), core::convert::Infallible> {
                         Keycode::Up => stroke_width += 1,
                         Keycode::Down => stroke_width = (stroke_width as i32 - 1).max(0) as u32,
                         Keycode::Space => draw_extra = !draw_extra,
+                        Keycode::O => offs += 1,
+                        Keycode::L => offs -= 1,
                         _ => (),
                     }
 
-                    draw(&mut display, position, stroke_width, draw_extra)?;
+                    draw(&mut display, position, stroke_width, draw_extra, offs)?;
                 }
                 SimulatorEvent::MouseButtonDown { point, .. } => {
                     mouse_down = true;
                     position = point;
 
-                    draw(&mut display, position, stroke_width, draw_extra)?;
+                    draw(&mut display, position, stroke_width, draw_extra, offs)?;
                 }
                 SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
                 SimulatorEvent::MouseMove { point, .. } => {
                     if mouse_down {
                         position = point;
-                        draw(&mut display, position, stroke_width, draw_extra)?;
+                        draw(&mut display, position, stroke_width, draw_extra, offs)?;
                     }
                 }
                 _ => {}
