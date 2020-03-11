@@ -89,6 +89,7 @@ where
             char_width: 0,
             char_walk_x: 0,
             char_walk_y: 0,
+            top_left: self.primitive.position,
             pos: self.primitive.position,
             style: self.style,
         }
@@ -118,17 +119,21 @@ where
         let width = if !self.primitive.text.is_empty() {
             self.primitive
                 .text
-                .chars()
-                .map(|c| F::char_width(c) + F::CHARACTER_SPACING)
-                .sum::<u32>()
-                - F::CHARACTER_SPACING
+                .lines()
+                .map(|l| {
+                    l.chars()
+                        .map(|c| F::char_width(c) + F::CHARACTER_SPACING)
+                        .sum::<u32>()
+                        - F::CHARACTER_SPACING
+                })
+                .max()
+                .unwrap_or(0)
         } else {
             0
         };
 
-        // TODO: Handle height of text with newlines in it
         let height = if width > 0 {
-            F::CHARACTER_SIZE.height
+            F::CHARACTER_SIZE.height * self.primitive.text.lines().count() as u32
         } else {
             0
         };
@@ -149,6 +154,7 @@ where
     char_walk_y: i32,
     current_char: Option<char>,
     idx: usize,
+    top_left: Point,
     pos: Point,
     text: &'a str,
     style: TextStyle<C, F>,
@@ -163,7 +169,12 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.char_walk_x < 0 {
+            if self.current_char == Some('\n') {
+                self.pos.x = self.top_left.x;
+                self.pos.y += F::CHARACTER_SIZE.height as i32;
+                self.idx += 1;
+                self.current_char = self.text.chars().nth(self.idx);
+            } else if self.char_walk_x < 0 {
                 let x = self.pos.x + self.char_walk_x;
                 let y = self.pos.y + self.char_walk_y;
 
@@ -225,7 +236,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
+    use crate::{fonts::Font6x8, mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct SpacedFont;
@@ -289,6 +300,46 @@ mod tests {
                 .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
                 .size(),
             Size::new(4 * 3 + 5 * 2, 4)
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn multiline() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+
+        Text::new("AB\nC", Point::zero())
+            .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " ###  ####  ",
+                "#   # #   # ",
+                "#   # #   # ",
+                "##### ####  ",
+                "#   # #   # ",
+                "#   # #   # ",
+                "#   # ####  ",
+                "            ",
+                " ###        ",
+                "#   #       ",
+                "#           ",
+                "#           ",
+                "#           ",
+                "#   #       ",
+                " ###        ",
+                "            ",
+            ])
+        );
+
+        assert_eq!(
+            Text::new("AB\nC", Point::zero())
+                .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+                .size(),
+            Size::new(2 * 6, 2 * 8)
         );
 
         Ok(())

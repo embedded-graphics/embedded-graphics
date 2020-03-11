@@ -184,7 +184,7 @@ mod tests {
         let style = TextStyle::new(Font6x12, BinaryColor::On);
 
         let mut display = MockDisplay::new();
-        Text::new("\0\n", Point::zero())
+        Text::new("\0\r", Point::zero())
             .into_styled(style)
             .draw(&mut display)?;
         assert_eq!(display, two_question_marks);
