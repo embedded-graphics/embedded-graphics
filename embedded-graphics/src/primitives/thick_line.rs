@@ -145,6 +145,8 @@ where
         let e_diag = -2 * dx;
         let e_square = 2 * dy;
 
+        dbg!(step_major, step_minor);
+
         Self {
             step_major,
             step_minor,
@@ -190,6 +192,9 @@ where
                 line.end,
                 dx,
                 dy,
+                e_square,
+                e_diag,
+                threshold,
                 direction,
                 step_major,
                 step_minor,
@@ -238,6 +243,9 @@ where
                                     end,
                                     self.dx,
                                     self.dy,
+                                    self.e_square,
+                                    self.e_diag,
+                                    self.threshold,
                                     self.direction,
                                     self.step_major,
                                     self.step_minor,
@@ -265,6 +273,9 @@ where
                         self.end_l,
                         self.dx,
                         self.dy,
+                        self.e_square,
+                        self.e_diag,
+                        self.threshold,
                         self.direction,
                         self.step_major,
                         self.step_minor,
@@ -292,6 +303,9 @@ where
                                     end,
                                     self.dx,
                                     self.dy,
+                                    self.e_square,
+                                    self.e_diag,
+                                    self.threshold,
                                     self.direction,
                                     self.step_major,
                                     self.step_minor,
@@ -319,6 +333,9 @@ where
                         self.end_r,
                         self.dx,
                         self.dy,
+                        self.e_square,
+                        self.e_diag,
+                        self.threshold,
                         self.direction,
                         self.step_major,
                         self.step_minor,
