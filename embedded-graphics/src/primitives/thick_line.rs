@@ -5,7 +5,6 @@ use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
 use crate::primitives::perp_line::JoinerIterator;
 use crate::style::PrimitiveStyle;
-use integer_sqrt::IntegerSquareRoot;
 
 /// TODO: Docs
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -127,8 +126,9 @@ where
             (false, false) => Point::new(-1, -1),
         };
 
+        // Originally contained a `sqrt()` call. Removed by squaring all components
         let side_thickness =
-            2 * line.style.stroke_width * (dx.pow(2) as u32 + dy.pow(2) as u32).integer_sqrt();
+            4 * line.style.stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
 
         let mut dx = dx.abs();
         let mut dy = dy.abs();
@@ -215,7 +215,7 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.tk > self.side_thickness {
+        if self.tk.pow(2) > self.side_thickness {
             return None;
         }
 
