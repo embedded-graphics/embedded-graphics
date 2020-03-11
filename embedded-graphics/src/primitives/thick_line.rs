@@ -44,9 +44,12 @@ where
     }
 }
 
+/// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
+pub enum Side {
+    /// TODO: Docs
     Left,
+    /// TODO: Docs
     Right,
 }
 
@@ -65,7 +68,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     // perp: PerpLineIterator,
     // extra_perp: Option<PerpLineIterator>,
     side_thickness: u32,
-    p_error: i32,
+
     draw_extra: bool,
     direction: Point,
     start: Point,
@@ -75,6 +78,8 @@ pub struct ThickLineIterator<C: PixelColor> {
     start_r: Point,
     end_l: Point,
     end_r: Point,
+    p_error_l: i32,
+    p_error_r: i32,
 
     /// The "major" step
     ///
@@ -136,6 +141,10 @@ where
             (Point::new(direction.x, 0), Point::new(0, direction.y))
         };
 
+        let threshold = dx - 2 * dy;
+        let e_diag = -2 * dx;
+        let e_square = 2 * dy;
+
         Self {
             step_major,
             step_minor,
@@ -145,9 +154,9 @@ where
             dy,
             start: line.start,
             end: line.end,
-            threshold: dx - 2 * dy,
-            e_diag: -2 * dx,
-            e_square: 2 * dy,
+            threshold,
+            e_diag,
+            e_square,
             length: dx,
             style,
             draw_extra: line.draw_extra,
@@ -164,17 +173,29 @@ where
             // ),
             // extra_perp: None,
             side_thickness,
-            p_error,
+            p_error_l: 0,
+            p_error_r: 0,
             direction,
             tk: (dx + dy) as u32,
+            // Next side to draw on will be left side
             side: Side::Left,
             start_l: line.start,
             start_r: line.start,
             end_l: line.end,
             end_r: line.end,
             color: style.stroke_color.unwrap(),
+            // Draw center line first
             joiner: JoinerIterator::new(
-                line.start, line.end, dx, dy, direction, step_major, step_minor, 0,
+                line.start,
+                line.end,
+                dx,
+                dy,
+                direction,
+                step_major,
+                step_minor,
+                0,
+                false,
+                Side::Left,
             ),
             extra_joiner: None,
         }
@@ -188,41 +209,48 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.tk > self.side_thickness {
+            return None;
+        }
+
         if let Some(point) = self.extra_joiner.as_mut().and_then(|it| it.next()) {
-            Some(Pixel(point, self.color))
+            Some(Pixel(point, self.style.stroke_color.unwrap()))
         } else if let Some(point) = self.joiner.next() {
             Some(Pixel(point, self.color))
         } else {
             self.color = self.style.fill_color.unwrap();
 
             match self.side {
-                Side::Left if self.tk > self.side_thickness => None,
-                Side::Right if self.tk > self.side_thickness => None,
                 Side::Left => {
+                    let start = self.start_l;
+                    let end = self.end_l;
+
                     if self.error_l > self.threshold {
                         self.start_l += self.step_major;
                         self.end_l += self.step_major;
                         self.error_l += self.e_diag;
                         self.tk += 2 * self.dy as u32;
 
-                        if self.p_error > self.threshold {
-                            self.p_error += self.e_diag;
-
+                        if self.p_error_l > self.threshold {
                             if self.draw_extra {
                                 self.extra_joiner = Some(JoinerIterator::new(
-                                    self.start_l,
-                                    self.end_l,
+                                    start,
+                                    end,
                                     self.dx,
                                     self.dy,
                                     self.direction,
                                     self.step_major,
                                     self.step_minor,
-                                    self.p_error + self.e_square,
+                                    self.p_error_l + self.e_diag,
+                                    true,
+                                    Side::Left,
                                 ));
                             }
+
+                            self.p_error_l += self.e_diag;
                         }
 
-                        self.p_error += self.e_square;
+                        self.p_error_l += self.e_square;
                     }
 
                     self.start_l -= self.step_minor;
@@ -240,17 +268,43 @@ where
                         self.direction,
                         self.step_major,
                         self.step_minor,
-                        self.p_error,
+                        self.p_error_l,
+                        false,
+                        Side::Left,
                     );
 
                     Self::next(self)
                 }
                 Side::Right => {
-                    if self.error_r >= self.threshold {
+                    let start = self.start_r;
+                    let end = self.end_r;
+
+                    if self.error_r > self.threshold {
                         self.start_r -= self.step_major;
                         self.end_r -= self.step_major;
                         self.error_r += self.e_diag;
                         self.tk += 2 * self.dy as u32;
+
+                        if self.p_error_r > self.threshold {
+                            if self.draw_extra {
+                                self.extra_joiner = Some(JoinerIterator::new(
+                                    start,
+                                    end,
+                                    self.dx,
+                                    self.dy,
+                                    self.direction,
+                                    self.step_major,
+                                    self.step_minor,
+                                    self.p_error_r + self.e_diag,
+                                    true,
+                                    Side::Right,
+                                ));
+                            }
+
+                            self.p_error_r += self.e_diag;
+                        }
+
+                        self.p_error_r += self.e_square;
                     }
 
                     self.start_r += self.step_minor;
@@ -260,16 +314,18 @@ where
 
                     self.side = Side::Left;
 
-                    // self.joiner = JoinerIterator::new(
-                    //     self.start_r,
-                    //     self.end_r,
-                    //     self.dx,
-                    //     self.dy,
-                    //     self.direction,
-                    //     self.step_major,
-                    //     self.step_minor,
-                    //     0,
-                    // );
+                    self.joiner = JoinerIterator::new(
+                        self.start_r,
+                        self.end_r,
+                        self.dx,
+                        self.dy,
+                        self.direction,
+                        self.step_major,
+                        self.step_minor,
+                        self.p_error_r,
+                        false,
+                        Side::Right,
+                    );
 
                     Self::next(self)
                 }

@@ -1,12 +1,7 @@
 //! TODO: Docs
 
+use super::thick_line::Side;
 use crate::geometry::Point;
-
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
-    Left,
-    Right,
-}
 
 /// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -28,6 +23,7 @@ pub(crate) struct JoinerIterator {
     error: i32,
     step_major: Point,
     step_minor: Point,
+    is_extra: bool,
 }
 
 impl JoinerIterator {
@@ -41,7 +37,11 @@ impl JoinerIterator {
         step_major: Point,
         step_minor: Point,
         initial_error: i32,
+        is_extra: bool,
+        side: Side,
     ) -> Self {
+        // dbg!((side, start, is_extra));
+
         Self {
             start,
             end,
@@ -61,6 +61,7 @@ impl JoinerIterator {
             stop: false,
             step_major,
             step_minor,
+            is_extra,
         }
     }
 }
@@ -72,7 +73,7 @@ impl Iterator for JoinerIterator {
     fn next(&mut self) -> Option<Self::Item> {
         self.iters += 1;
 
-        if !self.stop && self.iters < 100 {
+        if !self.stop && self.iters <= self.dx as u32 {
             if self.error > self.threshold {
                 self.start += self.step_minor;
                 self.error += self.e_diag;
