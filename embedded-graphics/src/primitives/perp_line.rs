@@ -24,6 +24,7 @@ pub(crate) struct JoinerIterator {
     step_major: Point,
     step_minor: Point,
     is_extra: bool,
+    side: Side,
 }
 
 impl JoinerIterator {
@@ -65,6 +66,7 @@ impl JoinerIterator {
             step_major,
             step_minor,
             is_extra,
+            side,
         }
     }
 }
@@ -77,13 +79,26 @@ impl Iterator for JoinerIterator {
         self.iters += 1;
 
         if !self.stop && self.iters <= self.dx as u32 {
-            if self.error > self.threshold {
-                self.start += self.step_minor;
-                self.error += self.e_diag;
-            }
+            match self.side {
+                Side::Left => {
+                    if self.error > self.threshold {
+                        self.start += self.step_minor;
+                        self.error += self.e_diag;
+                    }
 
-            self.start += self.step_major;
-            self.error += self.e_square;
+                    self.start += self.step_major;
+                    self.error += self.e_square;
+                }
+                Side::Right => {
+                    if self.error < -self.threshold {
+                        self.start += self.step_minor;
+                        self.error -= self.e_diag;
+                    }
+
+                    self.start += self.step_major;
+                    self.error -= self.e_square;
+                }
+            }
 
             if self.start == self.end {
                 self.stop = true;
