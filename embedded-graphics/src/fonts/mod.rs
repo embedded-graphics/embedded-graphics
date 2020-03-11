@@ -155,6 +155,7 @@
 //!
 //! | Type | Screenshot |
 //! |------|------------|
+//! | [`Font6x6`] | ![6x6 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x6.png) |
 //! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x8.png) |
 //! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font6x12.png) |
 //! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/embedded-graphics/data/font8x16.png) |
@@ -164,6 +165,7 @@
 //! [built-in fonts]: #built-in-fonts
 //! [`egtext`]: ../macro.egtext.html
 //! [`text_style`]: ../macro.text_style.html
+//! [`Font6x6`]: struct.Font6x6.html
 //! [`Font6x8`]: struct.Font6x8.html
 //! [`Font6x12`]: struct.Font6x12.html
 //! [`Font8x16`]: struct.Font8x16.html
@@ -178,6 +180,7 @@
 mod font12x16;
 mod font24x32;
 mod font6x12;
+mod font6x6;
 mod font6x8;
 mod font8x16;
 mod text;
@@ -187,6 +190,7 @@ pub use text::{StyledTextIterator, Text};
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
 pub use font6x12::Font6x12;
+pub use font6x6::Font6x6;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
 
@@ -211,8 +215,58 @@ pub trait Font {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
+    /// Whether characters have a variable width or not.
+    ///
+    /// Variable width characters have a maximum width of CHARACTER_SIZE.x, but the empty columns at
+    /// the right of each characters are ignored, allowing some characters to be smaller than others.
+    const VARIABLE_WIDTH: bool = false;
+
     /// Returns the position a character in the font.
     fn char_offset(_: char) -> u32;
+
+    /// Returns the actual width of a character in the font.
+    fn char_width(c: char) -> u32 {
+        if Self::VARIABLE_WIDTH {
+            let mut x_max = 0;
+            for y in 0..Self::CHARACTER_SIZE.height {
+                for x in (x_max..Self::CHARACTER_SIZE.width).rev() {
+                    if Self::character_pixel(c, x, y) {
+                        x_max = x;
+                        break;
+                    }
+                }
+            }
+            x_max + 1
+        } else {
+            Self::CHARACTER_SIZE.width
+        }
+    }
+
+    /// Returns the value of a pixel in a character in the font.
+    fn character_pixel(c: char, x: u32, y: u32) -> bool {
+        let char_per_row = Self::FONT_IMAGE_WIDTH / Self::CHARACTER_SIZE.width;
+
+        // Char _code_ offset from first char, most often a space
+        // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
+        let char_offset = Self::char_offset(c);
+        let row = char_offset / char_per_row;
+
+        // Top left corner of character, in pixels
+        let char_x = (char_offset - (row * char_per_row)) * Self::CHARACTER_SIZE.width;
+        let char_y = row * Self::CHARACTER_SIZE.height;
+
+        // Bit index
+        // = X pixel offset for char
+        // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
+        // + X offset for the pixel block that comprises this char
+        // + Y offset for pixel block
+        let bitmap_bit_index = char_x + x + ((char_y + y) * Self::FONT_IMAGE_WIDTH);
+
+        let bitmap_byte = bitmap_bit_index / 8;
+        let bitmap_bit = 7 - (bitmap_bit_index % 8);
+
+        Self::FONT_IMAGE[bitmap_byte as usize] & (1 << bitmap_bit) != 0
+    }
 }
 
 /// Creates a styled text.
@@ -260,6 +314,11 @@ mod tests {
 
     #[test]
     fn font_macros() {
+        let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x6>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font6x6)
+        );
         let _text: Styled<Text<'_>, TextStyle<BinaryColor, Font6x8>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),
@@ -289,6 +348,11 @@ mod tests {
 
     #[test]
     fn styled_text() {
+        let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x6>> = egtext!(
+            text = "Hello!",
+            top_left = Point::zero(),
+            style = text_style!(font = Font6x6, text_color = Rgb565::RED)
+        );
         let _text: Styled<Text<'_>, TextStyle<Rgb565, Font6x8>> = egtext!(
             text = "Hello!",
             top_left = Point::zero(),

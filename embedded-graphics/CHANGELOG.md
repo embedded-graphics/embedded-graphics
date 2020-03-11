@@ -6,6 +6,15 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#267](https://github.com/jamwaffles/embedded-graphics/pull/267) Added a `6x6` hand-drawn variable width font.
+- [#267](https://github.com/jamwaffles/embedded-graphics/pull/267) Support for variable width fonts.
+
+### Fixed
+
+- [#267](https://github.com/jamwaffles/embedded-graphics/pull/267) Fonts with CHARACTER_SPACING now properly render the background color between characters.
+
 ## [0.6.0-beta.2] - 2020-03-06
 
 ### Fixed

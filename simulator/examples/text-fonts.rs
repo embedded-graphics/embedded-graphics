@@ -1,6 +1,6 @@
 use embedded_graphics::{
     egtext,
-    fonts::{Font12x16, Font6x12, Font6x8, Font8x16, Text},
+    fonts::{Font12x16, Font6x12, Font6x6, Font6x8, Font8x16, Text},
     pixelcolor::BinaryColor,
     prelude::*,
     style::{TextStyle, TextStyleBuilder},
@@ -9,7 +9,7 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(256, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(256, 144));
 
     // Show smallest font with black font on white background (default value for fonts)
     Text::new("Hello World! - default style 6x8", Point::new(15, 15))
@@ -53,6 +53,14 @@ fn main() -> Result<(), core::convert::Infallible> {
         text = "Hello 12x16!",
         top_left = (15, 105),
         style = text_style!(font = Font12x16, text_color = BinaryColor::On)
+    )
+    .draw(&mut display)?;
+
+    // Show 6x6 Font using a macro
+    egtext!(
+        text = "Hello 6x6!",
+        top_left = (15, 128),
+        style = text_style!(font = Font6x6, text_color = BinaryColor::On)
     )
     .draw(&mut display)?;
 
