@@ -215,14 +215,22 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.tk.pow(2) > self.side_thickness {
+        let color = if let Some(c) = self.style.stroke_color {
+            c
+        } else {
+            // Don't draw line if no stroke color is set
+            return None;
+        };
+
+        // Quit iterator if width threshold is reached or the line has no length/thickness
+        if self.tk.pow(2) > self.side_thickness || self.dx == 0 || self.style.stroke_width == 0 {
             return None;
         }
 
         if let Some(point) = self.extra_joiner.as_mut().and_then(|it| it.next()) {
-            Some(Pixel(point, self.style.stroke_color.unwrap()))
+            Some(Pixel(point, color))
         } else if let Some(point) = self.joiner.next() {
-            Some(Pixel(point, self.color))
+            Some(Pixel(point, color))
         } else {
             self.color = self.style.fill_color.unwrap();
 
