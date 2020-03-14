@@ -211,6 +211,7 @@ where
         } else {
             match self.side {
                 Side::Left => {
+                    let mut extra = false;
                     let start = self.start_l;
                     let end = self.end_l;
 
@@ -221,6 +222,8 @@ where
                         self.tk += 2 * self.dy as u32;
 
                         if self.p_error_l > self.threshold {
+                            extra = true;
+
                             self.extra_joiner = Some(JoinerIterator::new(
                                 start,
                                 end,
@@ -236,37 +239,42 @@ where
                                 Side::Left,
                             ));
 
+                            self.side = Side::Right;
+
                             self.p_error_l += self.e_diag;
                         }
 
                         self.p_error_l += self.e_square;
                     }
 
-                    self.start_l -= self.step_minor;
-                    self.end_l -= self.step_minor;
-                    self.error_l += self.e_square;
-                    self.tk += 2 * self.dx as u32;
+                    if !extra {
+                        self.start_l -= self.step_minor;
+                        self.end_l -= self.step_minor;
+                        self.error_l += self.e_square;
+                        self.tk += 2 * self.dx as u32;
 
-                    self.side = Side::Right;
+                        self.side = Side::Right;
 
-                    self.joiner = JoinerIterator::new(
-                        self.start_l,
-                        self.end_l,
-                        self.dx,
-                        self.dy,
-                        self.e_square,
-                        self.e_diag,
-                        self.threshold,
-                        self.direction,
-                        self.step_major,
-                        self.step_minor,
-                        self.p_error_l,
-                        Side::Left,
-                    );
+                        self.joiner = JoinerIterator::new(
+                            self.start_l,
+                            self.end_l,
+                            self.dx,
+                            self.dy,
+                            self.e_square,
+                            self.e_diag,
+                            self.threshold,
+                            self.direction,
+                            self.step_major,
+                            self.step_minor,
+                            self.p_error_l,
+                            Side::Left,
+                        );
+                    }
 
                     Self::next(self)
                 }
                 Side::Right => {
+                    let mut extra = false;
                     let start = self.start_r;
                     let end = self.end_r;
 
@@ -277,6 +285,8 @@ where
                         self.tk += 2 * self.dy as u32;
 
                         if self.p_error_r > self.threshold {
+                            extra = true;
+
                             self.extra_joiner = Some(JoinerIterator::new(
                                 start - self.step_major,
                                 end,
@@ -292,33 +302,37 @@ where
                                 Side::Right,
                             ));
 
+                            self.side = Side::Left;
+
                             self.p_error_r += self.e_diag;
                         }
 
                         self.p_error_r += self.e_square;
                     }
 
-                    self.start_r += self.step_minor;
-                    self.end_r += self.step_minor;
-                    self.error_r += self.e_square;
-                    self.tk += 2 * self.dx as u32;
+                    if !extra {
+                        self.start_r += self.step_minor;
+                        self.end_r += self.step_minor;
+                        self.error_r += self.e_square;
+                        self.tk += 2 * self.dx as u32;
 
-                    self.side = Side::Left;
+                        self.side = Side::Left;
 
-                    self.joiner = JoinerIterator::new(
-                        self.start_r,
-                        self.end_r,
-                        self.dx,
-                        self.dy,
-                        self.e_square,
-                        self.e_diag,
-                        self.threshold,
-                        self.direction,
-                        self.step_major,
-                        self.step_minor,
-                        self.p_error_r,
-                        Side::Right,
-                    );
+                        self.joiner = JoinerIterator::new(
+                            self.start_r,
+                            self.end_r,
+                            self.dx,
+                            self.dy,
+                            self.e_square,
+                            self.e_diag,
+                            self.threshold,
+                            self.direction,
+                            self.step_major,
+                            self.step_minor,
+                            self.p_error_r,
+                            Side::Right,
+                        );
+                    }
 
                     Self::next(self)
                 }
