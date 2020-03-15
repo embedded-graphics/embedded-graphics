@@ -12,7 +12,33 @@ use crate::style::PrimitiveStyle;
 use crate::style::Styled;
 use crate::transform::Transform;
 
-/// TODO: Docs
+/// Line primitive
+///
+/// # Examples
+///
+/// The [macro examples](../../macro.egline.html) make for more concise code.
+///
+/// ## Create some lines with different styles
+///
+/// ```rust
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565, prelude::*, primitives::Line, style::PrimitiveStyle,
+/// };
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
+///
+/// // Red 1 pixel wide line from (50, 20) to (60, 35)
+/// Line::new(Point::new(50, 20), Point::new(60, 35))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
+///     .draw(&mut display)?;
+///
+/// // Green 10 pixel wide line with translation applied
+/// Line::new(Point::new(50, 20), Point::new(60, 35))
+///     .translate(Point::new(65, 35))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 10))
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Line {
     /// Start point
@@ -23,7 +49,7 @@ pub struct Line {
 }
 
 impl Line {
-    /// TODO: Docs
+    /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
         Self { start, end }
     }
@@ -45,16 +71,26 @@ impl Dimensions for Line {
     }
 }
 
-/// TODO: Docs
+/// Which side of the center line to draw on
+///
+/// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
+/// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum Side {
-    /// TODO: Docs
+enum Side {
     Left,
-    /// TODO: Docs
     Right,
 }
 
-/// TODO: Docs
+impl Side {
+    fn swap(&mut self) {
+        match self {
+            Self::Left => *self = Self::Right,
+            Self::Right => *self = Self::Left,
+        }
+    }
+}
+
+/// Current state of each parallel line drawn
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 struct ParallelLineState {
     start: Point,
@@ -63,13 +99,18 @@ struct ParallelLineState {
     side: Side,
 }
 
-/// TODO: Docs
+/// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct LineIterator {
-    error_l: i32,
-    error_r: i32,
+    /// Bresenham error threshold
+    ///
+    /// If this is exceeded, a "minor" move is made
     threshold: i32,
+
+    /// "Major" error component
     e_diag: i32,
+
+    /// "Minor" error component
     e_square: i32,
 
     /// The "major" (greater) delta. Swapped with `dy` if dy is greater than dx
@@ -77,14 +118,44 @@ pub struct LineIterator {
 
     /// The "minor" (lesser) delta. Swapped with `dx` if dx is greater than dy
     dy: u32,
+
+    /// Line thickness in arbitrary units
+    ///
+    /// Thickness is calculated according to the section titled "Fixing the Thickness" in [this
+    /// article](http://kt8216.unixcab.org/murphy/index.html). The difference in this implementation
+    /// is that both sides of the comparison are squared, removing the need for an expensive
+    /// `sqrt()` call.
     thickness: u32,
+
+    /// Step direction
     direction: Point,
+
+    /// Line start point
     start: Point,
+
+    /// Line end point
     end: Point,
 
+    /// Left side perpendicular error accumulator
+    error_l: i32,
+
+    /// Right side perpendicular error accumulator
+    error_r: i32,
+
+    /// Start point of left-side parallel lines
+    ///
+    /// Starts at `line.start` and moves away on the LHS of the center line
     start_l: Point,
+
+    /// Start point of right-side parallel lines
+    ///
+    /// Starts at `line.start` and moves away on the RHS of the center line
     start_r: Point,
+
+    /// Left side perpendcular Bresenham error accumulator
     p_error_l: i32,
+
+    /// Right side perpendcular Bresenham error accumulator
     p_error_r: i32,
 
     /// The "major" step
@@ -99,9 +170,18 @@ pub struct LineIterator {
     /// direction to move in.
     step_minor: Point,
 
+    /// Thickness of pixels drawn so far
+    ///
+    /// Compared against `thickness` for width limit
     thickness_accum: u32,
-    side: Side,
 
+    /// Which side the _next_ parallel line will be on
+    ///
+    /// Lines start down the center, then alternate between left, then right. For lines with an even
+    /// width, the line is unbalanced by 1px to the left.
+    next_side: Side,
+
+    /// State of the parallel line currently being iterated over
     state: ParallelLineState,
 }
 
@@ -118,13 +198,14 @@ impl LineIterator {
             (false, false) => Point::new(-1, -1),
         };
 
-        // Originally contained a `sqrt()` call. Removed by squaring all components
+        // Thickness threshold, taking into account that fewer pixels are required to draw a
+        // diagonal line of the same perceived width.
         let thickness = 4 * stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
 
         let mut dx = dx.abs();
         let mut dy = dy.abs();
 
-        // Swap components if line is Y-major
+        // Swap components if line is Y-major. dx is always the "major" direction delta.
         let (step_major, step_minor) = if dy > dx {
             core::mem::swap(&mut dx, &mut dy);
 
@@ -158,14 +239,15 @@ impl LineIterator {
             p_error_r: 0,
             direction,
             thickness_accum: dx + dy,
-            // Next side to draw on will be left side
-            side: Side::Left,
+            // Next side after current line in `state` is drawn will be right side
+            next_side: Side::Right,
             start_l: line.start,
             start_r: line.start,
             state: ParallelLineState {
                 dx_accum: 0,
                 error: 0,
                 start: line.start,
+                // First side to draw on will be left side
                 side: Side::Left,
             },
         }
@@ -209,7 +291,7 @@ impl Iterator for LineIterator {
 
             Some(p)
         } else {
-            match self.side {
+            match self.next_side {
                 Side::Left => {
                     let mut extra = false;
                     let start = self.start_l;
@@ -229,8 +311,6 @@ impl Iterator for LineIterator {
                                 side: Side::Left,
                             };
 
-                            self.side = Side::Right;
-
                             self.p_error_l += self.e_diag;
                         }
 
@@ -241,8 +321,6 @@ impl Iterator for LineIterator {
                         self.start_l -= self.step_minor;
                         self.error_l += self.e_square;
                         self.thickness_accum += 2 * self.dx;
-
-                        self.side = Side::Right;
 
                         self.state = ParallelLineState {
                             dx_accum: 0,
@@ -271,8 +349,6 @@ impl Iterator for LineIterator {
                                 side: Side::Right,
                             };
 
-                            self.side = Side::Left;
-
                             self.p_error_r += self.e_diag;
                         }
 
@@ -284,8 +360,6 @@ impl Iterator for LineIterator {
                         self.error_r += self.e_square;
                         self.thickness_accum += 2 * self.dx;
 
-                        self.side = Side::Left;
-
                         self.state = ParallelLineState {
                             dx_accum: 0,
                             start: self.start_r,
@@ -295,6 +369,9 @@ impl Iterator for LineIterator {
                     }
                 }
             }
+
+            // Switch to opposite side of line to keep it balanced
+            self.next_side.swap();
 
             Self::next(self)
         }
