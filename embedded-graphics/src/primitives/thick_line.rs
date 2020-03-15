@@ -14,21 +14,21 @@ use crate::transform::Transform;
 
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct ThickLine {
+pub struct Line {
     start: Point,
     end: Point,
 }
 
-impl ThickLine {
+impl Line {
     /// TODO: Docs
     pub const fn new(start: Point, end: Point) -> Self {
         Self { start, end }
     }
 }
 
-impl Primitive for ThickLine {}
+impl Primitive for Line {}
 
-impl Dimensions for ThickLine {
+impl Dimensions for Line {
     fn top_left(&self) -> Point {
         Point::new(self.start.x.min(self.end.x), self.start.y.min(self.end.y))
     }
@@ -62,7 +62,7 @@ struct ParallelLineState {
 
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct ThickLineIterator {
+pub struct LineIterator {
     error_l: i32,
     error_r: i32,
     threshold: i32,
@@ -102,9 +102,9 @@ pub struct ThickLineIterator {
     state: ParallelLineState,
 }
 
-impl ThickLineIterator {
+impl LineIterator {
     /// TODO: Docs
-    pub fn new(line: &ThickLine, stroke_width: u32) -> Self {
+    pub fn new(line: &Line, stroke_width: u32) -> Self {
         let dx: i32 = line.end.x - line.start.x;
         let dy: i32 = line.end.y - line.start.y;
 
@@ -169,7 +169,7 @@ impl ThickLineIterator {
     }
 }
 
-impl Iterator for ThickLineIterator {
+impl Iterator for LineIterator {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -295,7 +295,7 @@ impl Iterator for ThickLineIterator {
     }
 }
 
-impl Transform for ThickLine {
+impl Transform for Line {
     /// Translate the line from its current position to a new position by (x, y) pixels, returning
     /// a new `Line`. For a mutating transform, see `translate_mut`.
     ///
@@ -335,7 +335,7 @@ impl Transform for ThickLine {
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<ThickLine, PrimitiveStyle<C>>
+impl<'a, C> IntoIterator for &'a Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
@@ -346,7 +346,7 @@ where
         StyledLineIterator {
             style: self.style,
 
-            line_iter: ThickLineIterator::new(&self.primitive, self.style.stroke_width),
+            line_iter: LineIterator::new(&self.primitive, self.style.stroke_width),
         }
     }
 }
@@ -359,7 +359,7 @@ where
 {
     style: PrimitiveStyle<C>,
 
-    line_iter: ThickLineIterator,
+    line_iter: LineIterator,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -381,7 +381,7 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Styled<ThickLine, PrimitiveStyle<C>>
+impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {

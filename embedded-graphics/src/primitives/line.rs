@@ -1,49 +1,29 @@
-//! The line primitive
+//! TODO: Docs
 
-use crate::{
-    drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
-    primitives::Primitive,
-    style::{PrimitiveStyle, Styled},
-    transform::Transform,
-    DrawTarget,
-};
+use crate::draw_target::DrawTarget;
+use crate::drawable::Drawable;
+use crate::drawable::Pixel;
+use crate::geometry::Dimensions;
+use crate::geometry::Point;
+use crate::geometry::Size;
+use crate::pixelcolor::PixelColor;
+use crate::primitives::Primitive;
+use crate::style::PrimitiveStyle;
+use crate::style::Styled;
+use crate::transform::Transform;
 
-/// Line primitive
-///
-/// # Examples
-///
-/// The [macro examples](../../macro.egline.html) make for more concise code.
-///
-/// ## Create some lines with different styles
-///
-/// ```rust
-/// use embedded_graphics::{
-///     pixelcolor::Rgb565, prelude::*, primitives::Line, style::PrimitiveStyle,
-/// };
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::default();
-///
-/// // Red 1 pixel wide line from (50, 20) to (60, 35)
-/// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-///     .draw(&mut display)?;
-///
-/// // Green 1 pixel wide line with translation applied
-/// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .translate(Point::new(65, 35))
-///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
-///     .draw(&mut display)?;
-/// # Ok::<(), core::convert::Infallible>(())
-/// ```
+/// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Line {
-    /// Start point
-    pub start: Point,
+    start: Point,
+    end: Point,
+}
 
-    /// End point
-    pub end: Point,
+impl Line {
+    /// TODO: Docs
+    pub const fn new(start: Point, end: Point) -> Self {
+        Self { start, end }
+    }
 }
 
 impl Primitive for Line {}
@@ -62,79 +42,255 @@ impl Dimensions for Line {
     }
 }
 
-impl Line {
-    /// Create a new line
-    pub const fn new(start: Point, end: Point) -> Self {
-        Line { start, end }
-    }
+/// TODO: Docs
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum Side {
+    /// TODO: Docs
+    Left,
+    /// TODO: Docs
+    Right,
 }
 
-/// Pixel iterator for each pixel in the line
+/// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) struct LineIterator {
+struct ParallelLineState {
+    start: Point,
+    error: i32,
+    dx_accum: u32,
+    side: Side,
+}
+
+/// TODO: Docs
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct LineIterator {
+    error_l: i32,
+    error_r: i32,
+    threshold: i32,
+    e_diag: i32,
+    e_square: i32,
+
+    /// The "major" (greater) delta. Swapped with `dy` if dy is greater than dx
+    dx: u32,
+
+    /// The "minor" (lesser) delta. Swapped with `dx` if dx is greater than dy
+    dy: u32,
+    thickness: u32,
+    direction: Point,
     start: Point,
     end: Point,
-    delta: Point,
-    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
-    direction: Point,
-    err: i32,
-    stop: bool,
+
+    start_l: Point,
+    start_r: Point,
+    p_error_l: i32,
+    p_error_r: i32,
+
+    /// The "major" step
+    ///
+    /// The X or Y component with the larger delta is considered "major". This is the most common
+    /// direction to move in.
+    step_major: Point,
+
+    /// The "minor" step
+    ///
+    /// The X or Y component with the smaller delta is considered "minor". This is the less common
+    /// direction to move in.
+    step_minor: Point,
+
+    thickness_accum: u32,
+    side: Side,
+
+    state: ParallelLineState,
 }
 
 impl LineIterator {
-    /// Create a new line iterator from a `Line`
-    pub(crate) fn new(line: &Line) -> Self {
-        let mut delta = line.end - line.start;
+    /// TODO: Docs
+    pub fn new(line: &Line, stroke_width: u32) -> Self {
+        let dx: i32 = line.end.x - line.start.x;
+        let dy: i32 = line.end.y - line.start.y;
 
-        if delta.x < 0 {
-            delta = Point::new(-delta.x, delta.y);
-        }
-        if delta.y > 0 {
-            delta = Point::new(delta.x, -delta.y);
-        }
-
-        let direction = match (line.start.x >= line.end.x, line.start.y >= line.end.y) {
-            (false, false) => Point::new(1, 1),
-            (false, true) => Point::new(1, -1),
-            (true, false) => Point::new(-1, 1),
-            (true, true) => Point::new(-1, -1),
+        let direction = match (dx >= 0, dy >= 0) {
+            (true, true) => Point::new(1, 1),
+            (true, false) => Point::new(1, -1),
+            (false, true) => Point::new(-1, 1),
+            (false, false) => Point::new(-1, -1),
         };
 
+        // Originally contained a `sqrt()` call. Removed by squaring all components
+        let thickness = 4 * stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
+
+        let mut dx = dx.abs();
+        let mut dy = dy.abs();
+
+        // Swap components if line is Y-major
+        let (step_major, step_minor) = if dy > dx {
+            core::mem::swap(&mut dx, &mut dy);
+
+            (Point::new(0, direction.y), Point::new(direction.x, 0))
+        } else {
+            (Point::new(direction.x, 0), Point::new(0, direction.y))
+        };
+
+        let threshold = dx - 2 * dy;
+        let e_diag = -2 * dx;
+        let e_square = 2 * dy;
+
+        // Safe due to abs() call above
+        let dx = dx as u32;
+        let dy = dy as u32;
+
         Self {
+            step_major,
+            step_minor,
+            error_l: 0,
+            error_r: 0,
+            dx: dx,
+            dy: dy,
             start: line.start,
             end: line.end,
-            delta,
+            threshold,
+            e_diag,
+            e_square,
+            thickness,
+            p_error_l: 0,
+            p_error_r: 0,
             direction,
-            err: delta.x + delta.y,
-            stop: line.start == line.end, /* if line length is zero, draw nothing */
+            thickness_accum: dx + dy,
+            // Next side to draw on will be left side
+            side: Side::Left,
+            start_l: line.start,
+            start_r: line.start,
+            state: ParallelLineState {
+                dx_accum: 0,
+                error: 0,
+                start: line.start,
+                side: Side::Left,
+            },
         }
     }
 }
 
-// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
 impl Iterator for LineIterator {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if !self.stop {
-            let point = self.start;
+        // Quit iterator if width threshold is reached or the line has no length
+        if self.thickness_accum.pow(2) > self.thickness || self.dx == 0 {
+            return None;
+        }
 
-            if self.start == self.end {
-                self.stop = true;
-            }
-            let err_double = 2 * self.err;
-            if err_double > self.delta.y {
-                self.err += self.delta.y;
-                self.start += Point::new(self.direction.x, 0);
-            }
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
-                self.start += Point::new(0, self.direction.y);
+        self.state.dx_accum += 1;
+
+        if self.state.dx_accum <= self.dx {
+            match self.state.side {
+                Side::Left => {
+                    if self.state.error > self.threshold {
+                        self.state.start += self.step_minor;
+                        self.state.error += self.e_diag;
+                    }
+
+                    self.state.start += self.step_major;
+                    self.state.error += self.e_square;
+                }
+                Side::Right => {
+                    if self.state.error < -self.threshold {
+                        self.state.start += self.step_minor;
+                        self.state.error -= self.e_diag;
+                    }
+
+                    self.state.start += self.step_major;
+                    self.state.error -= self.e_square;
+                }
             }
 
-            Some(point)
+            Some(self.state.start)
         } else {
-            None
+            match self.side {
+                Side::Left => {
+                    let mut extra = false;
+                    let start = self.start_l;
+
+                    if self.error_l > self.threshold {
+                        self.start_l += self.step_major;
+                        self.error_l += self.e_diag;
+                        self.thickness_accum += 2 * self.dy;
+
+                        if self.p_error_l > self.threshold {
+                            extra = true;
+
+                            self.state = ParallelLineState {
+                                dx_accum: 0,
+                                start: start,
+                                error: self.p_error_l + self.e_diag,
+                                side: Side::Left,
+                            };
+
+                            self.side = Side::Right;
+
+                            self.p_error_l += self.e_diag;
+                        }
+
+                        self.p_error_l += self.e_square;
+                    }
+
+                    if !extra {
+                        self.start_l -= self.step_minor;
+                        self.error_l += self.e_square;
+                        self.thickness_accum += 2 * self.dx;
+
+                        self.side = Side::Right;
+
+                        self.state = ParallelLineState {
+                            dx_accum: 0,
+                            start: self.start_l,
+                            error: self.p_error_l,
+                            side: Side::Left,
+                        };
+                    }
+                }
+                Side::Right => {
+                    let mut extra = false;
+
+                    if self.error_r > self.threshold {
+                        self.start_r -= self.step_major;
+                        self.error_r += self.e_diag;
+                        self.thickness_accum += 2 * self.dy;
+
+                        if self.p_error_r > self.threshold {
+                            extra = true;
+
+                            self.state = ParallelLineState {
+                                dx_accum: 0,
+                                start: self.start_r,
+                                error: self.p_error_r + self.e_diag + self.e_square,
+                                side: Side::Right,
+                            };
+
+                            self.side = Side::Left;
+
+                            self.p_error_r += self.e_diag;
+                        }
+
+                        self.p_error_r += self.e_square;
+                    }
+
+                    if !extra {
+                        self.start_r += self.step_minor;
+                        self.error_r += self.e_square;
+                        self.thickness_accum += 2 * self.dx;
+
+                        self.side = Side::Left;
+
+                        self.state = ParallelLineState {
+                            dx_accum: 0,
+                            start: self.start_r,
+                            error: self.p_error_r,
+                            side: Side::Right,
+                        };
+                    }
+                }
+            }
+
+            Self::next(self)
         }
     }
 }
@@ -190,7 +346,7 @@ where
         StyledLineIterator {
             style: self.style,
 
-            line_iter: LineIterator::new(&self.primitive),
+            line_iter: LineIterator::new(&self.primitive, self.style.stroke_width),
         }
     }
 }
@@ -230,135 +386,7 @@ where
     C: PixelColor,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_line(self)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{drawable::Pixel, pixelcolor::BinaryColor};
-
-    fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line =
-            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
-        let mut expected_iter = expected.iter();
-        for Pixel(coord, _) in line.into_iter() {
-            match expected_iter.next() {
-                Some(point) => assert_eq!(coord, Point::from(*point)),
-                // expected runs out of points before line does
-                None => unreachable!(),
-            }
-        }
-        // check that expected has no points left
-        assert!(expected_iter.next().is_none())
-    }
-
-    #[test]
-    fn bounding_box() {
-        let start = Point::new(10, 10);
-        let end = Point::new(20, 20);
-
-        let line: Line = Line::new(start, end);
-        let backwards_line: Line = Line::new(end, start);
-
-        assert_eq!(line.top_left(), start);
-        assert_eq!(line.bottom_right(), end);
-        assert_eq!(line.size(), Size::new(10, 10));
-
-        assert_eq!(backwards_line.top_left(), start);
-        assert_eq!(backwards_line.bottom_right(), end);
-        assert_eq!(backwards_line.size(), Size::new(10, 10));
-    }
-
-    #[test]
-    fn draws_no_dot() {
-        let start = Point::new(10, 10);
-        let end = Point::new(10, 10);
-        let expected = [];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn no_stroke_width_no_line() {
-        let start = Point::new(2, 3);
-        let end = Point::new(3, 2);
-
-        let line =
-            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
-
-        assert!(line.into_iter().eq(core::iter::empty()));
-    }
-
-    #[test]
-    fn draws_short_correctly() {
-        let start = Point::new(2, 3);
-        let end = Point::new(3, 2);
-        let expected = [(2, 3), (3, 2)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_1_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(15, 13);
-        let expected = [(10, 10), (11, 11), (12, 11), (13, 12), (14, 12), (15, 13)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_2_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(13, 15);
-        let expected = [(10, 10), (11, 11), (11, 12), (12, 13), (12, 14), (13, 15)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_3_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(7, 15);
-        let expected = [(10, 10), (9, 11), (9, 12), (8, 13), (8, 14), (7, 15)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_4_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(5, 13);
-        let expected = [(10, 10), (9, 11), (8, 11), (7, 12), (6, 12), (5, 13)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_5_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(5, 7);
-        let expected = [(10, 10), (9, 9), (8, 9), (7, 8), (6, 8), (5, 7)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_6_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(7, 5);
-        let expected = [(10, 10), (9, 9), (9, 8), (8, 7), (8, 6), (7, 5)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_7_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(13, 5);
-        let expected = [(10, 10), (11, 9), (11, 8), (12, 7), (12, 6), (13, 5)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_8_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(15, 7);
-        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
-        test_expected_line(start, end, &expected);
+        // display.draw_line(self)
+        display.draw_iter(self)
     }
 }
