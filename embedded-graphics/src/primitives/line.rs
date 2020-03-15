@@ -469,7 +469,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{drawable::Pixel, pixelcolor::BinaryColor};
+    use crate::{drawable::Pixel, mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
         let line =
@@ -592,5 +592,103 @@ mod tests {
         let end = Point::new(15, 7);
         let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
         test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn thick_line_octant_1() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Line::new(Point::new(2, 2), Point::new(20, 8))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 5))
+            .draw(&mut display)
+            .unwrap();
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "                      ",
+                "  ##                  ",
+                "  #####               ",
+                "  ########            ",
+                " ############         ",
+                "    ############      ",
+                "       ############   ",
+                "          ########### ",
+                "             ######## ",
+                "                ##### ",
+                "                   #  ",
+            ])
+        );
+    }
+
+    #[test]
+    fn thick_line_2px() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        // Horizontal line
+        Line::new(Point::new(2, 2), Point::new(10, 2))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 2))
+            .draw(&mut display)
+            .unwrap();
+
+        // Vertical line
+        Line::new(Point::new(2, 5), Point::new(2, 10))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 2))
+            .draw(&mut display)
+            .unwrap();
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "            ",
+                "            ",
+                "  ######### ",
+                "  ######### ",
+                "            ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+            ])
+        );
+    }
+
+    #[test]
+    fn thick_line_3px() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        // Horizontal line
+        Line::new(Point::new(2, 2), Point::new(10, 2))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 3))
+            .draw(&mut display)
+            .unwrap();
+
+        // Vertical line
+        Line::new(Point::new(2, 5), Point::new(2, 10))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 3))
+            .draw(&mut display)
+            .unwrap();
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "            ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "            ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+            ])
+        );
     }
 }
