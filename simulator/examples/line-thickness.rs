@@ -1,8 +1,16 @@
+//! A debugging tool for thick lines
+//!
+//! Use the up/down arrow keys to increase or decrease the line thickness. Click and drag to move
+//! the end point of the line around.
+//!
+//! The thickness, DX and DY components of the line are displayed in the top right corner of the
+//! window.
+
 extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
 use embedded_graphics::{
-    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitive_style, primitives::ThickLine,
+    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitive_style, primitives::Line,
     text_style,
 };
 use embedded_graphics_simulator::{
@@ -11,14 +19,11 @@ use embedded_graphics_simulator::{
 use sdl2::keyboard::Keycode;
 
 const BACKGROUND_COLOR: Rgb888 = Rgb888::BLACK;
-const FOREGROUND_COLOR: Rgb888 = Rgb888::RED;
 
 fn draw(
     display: &mut SimulatorDisplay<Rgb888>,
     position: Point,
     stroke_width: u32,
-    draw_extra: bool,
-    offs: i32,
 ) -> Result<(), core::convert::Infallible> {
     display.clear(BACKGROUND_COLOR)?;
 
@@ -43,18 +48,12 @@ fn draw(
     )
     .draw(display)?;
 
-    ThickLine::new(
-        start,
-        position,
-        primitive_style!(
+    Line::new(start, position)
+        .into_styled(primitive_style!(
             stroke_width = stroke_width,
             stroke_color = Rgb888::new(0x80, 0xf2, 0x91),
-        ),
-        draw_extra,
-        offs,
-    )
-    .into_iter()
-    .draw(display)?;
+        ))
+        .draw(display)?;
 
     Ok(())
 }
@@ -62,18 +61,16 @@ fn draw(
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(200, 200));
     let output_settings = OutputSettingsBuilder::new()
-        .scale(8)
+        .scale(4)
         .pixel_spacing(1)
         .build();
-    let mut window = Window::new("Line thickness", &output_settings);
+    let mut window = Window::new("Line thickness debugger", &output_settings);
 
     let mut position = Point::new(150, 120);
     let mut stroke_width = 5;
-    let mut draw_extra = true;
     let mut mouse_down = false;
-    let mut offs = 0;
 
-    draw(&mut display, position, stroke_width, draw_extra, offs)?;
+    draw(&mut display, position, stroke_width)?;
 
     'running: loop {
         window.update(&display);
@@ -85,25 +82,22 @@ fn main() -> Result<(), core::convert::Infallible> {
                     match keycode {
                         Keycode::Up => stroke_width += 1,
                         Keycode::Down => stroke_width = (stroke_width as i32 - 1).max(0) as u32,
-                        Keycode::Space => draw_extra = !draw_extra,
-                        Keycode::O => offs += 1,
-                        Keycode::L => offs -= 1,
                         _ => (),
                     }
 
-                    draw(&mut display, position, stroke_width, draw_extra, offs)?;
+                    draw(&mut display, position, stroke_width)?;
                 }
                 SimulatorEvent::MouseButtonDown { point, .. } => {
                     mouse_down = true;
                     position = point;
 
-                    draw(&mut display, position, stroke_width, draw_extra, offs)?;
+                    draw(&mut display, position, stroke_width)?;
                 }
                 SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
                 SimulatorEvent::MouseMove { point, .. } => {
                     if mouse_down {
                         position = point;
-                        draw(&mut display, position, stroke_width, draw_extra, offs)?;
+                        draw(&mut display, position, stroke_width)?;
                     }
                 }
                 _ => {}
