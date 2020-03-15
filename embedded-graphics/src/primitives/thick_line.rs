@@ -99,7 +99,6 @@ pub struct ThickLineIterator<C: PixelColor> {
     side: Side,
 
     joiner: JoinerIterator,
-    extra_joiner: Option<JoinerIterator>,
 }
 
 impl<C> ThickLineIterator<C>
@@ -178,7 +177,6 @@ where
                 0,
                 Side::Left,
             ),
-            extra_joiner: None,
         }
     }
 }
@@ -202,9 +200,7 @@ where
             return None;
         }
 
-        if let Some(point) = self.extra_joiner.as_mut().and_then(|it| it.next()) {
-            Some(Pixel(point, color))
-        } else if let Some(point) = self.joiner.next() {
+        if let Some(point) = self.joiner.next() {
             Some(Pixel(point, color))
         } else {
             match self.side {
@@ -222,7 +218,7 @@ where
                         if self.p_error_l > self.threshold {
                             extra = true;
 
-                            self.extra_joiner = Some(JoinerIterator::new(
+                            self.joiner = JoinerIterator::new(
                                 start,
                                 end,
                                 self.dx,
@@ -235,7 +231,7 @@ where
                                 self.step_minor,
                                 self.p_error_l + self.e_diag,
                                 Side::Left,
-                            ));
+                            );
 
                             self.side = Side::Right;
 
@@ -283,7 +279,7 @@ where
                         if self.p_error_r > self.threshold {
                             extra = true;
 
-                            self.extra_joiner = Some(JoinerIterator::new(
+                            self.joiner = JoinerIterator::new(
                                 self.start_r,
                                 self.end_r,
                                 self.dx,
@@ -296,7 +292,7 @@ where
                                 self.step_minor,
                                 self.p_error_r + self.e_diag + self.e_square,
                                 Side::Right,
-                            ));
+                            );
 
                             self.side = Side::Left;
 
