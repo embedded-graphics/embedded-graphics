@@ -3,7 +3,6 @@
 use crate::drawable::Pixel;
 use crate::geometry::Point;
 use crate::pixelcolor::PixelColor;
-use crate::primitives::perp_line::JoinerIterator;
 use crate::style::PrimitiveStyle;
 
 /// TODO: Docs
@@ -52,6 +51,15 @@ pub enum Side {
 }
 
 /// TODO: Docs
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+struct ParallelLineState {
+    start: Point,
+    error: i32,
+    dx_accum: u32,
+    side: Side,
+}
+
+/// TODO: Docs
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ThickLineIterator<C: PixelColor> {
     error_l: i32,
@@ -59,7 +67,11 @@ pub struct ThickLineIterator<C: PixelColor> {
     threshold: i32,
     e_diag: i32,
     e_square: i32,
+
+    /// The "major" (greater) delta. Swapped with `dy` if dy is greater than dx
     dx: u32,
+
+    /// The "minor" (lesser) delta. Swapped with `dx` if dx is greater than dy
     dy: u32,
     style: PrimitiveStyle<C>,
     thickness: u32,
@@ -69,8 +81,6 @@ pub struct ThickLineIterator<C: PixelColor> {
 
     start_l: Point,
     start_r: Point,
-    end_l: Point,
-    end_r: Point,
     p_error_l: i32,
     p_error_r: i32,
 
@@ -89,7 +99,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     thickness_accum: u32,
     side: Side,
 
-    joiner: JoinerIterator,
+    state: ParallelLineState,
 }
 
 impl<C> ThickLineIterator<C>
@@ -153,23 +163,12 @@ where
             side: Side::Left,
             start_l: line.start,
             start_r: line.start,
-            end_l: line.end,
-            end_r: line.end,
-            // Initialise joiner iter to draw center line first
-            joiner: JoinerIterator::new(
-                line.start,
-                line.end,
-                dx,
-                dy,
-                e_square,
-                e_diag,
-                threshold,
-                direction,
-                step_major,
-                step_minor,
-                0,
-                Side::Left,
-            ),
+            state: ParallelLineState {
+                dx_accum: 0,
+                error: 0,
+                start: line.start,
+                side: Side::Left,
+            },
         }
     }
 }
@@ -197,38 +196,51 @@ where
             return None;
         }
 
-        if let Some(point) = self.joiner.next() {
-            Some(Pixel(point, color))
+        self.state.dx_accum += 1;
+
+        if self.state.dx_accum <= self.dx {
+            match self.state.side {
+                Side::Left => {
+                    if self.state.error > self.threshold {
+                        self.state.start += self.step_minor;
+                        self.state.error += self.e_diag;
+                    }
+
+                    self.state.start += self.step_major;
+                    self.state.error += self.e_square;
+                }
+                Side::Right => {
+                    if self.state.error < -self.threshold {
+                        self.state.start += self.step_minor;
+                        self.state.error -= self.e_diag;
+                    }
+
+                    self.state.start += self.step_major;
+                    self.state.error -= self.e_square;
+                }
+            }
+
+            Some(Pixel(self.state.start, color))
         } else {
             match self.side {
                 Side::Left => {
                     let mut extra = false;
                     let start = self.start_l;
-                    let end = self.end_l;
 
                     if self.error_l > self.threshold {
                         self.start_l += self.step_major;
-                        self.end_l += self.step_major;
                         self.error_l += self.e_diag;
                         self.thickness_accum += 2 * self.dy;
 
                         if self.p_error_l > self.threshold {
                             extra = true;
 
-                            self.joiner = JoinerIterator::new(
-                                start,
-                                end,
-                                self.dx,
-                                self.dy,
-                                self.e_square,
-                                self.e_diag,
-                                self.threshold,
-                                self.direction,
-                                self.step_major,
-                                self.step_minor,
-                                self.p_error_l + self.e_diag,
-                                Side::Left,
-                            );
+                            self.state = ParallelLineState {
+                                dx_accum: 0,
+                                start: start,
+                                error: self.p_error_l + self.e_diag,
+                                side: Side::Left,
+                            };
 
                             self.side = Side::Right;
 
@@ -240,56 +252,36 @@ where
 
                     if !extra {
                         self.start_l -= self.step_minor;
-                        self.end_l -= self.step_minor;
                         self.error_l += self.e_square;
                         self.thickness_accum += 2 * self.dx;
 
                         self.side = Side::Right;
 
-                        self.joiner = JoinerIterator::new(
-                            self.start_l,
-                            self.end_l,
-                            self.dx,
-                            self.dy,
-                            self.e_square,
-                            self.e_diag,
-                            self.threshold,
-                            self.direction,
-                            self.step_major,
-                            self.step_minor,
-                            self.p_error_l,
-                            Side::Left,
-                        );
+                        self.state = ParallelLineState {
+                            dx_accum: 0,
+                            start: self.start_l,
+                            error: self.p_error_l,
+                            side: Side::Left,
+                        };
                     }
-
-                    Self::next(self)
                 }
                 Side::Right => {
                     let mut extra = false;
 
                     if self.error_r > self.threshold {
                         self.start_r -= self.step_major;
-                        self.end_r -= self.step_major;
                         self.error_r += self.e_diag;
                         self.thickness_accum += 2 * self.dy;
 
                         if self.p_error_r > self.threshold {
                             extra = true;
 
-                            self.joiner = JoinerIterator::new(
-                                self.start_r,
-                                self.end_r,
-                                self.dx,
-                                self.dy,
-                                self.e_square,
-                                self.e_diag,
-                                self.threshold,
-                                self.direction,
-                                self.step_major,
-                                self.step_minor,
-                                self.p_error_r + self.e_diag + self.e_square,
-                                Side::Right,
-                            );
+                            self.state = ParallelLineState {
+                                dx_accum: 0,
+                                start: self.start_r,
+                                error: self.p_error_r + self.e_diag + self.e_square,
+                                side: Side::Right,
+                            };
 
                             self.side = Side::Left;
 
@@ -301,31 +293,22 @@ where
 
                     if !extra {
                         self.start_r += self.step_minor;
-                        self.end_r += self.step_minor;
                         self.error_r += self.e_square;
                         self.thickness_accum += 2 * self.dx;
 
                         self.side = Side::Left;
 
-                        self.joiner = JoinerIterator::new(
-                            self.start_r,
-                            self.end_r,
-                            self.dx,
-                            self.dy,
-                            self.e_square,
-                            self.e_diag,
-                            self.threshold,
-                            self.direction,
-                            self.step_major,
-                            self.step_minor,
-                            self.p_error_r,
-                            Side::Right,
-                        );
+                        self.state = ParallelLineState {
+                            dx_accum: 0,
+                            start: self.start_r,
+                            error: self.p_error_r,
+                            side: Side::Right,
+                        };
                     }
-
-                    Self::next(self)
                 }
             }
+
+            Self::next(self)
         }
     }
 }

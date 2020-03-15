@@ -2,7 +2,6 @@
 
 pub mod circle;
 pub mod line;
-pub mod perp_line;
 pub mod rectangle;
 pub mod thick_line;
 pub mod triangle;
