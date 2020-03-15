@@ -275,8 +275,6 @@ where
                 }
                 Side::Right => {
                     let mut extra = false;
-                    let start = self.start_r;
-                    let end = self.end_r;
 
                     if self.error_r > self.threshold {
                         self.start_r -= self.step_major;
@@ -288,8 +286,8 @@ where
                             extra = true;
 
                             self.extra_joiner = Some(JoinerIterator::new(
-                                start - self.step_major,
-                                end,
+                                self.start_r,
+                                self.end_r,
                                 self.dx,
                                 self.dy,
                                 self.e_square,
