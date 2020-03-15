@@ -180,6 +180,9 @@ pub struct LineIterator {
 
 impl LineIterator {
     /// Create a new line iterator from a `Line` and a stroke width
+    ///
+    /// Lines with a thickness greater than 1px are filled using multiple parallel lines to the
+    /// left/right of the central original line.
     pub(crate) fn new(line: &Line, stroke_width: u32) -> Self {
         let dx: i32 = line.end.x - line.start.x;
         let dy: i32 = line.end.y - line.start.y;
