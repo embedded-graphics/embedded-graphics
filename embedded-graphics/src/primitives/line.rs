@@ -15,8 +15,11 @@ use crate::transform::Transform;
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Line {
-    start: Point,
-    end: Point,
+    /// Start point
+    pub start: Point,
+
+    /// End point
+    pub end: Point,
 }
 
 impl Line {
