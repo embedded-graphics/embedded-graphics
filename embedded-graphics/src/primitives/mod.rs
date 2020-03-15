@@ -3,7 +3,6 @@
 pub mod circle;
 pub mod line;
 pub mod rectangle;
-// pub mod thick_line;
 pub mod triangle;
 
 pub use self::{circle::Circle, line::Line, rectangle::Rectangle, triangle::Triangle};
