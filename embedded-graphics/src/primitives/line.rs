@@ -181,6 +181,8 @@ impl Iterator for LineIterator {
         self.state.dx_accum += 1;
 
         if self.state.dx_accum <= self.dx {
+            let p = self.state.start;
+
             match self.state.side {
                 Side::Left => {
                     if self.state.error > self.threshold {
@@ -202,7 +204,7 @@ impl Iterator for LineIterator {
                 }
             }
 
-            Some(self.state.start)
+            Some(p)
         } else {
             match self.side {
                 Side::Left => {
@@ -249,6 +251,7 @@ impl Iterator for LineIterator {
                 }
                 Side::Right => {
                     let mut extra = false;
+                    let start = self.start_r;
 
                     if self.error_r > self.threshold {
                         self.start_r -= self.step_major;
@@ -260,8 +263,8 @@ impl Iterator for LineIterator {
 
                             self.state = ParallelLineState {
                                 dx_accum: 0,
-                                start: self.start_r,
-                                error: self.p_error_r + self.e_diag + self.e_square,
+                                start: start + self.step_minor,
+                                error: self.p_error_r,
                                 side: Side::Right,
                             };
 
