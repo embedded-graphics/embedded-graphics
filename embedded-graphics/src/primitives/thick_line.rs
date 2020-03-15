@@ -12,7 +12,6 @@ pub struct ThickLine<C: PixelColor> {
     start: Point,
     end: Point,
     style: PrimitiveStyle<C>,
-    draw_extra: bool,
     offs: i32,
 }
 
@@ -21,18 +20,11 @@ where
     C: PixelColor,
 {
     /// TODO: Docs
-    pub fn new(
-        start: Point,
-        end: Point,
-        style: PrimitiveStyle<C>,
-        draw_extra: bool,
-        offs: i32,
-    ) -> Self {
+    pub fn new(start: Point, end: Point, style: PrimitiveStyle<C>, offs: i32) -> Self {
         Self {
             start,
             end,
             style,
-            draw_extra,
             offs,
         }
     }
@@ -70,8 +62,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     dx: u32,
     dy: u32,
     style: PrimitiveStyle<C>,
-    side_thickness: u32,
-    draw_extra: bool,
+    thickness: u32,
     direction: Point,
     start: Point,
     end: Point,
@@ -95,7 +86,7 @@ pub struct ThickLineIterator<C: PixelColor> {
     /// direction to move in.
     step_minor: Point,
 
-    tk: u32,
+    thickness_accum: u32,
     side: Side,
 
     joiner: JoinerIterator,
@@ -118,14 +109,13 @@ where
         };
 
         // Originally contained a `sqrt()` call. Removed by squaring all components
-        let side_thickness =
-            4 * line.style.stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
+        let thickness = 4 * line.style.stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
 
         let mut dx = dx.abs();
         let mut dy = dy.abs();
 
+        // Swap components if line is Y-major
         let (step_major, step_minor) = if dy > dx {
-            // Swap components if line is Y-major
             core::mem::swap(&mut dx, &mut dy);
 
             (Point::new(0, direction.y), Point::new(direction.x, 0))
@@ -137,25 +127,28 @@ where
         let e_diag = -2 * dx;
         let e_square = 2 * dy;
 
+        // Safe due to abs() call above
+        let dx = dx as u32;
+        let dy = dy as u32;
+
         Self {
             step_major,
             step_minor,
             error_l: 0,
             error_r: 0,
-            dx: dx as u32,
-            dy: dy as u32,
+            dx: dx,
+            dy: dy,
             start: line.start,
             end: line.end,
             threshold,
             e_diag,
             e_square,
             style,
-            draw_extra: line.draw_extra,
-            side_thickness,
+            thickness,
             p_error_l: 0,
             p_error_r: 0,
             direction,
-            tk: (dx + dy) as u32,
+            thickness_accum: dx + dy,
             // Next side to draw on will be left side
             side: Side::Left,
             start_l: line.start,
@@ -166,8 +159,8 @@ where
             joiner: JoinerIterator::new(
                 line.start,
                 line.end,
-                dx as u32,
-                dy as u32,
+                dx,
+                dy,
                 e_square,
                 e_diag,
                 threshold,
@@ -188,6 +181,7 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // Separate block here to remove call to unwrap()
         let color = if let Some(c) = self.style.stroke_color {
             c
         } else {
@@ -196,7 +190,10 @@ where
         };
 
         // Quit iterator if width threshold is reached or the line has no length/thickness
-        if self.tk.pow(2) > self.side_thickness || self.dx == 0 || self.style.stroke_width == 0 {
+        if self.thickness_accum.pow(2) > self.thickness
+            || self.dx == 0
+            || self.style.stroke_width == 0
+        {
             return None;
         }
 
@@ -213,7 +210,7 @@ where
                         self.start_l += self.step_major;
                         self.end_l += self.step_major;
                         self.error_l += self.e_diag;
-                        self.tk += 2 * self.dy;
+                        self.thickness_accum += 2 * self.dy;
 
                         if self.p_error_l > self.threshold {
                             extra = true;
@@ -245,7 +242,7 @@ where
                         self.start_l -= self.step_minor;
                         self.end_l -= self.step_minor;
                         self.error_l += self.e_square;
-                        self.tk += 2 * self.dx;
+                        self.thickness_accum += 2 * self.dx;
 
                         self.side = Side::Right;
 
@@ -274,7 +271,7 @@ where
                         self.start_r -= self.step_major;
                         self.end_r -= self.step_major;
                         self.error_r += self.e_diag;
-                        self.tk += 2 * self.dy;
+                        self.thickness_accum += 2 * self.dy;
 
                         if self.p_error_r > self.threshold {
                             extra = true;
@@ -306,7 +303,7 @@ where
                         self.start_r += self.step_minor;
                         self.end_r += self.step_minor;
                         self.error_r += self.e_square;
-                        self.tk += 2 * self.dx;
+                        self.thickness_accum += 2 * self.dx;
 
                         self.side = Side::Left;
 

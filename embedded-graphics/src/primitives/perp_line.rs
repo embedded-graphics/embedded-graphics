@@ -9,7 +9,7 @@ pub(crate) struct JoinerIterator {
     start: Point,
     end: Point,
     direction: Point,
-    iters: u32,
+    dx_accum: u32,
     threshold: i32,
     e_diag: i32,
     e_square: i32,
@@ -47,7 +47,7 @@ impl JoinerIterator {
             e_diag,
             e_square,
             direction,
-            iters: 0,
+            dx_accum: 0,
             step_major,
             step_minor,
             side,
@@ -60,9 +60,9 @@ impl Iterator for JoinerIterator {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iters += 1;
+        self.dx_accum += 1;
 
-        if self.iters <= self.dx {
+        if self.dx_accum <= self.dx {
             match self.side {
                 Side::Left => {
                     if self.error > self.threshold {
