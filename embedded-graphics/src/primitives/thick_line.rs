@@ -1,43 +1,44 @@
 //! TODO: Docs
 
+use crate::draw_target::DrawTarget;
+use crate::drawable::Drawable;
 use crate::drawable::Pixel;
+use crate::geometry::Dimensions;
 use crate::geometry::Point;
+use crate::geometry::Size;
 use crate::pixelcolor::PixelColor;
+use crate::primitives::Primitive;
 use crate::style::PrimitiveStyle;
+use crate::style::Styled;
+use crate::transform::Transform;
 
 /// TODO: Docs
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct ThickLine<C: PixelColor> {
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct ThickLine {
     start: Point,
     end: Point,
-    style: PrimitiveStyle<C>,
-    offs: i32,
 }
 
-impl<C> ThickLine<C>
-where
-    C: PixelColor,
-{
+impl ThickLine {
     /// TODO: Docs
-    pub fn new(start: Point, end: Point, style: PrimitiveStyle<C>, offs: i32) -> Self {
-        Self {
-            start,
-            end,
-            style,
-            offs,
-        }
+    pub const fn new(start: Point, end: Point) -> Self {
+        Self { start, end }
     }
 }
 
-impl<C> IntoIterator for ThickLine<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = ThickLineIterator<C>;
+impl Primitive for ThickLine {}
 
-    fn into_iter(self) -> Self::IntoIter {
-        ThickLineIterator::new(&self, self.style)
+impl Dimensions for ThickLine {
+    fn top_left(&self) -> Point {
+        Point::new(self.start.x.min(self.end.x), self.start.y.min(self.end.y))
+    }
+
+    fn bottom_right(&self) -> Point {
+        self.top_left() + self.size()
+    }
+
+    fn size(&self) -> Size {
+        Size::from_bounding_box(self.start, self.end)
     }
 }
 
@@ -60,8 +61,8 @@ struct ParallelLineState {
 }
 
 /// TODO: Docs
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct ThickLineIterator<C: PixelColor> {
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct ThickLineIterator {
     error_l: i32,
     error_r: i32,
     threshold: i32,
@@ -73,7 +74,6 @@ pub struct ThickLineIterator<C: PixelColor> {
 
     /// The "minor" (lesser) delta. Swapped with `dx` if dx is greater than dy
     dy: u32,
-    style: PrimitiveStyle<C>,
     thickness: u32,
     direction: Point,
     start: Point,
@@ -102,12 +102,9 @@ pub struct ThickLineIterator<C: PixelColor> {
     state: ParallelLineState,
 }
 
-impl<C> ThickLineIterator<C>
-where
-    C: PixelColor,
-{
+impl ThickLineIterator {
     /// TODO: Docs
-    pub fn new(line: &ThickLine<C>, style: PrimitiveStyle<C>) -> Self {
+    pub fn new(line: &ThickLine, stroke_width: u32) -> Self {
         let dx: i32 = line.end.x - line.start.x;
         let dy: i32 = line.end.y - line.start.y;
 
@@ -119,7 +116,7 @@ where
         };
 
         // Originally contained a `sqrt()` call. Removed by squaring all components
-        let thickness = 4 * line.style.stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
+        let thickness = 4 * stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
 
         let mut dx = dx.abs();
         let mut dy = dy.abs();
@@ -153,7 +150,6 @@ where
             threshold,
             e_diag,
             e_square,
-            style,
             thickness,
             p_error_l: 0,
             p_error_r: 0,
@@ -173,26 +169,12 @@ where
     }
 }
 
-impl<C> Iterator for ThickLineIterator<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
+impl Iterator for ThickLineIterator {
+    type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Separate block here to remove call to unwrap()
-        let color = if let Some(c) = self.style.stroke_color {
-            c
-        } else {
-            // Don't draw line if no stroke color is set
-            return None;
-        };
-
         // Quit iterator if width threshold is reached or the line has no length/thickness
-        if self.thickness_accum.pow(2) > self.thickness
-            || self.dx == 0
-            || self.style.stroke_width == 0
-        {
+        if self.thickness_accum.pow(2) > self.thickness || self.dx == 0 {
             return None;
         }
 
@@ -220,7 +202,7 @@ where
                 }
             }
 
-            Some(Pixel(self.state.start, color))
+            Some(self.state.start)
         } else {
             match self.side {
                 Side::Left => {
@@ -310,5 +292,101 @@ where
 
             Self::next(self)
         }
+    }
+}
+
+impl Transform for ThickLine {
+    /// Translate the line from its current position to a new position by (x, y) pixels, returning
+    /// a new `Line`. For a mutating transform, see `translate_mut`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Line;
+    /// # use embedded_graphics::prelude::*;
+    /// let line = Line::new(Point::new(5, 10), Point::new(15, 20));
+    /// let moved = line.translate(Point::new(10, 10));
+    ///
+    /// assert_eq!(moved.start, Point::new(15, 20));
+    /// assert_eq!(moved.end, Point::new(25, 30));
+    /// ```
+    fn translate(&self, by: Point) -> Self {
+        Self {
+            start: self.start + by,
+            end: self.end + by,
+            ..*self
+        }
+    }
+
+    /// Translate the line from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Line;
+    /// # use embedded_graphics::prelude::*;
+    /// let mut line = Line::new(Point::new(5, 10), Point::new(15, 20));
+    /// line.translate_mut(Point::new(10, 10));
+    ///
+    /// assert_eq!(line.start, Point::new(15, 20));
+    /// assert_eq!(line.end, Point::new(25, 30));
+    /// ```
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
+        self.start += by;
+        self.end += by;
+
+        self
+    }
+}
+
+impl<'a, C> IntoIterator for &'a Styled<ThickLine, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = StyledLineIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        StyledLineIterator {
+            style: self.style,
+
+            line_iter: ThickLineIterator::new(&self.primitive, self.style.stroke_width),
+        }
+    }
+}
+
+/// Pixel iterator for each pixel in the line
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct StyledLineIterator<C>
+where
+    C: PixelColor,
+{
+    style: PrimitiveStyle<C>,
+
+    line_iter: ThickLineIterator,
+}
+
+// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+impl<C: PixelColor> Iterator for StyledLineIterator<C> {
+    type Item = Pixel<C>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Break if stroke width is zero
+        if self.style.stroke_width == 0 {
+            return None;
+        }
+
+        // Return none if stroke color is none
+        let stroke_color = self.style.stroke_color?;
+
+        self.line_iter
+            .next()
+            .map(|point| Pixel(point, stroke_color))
+    }
+}
+
+impl<'a, C: 'a> Drawable<C> for &Styled<ThickLine, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+        // display.draw_line(self)
+        display.draw_iter(self)
     }
 }
