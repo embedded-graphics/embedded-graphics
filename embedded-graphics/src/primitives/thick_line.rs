@@ -67,9 +67,8 @@ pub struct ThickLineIterator<C: PixelColor> {
     threshold: i32,
     e_diag: i32,
     e_square: i32,
-    dx: i32,
-    dy: i32,
-    length: i32,
+    dx: u32,
+    dy: u32,
     style: PrimitiveStyle<C>,
     side_thickness: u32,
     draw_extra: bool,
@@ -109,8 +108,8 @@ where
 {
     /// TODO: Docs
     pub fn new(line: &ThickLine<C>, style: PrimitiveStyle<C>) -> Self {
-        let dx = line.end.x - line.start.x;
-        let dy = line.end.y - line.start.y;
+        let dx: i32 = line.end.x - line.start.x;
+        let dy: i32 = line.end.y - line.start.y;
 
         let direction = match (dx >= 0, dy >= 0) {
             (true, true) => Point::new(1, 1),
@@ -144,14 +143,13 @@ where
             step_minor,
             error_l: 0,
             error_r: 0,
-            dx,
-            dy,
+            dx: dx as u32,
+            dy: dy as u32,
             start: line.start,
             end: line.end,
             threshold,
             e_diag,
             e_square,
-            length: dx,
             style,
             draw_extra: line.draw_extra,
             side_thickness,
@@ -169,8 +167,8 @@ where
             joiner: JoinerIterator::new(
                 line.start,
                 line.end,
-                dx,
-                dy,
+                dx as u32,
+                dy as u32,
                 e_square,
                 e_diag,
                 threshold,
@@ -219,7 +217,7 @@ where
                         self.start_l += self.step_major;
                         self.end_l += self.step_major;
                         self.error_l += self.e_diag;
-                        self.tk += 2 * self.dy as u32;
+                        self.tk += 2 * self.dy;
 
                         if self.p_error_l > self.threshold {
                             extra = true;
@@ -251,7 +249,7 @@ where
                         self.start_l -= self.step_minor;
                         self.end_l -= self.step_minor;
                         self.error_l += self.e_square;
-                        self.tk += 2 * self.dx as u32;
+                        self.tk += 2 * self.dx;
 
                         self.side = Side::Right;
 
@@ -280,7 +278,7 @@ where
                         self.start_r -= self.step_major;
                         self.end_r -= self.step_major;
                         self.error_r += self.e_diag;
-                        self.tk += 2 * self.dy as u32;
+                        self.tk += 2 * self.dy;
 
                         if self.p_error_r > self.threshold {
                             extra = true;
@@ -312,7 +310,7 @@ where
                         self.start_r += self.step_minor;
                         self.end_r += self.step_minor;
                         self.error_r += self.e_square;
-                        self.tk += 2 * self.dx as u32;
+                        self.tk += 2 * self.dx;
 
                         self.side = Side::Left;
 

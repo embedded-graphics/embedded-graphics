@@ -13,8 +13,8 @@ pub(crate) struct JoinerIterator {
     threshold: i32,
     e_diag: i32,
     e_square: i32,
-    dx: i32,
-    dy: i32,
+    dx: u32,
+    dy: u32,
     error: i32,
     step_major: Point,
     step_minor: Point,
@@ -26,8 +26,8 @@ impl JoinerIterator {
     pub(crate) fn new(
         start: Point,
         end: Point,
-        dx: i32,
-        dy: i32,
+        dx: u32,
+        dy: u32,
         e_square: i32,
         e_diag: i32,
         threshold: i32,
@@ -62,7 +62,7 @@ impl Iterator for JoinerIterator {
     fn next(&mut self) -> Option<Self::Item> {
         self.iters += 1;
 
-        if self.iters <= self.dx as u32 {
+        if self.iters <= self.dx {
             match self.side {
                 Side::Left => {
                     if self.error > self.threshold {
