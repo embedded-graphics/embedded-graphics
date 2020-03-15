@@ -180,7 +180,7 @@ impl Iterator for LineIterator {
 
         self.state.dx_accum += 1;
 
-        if self.state.dx_accum <= self.dx {
+        if self.state.dx_accum <= self.dx + 1 {
             let p = self.state.start;
 
             match self.state.side {
