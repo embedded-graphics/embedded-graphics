@@ -6,6 +6,19 @@
 
 As a general user of embedded-graphics, please read on.
 
+## Table of contents
+
+- [Pixel colors](#pixel-colors)
+  - [Associated constants](#associated-constants)
+- [General drawing operations](#general-drawing-operations)
+- [Coordinates and positioning](#coordinates-and-positioning)
+- [Text](#text)
+- [Primitives](#primitives)
+- [Images](#images)
+- [For driver authors](#for-driver-authors)
+  - [Choosing the right pixel color type](#choosing-the-right-pixel-color-type)
+- [For font authors](#for-font-authors)
+
 ## Pixel colors
 
 A `u8`, `u16` or `u32` primitive is no longer used as pixel color storage. The primitive types don't allow the exact color format to be specified at the type level, which could lead to errors when colors weren't used in different places without being converted explicitly (e.g. when displaying a grayscale image on a color display).
