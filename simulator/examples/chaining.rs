@@ -1,4 +1,9 @@
+//! # Example: Chaining
+//!
 //! Demonstrate the chaining abilities of embedded graphics iterators
+//!
+//! This example displays the same end result as the `hello.rs` example, but does it using a single
+//! chained iterator.
 
 use embedded_graphics::{
     fonts::{Font6x8, Text},
@@ -13,6 +18,7 @@ use embedded_graphics_simulator::{
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(129, 129));
+
     let mut objects = Circle::new(Point::new(64, 64), 64)
         .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
         .into_iter()

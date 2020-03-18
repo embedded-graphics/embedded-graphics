@@ -1,3 +1,7 @@
+//! # Example: Multiline text
+//!
+//! Exercise the font renderer to demonstrate rendering of multiline text
+
 use embedded_graphics::{
     egtext,
     fonts::{Font6x8, Text},

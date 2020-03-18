@@ -1,3 +1,7 @@
+//! # Example: Fonts
+//!
+//! Demonstrate the available builtin fonts.
+
 use embedded_graphics::{
     egtext,
     fonts::{Font12x16, Font6x12, Font6x6, Font6x8, Font8x16, Text},

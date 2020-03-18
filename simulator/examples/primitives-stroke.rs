@@ -1,3 +1,7 @@
+//! # Example: Primitive stroke styles
+//!
+//! This example demonstrates the different stroke styles available for primitives.
+
 use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,

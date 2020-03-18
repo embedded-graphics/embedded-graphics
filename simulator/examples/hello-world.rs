@@ -1,3 +1,7 @@
+//! # Example: Hello world
+//!
+//! A simple hello world example displaying some primitive shapes and some text underneath.
+
 use embedded_graphics::{
     fonts::{Font6x8, Text},
     pixelcolor::BinaryColor,

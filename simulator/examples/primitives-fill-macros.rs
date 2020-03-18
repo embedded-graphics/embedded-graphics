@@ -1,4 +1,6 @@
-//! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code
+//! # Example: Using macros to define and style primitives
+//!
+//! Demonstrate usage of primitives like `fill.rs` but use macros instead for shorter code.
 
 use embedded_graphics::{
     egcircle, egrectangle, egtriangle, pixelcolor::BinaryColor, prelude::*, primitive_style,

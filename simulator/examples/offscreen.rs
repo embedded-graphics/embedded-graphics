@@ -1,3 +1,8 @@
+//! # Example: Off screen
+//!
+//! This example demonstrates drawing of shapes that are off the screen boundary. Only the pixels
+//! that are on the display are drawn, with all other pixels being ignored.
+
 use embedded_graphics::{
     pixelcolor::BinaryColor, prelude::*, primitives::Rectangle, style::PrimitiveStyle,
 };
