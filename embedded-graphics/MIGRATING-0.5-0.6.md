@@ -13,7 +13,7 @@ As a general user of embedded-graphics, please read on.
 - [General drawing operations](#general-drawing-operations)
 - [Coordinates and positioning](#coordinates-and-positioning)
 - [Text](#text)
-- [Primitives](#primitives)
+- [Primitives and their styling](#primitives-and-their-styling)
 - [Images](#images)
 - [For driver authors](#for-driver-authors)
   - [Choosing the right pixel color type](#choosing-the-right-pixel-color-type)
@@ -148,7 +148,9 @@ Drawing operations are now fallible, with `.draw()` calls returning a `Result`. 
 
 ## Coordinates and positioning
 
-The `Coord` and `UnsignedCoord` have been renamed to `Point` and `Size` respectively. Both items are no longer tuple structs, but structs with the named fields `x` and `y` for `Point` and `width` and `height` for `Size`. `Point`s can store negative coordinates, whereas `Size`s must be positive up to `u32::MAX_VALUE`.
+The `Coord` and `UnsignedCoord` have been replaced with `Point` and `Size` respectively. Both items are no longer tuple structs, but structs with the named fields `x` and `y` for `Point` and `width` and `height` for `Size`. `Point`s can store negative coordinates, whereas `Size`s must be positive up to `u32::MAX_VALUE`.
+
+It is important to note that the `Pixel` type now uses `Point` for it's coordinate component. In 0.5, `UnsignedCoord` was used. This change now allows `Pixel`s to represent negative coordinates.
 
 The `icoord` and `ucoord` macros have been removed. Instead, use `Point::new(x, y)` and `Size::new(x, y)` respectively.
 
@@ -170,7 +172,7 @@ The `icoord` and `ucoord` macros have been removed. Instead, use `Point::new(x, 
 
 ## Text
 
-Text is now drawn with the `Text` struct. A `TextStyle` must be provided which selects which font to draw the text with.
+Text is now drawn with the `Text` struct. A `TextStyle` must be provided which selects which font and color to draw the text with. The `stroke_color` property from 0.5 is renamed to `text_color`. Likewise, `fill_color` is renamed to `background_color`.
 
 ```diff
 - use embedded_graphics::{
@@ -205,7 +207,9 @@ Text is now drawn with the `Text` struct. A `TextStyle` must be provided which s
 ```
 
 - A new `Text` struct is introduced. Instead of `YourFont::render_str("text")`, use `Text::new("text")`.
-- Text must be given a `TextStyle` for it to be drawn on a display. Create a style with `TextStyleBuilder` and add it with `.into_styled(style)`.
+- Text must be given a `TextStyle` for it to be drawn on a display. Create a style with either:
+  - `TextStyleBuilder` and add it with `.into_styled(style)` or
+  - `TextStyle::new(font, text_color)` to create a basic style in a more concise way.
 - The chosen font is now part of the `TextStyleBuilder` creation process. Set it with `TextStyleBuilder::new(<your font here>)`.
 
 Macro usage has also changed:
@@ -239,13 +243,31 @@ Macro usage has also changed:
 - All built in `text_*!()` macros are removed and replaced with the `egtext!()` macro.
 - `egtext!()` should be coupled with the `text_style!()` macro to create styled texts with a chosen font.
 
-## Primitives
+## Primitives and their styling
 
-Primitives changes:
+Note: The `Triangle` primitive was added in 0.4.8. If you were using 3 separate lines, this primitive is suggested instead.
 
-- Note: The `Triangle` primitive was added. If you were using 3 separate lines, this primitive is suggested instead.
+**Primitive styles now default to a stroke width of `0` instead of `1`.** If nothing is drawn to the display, it may be that `stroke_width` is set to 0.
 
-- Primitive styles now default to a stroke width of `0` instead of `1`. If nothing is drawn to the display, check that you set the `stroke_width` in `PrimitiveStyleBuilder`.
+To style a primitive, a `PrimitiveStyle` must be used. To create simple styles, the `PrimitiveStyle::with_stroke()` and `PrimitiveStyle::with_fill()` methods can be used. For a more flexible way of creating styles, use `PrimitiveStyleBuilder`:
+
+```rust
+use embedded_graphics::{
+    pixelcolor::{BinaryColor, Rgb565},
+    prelude::*,
+    style::{PrimitiveStyle, PrimitiveStyleBuilder},
+};
+
+// Simple style with only a 1px stroke
+let style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
+
+// Create a more complex style using the builder
+let style: PrimitiveStyle<Rgb565> = PrimitiveStyleBuilder::new()
+    .stroke_color(Rgb565::RED)
+    .stroke_width(3)
+    .fill_color(Rgb565::GREEN)
+    .build();
+```
 
 ## Images
 
@@ -286,6 +308,8 @@ Then any image code:
 Adding embedded-graphics support to a display driver has changed somewhat. The `Drawing` trait has been replaced by the `DrawTarget` trait which provides a slightly different interface.
 
 An associated error type is also added to `DrawTarget` to allow for better error handling than a `panic!()`.
+
+Below is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as pixels on the SSD1306 can only be on or off.
 
 ```rust
 use embedded_graphics::{
@@ -331,8 +355,6 @@ where
     }
 }
 ```
-
-This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as pixels on the SSD1306 can only be on or off.
 
 Some notes on the above:
 
@@ -388,7 +410,7 @@ The `Font` trait implementation has changed slightly, replacing `CHART_WIDTH` an
 + use embedded_graphics::geometry::Size;
 
   #[derive(Debug, Copy, Clone)]
-  pub enum MyFont {}
+  pub struct MyFont {}
 
   impl Font for MyFont {
       const FONT_IMAGE: &'static [u8] = include_bytes!("../data/my_font.raw");
