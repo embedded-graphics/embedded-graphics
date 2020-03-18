@@ -258,6 +258,42 @@ Macro usage has also changed:
   .draw(&mut display)?;
   ```
 
+Multiline text is now supported:
+
+```diff
+- use embedded_graphics::{prelude::*, text_6x8};
+-
+- display.draw(
+-     text_6x8!(
+-         "Hello,",
+-         stroke = Some(1u8.into()),
+-         fill = Some(0u8.into())
+-     )
+-     .translate(Coord::new(0, 8))
+- );
+- display.draw(
+-     text_6x8!(
+-         "World!",
+-         stroke = Some(1u8.into()),
+-         fill = Some(0u8.into())
+-     )
+-     .translate(Coord::new(0, 8))
+- );
+
++ use embedded_graphics::{egtext, text_style, fonts::Font6x8, pixelcolor::BinaryColor, prelude::*};
++
++ egtext!(
++     text = "Hello,\nworld!",
++     top_left = (0, 0),
++     style = text_style!(
++         font = Font6x8,
++         text_color = BinaryColor::On,
++         background_color = BinaryColor::Off,
++     )
++ )
++ .draw(&mut display)?;
+```
+
 ## Primitives and their styling
 
 Note: The `Triangle` primitive was added in 0.4.8. If you were using 3 separate lines, this primitive is suggested instead.
