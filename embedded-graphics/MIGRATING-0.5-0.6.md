@@ -377,23 +377,24 @@ If the display's pixel order is reversed (BGR instead of RGB) and cannot be chan
 
 ## For font authors
 
-- The `embedded_graphics::fonts::font_builder` module along with its exported `FontBuilderConf` and `FontBuilder` is removed. Now only `Font` needs to be implemented.
-- The `Font` trait (used to be `FontBuilderConf`) implementation has changed slightly, replacing `CHART_WIDTH` and `CHAR_HEIGHT` with a single `CHARACTER_SIZE` constant, using the `Size` struct:
+The `FontBuilderConf` trait is renamed to `Font`. This is the only trait impl that is required for embedded-graphics integration. `FontBuilder` is now removed, along with the `embedded_graphics::fonts::font_builder` module.
 
-  ```diff
-  - use embedded_graphics::fonts::font_builder::{FontBuilder, FontBuilderConf};
-  + use embedded_graphics::fonts::Font;
+The `Font` trait implementation has changed slightly, replacing `CHART_WIDTH` and `CHAR_HEIGHT` with a single `CHARACTER_SIZE` constant, using the `Size` struct:
 
-  + use embedded_graphics::geometry::Size;
+```diff
+- use embedded_graphics::fonts::font_builder::{FontBuilder, FontBuilderConf};
++ use embedded_graphics::fonts::Font;
 
-    #[derive(Debug, Copy, Clone)]
-    pub enum MyFont {}
++ use embedded_graphics::geometry::Size;
 
-    impl Font for MyFont {
-        const FONT_IMAGE: &'static [u8] = include_bytes!("../data/my_font.raw");
-  -     const CHAR_WIDTH: u32 = 12;
-  -     const CHAR_HEIGHT: u32 = 22;
-  +     const CHARACTER_SIZE: Size = Size::new(12, 22);
-        const FONT_IMAGE_WIDTH: u32 = 480;
-    }
-  ```
+  #[derive(Debug, Copy, Clone)]
+  pub enum MyFont {}
+
+  impl Font for MyFont {
+      const FONT_IMAGE: &'static [u8] = include_bytes!("../data/my_font.raw");
+-     const CHAR_WIDTH: u32 = 12;
+-     const CHAR_HEIGHT: u32 = 22;
++     const CHARACTER_SIZE: Size = Size::new(12, 22);
+      const FONT_IMAGE_WIDTH: u32 = 480;
+  }
+```
