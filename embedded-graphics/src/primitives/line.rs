@@ -1,4 +1,4 @@
-//! TODO: Docs
+//! The line primitive
 
 use crate::{
     draw_target::DrawTarget, drawable::Drawable, drawable::Pixel, geometry::Dimensions,
@@ -89,7 +89,39 @@ struct ParallelLineState {
     start: Point,
     error: i32,
     dx_accum: u32,
-    side: Side,
+}
+
+impl ParallelLineState {
+    fn new(start: Point, initial_error: i32) -> Self {
+        Self {
+            start,
+            error: initial_error,
+            dx_accum: 0,
+        }
+    }
+}
+
+/// Current side state
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+struct SideState {
+    /// Parallel line start point
+    start: Point,
+
+    /// Error accumulator
+    error: i32,
+
+    /// Perpendicular error accumulator
+    p_error: i32,
+}
+
+impl SideState {
+    fn new(start: Point) -> Self {
+        Self {
+            start,
+            error: 0,
+            p_error: 0,
+        }
+    }
 }
 
 /// Pixel iterator for each pixel in the line
@@ -129,28 +161,6 @@ pub struct LineIterator {
     /// Line end point
     end: Point,
 
-    /// Left side perpendicular error accumulator
-    error_l: i32,
-
-    /// Right side perpendicular error accumulator
-    error_r: i32,
-
-    /// Start point of left-side parallel lines
-    ///
-    /// Starts at `line.start` and moves away on the LHS of the center line
-    start_l: Point,
-
-    /// Start point of right-side parallel lines
-    ///
-    /// Starts at `line.start` and moves away on the RHS of the center line
-    start_r: Point,
-
-    /// Left side perpendcular Bresenham error accumulator
-    p_error_l: i32,
-
-    /// Right side perpendcular Bresenham error accumulator
-    p_error_r: i32,
-
     /// The "major" step
     ///
     /// The X or Y component with the larger delta is considered "major". This is the most common
@@ -175,7 +185,13 @@ pub struct LineIterator {
     next_side: Side,
 
     /// State of the parallel line currently being iterated over
-    state: ParallelLineState,
+    parallel: ParallelLineState,
+
+    /// Left side state
+    left: SideState,
+
+    /// Right side state
+    right: SideState,
 }
 
 impl LineIterator {
@@ -221,8 +237,6 @@ impl LineIterator {
         Self {
             step_major,
             step_minor,
-            error_l: 0,
-            error_r: 0,
             dx: dx,
             dy: dy,
             start: line.start,
@@ -231,21 +245,13 @@ impl LineIterator {
             e_diag,
             e_square,
             thickness,
-            p_error_l: 0,
-            p_error_r: 0,
             direction,
             thickness_accum: dx + dy,
             // Next side after current line in `state` is drawn will be right side
             next_side: Side::Right,
-            start_l: line.start,
-            start_r: line.start,
-            state: ParallelLineState {
-                dx_accum: 0,
-                error: 0,
-                start: line.start,
-                // First side to draw on will be left side
-                side: Side::Left,
-            },
+            parallel: ParallelLineState::new(line.start, 0),
+            left: SideState::new(line.start),
+            right: SideState::new(line.start),
         }
     }
 }
@@ -259,111 +265,65 @@ impl Iterator for LineIterator {
             return None;
         }
 
-        self.state.dx_accum += 1;
+        self.parallel.dx_accum += 1;
 
-        if self.state.dx_accum <= self.dx + 1 {
-            let p = self.state.start;
+        if self.parallel.dx_accum <= self.dx + 1 {
+            let p = self.parallel.start;
 
-            match self.state.side {
-                Side::Left => {
-                    if self.state.error > self.threshold {
-                        self.state.start += self.step_minor;
-                        self.state.error += self.e_diag;
-                    }
-
-                    self.state.start += self.step_major;
-                    self.state.error += self.e_square;
-                }
-                Side::Right => {
-                    if self.state.error < -self.threshold {
-                        self.state.start += self.step_minor;
-                        self.state.error -= self.e_diag;
-                    }
-
-                    self.state.start += self.step_major;
-                    self.state.error -= self.e_square;
-                }
+            if self.parallel.error > self.threshold {
+                self.parallel.start += self.step_minor;
+                self.parallel.error += self.e_diag;
             }
+
+            self.parallel.start += self.step_major;
+            self.parallel.error += self.e_square;
 
             Some(p)
         } else {
-            match self.next_side {
-                Side::Left => {
-                    let mut extra = false;
-                    let start = self.start_l;
+            let side = match self.next_side {
+                Side::Left => &mut self.left,
+                Side::Right => &mut self.right,
+            };
 
-                    if self.error_l > self.threshold {
-                        self.start_l += self.step_major;
-                        self.error_l += self.e_diag;
-                        self.thickness_accum += 2 * self.dy;
+            let mut extra = false;
+            let start = side.start;
 
-                        if self.p_error_l > self.threshold {
-                            extra = true;
+            if side.error > self.threshold {
+                match self.next_side {
+                    Side::Left => side.start += self.step_major,
+                    Side::Right => side.start -= self.step_major,
+                };
+                side.error += self.e_diag;
+                self.thickness_accum += 2 * self.dy;
 
-                            self.state = ParallelLineState {
-                                dx_accum: 0,
-                                start: start,
-                                error: self.p_error_l + self.e_diag,
-                                side: Side::Left,
-                            };
+                if side.p_error > self.threshold {
+                    extra = true;
 
-                            self.p_error_l += self.e_diag;
-                        }
+                    let (start, p_error) = match self.next_side {
+                        Side::Left => (start, side.p_error + self.e_diag),
+                        Side::Right => (start + self.step_minor, -side.p_error),
+                    };
+                    self.parallel = ParallelLineState::new(start, p_error);
 
-                        self.p_error_l += self.e_square;
-                    }
-
-                    if !extra {
-                        self.start_l -= self.step_minor;
-                        self.error_l += self.e_square;
-                        self.thickness_accum += 2 * self.dx;
-
-                        self.state = ParallelLineState {
-                            dx_accum: 0,
-                            start: self.start_l,
-                            error: self.p_error_l,
-                            side: Side::Left,
-                        };
-                    }
+                    side.p_error += self.e_diag;
                 }
-                Side::Right => {
-                    let mut extra = false;
-                    let start = self.start_r;
 
-                    if self.error_r > self.threshold {
-                        self.start_r -= self.step_major;
-                        self.error_r += self.e_diag;
-                        self.thickness_accum += 2 * self.dy;
+                side.p_error += self.e_square;
+            }
 
-                        if self.p_error_r > self.threshold {
-                            extra = true;
+            if !extra {
+                match self.next_side {
+                    Side::Left => side.start -= self.step_minor,
+                    Side::Right => side.start += self.step_minor,
+                };
+                side.error += self.e_square;
+                self.thickness_accum += 2 * self.dx;
 
-                            self.state = ParallelLineState {
-                                dx_accum: 0,
-                                start: start + self.step_minor,
-                                error: self.p_error_r,
-                                side: Side::Right,
-                            };
-
-                            self.p_error_r += self.e_diag;
-                        }
-
-                        self.p_error_r += self.e_square;
-                    }
-
-                    if !extra {
-                        self.start_r += self.step_minor;
-                        self.error_r += self.e_square;
-                        self.thickness_accum += 2 * self.dx;
-
-                        self.state = ParallelLineState {
-                            dx_accum: 0,
-                            start: self.start_r,
-                            error: self.p_error_r,
-                            side: Side::Right,
-                        };
-                    }
-                }
+                let p_error = match self.next_side {
+                    Side::Left => side.p_error,
+                    Side::Right => -side.p_error,
+                };
+                self.parallel = ParallelLineState::new(side.start, p_error);
             }
 
             // Switch to opposite side of line to keep it balanced
