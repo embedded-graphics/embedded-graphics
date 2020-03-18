@@ -1,5 +1,11 @@
 # Migrating from embedded-graphics 0.5.x to 0.6.0
 
+**Are you a driver author? Please see the [for driver authors](#for-driver-authors) section for required changes.**
+
+**Are you a font author? Please see the [for font authors](#for-font-authors) section for required changes.**
+
+As a general user of embedded-graphics, please read on.
+
 ## Pixel colors
 
 A `u8`, `u16` or `u32` primitive is no longer used as pixel color storage. The primitive types don't allow the exact color format to be specified at the type level, which could lead to errors when colors weren't used in different places without being converted explicitly (e.g. when displaying a grayscale image on a color display).
@@ -37,119 +43,51 @@ let rust = Rgb565::new(0xff, 0x07, 0x00);
 let magenta = Rgb888::MAGENTA;
 ```
 
-## For driver authors
-
-Adding embedded-graphics support to a display driver has changed somewhat. The `Drawing` trait has been replaced by the `DrawTarget` trait which provides a slightly different interface.
-
-An associated error type is also added to `DrawTarget` to allow for better error handling than a `panic!()`.
+Pixels can also be converted to their underlying storage by calling `.into_storage()`:
 
 ```rust
 use embedded_graphics::{
-    drawable,
-    geometry::Size,
-    pixelcolor::{
-        raw::{RawData, RawU1},
-        BinaryColor, PixelColor,
-    },
-    DrawTarget,
+    pixelcolor::Rgb565,
+    prelude::*,
 };
 
-impl<C> DrawTarget<C> for DisplayDriver
-where
-    C: PixelColor + Into<BinaryColor>,
-{
-    type Error = DI::Error;
-
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<C>) -> Result<(), Self::Error> {
-        let drawable::Pixel(pos, color) = pixel;
-
-        // Guard against negative values. All positive i32 values from `pos` can be represented in
-        // the `u32`s that `set_pixel()` accepts...
-        if pos.x < 0 || pos.y < 0 {
-            return Ok(());
-        }
-
-        // ... which makes the `as` coercions here safe.
-        self.set_pixel(
-            pos.x as u32,
-            pos.y as u32,
-            // Convery color to BinaryColor, then into underlying raw storage u8
-            color.into().into_storage(),
-        );
-
-        Ok(())
-    }
-
-    fn size(&self) -> Size {
-        let (w, h) = self.get_dimensions();
-
-        Size::new(w as u32, h as u32)
-    }
-}
+let raw_value: u16 = Rgb565::MAGENTA.into_storage();
 ```
 
-This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as pixels on the SSD1306 can only be on or off.
+### Associated constants
 
-Some notes on the above:
+Some useful predefined constants have been added to all colors except `BinaryColor`.
 
-- The `Drawing` trait is renamed to `DrawTarget`.
-- This implementation takes a `C: PixelColor + Into<BinaryColor>` allowing items using other color types to be used on the monochrome display.
-- The `draw()` method is replaced by `draw_pixel()`. This method should handle setting of individual pixels on the display. How it does this is at the descretion of the display driver (pixel buffer, immediate mode, etc).
-- A new `size()` method is now a required item. This should return the width and height of the display as a `Size`.
-- The implementation of `DrawTarget` must now provide an associated `Error` type. In the above example `core::convert::Infallible` is used, however a better error type should be used to communicate hardware failures, etc to the user.
-- Any pixels that are offscreen (negative coordinates or greater than display dimensions) should result in a noop. In the example above, `self.set_pixel()` (defined by the SSD1306 driver) will not attempt to set any pixels beyond the positive screen limits.
-- `draw_pixel()` now returns `Result<(), Self::Error>` to account for driver error handling.
+Usage:
 
-### Choosing the right pixel color type
+```rust
+use embedded_graphics::{prelude::*, pixelcolor::{Gray8, Rgb565}};
 
-Below are some common use cases to help choose the right pixel color for a given display module. The full list of pixel colors is described in [the table above](#pixel-colors).
+let white = Gray8::WHITE;
+let cyan = Rgb565::CYAN;
+```
 
-#### `BinaryColor`
+#### Predefined colors for `Gray2`, `Gray4` and `Gray8`
 
-If the display only supports two states, use `BinaryColor`. This is applicable to monochrome OLED displays like the SSD1306 or SH1106, character/bitmap LCDs and even LED matrices.
+These are provided by the `GrayColor` trait impl.
 
-#### `Gray2`
+- `BLACK`
+- `WHITE`
 
-Use for displays that can represent 2 or 3 color states. For example, tricolor epaper displays that can show white, black or red should use this type.
+#### Predefined colors for `Rgb555` `Rgb565`, `Bgr555`, `Bgr565`, `Rgb888` and `Bgr888`
 
-#### `Rgb565`
+These are provided by the `RgbColor` trait impl.
 
-Use `Rgb565` for displays advertised as 16 bit color displays will often use a 5R 6G 5B pixel packing, storing each pixel color as a `u16`.
+- `BLACK`
+- `WHITE`
+- `RED`
+- `GREEN`
+- `BLUE`
+- `CYAN`
+- `MAGENTA`
+- `YELLOW`
 
-#### `Bgr565`
-
-If the display's pixel order is reversed (BGR instead of RGB) and cannot be changed in configuration, use this type instead of `Rgb565`.
-
-#### `Rgb888`
-
-24 bit color, most useful in the embedded graphics simulator, or for high color display modules.
-
-## For font authors
-
-- The `embedded_graphics::fonts::font_builder` module along with its exported `FontBuilderConf` and `FontBuilder` is removed. Now only `Font` needs to be implemented.
-- The `Font` trait (used to be `FontBuilderConf`) implementation has changed slightly, replacing `CHART_WIDTH` and `CHAR_HEIGHT` with a single `CHARACTER_SIZE` constant, using the `Size` struct:
-
-  ```diff
-  - use embedded_graphics::fonts::font_builder::{FontBuilder, FontBuilderConf};
-  + use embedded_graphics::fonts::Font;
-
-  + use embedded_graphics::geometry::Size;
-
-    #[derive(Debug, Copy, Clone)]
-    pub enum MyFont {}
-
-    impl Font for MyFont {
-        const FONT_IMAGE: &'static [u8] = include_bytes!("../data/my_font.raw");
-  -     const CHAR_WIDTH: u32 = 12;
-  -     const CHAR_HEIGHT: u32 = 22;
-  +     const CHARACTER_SIZE: Size = Size::new(12, 22);
-        const FONT_IMAGE_WIDTH: u32 = 480;
-    }
-  ```
-
-## For library consumers
-
-### General drawing operations
+## General drawing operations
 
 Drawing operations are "reversed" in 0.6.0. Instead of calling `display.draw(thing)`, call `thing.draw(&mut display)`:
 
@@ -195,7 +133,7 @@ Circle::new(Point::new(64, 64), 64)
 
 Drawing operations are now fallible, with `.draw()` calls returning a `Result`. This allows for error handling if an error occurs during a drawing operation. The error type of this `Result` is dependent on the associated `Error` type as defined by the display driver.
 
-### Coordinates and positioning
+## Coordinates and positioning
 
 The `Coord` and `UnsignedCoord` have been renamed to `Point` and `Size` respectively. Both items are no longer tuple structs, but structs with the named fields `x` and `y` for `Point` and `width` and `height` for `Size`. `Point`s can store negative coordinates, whereas `Size`s must be positive up to `u32::MAX_VALUE`.
 
@@ -217,7 +155,7 @@ The `icoord` and `ucoord` macros have been removed. Instead, use `Point::new(x, 
 + println!("X: {}, Y: {}", p.width, p.height);
 ```
 
-### Text
+## Text
 
 Text is now drawn with the `Text` struct. A `TextStyle` must be provided which selects which font to draw the text with.
 
@@ -288,7 +226,7 @@ Macro usage has also changed:
 - All built in `text_*!()` macros are removed and replaced with the `egtext!()` macro.
 - `egtext!()` should be coupled with the `text_style!()` macro to create styled texts with a chosen font.
 
-### Primitives
+## Primitives
 
 Primitives changes:
 
@@ -296,7 +234,7 @@ Primitives changes:
 
 - Primitive styles now default to a stroke width of `0` instead of `1`. If nothing is drawn to the display, check that you set the `stroke_width` in `PrimitiveStyleBuilder`.
 
-### Images
+## Images
 
 The `ImageBMP` and `ImageTGA` built-in image types are removed in favour of using the new `graphics` features of the [tinybmp](https://crates.io/crates/tinybmp) and [tinytga](https://crates.io/crates/tinytga) crates. These must be wrapped in the `Image` struct for use with embedded-graphics.
 
@@ -329,3 +267,120 @@ Then any image code:
 +
 + image.draw(&mut display)?;
 ```
+
+## For driver authors
+
+Adding embedded-graphics support to a display driver has changed somewhat. The `Drawing` trait has been replaced by the `DrawTarget` trait which provides a slightly different interface.
+
+An associated error type is also added to `DrawTarget` to allow for better error handling than a `panic!()`.
+
+```rust
+use embedded_graphics::{
+    drawable,
+    geometry::Size,
+    pixelcolor::{
+        raw::{RawData, RawU1},
+        BinaryColor, PixelColor,
+    },
+    DrawTarget,
+};
+
+impl<C> DrawTarget<C> for DisplayDriver
+where
+    C: PixelColor + Into<BinaryColor>,
+{
+    type Error = DI::Error;
+
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<C>) -> Result<(), Self::Error> {
+        let drawable::Pixel(pos, color) = pixel;
+
+        // Guard against negative values. All positive i32 values from `pos` can be represented in
+        // the `u32`s that `set_pixel()` accepts...
+        if pos.x < 0 || pos.y < 0 {
+            return Ok(());
+        }
+
+        // ... which makes the `as` coercions here safe.
+        self.set_pixel(
+            pos.x as u32,
+            pos.y as u32,
+            // Convery color to BinaryColor, then into underlying raw storage u8
+            color.into().into_storage(),
+        );
+
+        Ok(())
+    }
+
+    fn size(&self) -> Size {
+        let (w, h) = self.get_dimensions();
+
+        Size::new(w as u32, h as u32)
+    }
+}
+```
+
+This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1306) driver. It uses `BinaryColor` as pixels on the SSD1306 can only be on or off.
+
+Some notes on the above:
+
+- The `Drawing` trait is renamed to `DrawTarget`.
+- This implementation takes a `C: PixelColor + Into<BinaryColor>` allowing items using other color types to be used on the monochrome display. If this is not possible or undesired, use the appropriate pixel type directly. For example:
+
+  ```rust
+  impl DrawTarget<Rgb565> for DisplayDriver {
+      // ...
+  }
+  ```
+
+- The `draw()` method is replaced by `draw_pixel()`. This method should handle setting of individual pixels on the display. How it does this is at the descretion of the display driver (pixel buffer, immediate mode, etc).
+- A new `size()` method is now a required item. This should return the width and height of the display as a `Size`.
+- The implementation of `DrawTarget` must now provide an associated `Error` type. In the above example `core::convert::Infallible` is used, however a better error type should be used to communicate hardware failures, etc to the user.
+- Any pixels that are offscreen (negative coordinates or greater than display dimensions) should result in a noop. In the example above, `self.set_pixel()` (defined by the SSD1306 driver) will not attempt to set any pixels beyond the positive screen limits.
+- `draw_pixel()` now returns `Result<(), Self::Error>` to account for driver error handling.
+
+### Choosing the right pixel color type
+
+Below are some common use cases to help choose the right pixel color for a given display module. The full list of pixel colors is described in [the table above](#pixel-colors).
+
+#### `BinaryColor`
+
+If the display only supports two states, use `BinaryColor`. This is applicable to monochrome OLED displays like the SSD1306 or SH1106, character/bitmap LCDs and even LED matrices.
+
+#### `Gray2`
+
+Use for displays that can represent 2 or 3 color states. For example, tricolor epaper displays that can show white, black or red like the SSD1675 should use this type.
+
+#### `Rgb565`
+
+Use `Rgb565` for displays advertised as 16 bit color displays will often use a 5R 6G 5B pixel packing, storing each pixel color as a `u16`.
+
+#### `Bgr565`
+
+If the display's pixel order is reversed (BGR instead of RGB) and cannot be changed in configuration, use this type instead of `Rgb565`.
+
+#### `Rgb888`
+
+24 bit color, most useful in the embedded graphics simulator, or for high color display modules.
+
+## For font authors
+
+- The `embedded_graphics::fonts::font_builder` module along with its exported `FontBuilderConf` and `FontBuilder` is removed. Now only `Font` needs to be implemented.
+- The `Font` trait (used to be `FontBuilderConf`) implementation has changed slightly, replacing `CHART_WIDTH` and `CHAR_HEIGHT` with a single `CHARACTER_SIZE` constant, using the `Size` struct:
+
+  ```diff
+  - use embedded_graphics::fonts::font_builder::{FontBuilder, FontBuilderConf};
+  + use embedded_graphics::fonts::Font;
+
+  + use embedded_graphics::geometry::Size;
+
+    #[derive(Debug, Copy, Clone)]
+    pub enum MyFont {}
+
+    impl Font for MyFont {
+        const FONT_IMAGE: &'static [u8] = include_bytes!("../data/my_font.raw");
+  -     const CHAR_WIDTH: u32 = 12;
+  -     const CHAR_HEIGHT: u32 = 22;
+  +     const CHARACTER_SIZE: Size = Size::new(12, 22);
+        const FONT_IMAGE_WIDTH: u32 = 480;
+    }
+  ```
