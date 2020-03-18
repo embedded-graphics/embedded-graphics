@@ -90,13 +90,16 @@
 //! ```rust
 //! use embedded_graphics::{
 //!     fonts::{Font6x8, Text},
+//!     mock_display::MockDisplay,
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     primitives::Circle,
 //!     style::{PrimitiveStyle, TextStyle},
 //! };
-//! # use embedded_graphics::mock_display::MockDisplay;
-//! # let mut display = MockDisplay::default();
+//!
+//! // Create a display using the builtin MockDisplay. This would be replaced by an actual display
+//! // driver in real code.
+//! let mut display = MockDisplay::default();
 //!
 //! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
 //! let t = Text::new("Hello Rust!", Point::new(20, 16))
@@ -114,11 +117,13 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     egcircle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
-//!     text_style,
+//!     egcircle, egtext, fonts::Font6x8, mock_display::MockDisplay, pixelcolor::Rgb565,
+//!     prelude::*, primitive_style, text_style,
 //! };
-//! # use embedded_graphics::mock_display::MockDisplay;
-//! # let mut display = MockDisplay::default();
+//!
+//! // Create a display using the builtin MockDisplay. This would be replaced by an actual display
+//! // driver in real code.
+//! let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!(
 //!     center = (20, 20),
@@ -142,10 +147,13 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*,
-//!     primitive_style, text_style,
+//!     egcircle, egrectangle, egtext, fonts::Font6x8, mock_display::MockDisplay,
+//!     pixelcolor::Rgb565, prelude::*, primitive_style, text_style,
 //! };
-//! # use embedded_graphics::mock_display::MockDisplay;
+//!
+//! // Create a display using the builtin MockDisplay. This would be replaced by an actual display
+//! // driver in real code.
+//! let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     egrectangle!(top_left = (0, 0), bottom_right = (40, 40))
