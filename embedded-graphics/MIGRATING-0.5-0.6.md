@@ -1,8 +1,41 @@
 # Migrating from embedded-graphics 0.5.x to 0.6.0
 
-## Pixel colours
+## Pixel colors
 
-TODO for both driver authors and library consumers
+A `u8`, `u16` or `u32` primitive is no longer used as pixel color storage. The primitive types don't allow the exact color format to be specified at the type level, which could lead to errors when colors weren't used in different places without being converted explicitly (e.g. when displaying a grayscale image on a color display).
+
+Instead, multiple explicit color types have been added. These pixel types distinguish their underlying storage from their color representation using the `Raw*` types. The table below lists the new colors and accompanying storage types.
+
+| Type name     | Storage type | Underlying storage |
+| ------------- | ------------ | ------------------ |
+| `BinaryColor` | `RawU1`      | `u8`               |
+| `Gray2`       | `RawU2`      | `u8`               |
+| `Gray4`       | `RawU4`      | `u8`               |
+| `Gray8`       | `RawU8`      | `u8`               |
+| `Rgb555`      | `RawU16`     | `u16`              |
+| `Rgb565`      | `RawU16`     | `u16`              |
+| `Bgr555`      | `RawU16`     | `u16`              |
+| `Bgr565`      | `RawU16`     | `u16`              |
+| `Rgb888`      | `RawU24`     | `u32`              |
+| `Bgr888`      | `RawU24`     | `u32`              |
+
+Creating various colors now works like this:
+
+```rust
+use embedded_graphics::{
+    pixelcolor::{BinaryColor, Rgb565, Rgb888},
+    prelude::*,
+};
+
+// Binary color (off/on)
+let on = BinaryColor::On;
+
+// Red with a small amount of green creates a deep orange colour
+let rust = Rgb565::new(0xff, 0x07, 0x00);
+
+// Use a preset provided by the RGB color types
+let magenta = Rgb888::MAGENTA;
+```
 
 ## For driver authors
 
@@ -10,25 +43,24 @@ Adding embedded-graphics support to a display driver has changed somewhat. The `
 
 An associated error type is also added to `DrawTarget` to allow for better error handling than a `panic!()`.
 
-Implementations for display drivers should now at minimum look something like the following:
-
 ```rust
 use embedded_graphics::{
     drawable,
     geometry::Size,
     pixelcolor::{
         raw::{RawData, RawU1},
-        BinaryColor,
+        BinaryColor, PixelColor,
     },
     DrawTarget,
 };
 
-#[cfg(feature = "graphics")]
-impl DrawTarget<BinaryColor> for DisplayDriver
+impl<C> DrawTarget<C> for DisplayDriver
+where
+    C: PixelColor + Into<BinaryColor>,
 {
-    type Error = core::convert::Infallible;
+    type Error = DI::Error;
 
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) -> Result<(), Self::Error> {
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<C>) -> Result<(), Self::Error> {
         let drawable::Pixel(pos, color) = pixel;
 
         // Guard against negative values. All positive i32 values from `pos` can be represented in
@@ -38,7 +70,12 @@ impl DrawTarget<BinaryColor> for DisplayDriver
         }
 
         // ... which makes the `as` coercions here safe.
-        self.set_pixel(pos.x as u32, pos.y as u32, RawU1::from(color).into_inner());
+        self.set_pixel(
+            pos.x as u32,
+            pos.y as u32,
+            // Convery color to BinaryColor, then into underlying raw storage u8
+            color.into().into_storage(),
+        );
 
         Ok(())
     }
@@ -56,11 +93,36 @@ This is a reduced example taken from the [ssd1306](https://crates.io/crates/ssd1
 Some notes on the above:
 
 - The `Drawing` trait is renamed to `DrawTarget`.
+- This implementation takes a `C: PixelColor + Into<BinaryColor>` allowing items using other color types to be used on the monochrome display.
 - The `draw()` method is replaced by `draw_pixel()`. This method should handle setting of individual pixels on the display. How it does this is at the descretion of the display driver (pixel buffer, immediate mode, etc).
 - A new `size()` method is now a required item. This should return the width and height of the display as a `Size`.
 - The implementation of `DrawTarget` must now provide an associated `Error` type. In the above example `core::convert::Infallible` is used, however a better error type should be used to communicate hardware failures, etc to the user.
 - Any pixels that are offscreen (negative coordinates or greater than display dimensions) should result in a noop. In the example above, `self.set_pixel()` (defined by the SSD1306 driver) will not attempt to set any pixels beyond the positive screen limits.
 - `draw_pixel()` now returns `Result<(), Self::Error>` to account for driver error handling.
+
+### Choosing the right pixel color type
+
+Below are some common use cases to help choose the right pixel color for a given display module. The full list of pixel colors is described in [the table above](#pixel-colors).
+
+#### `BinaryColor`
+
+If the display only supports two states, use `BinaryColor`. This is applicable to monochrome OLED displays like the SSD1306 or SH1106, character/bitmap LCDs and even LED matrices.
+
+#### `Gray2`
+
+Use for displays that can represent 2 or 3 color states. For example, tricolor epaper displays that can show white, black or red should use this type.
+
+#### `Rgb565`
+
+Use `Rgb565` for displays advertised as 16 bit color displays will often use a 5R 6G 5B pixel packing, storing each pixel color as a `u16`.
+
+#### `Bgr565`
+
+If the display's pixel order is reversed (BGR instead of RGB) and cannot be changed in configuration, use this type instead of `Rgb565`.
+
+#### `Rgb888`
+
+24 bit color, most useful in the embedded graphics simulator, or for high color display modules.
 
 ## For font authors
 
@@ -108,6 +170,27 @@ Drawing operations are "reversed" in 0.6.0. Instead of calling `display.draw(thi
 + Rectangle::new(Point::new(50, 20), Point::new(60, 35))
 +     .into_styled(style)
 +     .draw(&mut display)?;
+```
+
+Chaining now looks like this:
+
+```rust
+Circle::new(Point::new(64, 64), 64)
+    .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+    .into_iter()
+    .chain(
+        &Line::new(Point::new(64, 64), Point::new(0, 64))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)),
+    )
+    .chain(
+        &Line::new(Point::new(64, 64), Point::new(80, 80))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1)),
+    )
+    .chain(
+        &Text::new("Hello World!", Point::new(5, 50))
+            .into_styled(TextStyle::new(Font6x8, BinaryColor::On)),
+    )
+    .draw(&mut display);
 ```
 
 Drawing operations are now fallible, with `.draw()` calls returning a `Result`. This allows for error handling if an error occurs during a drawing operation. The error type of this `Result` is dependent on the associated `Error` type as defined by the display driver.
