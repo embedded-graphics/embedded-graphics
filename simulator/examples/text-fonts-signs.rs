@@ -1,10 +1,8 @@
 use embedded_graphics::{
-    egtext,
     fonts::{Text, *},
     pixelcolor::BinaryColor,
     prelude::*,
     style::TextStyle,
-    text_style,
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
