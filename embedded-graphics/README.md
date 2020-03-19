@@ -158,7 +158,7 @@ fn main() -> Result<(), std::convert::Infallible> {
 ```
 
 This example is also included in the [simulator](./simulator/examples) crate and
-can be run using ```cargo run --example hello-world```.
+can be run using `cargo run --example hello-world`.
 
 ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
 
@@ -231,6 +231,10 @@ fn main() {
 - `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
   support to enable conversions from `nalgebra::Vector2` to `Coord` and `UnsignedCoord`.
 
+## Migrating from 0.5 to 0.6
+
+Please read [the migration guide](embedded-graphics/MIGRATING-0.5-0.6.md).
+
 ## Development setup
 
 ### Minimum supported Rust version
@@ -248,10 +252,7 @@ rustup update
 rustup component add rustfmt
 
 # Install SDL2 for simulator and PIP to install linkchecker
-sudo apt install libsdl2-dev python-pip
-
-# Install linkchecker so doc links can be checked
-sudo pip install linkchecker
+sudo apt install libsdl2-dev linkchecker
 ```
 
 ## Attribution
