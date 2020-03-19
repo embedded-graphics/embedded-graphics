@@ -65,6 +65,20 @@ impl Circle {
     pub const fn new(top_left: Point, diameter: u32) -> Self {
         Circle { top_left, diameter }
     }
+
+    /// Create a new circle centered around a given point with a specific diameter
+    pub const fn with_center(center: Point, diameter: u32) -> Self {
+        let top_left = Point::new(
+            center.x - diameter as i32 / 2,
+            center.y - diameter as i32 / 2,
+        );
+        Circle { top_left, diameter }
+    }
+
+    /// Return the center point of the circle
+    pub fn center(&self) -> Point {
+        self.top_left + Size::new(self.diameter / 2, self.diameter / 2)
+    }
 }
 
 impl Primitive for Circle {}
@@ -374,5 +388,14 @@ mod tests {
         assert!(negative.into_iter().eq(positive
             .into_iter()
             .map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
+    }
+
+    #[test]
+    fn center_is_correct() {
+        let circle = Circle::with_center(Point::new(10, 10), 5);
+
+        assert_eq!(circle.top_left(), Point::new(8, 8));
+        assert_eq!(circle.center(), Point::new(10, 10));
+        assert_eq!(circle.bottom_right(), Point::new(12, 12));
     }
 }

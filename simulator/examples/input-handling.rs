@@ -20,16 +20,16 @@ const KEYBOARD_DELTA: i32 = 20;
 
 fn move_circle(
     display: &mut SimulatorDisplay<Rgb888>,
-    old_pos: Point,
-    new_pos: Point,
+    old_center: Point,
+    new_center: Point,
 ) -> Result<(), core::convert::Infallible> {
     // Clear old circle
-    Circle::new(old_pos, 200)
+    Circle::with_center(old_center, 200)
         .into_styled(PrimitiveStyle::with_fill(BACKGROUND_COLOR))
         .draw(display)?;
 
     // Draw circle at new location
-    Circle::new(new_pos, 200)
+    Circle::with_center(new_center, 200)
         .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
         .draw(display)?;
 
@@ -40,8 +40,8 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(800, 480));
     let mut window = Window::new("Click to move circle", &OutputSettings::default());
 
-    let mut position = Point::new(100, 100);
-    Circle::new(position, 200)
+    let mut position = Point::new(200, 200);
+    Circle::with_center(position, 200)
         .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
         .draw(&mut display)?;
 
@@ -64,7 +64,6 @@ fn main() -> Result<(), core::convert::Infallible> {
                     position = new_position;
                 }
                 SimulatorEvent::MouseButtonUp { point, .. } => {
-                    let point = point - Size::new(100, 100);
                     move_circle(&mut display, position, point)?;
                     position = point;
                 }
