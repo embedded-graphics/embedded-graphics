@@ -1,3 +1,7 @@
+//! # Example: Transparent fonts
+//!
+//! Demonstrate the background styles and transparency behaviors of different font styles.
+
 use embedded_graphics::{
     egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
     text_style,

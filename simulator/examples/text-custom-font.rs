@@ -1,3 +1,8 @@
+//! # Example: Custom font
+//!
+//! Shows how to implement the `Font` trait for a custom `SeventSegmentFont` font. This font renders
+//! numbers only and emulates a classic 7 segment display.
+
 use embedded_graphics::{egtext, pixelcolor::BinaryColor, prelude::*, text_style};
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,

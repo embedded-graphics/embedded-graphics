@@ -1,6 +1,10 @@
+//! # Example: Fonts
+//!
+//! Demonstrate the available builtin fonts.
+
 use embedded_graphics::{
     egtext,
-    fonts::{Font12x16, Font6x12, Font6x6, Font6x8, Font8x16, Text},
+    fonts::{Font12x16, Font24x32, Font6x12, Font6x6, Font6x8, Font8x16, Text},
     pixelcolor::BinaryColor,
     prelude::*,
     style::{TextStyle, TextStyleBuilder},
@@ -9,7 +13,7 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(256, 144));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(350, 200));
 
     // Show smallest font with black font on white background (default value for fonts)
     Text::new("Hello World! - default style 6x8", Point::new(15, 15))
@@ -56,10 +60,18 @@ fn main() -> Result<(), core::convert::Infallible> {
     )
     .draw(&mut display)?;
 
+    // Show 24x32 Font using a macro
+    egtext!(
+        text = "Hello 24x32!",
+        top_left = (15, 128),
+        style = text_style!(font = Font24x32, text_color = BinaryColor::On)
+    )
+    .draw(&mut display)?;
+
     // Show 6x6 Font using a macro
     egtext!(
         text = "Hello 6x6!",
-        top_left = (15, 128),
+        top_left = (15, 170),
         style = text_style!(font = Font6x6, text_color = BinaryColor::On)
     )
     .draw(&mut display)?;

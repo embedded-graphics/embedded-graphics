@@ -1,3 +1,7 @@
+//! # Example: Primitive fill styles
+//!
+//! This example demonstrates the different fill and stroke styles available for primitives.
+
 use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,

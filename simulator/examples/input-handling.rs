@@ -4,6 +4,7 @@
 //! screen, or move the circle using the arrow keys. Although input handling is not a part of the
 //! embedded-graphics API, the simulator can be used to emulate input controls in order to
 //! represent more complex UI systems such as touch screens.
+
 extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
