@@ -216,12 +216,6 @@ mod tests {
         assert_eq!(display, two_question_marks);
 
         let mut display = MockDisplay::new();
-        Text::new("¡ÿ", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
         Text::new("Ā💣", Point::zero())
             .into_styled(style)
             .draw(&mut display)?;
