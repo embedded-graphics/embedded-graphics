@@ -8,10 +8,12 @@ As a general user of embedded-graphics, please read on.
 
 ## Table of contents
 
+- [Table of contents](#table-of-contents)
 - [Pixel colors](#pixel-colors)
-  - [Associated constants](#associated-constants)
+  - [Color constants](#color-constants)
+  - [Upgrading from the old `Rgb565` color type](#upgrading-from-the-old-rgb565-color-type)
 - [General drawing operations](#general-drawing-operations)
-- [Coordinates and positioning](#coordinates-and-positioning)
+- [Coordinates, sizing and positioning](#coordinates-sizing-and-positioning)
 - [Text](#text)
 - [Primitives and their styling](#primitives-and-their-styling)
 - [Images](#images)
@@ -51,8 +53,8 @@ use embedded_graphics::{
 // Binary color (off/on)
 let on = BinaryColor::On;
 
-// Red with a small amount of green creates a deep orange colour
-let rust = Rgb565::new(0xff, 0x07, 0x00);
+// Red with a small amount of green creates a deep orange color
+let rust = Rgb565::new(0x1f, 0x07, 0x00);
 
 // Use a color constant provided by the RGB color types
 let magenta = Rgb888::MAGENTA;
@@ -102,6 +104,16 @@ These are provided by the `RgbColor` trait impl.
 - `MAGENTA`
 - `YELLOW`
 
+### Upgrading from the old `Rgb565` color type
+
+0.5 also includes the `Rgb565` color type. Previously creating a new `Rgb565` required a tuple of 3 values. This is now replaced by the `Rgb565::new` method:
+
+```diff
+// Create an orange color
+- let color: Rgb565 = (0x1f, 0x07, 0x00).into();
++ let color = Rgb565::new(0x1f, 0x07, 0x00);
+```
+
 ## General drawing operations
 
 Drawing operations are "reversed" in 0.6.0. Instead of calling `display.draw(thing)`, call `thing.draw(&mut display)`:
@@ -148,7 +160,7 @@ Circle::new(Point::new(64, 64), 64)
 
 Drawing operations are now fallible, with `.draw()` calls returning a `Result`. This allows for error handling if an error occurs during a drawing operation. The error type of this `Result` is dependent on the associated `Error` type as defined by the display driver's `DrawTarget` impl.
 
-## Coordinates and positioning
+## Coordinates, sizing and positioning
 
 The `Coord` and `UnsignedCoord` have been replaced with `Point` and `Size` respectively. Both items are no longer tuple structs, but structs with the named fields `x` and `y` for `Point` and `width` and `height` for `Size`. `Point`s can store negative coordinates, whereas `Size`s must be positive as each dimension is stored as a `u32`.
 
@@ -407,29 +419,22 @@ impl DrawTarget<BinaryColor> for DisplayDriver
 Some notes on the above:
 
 - The `Drawing` trait is renamed to `DrawTarget`.
-- This implementation takes a `C: PixelColor + Into<BinaryColor>` allowing items using other color types to be used on the monochrome display. If this is not possible or undesired, use the appropriate pixel type directly. For example:
-
-  ```rust
-  impl DrawTarget<Rgb565> for DisplayDriver {
-      // ...
-  }
-  ```
-
+- This implementation takes a `BinaryColor` as it's color type as pixels the SSD1306 can only be off or on. [Other pixel types](#pixel-colors) can be used for displays with a higher color depth.
 - The `Drawing::draw` method is replaced by `DrawTarget::draw_pixel`. This method should handle setting of individual pixels on the display. How it does this is at the discretion of the display driver (pixel buffer, immediate mode, etc).
 - A new `DrawTarget::size` method is now a required, which should return the width and height of the display in pixels as a `Size`.
 - The implementation of `DrawTarget` must now provide an associated `Error` type. If drawing operations can't fail, for example if the driver uses a framebuffer in RAM, `core::convert::Infallible` can used. If drawing operations can fail a better error type should be used to communicate hardware failures, etc to the user.
 - Any pixels drawn to offscreen coordinates need to be ignored by `DrawTarget` implementations and not result in panics or any modification of the display content. In the example above, `self.set_pixel()` (defined by the SSD1306 driver) will not attempt to set any pixels beyond the positive screen limits.
 - `draw_pixel()` now returns `Result<(), Self::Error>` to account for driver error handling.
 
-New methods have been added to `DrawTarget` to enable accelerated drawing operations if the hardware supports it:
+New methods have been added to `DrawTarget` that can be overridden by hardware accelerated implementations:
 
-- `DrawTarget::draw_circle` - draw a circle using hardware accelerated operations.
-- `DrawTarget::draw_rectangle` - draw a rectangle using hardware accelerated operations.
-- `DrawTarget::draw_triangle` - draw a triangle using hardware accelerated operations.
-- `DrawTarget::draw_line` - draw a line using hardware accelerated operations.
-- `DrawTarget::draw_image` - draw an image using hardware accelerated operations.
+- `DrawTarget::draw_circle`
+- `DrawTarget::draw_rectangle`
+- `DrawTarget::draw_triangle`
+- `DrawTarget::draw_line`
+- `DrawTarget::draw_image`
 
-By default these delegate to `DrawTarget::draw_iter` but can be overridden with custom implementations for improved draw performance.
+Methods that aren't overridden by the `DrawTarget` impl delegate to `DrawTarget::draw_iter` by default.
 
 More information is provided in the [`DrawTarget` trait documentation](https://docs.rs/embedded-graphics/0.6.0/embedded_graphics/trait.DrawTarget.html).
 
@@ -477,4 +482,6 @@ The `Font` trait implementation has changed slightly, replacing `CHAR_WIDTH` and
   }
 ```
 
-The `CHARACTER_SPACING` and `VARIABLE_WIDTH` constants were also added, creating support for basic variable width fonts.
+The `CHARACTER_SPACING` constant is added, providing configurable fixed spacing between characters. This is useful for fonts where there is no built-in spacing in the source bitmap data.
+
+The `VARIABLE_WIDTH` constants is also added, creating support for basic variable width fonts. Setting this to `true` will trim empty pixels to the right of a glyph and add `CHARACTER_SPACING` between each character.
