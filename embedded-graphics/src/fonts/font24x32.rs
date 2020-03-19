@@ -30,7 +30,10 @@ impl Font for Font24x32 {
         if c <= '~' {
             return c as u32 - ' ' as u32;
         }
-        fallback
+        if c < '¡' || c > 'ÿ' {
+            return fallback;
+        }
+        c as u32 - ' ' as u32 - 34
     }
 }
 
