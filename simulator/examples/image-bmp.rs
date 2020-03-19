@@ -16,9 +16,12 @@ fn main() -> Result<(), core::convert::Infallible> {
     let bmp = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
 
     // Create a new embedded-graphics Image, wrapping the BMP which provides pixel data. The top
-    // left corner of the image is positioned at (32, 32)
+    // left corner of the image is positioned at (32, 32). It is important to specify the color
+    // format used by the image, otherwise the compiler may infer an incorrect type. This image is
+    // in 16BPP RGB565 format, so the Rgb565 pixel color type is used.
     let image: Image<Bmp, Rgb565> = Image::new(&bmp, Point::new(32, 32));
 
+    // Display the image
     image.draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new().scale(2).build();

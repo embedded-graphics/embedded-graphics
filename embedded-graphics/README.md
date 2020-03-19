@@ -115,7 +115,7 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     let yoffset = 10;
 
-    // Draw an 3px wide outline around the display.
+    // Draw a 3px wide outline around the display.
     let bottom_right = Point::zero() + display.size() - Point::new(1, 1);
     Rectangle::new(Point::zero(), bottom_right)
         .into_styled(thick_stroke)

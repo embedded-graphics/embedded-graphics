@@ -16,10 +16,12 @@ fn main() -> Result<(), core::convert::Infallible> {
     let tga = Tga::from_slice(include_bytes!("./assets/rust-pride.tga")).unwrap();
 
     // Create a new embedded-graphics Image, wrapping the TGA which provides pixel data. The top
-    // left corner of the image is positioned at (32, 32)
+    // left corner of the image is positioned at (32, 32). It is important to specify the color
+    // format used by the image, otherwise the compiler may infer an incorrect type. This image is
+    // in 24BPP RGB888 format, so the Rgb888 pixel color type is used.
     let image: Image<Tga, Rgb888> = Image::new(&tga, Point::new(32, 32));
 
-    // Translate the image down and to the right by 32px, then display it
+    // Display the image
     image.draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new().scale(2).build();
