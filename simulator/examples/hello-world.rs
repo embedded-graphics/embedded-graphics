@@ -25,7 +25,7 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     let yoffset = 10;
 
-    // Draw an 3px wide outline around the display.
+    // Draw a 3px wide outline around the display.
     let bottom_right = Point::zero() + display.size() - Point::new(1, 1);
     Rectangle::new(Point::zero(), bottom_right)
         .into_styled(thick_stroke)
@@ -45,7 +45,7 @@ fn main() -> Result<(), std::convert::Infallible> {
         .into_styled(fill)
         .draw(&mut display)?;
 
-    // Draw a square with a 3px wide stroke.
+    // Draw a circle with a 3px wide stroke.
     Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(thick_stroke)
         .draw(&mut display)?;

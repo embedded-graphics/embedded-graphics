@@ -135,7 +135,7 @@ fn main() -> Result<(), std::convert::Infallible> {
         .into_styled(fill)
         .draw(&mut display)?;
 
-    // Draw a square with a 3px wide stroke.
+    // Draw a circle with a 3px wide stroke.
     Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(thick_stroke)
         .draw(&mut display)?;

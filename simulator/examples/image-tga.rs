@@ -15,11 +15,12 @@ fn main() -> Result<(), core::convert::Infallible> {
     // Load the TGA image
     let tga = Tga::from_slice(include_bytes!("./assets/rust-pride.tga")).unwrap();
 
-    // Create a new embedded-graphics Image, wrapping the TGA which provides pixel data
-    let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+    // Create a new embedded-graphics Image, wrapping the TGA which provides pixel data. The top
+    // left corner of the image is positioned at (32, 32)
+    let image: Image<Tga, Rgb888> = Image::new(&tga, Point::new(32, 32));
 
     // Translate the image down and to the right by 32px, then display it
-    image.translate(Point::new(32, 32)).draw(&mut display)?;
+    image.draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new().scale(2).build();
     Window::new("TGA image", &output_settings).show_static(&display);

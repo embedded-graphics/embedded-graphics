@@ -15,11 +15,11 @@ fn main() -> Result<(), core::convert::Infallible> {
     // Load the BMP image
     let bmp = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
 
-    // Create a new embedded-graphics Image, wrapping the BMP which provides pixel data
-    let image: Image<Bmp, Rgb565> = Image::new(&bmp, Point::zero());
+    // Create a new embedded-graphics Image, wrapping the BMP which provides pixel data. The top
+    // left corner of the image is positioned at (32, 32)
+    let image: Image<Bmp, Rgb565> = Image::new(&bmp, Point::new(32, 32));
 
-    // Translate the image down and to the right by 32px, then display it
-    image.translate(Point::new(32, 32)).draw(&mut display)?;
+    image.draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new().scale(2).build();
     Window::new("BMP image", &output_settings).show_static(&display);
