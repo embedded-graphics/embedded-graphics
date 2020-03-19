@@ -97,8 +97,8 @@
 //!     style::{PrimitiveStyle, TextStyle},
 //! };
 //!
-//! // Create a display using the builtin MockDisplay. This would be replaced by an actual display
-//! // driver in real code.
+//! // Create a draw target using the builtin MockDisplay. In real applications this would be
+//! // replaced by a draw target that is provided by a display driver crate.
 //! let mut display = MockDisplay::default();
 //!
 //! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
@@ -121,8 +121,8 @@
 //!     prelude::*, primitive_style, text_style,
 //! };
 //!
-//! // Create a display using the builtin MockDisplay. This would be replaced by an actual display
-//! // driver in real code.
+//! // Create a draw target using the builtin MockDisplay. In real applications this would be
+//! // replaced by a draw target that is provided by a display driver crate.
 //! let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!(
@@ -151,8 +151,8 @@
 //!     pixelcolor::Rgb565, prelude::*, primitive_style, text_style,
 //! };
 //!
-//! // Create a display using the builtin MockDisplay. This would be replaced by an actual display
-//! // driver in real code.
+//! // Create a draw target using the builtin MockDisplay. In real applications this would be
+//! // replaced by a draw target that is provided by a display driver crate.
 //! let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
