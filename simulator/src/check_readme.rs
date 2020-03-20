@@ -17,4 +17,7 @@ doc!(include_str!("../README.md"));
 // This test can be moved back into the embedded-graphics crate when
 // https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#features
 // gets stabilized.
-doc!(include_str!("../../embedded-graphics/README.md"));
+//
+// NOTE: Commented out as including this line prevents a publish due to the e-g readme not being
+// present in the crate path.
+// doc!(include_str!("../../embedded-graphics/README.md"));
