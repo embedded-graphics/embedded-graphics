@@ -25,7 +25,10 @@ impl Font for Font12x16 {
         if c <= '~' {
             return c as u32 - ' ' as u32;
         }
-        fallback
+        if c < '¡' || c > 'ÿ' {
+            return fallback;
+        }
+        c as u32 - ' ' as u32 - 34
     }
 }
 
@@ -178,6 +181,38 @@ mod tests {
     }
 
     #[test]
+    fn correct_latin1() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+        Text::new("¡ÿ", Point::zero())
+            .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+            .draw(&mut display)?;
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "    ##        ##  ##    ",
+                "    ##        ##  ##    ",
+                "                        ",
+                "                        ",
+                "    ##      ##      ##  ",
+                "    ##      ##      ##  ",
+                "    ##      ##      ##  ",
+                "    ##      ##      ##  ",
+                "    ##      ##      ##  ",
+                "    ##      ##      ##  ",
+                "    ##        ########  ",
+                "    ##        ########  ",
+                "    ##              ##  ",
+                "    ##              ##  ",
+                "              ######    ",
+                "              ######    ",
+            ])
+        );
+
+        Ok(())
+    }
+
+    #[test]
     fn dont_panic() -> Result<(), core::convert::Infallible> {
         let two_question_marks = MockDisplay::from_pattern(&[
             "  ######      ######    ",
@@ -208,12 +243,6 @@ mod tests {
 
         let mut display = MockDisplay::new();
         Text::new("\x7F\u{A0}", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
-        Text::new("¡ÿ", Point::zero())
             .into_styled(style)
             .draw(&mut display)?;
         assert_eq!(display, two_question_marks);
