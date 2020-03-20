@@ -1,5 +1,5 @@
 [package]
-version = "0.2.0-beta.2"
+version = "0.2.0"
 name = "embedded-graphics-simulator"
 description = "Embedded graphics simulator"
 authors = ["Byron Wasti <byron.wasti@gmail.com>", "James Waples <james@wapl.es>"]
