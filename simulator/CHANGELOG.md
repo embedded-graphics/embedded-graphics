@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.0] - 2020-03-20
+
 ### Added
 
 - **(breaking)** #266 Added [image](https://crates.io/crates/image) support and PNG export. See the `README.md` for information about how to use these features. The API for creating windows was changed to make the output settings independent of the `Window` type. The pixel scaling and theme settings were moved to a new `OutputSettings` struct, that can be built using the `OutputSettingsBuilder`. `WindowBuilder` was removed and replaced by a `Window::new(title, &output_settings)` function.
@@ -43,6 +45,7 @@
 - The builtin simulator now supports colour pixel types, like `RGB565`.
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0-beta.2...HEAD
+[unreleased]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0...HEAD
+[0.2.0]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0-beta.2...embedded-graphics-simulator-v0.2.0
 
 [0.2.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-simulator-v0.2.0-alpha.1...embedded-graphics-simulator-v0.2.0-beta.2
