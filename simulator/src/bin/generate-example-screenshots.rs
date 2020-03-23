@@ -16,7 +16,7 @@ use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 const OUTPUT_BASE: &str = "./target/drawing-ops";
 
 macro_rules! op {
-    ($display:ident, $name:expr, $code:block) => {
+    ($display:ident, $title:expr, $description:expr, $code:block) => {
         $display.clear(Rgb888::BLACK).unwrap();
 
         (|| $code)().unwrap();
@@ -26,7 +26,7 @@ macro_rules! op {
             .pixel_spacing(1)
             .build();
 
-        let path = format!("{}/{}.png", OUTPUT_BASE, $name);
+        let path = format!("{}/{}.png", OUTPUT_BASE, $title);
         $display
             .to_image_buffer(&output_settings)
             .save(&path)
@@ -41,12 +41,15 @@ macro_rules! op {
                 .trim()
         );
 
-        println!("/// ## {} example", $name);
+        println!("/// ## {}", $title);
+        println!("///");
+        println!("/// {}", $description);
         println!("///");
         println!(
             "/// ![{} example screenshot](data:image/png;base64,{})",
-            $name, screenshot,
+            $title, screenshot
         );
+        println!("///");
 
         for line in docs.lines() {
             println!("/// {}", line);
@@ -60,21 +63,29 @@ fn main() {
 
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(64, 64));
 
-    op!(display, "Pixel", {
-        Pixel(Point::new(32, 32), Rgb888::RED).draw(&mut display)
-    });
+    op!(
+        display,
+        "Draw a single pixel",
+        "This example draws a single red pixel",
+        { Pixel(Point::new(32, 32), Rgb888::RED).draw(&mut display) }
+    );
 
-    op!(display, "Rectangle", {
-        Rectangle::new(Point::new(16, 24), Point::new(48, 40))
-            .into_styled(
-                PrimitiveStyleBuilder::new()
-                    .stroke_width(2)
-                    .stroke_color(Rgb888::RED)
-                    .fill_color(Rgb888::CYAN)
-                    .build(),
-            )
-            .draw(&mut display)
-    });
+    op!(
+        display,
+        "Draw a rectangle",
+        "This example draws a rectangle with a 2px thick red stroke and cyan fill color",
+        {
+            Rectangle::new(Point::new(16, 24), Point::new(48, 40))
+                .into_styled(
+                    PrimitiveStyleBuilder::new()
+                        .stroke_width(2)
+                        .stroke_color(Rgb888::RED)
+                        .fill_color(Rgb888::CYAN)
+                        .build(),
+                )
+                .draw(&mut display)
+        }
+    );
 
     // Add dummy mod to allow running rustfmt
     println!("pub mod dummy {{}}");
