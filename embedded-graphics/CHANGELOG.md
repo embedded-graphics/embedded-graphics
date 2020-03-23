@@ -455,19 +455,7 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
 
 <!-- next-url -->
 
-<<<<<<< HEAD
 [unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0...HEAD
 [0.6.0]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.2...embedded-graphics-v0.6.0
-=======
-<<<<<<< HEAD
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0...HEAD
-[0.6.0]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.2...embedded-graphics-v0.6.0
-=======
-
-> > > > > > > Cleanup, changelog entries
-
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.2...HEAD
-
-> > > > > > > Cleanup, changelog entries
-> > > > > > > [0.6.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...embedded-graphics-v0.6.0-beta.2
-> > > > > > > [0.6.0-beta.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-alpha.3...embedded-graphics-v0.6.0-beta.1
+[0.6.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...embedded-graphics-v0.6.0-beta.2
+[0.6.0-beta.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-alpha.3...embedded-graphics-v0.6.0-beta.1
