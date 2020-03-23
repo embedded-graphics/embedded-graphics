@@ -33,6 +33,7 @@ required-features = ["bmp"]
 
 [dependencies]
 image = "0.23.0"
+base64 = "0.12.0"
 
 [dependencies.sdl2]
 version = "0.32.2"

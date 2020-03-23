@@ -29,15 +29,25 @@ macro_rules! op {
         let path = format!("{}/{}.png", OUTPUT_BASE, $name);
         $display
             .to_image_buffer(&output_settings)
-            .save(path)
+            .save(&path)
             .unwrap();
+
+        let screenshot = base64::encode(std::fs::read(&path).expect("Couldn't open screenshot"));
 
         let docs = format!(
             "```rust\n{}\n```",
-            stringify!($code).trim_matches(|c| c == '{' || c == '}')
+            stringify!($code)
+                .trim_matches(|c| c == '{' || c == '}')
+                .trim()
         );
 
-        println!("/// # {} example", $name);
+        println!("/// ## {} example", $name);
+        println!("///");
+        println!(
+            "/// ![{} example screenshot](data:image/png;base64,{})",
+            $name, screenshot,
+        );
+
         for line in docs.lines() {
             println!("/// {}", line);
         }
@@ -50,11 +60,11 @@ fn main() {
 
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(64, 64));
 
-    op!(display, "pixel", {
+    op!(display, "Pixel", {
         Pixel(Point::new(32, 32), Rgb888::RED).draw(&mut display)
     });
 
-    op!(display, "rectangle", {
+    op!(display, "Rectangle", {
         Rectangle::new(Point::new(16, 24), Point::new(48, 40))
             .into_styled(
                 PrimitiveStyleBuilder::new()
@@ -67,5 +77,5 @@ fn main() {
     });
 
     // Add dummy mod to allow running rustfmt
-    println!("mod dummy {}", "{}");
+    println!("pub mod dummy {{}}");
 }
