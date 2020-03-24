@@ -27,10 +27,8 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let yoffset = 10;
 
-    let bottom_right = Point::zero() + display.size() - Point::new(1, 1);
-
     // Draw an 3px wide outline around the display.
-    Rectangle::new(Point::zero(), bottom_right)
+    Rectangle::new(Point::zero(), display.size())
         .into_styled(thick_stroke)
         .into_iter()
         .chain(
@@ -45,7 +43,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         )
         .chain(
             // Draw a filled square
-            Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+            Rectangle::new(Point::new(52, yoffset), Size::new(16, 16))
                 .into_styled(fill)
                 .into_iter(),
         )

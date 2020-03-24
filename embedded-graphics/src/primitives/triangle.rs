@@ -377,12 +377,12 @@ mod tests {
         assert_eq!(tri.p1, Point::new(5, 10));
         assert_eq!(tri.p2, Point::new(15, 25));
         assert_eq!(tri.p3, Point::new(5, 25));
-        assert_eq!(tri.size(), Size::new(10, 15));
+        assert_eq!(tri.size(), Size::new(11, 16));
 
         assert_eq!(moved.p1, Point::new(-5, -1));
         assert_eq!(moved.p2, Point::new(5, 14));
         assert_eq!(moved.p3, Point::new(-5, 14));
-        assert_eq!(moved.size(), Size::new(10, 15));
+        assert_eq!(moved.size(), Size::new(11, 16));
     }
 
     #[test]

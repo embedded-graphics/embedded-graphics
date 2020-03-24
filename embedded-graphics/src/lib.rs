@@ -156,7 +156,7 @@
 //! let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
-//!     egrectangle!(top_left = (0, 0), bottom_right = (40, 40))
+//!     egrectangle!(top_left = (0, 0), size = (40, 40))
 //!         .into_iter()
 //!         .chain(&egcircle!(
 //!             top_left = (12, 12),

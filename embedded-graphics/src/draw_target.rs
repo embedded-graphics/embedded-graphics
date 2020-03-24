@@ -192,8 +192,7 @@ use crate::{
 ///
 /// // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
 /// let rect = egrectangle!(
-///     top_left = (10, 20),
-///     bottom_right = (30, 40),
+///     corners = [(10, 20), (30, 40)],
 ///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
 /// )
 /// .draw(&mut display)?;
@@ -253,7 +252,7 @@ where
     where
         Self: Sized,
     {
-        primitives::Rectangle::new(Point::zero(), Point::zero() + self.size())
+        primitives::Rectangle::new(Point::zero(), self.size())
             .into_styled(PrimitiveStyle::with_fill(color))
             .draw(self)
     }

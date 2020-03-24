@@ -11,7 +11,6 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 /// use embedded_graphics::{
 ///     egrectangle, egtext,
 ///     fonts::Font6x8,
-///     geometry::Point,
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
 ///     primitive_style, text_style,
@@ -19,7 +18,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// struct Button<'a, C: PixelColor> {
 ///     top_left: Point,
-///     bottom_right: Point,
+///     size: Size,
 ///     bg_color: C,
 ///     fg_color: C,
 ///     text: &'a str,
@@ -32,7 +31,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
 ///         egrectangle!(
 ///             top_left = self.top_left,
-///             bottom_right = self.bottom_right,
+///             size = self.size,
 ///             style = primitive_style!(fill_color = self.bg_color)
 ///         )
 ///         .draw(display);
@@ -47,7 +46,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// let mut button = Button {
 ///     top_left: Point::zero(),
-///     bottom_right: Point::new(100, 50),
+///     size: Size::new(100, 50),
 ///     bg_color: Rgb888::RED,
 ///     fg_color: Rgb888::BLUE,
 ///     text: "Click me!",
