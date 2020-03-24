@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#285](https://github.com/jamwaffles/embedded-graphics/pull/285) Add multiplication and division by a scalar for `Point` and `Size`.
+
 ### Changed
 
 - **(breaking)** [#274](https://github.com/jamwaffles/embedded-graphics/pull/274) The `Circle` is now defined by its bounding box top-left corner and its diameter instead of its center and its radius. To convert your code, you can replace `Circle::new(point, radius)` by `Circle::with_center(point, 2 * radius + 1)`.
