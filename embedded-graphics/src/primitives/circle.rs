@@ -77,7 +77,7 @@ impl Circle {
 
     /// Return the center point of the circle
     pub fn center(&self) -> Point {
-        self.top_left + Size::new(self.diameter / 2, self.diameter / 2)
+        self.top_left + Size::new(self.diameter, self.diameter) / 2
     }
 }
 

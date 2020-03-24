@@ -1,5 +1,5 @@
 use crate::geometry::Point;
-use core::ops::{Add, AddAssign, Index, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
 /// 2D size.
 ///
@@ -119,6 +119,36 @@ impl SubAssign for Size {
     }
 }
 
+impl Mul<u32> for Size {
+    type Output = Size;
+
+    fn mul(self, rhs: u32) -> Size {
+        Size::new(self.width * rhs, self.height * rhs)
+    }
+}
+
+impl MulAssign<u32> for Size {
+    fn mul_assign(&mut self, rhs: u32) {
+        self.width *= rhs;
+        self.height *= rhs;
+    }
+}
+
+impl Div<u32> for Size {
+    type Output = Size;
+
+    fn div(self, rhs: u32) -> Size {
+        Size::new(self.width / rhs, self.height / rhs)
+    }
+}
+
+impl DivAssign<u32> for Size {
+    fn div_assign(&mut self, rhs: u32) {
+        self.width /= rhs;
+        self.height /= rhs;
+    }
+}
+
 impl Index<usize> for Size {
     type Output = u32;
 
@@ -208,6 +238,26 @@ mod tests {
         let right = Size::new(10, 20);
 
         assert_eq!(left - right, Size::new(20, 20));
+    }
+
+    #[test]
+    fn sizes_can_be_multiplied_by_scalar() {
+        let s = Size::new(1, 2);
+        assert_eq!(s * 3, Size::new(3, 6));
+
+        let mut s = Size::new(2, 3);
+        s *= 4;
+        assert_eq!(s, Size::new(8, 12));
+    }
+
+    #[test]
+    fn sizes_can_be_divided_by_scalar() {
+        let s = Size::new(10, 20);
+        assert_eq!(s / 2, Size::new(5, 10));
+
+        let mut s = Size::new(20, 30);
+        s /= 5;
+        assert_eq!(s, Size::new(4, 6));
     }
 
     #[test]

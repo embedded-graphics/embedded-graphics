@@ -1,7 +1,7 @@
 use crate::geometry::Size;
 use core::{
     convert::{TryFrom, TryInto},
-    ops::{Add, AddAssign, Index, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 /// 2D point.
@@ -202,6 +202,36 @@ impl SubAssign<Size> for Point {
 
         self.x -= width;
         self.y -= height;
+    }
+}
+
+impl Mul<i32> for Point {
+    type Output = Point;
+
+    fn mul(self, rhs: i32) -> Point {
+        Point::new(self.x * rhs, self.y * rhs)
+    }
+}
+
+impl MulAssign<i32> for Point {
+    fn mul_assign(&mut self, rhs: i32) {
+        self.x *= rhs;
+        self.y *= rhs;
+    }
+}
+
+impl Div<i32> for Point {
+    type Output = Point;
+
+    fn div(self, rhs: i32) -> Point {
+        Point::new(self.x / rhs, self.y / rhs)
+    }
+}
+
+impl DivAssign<i32> for Point {
+    fn div_assign(&mut self, rhs: i32) {
+        self.x /= rhs;
+        self.y /= rhs;
     }
 }
 
@@ -437,6 +467,26 @@ mod tests {
         let right = Size::new(31, 42);
 
         assert_eq!(left - right, Point::new(-21, -22));
+    }
+
+    #[test]
+    fn points_can_be_multiplied_by_scalar() {
+        let p = Point::new(1, 2);
+        assert_eq!(p * 3, Point::new(3, 6));
+
+        let mut p = Point::new(3, 4);
+        p *= -5;
+        assert_eq!(p, Point::new(-15, -20));
+    }
+
+    #[test]
+    fn points_can_be_divided_by_scalar() {
+        let p = Point::new(10, 20);
+        assert_eq!(p / 2, Point::new(5, 10));
+
+        let mut p = Point::new(-10, 10);
+        p /= -5;
+        assert_eq!(p, Point::new(2, -2));
     }
 
     #[test]
