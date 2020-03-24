@@ -1,7 +1,7 @@
 use crate::{display::SimulatorDisplay, output_settings::OutputSettings};
 use embedded_graphics::{
     drawable::{Drawable, Pixel},
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::{PixelColor, Rgb888, RgbColor},
     primitives::{Primitive, Rectangle},
     style::{PrimitiveStyle, Styled},
@@ -54,17 +54,14 @@ impl Framebuffer {
         let Size { width, height } = display.size();
 
         let pixel_pitch = (self.output_settings.scale + self.output_settings.pixel_spacing) as i32;
-        let pixel_size = Size::new(
-            self.output_settings.scale - 1,
-            self.output_settings.scale - 1,
-        );
+        let pixel_size = Size::new(self.output_settings.scale, self.output_settings.scale);
 
         for y in 0..height as i32 {
             for x in 0..width as i32 {
                 let color = display.get_pixel(Point::new(x, y)).into();
                 let p = Point::new(x * pixel_pitch, y * pixel_pitch);
 
-                Rectangle::new(p, p + pixel_size)
+                Rectangle::new(p, pixel_size)
                     .into_styled(PrimitiveStyle::with_fill(
                         self.output_settings.theme.convert(color),
                     ))
@@ -116,7 +113,7 @@ impl DrawTarget<Rgb888> for Framebuffer {
             let color = &[fill_color.r(), fill_color.g(), fill_color.b()];
 
             let tl = item.primitive.top_left;
-            let br = item.primitive.bottom_right;
+            let br = item.primitive.bottom_right();
             for y in tl.y..=br.y {
                 for x in tl.x..=br.x {
                     let p = Point::new(x, y);

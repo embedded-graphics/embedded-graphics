@@ -40,7 +40,7 @@ impl DrawTarget<TestPixelColor> for FakeDisplay {
 fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
     let mut display = FakeDisplay {};
 
-    let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
+    let mut chained = Rectangle::new(Point::new(0, 0), Size::new(1, 1))
         .into_styled(PrimitiveStyle::default())
         .into_iter()
         .chain(
@@ -77,7 +77,7 @@ fn return_from_fn() -> Result<(), core::convert::Infallible> {
 fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
     let mut display = FakeDisplay {};
 
-    let mut chained = Rectangle::new(Point::new(0, 0), Point::new(1, 1))
+    let mut chained = Rectangle::new(Point::new(0, 0), Size::new(1, 1))
         .into_styled(PrimitiveStyle::default())
         .into_iter()
         .chain(

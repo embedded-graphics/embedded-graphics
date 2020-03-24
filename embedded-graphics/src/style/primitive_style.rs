@@ -137,7 +137,7 @@ where
 ///     .stroke_width(1)
 ///     .build();
 ///
-/// let rectangle = Rectangle::new(Point::new(20, 20), Point::new(40, 30)).into_styled(style);
+/// let rectangle = Rectangle::new(Point::new(20, 20), Size::new(20, 10)).into_styled(style);
 /// ```
 ///
 /// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html

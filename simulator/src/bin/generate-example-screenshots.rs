@@ -117,7 +117,7 @@ some display drivers implement accelerated drawing of iterators."#,
                 pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
             };
             {}
-            Rectangle::new(Point::new(16, 24), Point::new(48, 40))
+            Rectangle::new(Point::new(16, 24), Size::new(32, 16))
                 .into_styled(
                     PrimitiveStyleBuilder::new()
                         .stroke_width(2)
@@ -138,7 +138,7 @@ some display drivers implement accelerated drawing of iterators."#,
                 pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
             };
             {}
-            Circle::new(Point::new(32, 32), 20)
+            Circle::new(Point::new(16, 16), 40)
                 .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
                 .draw(&mut display)?;
         }
