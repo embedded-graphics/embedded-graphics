@@ -126,7 +126,7 @@ impl SideState {
 
 /// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct LineIterator {
+pub(crate) struct LineIterator {
     /// Bresenham error threshold
     ///
     /// If this is exceeded, a "minor" move is made
