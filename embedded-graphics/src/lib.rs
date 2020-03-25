@@ -191,7 +191,10 @@
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
-//! Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
+//! Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
@@ -206,7 +209,10 @@
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
-//! use embedded_graphics::{primitives::Line, style::PrimitiveStyleBuilder};
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyleBuilder,
+//! };
 //! Line::new(Point::new(16, 24), Point::new(48, 40))
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
@@ -214,7 +220,8 @@
 //!             .stroke_color(Rgb888::RED)
 //!             .build(),
 //!     )
-//!     .draw(&mut display)
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
@@ -229,7 +236,10 @@
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
-//! use embedded_graphics::{primitives::Rectangle, style::PrimitiveStyleBuilder};
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+//! };
 //! Rectangle::new(Point::new(16, 24), Point::new(48, 40))
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
@@ -238,7 +248,8 @@
 //!             .fill_color(Rgb888::CYAN)
 //!             .build(),
 //!     )
-//!     .draw(&mut display)
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
@@ -249,18 +260,22 @@
 //! This example draws a circle with no stroke and a solid blue fill.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABh0lEQVR4nO3RQWrDQBAF0eT+h0687I1BYFnVA++B1uo/9ftDSoCYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWLHBfh7fdecMe2MKwcBAtcf/Z29M/deNgiQ+fzpp41jN940CJC59+mnXZN3XTMIkPne009bhm+5YxAg88zTT/38/oJBgJgAMQEyzz/9VD5C+e9BgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxARY4fkM/fz+gkGAmAAxAVZ4JsOW4VvuGARY4XsZdk3edc0gwAr3Ztg4duNNgwArfJ5h78y9lw0CLHI9xhnTzrhyEIBbCRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQ+we54CqBtmNBDwAAAABJRU5ErkJggg==" />
+//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABU0lEQVR4nO3RMQoCQRAFUb3/odXQwAGXDqpZ3oPJ+089H6QEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYrcM8Pq8XzaO3XjTmACB06efbBm+5Y4xAWICxATIXP36b/38/oIxAWICxASICRATICZATIAVrmbYMnzLHWMCxASICbDIKcbGsRtvGhOAvwkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkDsDS0HFIEk5XYuAAAAAElFTkSuQmCC" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
-//! use embedded_graphics::{primitives::Circle, style::PrimitiveStyleBuilder};
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyleBuilder,
+//! };
 //! Circle::new(Point::new(32, 32), 10)
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
 //!             .fill_color(Rgb888::BLUE)
 //!             .build(),
 //!     )
-//!     .draw(&mut display)
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
@@ -275,7 +290,10 @@
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
-//! use embedded_graphics::{primitives::Triangle, style::PrimitiveStyleBuilder};
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyleBuilder,
+//! };
 //! Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
@@ -283,7 +301,8 @@
 //!             .stroke_color(Rgb888::MAGENTA)
 //!             .build(),
 //!     )
-//!     .draw(&mut display)
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
@@ -298,8 +317,11 @@
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
 //!     fonts::{Font6x8, Text},
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
 //!     style::TextStyleBuilder,
 //! };
 //! let style = TextStyleBuilder::new(Font6x8)
@@ -307,7 +329,8 @@
 //!     .build();
 //! Text::new("Hello,\nRust!", Point::new(2, 28))
 //!     .into_styled(style)
-//!     .draw(&mut display)
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
@@ -322,11 +345,13 @@
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb888};
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 //! use tinytga::Tga;
 //! let tga = Tga::from_slice(include_bytes!("../../examples/assets/rust-pride.tga")).unwrap();
 //! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
-//! image.draw(&mut display)
+//! image.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
 //! </div>
