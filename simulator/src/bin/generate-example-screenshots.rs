@@ -41,19 +41,28 @@ macro_rules! op {
                 .trim()
         );
 
-        println!("/// ## {}", $title);
-        println!("///");
-        println!("/// {}", $description);
-        println!("///");
+        // Note: empty lines must remain between HTML elements and inner Markdown for the Markdown
+        // to be parsed correctly.
         println!(
-            "/// ![{} example screenshot](data:image/png;base64,{})",
-            $title, screenshot
+            r#"///<tr><td>
+            ///
+            /// ![{} example screenshot](data:image/png;base64,{})
+            ///
+            ///</td><td>
+///
+/// ## {}
+///
+/// {}
+///
+/// {}
+///
+/// </td></tr>"#,
+            $title,
+            screenshot,
+            $title,
+            $description,
+            docs.lines().collect::<Vec<_>>().join("\n/// ")
         );
-        println!("///");
-
-        for line in docs.lines() {
-            println!("/// {}", line);
-        }
     };
 }
 
@@ -62,6 +71,8 @@ fn main() {
     std::fs::create_dir_all(output_base).expect("Output directory could not be created");
 
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(64, 64));
+
+    println!("/// <table>");
 
     op!(
         display,
@@ -86,6 +97,8 @@ fn main() {
                 .draw(&mut display)
         }
     );
+
+    println!("/// </table>");
 
     // Add dummy mod to allow running rustfmt
     println!("pub mod dummy {{}}");
