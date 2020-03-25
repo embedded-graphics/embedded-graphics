@@ -8,9 +8,7 @@
 //!
 //! Screenshots are output to `target/drawing-ops`.
 
-use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
-};
+use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 
 const OUTPUT_BASE: &str = "./target/drawing-ops";
@@ -21,10 +19,7 @@ macro_rules! op {
 
         (|| $code)().unwrap();
 
-        let output_settings = OutputSettingsBuilder::new()
-            .scale(2)
-            .pixel_spacing(1)
-            .build();
+        let output_settings = OutputSettingsBuilder::new().scale(2).build();
 
         let path = format!("{}/{}.png", OUTPUT_BASE, $title);
         $display
@@ -44,23 +39,23 @@ macro_rules! op {
         // Note: empty lines must remain between HTML elements and inner Markdown for the Markdown
         // to be parsed correctly.
         println!(
-            r#"///<tr><td>
+            r#"/// ## {}
             ///
-            /// ![{} example screenshot](data:image/png;base64,{})
+            /// {}
             ///
-            ///</td><td>
-///
-/// ## {}
+            /// <div style="display: flex">
+            /// <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="{} example screenshot" src="data:image/png;base64,{}" />
+            /// <div style="flex-grow: 1;">
 ///
 /// {}
 ///
-/// {}
-///
-/// </td></tr>"#,
-            $title,
-            screenshot,
+/// </div>
+/// </div>
+///"#,
             $title,
             $description,
+            $title,
+            screenshot,
             docs.lines().collect::<Vec<_>>().join("\n/// ")
         );
     };
@@ -72,20 +67,38 @@ fn main() {
 
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(64, 64));
 
-    println!("/// <table>");
-
     op!(
         display,
         "Draw a single pixel",
-        "This example draws a single red pixel",
-        { Pixel(Point::new(32, 32), Rgb888::RED).draw(&mut display) }
+        "This example draws a single green pixel.",
+        { Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display) }
+    );
+
+    op!(
+        display,
+        "Draw a line",
+        "This example draws a red line with 1px stroke.",
+        {
+            use embedded_graphics::{primitives::Line, style::PrimitiveStyleBuilder};
+
+            Line::new(Point::new(16, 24), Point::new(48, 40))
+                .into_styled(
+                    PrimitiveStyleBuilder::new()
+                        .stroke_width(1)
+                        .stroke_color(Rgb888::RED)
+                        .build(),
+                )
+                .draw(&mut display)
+        }
     );
 
     op!(
         display,
         "Draw a rectangle",
-        "This example draws a rectangle with a 2px thick red stroke and cyan fill color",
+        "This example draws a rectangle with a 2px thick red stroke and cyan fill color.",
         {
+            use embedded_graphics::{primitives::Rectangle, style::PrimitiveStyleBuilder};
+
             Rectangle::new(Point::new(16, 24), Point::new(48, 40))
                 .into_styled(
                     PrimitiveStyleBuilder::new()
@@ -98,7 +111,84 @@ fn main() {
         }
     );
 
-    println!("/// </table>");
+    op!(
+        display,
+        "Draw a circle",
+        "This example draws a circle with no stroke and a solid blue fill.",
+        {
+            use embedded_graphics::{primitives::Circle, style::PrimitiveStyleBuilder};
+
+            Circle::new(Point::new(32, 32), 10)
+                .into_styled(
+                    PrimitiveStyleBuilder::new()
+                        .fill_color(Rgb888::BLUE)
+                        .build(),
+                )
+                .draw(&mut display)
+        }
+    );
+
+    op!(
+        display,
+        "Draw a triangle",
+        "This example draws a triangle with a solid 1px magenta stroke and no fill.",
+        {
+            use embedded_graphics::{primitives::Triangle, style::PrimitiveStyleBuilder};
+
+            Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
+                .into_styled(
+                    PrimitiveStyleBuilder::new()
+                        .stroke_width(1)
+                        .stroke_color(Rgb888::MAGENTA)
+                        .build(),
+                )
+                .draw(&mut display)
+        }
+    );
+
+    op!(
+        display,
+        "Draw some text",
+        "This example draws the text \"Hello,\\nRust!\" with the [`Font6x8`] font in green.",
+        {
+            use embedded_graphics::{
+                fonts::{Font6x8, Text},
+                style::TextStyleBuilder,
+            };
+
+            // Create a new text style
+            let style = TextStyleBuilder::new(Font6x8)
+                .text_color(Rgb888::GREEN)
+                .build();
+
+            Text::new("Hello,\nRust!", Point::new(2, 28))
+                .into_styled(style)
+                .draw(&mut display)
+        }
+    );
+
+    op!(
+        display,
+        "Display a TGA image",
+        "This example uses [tinytga](https://crates.io/crates/tinytga) to draw an image to the display.",
+        {
+            use embedded_graphics::{
+                image::Image,
+                pixelcolor::Rgb888,
+            };
+            use tinytga::Tga;
+
+            // Load the TGA image
+            let tga = Tga::from_slice(
+                include_bytes!("../../examples/assets/rust-pride.tga")
+            ).unwrap();
+
+            let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+
+            // Display the image
+            image.draw(&mut display)
+        }
+    );
 
     // Add dummy mod to allow running rustfmt
     println!("pub mod dummy {{}}");
