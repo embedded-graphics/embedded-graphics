@@ -39,24 +39,24 @@ macro_rules! op {
         // Note: empty lines must remain between HTML elements and inner Markdown for the Markdown
         // to be parsed correctly.
         println!(
-            r#"/// ## {}
-            ///
-            /// {}
-            ///
-            /// <div style="display: flex">
-            /// <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="{} example screenshot" src="data:image/png;base64,{}" />
-            /// <div style="flex-grow: 1;">
-///
-/// {}
-///
-/// </div>
-/// </div>
-///"#,
+            r#"//! ## {}
+            //!
+            //! {}
+            //!
+            //! <div style="display: flex">
+            //! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="{} example screenshot" src="data:image/png;base64,{}" />
+            //! <div style="flex-grow: 1;">
+//!
+//! {}
+//!
+//! </div>
+//! </div>
+//!"#,
             $title,
             $description,
             $title,
             screenshot,
-            docs.lines().collect::<Vec<_>>().join("\n/// ")
+            docs.lines().collect::<Vec<_>>().join("\n//! ")
         );
     };
 }
