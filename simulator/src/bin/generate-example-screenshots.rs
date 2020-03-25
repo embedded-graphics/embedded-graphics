@@ -134,7 +134,7 @@ fn main() {
                 pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyleBuilder,
             };
 
-            Circle::new(Point::new(32, 32), 10)
+            Circle::new(Point::new(22, 22), 20)
                 .into_styled(
                     PrimitiveStyleBuilder::new()
                         .fill_color(Rgb888::BLUE)

@@ -260,7 +260,7 @@
 //! This example draws a circle with no stroke and a solid blue fill.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABU0lEQVR4nO3RMQoCQRAFUb3/odXQwAGXDqpZ3oPJ+089H6QEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYrcM8Pq8XzaO3XjTmACB06efbBm+5Y4xAWICxATIXP36b/38/oIxAWICxASICRATICZATIAVrmbYMnzLHWMCxASICbDIKcbGsRtvGhOAvwkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkDsDS0HFIEk5XYuAAAAAElFTkSuQmCC" />
+//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABfElEQVR4nO3RQWoDQRAEQfv/j7ZNn/YiLJBW2QMRMPeuye8vUgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRA7LsDP3/vPSaNOunUIEHjm0x/ZPnD7fUOAwCuf/sjGsRtvGgJk7vj6q12Td10zBIgJEBMgc/fXX20ZvuWOIUBMgJgAmU9+/VU/v79gCBATICZATICYADEBYgLEBIgJEBMgJsAKn8ywZfiWO4YAMQFiAqxwd4Zdk3ddMwSICRATYIU7Mmwcu/GmIcAir8TYPnD7fUOARZ6JcdKok24dAvBWAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEPsFGt0ogSGTjtYAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -268,7 +268,7 @@
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyleBuilder,
 //! };
-//! Circle::new(Point::new(32, 32), 10)
+//! Circle::new(Point::new(22, 22), 20)
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
 //!             .fill_color(Rgb888::BLUE)
