@@ -348,7 +348,11 @@
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 //! use tinytga::Tga;
-//! let tga = Tga::from_slice(include_bytes!("../../examples/assets/rust-pride.tga")).unwrap();
+//! let tga = Tga::from_slice(include_bytes!(concat!(
+//!     env!("CARGO_MANIFEST_DIR"),
+//!     "/../simulator/examples/assets/rust-pride.tga"
+//! )))
+//! .unwrap();
 //! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())

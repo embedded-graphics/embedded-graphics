@@ -201,7 +201,7 @@ fn main() {
 
             // Load the TGA image
             let tga = Tga::from_slice(
-                include_bytes!("../../examples/assets/rust-pride.tga")
+                include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../simulator/examples/assets/rust-pride.tga"))
             ).unwrap();
 
             let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
