@@ -92,11 +92,11 @@ struct ParallelLineState {
 }
 
 impl ParallelLineState {
-    fn new(start: Point, initial_error: i32) -> Self {
+    fn new(start: Point, initial_error: i32, dx_accum: u32) -> Self {
         Self {
             start,
             error: initial_error,
-            dx_accum: 0,
+            dx_accum,
         }
     }
 }
@@ -249,7 +249,7 @@ impl LineIterator {
             thickness_accum: dx + dy,
             // Next side after current line in `state` is drawn will be right side
             next_side: Side::Right,
-            parallel: ParallelLineState::new(line.start, 0),
+            parallel: ParallelLineState::new(line.start, 0, 0),
             left: SideState::new(line.start),
             right: SideState::new(line.start),
         }
@@ -299,11 +299,11 @@ impl Iterator for LineIterator {
                 if side.p_error > self.threshold {
                     extra = true;
 
-                    let (start, p_error) = match self.next_side {
-                        Side::Left => (start, side.p_error + self.e_diag),
-                        Side::Right => (start + self.step_minor, -side.p_error),
+                    let (start, p_error, initial_accum) = match self.next_side {
+                        Side::Left => (start, side.p_error + self.e_diag, 0),
+                        Side::Right => (start + self.step_minor, -side.p_error, 1),
                     };
-                    self.parallel = ParallelLineState::new(start, p_error);
+                    self.parallel = ParallelLineState::new(start, p_error, initial_accum);
 
                     side.p_error += self.e_diag;
                 }
@@ -323,7 +323,7 @@ impl Iterator for LineIterator {
                     Side::Left => side.p_error,
                     Side::Right => -side.p_error,
                 };
-                self.parallel = ParallelLineState::new(side.start, p_error);
+                self.parallel = ParallelLineState::new(side.start, p_error, 0);
             }
 
             // Switch to opposite side of line to keep it balanced
@@ -616,6 +616,35 @@ mod tests {
                 "  ..        ",
                 "  ..        ",
                 "  ..        ",
+            ])
+        );
+    }
+
+    // Check that 45 degree lines don't draw their right side 1px too long
+    #[test]
+    fn diagonal() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Line::new(Point::new(3, 2), Point::new(10, 9))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 7))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     #        ",
+                "    ###       ",
+                "   #####      ",
+                "  #######     ",
+                " #########    ",
+                "  #########   ",
+                "   #########  ",
+                "    ######### ",
+                "     #######  ",
+                "      #####   ",
+                "       ###    ",
+                "        #     ",
             ])
         );
     }
