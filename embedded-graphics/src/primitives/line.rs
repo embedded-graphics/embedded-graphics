@@ -69,8 +69,10 @@ impl Line {
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
+pub enum Side {
+    /// DOCS LOL
     Left,
+    /// DOCS LOL
     Right,
 }
 
@@ -173,6 +175,9 @@ pub(crate) struct LineIterator {
     /// direction to move in.
     step_minor: Point,
 
+    perp_step_major: Point,
+    perp_step_minor: Point,
+
     /// Thickness of pixels drawn so far
     ///
     /// Compared against `thickness` for width limit
@@ -192,6 +197,8 @@ pub(crate) struct LineIterator {
 
     /// Right side state
     right: SideState,
+
+    swap_sides: bool,
 }
 
 impl LineIterator {
@@ -210,6 +217,14 @@ impl LineIterator {
             (false, false) => Point::new(-1, -1),
         };
 
+        // Left-hand perpendicular to the line between start and end
+        let perp_direction = match (dx >= 0, dy >= 0) {
+            (true, true) => Point::new(1, -1),
+            (true, false) => Point::new(-1, -1),
+            (false, true) => Point::new(1, 1),
+            (false, false) => Point::new(-1, 1),
+        };
+
         // Thickness threshold, taking into account that fewer pixels are required to draw a
         // diagonal line of the same perceived width.
         let thickness = 4 * stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
@@ -217,13 +232,29 @@ impl LineIterator {
         let mut dx = dx.abs();
         let mut dy = dy.abs();
 
+        // Force LHS to stay on left by swapping sides on some octants
+        let swap_sides = match (dy > dx, direction.x, direction.y) {
+            (false, 1, -1) | (true, 1, 1) | (false, -1, 1) | (true, -1, -1) => true,
+            _ => false,
+        };
+
         // Swap components if line is Y-major. dx is always the "major" direction delta.
-        let (step_major, step_minor) = if dy > dx {
+        let (step_major, step_minor, perp_step_major, perp_step_minor) = if dy > dx {
             core::mem::swap(&mut dx, &mut dy);
 
-            (Point::new(0, direction.y), Point::new(direction.x, 0))
+            (
+                Point::new(0, direction.y),
+                Point::new(direction.x, 0),
+                Point::new(0, perp_direction.y),
+                Point::new(perp_direction.x, 0),
+            )
         } else {
-            (Point::new(direction.x, 0), Point::new(0, direction.y))
+            (
+                Point::new(direction.x, 0),
+                Point::new(0, direction.y),
+                Point::new(perp_direction.x, 0),
+                Point::new(0, perp_direction.y),
+            )
         };
 
         let threshold = dx - 2 * dy;
@@ -237,6 +268,8 @@ impl LineIterator {
         Self {
             step_major,
             step_minor,
+            perp_step_major,
+            perp_step_minor,
             dx: dx,
             dy: dy,
             start: line.start,
@@ -247,11 +280,12 @@ impl LineIterator {
             thickness,
             direction,
             thickness_accum: dx + dy,
-            // Next side after current line in `state` is drawn will be right side
-            next_side: Side::Right,
+            // Next side to draw after center line
+            next_side: Side::Left,
             parallel: ParallelLineState::new(line.start, 0, 0),
             left: SideState::new(line.start),
             right: SideState::new(line.start),
+            swap_sides,
         }
     }
 }
@@ -290,20 +324,24 @@ impl Iterator for LineIterator {
 
             if side.error > self.threshold {
                 match self.next_side {
-                    Side::Left => side.start += self.step_major,
-                    Side::Right => side.start -= self.step_major,
-                };
+                    Side::Left => side.start += self.perp_step_major,
+                    Side::Right => side.start -= self.perp_step_major,
+                }
+
                 side.error += self.e_diag;
                 self.thickness_accum += 2 * self.dy;
 
                 if side.p_error > self.threshold {
                     extra = true;
 
-                    let (start, p_error, initial_accum) = match self.next_side {
-                        Side::Left => (start, side.p_error + self.e_diag, 0),
-                        Side::Right => (start + self.step_minor, -side.p_error, 1),
+                    self.parallel = match (self.next_side, self.swap_sides) {
+                        (Side::Left, true) | (Side::Right, false) => {
+                            ParallelLineState::new(start + self.step_minor, -side.p_error, 1)
+                        }
+                        (Side::Right, true) | (Side::Left, false) => {
+                            ParallelLineState::new(start, side.p_error + self.e_diag, 0)
+                        }
                     };
-                    self.parallel = ParallelLineState::new(start, p_error, initial_accum);
 
                     side.p_error += self.e_diag;
                 }
@@ -313,9 +351,10 @@ impl Iterator for LineIterator {
 
             if !extra {
                 match self.next_side {
-                    Side::Left => side.start -= self.step_minor,
-                    Side::Right => side.start += self.step_minor,
-                };
+                    Side::Left => side.start += self.perp_step_minor,
+                    Side::Right => side.start -= self.perp_step_minor,
+                }
+
                 side.error += self.e_square;
                 self.thickness_accum += 2 * self.dx;
 
@@ -323,6 +362,9 @@ impl Iterator for LineIterator {
                     Side::Left => side.p_error,
                     Side::Right => -side.p_error,
                 };
+
+                let p_error = if self.swap_sides { -p_error } else { p_error };
+
                 self.parallel = ParallelLineState::new(side.start, p_error, 0);
             }
 
@@ -566,21 +608,19 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        #[rustfmt::skip]
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
-                "                      ",
-                "  ##                  ",
-                "  #####               ",
-                "  ########            ",
-                " ############         ",
-                "    ############      ",
-                "       ############   ",
-                "          ########### ",
-                "             ######## ",
-                "                ##### ",
-                "                   #  ",
+                "   #                   ",
+                "  #####                ",
+                "  ########             ",
+                "  ###########          ",
+                "    ############       ",
+                "       ############    ",
+                "          ############ ",
+                "             ########  ",
+                "                #####  ",
+                "                   ##  ",
             ])
         );
     }
@@ -601,14 +641,13 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        #[rustfmt::skip]
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
                 "            ",
+                "  ######### ",
+                "  ######### ",
                 "            ",
-                "  ######### ",
-                "  ######### ",
                 "            ",
                 "  ..        ",
                 "  ..        ",
@@ -665,7 +704,6 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        #[rustfmt::skip]
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
@@ -680,6 +718,40 @@ mod tests {
                 " ...        ",
                 " ...        ",
                 " ...        ",
+            ])
+        );
+    }
+
+    #[test]
+    fn event_width_offset() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        // Horizontal line
+        Line::new(Point::new(2, 3), Point::new(10, 3))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
+            .draw(&mut display)
+            .unwrap();
+
+        // Vertical line
+        Line::new(Point::new(2, 9), Point::new(10, 8))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "            ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "            ",
+                "       #### ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "  #####     ",
             ])
         );
     }
