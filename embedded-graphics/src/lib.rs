@@ -42,7 +42,6 @@
 //!
 //! Note that some drivers may not support the latest version of embedded-graphics.
 //!
-//! 
 //! * [epd-waveshare](https://crates.io/crates/epd-waveshare) Driver for various ePaper displays (EPD) from Waveshare
 //! * [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
 //! * [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
