@@ -3,12 +3,14 @@
 pub mod circle;
 pub mod ellipse;
 pub mod line;
+pub mod polyline;
 pub mod rectangle;
 mod thick_line_iterator;
 pub mod triangle;
 
 pub use self::{
-    circle::Circle, ellipse::Ellipse, line::Line, rectangle::Rectangle, triangle::Triangle,
+    circle::Circle, ellipse::Ellipse, line::Line, polyline::Polyline, rectangle::Rectangle,
+    triangle::Triangle,
 };
 use crate::{
     geometry::{Dimensions, Point},

@@ -3,7 +3,7 @@ use embedded_graphics::{
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::Gray8,
-    primitives::{Circle, Ellipse, Line, Primitive, Rectangle, Triangle},
+    primitives::*,
     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 };
 
@@ -107,6 +107,23 @@ fn filled_ellipse(c: &mut Criterion) {
     });
 }
 
+fn polyline(c: &mut Criterion) {
+    c.bench_function("polyline", |b| {
+        let points = [
+            Point::new(5, 10),
+            Point::new(15, 20),
+            Point::new(5, 20),
+            Point::new(30, 50),
+            Point::new(100, 100),
+        ];
+
+        let object =
+            &Polyline::new(&points).into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 criterion_group!(
     primitives,
     filled_circle,
@@ -118,6 +135,7 @@ criterion_group!(
     triangle,
     filled_triangle,
     ellipse,
-    filled_ellipse
+    filled_ellipse,
+    polyline
 );
 criterion_main!(primitives);
