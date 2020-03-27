@@ -12,8 +12,8 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(256, 128));
 
     egcircle!(
-        top_left = (0, 0),
-        diameter = 41,
+        center = (20, 20),
+        radius = 20 as u32,
         style = primitive_style!(fill_color = Rgb565::RED)
     )
     .into_iter()

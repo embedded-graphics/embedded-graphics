@@ -24,12 +24,12 @@ fn move_circle(
     new_center: Point,
 ) -> Result<(), core::convert::Infallible> {
     // Clear old circle
-    Circle::with_center(old_center, 200)
+    Circle::new(old_center, 100)
         .into_styled(PrimitiveStyle::with_fill(BACKGROUND_COLOR))
         .draw(display)?;
 
     // Draw circle at new location
-    Circle::with_center(new_center, 200)
+    Circle::new(new_center, 100)
         .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
         .draw(display)?;
 
@@ -41,7 +41,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut window = Window::new("Click to move circle", &OutputSettings::default());
 
     let mut position = Point::new(200, 200);
-    Circle::with_center(position, 200)
+    Circle::new(position, 100)
         .into_styled(PrimitiveStyle::with_fill(FOREGROUND_COLOR))
         .draw(&mut display)?;
 

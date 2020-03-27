@@ -98,7 +98,7 @@ where
 /// ## Build a style with configured stroke and fill
 ///
 /// This example builds a style for a circle with a 3px red stroke and a solid green fill. The
-/// circle has its top-left at (10, 10) with a diameter of 20px.
+/// circle is centered at (20, 20) with a radius of 10px.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -115,7 +115,7 @@ where
 ///     .fill_color(Rgb565::GREEN)
 ///     .build();
 ///
-/// let circle = Circle::new(Point::new(10, 10), 20).into_styled(style);
+/// let circle = Circle::new(Point::new(20, 20), 10).into_styled(style);
 /// ```
 ///
 /// ## Build a style with stroke and no fill
