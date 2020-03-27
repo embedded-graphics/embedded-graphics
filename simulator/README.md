@@ -27,7 +27,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let line_style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
-    Circle::new(Point::new(0, 0), 129)
+    Circle::new(Point::new(64, 64), 64)
         .into_styled(line_style)
         .draw(&mut display)?;
 

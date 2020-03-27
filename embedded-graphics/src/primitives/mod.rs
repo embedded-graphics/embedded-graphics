@@ -39,11 +39,11 @@ pub trait Primitive: Dimensions {
 ///
 /// // Coordinates can be defined as any type that implements `Into<Point>`
 /// let line_circle: Styled<Circle, PrimitiveStyle<Rgb565>> =
-///     egcircle!(top_left = (10, 20), diameter = 30);
+///     egcircle!(center = (10, 20), radius = 30);
 ///
 /// let filled_circle: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
 ///     center = (10, 20),
-///     diameter = 30,
+///     radius = 30,
 ///     style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
 /// );
 /// ```
@@ -64,8 +64,8 @@ pub trait Primitive: Dimensions {
 /// };
 ///
 /// let circle_1: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
-///     top_left = (10, 20),
-///     diameter = 30,
+///     center = (10, 20),
+///     radius = 30,
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
 ///         fill_color = Rgb565::GREEN,
@@ -86,26 +86,15 @@ pub trait Primitive: Dimensions {
 /// ```
 #[macro_export]
 macro_rules! egcircle {
-    (top_left = $top_left:expr, diameter = $d:expr $(,)?) => {{
-        $crate::egcircle!(
-            top_left = $top_left,
-            diameter = $d,
-            style = $crate::style::PrimitiveStyle::default()
-        )
-    }};
-    (top_left = $top_left:expr, diameter = $d:expr, style = $style:expr $(,)?) => {{
-        $crate::primitives::Circle::new($crate::geometry::Point::from($top_left), $d)
-            .into_styled($style)
-    }};
-    (center = $center:expr, diameter = $d:expr $(,)?) => {{
+    (center = $center:expr, radius = $r:expr $(,)?) => {{
         $crate::egcircle!(
             center = $center,
-            diameter = $d,
+            radius = $r,
             style = $crate::style::PrimitiveStyle::default()
         )
     }};
-    (center = $center:expr, diameter = $d:expr, style = $style:expr $(,)?) => {{
-        $crate::primitives::Circle::with_center($crate::geometry::Point::from($center), $d)
+    (center = $center:expr, radius = $r:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
             .into_styled($style)
     }};
 }
@@ -349,19 +338,11 @@ mod tests {
     #[test]
     fn circle() {
         let _c: Styled<Circle, PrimitiveStyle<Rgb565>> =
-            egcircle!(top_left = Point::new(10, 20), diameter = 30);
-        let _c: Styled<Circle, PrimitiveStyle<Rgb565>> =
-            egcircle!(top_left = (10, 20), diameter = 30);
-        let _c: Styled<Circle, PrimitiveStyle<Rgb565>> =
-            egcircle!(center = (10, 20), diameter = 30);
-        let _c: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
-            top_left = (10, 20),
-            diameter = 30,
-            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
-        );
+            egcircle!(center = Point::new(10, 20), radius = 30);
+        let _c: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(center = (10, 20), radius = 30);
         let _c: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
             center = (10, 20),
-            diameter = 30,
+            radius = 30,
             style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
         );
     }

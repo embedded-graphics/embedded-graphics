@@ -44,7 +44,7 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
         .into_styled(PrimitiveStyle::default())
         .into_iter()
         .chain(
-            Circle::new(Point::new(1, 1), 3)
+            Circle::new(Point::new(2, 2), 1)
                 .into_styled(PrimitiveStyle::default())
                 .into_iter(),
         );
@@ -57,7 +57,7 @@ fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
         .into_styled(PrimitiveStyle::with_stroke(1u8.into(), 1))
         .into_iter();
 
-    let circle = Circle::new(Point::new(2, 2), 7)
+    let circle = Circle::new(Point::new(5, 5), 3)
         .into_styled(PrimitiveStyle::with_stroke(1u8.into(), 1))
         .into_iter();
 
@@ -81,7 +81,7 @@ fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
         .into_styled(PrimitiveStyle::default())
         .into_iter()
         .chain(
-            Circle::new(Point::new(1, 1), 3)
+            Circle::new(Point::new(2, 2), 1)
                 .into_styled(PrimitiveStyle::default())
                 .into_iter(),
         );

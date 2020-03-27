@@ -91,10 +91,10 @@ use crate::{
 ///     iface: SPI1,
 /// };
 ///
-/// // Draw a circle with top-left at `(22, 22)` with a diameter of `20` and a white stroke
+/// // Draw a circle centered around `(32, 32)` with a radius of `10` and a white stroke
 /// let circle = egcircle!(
-///     top_left = (22, 22),
-///     diameter = 20,
+///     center = (32, 32),
+///     radius = 10,
 ///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
 /// );
 /// circle.draw(&mut display)?;

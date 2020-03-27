@@ -46,7 +46,7 @@ fn main() -> Result<(), std::convert::Infallible> {
         .draw(&mut display)?;
 
     // Draw a circle with a 3px wide stroke.
-    Circle::new(Point::new(88, yoffset), 17)
+    Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(thick_stroke)
         .draw(&mut display)?;
 
