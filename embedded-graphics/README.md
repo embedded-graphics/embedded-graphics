@@ -70,6 +70,7 @@ issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 ## Display drivers
 
 - [embedded-graphics-simulator](https://docs.rs/embedded-graphics-simulator/): Simulated display
+- [epd-waveshare](https://crates.io/crates/epd-waveshare) Driver for various ePaper displays (EPD) from Waveshare
 - [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
 - [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
 - [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
@@ -81,7 +82,6 @@ issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 - [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
 - [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
 - [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
-- [epd-waveshare](https://crates.io/crates/epd-waveshare) Driver for various ePaper displays (EPD) from Waveshare 
 
 Note that some drivers may not support the latest version of embedded-graphics.
 
