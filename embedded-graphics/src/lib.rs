@@ -186,8 +186,11 @@
 //!
 //! This example draws a single green pixel.
 //!
+//! For cases where many pixels are drawn or where performance is a concern, it may be
+//! preferable to implement a custom iterator instead of calling `draw_pixel` many times.
+//!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a single pixel example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABNElEQVR4nO3RsQkAMQwEwf/+i7YduQEHi2AGlOvY/yMlQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEJsfYJ0bvGPs45cAvBAgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWIbyaYCgYRUdd0AAAAASUVORK5CYII=" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a single pixel example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABNElEQVR4nO3RsQkAMQwEwf/+i7YduQEHi2AGlOvY/yMlQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEJsfYJ0bvGPs45cAvBAgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWIbyaYCgYRUdd0AAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -205,7 +208,7 @@
 //! This example draws a red line with 1px stroke.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a line example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABgUlEQVR4nO3RQUrFQBAAUb3/oVUILuSDCDJTPckryDbT3e/9TWkA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIC45QAfX993yx87sOU3AfB7W28C47WtdwDwWnYHGFfZ7gCuRuz+ZIwR+wIY1NMwxu0IYFBPwBi9F4BB3RXjmF0ADOpOGEfOD2BQp2OcOPOPAAzqRIxT5vxTAAZ1Csbk2f4VgEFNxpg2z5IADGoaxoQZtgZgUBMwqndHBGBQFcbOt0YHYFA7MVb//8gADOrCWHemdX++SQBuHoA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGI+wRL3SKBI6DgaAAAAABJRU5ErkJggg==" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a line example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABgUlEQVR4nO3RQUrFQBAAUb3/oVUILuSDCDJTPckryDbT3e/9TWkA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIC45QAfX993yx87sOU3AfB7W28C47WtdwDwWnYHGFfZ7gCuRuz+ZIwR+wIY1NMwxu0IYFBPwBi9F4BB3RXjmF0ADOpOGEfOD2BQp2OcOPOPAAzqRIxT5vxTAAZ1Csbk2f4VgEFNxpg2z5IADGoaxoQZtgZgUBMwqndHBGBQFcbOt0YHYFA7MVb//8gADOrCWHemdX++SQBuHoA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGI+wRL3SKBI6DgaAAAAABJRU5ErkJggg==" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -232,7 +235,7 @@
 //! This example draws a rectangle with a 2px thick red stroke and cyan fill color.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a rectangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB2klEQVR4nO3RMWokURAE0Z37H3pWRoISCjUylIQE8aChv5NGxeufUAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmANg8wPvj+/t2Z9othwGe7ZbDAM92y2GAZ7vl6ACvd79+u/fr8ziffz9ttxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+X4Syf/2u5Mu+UwwLPdchjg2W45DPBst6xvMQDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDsPzy9cIE/9mieAAAAAElFTkSuQmCC" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a rectangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB2klEQVR4nO3RMWokURAE0Z37H3pWRoISCjUylIQE8aChv5NGxeufUAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmANg8wPvj+/t2Z9othwGe7ZbDAM92y2GAZ7vl6ACvd79+u/fr8ziffz9ttxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+X4Syf/2u5Mu+UwwLPdchjg2W45DPBst6xvMQDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDsPzy9cIE/9mieAAAAAElFTkSuQmCC" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -260,20 +263,16 @@
 //! This example draws a circle with no stroke and a solid blue fill.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABfElEQVR4nO3RQWoDQRAEQfv/j7ZNn/YiLJBW2QMRMPeuye8vUgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRA7LsDP3/vPSaNOunUIEHjm0x/ZPnD7fUOAwCuf/sjGsRtvGgJk7vj6q12Td10zBIgJEBMgc/fXX20ZvuWOIUBMgJgAmU9+/VU/v79gCBATICZATICYADEBYgLEBIgJEBMgJsAKn8ywZfiWO4YAMQFiAqxwd4Zdk3ddMwSICRATYIU7Mmwcu/GmIcAir8TYPnD7fUOARZ6JcdKok24dAvBWAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEPsFGt0ogSGTjtYAAAAASUVORK5CYII=" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACe0lEQVR4nO3RS1LEMAxFUdj/ovlkwisMJJZkPSfcU9VDyR3d1xdYEcCMAGYEMCOAGQHMCGBGADMCmBHAjABmBDAjgBkBzAhgRgAzApgRwIwAZgQwI4AZAcwIYEYAsxsFePv4zdv9A3f/f4IArWLnvmKvT97r3wgCGKw7+m/8n+//B4IABv1H/43nFJ5XBQFs9jm96j5I93uCAJ+63zvseXrVd5a+lwQBvvS9dNj/9KrjOB1vCAJ81/HG4V6nV2tPtHa7IMDP1m4/3Pf0atWhVu0VBPjLqr2HZ5xe1Z+rfqMgwLn6jYIA5+o3CgKcq994eN7pVeXRKncJAlxVuUsQ4KrKXYIAV1XuOjz79KrmdDVbBAHm1GwRBJhTs0UQYE7NFkGAOTVbBAHm1Gw5/J/Tq+wBs/OCABHZeUGAiOy8IEBEdl4QICI7LwgQkZ0XBIjIzgsCRGTnBQEisvOCABHZeUGAiOy8IEBEdl4QICI7LwgQkZ0XBIjIzgsCRGTnBQEisvOCABHZ+cH/yVBzupotggBzarYIAsyp2SIIMKdmiyDAnJotggBzarYMnp2h8miVuwQBrqrcJQhwVeUuQYCrKncNnpeh/lz1GwUBztVvFAQ4V79REOBc/cbBMzKsOtSqvYIAf1m1d3DfDGtPtHa7IMDP1m4f3CtDx3E63hAE+K7jjcH+GfrO0veSIMCXvpcGe2boPkj3e4IAn7rfG+yTwXMKz6uCABvpj+H/fP8/EATYyLoYe33yXv9GEGA7sSS7f+Du/08QAAsQwIwAZgQwI4AZAcwIYEYAMwKYEcCMAGYEMCOAGQHMCGBGADMCmBHAjABmBDAjgBkBzN4BABtSgS+nmkgAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyleBuilder,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
 //! };
-//! Circle::new(Point::new(22, 22), 20)
-//!     .into_styled(
-//!         PrimitiveStyleBuilder::new()
-//!             .fill_color(Rgb888::BLUE)
-//!             .build(),
-//!     )
+//! Circle::new(Point::new(32, 32), 20)
+//!     .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -286,21 +285,16 @@
 //! This example draws a triangle with a solid 1px magenta stroke and no fill.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw a triangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAC0klEQVR4nO3R0YpbMQyE4fb9H7p1CQwHygn22ppfhvn2ZgmJNdL8/hWoFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFAC7voA/4+/fGrcucmtuSQGwFABLAZjn6Z//3+W+xPI8+vP/u9yXWJ5Hf/5/l/sSy/Poz//vcl/i4e3cb593dlNWeTv02+ed3ZRV3g799nlnN2WVt0O/fd7ZTVmHmRPPfKePO1LKzHFnvtPHHSll5rgz3+njjpQyc9yZ7/RxR8ph9ayr36d0zyerB139PqV7Plk96Or3Kd3zyepBV79P6Z5v2Dnlzm89+iaTnSPu/NajbzLZOeLObz36JpOdI+781qNvsuHU+U69U6FjJjl1uFPvVOiYSU4d7tQ7FTpmklOHO/VOhY6ZhoqTVby5r1caqThWxZv7eqWRimNVvLmvVxqpOFbFm/t6pRmqz1T9/qouOaT6QNXvr+qSQ6oPVP3+qi45pPpA1e+v6pJjcJ7GOes7PoE4j+Kc9R2fQJxHcc76jk8gzqM4Z33HJxioc1Bzn8jZQh2CmvtEzhbqENTcJ3K2UIeg5j6Rs4cOJ2AzMFOFXf6DzcBMFXb5DzYDM1XY5T/YDMzUgV37f1Qe9zyhFn5D5XHPE2rhN1Qe9zyhFn5D5XHPG6hVZ/iz+SaJf8l5/my+SeJfcp4/m2+S+Jec58/mmzT41/sZZ07HDHEutsOZ0zFDnIvtcOZ0zBDnYjucOR0zBudKp3gy174unmXO8mSufV08y5zlyVz7uniWOcuTufb14bPG7epqqHpXUsB3Ve/GpBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAPsLOXL8gVjK1mAAAAAASUVORK5CYII=" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a triangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAC0klEQVR4nO3R0YpbMQyE4fb9H7p1CQwHygn22ppfhvn2ZgmJNdL8/hWoFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFAC7voA/4+/fGrcucmtuSQGwFABLAZjn6Z//3+W+xPI8+vP/u9yXWJ5Hf/5/l/sSy/Poz//vcl/i4e3cb593dlNWeTv02+ed3ZRV3g799nlnN2WVt0O/fd7ZTVmHmRPPfKePO1LKzHFnvtPHHSll5rgz3+njjpQyc9yZ7/RxR8ph9ayr36d0zyerB139PqV7Plk96Or3Kd3zyepBV79P6Z5v2Dnlzm89+iaTnSPu/NajbzLZOeLObz36JpOdI+781qNvsuHU+U69U6FjJjl1uFPvVOiYSU4d7tQ7FTpmklOHO/VOhY6ZhoqTVby5r1caqThWxZv7eqWRimNVvLmvVxqpOFbFm/t6pRmqz1T9/qouOaT6QNXvr+qSQ6oPVP3+qi45pPpA1e+v6pJjcJ7GOes7PoE4j+Kc9R2fQJxHcc76jk8gzqM4Z33HJxioc1Bzn8jZQh2CmvtEzhbqENTcJ3K2UIeg5j6Rs4cOJ2AzMFOFXf6DzcBMFXb5DzYDM1XY5T/YDMzUgV37f1Qe9zyhFn5D5XHPE2rhN1Qe9zyhFn5D5XHPG6hVZ/iz+SaJf8l5/my+SeJfcp4/m2+S+Jec58/mmzT41/sZZ07HDHEutsOZ0zFDnIvtcOZ0zBDnYjucOR0zBudKp3gy174unmXO8mSufV08y5zlyVz7uniWOcuTufb14bPG7epqqHpXUsB3Ve/GpBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAEsBsBQASwGwFABLAbAUAPsLOXL8gVjK1mAAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyleBuilder,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
 //! };
 //! Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
-//!     .into_styled(
-//!         PrimitiveStyleBuilder::new()
-//!             .stroke_width(1)
-//!             .stroke_color(Rgb888::MAGENTA)
-//!             .build(),
-//!     )
+//!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -313,7 +307,7 @@
 //! This example draws the text "Hello,\nRust!" with the [`Font6x8`] font in green.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Draw some text example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAADBklEQVR4nO3R247bUAxD0fb/P7ptwBeqGhky5sIcYy+ggEEz0yj8/QtRDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBBWB/jz79//2cuUX9OnZPrspvNo9Wj9HDV7mfJr+pRMn910Hq0erZ+jZi9TvrH57KbzUPXo6YeY8o3NZzedh6pHTz9Ez5U4f+vUnN7KdUdv3dQ8UD1Fp9bspedKnL91ak5v5bqjt25qHqie0k916qqjZ3c3d1Pnbn6geoQOm6irjp7d3dxNnbv5geoR02Ge63mijlO/527q3M0PVI+YDvNczxN1nPo9d1Pnbn6gesR0mOf+vLHpT519rkQ8f3v1y+qMmr147s8bm/7U2edKxPO3V7+szqjZS8+VOH8rP9kRNae3b6l+2emAnitx/lZ+siNqTm/f0lFf9sKBP70c+JU/9JABdEZXW19J/+Pm7++bR6kH6ciutr6S/sfN3983j1IPmo6c8s/b/+V98yj1oOnIKf+8/V/eN49SD5qO9NyfXc+VdOr0t8on6l93DlQPmo703J9dz5V06vS3yifqX3cOVA/SkZ231PFEPPfna9/RPEo9SEd23lLHE/Hcn699R/Mo9SA/0p/dPlfi/K2o0/Nu3zxKPciP9Ge3z5U4fyvq9LzbN49SD+pH7hPxvFPTO5vk0eqh/fh9Ip53anpnkzxaPXQ6vudKRLkSf+70tvP+dWd6e6x60HRkz5WIciX+3Olt5/3rzvT2WI876DQMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBD2FyjfqoEr2rxJAAAAAElFTkSuQmCC" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw some text example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAADBklEQVR4nO3R247bUAxD0fb/P7ptwBeqGhky5sIcYy+ggEEz0yj8/QtRDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBBWB/jz79//2cuUX9OnZPrspvNo9Wj9HDV7mfJr+pRMn910Hq0erZ+jZi9TvrH57KbzUPXo6YeY8o3NZzedh6pHTz9Ez5U4f+vUnN7KdUdv3dQ8UD1Fp9bspedKnL91ak5v5bqjt25qHqie0k916qqjZ3c3d1Pnbn6geoQOm6irjp7d3dxNnbv5geoR02Ge63mijlO/527q3M0PVI+YDvNczxN1nPo9d1Pnbn6gesR0mOf+vLHpT519rkQ8f3v1y+qMmr147s8bm/7U2edKxPO3V7+szqjZS8+VOH8rP9kRNae3b6l+2emAnitx/lZ+siNqTm/f0lFf9sKBP70c+JU/9JABdEZXW19J/+Pm7++bR6kH6ciutr6S/sfN3983j1IPmo6c8s/b/+V98yj1oOnIKf+8/V/eN49SD5qO9NyfXc+VdOr0t8on6l93DlQPmo703J9dz5V06vS3yifqX3cOVA/SkZ231PFEPPfna9/RPEo9SEd23lLHE/Hcn699R/Mo9SA/0p/dPlfi/K2o0/Nu3zxKPciP9Ge3z5U4fyvq9LzbN49SD+pH7hPxvFPTO5vk0eqh/fh9Ip53anpnkzxaPXQ6vudKRLkSf+70tvP+dWd6e6x60HRkz5WIciX+3Olt5/3rzvT2WI876DQMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBDGAGEMEMYAYQwQxgBhDBD2FyjfqoEr2rxJAAAAAElFTkSuQmCC" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -322,11 +316,9 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
-//!     style::TextStyleBuilder,
+//!     style::TextStyle,
 //! };
-//! let style = TextStyleBuilder::new(Font6x8)
-//!     .text_color(Rgb888::GREEN)
-//!     .build();
+//! let style = TextStyle::new(Font6x8, Rgb888::GREEN);
 //! Text::new("Hello,\nRust!", Point::new(2, 28))
 //!     .into_styled(style)
 //!     .draw(&mut display)?;
@@ -341,7 +333,7 @@
 //! This example uses [tinytga](https://crates.io/crates/tinytga) to draw an image to the display.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="Display a TGA image example screenshot" src="data:image/png;base64,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" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Display a TGA image example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAI1ElEQVR4nO2cT+hVRRTHZ8DAFoGCC42EDFrozqAgwxYKLYyCDFroKjLBija6if4syghCN5EFWbTSRZBBki1CF0YFtXCni0CDRBcFCi0SEm7nznnPd+4798w9d+6dO/f+nI+8w7yZM+ff1/fyvfRnzWQpVoOZYW+BmSRZgMSMVIDiQXMH+4eppS+ftGQBEpNMgGI7GGN/BFMDnprb8JhhfwEzo3gcTA1+H3pKQU/pNDZZgJmndBqbBAIUz4GpYL8BM4Of9os/Fz0dhixABXo6DCkEOABmpNhPwQxKFqDCChGgeBeMse+AqQFPx4m/Zum0C1mACv6apdMuxBHgMzARsfvBVLj2IRizYQ2YiPC83ckCtIDn7U4cAb4FExH7LJgaGvLix7pV8JiDO4i0j7hTKW8XsgBzpH3EnUp5uxBHgF/BRMQ+BqaGiHmdJHYbmJ7JAugYmwDFn2Aq2I1gZvDTttBoSNuY3SNwaEwejZ7qyQK0gMbk0eipnlAB/gPTG/YeMCr8eW/+Dcas3QBGhT9aW/RdULIAvaHvghIowI0CTCfWBmYu4dn3uj8gnjkNJhAesy1hHQVdSlcuwrPfdQIgF4OK3tIpZ1yG76jD1RTlxmb4jjpcNeasutydnfKkYZjuOlwdqsRUDNNdw9UT6iIk9jZkGDuxJ+A9jJ9+/MSegPdwzpGgIg6pYk+DeBNQuMRMPxXiTUDhYszBoPRj5qiq72XazkGTReHSPvH40YyG03YOmiwKF2P2tEw8RU4qJrF6PRiz+zoYFZqYCpcswJxkAuwYpQD4L5RuwaMbGAc5o5jHLvU0NNEULlmAKtEF2KxOsFK5VDOVZfiUUEj8DUHXCO5cYJHZRl3ou41kAqxhQTXcC48m/oWHznM8XK/MZpkNQbNCaGSyzAJUoWPiRBFgBv0X0DXgCwt9cL2iqZtQSZgALBrbALIAlLoJlUQUACnUf7tjZWPZ566wyfA4jixAE3xwYZPhcRweAbaCqcFeAFOBevpPw+Ax/XTPSOHZaXz/KYV7OrIATfDsNL7/lMI9HXUCFLvA1GDPgKmB+nMfehoGj6mn3+w8Gj1FuA+F+WcBmqDZeTR6inAfCvOfC1C8BKaBq+7j1MaTYCrwu/YLMDP4aVtotLb8tQeMWdfhIyDNznuhpwj3kXB3swBN0Oy8F3qKcB8Jd/eOAG+CUXHc/cdkv3spSbfs+2BmSD56aLS2dMnO80rR0PO8G/329WBUuFtZABmeV4qGnp0EQIqPwXTCvgamQoyYGuLl7TVyFkBGyttr5KoASPE1GBVPHQZjfnBvShL6aOPBPg9GRdvuWOQsQB1sTCJtu2ORawX4CUwD9gkwKjTRxoO+L86s01vwqIJf3TtY/CxAFX1fnFmnXQQoLoNRYR8Co0IfMxW79oEx358D0wl9p2R6WYDkAhTuC4a2WPWH+7D4M/DlTF7CM/g+30FwX4FdC6YTxQ0wbckCzEkmwD9B/3f5vup7l4ew+KnQ98UJ6jQLUEXfFyeo02q+39UhHq5e9KCPmZZV8Jj9YKYW3VFopxgNwZi4g2sSf7EqoSH8kBAN6GOmRRhQC2inGA3BmLiDaxJ/sVpwngSSeLLuYi2aaH6GzIXEy8giLz8v0QRlgUQ00fwMmQuJl5FFXn5e8pUi6At1F2vRRPOjz0XpkhffLnYr8p5iWfBNBiMgdIfFXH5eoildPxRNND/6XJQueYVh1dCzAB+xcBKvVy960MeU0OeifOLyYvMcHAc9xR3KK968GD8MEnmxKtEPSz8UfUwJfS4KDoiOmILjpqe4QyFjqgHjh0Eiz1dvtAz3wfxiI1JkbBhHIK0RfS7KAffV2LpNYAJ5z4IReVvoS4+LXz5KpDFJ6IciRaaDltaIPhdlYgK82DlcMtzXbV8KXw6+7PqiciIoc1qOl8MvHyVZgOGpCEB5xhWNYOljKNfP6bpGANrLGGB1Lj8voUVnAfqF1bn8fMFWUjoKgGJQcB/BU9zBNQX34/Gb0MijpIu0CBXW75ZkAfpFqLB+t2R9tNKpGCgV7uAawR09V4VGHojWRVuECut3S7IA/SJUWLvriqYjwNHQHYTu0/Xw3K5tZM4q19EYYHUuP3e4cukopeHSfboeHtZYhakIsAFHP0GuVxtZgvaFf0kGP7bh2o/kKe1ruEmqXawAWui0WCECIJtdufhXnNzH/MpaQuMTj0t1jSyBfaWF17n8HMBC6UDpWkLjEw/eGAf7Sguvc/l5LbtI6ThiHDeHn+JObM7pGgF2kF5io6mq2QPIAoShqarZA9jTsuiTurCTI8Ycmj2AGImnSIw5NHsAB1smRo6y4DTOLfjDmDHHTOe/FN4ZWtUVeNsw5pTZCZZCffTwCXCaPYC+0tM4WQCk2QM4EpRewyFdAVFJ212zB5C2xNik7a7B40S04pC9TQVEJXZ3iL9H3xkQu0R/cbGJ3R3i79F31shZRQM7WQp+i/sMA62E1/Cd+6ptNfxqgt/VE34ToA1I8OL4Le4zDLQSXsMEBLhIGpDYIqSgdyWf2GhqoD4S0l0N4TeBLsXRu5JPbDQ1UB8J6a6GwJs3FGUha1mKa+6lfS95aXOfYaBdSDVQHz9SBD8hd4AuZWUBKCF3gMINsV8siDIUBfwqwS/L8bcCXyN0R1qXhNWfBQDoKOkaoTvSuiSs/mABLoOlWLP4ESz8NAwaswsFvO2V4LBwcCFYcz9YZB5zAT3VkwVoAR3xPOYCeqonUAA/hcEf3sXBFyl9+5J2JNDT7xMLax4B2y9ZgBZMSAD6wxz9L3l8W0D8numx5mmw/ZIFaMGEBPgc7MrDmn1g+yUL0IIJCXAYrDVvgeXg6Tjx1yyddiELUMFfs3TahSgC+CnMq2DHiTXHwA5JFqDCXSLAbrAUa06BRfhpv/hz0dNhyAJUoKfDkEAApDDbwFrzM1gOnlKoJz9F/D70lIKe0mlssgAzT+k0NskE8FOYTWARa66A5fTlkxYLjxGiGVxfPmmx8JgoBfnyzla+1JsSWYDE/A9lt2Bu48VmMQAAAABJRU5ErkJggg==" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust

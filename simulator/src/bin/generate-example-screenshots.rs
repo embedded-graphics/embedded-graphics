@@ -45,7 +45,7 @@ macro_rules! op {
             //! {}
             //!
             //! <div style="display: flex">
-            //! <img style="width: 128px; height: 128px; display: inline-block; margin-right: 8px;" alt="{} example screenshot" src="data:image/png;base64,{}" />
+            //! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="{} example screenshot" src="data:image/png;base64,{}" />
             //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -58,7 +58,7 @@ macro_rules! op {
 //! </div>
 //!"#,
             $title,
-            $description,
+            $description.lines().collect::<Vec<_>>().join("\n//! "),
             $title,
             screenshot,
             docs.lines().collect::<Vec<_>>().join("\n//! ")
@@ -76,7 +76,10 @@ fn main() {
     op!(
         display,
         "Draw a single pixel",
-        "This example draws a single green pixel.",
+        r#"This example draws a single green pixel.
+
+For cases where many pixels are drawn or where performance is a concern, it may be
+preferable to implement a custom iterator instead of calling `draw_pixel` many times."#,
         {
             use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 
@@ -131,15 +134,11 @@ fn main() {
         "This example draws a circle with no stroke and a solid blue fill.",
         {
             use embedded_graphics::{
-                pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyleBuilder,
+                pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
             };
 
-            Circle::new(Point::new(22, 22), 20)
-                .into_styled(
-                    PrimitiveStyleBuilder::new()
-                        .fill_color(Rgb888::BLUE)
-                        .build(),
-                )
+            Circle::new(Point::new(32, 32), 20)
+                .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
                 .draw(&mut display)?;
         }
     );
@@ -150,16 +149,11 @@ fn main() {
         "This example draws a triangle with a solid 1px magenta stroke and no fill.",
         {
             use embedded_graphics::{
-                pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyleBuilder,
+                pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
             };
 
             Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
-                .into_styled(
-                    PrimitiveStyleBuilder::new()
-                        .stroke_width(1)
-                        .stroke_color(Rgb888::MAGENTA)
-                        .build(),
-                )
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
                 .draw(&mut display)?;
         }
     );
@@ -173,13 +167,11 @@ fn main() {
                 fonts::{Font6x8, Text},
                 pixelcolor::Rgb888,
                 prelude::*,
-                style::TextStyleBuilder,
+                style::TextStyle,
             };
 
             // Create a new text style
-            let style = TextStyleBuilder::new(Font6x8)
-                .text_color(Rgb888::GREEN)
-                .build();
+            let style = TextStyle::new(Font6x8, Rgb888::GREEN);
 
             Text::new("Hello,\nRust!", Point::new(2, 28))
                 .into_styled(style)
