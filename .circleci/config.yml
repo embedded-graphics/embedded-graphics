@@ -52,10 +52,6 @@ jobs:
     environment:
       - RUST_VERSION: 'beta'
     <<: *precheck_steps
-  precheck-nightly:
-    environment:
-      - RUST_VERSION: 'nightly'
-    <<: *precheck_steps
 
   target-arm-unknown-linux-eabi:
     environment:
