@@ -36,7 +36,6 @@ target_steps: &target_steps
           echo "Target $TARGET is already installed"
         fi
     - run: cargo update
-    - run: ./build_target.sh
     - run: ./build_target.sh --release
     - save_cache:
         key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}-{{ .Environment.TARGET }}
