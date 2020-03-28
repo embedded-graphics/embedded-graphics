@@ -70,3 +70,18 @@ If a program doesn't require to display a window and only needs to export one or
 `SimulatorDisplay` can also be converted to an `image` crate `ImageBuffer` by using the
 `to_image_buffer` method. The resulting buffer can then be used to save the display content to
 any format supported by `image`.
+
+# Usage without SDL2
+
+The `with-sdl` feature can be disabled by adding `default-features = false` to the dependency. This
+will remove the requirement on SDL2 build files being present. For example:
+
+```toml
+[dependencies]
+embedded-graphics-simulator = "0.2.0"
+default-features = false
+```
+
+See the [Choosing
+Features](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#choosing-features)
+Cargo manifest documentation for more details.
