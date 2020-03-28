@@ -32,8 +32,11 @@ name = "image"
 required-features = ["bmp"]
 
 [dependencies]
-sdl2 = "0.32.2"
 image = "0.23.0"
+
+[dependencies.sdl2]
+version = "0.32.2"
+optional = true
 
 [dependencies.embedded-graphics]
 version = "0.6.0"
@@ -43,3 +46,7 @@ chrono = "0.4.10"
 criterion = { version = "0.3.0", default-features = false }
 tinybmp = { version = "0.2.2", features = [ "graphics" ] }
 tinytga = { version = "0.3.2", features = [ "graphics" ] }
+
+[features]
+default = [ "with-sdl" ]
+with-sdl = [ "sdl2" ]

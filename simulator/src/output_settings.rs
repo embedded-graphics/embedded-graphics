@@ -31,11 +31,13 @@ impl OutputSettings {
     }
 
     /// Translates a output coordinate to the corresponding display coordinate.
+    #[allow(unused)]
     pub(crate) const fn output_to_display(&self, output_point: Point) -> Point {
         let pitch = self.pixel_pitch() as i32;
         Point::new(output_point.x / pitch, output_point.y / pitch)
     }
 
+    #[allow(unused)]
     pub(crate) const fn pixel_pitch(&self) -> u32 {
         self.scale + self.pixel_spacing
     }

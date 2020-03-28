@@ -86,11 +86,15 @@ mod display;
 mod framebuffer;
 mod output_settings;
 mod theme;
+
+#[cfg(feature = "with-sdl")]
 mod window;
+
+#[cfg(feature = "with-sdl")]
+pub use window::{SimulatorEvent, Window};
 
 pub use crate::{
     display::SimulatorDisplay,
     output_settings::{OutputSettings, OutputSettingsBuilder},
     theme::BinaryColorTheme,
-    window::{SimulatorEvent, Window},
 };
