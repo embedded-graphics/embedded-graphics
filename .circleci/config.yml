@@ -101,7 +101,6 @@ build_jobs: &build_jobs
   jobs:
     - precheck-stable
     - precheck-beta
-    - precheck-nightly
 
     # Raspberry Pi 1
     - target-arm-unknown-linux-eabi:
