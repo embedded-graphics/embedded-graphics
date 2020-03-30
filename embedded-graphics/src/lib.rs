@@ -186,8 +186,9 @@
 //!
 //! This example draws a single green pixel.
 //!
-//! For cases where many pixels are drawn or where performance is a concern, it may be
-//! preferable to implement a custom iterator instead of calling `draw_pixel` many times.
+//! For cases where many pixels are drawn it is preferable to implement
+//! a custom iterator instead of calling `Pixel::draw` for each pixel, because
+//! some display drivers implement accelerated drawing of iterators.
 //!
 //! <div style="display: flex">
 //! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a single pixel example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABNElEQVR4nO3RsQkAMQwEwf/+i7YduQEHi2AGlOvY/yMlQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEJsfYJ0bvGPs45cAvBAgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWIbyaYCgYRUdd0AAAAASUVORK5CYII=" />
