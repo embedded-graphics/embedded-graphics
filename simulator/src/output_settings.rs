@@ -29,7 +29,10 @@ impl OutputSettings {
 
         Size::new(output_width, output_height)
     }
+}
 
+#[cfg(feature = "with-sdl")]
+impl OutputSettings {
     /// Translates a output coordinate to the corresponding display coordinate.
     pub(crate) const fn output_to_display(&self, output_point: Point) -> Point {
         let pitch = self.pixel_pitch() as i32;
