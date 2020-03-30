@@ -74,13 +74,15 @@ any format supported by `image`.
 # Usage without SDL2
 
 The `with-sdl` feature can be disabled by adding `default-features = false` to the dependency. This
-will remove the requirement on SDL2 build files being present. For example:
+will remove the requirement on SDL2 build files being present and removes the `OutputSettings::output_to_display` and `OutputSettings::pixel_pitch` methods. For example:
 
 ```toml
 [dependencies]
 embedded-graphics-simulator = "0.2.0"
 default-features = false
 ```
+
+This may be useful for screenshot generation in headless/CI environments where extra dependencies are undesirable.
 
 See the [Choosing
 Features](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#choosing-features)
