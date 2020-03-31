@@ -69,10 +69,8 @@ impl Line {
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum Side {
-    /// DOCS LOL
+enum Side {
     Left,
-    /// DOCS LOL
     Right,
 }
 
@@ -88,15 +86,22 @@ impl Side {
 /// Current state of each parallel line drawn
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 struct ParallelLineState {
-    start: Point,
+    /// Current point along the line
+    current_point: Point,
+
+    /// Error accumulator
     error: i32,
+
+    /// Length accumulator
+    ///
+    /// Checked against total `dx` of the line to know when to stop iterating
     dx_accum: u32,
 }
 
 impl ParallelLineState {
-    fn new(start: Point, initial_error: i32, dx_accum: u32) -> Self {
+    fn new(current_point: Point, initial_error: i32, dx_accum: u32) -> Self {
         Self {
-            start,
+            current_point,
             error: initial_error,
             dx_accum,
         }
@@ -107,7 +112,7 @@ impl ParallelLineState {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 struct SideState {
     /// Parallel line start point
-    start: Point,
+    parallel_start: Point,
 
     /// Error accumulator
     error: i32,
@@ -117,9 +122,9 @@ struct SideState {
 }
 
 impl SideState {
-    fn new(start: Point) -> Self {
+    fn new(parallel_start: Point) -> Self {
         Self {
-            start,
+            parallel_start,
             error: 0,
             p_error: 0,
         }
@@ -302,14 +307,14 @@ impl Iterator for LineIterator {
         self.parallel.dx_accum += 1;
 
         if self.parallel.dx_accum <= self.dx + 1 {
-            let p = self.parallel.start;
+            let p = self.parallel.current_point;
 
             if self.parallel.error > self.threshold {
-                self.parallel.start += self.step_minor;
+                self.parallel.current_point += self.step_minor;
                 self.parallel.error += self.e_diag;
             }
 
-            self.parallel.start += self.step_major;
+            self.parallel.current_point += self.step_major;
             self.parallel.error += self.e_square;
 
             Some(p)
@@ -320,12 +325,12 @@ impl Iterator for LineIterator {
             };
 
             let mut extra = false;
-            let start = side.start;
+            let parallel_start = side.parallel_start;
 
             if side.error > self.threshold {
                 match self.next_side {
-                    Side::Left => side.start += self.perp_step_major,
-                    Side::Right => side.start -= self.perp_step_major,
+                    Side::Left => side.parallel_start += self.perp_step_major,
+                    Side::Right => side.parallel_start -= self.perp_step_major,
                 }
 
                 side.error += self.e_diag;
@@ -335,11 +340,13 @@ impl Iterator for LineIterator {
                     extra = true;
 
                     self.parallel = match (self.next_side, self.swap_sides) {
-                        (Side::Left, true) | (Side::Right, false) => {
-                            ParallelLineState::new(start + self.step_minor, -side.p_error, 1)
-                        }
+                        (Side::Left, true) | (Side::Right, false) => ParallelLineState::new(
+                            parallel_start + self.step_minor,
+                            -side.p_error,
+                            1,
+                        ),
                         (Side::Right, true) | (Side::Left, false) => {
-                            ParallelLineState::new(start, side.p_error + self.e_diag, 0)
+                            ParallelLineState::new(parallel_start, side.p_error + self.e_diag, 0)
                         }
                     };
 
@@ -351,8 +358,8 @@ impl Iterator for LineIterator {
 
             if !extra {
                 match self.next_side {
-                    Side::Left => side.start += self.perp_step_minor,
-                    Side::Right => side.start -= self.perp_step_minor,
+                    Side::Left => side.parallel_start += self.perp_step_minor,
+                    Side::Right => side.parallel_start -= self.perp_step_minor,
                 }
 
                 side.error += self.e_square;
@@ -365,7 +372,7 @@ impl Iterator for LineIterator {
 
                 let p_error = if self.swap_sides { -p_error } else { p_error };
 
-                self.parallel = ParallelLineState::new(side.start, p_error, 0);
+                self.parallel = ParallelLineState::new(side.parallel_start, p_error, 0);
             }
 
             // Switch to opposite side of line to keep it balanced
