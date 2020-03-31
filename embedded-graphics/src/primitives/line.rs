@@ -158,15 +158,6 @@ pub(crate) struct LineIterator {
     /// Compared against `thickness` for width limit
     thickness_accum: i32,
 
-    /// Step direction
-    direction: Point,
-
-    /// Line start point
-    start: Point,
-
-    /// Line end point
-    end: Point,
-
     /// The "major" step
     ///
     /// The X or Y component with the larger delta is considered "major". This is the most common
@@ -268,13 +259,10 @@ impl LineIterator {
             step_minor,
             perp_step_major,
             perp_step_minor,
-            start: line.start,
-            end: line.end,
             threshold,
             e_diag,
             e_square,
             thickness,
-            direction,
             thickness_accum: dx + dy,
             // Next side to draw after center line
             next_side: Side::Left,
