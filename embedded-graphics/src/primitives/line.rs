@@ -145,19 +145,18 @@ pub(crate) struct LineIterator {
     /// "Minor" error component
     e_square: i32,
 
-    /// The "major" (greater) delta. Swapped with `dy` if dy is greater than dx
-    dx: u32,
-
-    /// The "minor" (lesser) delta. Swapped with `dx` if dx is greater than dy
-    dy: u32,
-
     /// Line thickness in arbitrary units
     ///
     /// Thickness is calculated according to the section titled "Fixing the Thickness" in [this
     /// article](http://kt8216.unixcab.org/murphy/index.html). The difference in this implementation
     /// is that both sides of the comparison are squared, removing the need for an expensive
     /// `sqrt()` call.
-    thickness: u32,
+    thickness: i32,
+
+    /// Thickness of pixels drawn so far
+    ///
+    /// Compared against `thickness` for width limit
+    thickness_accum: i32,
 
     /// Step direction
     direction: Point,
@@ -183,11 +182,6 @@ pub(crate) struct LineIterator {
     perp_step_major: Point,
     perp_step_minor: Point,
 
-    /// Thickness of pixels drawn so far
-    ///
-    /// Compared against `thickness` for width limit
-    thickness_accum: u32,
-
     /// Which side the _next_ parallel line will be on
     ///
     /// Lines start down the center, then alternate between left, then right. For lines with an even
@@ -196,6 +190,9 @@ pub(crate) struct LineIterator {
 
     /// State of the parallel line currently being iterated over
     parallel: ParallelLineState,
+
+    /// Length of parallel lines.
+    parallel_length: u32,
 
     /// Left side state
     left: SideState,
@@ -211,7 +208,7 @@ impl LineIterator {
     ///
     /// Lines with a thickness greater than 1px are filled using multiple parallel lines to the
     /// left/right of the central original line.
-    pub(crate) fn new(line: &Line, stroke_width: u32) -> Self {
+    pub(crate) fn new(line: &Line, stroke_width: i32) -> Self {
         let dx: i32 = line.end.x - line.start.x;
         let dy: i32 = line.end.y - line.start.y;
 
@@ -232,7 +229,7 @@ impl LineIterator {
 
         // Thickness threshold, taking into account that fewer pixels are required to draw a
         // diagonal line of the same perceived width.
-        let thickness = 4 * stroke_width.pow(2) * (dx.pow(2) as u32 + dy.pow(2) as u32);
+        let thickness = 4 * stroke_width.pow(2) * (dx.pow(2) + dy.pow(2));
 
         let mut dx = dx.abs();
         let mut dy = dy.abs();
@@ -266,17 +263,11 @@ impl LineIterator {
         let e_diag = -2 * dx;
         let e_square = 2 * dy;
 
-        // Safe due to abs() call above
-        let dx = dx as u32;
-        let dy = dy as u32;
-
         Self {
             step_major,
             step_minor,
             perp_step_major,
             perp_step_minor,
-            dx: dx,
-            dy: dy,
             start: line.start,
             end: line.end,
             threshold,
@@ -288,6 +279,7 @@ impl LineIterator {
             // Next side to draw after center line
             next_side: Side::Left,
             parallel: ParallelLineState::new(line.start, 0, 0),
+            parallel_length: dx as u32,
             left: SideState::new(line.start),
             right: SideState::new(line.start),
             swap_sides,
@@ -300,13 +292,13 @@ impl Iterator for LineIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         // Quit iterator if width threshold is reached or the line has no length
-        if self.thickness_accum.pow(2) > self.thickness || self.dx == 0 {
+        if self.thickness_accum.pow(2) > self.thickness || self.parallel_length == 0 {
             return None;
         }
 
         self.parallel.dx_accum += 1;
 
-        if self.parallel.dx_accum <= self.dx + 1 {
+        if self.parallel.dx_accum <= self.parallel_length + 1 {
             let p = self.parallel.current_point;
 
             if self.parallel.error > self.threshold {
@@ -334,7 +326,7 @@ impl Iterator for LineIterator {
                 }
 
                 side.error += self.e_diag;
-                self.thickness_accum += 2 * self.dy;
+                self.thickness_accum += self.e_square;
 
                 if side.p_error > self.threshold {
                     extra = true;
@@ -363,7 +355,7 @@ impl Iterator for LineIterator {
                 }
 
                 side.error += self.e_square;
-                self.thickness_accum += 2 * self.dx;
+                self.thickness_accum -= self.e_diag;
 
                 let p_error = match self.next_side {
                     Side::Left => side.p_error,
@@ -434,7 +426,7 @@ where
         StyledLineIterator {
             style: self.style,
 
-            line_iter: LineIterator::new(&self.primitive, self.style.stroke_width),
+            line_iter: LineIterator::new(&self.primitive, self.style.stroke_width_i32()),
         }
     }
 }
