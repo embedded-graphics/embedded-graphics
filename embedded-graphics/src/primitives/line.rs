@@ -155,10 +155,8 @@ impl SideState {
         side: Side,
         swapped_side: Side,
     ) -> (ParallelLineState, i32) {
-        let mut extra = false;
         let parallel_start = self.parallel_start;
 
-        let mut parallel = ParallelLineState::new(Point::zero(), 0, 0);
         let mut thickness_change = 0;
 
         if self.error > parameters.threshold {
@@ -171,9 +169,7 @@ impl SideState {
             thickness_change += parameters.e_square;
 
             if self.p_error > parameters.threshold {
-                extra = true;
-
-                parallel = match swapped_side {
+                let parallel = match swapped_side {
                     Side::Right => ParallelLineState::new(
                         parallel_start + parameters.step_minor,
                         1,
@@ -184,28 +180,28 @@ impl SideState {
                     }
                 };
 
-                self.p_error += parameters.e_diag;
-            }
+                self.p_error += parameters.e_diag + parameters.e_square;
 
-            self.p_error += parameters.e_square;
+                return (parallel, thickness_change);
+            } else {
+                self.p_error += parameters.e_square;
+            }
         }
 
-        if !extra {
-            match side {
-                Side::Left => self.parallel_start += parameters.perp_step_minor,
-                Side::Right => self.parallel_start -= parameters.perp_step_minor,
-            }
-
-            self.error += parameters.e_square;
-            thickness_change -= parameters.e_diag;
-
-            let p_error = match swapped_side {
-                Side::Left => self.p_error,
-                Side::Right => -self.p_error,
-            };
-
-            parallel = ParallelLineState::new(self.parallel_start, 0, p_error);
+        match side {
+            Side::Left => self.parallel_start += parameters.perp_step_minor,
+            Side::Right => self.parallel_start -= parameters.perp_step_minor,
         }
+
+        self.error += parameters.e_square;
+        thickness_change -= parameters.e_diag;
+
+        let p_error = match swapped_side {
+            Side::Left => self.p_error,
+            Side::Right => -self.p_error,
+        };
+
+        let parallel = ParallelLineState::new(self.parallel_start, 0, p_error);
 
         (parallel, thickness_change)
     }
