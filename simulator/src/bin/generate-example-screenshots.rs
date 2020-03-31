@@ -3,7 +3,7 @@
 //! Run from the workspace root with:
 //!
 //! ```bash
-//! cargo run --bin generate-example-screenshots | rustfmt +nightly --config-path rustfmt.nightly.toml
+//! cargo run --bin generate-example-screenshots | rustfmt +nightly --config-path rustfmt.examples.toml
 //! ```
 //!
 //! Screenshots are output to `target/drawing-ops`.
@@ -33,9 +33,14 @@ macro_rules! op {
 
         let screenshot = base64::encode(std::fs::read(&path).expect("Couldn't open screenshot"));
 
-        let docs = stringify!($code)
+        // Newlines in the code block aren't preserved by the stringify macro.
+        // Use {} in the code block to insert newlines in the generated output.
+        let doc_lines: Vec<_> = stringify!($code)
                 .trim_matches(|c| c == '{' || c == '}')
-                .trim();
+                .trim()
+                .lines()
+                .map(|l| l.trim())
+                .map(|l| if l == "{ }" { "" } else { l }).collect();
 
         // Note: empty lines must remain between HTML elements and inner Markdown for the Markdown
         // to be parsed correctly.
@@ -61,7 +66,7 @@ macro_rules! op {
             $description.lines().collect::<Vec<_>>().join("\n//! "),
             $title,
             screenshot,
-            docs.lines().collect::<Vec<_>>().join("\n//! ")
+            doc_lines.join("\n//! ")
         );
     };
 }
@@ -83,7 +88,7 @@ a custom iterator instead of calling `Pixel::draw` for each pixel, because
 some display drivers implement accelerated drawing of iterators."#,
         {
             use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
-
+            {}
             Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)?;
         }
     );
@@ -96,7 +101,7 @@ some display drivers implement accelerated drawing of iterators."#,
             use embedded_graphics::{
                 pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyleBuilder,
             };
-
+            {}
             Line::new(Point::new(16, 24), Point::new(48, 40))
                 .into_styled(
                     PrimitiveStyleBuilder::new()
@@ -116,7 +121,7 @@ some display drivers implement accelerated drawing of iterators."#,
             use embedded_graphics::{
                 pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
             };
-
+            {}
             Rectangle::new(Point::new(16, 24), Point::new(48, 40))
                 .into_styled(
                     PrimitiveStyleBuilder::new()
@@ -137,7 +142,7 @@ some display drivers implement accelerated drawing of iterators."#,
             use embedded_graphics::{
                 pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
             };
-
+            {}
             Circle::new(Point::new(32, 32), 20)
                 .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
                 .draw(&mut display)?;
@@ -152,7 +157,7 @@ some display drivers implement accelerated drawing of iterators."#,
             use embedded_graphics::{
                 pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
             };
-
+            {}
             Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
                 .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
                 .draw(&mut display)?;
@@ -170,10 +175,10 @@ some display drivers implement accelerated drawing of iterators."#,
                 prelude::*,
                 style::TextStyle,
             };
-
+            {}
             // Create a new text style
             let style = TextStyle::new(Font6x8, Rgb888::GREEN);
-
+            {}
             Text::new("Hello,\nRust!", Point::new(2, 28))
                 .into_styled(style)
                 .draw(&mut display)?;
@@ -191,14 +196,14 @@ some display drivers implement accelerated drawing of iterators."#,
                 prelude::*,
             };
             use tinytga::Tga;
-
+            {}
             // Load the TGA image
             let tga = Tga::from_slice(
                 include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../simulator/examples/assets/rust-pride.tga"))
             ).unwrap();
-
+            {}
             let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
-
+            {}
             // Display the image
             image.draw(&mut display)?;
         }

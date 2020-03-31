@@ -1,0 +1,7 @@
+# Used for generate-example-screenshots.
+
+format_code_in_doc_comments = true
+merge_imports = true
+format_macro_matchers = true
+format_macro_bodies = true
+imports_layout = "Vertical"

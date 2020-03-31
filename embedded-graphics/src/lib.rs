@@ -196,7 +196,11 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//! };
+//!
 //! Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -215,8 +219,12 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyleBuilder,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Line,
+//!     style::PrimitiveStyleBuilder,
 //! };
+//!
 //! Line::new(Point::new(16, 24), Point::new(48, 40))
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
@@ -242,8 +250,12 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Rectangle,
+//!     style::PrimitiveStyleBuilder,
 //! };
+//!
 //! Rectangle::new(Point::new(16, 24), Point::new(48, 40))
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
@@ -270,8 +282,12 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Circle,
+//!     style::PrimitiveStyle,
 //! };
+//!
 //! Circle::new(Point::new(32, 32), 20)
 //!     .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
 //!     .draw(&mut display)?;
@@ -292,8 +308,12 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Triangle,
+//!     style::PrimitiveStyle,
 //! };
+//!
 //! Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
 //!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
 //!     .draw(&mut display)?;
@@ -314,12 +334,17 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     fonts::{
+//!         Font6x8,
+//!         Text,
+//!     },
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
 //!     style::TextStyle,
 //! };
+//!
 //! let style = TextStyle::new(Font6x8, Rgb888::GREEN);
+//!
 //! Text::new("Hello,\nRust!", Point::new(2, 28))
 //!     .into_styled(style)
 //!     .draw(&mut display)?;
@@ -339,14 +364,21 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+//! use embedded_graphics::{
+//!     image::Image,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//! };
 //! use tinytga::Tga;
+//!
 //! let tga = Tga::from_slice(include_bytes!(concat!(
 //!     env!("CARGO_MANIFEST_DIR"),
 //!     "/../simulator/examples/assets/rust-pride.tga"
 //! )))
 //! .unwrap();
+//!
 //! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+//!
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
