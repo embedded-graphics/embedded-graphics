@@ -4,10 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{
-        line::{Line, LineIterator},
-        Primitive,
-    },
+    primitives::{line::Line, Primitive, ThickLineIterator},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -194,9 +191,9 @@ where
     fn into_iter(self) -> Self::IntoIter {
         let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
 
-        let mut line_a = LineIterator::new(&Line::new(v1, v2), 1);
-        let mut line_b = LineIterator::new(&Line::new(v1, v3), 1);
-        let mut line_c = LineIterator::new(&Line::new(v2, v3), 1);
+        let mut line_a = ThickLineIterator::new(&Line::new(v1, v2), 1);
+        let mut line_b = ThickLineIterator::new(&Line::new(v1, v3), 1);
+        let mut line_c = ThickLineIterator::new(&Line::new(v2, v3), 1);
 
         let next_ac = line_a.next().or_else(|| line_c.next());
         let next_b = line_b.next();
@@ -229,9 +226,9 @@ pub struct StyledTriangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    line_a: LineIterator,
-    line_b: LineIterator,
-    line_c: LineIterator,
+    line_a: ThickLineIterator,
+    line_b: ThickLineIterator,
+    line_c: ThickLineIterator,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
     next_ac: Option<Point>,
