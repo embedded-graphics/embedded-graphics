@@ -12,7 +12,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Fixed
 
-- [#271](https://github.com/jamwaffles/embedded-graphics/pull/271) Add styling support for lines thicker than 1px.
+- [#271](https://github.com/jamwaffles/embedded-graphics/pull/271) Styled `Line`s are now drawn using the `stroke_with` specified in the `PrimitiveStyle` and no longer default to 1px width.
 
 ## [0.6.0] - 2020-03-20
 
