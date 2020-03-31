@@ -94,16 +94,16 @@ struct ParallelLineState {
 
     /// Length accumulator
     ///
-    /// Checked against total `dx` of the line to know when to stop iterating
-    dx_accum: u32,
+    /// Checked against `parallel_length` of the line to know when to stop iterating
+    current_length: u32,
 }
 
 impl ParallelLineState {
-    fn new(current_point: Point, initial_error: i32, dx_accum: u32) -> Self {
+    fn new(start_point: Point, initial_error: i32, start_length: u32) -> Self {
         Self {
-            current_point,
+            current_point: start_point,
             error: initial_error,
-            dx_accum,
+            current_length: start_length,
         }
     }
 }
@@ -296,9 +296,9 @@ impl Iterator for LineIterator {
             return None;
         }
 
-        self.parallel.dx_accum += 1;
+        if self.parallel.current_length <= self.parallel_length {
+            self.parallel.current_length += 1;
 
-        if self.parallel.dx_accum <= self.parallel_length + 1 {
             let p = self.parallel.current_point;
 
             if self.parallel.error > self.threshold {
