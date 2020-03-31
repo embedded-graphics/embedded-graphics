@@ -89,22 +89,41 @@ struct ParallelLineState {
     /// Current point along the line
     current_point: Point,
 
-    /// Error accumulator
-    error: i32,
-
     /// Length accumulator
     ///
     /// Checked against `parallel_length` of the line to know when to stop iterating
     current_length: u32,
+
+    /// Error accumulator
+    error: i32,
 }
 
 impl ParallelLineState {
-    fn new(start_point: Point, initial_error: i32, start_length: u32) -> Self {
+    fn new(start_point: Point, initial_length: u32, initial_error: i32) -> Self {
         Self {
             current_point: start_point,
+            current_length: initial_length,
             error: initial_error,
-            current_length: start_length,
         }
+    }
+
+    fn next(&mut self, parameters: &BresenhamParameters) -> Option<Point> {
+        if self.current_length > parameters.parallel_length {
+            return None;
+        }
+
+        self.current_length += 1;
+
+        let p = self.current_point;
+
+        if self.error > parameters.threshold {
+            self.current_point += parameters.step_minor;
+            self.error += parameters.e_diag;
+        }
+
+        self.current_point += parameters.step_major;
+        self.error += parameters.e_square;
+        Some(p)
     }
 }
 
@@ -129,11 +148,72 @@ impl SideState {
             p_error: 0,
         }
     }
+
+    fn next(&mut self, parameters: &BresenhamParameters, side: Side) -> (ParallelLineState, i32) {
+        let mut extra = false;
+        let parallel_start = self.parallel_start;
+
+        let mut parallel = ParallelLineState::new(Point::zero(), 0, 0);
+        let mut thickness_change = 0;
+
+        if self.error > parameters.threshold {
+            match side {
+                Side::Left => self.parallel_start += parameters.perp_step_major,
+                Side::Right => self.parallel_start -= parameters.perp_step_major,
+            }
+
+            self.error += parameters.e_diag;
+            thickness_change += parameters.e_square;
+
+            if self.p_error > parameters.threshold {
+                extra = true;
+
+                parallel = match (side, parameters.swap_sides) {
+                    (Side::Left, true) | (Side::Right, false) => ParallelLineState::new(
+                        parallel_start + parameters.step_minor,
+                        1,
+                        -self.p_error,
+                    ),
+                    (Side::Right, true) | (Side::Left, false) => {
+                        ParallelLineState::new(parallel_start, 0, self.p_error + parameters.e_diag)
+                    }
+                };
+
+                self.p_error += parameters.e_diag;
+            }
+
+            self.p_error += parameters.e_square;
+        }
+
+        if !extra {
+            match side {
+                Side::Left => self.parallel_start += parameters.perp_step_minor,
+                Side::Right => self.parallel_start -= parameters.perp_step_minor,
+            }
+
+            self.error += parameters.e_square;
+            thickness_change -= parameters.e_diag;
+
+            let p_error = match side {
+                Side::Left => self.p_error,
+                Side::Right => -self.p_error,
+            };
+
+            let p_error = if parameters.swap_sides {
+                -p_error
+            } else {
+                p_error
+            };
+
+            parallel = ParallelLineState::new(self.parallel_start, 0, p_error);
+        }
+
+        (parallel, thickness_change)
+    }
 }
 
-/// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) struct LineIterator {
+struct BresenhamParameters {
     /// Bresenham error threshold
     ///
     /// If this is exceeded, a "minor" move is made
@@ -153,11 +233,6 @@ pub(crate) struct LineIterator {
     /// `sqrt()` call.
     thickness: i32,
 
-    /// Thickness of pixels drawn so far
-    ///
-    /// Compared against `thickness` for width limit
-    thickness_accum: i32,
-
     /// The "major" step
     ///
     /// The X or Y component with the larger delta is considered "major". This is the most common
@@ -172,34 +247,14 @@ pub(crate) struct LineIterator {
 
     perp_step_major: Point,
     perp_step_minor: Point,
-
-    /// Which side the _next_ parallel line will be on
-    ///
-    /// Lines start down the center, then alternate between left, then right. For lines with an even
-    /// width, the line is unbalanced by 1px to the left.
-    next_side: Side,
-
-    /// State of the parallel line currently being iterated over
-    parallel: ParallelLineState,
-
-    /// Length of parallel lines.
-    parallel_length: u32,
-
-    /// Left side state
-    left: SideState,
-
-    /// Right side state
-    right: SideState,
-
     swap_sides: bool,
+
+    /// Length of parallel lines
+    parallel_length: u32,
 }
 
-impl LineIterator {
-    /// Create a new line iterator from a `Line` and a stroke width
-    ///
-    /// Lines with a thickness greater than 1px are filled using multiple parallel lines to the
-    /// left/right of the central original line.
-    pub(crate) fn new(line: &Line, stroke_width: i32) -> Self {
+impl BresenhamParameters {
+    fn new(line: &Line, stroke_width: i32) -> Self {
         let dx: i32 = line.end.x - line.start.x;
         let dy: i32 = line.end.y - line.start.y;
 
@@ -263,14 +318,57 @@ impl LineIterator {
             e_diag,
             e_square,
             thickness,
-            thickness_accum: dx + dy,
+            swap_sides,
+            parallel_length: dx as u32,
+        }
+    }
+}
+
+/// Pixel iterator for each pixel in the line
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(crate) struct LineIterator {
+    /// Bresenham algorithm parameters.
+    parameters: BresenhamParameters,
+
+    /// Thickness of pixels drawn so far
+    ///
+    /// Compared against `thickness` for width limit
+    thickness_accum: i32,
+
+    /// Which side the _next_ parallel line will be on
+    ///
+    /// Lines start down the center, then alternate between left, then right. For lines with an even
+    /// width, the line is unbalanced by 1px to the left.
+    next_side: Side,
+
+    /// State of the parallel line currently being iterated over
+    parallel: ParallelLineState,
+
+    /// Left side state
+    left: SideState,
+
+    /// Right side state
+    right: SideState,
+}
+
+impl LineIterator {
+    /// Create a new line iterator from a `Line` and a stroke width
+    ///
+    /// Lines with a thickness greater than 1px are filled using multiple parallel lines to the
+    /// left/right of the central original line.
+    pub(crate) fn new(line: &Line, stroke_width: i32) -> Self {
+        let parameters = BresenhamParameters::new(line, stroke_width);
+
+        let thickness_accum = (parameters.e_square - parameters.e_diag) / 2;
+
+        Self {
+            parameters,
+            thickness_accum,
             // Next side to draw after center line
             next_side: Side::Left,
             parallel: ParallelLineState::new(line.start, 0, 0),
-            parallel_length: dx as u32,
             left: SideState::new(line.start),
             right: SideState::new(line.start),
-            swap_sides,
         }
     }
 }
@@ -280,80 +378,22 @@ impl Iterator for LineIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         // Quit iterator if width threshold is reached or the line has no length
-        if self.thickness_accum.pow(2) > self.thickness || self.parallel_length == 0 {
+        if self.thickness_accum.pow(2) > self.parameters.thickness
+            || self.parameters.parallel_length == 0
+        {
             return None;
         }
 
-        if self.parallel.current_length <= self.parallel_length {
-            self.parallel.current_length += 1;
-
-            let p = self.parallel.current_point;
-
-            if self.parallel.error > self.threshold {
-                self.parallel.current_point += self.step_minor;
-                self.parallel.error += self.e_diag;
-            }
-
-            self.parallel.current_point += self.step_major;
-            self.parallel.error += self.e_square;
-
+        if let Some(p) = self.parallel.next(&self.parameters) {
             Some(p)
         } else {
-            let side = match self.next_side {
-                Side::Left => &mut self.left,
-                Side::Right => &mut self.right,
+            let (parallel, thickness_change) = match self.next_side {
+                Side::Left => self.left.next(&self.parameters, Side::Left),
+                Side::Right => self.right.next(&self.parameters, Side::Right),
             };
 
-            let mut extra = false;
-            let parallel_start = side.parallel_start;
-
-            if side.error > self.threshold {
-                match self.next_side {
-                    Side::Left => side.parallel_start += self.perp_step_major,
-                    Side::Right => side.parallel_start -= self.perp_step_major,
-                }
-
-                side.error += self.e_diag;
-                self.thickness_accum += self.e_square;
-
-                if side.p_error > self.threshold {
-                    extra = true;
-
-                    self.parallel = match (self.next_side, self.swap_sides) {
-                        (Side::Left, true) | (Side::Right, false) => ParallelLineState::new(
-                            parallel_start + self.step_minor,
-                            -side.p_error,
-                            1,
-                        ),
-                        (Side::Right, true) | (Side::Left, false) => {
-                            ParallelLineState::new(parallel_start, side.p_error + self.e_diag, 0)
-                        }
-                    };
-
-                    side.p_error += self.e_diag;
-                }
-
-                side.p_error += self.e_square;
-            }
-
-            if !extra {
-                match self.next_side {
-                    Side::Left => side.parallel_start += self.perp_step_minor,
-                    Side::Right => side.parallel_start -= self.perp_step_minor,
-                }
-
-                side.error += self.e_square;
-                self.thickness_accum -= self.e_diag;
-
-                let p_error = match self.next_side {
-                    Side::Left => side.p_error,
-                    Side::Right => -side.p_error,
-                };
-
-                let p_error = if self.swap_sides { -p_error } else { p_error };
-
-                self.parallel = ParallelLineState::new(side.parallel_start, p_error, 0);
-            }
+            self.thickness_accum += thickness_change;
+            self.parallel = parallel;
 
             // Switch to opposite side of line to keep it balanced
             self.next_side.swap();
