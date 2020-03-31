@@ -75,10 +75,10 @@ enum Side {
 }
 
 impl Side {
-    fn swap(&mut self) {
+    fn swap(self) -> Self {
         match self {
-            Self::Left => *self = Self::Right,
-            Self::Right => *self = Self::Left,
+            Self::Left => Self::Right,
+            Self::Right => Self::Left,
         }
     }
 }
@@ -149,7 +149,12 @@ impl SideState {
         }
     }
 
-    fn next(&mut self, parameters: &BresenhamParameters, side: Side) -> (ParallelLineState, i32) {
+    fn next(
+        &mut self,
+        parameters: &BresenhamParameters,
+        side: Side,
+        swapped_side: Side,
+    ) -> (ParallelLineState, i32) {
         let mut extra = false;
         let parallel_start = self.parallel_start;
 
@@ -168,13 +173,13 @@ impl SideState {
             if self.p_error > parameters.threshold {
                 extra = true;
 
-                parallel = match (side, parameters.swap_sides) {
-                    (Side::Left, true) | (Side::Right, false) => ParallelLineState::new(
+                parallel = match swapped_side {
+                    Side::Right => ParallelLineState::new(
                         parallel_start + parameters.step_minor,
                         1,
                         -self.p_error,
                     ),
-                    (Side::Right, true) | (Side::Left, false) => {
+                    Side::Left => {
                         ParallelLineState::new(parallel_start, 0, self.p_error + parameters.e_diag)
                     }
                 };
@@ -194,15 +199,9 @@ impl SideState {
             self.error += parameters.e_square;
             thickness_change -= parameters.e_diag;
 
-            let p_error = match side {
+            let p_error = match swapped_side {
                 Side::Left => self.p_error,
                 Side::Right => -self.p_error,
-            };
-
-            let p_error = if parameters.swap_sides {
-                -p_error
-            } else {
-                p_error
             };
 
             parallel = ParallelLineState::new(self.parallel_start, 0, p_error);
@@ -387,16 +386,22 @@ impl Iterator for LineIterator {
         if let Some(p) = self.parallel.next(&self.parameters) {
             Some(p)
         } else {
+            let swapped_side = if self.parameters.swap_sides {
+                self.next_side.swap()
+            } else {
+                self.next_side
+            };
+
             let (parallel, thickness_change) = match self.next_side {
-                Side::Left => self.left.next(&self.parameters, Side::Left),
-                Side::Right => self.right.next(&self.parameters, Side::Right),
+                Side::Left => self.left.next(&self.parameters, Side::Left, swapped_side),
+                Side::Right => self.right.next(&self.parameters, Side::Right, swapped_side),
             };
 
             self.thickness_accum += thickness_change;
             self.parallel = parallel;
 
             // Switch to opposite side of line to keep it balanced
-            self.next_side.swap();
+            self.next_side = self.next_side.swap();
 
             Self::next(self)
         }
