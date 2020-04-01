@@ -10,6 +10,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#285](https://github.com/jamwaffles/embedded-graphics/pull/285) Add multiplication and division by a scalar for `Point` and `Size`.
 
+### Fixed
+
+- [#271](https://github.com/jamwaffles/embedded-graphics/pull/271) Styled `Line`s are now drawn using the `stroke_with` specified in the `PrimitiveStyle` and no longer default to 1px width.
+
 ## [0.6.0] - 2020-03-20
 
 ### Added

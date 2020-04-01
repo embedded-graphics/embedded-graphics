@@ -53,6 +53,24 @@ fn line(c: &mut Criterion) {
     });
 }
 
+fn thick_line(c: &mut Criterion) {
+    c.bench_function("thick line 10px wide", |b| {
+        let object = &Line::new(Point::new(100, 100), Point::new(150, 200))
+            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 10));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
+fn thicker_line(c: &mut Criterion) {
+    c.bench_function("thick line 50px wide", |b| {
+        let object = &Line::new(Point::new(20, 20), Point::new(150, 200))
+            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 50));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 fn triangle(c: &mut Criterion) {
     c.bench_function("triangle", |b| {
         let object = &Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
@@ -77,6 +95,8 @@ criterion_group!(
     filled_rect,
     empty_rect,
     line,
+    thick_line,
+    thicker_line,
     triangle,
     filled_triangle
 );

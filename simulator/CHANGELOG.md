@@ -9,6 +9,7 @@
 ### Added
 
 - [#298](https://github.com/jamwaffles/embedded-graphics/pull/298) Added the `with-sdl` option (enabled by default) to allow optionally disabling SDL2 support.
+- [#271](https://github.com/jamwaffles/embedded-graphics/pull/271) Add `MouseMove` event support to simulator.
 
 ## [0.2.0] - 2020-03-20
 

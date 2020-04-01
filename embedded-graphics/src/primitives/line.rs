@@ -1,13 +1,17 @@
 //! The line primitive
 
 use crate::{
-    drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
+    draw_target::DrawTarget,
+    drawable::Drawable,
+    drawable::Pixel,
+    geometry::Dimensions,
+    geometry::Point,
+    geometry::Size,
     pixelcolor::PixelColor,
-    primitives::Primitive,
-    style::{PrimitiveStyle, Styled},
+    primitives::{Primitive, ThickLineIterator},
+    style::PrimitiveStyle,
+    style::Styled,
     transform::Transform,
-    DrawTarget,
 };
 
 /// Line primitive
@@ -30,10 +34,10 @@ use crate::{
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
 ///     .draw(&mut display)?;
 ///
-/// // Green 1 pixel wide line with translation applied
+/// // Green 10 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
 ///     .translate(Point::new(65, 35))
-///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 10))
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
@@ -45,7 +49,6 @@ pub struct Line {
     /// End point
     pub end: Point,
 }
-
 impl Primitive for Line {}
 
 impl Dimensions for Line {
@@ -65,77 +68,7 @@ impl Dimensions for Line {
 impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
-        Line { start, end }
-    }
-}
-
-/// Pixel iterator for each pixel in the line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) struct LineIterator {
-    start: Point,
-    end: Point,
-    delta: Point,
-    /// in which quadrant is the line drawn (upper-left=(-1, -1), lower-right=(1, 1), ...)
-    direction: Point,
-    err: i32,
-    stop: bool,
-}
-
-impl LineIterator {
-    /// Create a new line iterator from a `Line`
-    pub(crate) fn new(line: &Line) -> Self {
-        let mut delta = line.end - line.start;
-
-        if delta.x < 0 {
-            delta = Point::new(-delta.x, delta.y);
-        }
-        if delta.y > 0 {
-            delta = Point::new(delta.x, -delta.y);
-        }
-
-        let direction = match (line.start.x >= line.end.x, line.start.y >= line.end.y) {
-            (false, false) => Point::new(1, 1),
-            (false, true) => Point::new(1, -1),
-            (true, false) => Point::new(-1, 1),
-            (true, true) => Point::new(-1, -1),
-        };
-
-        Self {
-            start: line.start,
-            end: line.end,
-            delta,
-            direction,
-            err: delta.x + delta.y,
-            stop: line.start == line.end, /* if line length is zero, draw nothing */
-        }
-    }
-}
-
-// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl Iterator for LineIterator {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if !self.stop {
-            let point = self.start;
-
-            if self.start == self.end {
-                self.stop = true;
-            }
-            let err_double = 2 * self.err;
-            if err_double > self.delta.y {
-                self.err += self.delta.y;
-                self.start += Point::new(self.direction.x, 0);
-            }
-            if err_double < self.delta.x {
-                self.err += self.delta.x;
-                self.start += Point::new(0, self.direction.y);
-            }
-
-            Some(point)
-        } else {
-            None
-        }
+        Self { start, end }
     }
 }
 
@@ -190,7 +123,7 @@ where
         StyledLineIterator {
             style: self.style,
 
-            line_iter: LineIterator::new(&self.primitive),
+            line_iter: ThickLineIterator::new(&self.primitive, self.style.stroke_width_i32()),
         }
     }
 }
@@ -203,7 +136,7 @@ where
 {
     style: PrimitiveStyle<C>,
 
-    line_iter: LineIterator,
+    line_iter: ThickLineIterator,
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -237,7 +170,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{drawable::Pixel, pixelcolor::BinaryColor};
+    use crate::{drawable::Pixel, mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
         let line =
@@ -360,5 +293,162 @@ mod tests {
         let end = Point::new(15, 7);
         let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
         test_expected_line(start, end, &expected);
+    }
+
+    #[test]
+    fn thick_line_octant_1() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Line::new(Point::new(2, 2), Point::new(20, 8))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 5))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "   #                   ",
+                "  #####                ",
+                "  ########             ",
+                "  ###########          ",
+                "    ############       ",
+                "       ############    ",
+                "          ############ ",
+                "             ########  ",
+                "                #####  ",
+                "                   ##  ",
+            ])
+        );
+    }
+
+    #[test]
+    fn thick_line_2px() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        // Horizontal line
+        Line::new(Point::new(2, 2), Point::new(10, 2))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 2))
+            .draw(&mut display)
+            .unwrap();
+
+        // Vertical line
+        Line::new(Point::new(2, 5), Point::new(2, 10))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 2))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "            ",
+                "  ######### ",
+                "  ######### ",
+                "            ",
+                "            ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+                "  ..        ",
+            ])
+        );
+    }
+
+    // Check that 45 degree lines don't draw their right side 1px too long
+    #[test]
+    fn diagonal() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Line::new(Point::new(3, 2), Point::new(10, 9))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 7))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     #        ",
+                "    ###       ",
+                "   #####      ",
+                "  #######     ",
+                " #########    ",
+                "  #########   ",
+                "   #########  ",
+                "    ######### ",
+                "     #######  ",
+                "      #####   ",
+                "       ###    ",
+                "        #     ",
+            ])
+        );
+    }
+
+    #[test]
+    fn thick_line_3px() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        // Horizontal line
+        Line::new(Point::new(2, 2), Point::new(10, 2))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 3))
+            .draw(&mut display)
+            .unwrap();
+
+        // Vertical line
+        Line::new(Point::new(2, 5), Point::new(2, 10))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 3))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "            ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "            ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+                " ...        ",
+            ])
+        );
+    }
+
+    #[test]
+    fn event_width_offset() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        // Horizontal line
+        Line::new(Point::new(2, 3), Point::new(10, 3))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
+            .draw(&mut display)
+            .unwrap();
+
+        // Vertical line
+        Line::new(Point::new(2, 9), Point::new(10, 8))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "            ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "            ",
+                "       #### ",
+                "  ######### ",
+                "  ######### ",
+                "  ######### ",
+                "  #####     ",
+            ])
+        );
     }
 }
