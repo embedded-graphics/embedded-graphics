@@ -210,10 +210,10 @@
 //!
 //! ## Draw a line
 //!
-//! This example draws a red line with 1px stroke.
+//! This example draws a red line with 8px stroke.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a line example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABgUlEQVR4nO3RQUrFQBAAUb3/oVUILuSDCDJTPckryDbT3e/9TWkA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIC45QAfX993yx87sOU3AfB7W28C47WtdwDwWnYHGFfZ7gCuRuz+ZIwR+wIY1NMwxu0IYFBPwBi9F4BB3RXjmF0ADOpOGEfOD2BQp2OcOPOPAAzqRIxT5vxTAAZ1Csbk2f4VgEFNxpg2z5IADGoaxoQZtgZgUBMwqndHBGBQFcbOt0YHYFA7MVb//8gADOrCWHemdX++SQBuHoA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGIAxAHIA5AHIA4AHEA4gDEAYgDEAcgDkAcgDgAcQDiAMQBiAMQByAOQByAOABxAOIAxAGI+wRL3SKBI6DgaAAAAABJRU5ErkJggg==" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a line example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABxklEQVR4nO3RQW7bQBAAweT/j04C+OhQkM2d7ZVcBfC6nJn+/YuUADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQGxTgD//vm0/eymbbiLAlU03+QhwZdMQR9q0uwBXNu3+OMBnm8Y6wKZNBbgyvulXT//Y+LjbjW8kwGPjG60N8Nn4AsPG5xfgsfH5pwNcGV9skfE5BXhscM7q9FcGV71hcCoBnjE41WkBrgye4AmDfxfgGVv/LslnO/8lwH/s/Nelnxxm4s0vE+A4PyfJ/RdGCHCo08LcP9/9F7YS4Dhtkvvnu/9CTIBDTYdZdbhV7xxHgOOsTbLqcKveeQECHOp7YVYdbtU7L0yA4zxOsvZka197EwIc6iPM2pOtfe3NCfCGBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMg9hfefCSBHuP7aAAAAABJRU5ErkJggg==" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -222,16 +222,11 @@
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
 //!     primitives::Line,
-//!     style::PrimitiveStyleBuilder,
+//!     style::PrimitiveStyle,
 //! };
 //!
-//! Line::new(Point::new(16, 24), Point::new(48, 40))
-//!     .into_styled(
-//!         PrimitiveStyleBuilder::new()
-//!             .stroke_width(1)
-//!             .stroke_color(Rgb888::RED)
-//!             .build(),
-//!     )
+//! Line::new(Point::new(16, 24), Point::new(51, 34))
+//!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 8))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```

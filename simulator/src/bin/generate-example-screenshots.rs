@@ -96,19 +96,14 @@ some display drivers implement accelerated drawing of iterators."#,
     op!(
         display,
         "Draw a line",
-        "This example draws a red line with 1px stroke.",
+        "This example draws a red line with 8px stroke.",
         {
             use embedded_graphics::{
-                pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyleBuilder,
+                pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyle,
             };
             {}
-            Line::new(Point::new(16, 24), Point::new(48, 40))
-                .into_styled(
-                    PrimitiveStyleBuilder::new()
-                        .stroke_width(1)
-                        .stroke_color(Rgb888::RED)
-                        .build(),
-                )
+            Line::new(Point::new(16, 24), Point::new(51, 34))
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 8))
                 .draw(&mut display)?;
         }
     );
