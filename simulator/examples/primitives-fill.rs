@@ -5,15 +5,16 @@
 use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Rectangle, Triangle},
+    primitives::{Circle, Ellipse, Rectangle, Triangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 static CIRCLE_SIZE: i32 = 65;
+static ELLIPSE_SIZE: Size = Size::new(90, 65);
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(304, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(404, 128));
 
     let stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
@@ -70,6 +71,21 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     Triangle::new(Point::new(32, 0), Point::new(0, 64), Point::new(64, 64))
         .translate(Point::new(96 * 2 + 32, 32))
+        .into_styled(stroke_off_fill_off)
+        .draw(&mut display)?;
+
+    Ellipse::new(Point::new(0, 0), ELLIPSE_SIZE)
+        .translate(Point::new(96 * 3, 0))
+        .into_styled(stroke)
+        .draw(&mut display)?;
+
+    Ellipse::new(Point::new(0, 0), ELLIPSE_SIZE)
+        .translate(Point::new(96 * 3 + 16, 16))
+        .into_styled(stroke_off_fill_on)
+        .draw(&mut display)?;
+
+    Ellipse::new(Point::new(0, 0), ELLIPSE_SIZE)
+        .translate(Point::new(96 * 3 + 32, 32))
         .into_styled(stroke_off_fill_off)
         .draw(&mut display)?;
 

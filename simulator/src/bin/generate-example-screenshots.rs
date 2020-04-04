@@ -146,6 +146,21 @@ some display drivers implement accelerated drawing of iterators."#,
 
     op!(
         display,
+        "Draw an ellipse",
+        "This example draws an ellipse with a 2px green stroke.",
+        {
+            use embedded_graphics::{
+                pixelcolor::Rgb888, prelude::*, primitives::Ellipse, style::PrimitiveStyle,
+            };
+            {}
+            Ellipse::new(Point::new(8, 16), Size::new(48, 32))
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
+                .draw(&mut display)?;
+        }
+    );
+
+    op!(
+        display,
         "Draw a triangle",
         "This example draws a triangle with a solid 1px magenta stroke and no fill.",
         {
