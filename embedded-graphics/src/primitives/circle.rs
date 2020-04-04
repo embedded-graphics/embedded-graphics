@@ -260,7 +260,7 @@ where
     }
 }
 
-fn diameter_to_threshold(diameter: u32) -> u32 {
+pub(in crate::primitives) fn diameter_to_threshold(diameter: u32) -> u32 {
     if diameter <= 4 {
         diameter.pow(2) - diameter / 2
     } else {

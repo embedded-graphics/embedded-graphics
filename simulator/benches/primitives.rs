@@ -3,7 +3,7 @@ use embedded_graphics::{
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::Gray8,
-    primitives::{Circle, Line, Primitive, Rectangle, Triangle},
+    primitives::{Circle, Ellipse, Line, Primitive, Rectangle, Triangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 };
 
@@ -89,6 +89,24 @@ fn filled_triangle(c: &mut Criterion) {
     });
 }
 
+fn ellipse(c: &mut Criterion) {
+    c.bench_function("ellipse", |b| {
+        let object = &Ellipse::new(Point::new(10, 10), Size::new(50, 30))
+            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
+fn filled_ellipse(c: &mut Criterion) {
+    c.bench_function("filled_ellipse", |b| {
+        let object = &Ellipse::new(Point::new(10, 10), Size::new(50, 30))
+            .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 criterion_group!(
     primitives,
     filled_circle,
@@ -98,6 +116,8 @@ criterion_group!(
     thick_line,
     thicker_line,
     triangle,
-    filled_triangle
+    filled_triangle,
+    ellipse,
+    filled_ellipse
 );
 criterion_main!(primitives);
