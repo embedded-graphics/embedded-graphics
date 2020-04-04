@@ -17,6 +17,7 @@ It contains built in items that make it easy to draw 2D graphics primitives:
   - Lines
   - Rectangles
   - Circles
+  - Ellipses
   - Triangles
 - Images
   - Built in support for images from raw data

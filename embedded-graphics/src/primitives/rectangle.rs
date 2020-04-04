@@ -95,6 +95,17 @@ impl Rectangle {
             bottom_right,
         }
     }
+
+    /// Returns the center of this rectangle.
+    ///
+    /// For rectangles with even width and/or height the returned value is rounded down
+    /// to the nearest integer pixel.
+    pub fn center(&self) -> Point {
+        let dx = self.size().width.saturating_sub(1) / 2;
+        let dy = self.size().height.saturating_sub(1) / 2;
+
+        self.top_left + Size::new(dx, dy)
+    }
 }
 
 impl Transform for Rectangle {

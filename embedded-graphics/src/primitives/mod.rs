@@ -1,12 +1,15 @@
 //! Graphics primitives
 
 pub mod circle;
+pub mod ellipse;
 pub mod line;
 pub mod rectangle;
 mod thick_line_iterator;
 pub mod triangle;
 
-pub use self::{circle::Circle, line::Line, rectangle::Rectangle, triangle::Triangle};
+pub use self::{
+    circle::Circle, ellipse::Ellipse, line::Line, rectangle::Rectangle, triangle::Triangle,
+};
 use crate::{
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
@@ -110,6 +113,98 @@ macro_rules! egcircle {
     (center = $center:expr, radius = $r:expr, style = $style:expr $(,)?) => {{
         $crate::primitives::Circle::new($crate::geometry::Point::from($center), $r)
             .into_styled($style)
+    }};
+}
+
+/// Create a [`Ellipse`](./primitives/ellipse/struct.Ellipse.html) with optional styling using a
+/// convenient macro.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egellipse,
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitive_style,
+///     primitives::Ellipse,
+///     style::{PrimitiveStyle, Styled},
+/// };
+///
+/// // Coordinates can be defined as any type that implements `Into<Point>`
+/// let line_ellipse: Styled<Ellipse, PrimitiveStyle<Rgb565>> =
+///     egellipse!(top_left = (10, 20), size = Size::new(30, 50));
+///
+/// let filled_ellipse: Styled<Ellipse, PrimitiveStyle<Rgb565>> = egellipse!(
+///     center = (10, 20),
+///     size = Size::new(30, 50),
+///     style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
+/// );
+/// ```
+///
+/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
+/// For example, the following code makes two identical ellipses:
+///
+/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egellipse,
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitive_style,
+///     primitives::Ellipse,
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled},
+/// };
+///
+/// let ellipse_1: Styled<Ellipse, PrimitiveStyle<Rgb565>> = egellipse!(
+///     top_left = (10, 20),
+///     size = (30, 50),
+///     style = primitive_style!(
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
+///     )
+/// );
+///
+/// let style = PrimitiveStyleBuilder::new()
+///     .fill_color(Rgb565::GREEN)
+///     .stroke_color(Rgb565::RED)
+///     .stroke_width(1)
+///     .build();
+///
+/// let ellipse_2: Styled<Ellipse, PrimitiveStyle<Rgb565>> =
+///     Ellipse::new(Point::new(10, 20), Size::new(30, 50)).into_styled(style);
+///
+/// assert_eq!(ellipse_1, ellipse_2);
+/// ```
+#[macro_export]
+macro_rules! egellipse {
+    (top_left = $top_left:expr, size = $size:expr $(,)?) => {{
+        $crate::egellipse!(
+            top_left = $top_left,
+            size = $size,
+            style = $crate::style::PrimitiveStyle::default()
+        )
+    }};
+    (top_left = $top_left:expr, size = $size:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Ellipse::new(
+            $crate::geometry::Point::from($top_left),
+            $crate::geometry::Size::from($size),
+        )
+        .into_styled($style)
+    }};
+    (center = $center:expr, size = $size:expr $(,)?) => {{
+        $crate::egellipse!(
+            center = $center,
+            size = $size,
+            style = $crate::style::PrimitiveStyle::default()
+        )
+    }};
+    (center = $center:expr, size = $size:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::Ellipse::with_center(
+            $crate::geometry::Point::from($center),
+            $crate::geometry::Size::from($size),
+        )
+        .into_styled($style)
     }};
 }
 
@@ -343,7 +438,7 @@ macro_rules! egtriangle {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Point,
+        geometry::{Point, Size},
         pixelcolor::{Rgb565, RgbColor},
         primitive_style,
         style::PrimitiveStyle,
@@ -357,6 +452,26 @@ mod tests {
         let _c: Styled<Circle, PrimitiveStyle<Rgb565>> = egcircle!(
             center = (10, 20),
             radius = 30,
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
+        );
+    }
+
+    #[test]
+    fn ellipse() {
+        let _c: Styled<Ellipse, PrimitiveStyle<Rgb565>> =
+            egellipse!(top_left = Point::new(10, 20), size = Size::new(30, 50));
+        let _c: Styled<Ellipse, PrimitiveStyle<Rgb565>> =
+            egellipse!(top_left = (10, 20), size = Size::new(30, 50));
+        let _c: Styled<Ellipse, PrimitiveStyle<Rgb565>> =
+            egellipse!(center = (10, 20), size = Size::new(30, 50));
+        let _c: Styled<Ellipse, PrimitiveStyle<Rgb565>> = egellipse!(
+            top_left = (10, 20),
+            size = Size::new(30, 50),
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
+        );
+        let _c: Styled<Ellipse, PrimitiveStyle<Rgb565>> = egellipse!(
+            center = (10, 20),
+            size = Size::new(30, 50),
             style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN),
         );
     }

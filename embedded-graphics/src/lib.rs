@@ -6,6 +6,7 @@
 //!     * [Lines](./primitives/line/struct.Line.html)
 //!     * [Rectangles (and squares)](./primitives/rectangle/struct.Rectangle.html)
 //!     * [Circles](./primitives/circle/struct.Circle.html)
+//!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
@@ -286,6 +287,32 @@
 //!
 //! Circle::new(Point::new(32, 32), 20)
 //!     .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
+//! ## Draw an ellipse
+//!
+//! This example draws an ellipse with a 2px green stroke.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an ellipse example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAC6ElEQVR4nO3R3WrsQAwD4HPe/6FbwUII223JjGzLY/RB7jL+0/9/JuUAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ALHeAXzhi9B4y8ajgQMoEnXoVQ22bzACOIBSz88dNV19x8fKG0L9Oeo7PlbV8O8TVE3xrsFUJU2gwaofNJgqs8lv62X2ZJXPnFYYypcJUD5zTuGfa+T0yVWyRUJJKBk9XckW0SVLhi6VvFFoMUgeVyB5o7hiyYOKpW0XVAbSRmwhbbuIMvfhIup1F7ovXQBCBzpA6L5cgfsoL1y9M4RuTTyF0FGOEbr17tPQIY4UdIGtRxDU/mBBF9h6BPf2uzUmoO+w9QjoxkPQd9h6BHTjIeg7bD0CuvEQ9B3WH9EtByJusvg7EM3GIm6y+DsQzcYibrL4OxDNxiJusvg7EM3GIm6y+DsQzcYibrL4OxDNxiJusvg7EM3GIm6y+DsQzcYibrL4OxDNxiJusvg7EM3GIm6y+DsQzcYibrL4+4VoOQp9h61HQDcegr7D1iOgGw9B32HrEdCNh6DvsPUI7o1fdiudKugCW48gqP3Bgi6w9egSNMRhQrcmnkLoKMcI3Zp4erkPFFGvu9B96QIQOtABQvelC1zuY73E1dZL2y6oDKSN2ELadkFlLmmDyiRvFFoMkscVSN4otNgleegiJVsklISS0dOVbJFQ8vJzgZfMnqzymdMKQ/kyAcpnTiv85rfFXqqmeNdgqpIm0GDVDxpMVdLkzd9r30VNV9/xsfKGUH+O+o6PlTf86PmBYjXYvsEI4ACaigqm8ZaNRwMHYNkcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByD2DbG6eIHsabVuAAAAAElFTkSuQmCC" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Ellipse,
+//!     style::PrimitiveStyle,
+//! };
+//!
+//! Ellipse::new(Point::new(8, 16), Size::new(48, 32))
+//!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
