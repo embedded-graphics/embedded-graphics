@@ -50,8 +50,8 @@ fn main() -> Result<(), core::convert::Infallible> {
                 .into_iter(),
         )
         .chain(
-            // Draw a square with a 3px wide stroke.
-            Circle::new(Point::new(96, yoffset + 8), 8)
+            // Draw a circle with a 3px wide stroke.
+            Circle::new(Point::new(88, yoffset), 17)
                 .into_styled(thick_stroke)
                 .into_iter(),
         )

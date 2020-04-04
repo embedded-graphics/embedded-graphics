@@ -46,7 +46,7 @@ fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     // Use the circle macro to create the outer face
     let face = egcircle!(
         center = CENTER,
-        radius = SIZE,
+        diameter = 2 * SIZE + 1,
         style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 2)
     );
 
@@ -92,7 +92,7 @@ fn draw_seconds_hand(seconds: u32) -> impl Iterator<Item = Pixel<BinaryColor>> {
         .build();
 
     // Add a fancy circle near the end of the hand
-    let decoration = Circle::new(decoration_position, 5).into_styled(decoration_style);
+    let decoration = Circle::with_center(decoration_position, 11).into_styled(decoration_style);
 
     hand.into_iter().chain(&decoration)
 }
@@ -171,7 +171,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
         // Draw a small circle over the hands in the center of the clock face. This has to happen
         // after the hands are drawn so they're covered up
-        Circle::new(CENTER, 4)
+        Circle::with_center(CENTER, 9)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .draw(&mut display)?;
 
