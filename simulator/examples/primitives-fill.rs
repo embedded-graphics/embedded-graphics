@@ -10,7 +10,7 @@ use embedded_graphics::{
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
-static CIRCLE_SIZE: i32 = 32;
+static CIRCLE_SIZE: i32 = 65;
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(304, 128));
@@ -29,17 +29,17 @@ fn main() -> Result<(), core::convert::Infallible> {
         .fill_color(BinaryColor::On)
         .build();
 
-    Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+    Circle::new(Point::new(0, 0), CIRCLE_SIZE as u32)
         .into_styled(stroke)
         .draw(&mut display)?;
 
-    Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
+    Circle::new(Point::new(0, 0), CIRCLE_SIZE as u32)
         .translate(Point::new(16, 16))
         .into_styled(stroke_off_fill_on)
         .draw(&mut display)?;
 
-    Circle::new(Point::new(CIRCLE_SIZE, CIRCLE_SIZE), CIRCLE_SIZE as u32)
-        .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
+    Circle::new(Point::new(0, 0), CIRCLE_SIZE as u32)
+        .translate(Point::new(CIRCLE_SIZE / 2, CIRCLE_SIZE / 2))
         .into_styled(stroke_off_fill_off)
         .draw(&mut display)?;
 

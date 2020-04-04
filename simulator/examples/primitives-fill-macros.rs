@@ -8,21 +8,21 @@ use embedded_graphics::{
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
-static CIRCLE_SIZE: i32 = 32;
+static CIRCLE_SIZE: i32 = 65;
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(384, 128));
 
     egcircle!(
-        center = (CIRCLE_SIZE, CIRCLE_SIZE),
-        radius = CIRCLE_SIZE as u32,
+        top_left = (0, 0),
+        diameter = CIRCLE_SIZE as u32,
         style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .draw(&mut display)?;
 
     egcircle!(
-        center = (CIRCLE_SIZE, CIRCLE_SIZE),
-        radius = CIRCLE_SIZE as u32,
+        top_left = (0, 0),
+        diameter = CIRCLE_SIZE as u32,
         style = primitive_style!(
             stroke_color = BinaryColor::Off,
             stroke_width = 1,
@@ -33,15 +33,15 @@ fn main() -> Result<(), core::convert::Infallible> {
     .draw(&mut display)?;
 
     egcircle!(
-        center = (CIRCLE_SIZE, CIRCLE_SIZE),
-        radius = CIRCLE_SIZE as u32,
+        top_left = (0, 0),
+        diameter = CIRCLE_SIZE as u32,
         style = primitive_style!(
             stroke_color = BinaryColor::Off,
             stroke_width = 1,
             fill_color = BinaryColor::Off
         )
     )
-    .translate(Point::new(CIRCLE_SIZE, CIRCLE_SIZE))
+    .translate(Point::new(CIRCLE_SIZE / 2, CIRCLE_SIZE / 2))
     .draw(&mut display)?;
 
     egrectangle!(

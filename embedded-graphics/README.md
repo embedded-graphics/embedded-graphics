@@ -137,7 +137,7 @@ fn main() -> Result<(), std::convert::Infallible> {
         .draw(&mut display)?;
 
     // Draw a circle with a 3px wide stroke.
-    Circle::new(Point::new(96, yoffset + 8), 8)
+    Circle::new(Point::new(88, yoffset), 17)
         .into_styled(thick_stroke)
         .draw(&mut display)?;
 
@@ -185,10 +185,10 @@ fn main() {
     // This will be whichever display driver you decide to use, like the SSD1306, SSD1351, etc
     let mut display = Display::new();
 
-    // Draw a circle centered at (64, 64) with a radius of 64 and a white 1px stroke
+    // Draw a circle with top-left at (0, 0) with a diameter of 128 and a white 1px stroke
     egcircle!(
-        center = (64, 64),
-        radius = 64,
+        top_left = (0, 0),
+        diameter = 128,
         style = primitive_style!(stroke_color = Rgb565::WHITE)
     )
     .draw(&mut display);

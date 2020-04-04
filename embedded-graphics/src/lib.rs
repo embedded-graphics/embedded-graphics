@@ -108,7 +108,7 @@
 //! // replaced by a draw target that is provided by a display driver crate.
 //! let mut display = MockDisplay::default();
 //!
-//! let c = Circle::new(Point::new(20, 20), 8).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
+//! let c = Circle::new(Point::new(12, 12), 17).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
 //! let t = Text::new("Hello Rust!", Point::new(20, 16))
 //!     .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
 //!
@@ -133,8 +133,8 @@
 //! let mut display = MockDisplay::default();
 //!
 //! let c = egcircle!(
-//!     center = (20, 20),
-//!     radius = 8,
+//!     top_left = (12, 12),
+//!     diameter = 17,
 //!     style = primitive_style!(fill_color = Rgb565::RED)
 //! );
 //! let t = egtext!(
@@ -166,8 +166,8 @@
 //!     egrectangle!(top_left = (0, 0), bottom_right = (40, 40))
 //!         .into_iter()
 //!         .chain(&egcircle!(
-//!             center = (20, 20),
-//!             radius = 8,
+//!             top_left = (12, 12),
+//!             diameter = 17,
 //!             style = primitive_style!(fill_color = Rgb565::RED)
 //!         ))
 //!         .chain(&egtext!(

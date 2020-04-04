@@ -28,12 +28,12 @@ use crate::{
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Circle with 1 pixel wide white stroke centered around (10, 20) with a radius of 30
+/// // Circle with 1 pixel wide white stroke with top-left point at (10, 20) with a diameter of 30
 /// Circle::new(Point::new(10, 20), 30)
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
 ///     .draw(&mut display)?;
 ///
-/// // Circle with styled stroke and fill centered around (50, 20) with a radius of 30
+/// // Circle with styled stroke and fill with top-left point at (50, 20) with a diameter of 30
 /// let style = PrimitiveStyleBuilder::new()
 ///     .stroke_color(Rgb565::RED)
 ///     .stroke_width(3)
@@ -53,17 +53,31 @@ use crate::{
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Circle {
-    /// Center point of circle
-    pub center: Point,
+    /// Top-left point of circle's bounding box
+    pub top_left: Point,
 
-    /// Radius of the circle
-    pub radius: u32,
+    /// Diameter of the circle
+    pub diameter: u32,
 }
 
 impl Circle {
-    /// Create a new circle centered around a given point with a specific radius
-    pub const fn new(center: Point, radius: u32) -> Self {
-        Circle { center, radius }
+    /// Create a new circle delimited with a top-left point with a specific diameter
+    pub const fn new(top_left: Point, diameter: u32) -> Self {
+        Circle { top_left, diameter }
+    }
+
+    /// Create a new circle centered around a given point with a specific diameter
+    pub const fn with_center(center: Point, diameter: u32) -> Self {
+        let top_left = Point::new(
+            center.x - diameter as i32 / 2,
+            center.y - diameter as i32 / 2,
+        );
+        Circle { top_left, diameter }
+    }
+
+    /// Return the center point of the circle
+    pub fn center(&self) -> Point {
+        self.top_left + Size::new(self.diameter, self.diameter) / 2
     }
 }
 
@@ -71,9 +85,7 @@ impl Primitive for Circle {}
 
 impl Dimensions for Circle {
     fn top_left(&self) -> Point {
-        let radius_coord = Point::new(self.radius as i32, self.radius as i32);
-
-        self.center - radius_coord
+        self.top_left
     }
 
     fn bottom_right(&self) -> Point {
@@ -81,12 +93,16 @@ impl Dimensions for Circle {
     }
 
     fn size(&self) -> Size {
-        Size::new(self.radius * 2, self.radius * 2)
+        if self.diameter < 1 {
+            Size::new(0, 0)
+        } else {
+            Size::new(self.diameter - 1, self.diameter - 1)
+        }
     }
 }
 
 impl Transform for Circle {
-    /// Translate the circle center from its current position to a new position by (x, y) pixels,
+    /// Translate the circle from its current position to a new position by (x, y) pixels,
     /// returning a new `Circle`. For a mutating transform, see `translate_mut`.
     ///
     /// ```
@@ -95,16 +111,16 @@ impl Transform for Circle {
     /// let circle = Circle::new(Point::new(5, 10), 10);
     /// let moved = circle.translate(Point::new(10, 10));
     ///
-    /// assert_eq!(moved.center, Point::new(15, 20));
+    /// assert_eq!(moved.top_left, Point::new(15, 20));
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
-            center: self.center + by,
+            top_left: self.top_left + by,
             ..*self
         }
     }
 
-    /// Translate the circle center from its current position to a new position by (x, y) pixels.
+    /// Translate the circle from its current position to a new position by (x, y) pixels.
     ///
     /// ```
     /// # use embedded_graphics::primitives::Circle;
@@ -112,10 +128,10 @@ impl Transform for Circle {
     /// let mut circle = Circle::new(Point::new(5, 10), 10);
     /// circle.translate_mut(Point::new(10, 10));
     ///
-    /// assert_eq!(circle.center, Point::new(15, 20));
+    /// assert_eq!(circle.top_left, Point::new(15, 20));
     /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.center += by;
+        self.top_left += by;
 
         self
     }
@@ -124,10 +140,11 @@ impl Transform for Circle {
 /// Pixel iterator for each pixel in the circle border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct StyledCircleIterator<C: PixelColor> {
-    center: Point,
-    radius: u32,
+    top_left: Point,
+    diameter: u32,
     style: PrimitiveStyle<C>,
     p: Point,
+    c: Point,
     outer_threshold: i32,
     inner_threshold: i32,
 }
@@ -148,7 +165,7 @@ where
         }
 
         loop {
-            let len = (2 * self.p.x).pow(2) + (2 * self.p.y).pow(2);
+            let len = (self.c.x - 2 * self.p.x).pow(2) + (self.c.y - 2 * self.p.y).pow(2);
 
             let color = if len < self.inner_threshold {
                 self.style.fill_color
@@ -158,16 +175,16 @@ where
             } else {
                 None
             };
-            let item = color.map(|c| Pixel(self.center + self.p, c));
+            let item = color.map(|c| Pixel(self.p, c));
 
             self.p.x += 1;
 
-            if self.p.x > self.radius as i32 {
-                self.p.x = -(self.radius as i32);
+            if self.p.x > self.top_left.x + self.diameter as i32 {
+                self.p.x = self.top_left.x;
                 self.p.y += 1;
             }
 
-            if self.p.y > self.radius as i32 {
+            if self.p.y > self.top_left.y + self.diameter as i32 {
                 break None;
             }
 
@@ -187,13 +204,11 @@ where
     }
 }
 
-fn radius_to_threshold(radius: i32) -> i32 {
-    if radius == 1 {
-        // Special case for small circles. This kludge removes the top-left pixel and leaves the
-        // circle as a `+` shape.
-        5
+fn diameter_to_threshold(diameter: i32) -> i32 {
+    if diameter <= 4 {
+        diameter.pow(2) - diameter / 2
     } else {
-        4 * (radius.pow(2) + radius) + 1
+        diameter.pow(2)
     }
 }
 
@@ -205,22 +220,21 @@ where
     type IntoIter = StyledCircleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let top_left = Point::new(
-            -(self.primitive.radius as i32),
-            -(self.primitive.radius as i32),
-        );
+        let center = Point::new(2 * self.primitive.top_left.x, 2 * self.primitive.top_left.y)
+            + self.primitive.size();
 
-        let inner_radius = self.primitive.radius as i32 - self.style.stroke_width_i32();
-        let outer_radius = self.primitive.radius as i32;
+        let inner_diameter = self.primitive.diameter as i32 - 2 * self.style.stroke_width_i32();
+        let outer_diameter = self.primitive.diameter as i32;
 
-        let inner_threshold = radius_to_threshold(inner_radius);
-        let outer_threshold = radius_to_threshold(outer_radius);
+        let inner_threshold = diameter_to_threshold(core::cmp::max(inner_diameter, 0));
+        let outer_threshold = diameter_to_threshold(outer_diameter);
 
         StyledCircleIterator {
-            center: self.primitive.center,
-            radius: self.primitive.radius,
+            top_left: self.primitive.top_left,
+            diameter: self.primitive.diameter,
             style: self.style,
-            p: top_left,
+            p: self.primitive.top_left,
+            c: center,
             outer_threshold,
             inner_threshold,
         }
@@ -256,7 +270,7 @@ mod tests {
     fn tiny_circle() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
-        Circle::new(Point::new(1, 1), 1)
+        Circle::new(Point::new(0, 0), 3)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut display)?;
 
@@ -278,7 +292,7 @@ mod tests {
     fn tiny_circle_filled() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
-        Circle::new(Point::new(1, 1), 1)
+        Circle::new(Point::new(0, 0), 3)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .draw(&mut display)?;
 
@@ -327,7 +341,7 @@ mod tests {
 
     #[test]
     fn negative_dimensions() {
-        let circle = Circle::new(Point::new(-10, -10), 5);
+        let circle = Circle::new(Point::new(-15, -15), 11);
 
         assert_eq!(circle.top_left(), Point::new(-15, -15));
         assert_eq!(circle.bottom_right(), Point::new(-5, -5));
@@ -336,7 +350,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let circle = Circle::new(Point::new(10, 20), 5);
+        let circle = Circle::new(Point::new(5, 15), 11);
 
         assert_eq!(circle.top_left(), Point::new(5, 15));
         assert_eq!(circle.bottom_right(), Point::new(15, 25));
@@ -344,8 +358,8 @@ mod tests {
     }
 
     #[test]
-    fn large_radius() {
-        let circle = Circle::new(Point::new(5, 5), 10);
+    fn large_diameter() {
+        let circle = Circle::new(Point::new(-5, -5), 21);
 
         assert_eq!(circle.top_left(), Point::new(-5, -5));
         assert_eq!(circle.bottom_right(), Point::new(15, 15));
@@ -354,8 +368,9 @@ mod tests {
 
     #[test]
     fn transparent_border() {
-        let circle: Styled<Circle, PrimitiveStyle<BinaryColor>> = Circle::new(Point::new(5, 5), 10)
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+        let circle: Styled<Circle, PrimitiveStyle<BinaryColor>> =
+            Circle::new(Point::new(-5, -5), 21)
+                .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         assert!(circle.into_iter().count() > 0);
     }
@@ -373,5 +388,14 @@ mod tests {
         assert!(negative.into_iter().eq(positive
             .into_iter()
             .map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
+    }
+
+    #[test]
+    fn center_is_correct() {
+        let circle = Circle::with_center(Point::new(10, 10), 5);
+
+        assert_eq!(circle.top_left(), Point::new(8, 8));
+        assert_eq!(circle.center(), Point::new(10, 10));
+        assert_eq!(circle.bottom_right(), Point::new(12, 12));
     }
 }
