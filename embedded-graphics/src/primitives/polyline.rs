@@ -78,6 +78,8 @@ impl<'a> Dimensions for Polyline<'a> {
     }
 }
 
+// TODO: Find a way to impl Transform
+
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct PolylineIterator<'a> {
@@ -232,4 +234,13 @@ mod tests {
         assert_eq!(polyline.bottom_right(), Point::new(200, -16));
         assert_eq!(polyline.size(), Size::new(290, 74));
     }
+
+    // #[test]
+    // fn transformed_dimensions() {
+    //     let polyline = Polyline::new(&HEARTBEAT).translate(Point::new(-100, -100));
+
+    //     assert_eq!(polyline.top_left(), Point::new(-90, -90));
+    //     assert_eq!(polyline.bottom_right(), Point::new(200, -16));
+    //     assert_eq!(polyline.size(), Size::new(290, 74));
+    // }
 }
