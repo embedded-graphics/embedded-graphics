@@ -13,8 +13,11 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Changed
 
 - **(breaking)** [#274](https://github.com/jamwaffles/embedded-graphics/pull/274) The `Circle` is now defined by its bounding box top-left corner and its diameter instead of its center and its radius. To convert your code, you can replace `Circle::new(point, radius)` by `Circle::with_center(point, 2 * radius + 1)`.
-
 - **(breaking)** [#306](https://github.com/jamwaffles/embedded-graphics/pull/306) The `Rectangle` is now defined by its top-left corner and its size instead of the top-left and bottom-right corner. To convert your code, you can replace `Rectangle::new` by `Rectangle::with_corners`.
+
+### Fixed
+
+- [#309](https://github.com/jamwaffles/embedded-graphics/pull/309) Prevent triangles with off-screen vertices from infinitely looping.
 
 ## [0.6.1] - 2020-04-01
 
