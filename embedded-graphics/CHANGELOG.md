@@ -10,6 +10,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#307](https://github.com/jamwaffles/embedded-graphics/pull/307) Added `Primitive::points` to get an iterator over all points inside a primitive.
 
+### Fixed
+
+- [#309](https://github.com/jamwaffles/embedded-graphics/pull/309) Prevent triangles with off-screen vertices from infinitely looping.
+
 ## [0.6.1] - 2020-04-01
 
 ### Added
