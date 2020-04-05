@@ -163,7 +163,7 @@
 //! let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
-//!     egrectangle!(top_left = (0, 0), bottom_right = (40, 40))
+//!     egrectangle!(top_left = (0, 0), size = (40, 40))
 //!         .into_iter()
 //!         .chain(&egcircle!(
 //!             top_left = (12, 12),
@@ -239,7 +239,7 @@
 //! This example draws a rectangle with a 2px thick red stroke and cyan fill color.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a rectangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB2klEQVR4nO3RMWokURAE0Z37H3pWRoISCjUylIQE8aChv5NGxeufUAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmANg8wPvj+/t2Z9othwGe7ZbDAM92y2GAZ7vl6ACvd79+u/fr8ziffz9ttxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+Xokxvg2i1Hn9wA1245+uQGuHbL0Sc3wLVbjj65Aa7dcvTJDXDtlqNPboBrtxx9cgNcu+X4Syf/2u5Mu+UwwLPdchjg2W45DPBst6xvMQDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDsPzy9cIE/9mieAAAAAElFTkSuQmCC" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a rectangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABhUlEQVR4nO3RMWoDURAEUev+h5adyYomakqC92Bhf9LB1OOHlAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQGwe4Pn3fbP1gdb7AhzW+wIc1vsCHNb7bwEez/+vz/V8vM7y+ttY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvvwX4RusDrfcFOKz3BTis9wU4rPc5CBATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxH4By6BogfSjbAMAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -251,7 +251,7 @@
 //!     style::PrimitiveStyleBuilder,
 //! };
 //!
-//! Rectangle::new(Point::new(16, 24), Point::new(48, 40))
+//! Rectangle::new(Point::new(16, 24), Size::new(32, 16))
 //!     .into_styled(
 //!         PrimitiveStyleBuilder::new()
 //!             .stroke_width(2)
@@ -271,7 +271,7 @@
 //! This example draws a circle with no stroke and a solid blue fill.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACe0lEQVR4nO3RS1LEMAxFUdj/ovlkwisMJJZkPSfcU9VDyR3d1xdYEcCMAGYEMCOAGQHMCGBGADMCmBHAjABmBDAjgBkBzAhgRgAzApgRwIwAZgQwI4AZAcwIYEYAsxsFePv4zdv9A3f/f4IArWLnvmKvT97r3wgCGKw7+m/8n+//B4IABv1H/43nFJ5XBQFs9jm96j5I93uCAJ+63zvseXrVd5a+lwQBvvS9dNj/9KrjOB1vCAJ81/HG4V6nV2tPtHa7IMDP1m4/3Pf0atWhVu0VBPjLqr2HZ5xe1Z+rfqMgwLn6jYIA5+o3CgKcq994eN7pVeXRKncJAlxVuUsQ4KrKXYIAV1XuOjz79KrmdDVbBAHm1GwRBJhTs0UQYE7NFkGAOTVbBAHm1Gw5/J/Tq+wBs/OCABHZeUGAiOy8IEBEdl4QICI7LwgQkZ0XBIjIzgsCRGTnBQEisvOCABHZeUGAiOy8IEBEdl4QICI7LwgQkZ0XBIjIzgsCRGTnBQEisvOCABHZ+cH/yVBzupotggBzarYIAsyp2SIIMKdmiyDAnJotggBzarYMnp2h8miVuwQBrqrcJQhwVeUuQYCrKncNnpeh/lz1GwUBztVvFAQ4V79REOBc/cbBMzKsOtSqvYIAf1m1d3DfDGtPtHa7IMDP1m4f3CtDx3E63hAE+K7jjcH+GfrO0veSIMCXvpcGe2boPkj3e4IAn7rfG+yTwXMKz6uCABvpj+H/fP8/EATYyLoYe33yXv9GEGA7sSS7f+Du/08QAAsQwIwAZgQwI4AZAcwIYEYAMwKYEcCMAGYEMCOAGQHMCGBGADMCmBHAjABmBDAjgBkBzN4BABtSgS+nmkgAAAAASUVORK5CYII=" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a circle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACV0lEQVR4nO3RUU7FMAwFUdj/ooF+UVUhkidpblrmSPzZKc/z+aEoA4QZIMwAYQYIM0CYAcIMEGaAMAOEGSDMAGEGCDNAmAHCDBBmgDADhBkgzABhBggzQJgBwgwQZoAwA4QZIMwAYQYIM0CYAcIMEPaCAF8/fxV7/eS9/hvEAItUD12VOUXmq4gBAu4++l/WnWXdlxADxKROf7biOCu+gRggYIej/+WuQ931LmKAmJ1Pfzb/XPNfRAwQ85TTn8082sy3EAPEPPH0Z3NON+cVxACHOa8gBjjMeQUxwGHOK0VPP/3Z6AFH9xED/BrdL3rT6c/4GfkmYoArvokY4IpvIga44ptFbz39GTkm2UEM0EZ2EAO0kR3EAG1kBzFAG9lBDNBGdhADtJEdxABtZKfoP5z+rHbS2jRigJ7aNGKAnto0YoCe2jRigJ7aNGKAnto0YoCe2jRigJ7aNGKAnto0YoCe2jRigJ7aNGKAnto0YoCe2jRigJ7aNGKAnto0YoCe2vSA/5CBHJPsIAZoIzuIAdrIDmKANrKDGKCN7CAGaCM7iAHayA5igDayM+CtGfgZ+SZigCu+iRjgim8iBrjimwPelGH0gKP7iAF+je4PeHqGOaeb8wpigMOcVxADHOa8ghjgMOeVAU/MMPNoM99CDLCFp2SYf675LyIG2MLOGe461F3vIgbYyA4xVhxnxTcQA2whlWHdWdZ9CTHARu6OkTlF5quIATZVDbPXT97rv0EMoAEGCDNAmAHCDBBmgDADhBkgzABhBggzQJgBwgwQZoAwA4QZIOwbbHdQgYxk5xMAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
@@ -283,7 +283,7 @@
 //!     style::PrimitiveStyle,
 //! };
 //!
-//! Circle::new(Point::new(32, 32), 20)
+//! Circle::new(Point::new(16, 16), 40)
 //!     .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())

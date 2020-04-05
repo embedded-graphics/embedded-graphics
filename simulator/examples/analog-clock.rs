@@ -133,8 +133,9 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
 
     // Add a background around the time digits. Note that there is no bottom-right padding as this
     // is added by the font renderer itself
-    let background = Rectangle::new(text.top_left() - Size::new(3, 3), text.bottom_right())
-        .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+    let background =
+        Rectangle::with_corners(text.top_left() - Point::new(3, 3), text.bottom_right())
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
     // Draw the white background first, then the black text. Order matters here
     background.into_iter().chain(&text)

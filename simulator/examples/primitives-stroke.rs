@@ -21,7 +21,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let triangle = Triangle::new(Point::new(0, 64), Point::new(64, 0), Point::new(64, 64));
     let rectangle =
-        Rectangle::new(Point::new(0, 0), Point::new(64, 64)).translate(Point::new(64 + PADDING, 0));
+        Rectangle::new(Point::new(0, 0), Size::new(64, 64)).translate(Point::new(64 + PADDING, 0));
     let line = Line::new(Point::new(0, 0), Point::new(64, 64))
         .translate(Point::new((64 + PADDING) * 2, 0));
     let circle = Circle::new(Point::new(0, 0), 64).translate(Point::new((64 + PADDING) * 3, 0));

@@ -57,7 +57,7 @@ impl Dimensions for Line {
     }
 
     fn bottom_right(&self) -> Point {
-        self.top_left() + self.size()
+        self.top_left() + (self.size() - Size::new(1, 1))
     }
 
     fn size(&self) -> Size {
@@ -190,18 +190,18 @@ mod tests {
     #[test]
     fn bounding_box() {
         let start = Point::new(10, 10);
-        let end = Point::new(20, 20);
+        let end = Point::new(19, 29);
 
         let line: Line = Line::new(start, end);
         let backwards_line: Line = Line::new(end, start);
 
         assert_eq!(line.top_left(), start);
         assert_eq!(line.bottom_right(), end);
-        assert_eq!(line.size(), Size::new(10, 10));
+        assert_eq!(line.size(), Size::new(10, 20));
 
         assert_eq!(backwards_line.top_left(), start);
         assert_eq!(backwards_line.bottom_right(), end);
-        assert_eq!(backwards_line.size(), Size::new(10, 10));
+        assert_eq!(backwards_line.size(), Size::new(10, 20));
     }
 
     #[test]

@@ -19,7 +19,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     .into_iter()
     .chain(&egrectangle!(
         top_left = (20, 20),
-        bottom_right = (100, 80),
+        size = (80, 60),
         style = primitive_style!(fill_color = Rgb565::RED)
     ))
     .draw(&mut display)

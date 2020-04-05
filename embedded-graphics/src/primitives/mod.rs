@@ -204,11 +204,11 @@ macro_rules! egline {
 /// };
 ///
 /// let empty_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
-///     egrectangle!(top_left = (10, 20), bottom_right = (30, 40));
+///     egrectangle!(top_left = (10, 20), size = (20, 20));
 ///
 /// let filled_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = (10, 20),
-///     bottom_right = (30, 40),
+///     size = (20, 20),
 ///     style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
 /// );
 /// ```
@@ -230,7 +230,7 @@ macro_rules! egline {
 ///
 /// let rectangle_1: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
 ///     top_left = (10, 20),
-///     bottom_right = (30, 40),
+///     size = (20, 20),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
 ///         fill_color = Rgb565::GREEN,
@@ -245,23 +245,36 @@ macro_rules! egline {
 ///     .build();
 ///
 /// let rectangle_2: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
-///     Rectangle::new(Point::new(10, 20), Point::new(30, 40)).into_styled(style);
+///     Rectangle::new(Point::new(10, 20), Size::new(20, 20)).into_styled(style);
 ///
 /// assert_eq!(rectangle_1, rectangle_2);
 /// ```
 #[macro_export]
 macro_rules! egrectangle {
-    (top_left = $top_left:expr, bottom_right = $bottom_right:expr $(,)?) => {{
+    (corners = [$corner_1:expr, $corner_2:expr] $(,)?) => {{
         $crate::egrectangle!(
-            top_left = $top_left,
-            bottom_right = $bottom_right,
+            corners = [$corner_1, $corner_2],
             style = $crate::style::PrimitiveStyle::default()
         )
     }};
-    (top_left = $top_left:expr, bottom_right = $bottom_right:expr, style = $style:expr $(,)?) => {{
+    (corners = [$corner_1:expr, $corner_2:expr], style = $style:expr $(,)?) => {{
+        $crate::primitives::Rectangle::with_corners(
+            $crate::geometry::Point::from($corner_1),
+            $crate::geometry::Point::from($corner_2),
+        )
+        .into_styled($style)
+    }};
+    (top_left = $top_left:expr, size = $size:expr $(,)?) => {{
+        $crate::egrectangle!(
+            top_left = $top_left,
+            size = $size,
+            style = $crate::style::PrimitiveStyle::default()
+        )
+    }};
+    (top_left = $top_left:expr, size = $size:expr, style = $style:expr $(,)?) => {{
         $crate::primitives::Rectangle::new(
             $crate::geometry::Point::from($top_left),
-            $crate::geometry::Point::from($bottom_right),
+            $crate::geometry::Size::from($size),
         )
         .into_styled($style)
     }};
@@ -342,7 +355,7 @@ macro_rules! egtriangle {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Point,
+        geometry::{Point, Size},
         pixelcolor::{Rgb565, RgbColor},
         primitive_style,
         style::PrimitiveStyle,
@@ -382,15 +395,20 @@ mod tests {
 
     #[test]
     fn rectangle() {
-        let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
-            top_left = Point::new(10, 20),
-            bottom_right = Point::new(30, 40),
-        );
         let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
-            egrectangle!(top_left = (10, 20), bottom_right = (30, 40),);
+            egrectangle!(top_left = Point::new(10, 20), size = Size::new(20, 20),);
+        let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
+            egrectangle!(top_left = (10, 20), size = (20, 20),);
         let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
             top_left = (10, 20),
-            bottom_right = (30, 40),
+            size = (20, 20),
+            style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
+        );
+
+        let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> =
+            egrectangle!(corners = [Point::new(10, 20), Point::new(30, 40)]);
+        let _r: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
+            corners = [Point::new(10, 20), Point::new(30, 40)],
             style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
         );
     }

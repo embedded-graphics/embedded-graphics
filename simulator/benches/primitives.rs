@@ -1,7 +1,7 @@
 use criterion::*;
 use embedded_graphics::{
     drawable::Pixel,
-    geometry::Point,
+    geometry::{Point, Size},
     pixelcolor::Gray8,
     primitives::{Circle, Line, Primitive, Rectangle, Triangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder},
@@ -29,7 +29,7 @@ fn filled_rect(c: &mut Criterion) {
             .stroke_width(1)
             .build();
 
-        let object = &Rectangle::new(Point::new(100, 100), Point::new(200, 200)).into_styled(style);
+        let object = &Rectangle::new(Point::new(100, 100), Size::new(100, 100)).into_styled(style);
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
     });
@@ -37,7 +37,7 @@ fn filled_rect(c: &mut Criterion) {
 
 fn empty_rect(c: &mut Criterion) {
     c.bench_function("unfilled rectangle", |b| {
-        let object = &Rectangle::new(Point::new(100, 100), Point::new(200, 200))
+        let object = &Rectangle::new(Point::new(100, 100), Size::new(100, 100))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
         b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())

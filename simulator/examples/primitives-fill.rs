@@ -43,17 +43,17 @@ fn main() -> Result<(), core::convert::Infallible> {
         .into_styled(stroke_off_fill_off)
         .draw(&mut display)?;
 
-    Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+    Rectangle::new(Point::new(0, 0), Size::new(64, 64))
         .translate(Point::new(96, 0))
         .into_styled(stroke)
         .draw(&mut display)?;
 
-    Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+    Rectangle::new(Point::new(0, 0), Size::new(64, 64))
         .translate(Point::new(96 + 16, 16))
         .into_styled(stroke_off_fill_on)
         .draw(&mut display)?;
 
-    Rectangle::new(Point::new(0, 0), Point::new(64, 64))
+    Rectangle::new(Point::new(0, 0), Size::new(64, 64))
         .translate(Point::new(96 + 32, 32))
         .into_styled(stroke_off_fill_off)
         .draw(&mut display)?;

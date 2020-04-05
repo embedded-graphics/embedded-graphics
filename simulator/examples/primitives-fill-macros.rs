@@ -46,7 +46,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     egrectangle!(
         top_left = (0, 0),
-        bottom_right = (64, 64),
+        size = (64, 64),
         style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 1,)
     )
     .translate(Point::new(96, 0))
@@ -54,7 +54,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     egrectangle!(
         top_left = (0, 0),
-        bottom_right = (64, 64),
+        size = (64, 64),
         style = primitive_style!(
             stroke_color = BinaryColor::Off,
             stroke_width = 1,
@@ -66,7 +66,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     egrectangle!(
         top_left = (0, 0),
-        bottom_right = (64, 64),
+        size = (64, 64),
         style = primitive_style!(
             stroke_color = BinaryColor::Off,
             stroke_width = 1,
