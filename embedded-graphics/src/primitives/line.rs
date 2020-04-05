@@ -49,7 +49,14 @@ pub struct Line {
     /// End point
     pub end: Point,
 }
-impl Primitive for Line {}
+
+impl Primitive for Line {
+    type PointsIter = Points;
+
+    fn points(&self) -> Self::PointsIter {
+        Points::new(self)
+    }
+}
 
 impl Dimensions for Line {
     fn top_left(&self) -> Point {
@@ -125,6 +132,28 @@ where
 
             line_iter: ThickLineIterator::new(&self.primitive, self.style.stroke_width_i32()),
         }
+    }
+}
+
+/// Iterator over all points on the line.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Points {
+    line_iter: ThickLineIterator,
+}
+
+impl Points {
+    fn new(line: &Line) -> Self {
+        Self {
+            line_iter: ThickLineIterator::new(line, 1),
+        }
+    }
+}
+
+impl Iterator for Points {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.line_iter.next()
     }
 }
 
@@ -450,5 +479,18 @@ mod tests {
                 "  #####     ",
             ])
         );
+    }
+
+    #[test]
+    fn points_iter() {
+        let line = Line::new(Point::new(10, 10), Point::new(20, 30));
+
+        let styled_points = line
+            .clone()
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter()
+            .map(|Pixel(p, _)| p);
+
+        assert!(line.points().eq(styled_points));
     }
 }
