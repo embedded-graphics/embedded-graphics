@@ -4,7 +4,7 @@
 //! several [built-in fonts].
 //!
 //! Additional custom fonts can be added by the application or other crates. This
-//! is demonstrated in the `custom-font` example in the simulator crate.
+//! is demonstrated in the `text-custom-font` example in the simulator crate.
 //!
 //! # Examples
 //!
