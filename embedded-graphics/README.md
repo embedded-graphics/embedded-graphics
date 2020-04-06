@@ -18,6 +18,7 @@ It contains built in items that make it easy to draw 2D graphics primitives:
   - Rectangles
   - Circles
   - Ellipses
+  - Arcs
   - Triangles
   - Polylines
   - Rounded rectangles

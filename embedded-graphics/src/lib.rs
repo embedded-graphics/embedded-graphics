@@ -7,6 +7,7 @@
 //!     * [Rectangles (and squares)](./primitives/rectangle/struct.Rectangle.html)
 //!     * [Circles](./primitives/circle/struct.Circle.html)
 //!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
+//!     * [Arcs](./primitives/arc/struct.Arc.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //!     * [Polylines](./primitives/polyline/struct.Polyline.html)
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
@@ -295,6 +296,29 @@
 //! };
 //!
 //! Ellipse::new(Point::new(8, 16), Size::new(48, 32))
+//!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
+//! ## Draw an arc
+//!
+//! This example draws an arc with a 2px green stroke.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an arc example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABTUlEQVR42u3cQQ6DMAxFQRvl/lcOOzaIDYqEHWYu0Ba9/gapbUbEDH7rcAkEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAqC/se0rW/1d57QAbCij++8CZoEraAGwAFXf8dns8SwAFuDNOzKLPI9mi2ABLEDTBciiz6vZElgAC+D/AbY+q1gALIAlsABYAEtgAbAAlsACYAEsgQVAAF9vbwoAAXA7G0wBIABnAQEgAGcBASAAZwEBIAAEgADcDQgAAbgbEAACQAAIAAEgAASAABAAAkAACAABIAAEwKPhEhQzLQAWgEtaAASAAHAGcPq3AFgAp38LgAAQAIs+afxXsAVAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACIDvnG3zIPeb6boNAAAAAElFTkSuQmCC" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Arc, style::PrimitiveStyle,
+//! };
+//!
+//! Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
 //!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())

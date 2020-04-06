@@ -1,5 +1,6 @@
 //! Graphics primitives
 
+pub mod arc;
 pub mod circle;
 pub mod ellipse;
 pub mod line;
@@ -9,6 +10,7 @@ pub mod rounded_rectangle;
 pub mod triangle;
 
 pub use self::{
+    arc::Arc,
     circle::Circle,
     ellipse::Ellipse,
     line::Line,
