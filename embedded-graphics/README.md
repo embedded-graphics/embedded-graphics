@@ -176,6 +176,9 @@ Additional examples can be found in the [simulator](./simulator/examples) crate.
 - `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
   support to enable conversions from `nalgebra::Vector2` to `Coord` and `UnsignedCoord`.
 
+- `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
+  calculation.
+
 ## Migrating from 0.5 to 0.6
 
 Please read [the migration guide](embedded-graphics/MIGRATING-0.5-0.6.md).

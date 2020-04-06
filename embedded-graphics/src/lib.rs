@@ -88,6 +88,9 @@
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 //! support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
 //!
+//! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
+//! calculation.
+//!
 //! # Implementing `embedded_graphics` in a driver
 //!
 //! To add support for embedded_graphics to a display driver, [`DrawTarget`] should be implemented.
