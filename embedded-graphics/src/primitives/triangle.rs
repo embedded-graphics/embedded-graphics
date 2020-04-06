@@ -72,7 +72,13 @@ pub struct Triangle {
     pub p3: Point,
 }
 
-impl Primitive for Triangle {}
+impl Primitive for Triangle {
+    type PointsIter = Points;
+
+    fn points(&self) -> Self::PointsIter {
+        Points::new(self)
+    }
+}
 
 impl Dimensions for Triangle {
     fn top_left(&self) -> Point {
@@ -218,6 +224,131 @@ enum IterState {
     Border(Point),
     LeftRight(Point, Point),
     None,
+}
+
+/// Iterator over all points inside the triangle.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Points {
+    line_a: ThickLineIterator,
+    line_b: ThickLineIterator,
+    line_c: ThickLineIterator,
+    cur_ac: Option<Point>,
+    cur_b: Option<Point>,
+    next_ac: Option<Point>,
+    next_b: Option<Point>,
+    x: i32,
+    max_y: i32,
+    min_y: i32,
+}
+
+impl Points {
+    fn new(triangle: &Triangle) -> Self {
+        let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
+
+        let mut line_a = ThickLineIterator::new(&Line::new(v1, v2), 1);
+        let mut line_b = ThickLineIterator::new(&Line::new(v1, v3), 1);
+        let mut line_c = ThickLineIterator::new(&Line::new(v2, v3), 1);
+
+        let next_ac = line_a.next().or_else(|| line_c.next());
+        let next_b = line_b.next();
+
+        Self {
+            line_a,
+            line_b,
+            line_c,
+            cur_ac: None,
+            cur_b: None,
+            next_ac,
+            next_b,
+            x: 0,
+            min_y: v1.y,
+            max_y: v3.y,
+        }
+    }
+
+    fn update_ac(&mut self) -> IterState {
+        if let Some(ac) = self.next_ac {
+            self.cur_ac = Some(ac);
+            self.next_ac = self.line_a.next().or_else(|| self.line_c.next());
+            self.x = 0;
+            IterState::Border(ac)
+        } else {
+            IterState::None
+        }
+    }
+
+    fn update_b(&mut self) -> IterState {
+        if let Some(b) = self.next_b {
+            self.cur_b = Some(b);
+            self.next_b = self.line_b.next();
+            self.x = 0;
+            IterState::Border(b)
+        } else {
+            IterState::None
+        }
+    }
+
+    fn points(&mut self) -> IterState {
+        match (self.cur_ac, self.cur_b) {
+            // Point of ac line or b line is missing
+            (None, _) => self.update_ac(),
+            (_, None) => self.update_b(),
+            // Both points are present
+            (Some(ac), Some(b)) => {
+                match (self.next_ac, self.next_b) {
+                    (Some(n_ac), Some(n_b)) => {
+                        // If y component differs, take new points from edge until both side have
+                        // the same y
+                        if n_ac.y < n_b.y {
+                            self.update_ac()
+                        } else if n_ac.y > n_b.y {
+                            self.update_b()
+                        } else {
+                            let (l, r) = sort_two_yx(n_ac, n_b);
+                            IterState::LeftRight(l, r)
+                        }
+                    }
+                    (None, Some(_)) => self.update_b(),
+                    (Some(_), None) => self.update_ac(),
+                    (None, None) => {
+                        let (l, r) = sort_two_yx(ac, b);
+                        IterState::LeftRight(l, r)
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl Iterator for Points {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.points() {
+                IterState::Border(point) => {
+                    // Draw edges of the triangle
+                    if point.x >= 0 && point.y >= 0 {
+                        self.x += 1;
+                        return Some(point);
+                    }
+                }
+                IterState::LeftRight(l, r) => {
+                    // Fill the space between the left and right points
+                    if l.x >= 0 && l.y >= 0 && r.x >= 0 && r.y >= 0 && l.x + self.x < r.x {
+                        let point = Point::new(l.x + self.x, l.y);
+                        self.x += 1;
+                        return Some(point);
+                    } else if l.x + self.x >= r.x {
+                        // We reached the right edge, move on to next row
+                        self.cur_ac = None;
+                        self.cur_b = None;
+                    }
+                }
+                IterState::None => return None,
+            }
+        }
+    }
 }
 
 /// Pixel iterator for each pixel in the triangle border
@@ -499,5 +630,18 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(Point::new(1, 0), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 0), BinaryColor::On)));
         assert_eq!(tri.next(), None);
+    }
+
+    #[test]
+    fn points_iter() {
+        let triangle = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
+
+        let styled_points = triangle
+            .clone()
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .into_iter()
+            .map(|Pixel(p, _)| p);
+
+        assert!(triangle.points().eq(styled_points));
     }
 }

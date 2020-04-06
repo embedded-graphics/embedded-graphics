@@ -67,7 +67,13 @@ impl Circle {
     }
 }
 
-impl Primitive for Circle {}
+impl Primitive for Circle {
+    type PointsIter = Points;
+
+    fn points(&self) -> Self::PointsIter {
+        Points::new(self)
+    }
+}
 
 impl Dimensions for Circle {
     fn top_left(&self) -> Point {
@@ -118,6 +124,67 @@ impl Transform for Circle {
         self.center += by;
 
         self
+    }
+}
+
+/// Iterator over all points inside the circle.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Points {
+    top_left: Point,
+    radius: u32,
+    p: Point,
+    c: Point,
+    threshold: i32,
+}
+
+impl Points {
+    fn new(circle: &Circle) -> Self {
+        let top_left = Point::new(-(circle.radius as i32), -(circle.radius as i32));
+
+        let outer_radius = circle.radius as i32;
+
+        let threshold = radius_to_threshold(outer_radius);
+
+        Points {
+            top_left,
+            c: circle.center,
+            radius: circle.radius,
+            p: top_left,
+            threshold,
+        }
+    }
+}
+
+impl Iterator for Points {
+    type Item = Point;
+
+    // https://stackoverflow.com/a/1237519/383609
+    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles#comment80182898_1237519
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let len = (2 * self.p.x).pow(2) + (2 * self.p.y).pow(2);
+
+            let item = if len < self.threshold {
+                Some(self.c + self.p)
+            } else {
+                None
+            };
+
+            self.p.x += 1;
+
+            if self.p.x > self.radius as i32 {
+                self.p.x = -(self.radius as i32);
+                self.p.y += 1;
+            }
+
+            if self.p.y > self.radius as i32 {
+                break None;
+            }
+
+            if item.is_some() {
+                break item;
+            }
+        }
     }
 }
 
@@ -373,5 +440,18 @@ mod tests {
         assert!(negative.into_iter().eq(positive
             .into_iter()
             .map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
+    }
+
+    #[test]
+    fn points_iter() {
+        let circle = Circle::new(Point::new(10, 10), 5);
+
+        let styled_points = circle
+            .clone()
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .into_iter()
+            .map(|Pixel(p, _)| p);
+
+        assert!(circle.points().eq(styled_points));
     }
 }

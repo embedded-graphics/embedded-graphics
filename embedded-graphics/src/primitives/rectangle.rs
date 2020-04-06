@@ -52,7 +52,13 @@ pub struct Rectangle {
     pub bottom_right: Point,
 }
 
-impl Primitive for Rectangle {}
+impl Primitive for Rectangle {
+    type PointsIter = Points;
+
+    fn points(&self) -> Self::PointsIter {
+        Points::new(self)
+    }
+}
 
 impl Dimensions for Rectangle {
     fn top_left(&self) -> Point {
@@ -132,6 +138,47 @@ where
             style: self.style,
             p: self.primitive.top_left,
         }
+    }
+}
+
+/// Iterator over all points inside the rectangle.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Points {
+    top_left: Point,
+    bottom_right: Point,
+    current_point: Point,
+}
+
+impl Points {
+    fn new(rectangle: &Rectangle) -> Self {
+        Self {
+            top_left: rectangle.top_left,
+            bottom_right: rectangle.bottom_right,
+            current_point: rectangle.top_left,
+        }
+    }
+}
+
+impl Iterator for Points {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Finished, i.e. we're below the rect
+        if self.current_point.y > self.bottom_right.y {
+            return None;
+        }
+
+        let ret = self.current_point;
+
+        self.current_point.x += 1;
+
+        // Reached end of row? Jump down one line
+        if self.current_point.x > self.bottom_right.x {
+            self.current_point.x = self.top_left.x;
+            self.current_point.y += 1;
+        }
+
+        Some(ret)
     }
 }
 
@@ -274,5 +321,18 @@ mod tests {
             .into_iter();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));
+    }
+
+    #[test]
+    fn points_iter() {
+        let rectangle = Rectangle::new(Point::new(10, 10), Point::new(30, 40));
+
+        let styled_points = rectangle
+            .clone()
+            .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
+            .into_iter()
+            .map(|Pixel(p, _)| p);
+
+        assert!(rectangle.points().eq(styled_points));
     }
 }
