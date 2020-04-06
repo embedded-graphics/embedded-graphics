@@ -335,7 +335,7 @@ impl Iterator for Points {
                 }
                 IterState::LeftRight(l, r) => {
                     // Fill the space between the left and right points
-                    if l.x >= 0 && l.y >= 0 && r.x >= 0 && r.y >= 0 && l.x + self.x < r.x {
+                    if l.x + self.x < r.x {
                         let point = Point::new(l.x + self.x, l.y);
                         self.x += 1;
                         return Some(point);
