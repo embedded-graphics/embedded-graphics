@@ -47,6 +47,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
+    primitives::Rectangle,
     transform::Transform,
 };
 use core::fmt::Debug;
@@ -142,8 +143,8 @@ impl<I, C> Transform for Image<'_, I, C> {
     ///
     /// let image_moved = image.translate(Point::new(10, 20));
     ///
-    /// assert_eq!(image.top_left(), Point::zero());
-    /// assert_eq!(image_moved.top_left(), Point::new(10, 20));
+    /// assert_eq!(image.bounding_box().top_left, Point::zero());
+    /// assert_eq!(image_moved.bounding_box().top_left, Point::new(10, 20));
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
@@ -176,7 +177,7 @@ impl<I, C> Transform for Image<'_, I, C> {
     ///
     /// image.translate_mut(Point::new(10, 20));
     ///
-    /// assert_eq!(image.top_left(), Point::new(10, 20));
+    /// assert_eq!(image.bounding_box().top_left, Point::new(10, 20));
     /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.offset += by;
@@ -201,16 +202,10 @@ where
     I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn top_left(&self) -> Point {
-        self.offset
-    }
+    fn bounding_box(&self) -> Rectangle {
+        let size = Size::new(self.image_data.width(), self.image_data.height());
 
-    fn bottom_right(&self) -> Point {
-        self.top_left() + self.size()
-    }
-
-    fn size(&self) -> Size {
-        Size::new(self.image_data.width(), self.image_data.height())
+        Rectangle::new(self.offset, size)
     }
 }
 

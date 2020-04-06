@@ -112,14 +112,9 @@ impl DrawTarget<Rgb888> for Framebuffer {
         if let Some(fill_color) = item.style.fill_color {
             let color = &[fill_color.r(), fill_color.g(), fill_color.b()];
 
-            let tl = item.primitive.top_left;
-            let br = item.primitive.bottom_right();
-            for y in tl.y..=br.y {
-                for x in tl.x..=br.x {
-                    let p = Point::new(x, y);
-                    if let Some(pixel) = self.get_pixel_mut(p) {
-                        pixel.copy_from_slice(color);
-                    }
+            for p in item.primitive.bounding_box().points() {
+                if let Some(pixel) = self.get_pixel_mut(p) {
+                    pixel.copy_from_slice(color);
                 }
             }
         }

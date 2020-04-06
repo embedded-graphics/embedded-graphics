@@ -6,9 +6,8 @@ use crate::{
     drawable::Pixel,
     geometry::Dimensions,
     geometry::Point,
-    geometry::Size,
     pixelcolor::PixelColor,
-    primitives::{Primitive, ThickLineIterator},
+    primitives::{Primitive, Rectangle, ThickLineIterator},
     style::PrimitiveStyle,
     style::Styled,
     transform::Transform,
@@ -59,16 +58,8 @@ impl Primitive for Line {
 }
 
 impl Dimensions for Line {
-    fn top_left(&self) -> Point {
-        Point::new(self.start.x.min(self.end.x), self.start.y.min(self.end.y))
-    }
-
-    fn bottom_right(&self) -> Point {
-        self.top_left() + (self.size() - Size::new(1, 1))
-    }
-
-    fn size(&self) -> Size {
-        Size::from_bounding_box(self.start, self.end)
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::with_corners(self.start, self.end)
     }
 }
 
@@ -199,7 +190,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{drawable::Pixel, mock_display::MockDisplay, pixelcolor::BinaryColor};
+    use crate::{
+        drawable::Pixel, geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor,
+    };
 
     fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
         let line =
@@ -224,13 +217,14 @@ mod tests {
         let line: Line = Line::new(start, end);
         let backwards_line: Line = Line::new(end, start);
 
-        assert_eq!(line.top_left(), start);
-        assert_eq!(line.bottom_right(), end);
-        assert_eq!(line.size(), Size::new(10, 20));
-
-        assert_eq!(backwards_line.top_left(), start);
-        assert_eq!(backwards_line.bottom_right(), end);
-        assert_eq!(backwards_line.size(), Size::new(10, 20));
+        assert_eq!(
+            line.bounding_box(),
+            Rectangle::new(start, Size::new(10, 20))
+        );
+        assert_eq!(
+            backwards_line.bounding_box(),
+            Rectangle::new(start, Size::new(10, 20))
+        );
     }
 
     #[test]

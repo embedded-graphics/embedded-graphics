@@ -3,6 +3,7 @@ use crate::{
     fonts::Font,
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
+    primitives::Rectangle,
     style::{Styled, TextStyle},
     transform::Transform,
     DrawTarget,
@@ -101,21 +102,7 @@ where
     C: PixelColor,
     F: Font,
 {
-    fn top_left(&self) -> Point {
-        self.primitive.position
-    }
-
-    fn bottom_right(&self) -> Point {
-        self.top_left() + self.size()
-    }
-
-    /// Returns the size of the bounding box of a styled text.
-    ///
-    /// Currently does not handle newlines (but neither does the rasteriser).
-    /// It will return [`Size::zero()`] if the string to render is empty.
-    ///
-    /// [`Size::zero()`]: ../geometry/struct.Size.html#method.zero
-    fn size(&self) -> Size {
+    fn bounding_box(&self) -> Rectangle {
         let width = if !self.primitive.text.is_empty() {
             self.primitive
                 .text
@@ -138,7 +125,9 @@ where
             0
         };
 
-        Size::new(width, height)
+        let size = Size::new(width, height);
+
+        Rectangle::new(self.primitive.position, size)
     }
 }
 
@@ -286,19 +275,22 @@ mod tests {
         assert_eq!(
             Text::new("#", Point::zero())
                 .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-                .size(),
+                .bounding_box()
+                .size,
             Size::new(4, 4)
         );
         assert_eq!(
             Text::new("##", Point::zero())
                 .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-                .size(),
+                .bounding_box()
+                .size,
             Size::new(4 * 2 + 5, 4)
         );
         assert_eq!(
             Text::new("###", Point::zero())
                 .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-                .size(),
+                .bounding_box()
+                .size,
             Size::new(4 * 3 + 5 * 2, 4)
         );
 
@@ -338,7 +330,8 @@ mod tests {
         assert_eq!(
             Text::new("AB\nC", Point::zero())
                 .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
-                .size(),
+                .bounding_box()
+                .size,
             Size::new(2 * 6, 2 * 8)
         );
 

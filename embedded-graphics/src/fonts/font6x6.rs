@@ -45,6 +45,7 @@ mod tests {
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
+        primitives::Rectangle,
         style::TextStyle,
         transform::Transform,
     };
@@ -59,8 +60,11 @@ mod tests {
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
         let empty = Text::new("", Point::zero()).into_styled(style);
 
-        assert_eq!(hello.size(), Size::new(HELLO_WORLD_WIDTH, HEIGHT as u32));
-        assert_eq!(empty.size(), Size::new(0, 0));
+        assert_eq!(
+            hello.bounding_box().size,
+            Size::new(HELLO_WORLD_WIDTH, HEIGHT as u32)
+        );
+        assert_eq!(empty.bounding_box().size, Size::zero());
     }
 
     #[test]
@@ -73,13 +77,17 @@ mod tests {
             .into_styled(style)
             .translate(Point::new(10, 20));
 
-        assert_eq!(hello.top_left(), Point::new(5, -20));
         assert_eq!(
-            hello.bottom_right(),
-            Point::new((HELLO_WORLD_WIDTH as i32) + 5, (HEIGHT as i32) - 20)
+            hello.bounding_box(),
+            Rectangle::new(
+                Point::new(5, -20),
+                Size::new(HELLO_WORLD_WIDTH, HEIGHT as u32)
+            )
         );
-        assert_eq!(empty.top_left(), Point::new(10, 20));
-        assert_eq!(empty.bottom_right(), Point::new(10, 20));
+        assert_eq!(
+            empty.bounding_box(),
+            Rectangle::new(Point::new(10, 20), Size::zero())
+        );
     }
 
     #[test]

@@ -1,5 +1,6 @@
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
+    primitives::Rectangle,
     transform::Transform,
 };
 
@@ -42,15 +43,8 @@ impl<T, S> Dimensions for Styled<T, S>
 where
     T: Dimensions,
 {
-    fn top_left(&self) -> Point {
-        self.primitive.top_left()
-    }
-
-    fn bottom_right(&self) -> Point {
-        self.primitive.bottom_right()
-    }
-
-    fn size(&self) -> Size {
-        self.primitive.size()
+    //FIXME: The bounding box for a styled primitive should use the stroke width and alignment.
+    fn bounding_box(&self) -> Rectangle {
+        self.primitive.bounding_box()
     }
 }
