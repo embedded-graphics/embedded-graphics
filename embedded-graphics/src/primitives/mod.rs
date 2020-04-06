@@ -8,7 +8,7 @@ pub mod triangle;
 
 pub use self::{circle::Circle, line::Line, rectangle::Rectangle, triangle::Triangle};
 use crate::{
-    geometry::Dimensions,
+    geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     style::{PrimitiveStyle, Styled},
 };
@@ -16,6 +16,9 @@ pub(crate) use thick_line_iterator::ThickLineIterator;
 
 /// Primitive trait
 pub trait Primitive: Dimensions {
+    /// Iterator over all points inside the primitive.
+    type PointsIter: Iterator<Item = Point>;
+
     /// Converts this primitive into a `Styled`.
     fn into_styled<C>(self, style: PrimitiveStyle<C>) -> Styled<Self, PrimitiveStyle<C>>
     where
@@ -24,6 +27,9 @@ pub trait Primitive: Dimensions {
     {
         Styled::new(self, style)
     }
+
+    /// Returns an iterator over all points inside the primitive.
+    fn points(&self) -> Self::PointsIter;
 }
 
 /// Create a [`Circle`](./primitives/circle/struct.Circle.html) with optional styling using a

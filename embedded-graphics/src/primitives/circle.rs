@@ -81,7 +81,13 @@ impl Circle {
     }
 }
 
-impl Primitive for Circle {}
+impl Primitive for Circle {
+    type PointsIter = Points;
+
+    fn points(&self) -> Self::PointsIter {
+        Points::new(self)
+    }
+}
 
 impl Dimensions for Circle {
     fn top_left(&self) -> Point {
@@ -134,6 +140,65 @@ impl Transform for Circle {
         self.top_left += by;
 
         self
+    }
+}
+
+/// Iterator over all points inside the circle.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Points {
+    top_left: Point,
+    diameter: u32,
+    p: Point,
+    c: Point,
+    threshold: i32,
+}
+
+impl Points {
+    fn new(circle: &Circle) -> Self {
+        let center = Point::new(2 * circle.top_left.x, 2 * circle.top_left.y) + circle.size();
+
+        let threshold = diameter_to_threshold(circle.diameter as i32);
+
+        Self {
+            top_left: circle.top_left,
+            diameter: circle.diameter,
+            p: circle.top_left,
+            c: center,
+            threshold,
+        }
+    }
+}
+
+impl Iterator for Points {
+    type Item = Point;
+
+    // https://stackoverflow.com/a/1237519/383609
+    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles#comment80182898_1237519
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let len = (self.c.x - 2 * self.p.x).pow(2) + (self.c.y - 2 * self.p.y).pow(2);
+
+            let point = if len < self.threshold {
+                Some(self.p)
+            } else {
+                None
+            };
+
+            self.p.x += 1;
+
+            if self.p.x > self.top_left.x + self.diameter as i32 {
+                self.p.x = self.top_left.x;
+                self.p.y += 1;
+            }
+
+            if self.p.y > self.top_left.y + self.diameter as i32 {
+                break None;
+            }
+
+            if point.is_some() {
+                break point;
+            }
+        }
     }
 }
 
@@ -397,5 +462,18 @@ mod tests {
         assert_eq!(circle.top_left(), Point::new(8, 8));
         assert_eq!(circle.center(), Point::new(10, 10));
         assert_eq!(circle.bottom_right(), Point::new(12, 12));
+    }
+
+    #[test]
+    fn points_iter() {
+        let circle = Circle::with_center(Point::new(10, 10), 5);
+
+        let styled_points = circle
+            .clone()
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .into_iter()
+            .map(|Pixel(p, _)| p);
+
+        assert!(circle.points().eq(styled_points));
     }
 }
