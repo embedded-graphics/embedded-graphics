@@ -501,6 +501,7 @@ mod tests {
         assert_eq!(tri.next(), None);
     }
 
+    #[test]
     fn issue_308_infinite() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
