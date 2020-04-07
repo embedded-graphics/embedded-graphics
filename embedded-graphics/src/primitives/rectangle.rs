@@ -83,6 +83,17 @@ impl Rectangle {
             size: Size::from_bounding_box(corner_1, corner_2),
         }
     }
+
+    /// Returns the center of this rectangle.
+    ///
+    /// For rectangles with even width and/or height the returned value is rounded down
+    /// to the nearest integer pixel.
+    pub fn center(&self) -> Point {
+        let dx = self.size.width.saturating_sub(1) / 2;
+        let dy = self.size.height.saturating_sub(1) / 2;
+
+        self.top_left + Size::new(dx, dy)
+    }
 }
 
 impl Transform for Rectangle {
@@ -326,7 +337,7 @@ mod tests {
     }
 
     #[test]
-    fn points_iter() {
+    fn points_iter_matches_filled_styled() {
         let rectangle = Rectangle::new(Point::new(10, 10), Size::new(20, 30));
 
         let styled_points = rectangle
@@ -336,5 +347,28 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(rectangle.points().eq(styled_points));
+    }
+
+    #[test]
+    fn points_iter() {
+        let rectangle = Rectangle::new(Point::new(10, 20), Size::new(2, 3));
+
+        let mut points = rectangle.points();
+        assert_eq!(points.next(), Some(Point::new(10, 20)));
+        assert_eq!(points.next(), Some(Point::new(11, 20)));
+        assert_eq!(points.next(), Some(Point::new(10, 21)));
+        assert_eq!(points.next(), Some(Point::new(11, 21)));
+        assert_eq!(points.next(), Some(Point::new(10, 22)));
+        assert_eq!(points.next(), Some(Point::new(11, 22)));
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn center() {
+        let odd = Rectangle::new(Point::new(10, 20), Size::new(5, 7));
+        assert_eq!(odd.center(), Point::new(12, 23));
+
+        let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
+        assert_eq!(even.center(), Point::new(21, 33));
     }
 }
