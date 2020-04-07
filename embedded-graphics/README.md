@@ -60,7 +60,7 @@ If you need more deeper/more personalized help, please check out the [embedded-g
 - [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
 - [TGA images - `tinytga`](https://crates.io/crates/tinytga)
 - [ProFont monospace font - `profont`](https://crates.io/crates/profont)
-- [Picofont Pico8 font - `picofont`](https://crates.io/crates/picofont)
+- [Picofont Pico8 font - `picofont`](https://crates.io/crates/embedded_picofont)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
