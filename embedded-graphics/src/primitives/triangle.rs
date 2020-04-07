@@ -645,6 +645,7 @@ mod tests {
         assert!(triangle.points().eq(styled_points));
     }
 
+    #[test]
     fn issue_308_infinite() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
