@@ -2,9 +2,9 @@
 
 use crate::{
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::{line::Line, Primitive, ThickLineIterator},
+    primitives::{line::Line, Primitive, Rectangle, ThickLineIterator},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -81,22 +81,14 @@ impl Primitive for Triangle {
 }
 
 impl Dimensions for Triangle {
-    fn top_left(&self) -> Point {
-        let x = min(min(self.p1.x, self.p2.x), self.p3.x);
-        let y = min(min(self.p1.y, self.p2.y), self.p3.y);
+    fn bounding_box(&self) -> Rectangle {
+        let x_min = min(min(self.p1.x, self.p2.x), self.p3.x);
+        let y_min = min(min(self.p1.y, self.p2.y), self.p3.y);
 
-        Point::new(x, y)
-    }
+        let x_max = max(max(self.p1.x, self.p2.x), self.p3.x);
+        let y_max = max(max(self.p1.y, self.p2.y), self.p3.y);
 
-    fn bottom_right(&self) -> Point {
-        let x = max(max(self.p1.x, self.p2.x), self.p3.x);
-        let y = max(max(self.p1.y, self.p2.y), self.p3.y);
-
-        Point::new(x, y)
-    }
-
-    fn size(&self) -> Size {
-        Size::from_bounding_box(self.top_left(), self.bottom_right())
+        Rectangle::with_corners(Point::new(x_min, y_min), Point::new(x_max, y_max))
     }
 }
 
@@ -492,6 +484,7 @@ where
 mod tests {
     use super::*;
     use crate::{
+        geometry::Size,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         style::PrimitiveStyleBuilder,
@@ -505,12 +498,12 @@ mod tests {
         assert_eq!(tri.p1, Point::new(5, 10));
         assert_eq!(tri.p2, Point::new(15, 25));
         assert_eq!(tri.p3, Point::new(5, 25));
-        assert_eq!(tri.size(), Size::new(11, 16));
+        assert_eq!(tri.bounding_box().size, Size::new(11, 16));
 
         assert_eq!(moved.p1, Point::new(-5, -1));
         assert_eq!(moved.p2, Point::new(5, 14));
         assert_eq!(moved.p3, Point::new(-5, 14));
-        assert_eq!(moved.size(), Size::new(11, 16));
+        assert_eq!(moved.bounding_box().size, Size::new(11, 16));
     }
 
     #[test]

@@ -62,23 +62,8 @@ impl Primitive for Rectangle {
 }
 
 impl Dimensions for Rectangle {
-    fn top_left(&self) -> Point {
-        self.top_left
-    }
-
-    fn bottom_right(&self) -> Point {
-        if self.size == Size::zero() {
-            // FIXME: The bottom right corner isn't valid if the size of the rectangle is zero,
-            //        because creating a rectangle from two corner points creates a rectangle that
-            //        is at least 1x1 pixels large.
-            self.top_left
-        } else {
-            self.top_left + self.size - Point::new(1, 1)
-        }
-    }
-
-    fn size(&self) -> Size {
-        self.size
+    fn bounding_box(&self) -> Rectangle {
+        *self
     }
 }
 
@@ -288,13 +273,15 @@ mod tests {
         let rect = Rectangle::new(Point::new(5, 10), Size::new(10, 20));
         let moved = rect.translate(Point::new(-10, -20));
 
-        assert_eq!(rect.top_left(), Point::new(5, 10));
-        assert_eq!(rect.bottom_right(), Point::new(14, 29));
-        assert_eq!(rect.size(), Size::new(10, 20));
+        assert_eq!(
+            rect.bounding_box(),
+            Rectangle::new(Point::new(5, 10), Size::new(10, 20))
+        );
 
-        assert_eq!(moved.top_left(), Point::new(-5, -10));
-        assert_eq!(moved.bottom_right(), Point::new(4, 9));
-        assert_eq!(moved.size(), Size::new(10, 20));
+        assert_eq!(
+            moved.bounding_box(),
+            Rectangle::new(Point::new(-5, -10), Size::new(10, 20))
+        );
     }
 
     #[test]
@@ -302,8 +289,9 @@ mod tests {
         let rect = Rectangle::new(Point::new(5, 10), Size::new(10, 20));
         let moved = rect.translate(Point::new(10, 15));
 
-        assert_eq!(moved.top_left, Point::new(15, 25));
-        assert_eq!(moved.size, Size::new(10, 20));
+        let bounding_box = moved.bounding_box();
+        assert_eq!(bounding_box.top_left, Point::new(15, 25));
+        assert_eq!(bounding_box.size, Size::new(10, 20));
     }
 
     #[test]
