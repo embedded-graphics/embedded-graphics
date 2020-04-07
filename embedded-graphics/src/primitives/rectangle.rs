@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::Primitive,
+    primitives::{ContainsPoint, Primitive},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -58,6 +58,19 @@ impl Primitive for Rectangle {
 
     fn points(&self) -> Self::PointsIter {
         Points::new(self)
+    }
+}
+
+impl ContainsPoint for Rectangle {
+    fn contains(&self, point: Point) -> bool {
+        if point.x >= self.top_left.x && point.y >= self.top_left.y {
+            // FIXME: use Rectangle::bottom_right
+            let delta = Size::from_bounding_box(self.top_left, point);
+
+            delta.width <= self.size.width && delta.height <= self.size.height
+        } else {
+            false
+        }
     }
 }
 
@@ -361,6 +374,18 @@ mod tests {
         assert_eq!(points.next(), Some(Point::new(10, 22)));
         assert_eq!(points.next(), Some(Point::new(11, 22)));
         assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn contains() {
+        let outer = Rectangle::new(Point::zero(), Size::new(10, 10));
+        let inner = Rectangle::new(Point::new(2, 4), Size::new(3, 5));
+
+        for p in outer.points() {
+            let expected = p.x >= 2 && p.x < 2 + 3 && p.y >= 4 && p.y < 4 + 5;
+
+            assert_eq!(inner.contains(p), expected, "{:?}", p);
+        }
     }
 
     #[test]

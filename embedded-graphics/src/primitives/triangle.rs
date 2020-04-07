@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::{line::Line, Primitive, Rectangle, ThickLineIterator},
+    primitives::{line::Line, ContainsPoint, Primitive, Rectangle, ThickLineIterator},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -77,6 +77,19 @@ impl Primitive for Triangle {
 
     fn points(&self) -> Self::PointsIter {
         Points::new(self)
+    }
+}
+
+impl ContainsPoint for Triangle {
+    fn contains(&self, point: Point) -> bool {
+        // Skip expensive calculations below if point is outside the bounding box
+        if !self.bounding_box().contains(point) {
+            return false;
+        }
+
+        // This is inefficient and should be replaced by a better algorithm to
+        // determine if point is inside the triangle
+        self.points().any(|p| p == point)
     }
 }
 
@@ -636,6 +649,17 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(triangle.points().eq(styled_points));
+    }
+
+    #[test]
+    fn contains() {
+        let triangle = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
+
+        for point in Rectangle::new(Point::new(0, 5), Size::new(15, 25)).points() {
+            let expected = triangle.points().any(|p| p == point);
+
+            assert_eq!(triangle.contains(point), expected, "{:?}", point);
+        }
     }
 
     #[test]

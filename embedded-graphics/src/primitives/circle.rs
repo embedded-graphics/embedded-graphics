@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{Primitive, Rectangle, Styled},
+    primitives::{ContainsPoint, Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
     DrawTarget,
@@ -97,6 +97,17 @@ impl Primitive for Circle {
 
     fn points(&self) -> Self::PointsIter {
         Points::new(self)
+    }
+}
+
+impl ContainsPoint for Circle {
+    fn contains(&self, point: Point) -> bool {
+        let delta = self.center_2x() - point * 2;
+        let distance = delta.x.pow(2) as u32 + delta.y.pow(2) as u32;
+
+        let threshold = diameter_to_threshold(self.diameter);
+
+        return distance < threshold;
     }
 }
 
@@ -489,7 +500,7 @@ mod tests {
 
     #[test]
     fn distance_iter() {
-        let circle = Circle::new(Point::new(0, 0), 3);
+        let circle = Circle::new(Point::zero(), 3);
 
         let mut iter = DistanceIterator::new(&circle);
         assert_eq!(iter.next(), Some((Point::new(0, 0), 8)));
@@ -502,6 +513,17 @@ mod tests {
         assert_eq!(iter.next(), Some((Point::new(1, 2), 4)));
         assert_eq!(iter.next(), Some((Point::new(2, 2), 8)));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn contains() {
+        let circle = Circle::new(Point::zero(), 5);
+
+        let contained_points = Rectangle::new(Point::new(-10, -10), Size::new(20, 20))
+            .points()
+            .filter(|p| circle.contains(*p));
+
+        assert!(contained_points.eq(circle.points()));
     }
 
     fn test_circle(diameter: u32, pattern: &[&str]) {

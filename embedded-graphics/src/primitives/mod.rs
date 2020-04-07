@@ -32,6 +32,12 @@ pub trait Primitive: Dimensions {
     fn points(&self) -> Self::PointsIter;
 }
 
+/// Trait to check if a point is inside a closed shape.
+pub trait ContainsPoint {
+    /// Returns `true` is the given point is inside the shape.
+    fn contains(&self, point: Point) -> bool;
+}
+
 /// Create a [`Circle`](./primitives/circle/struct.Circle.html) with optional styling using a
 /// convenient macro.
 ///
