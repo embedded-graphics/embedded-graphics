@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{Primitive, Styled},
+    primitives::{Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
     DrawTarget,
@@ -79,6 +79,24 @@ impl Circle {
     pub fn center(&self) -> Point {
         self.top_left + Size::new(self.diameter, self.diameter) / 2
     }
+
+    /// Return the center point of the circle scaled by a factor of 2
+    ///
+    /// This method is used to accurately calculate the outside edge of the circle.
+    /// The result is not equivalent to `self.center() * 2` because of rounding.
+    fn center_2x(&self) -> Point {
+        self.top_left * 2 + self.size_minus_one()
+    }
+
+    //FIXME: This temporary method replicates the old broken conversion from diameter to size and
+    //should be removed.
+    fn size_minus_one(&self) -> Size {
+        if self.diameter >= 1 {
+            Size::new(self.diameter - 1, self.diameter - 1)
+        } else {
+            Size::zero()
+        }
+    }
 }
 
 impl Primitive for Circle {
@@ -90,20 +108,8 @@ impl Primitive for Circle {
 }
 
 impl Dimensions for Circle {
-    fn top_left(&self) -> Point {
-        self.top_left
-    }
-
-    fn bottom_right(&self) -> Point {
-        self.top_left() + self.size()
-    }
-
-    fn size(&self) -> Size {
-        if self.diameter < 1 {
-            Size::new(0, 0)
-        } else {
-            Size::new(self.diameter - 1, self.diameter - 1)
-        }
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(self.top_left, self.size_minus_one())
     }
 }
 
@@ -155,8 +161,7 @@ pub struct Points {
 
 impl Points {
     fn new(circle: &Circle) -> Self {
-        let center = Point::new(2 * circle.top_left.x, 2 * circle.top_left.y) + circle.size();
-
+        let center = circle.center_2x();
         let threshold = diameter_to_threshold(circle.diameter as i32);
 
         Self {
@@ -285,8 +290,7 @@ where
     type IntoIter = StyledCircleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let center = Point::new(2 * self.primitive.top_left.x, 2 * self.primitive.top_left.y)
-            + self.primitive.size();
+        let center = self.primitive.center_2x();
 
         let inner_diameter = self.primitive.diameter as i32 - 2 * self.style.stroke_width_i32();
         let outer_diameter = self.primitive.diameter as i32;
@@ -391,9 +395,9 @@ mod tests {
                 Circle::new(Point::new(10, 16), size).into_styled(style);
 
             assert_eq!(
-                circle_stroke.size(),
-                circle_no_stroke.size(),
-                "Filled and unfilled circle iters are unequal for radius {}",
+                circle_stroke.bounding_box(),
+                circle_no_stroke.bounding_box(),
+                "Filled and unfilled circle bounding boxes are unequal for radius {}",
                 size
             );
             assert!(
@@ -408,27 +412,30 @@ mod tests {
     fn negative_dimensions() {
         let circle = Circle::new(Point::new(-15, -15), 11);
 
-        assert_eq!(circle.top_left(), Point::new(-15, -15));
-        assert_eq!(circle.bottom_right(), Point::new(-5, -5));
-        assert_eq!(circle.size(), Size::new(10, 10));
+        assert_eq!(
+            circle.bounding_box(),
+            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+        );
     }
 
     #[test]
     fn dimensions() {
         let circle = Circle::new(Point::new(5, 15), 11);
 
-        assert_eq!(circle.top_left(), Point::new(5, 15));
-        assert_eq!(circle.bottom_right(), Point::new(15, 25));
-        assert_eq!(circle.size(), Size::new(10, 10));
+        assert_eq!(
+            circle.bounding_box(),
+            Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+        );
     }
 
     #[test]
     fn large_diameter() {
         let circle = Circle::new(Point::new(-5, -5), 21);
 
-        assert_eq!(circle.top_left(), Point::new(-5, -5));
-        assert_eq!(circle.bottom_right(), Point::new(15, 15));
-        assert_eq!(circle.size(), Size::new(20, 20));
+        assert_eq!(
+            circle.bounding_box(),
+            Rectangle::new(Point::new(-5, -5), Size::new(20, 20))
+        );
     }
 
     #[test]
@@ -459,9 +466,7 @@ mod tests {
     fn center_is_correct() {
         let circle = Circle::with_center(Point::new(10, 10), 5);
 
-        assert_eq!(circle.top_left(), Point::new(8, 8));
         assert_eq!(circle.center(), Point::new(10, 10));
-        assert_eq!(circle.bottom_right(), Point::new(12, 12));
     }
 
     #[test]

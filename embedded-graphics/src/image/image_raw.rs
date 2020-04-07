@@ -247,6 +247,7 @@ mod tests {
         geometry::Dimensions,
         image::Image,
         pixelcolor::{raw::RawU32, *},
+        primitives::Rectangle,
         transform::Transform,
     };
 
@@ -278,9 +279,10 @@ mod tests {
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
-        assert_eq!(image.top_left(), Point::new(-1, -1));
-        assert_eq!(image.bottom_right(), Point::new(3, 3));
-        assert_eq!(image.size(), Size::new(4, 4));
+        assert_eq!(
+            image.bounding_box(),
+            Rectangle::new(Point::new(-1, -1), Size::new(4, 4))
+        );
     }
 
     #[test]
@@ -289,9 +291,10 @@ mod tests {
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
-        assert_eq!(image.top_left(), Point::new(100, 200));
-        assert_eq!(image.bottom_right(), Point::new(104, 204));
-        assert_eq!(image.size(), Size::new(4, 4));
+        assert_eq!(
+            image.bounding_box(),
+            Rectangle::new(Point::new(100, 200), Size::new(4, 4))
+        );
     }
 
     #[test]

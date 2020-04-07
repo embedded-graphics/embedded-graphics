@@ -4,6 +4,7 @@ use embedded_graphics::{
     image::Image,
     mock_display::MockDisplay,
     pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor},
+    primitives::Rectangle,
     transform::Transform,
 };
 use tinybmp::Bmp;
@@ -13,9 +14,10 @@ fn negative_top_left() {
     let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
     let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
-    assert_eq!(image.top_left(), Point::new(-1, -1));
-    assert_eq!(image.bottom_right(), Point::new(3, 3));
-    assert_eq!(image.size(), Size::new(4, 4));
+    assert_eq!(
+        image.bounding_box(),
+        Rectangle::new(Point::new(-1, -1), Size::new(4, 4))
+    );
 }
 
 #[test]
@@ -23,9 +25,10 @@ fn dimensions() {
     let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
     let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
-    assert_eq!(image.top_left(), Point::new(100, 200));
-    assert_eq!(image.bottom_right(), Point::new(104, 204));
-    assert_eq!(image.size(), Size::new(4, 4));
+    assert_eq!(
+        image.bounding_box(),
+        Rectangle::new(Point::new(100, 200), Size::new(4, 4))
+    );
 }
 
 #[test]
@@ -74,7 +77,7 @@ macro_rules! test_pattern {
 
         let pattern = create_color_pattern();
 
-        assert_eq!(image.size(), Size::new(4, 2));
+        assert_eq!(image.bounding_box().size, Size::new(4, 2));
 
         let mut iter = image.into_iter();
         for (y, row) in pattern.iter().enumerate() {
@@ -116,7 +119,7 @@ fn colors_grey8() {
     let image = Bmp::from_slice(include_bytes!("./colors_grey8.bmp")).unwrap();
     let image: Image<_, Gray8> = Image::new(&image, Point::zero());
 
-    assert_eq!(image.size(), Size::new(3, 1));
+    assert_eq!(image.bounding_box().size, Size::new(3, 1));
 
     let mut iter = image.into_iter();
 
