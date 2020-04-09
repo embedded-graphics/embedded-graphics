@@ -178,9 +178,12 @@ where
     C: PixelColor,
 {
     iter: DistanceIterator,
-    style: PrimitiveStyle<C>,
+
     outer_threshold: u32,
+    outer_color: Option<C>,
+
     inner_threshold: u32,
+    inner_color: Option<C>,
 }
 
 impl<C> StyledCircleIterator<C>
@@ -188,17 +191,24 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
+        // Always use a stroke width of 0 if no stroke color was set.
+        let stroke_width = match styled.style.stroke_color {
+            Some(_) => styled.style.stroke_width,
+            None => 0,
+        };
+
         let outer_diameter = styled.primitive.diameter;
-        let inner_diameter = outer_diameter.saturating_sub(2 * styled.style.stroke_width);
+        let inner_diameter = outer_diameter.saturating_sub(2 * stroke_width);
 
         let inner_threshold = diameter_to_threshold(inner_diameter);
         let outer_threshold = diameter_to_threshold(outer_diameter);
 
         Self {
             iter: DistanceIterator::new(&styled.primitive),
-            style: styled.style,
             outer_threshold,
+            outer_color: styled.style.stroke_color,
             inner_threshold,
+            inner_color: styled.style.fill_color,
         }
     }
 }
@@ -212,16 +222,15 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         // If the fill and stroke colors are `None`, treat entire object as transparent and exit
         // early.
-        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
+        if self.outer_color.is_none() && self.inner_color.is_none() {
             return None;
         }
 
         for (point, distance) in &mut self.iter {
             let color = if distance < self.inner_threshold {
-                self.style.fill_color
+                self.inner_color
             } else if distance < self.outer_threshold {
-                // Use fill_color if no stroke_color was set
-                self.style.stroke_color.or(self.style.fill_color)
+                self.outer_color
             } else {
                 None
             };
