@@ -191,10 +191,14 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
+        let has_fill_color = styled.style.fill_color.is_some();
+        let has_stroke_color = styled.style.stroke_color.is_some();
+
         // Always use a stroke width of 0 if no stroke color was set.
-        let stroke_width = match styled.style.stroke_color {
-            Some(_) => styled.style.stroke_width,
-            None => 0,
+        let stroke_width = if has_stroke_color {
+            styled.style.stroke_width
+        } else {
+            0
         };
 
         let outer_diameter = styled.primitive.diameter;
@@ -203,8 +207,14 @@ where
         let inner_threshold = diameter_to_threshold(inner_diameter);
         let outer_threshold = diameter_to_threshold(outer_diameter);
 
+        let iter = if has_stroke_color || has_fill_color {
+            DistanceIterator::new(&styled.primitive)
+        } else {
+            DistanceIterator::empty()
+        };
+
         Self {
-            iter: DistanceIterator::new(&styled.primitive),
+            iter,
             outer_threshold,
             outer_color: styled.style.stroke_color,
             inner_threshold,
@@ -220,12 +230,6 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // If the fill and stroke colors are `None`, treat entire object as transparent and exit
-        // early.
-        if self.outer_color.is_none() && self.inner_color.is_none() {
-            return None;
-        }
-
         for (point, distance) in &mut self.iter {
             let color = if distance < self.inner_threshold {
                 self.inner_color
@@ -285,6 +289,13 @@ impl DistanceIterator {
         Self {
             center: circle.center_2x(),
             points: circle.bounding_box().points(),
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            center: Point::zero(),
+            points: Rectangle::new(Point::zero(), Size::zero()).points(),
         }
     }
 }
