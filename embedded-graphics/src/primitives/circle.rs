@@ -67,17 +67,17 @@ impl Circle {
     }
 
     /// Create a new circle centered around a given point with a specific diameter
-    pub const fn with_center(center: Point, diameter: u32) -> Self {
-        let top_left = Point::new(
-            center.x - diameter as i32 / 2,
-            center.y - diameter as i32 / 2,
-        );
+    pub fn with_center(center: Point, diameter: u32) -> Self {
+        let d = diameter.saturating_sub(1) / 2;
+        let offset = Size::new(d, d);
+        let top_left = center - offset;
+
         Circle { top_left, diameter }
     }
 
     /// Return the center point of the circle
     pub fn center(&self) -> Point {
-        self.top_left + Size::new(self.diameter, self.diameter) / 2
+        self.bounding_box().center()
     }
 
     /// Return the center point of the circle scaled by a factor of 2
@@ -85,17 +85,10 @@ impl Circle {
     /// This method is used to accurately calculate the outside edge of the circle.
     /// The result is not equivalent to `self.center() * 2` because of rounding.
     fn center_2x(&self) -> Point {
-        self.top_left * 2 + self.size_minus_one()
-    }
+        // The radius scaled up by a factor of 2 is equal to the diameter
+        let radius = self.diameter.saturating_sub(1);
 
-    //FIXME: This temporary method replicates the old broken conversion from diameter to size and
-    //should be removed.
-    fn size_minus_one(&self) -> Size {
-        if self.diameter >= 1 {
-            Size::new(self.diameter - 1, self.diameter - 1)
-        } else {
-            Size::zero()
-        }
+        self.top_left * 2 + Size::new(radius, radius)
     }
 }
 
@@ -109,7 +102,7 @@ impl Primitive for Circle {
 
 impl Dimensions for Circle {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, self.size_minus_one())
+        Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter))
     }
 }
 
@@ -152,23 +145,16 @@ impl Transform for Circle {
 /// Iterator over all points inside the circle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
-    top_left: Point,
-    diameter: u32,
-    p: Point,
-    c: Point,
-    threshold: i32,
+    iter: DistanceIterator,
+    threshold: u32,
 }
 
 impl Points {
     fn new(circle: &Circle) -> Self {
-        let center = circle.center_2x();
-        let threshold = diameter_to_threshold(circle.diameter as i32);
+        let threshold = diameter_to_threshold(circle.diameter);
 
         Self {
-            top_left: circle.top_left,
-            diameter: circle.diameter,
-            p: circle.top_left,
-            c: center,
+            iter: DistanceIterator::new(&circle),
             threshold,
         }
     }
@@ -177,46 +163,64 @@ impl Points {
 impl Iterator for Points {
     type Item = Point;
 
-    // https://stackoverflow.com/a/1237519/383609
-    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles#comment80182898_1237519
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            let len = (self.c.x - 2 * self.p.x).pow(2) + (self.c.y - 2 * self.p.y).pow(2);
-
-            let point = if len < self.threshold {
-                Some(self.p)
-            } else {
-                None
-            };
-
-            self.p.x += 1;
-
-            if self.p.x > self.top_left.x + self.diameter as i32 {
-                self.p.x = self.top_left.x;
-                self.p.y += 1;
-            }
-
-            if self.p.y > self.top_left.y + self.diameter as i32 {
-                break None;
-            }
-
-            if point.is_some() {
-                break point;
-            }
-        }
+        let threshold = self.threshold;
+        self.iter
+            .find(|(_, distance)| *distance < threshold)
+            .map(|(point, _)| point)
     }
 }
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledCircleIterator<C: PixelColor> {
-    top_left: Point,
-    diameter: u32,
-    style: PrimitiveStyle<C>,
-    p: Point,
-    c: Point,
-    outer_threshold: i32,
-    inner_threshold: i32,
+pub struct StyledCircleIterator<C>
+where
+    C: PixelColor,
+{
+    iter: DistanceIterator,
+
+    outer_threshold: u32,
+    outer_color: Option<C>,
+
+    inner_threshold: u32,
+    inner_color: Option<C>,
+}
+
+impl<C> StyledCircleIterator<C>
+where
+    C: PixelColor,
+{
+    fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
+        let has_fill_color = styled.style.fill_color.is_some();
+        let has_stroke_color = styled.style.stroke_color.is_some();
+
+        // Always use a stroke width of 0 if no stroke color was set.
+        let stroke_width = if has_stroke_color {
+            styled.style.stroke_width
+        } else {
+            0
+        };
+
+        let outer_diameter = styled.primitive.diameter;
+        let inner_diameter = outer_diameter.saturating_sub(2 * stroke_width);
+
+        let inner_threshold = diameter_to_threshold(inner_diameter);
+        let outer_threshold = diameter_to_threshold(outer_diameter);
+
+        let iter = if has_stroke_color || has_fill_color {
+            DistanceIterator::new(&styled.primitive)
+        } else {
+            DistanceIterator::empty()
+        };
+
+        Self {
+            iter,
+            outer_threshold,
+            outer_color: styled.style.stroke_color,
+            inner_threshold,
+            inner_color: styled.style.fill_color,
+        }
+    }
 }
 
 impl<C> Iterator for StyledCircleIterator<C>
@@ -225,43 +229,22 @@ where
 {
     type Item = Pixel<C>;
 
-    // https://stackoverflow.com/a/1237519/383609
-    // https://stackoverflow.com/questions/1201200/fast-algorithm-for-drawing-filled-circles#comment80182898_1237519
     fn next(&mut self) -> Option<Self::Item> {
-        // If the fill and stroke colors are `None`, treat entire object as transparent and exit
-        // early.
-        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
-            return None;
-        }
-
-        loop {
-            let len = (self.c.x - 2 * self.p.x).pow(2) + (self.c.y - 2 * self.p.y).pow(2);
-
-            let color = if len < self.inner_threshold {
-                self.style.fill_color
-            } else if len < self.outer_threshold {
-                // Use fill_color if no stroke_color was set
-                self.style.stroke_color.or(self.style.fill_color)
+        for (point, distance) in &mut self.iter {
+            let color = if distance < self.inner_threshold {
+                self.inner_color
+            } else if distance < self.outer_threshold {
+                self.outer_color
             } else {
                 None
             };
-            let item = color.map(|c| Pixel(self.p, c));
 
-            self.p.x += 1;
-
-            if self.p.x > self.top_left.x + self.diameter as i32 {
-                self.p.x = self.top_left.x;
-                self.p.y += 1;
-            }
-
-            if self.p.y > self.top_left.y + self.diameter as i32 {
-                break None;
-            }
-
-            if item.is_some() {
-                break item;
+            if let Some(color) = color {
+                return Some(Pixel(point, color));
             }
         }
+
+        None
     }
 }
 
@@ -274,7 +257,7 @@ where
     }
 }
 
-fn diameter_to_threshold(diameter: i32) -> i32 {
+fn diameter_to_threshold(diameter: u32) -> u32 {
     if diameter <= 4 {
         diameter.pow(2) - diameter / 2
     } else {
@@ -290,23 +273,43 @@ where
     type IntoIter = StyledCircleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let center = self.primitive.center_2x();
+        StyledCircleIterator::new(self)
+    }
+}
 
-        let inner_diameter = self.primitive.diameter as i32 - 2 * self.style.stroke_width_i32();
-        let outer_diameter = self.primitive.diameter as i32;
+/// Iterator that returns the squared distance to the center for all points in the bounding box.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+struct DistanceIterator {
+    center: Point,
+    points: super::rectangle::Points,
+}
 
-        let inner_threshold = diameter_to_threshold(core::cmp::max(inner_diameter, 0));
-        let outer_threshold = diameter_to_threshold(outer_diameter);
-
-        StyledCircleIterator {
-            top_left: self.primitive.top_left,
-            diameter: self.primitive.diameter,
-            style: self.style,
-            p: self.primitive.top_left,
-            c: center,
-            outer_threshold,
-            inner_threshold,
+impl DistanceIterator {
+    fn new(circle: &Circle) -> Self {
+        Self {
+            center: circle.center_2x(),
+            points: circle.bounding_box().points(),
         }
+    }
+
+    fn empty() -> Self {
+        Self {
+            center: Point::zero(),
+            points: Rectangle::new(Point::zero(), Size::zero()).points(),
+        }
+    }
+}
+
+impl Iterator for DistanceIterator {
+    type Item = (Point, u32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.points.next().map(|p| {
+            let delta = self.center - p * 2;
+            let distance = delta.x.pow(2) as u32 + delta.y.pow(2) as u32;
+
+            (p, distance)
+        })
     }
 }
 
@@ -410,31 +413,21 @@ mod tests {
 
     #[test]
     fn negative_dimensions() {
-        let circle = Circle::new(Point::new(-15, -15), 11);
+        let circle = Circle::new(Point::new(-15, -15), 20);
 
         assert_eq!(
             circle.bounding_box(),
-            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+            Rectangle::new(Point::new(-15, -15), Size::new(20, 20))
         );
     }
 
     #[test]
     fn dimensions() {
-        let circle = Circle::new(Point::new(5, 15), 11);
+        let circle = Circle::new(Point::new(5, 15), 10);
 
         assert_eq!(
             circle.bounding_box(),
             Rectangle::new(Point::new(5, 15), Size::new(10, 10))
-        );
-    }
-
-    #[test]
-    fn large_diameter() {
-        let circle = Circle::new(Point::new(-5, -5), 21);
-
-        assert_eq!(
-            circle.bounding_box(),
-            Rectangle::new(Point::new(-5, -5), Size::new(20, 20))
         );
     }
 
@@ -464,8 +457,20 @@ mod tests {
 
     #[test]
     fn center_is_correct() {
-        let circle = Circle::with_center(Point::new(10, 10), 5);
+        // odd diameter
+        let circle = Circle::new(Point::new(10, 10), 5);
+        assert_eq!(circle.center(), Point::new(12, 12));
 
+        // even diameter
+        let circle = Circle::new(Point::new(10, 10), 6);
+        assert_eq!(circle.center(), Point::new(12, 12));
+
+        // odd diameter
+        let circle = Circle::with_center(Point::new(10, 10), 5);
+        assert_eq!(circle.center(), Point::new(10, 10));
+
+        // even diameter
+        let circle = Circle::with_center(Point::new(10, 10), 6);
         assert_eq!(circle.center(), Point::new(10, 10));
     }
 
@@ -480,5 +485,141 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(circle.points().eq(styled_points));
+    }
+
+    #[test]
+    fn distance_iter() {
+        let circle = Circle::new(Point::new(0, 0), 3);
+
+        let mut iter = DistanceIterator::new(&circle);
+        assert_eq!(iter.next(), Some((Point::new(0, 0), 8)));
+        assert_eq!(iter.next(), Some((Point::new(1, 0), 4)));
+        assert_eq!(iter.next(), Some((Point::new(2, 0), 8)));
+        assert_eq!(iter.next(), Some((Point::new(0, 1), 4)));
+        assert_eq!(iter.next(), Some((Point::new(1, 1), 0)));
+        assert_eq!(iter.next(), Some((Point::new(2, 1), 4)));
+        assert_eq!(iter.next(), Some((Point::new(0, 2), 8)));
+        assert_eq!(iter.next(), Some((Point::new(1, 2), 4)));
+        assert_eq!(iter.next(), Some((Point::new(2, 2), 8)));
+        assert_eq!(iter.next(), None);
+    }
+
+    fn test_circle(diameter: u32, pattern: &[&str]) {
+        let mut display = MockDisplay::new();
+
+        Circle::new(Point::new(0, 0), diameter)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(display, MockDisplay::from_pattern(pattern));
+    }
+
+    #[test]
+    fn circle_1() {
+        #[rustfmt::skip]
+        test_circle(1, &[
+            "#",
+        ],);
+    }
+
+    #[test]
+    fn circle_2() {
+        #[rustfmt::skip]
+        test_circle(2, &[
+            "##",
+            "##",
+        ],);
+    }
+
+    #[test]
+    fn circle_3() {
+        #[rustfmt::skip]
+        test_circle(3, &[
+            " # ",
+            "###",
+            " # ",
+        ],);
+    }
+
+    #[test]
+    fn circle_4() {
+        #[rustfmt::skip]
+        test_circle(4, &[
+            " ## ",
+            "####",
+            "####",
+            " ## ",
+        ],);
+    }
+
+    #[test]
+    fn circle_5() {
+        #[rustfmt::skip]
+        test_circle(5, &[
+            " ### ",
+            "#####",
+            "#####",
+            "#####",
+            " ### ",
+        ],);
+    }
+
+    #[test]
+    fn circle_6() {
+        #[rustfmt::skip]
+        test_circle(6, &[
+            " #### ",
+            "######",
+            "######",
+            "######",
+            "######",
+            " #### ",
+        ],);
+    }
+
+    #[test]
+    fn circle_7() {
+        #[rustfmt::skip]
+        test_circle(7, &[
+            "  ###  ",
+            " ##### ",
+            "#######",
+            "#######",
+            "#######",
+            " ##### ",
+            "  ###  ",
+        ],);
+    }
+
+    #[test]
+    fn circle_8() {
+        #[rustfmt::skip]
+        test_circle(8, &[
+            "  ####  ",
+            " ###### ",
+            "########",
+            "########",
+            "########",
+            "########",
+            " ###### ",
+            "  ####  ",
+        ],);
+    }
+
+    #[test]
+    fn circle_9() {
+        #[rustfmt::skip]
+        test_circle(9, &[
+            "  #####  ",
+            " ####### ",
+            "#########",
+            "#########",
+            "#########",
+            "#########",
+            "#########",
+            " ####### ",
+            "  #####  ",
+        ],);
     }
 }

@@ -9,6 +9,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Added
 
 - [#307](https://github.com/jamwaffles/embedded-graphics/pull/307) Added `Primitive::points` to get an iterator over all points inside a primitive.
+- [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `Rectangle::center` to get the center point of a rectangle.
 
 ### Changed
 
@@ -19,6 +20,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Fixed
 
 - [#309](https://github.com/jamwaffles/embedded-graphics/pull/309) Prevent triangles with off-screen vertices from infinitely looping.
+- [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) The bounding box size for `Circle`s was off by one.
 
 ## [0.6.1] - 2020-04-01
 
