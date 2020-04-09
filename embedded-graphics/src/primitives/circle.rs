@@ -146,7 +146,7 @@ impl Transform for Circle {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
     iter: DistanceIterator,
-    threshold: i32,
+    threshold: u32,
 }
 
 impl Points {
@@ -179,8 +179,8 @@ where
 {
     iter: DistanceIterator,
     style: PrimitiveStyle<C>,
-    outer_threshold: i32,
-    inner_threshold: i32,
+    outer_threshold: u32,
+    inner_threshold: u32,
 }
 
 impl<C> StyledCircleIterator<C>
@@ -244,11 +244,11 @@ where
     }
 }
 
-fn diameter_to_threshold(diameter: u32) -> i32 {
+fn diameter_to_threshold(diameter: u32) -> u32 {
     if diameter <= 4 {
-        (diameter.pow(2) - diameter / 2) as i32
+        diameter.pow(2) - diameter / 2
     } else {
-        diameter.pow(2) as i32
+        diameter.pow(2)
     }
 }
 
@@ -281,12 +281,12 @@ impl DistanceIterator {
 }
 
 impl Iterator for DistanceIterator {
-    type Item = (Point, i32);
+    type Item = (Point, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.points.next().map(|p| {
             let delta = self.center - p * 2;
-            let distance = delta.x.pow(2) + delta.y.pow(2);
+            let distance = delta.x.pow(2) as u32 + delta.y.pow(2) as u32;
 
             (p, distance)
         })
