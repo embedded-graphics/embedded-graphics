@@ -10,6 +10,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#307](https://github.com/jamwaffles/embedded-graphics/pull/307) Added `Primitive::points` to get an iterator over all points inside a primitive.
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `Rectangle::center` to get the center point of a rectangle.
+- [#318](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `ContainsPoint` trait to check if a point is inside a closed shape.
 
 ### Changed
 
