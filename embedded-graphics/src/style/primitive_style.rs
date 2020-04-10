@@ -70,6 +70,23 @@ where
     pub(crate) fn stroke_width_i32(&self) -> i32 {
         i32::try_from(self.stroke_width).unwrap_or(i32::max_value())
     }
+
+    /// Returns the effective stroke width.
+    ///
+    /// The effective stroke width takes the stroke color into account. If `stroke_color` is `None`
+    /// the effective stroke width is `0` independent of `stroke_width`.
+    pub(crate) fn effective_stroke_width(&self) -> u32 {
+        if self.stroke_color.is_some() {
+            self.stroke_width
+        } else {
+            0
+        }
+    }
+
+    /// Returns if a primitive drawn with this style is completely transparent.
+    pub(crate) fn is_transparent(&self) -> bool {
+        (self.stroke_color.is_none() || self.stroke_width == 0) && self.fill_color.is_none()
+    }
 }
 
 impl<C> Default for PrimitiveStyle<C>

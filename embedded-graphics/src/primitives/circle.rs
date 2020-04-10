@@ -307,7 +307,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, style::PrimitiveStyleBuilder};
+    use crate::{
+        mock_display::MockDisplay, pixelcolor::BinaryColor, primitives::Rectangle,
+        style::PrimitiveStyleBuilder,
+    };
 
     #[test]
     fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
