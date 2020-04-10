@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::Primitive,
+    primitives::{ContainsPoint, Primitive},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -57,6 +57,19 @@ impl Primitive for Rectangle {
 
     fn points(&self) -> Self::PointsIter {
         Points::new(self)
+    }
+}
+
+impl ContainsPoint for Rectangle {
+    fn contains(&self, point: Point) -> bool {
+        if point.x >= self.top_left.x && point.y >= self.top_left.y {
+            // FIXME: use Rectangle::bottom_right
+            let delta = Size::from_bounding_box(self.top_left, point);
+
+            delta.width <= self.size().width && delta.height <= self.size().height
+        } else {
+            false
+        }
     }
 }
 
@@ -324,7 +337,7 @@ mod tests {
     }
 
     #[test]
-    fn points_iter() {
+    fn points_iter_matches_filled_styled() {
         let rectangle = Rectangle::new(Point::new(10, 10), Point::new(30, 40));
 
         let styled_points = rectangle
@@ -334,5 +347,19 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(rectangle.points().eq(styled_points));
+    }
+
+    #[test]
+    fn points_iter() {
+        let rectangle = Rectangle::new(Point::new(10, 20), Point::new(11, 22));
+
+        let mut points = rectangle.points();
+        assert_eq!(points.next(), Some(Point::new(10, 20)));
+        assert_eq!(points.next(), Some(Point::new(11, 20)));
+        assert_eq!(points.next(), Some(Point::new(10, 21)));
+        assert_eq!(points.next(), Some(Point::new(11, 21)));
+        assert_eq!(points.next(), Some(Point::new(10, 22)));
+        assert_eq!(points.next(), Some(Point::new(11, 22)));
+        assert_eq!(points.next(), None);
     }
 }

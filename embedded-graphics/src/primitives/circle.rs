@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{Primitive, Styled},
+    primitives::{ContainsPoint, Primitive, Styled},
     style::PrimitiveStyle,
     transform::Transform,
     DrawTarget,
@@ -72,6 +72,16 @@ impl Primitive for Circle {
 
     fn points(&self) -> Self::PointsIter {
         Points::new(self)
+    }
+}
+
+impl ContainsPoint for Circle {
+    fn contains(&self, point: Point) -> bool {
+        let threshold = radius_to_threshold(self.radius as i32);
+
+        let distance = (2 * point.x).pow(2) + (2 * point.y).pow(2);
+
+        return distance < threshold;
     }
 }
 
@@ -453,5 +463,81 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(circle.points().eq(styled_points));
+    }
+
+    #[test]
+    fn contains() {
+        let circle = Circle::new(Point::zero(), 5);
+
+        let contained_points = Rectangle::new(Point::new(-10, -10), Point::new(10, 10))
+            .points()
+            .filter(|p| circle.contains(*p));
+
+        assert!(contained_points.eq(circle.points()));
+    }
+
+    fn test_circle(diameter: u32, pattern: &[&str]) {
+        let mut display = MockDisplay::new();
+
+        let radius = diameter / 2;
+
+        Circle::new(Point::new(radius as i32, radius as i32), radius)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(display, MockDisplay::from_pattern(pattern));
+    }
+
+    #[test]
+    fn circle_3() {
+        #[rustfmt::skip]
+        test_circle(3, &[
+            " # ",
+            "###",
+            " # ",
+        ],);
+    }
+
+    #[test]
+    fn circle_5() {
+        #[rustfmt::skip]
+        test_circle(5, &[
+            " ### ",
+            "#####",
+            "#####",
+            "#####",
+            " ### ",
+        ],);
+    }
+
+    #[test]
+    fn circle_7() {
+        #[rustfmt::skip]
+        test_circle(7, &[
+            "  ###  ",
+            " ##### ",
+            "#######",
+            "#######",
+            "#######",
+            " ##### ",
+            "  ###  ",
+        ],);
+    }
+
+    #[test]
+    fn circle_9() {
+        #[rustfmt::skip]
+        test_circle(9, &[
+            "  #####  ",
+            " ####### ",
+            "#########",
+            "#########",
+            "#########",
+            "#########",
+            "#########",
+            " ####### ",
+            "  #####  ",
+        ],);
     }
 }
