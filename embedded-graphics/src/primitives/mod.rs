@@ -7,6 +7,7 @@ pub mod line;
 pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
+pub mod sector;
 pub mod triangle;
 
 pub use self::{
@@ -17,6 +18,7 @@ pub use self::{
     polyline::Polyline,
     rectangle::Rectangle,
     rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
+    sector::Sector,
     triangle::Triangle,
 };
 use crate::{

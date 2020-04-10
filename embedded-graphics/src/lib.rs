@@ -8,6 +8,7 @@
 //!     * [Circles](./primitives/circle/struct.Circle.html)
 //!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
 //!     * [Arcs](./primitives/arc/struct.Arc.html)
+//!     * [Sectors](./primitives/sector/struct.Sector.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //!     * [Polylines](./primitives/polyline/struct.Polyline.html)
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
@@ -320,6 +321,29 @@
 //!
 //! Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
 //!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
+//! ## Draw a sector
+//!
+//! This example draws a sector with no stroke and a solid blue fill.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a sector example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABbElEQVR42u3dgYkCQRBE0W4x/5TbCISFXcHpei8D9V85I+h1VU0R6+UpEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAATvbe/xDvfu2hLQB7dR3/zaD5g6fQAmABUv7idy2CBXAN5PmFGgHgDBB+FjjjbGABnAFIPhsIwBnAJ4HJZwILYAG2/EqYJbAACAABkHkGcBawAAjg7OUaASCAB95L2ytrARCAs4AAiA3AWcACIABLYAEQAALg6xtk2P8N9H0CC4AAEACZAfhcwAIgAARARfxO4NX79VgALECwzEWwABaA5EWwAK6BXF+EFgD7sh5Pwx3zw5fGAuAW4LZgAbAAFsECIIBTF6EFgM8BuHQ2aAuAW4DbggXAGQALgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABCAABIAAEAACQAAIAAEgAATAfh9WESP9yc4uqgAAAABJRU5ErkJggg==" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Sector, style::PrimitiveStyle,
+//! };
+//!
+//! Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
+//!     .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
