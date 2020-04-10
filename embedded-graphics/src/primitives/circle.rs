@@ -202,15 +202,7 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
-        let has_fill_color = styled.style.fill_color.is_some();
-        let has_stroke_color = styled.style.stroke_color.is_some();
-
-        // Always use a stroke width of 0 if no stroke color was set.
-        let stroke_width = if has_stroke_color {
-            styled.style.stroke_width
-        } else {
-            0
-        };
+        let stroke_width = styled.style.effective_stroke_width();
 
         let outer_diameter = styled.primitive.diameter;
         let inner_diameter = outer_diameter.saturating_sub(2 * stroke_width);
@@ -218,7 +210,7 @@ where
         let inner_threshold = diameter_to_threshold(inner_diameter);
         let outer_threshold = diameter_to_threshold(outer_diameter);
 
-        let iter = if has_stroke_color || has_fill_color {
+        let iter = if !styled.style.is_transparent() {
             DistanceIterator::new(&styled.primitive)
         } else {
             DistanceIterator::empty()
@@ -512,6 +504,12 @@ mod tests {
         assert_eq!(iter.next(), Some((Point::new(0, 2), 8)));
         assert_eq!(iter.next(), Some((Point::new(1, 2), 4)));
         assert_eq!(iter.next(), Some((Point::new(2, 2), 8)));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn distance_iter_empty() {
+        let mut iter = DistanceIterator::empty();
         assert_eq!(iter.next(), None);
     }
 

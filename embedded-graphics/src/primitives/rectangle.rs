@@ -155,19 +155,14 @@ where
     type IntoIter = StyledRectangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        StyledRectangleIterator {
-            top_left: self.primitive.top_left,
-            bottom_right: self.primitive.top_left + self.primitive.size - Point::new(1, 1),
-            style: self.style,
-            p: self.primitive.top_left,
-        }
+        StyledRectangleIterator::new(self)
     }
 }
 
 /// Iterator over all points inside the rectangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
-    top_left: Point,
+    left: i32,
     bottom_right: Point,
     current_point: Point,
 }
@@ -175,9 +170,17 @@ pub struct Points {
 impl Points {
     fn new(rectangle: &Rectangle) -> Self {
         Self {
-            top_left: rectangle.top_left,
+            left: rectangle.top_left.x,
             bottom_right: rectangle.top_left + rectangle.size - Point::new(1, 1),
             current_point: rectangle.top_left,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            left: 0,
+            bottom_right: Point::new(-1, -1),
+            current_point: Point::zero(),
         }
     }
 }
@@ -197,7 +200,7 @@ impl Iterator for Points {
 
         // Reached end of row? Jump down one line
         if self.current_point.x > self.bottom_right.x {
-            self.current_point.x = self.top_left.x;
+            self.current_point.x = self.left;
             self.current_point.y += 1;
         }
 
@@ -211,10 +214,37 @@ pub struct StyledRectangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    top_left: Point,
-    bottom_right: Point,
-    style: PrimitiveStyle<C>,
-    p: Point,
+    iter: Points,
+
+    stroke_color: Option<C>,
+
+    fill_area: Rectangle,
+    fill_color: Option<C>,
+}
+
+impl<C> StyledRectangleIterator<C>
+where
+    C: PixelColor,
+{
+    fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
+        let iter = if !styled.style.is_transparent() {
+            styled.primitive.points()
+        } else {
+            Points::empty()
+        };
+
+        let stroke_width = styled.style.effective_stroke_width();
+        let stroke_offset = Size::new(stroke_width, stroke_width);
+        let fill_area_size = styled.primitive.size.saturating_sub(stroke_offset * 2);
+        let fill_area = Rectangle::new(styled.primitive.top_left + stroke_offset, fill_area_size);
+
+        Self {
+            iter,
+            stroke_color: styled.style.stroke_color,
+            fill_area,
+            fill_color: styled.style.fill_color,
+        }
+    }
 }
 
 impl<C> Iterator for StyledRectangleIterator<C>
@@ -224,57 +254,19 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Don't render anything if the rectangle has no border or fill color.
-        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
-            return None;
-        }
+        for point in &mut self.iter {
+            let color = if self.fill_area.contains(point) {
+                self.fill_color
+            } else {
+                self.stroke_color
+            };
 
-        loop {
-            let mut out = None;
-
-            // Finished, i.e. we're below the rect
-            if self.p.y > self.bottom_right.y {
-                break None;
-            }
-
-            let border_width = self.style.stroke_width_i32();
-            let tl = self.top_left;
-            let br = self.bottom_right;
-
-            // Border
-            if (
-                // Top border
-                (self.p.y >= tl.y && self.p.y < tl.y + border_width)
-            // Bottom border
-            || (self.p.y <= br.y && self.p.y > br.y - border_width)
-            // Left border
-            || (self.p.x >= tl.x && self.p.x < tl.x + border_width)
-            // Right border
-            || (self.p.x <= br.x && self.p.x > br.x - border_width)
-            ) && self.style.stroke_color.is_some()
-            {
-                out = Some(Pixel(
-                    self.p,
-                    self.style.stroke_color.expect("Expected stroke"),
-                ));
-            }
-            // Fill
-            else if let Some(fill) = self.style.fill_color {
-                out = Some(Pixel(self.p, fill));
-            }
-
-            self.p.x += 1;
-
-            // Reached end of row? Jump down one line
-            if self.p.x > self.bottom_right.x {
-                self.p.x = self.top_left.x;
-                self.p.y += 1;
-            }
-
-            if out.is_some() {
-                break out;
+            if let Some(color) = color {
+                return Some(Pixel(point, color));
             }
         }
+
+        None
     }
 }
 
@@ -373,6 +365,12 @@ mod tests {
         assert_eq!(points.next(), Some(Point::new(11, 21)));
         assert_eq!(points.next(), Some(Point::new(10, 22)));
         assert_eq!(points.next(), Some(Point::new(11, 22)));
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_empty() {
+        let mut points = Points::empty();
         assert_eq!(points.next(), None);
     }
 

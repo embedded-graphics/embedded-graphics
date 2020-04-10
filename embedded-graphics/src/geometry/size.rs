@@ -80,6 +80,17 @@ impl Size {
         }
     }
 
+    /// Saturating subtraction.
+    ///
+    /// Returns `0` for `width` and/or `height` instead of overflowing, if the
+    /// value in `other` is larger then in `self`.
+    pub(crate) fn saturating_sub(self, other: Self) -> Self {
+        Self {
+            width: self.width.saturating_sub(other.width),
+            height: self.height.saturating_sub(other.height),
+        }
+    }
+
     /// Creates a size from two corner points of a bounding box.
     pub(crate) fn from_bounding_box(corner_1: Point, corner_2: Point) -> Self {
         let width = (corner_1.x - corner_2.x).abs() as u32 + 1;
@@ -238,6 +249,16 @@ mod tests {
         let right = Size::new(10, 20);
 
         assert_eq!(left - right, Size::new(20, 20));
+    }
+
+    #[test]
+    fn saturating_sub() {
+        let p = Size::new(10, 20);
+
+        assert_eq!(p.saturating_sub(Size::new(9, 18)), Size::new(1, 2));
+        assert_eq!(p.saturating_sub(Size::new(11, 18)), Size::new(0, 2));
+        assert_eq!(p.saturating_sub(Size::new(9, 21)), Size::new(1, 0));
+        assert_eq!(p.saturating_sub(Size::new(11, 21)), Size::new(0, 0));
     }
 
     #[test]
