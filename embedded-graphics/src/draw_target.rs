@@ -342,6 +342,27 @@ where
         self.draw_iter(item)
     }
 
+    /// Draws a styled ellipse primitive.
+    ///
+    /// This default trait method can be overridden if a display provides hardware-accelerated
+    /// methods for drawing ellipses.
+    ///
+    /// # Caution
+    ///
+    /// This method should not be called directly from application code. It is used to define the
+    /// internals of the [`draw`] method used for the [`Styled`] [`Ellipse`] primitive. To draw a
+    /// ellipse, call [`draw`] on a `Styled<Ellipse>` object.
+    ///
+    /// [`Ellipse`]: ../primitives/ellipse/struct.Ellipse.html
+    /// [`draw`]: ./trait.DrawTarget.html#method.draw
+    /// [`Styled`]: ../style/struct.Styled.html
+    fn draw_ellipse(
+        &mut self,
+        item: &Styled<primitives::Ellipse, PrimitiveStyle<C>>,
+    ) -> Result<(), Self::Error> {
+        self.draw_iter(item)
+    }
+
     /// Draws an image with known size
     ///
     /// This default trait method can be overridden if a display provides hardware-accelerated
