@@ -270,7 +270,7 @@ where
     C: PixelColor,
 {
     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
+        display.draw_ellipse(self)
     }
 }
 
