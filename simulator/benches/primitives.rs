@@ -1,7 +1,7 @@
 use criterion::*;
 use embedded_graphics::{
     drawable::Pixel,
-    geometry::Point,
+    geometry::{Point, Size},
     pixelcolor::Gray8,
     primitives::{Circle, Ellipse, Line, Primitive, Rectangle, Triangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder},

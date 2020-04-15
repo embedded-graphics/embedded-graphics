@@ -363,24 +363,6 @@ mod tests {
         assert_eq!(display, MockDisplay::from_pattern(pattern));
     }
 
-    fn test_circles(style: PrimitiveStyle<BinaryColor>) {
-        for diameter in 0..50 {
-            let mut expected = MockDisplay::new();
-            Circle::new(Point::new(0, 0), diameter)
-                .into_styled(style)
-                .draw(&mut expected)
-                .unwrap();
-
-            let mut display = MockDisplay::new();
-            Ellipse::new(Point::new(0, 0), Size::new(diameter, diameter))
-                .into_styled(style)
-                .draw(&mut display)
-                .unwrap();
-
-            assert_eq!(display, expected, "diameter = {}", diameter);
-        }
-    }
-
     #[test]
     fn contains() {
         let mut expected = MockDisplay::new();
@@ -402,33 +384,6 @@ mod tests {
             .unwrap();
 
         assert_eq!(display, expected);
-    }
-
-    #[test]
-    fn circles_points() {
-        for diameter in 0..50 {
-            let circle_points = Circle::new(Point::new(0, 0), diameter).points();
-
-            let ellipse_points =
-                Ellipse::new(Point::new(0, 0), Size::new(diameter, diameter)).points();
-
-            assert!(circle_points.eq(ellipse_points), "diameter = {}", diameter);
-        }
-    }
-
-    #[test]
-    fn ellipse_equals_circle_fill() {
-        test_circles(PrimitiveStyle::with_fill(BinaryColor::On));
-    }
-
-    #[test]
-    fn ellipse_equals_circle_stroke_1px() {
-        test_circles(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
-    }
-
-    #[test]
-    fn ellipse_equals_circle_stroke_10px() {
-        test_circles(PrimitiveStyle::with_stroke(BinaryColor::On, 10));
     }
 
     #[test]
