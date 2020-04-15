@@ -7,7 +7,7 @@ use crate::drawable::Pixel;
 use crate::geometry::Dimensions;
 use crate::geometry::Size;
 use crate::pixelcolor::PixelColor;
-use crate::primitives::Primitive;
+use crate::primitives::{Primitive, Rectangle};
 use crate::style::PrimitiveStyle;
 use crate::style::Styled;
 use crate::{
@@ -57,24 +57,22 @@ impl<'a> Polyline<'a> {
 impl<'a> Primitive for Polyline<'a> {}
 
 impl<'a> Dimensions for Polyline<'a> {
-    fn top_left(&self) -> Point {
-        self.vertices
+    fn bounding_box(&self) -> Rectangle {
+        let top_left = self
+            .vertices
             .iter()
             .fold(Point::new(core::i32::MAX, core::i32::MAX), |accum, v| {
                 Point::new(accum.x.min(v.x), accum.y.min(v.y))
-            })
-    }
+            });
 
-    fn bottom_right(&self) -> Point {
-        self.vertices
+        let bottom_right = self
+            .vertices
             .iter()
             .fold(Point::new(core::i32::MIN, core::i32::MIN), |accum, v| {
                 Point::new(accum.x.max(v.x), accum.y.max(v.y))
-            })
-    }
+            });
 
-    fn size(&self) -> Size {
-        Size::from_bounding_box(self.top_left(), self.bottom_right())
+        Rectangle::with_corners(top_left, bottom_right)
     }
 }
 
