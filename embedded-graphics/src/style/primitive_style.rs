@@ -33,6 +33,15 @@ where
 
     /// Stroke width in pixels.
     pub stroke_width: u32,
+
+    /// Stroke alignment.
+    ///
+    /// The stroke alignment sets if the stroke is drawn inside, outside or centered
+    /// on the outline of a shape.
+    ///
+    /// This property only applies to closed shapes (rectangle, circle, ...) and is
+    /// ignored for open shapes (line, ...).
+    pub stroke_alignment: StrokeAlignment,
 }
 
 impl<C> PrimitiveStyle<C>
@@ -71,15 +80,35 @@ where
         i32::try_from(self.stroke_width).unwrap_or(i32::max_value())
     }
 
-    /// Returns the effective stroke width.
+    /// Returns the stroke width on the outside of the shape.
     ///
-    /// The effective stroke width takes the stroke color into account. If `stroke_color` is `None`
-    /// the effective stroke width is `0` independent of `stroke_width`.
-    pub(crate) fn effective_stroke_width(&self) -> u32 {
-        if self.stroke_color.is_some() {
-            self.stroke_width
-        } else {
-            0
+    /// The outside stroke width is determined by `stroke_width` and `stroke_alignment`.
+    /// If `stroke_color` is `None` the outside stroke width is always `0`.
+    pub(crate) fn outside_stroke_width(&self) -> u32 {
+        if self.stroke_color.is_none() {
+            return 0;
+        }
+
+        match self.stroke_alignment {
+            StrokeAlignment::Inside => 0,
+            StrokeAlignment::Center => self.stroke_width / 2,
+            StrokeAlignment::Outside => self.stroke_width,
+        }
+    }
+
+    /// Returns the stroke width on the inside of the shape.
+    ///
+    /// The inside stroke width is determined by `stroke_width` and `stroke_alignment`.
+    /// If `stroke_color` is `None` the inside stroke width is always `0`.
+    pub(crate) fn inside_stroke_width(&self) -> u32 {
+        if self.stroke_color.is_none() {
+            return 0;
+        }
+
+        match self.stroke_alignment {
+            StrokeAlignment::Inside => self.stroke_width,
+            StrokeAlignment::Center => (self.stroke_width + 1) / 2,
+            StrokeAlignment::Outside => 0,
         }
     }
 
@@ -98,6 +127,7 @@ where
             fill_color: None,
             stroke_color: None,
             stroke_width: 0,
+            stroke_alignment: StrokeAlignment::Center,
         }
     }
 }
@@ -199,9 +229,44 @@ where
         self
     }
 
+    /// Sets the stroke alignment.
+    pub fn stroke_alignment(mut self, stroke_alignment: StrokeAlignment) -> Self {
+        self.style.stroke_alignment = stroke_alignment;
+
+        self
+    }
+
     /// Builds the primitive style.
     pub fn build(self) -> PrimitiveStyle<C> {
         self.style
+    }
+}
+
+impl<C> From<&PrimitiveStyle<C>> for PrimitiveStyleBuilder<C>
+where
+    C: PixelColor,
+{
+    fn from(style: &PrimitiveStyle<C>) -> Self {
+        Self {
+            style: style.clone(),
+        }
+    }
+}
+
+/// Stroke alignment.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum StrokeAlignment {
+    /// Inside.
+    Inside,
+    /// Center.
+    Center,
+    /// Outside.
+    Outside,
+}
+
+impl Default for StrokeAlignment {
+    fn default() -> Self {
+        Self::Center
     }
 }
 
@@ -218,6 +283,7 @@ mod tests {
                 fill_color: None,
                 stroke_color: None,
                 stroke_width: 0,
+                stroke_alignment: StrokeAlignment::Center,
             }
         );
 
@@ -253,6 +319,49 @@ mod tests {
 
         style.stroke_width = 0xFFFFFFFF;
         assert_eq!(style.stroke_width_i32(), 0x7FFFFFFF);
+    }
+
+    #[test]
+    fn stroke_width_without_stroke_color() {
+        let style: PrimitiveStyle<BinaryColor> =
+            PrimitiveStyleBuilder::new().stroke_width(10).build();
+
+        assert_eq!(style.inside_stroke_width(), 0);
+        assert_eq!(style.outside_stroke_width(), 0);
+    }
+
+    #[test]
+    fn stroke_alignment_1px() {
+        let mut style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
+
+        style.stroke_alignment = StrokeAlignment::Inside;
+        assert_eq!(style.inside_stroke_width(), 1);
+        assert_eq!(style.outside_stroke_width(), 0);
+
+        style.stroke_alignment = StrokeAlignment::Center;
+        assert_eq!(style.inside_stroke_width(), 1);
+        assert_eq!(style.outside_stroke_width(), 0);
+
+        style.stroke_alignment = StrokeAlignment::Outside;
+        assert_eq!(style.inside_stroke_width(), 0);
+        assert_eq!(style.outside_stroke_width(), 1);
+    }
+
+    #[test]
+    fn stroke_alignment_2px() {
+        let mut style = PrimitiveStyle::with_stroke(BinaryColor::On, 2);
+
+        style.stroke_alignment = StrokeAlignment::Inside;
+        assert_eq!(style.inside_stroke_width(), 2);
+        assert_eq!(style.outside_stroke_width(), 0);
+
+        style.stroke_alignment = StrokeAlignment::Center;
+        assert_eq!(style.inside_stroke_width(), 1);
+        assert_eq!(style.outside_stroke_width(), 1);
+
+        style.stroke_alignment = StrokeAlignment::Outside;
+        assert_eq!(style.inside_stroke_width(), 0);
+        assert_eq!(style.outside_stroke_width(), 2);
     }
 
     #[test]

@@ -68,8 +68,7 @@ impl Ellipse {
 
     /// Create a new ellipse centered around a given point with a specific size
     pub fn with_center(center: Point, size: Size) -> Self {
-        let offset = size.saturating_sub(Size::new(1, 1)) / 2;
-        let top_left = center - offset;
+        let top_left = center - size.center_offset();
 
         Ellipse { top_left, size }
     }
@@ -87,6 +86,16 @@ impl Ellipse {
         let radius = self.size.saturating_sub(Size::new(1, 1));
 
         self.top_left * 2 + radius
+    }
+
+    fn expand(&self, offset: u32) -> Self {
+        let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
+        Self::with_center(self.center(), size)
+    }
+
+    fn shrink(&self, offset: u32) -> Self {
+        let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
+        Self::with_center(self.center(), size)
     }
 }
 
@@ -212,18 +221,17 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Ellipse, PrimitiveStyle<C>>) -> Self {
-        // Always use a stroke width of 0 if no stroke color was set.
-        let stroke_width = styled.style.effective_stroke_width();
+        let Styled { primitive, style } = styled;
 
-        let outer_size = styled.primitive.size;
-        let inner_size = outer_size.saturating_sub(Size::new(2 * stroke_width, 2 * stroke_width));
         let iter = if !styled.style.is_transparent() {
-            Points::new(&styled.primitive)
+            let stroke_area = primitive.expand(style.outside_stroke_width());
+            Points::new(&stroke_area)
         } else {
             Points::empty()
         };
 
-        let (inner_size_sq, threshold) = compute_threshold(inner_size);
+        let fill_area = primitive.shrink(style.inside_stroke_width());
+        let (inner_size_sq, threshold) = compute_threshold(fill_area.size);
 
         Self {
             iter,
@@ -328,8 +336,10 @@ where
 mod tests {
     use super::*;
     use crate::{
-        mock_display::MockDisplay, pixelcolor::BinaryColor, primitives::Circle,
-        style::PrimitiveStyleBuilder,
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::Circle,
+        style::{PrimitiveStyleBuilder, StrokeAlignment},
     };
 
     fn test_ellipse(size: Size, style: PrimitiveStyle<BinaryColor>, pattern: &[&str]) {
@@ -435,6 +445,7 @@ mod tests {
             PrimitiveStyleBuilder::new()
                 .stroke_width(10)
                 .stroke_color(BinaryColor::On)
+                .stroke_alignment(StrokeAlignment::Inside)
                 .fill_color(BinaryColor::Off)
                 .build(),
             &[
@@ -487,6 +498,7 @@ mod tests {
             PrimitiveStyleBuilder::new()
                 .stroke_width(3)
                 .stroke_color(BinaryColor::Off)
+                .stroke_alignment(StrokeAlignment::Inside)
                 .fill_color(BinaryColor::On)
                 .build(),
             &[
@@ -538,5 +550,42 @@ mod tests {
                 "        ### ",
             ])
         );
+    }
+
+    #[test]
+    fn stroke_alignment() {
+        const CENTER: Point = Point::new(15, 15);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let mut display_center = MockDisplay::new();
+        Ellipse::with_center(CENTER, SIZE)
+            .into_styled(style)
+            .draw(&mut display_center)
+            .unwrap();
+
+        let mut display_inside = MockDisplay::new();
+        Ellipse::with_center(CENTER, SIZE + Size::new(2, 2))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Inside)
+                    .build(),
+            )
+            .draw(&mut display_inside)
+            .unwrap();
+
+        let mut display_outside = MockDisplay::new();
+        Ellipse::with_center(CENTER, SIZE - Size::new(4, 4))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Outside)
+                    .build(),
+            )
+            .draw(&mut display_outside)
+            .unwrap();
+
+        assert_eq!(display_center, display_inside);
+        assert_eq!(display_center, display_outside);
     }
 }

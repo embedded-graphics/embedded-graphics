@@ -96,15 +96,36 @@ impl Rectangle {
         }
     }
 
+    /// Creates a new rectangle from the center point and the size.
+    ///
+    /// For rectangles with even width and/or height the top left corner doesn't
+    /// align with the pixel grid. Because of this the coordinates of the top left
+    /// corner will be rounded up to the nearest integer coordinate.
+    pub fn with_center(center: Point, size: Size) -> Self {
+        Rectangle {
+            top_left: center - size.center_offset(),
+            size,
+        }
+    }
+
     /// Returns the center of this rectangle.
     ///
     /// For rectangles with even width and/or height the returned value is rounded down
-    /// to the nearest integer pixel.
+    /// to the nearest integer coordinate.
     pub fn center(&self) -> Point {
-        let dx = self.size.width.saturating_sub(1) / 2;
-        let dy = self.size.height.saturating_sub(1) / 2;
+        self.top_left + self.size.center_offset()
+    }
 
-        self.top_left + Size::new(dx, dy)
+    pub(crate) fn expand(&self, offset: u32) -> Self {
+        let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
+
+        Self::with_center(self.center(), size)
+    }
+
+    pub(crate) fn shrink(&self, offset: u32) -> Self {
+        let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
+
+        Self::with_center(self.center(), size)
     }
 
     /// Returns the bottom right corner of this rectangle.
@@ -244,22 +265,22 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
-        let iter = if !styled.style.is_transparent() {
-            styled.primitive.points()
+        let Styled { style, primitive } = styled;
+
+        let iter = if !style.is_transparent() {
+            let stroke_area = primitive.expand(style.outside_stroke_width());
+            stroke_area.points()
         } else {
             Points::empty()
         };
 
-        let stroke_width = styled.style.effective_stroke_width();
-        let stroke_offset = Size::new(stroke_width, stroke_width);
-        let fill_area_size = styled.primitive.size.saturating_sub(stroke_offset * 2);
-        let fill_area = Rectangle::new(styled.primitive.top_left + stroke_offset, fill_area_size);
+        let fill_area = primitive.shrink(style.inside_stroke_width());
 
         Self {
             iter,
-            stroke_color: styled.style.stroke_color,
+            stroke_color: style.stroke_color,
             fill_area,
-            fill_color: styled.style.fill_color,
+            fill_color: style.fill_color,
         }
     }
 }
@@ -299,7 +320,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{Rgb565, RgbColor};
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::{BinaryColor, Rgb565, RgbColor},
+        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+    };
 
     #[test]
     fn dimensions() {
@@ -430,5 +455,42 @@ mod tests {
 
         let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
         assert_eq!(even.bottom_right(), Some(Point::new(23, 37)));
+    }
+
+    #[test]
+    fn stroke_alignment() {
+        const TOP_LEFT: Point = Point::new(5, 6);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let mut display_center = MockDisplay::new();
+        Rectangle::new(TOP_LEFT, SIZE)
+            .into_styled(style)
+            .draw(&mut display_center)
+            .unwrap();
+
+        let mut display_inside = MockDisplay::new();
+        Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Inside)
+                    .build(),
+            )
+            .draw(&mut display_inside)
+            .unwrap();
+
+        let mut display_outside = MockDisplay::new();
+        Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Outside)
+                    .build(),
+            )
+            .draw(&mut display_outside)
+            .unwrap();
+
+        assert_eq!(display_center, display_inside);
+        assert_eq!(display_center, display_outside);
     }
 }
