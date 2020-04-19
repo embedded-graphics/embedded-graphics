@@ -327,7 +327,7 @@ where
                 IterState::LeftRight(l, r) => {
                     // Fill the space between the left and right points
                     if let Some(color) = self.style.fill_color {
-                        if l.x >= 0 && l.y >= 0 && r.x >= 0 && r.y >= 0 && l.x + self.x < r.x {
+                        if l.x + self.x < r.x {
                             let point = Point::new(l.x + self.x, l.y);
                             self.x += 1;
                             return Some(Pixel(point, color));
@@ -499,5 +499,47 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(Point::new(1, 0), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 0), BinaryColor::On)));
         assert_eq!(tri.next(), None);
+    }
+
+    #[test]
+    fn issue_308_infinite() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Triangle::new(Point::new(10, 10), Point::new(20, 30), Point::new(30, -10))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+    }
+
+    #[test]
+    fn off_screen() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Triangle::new(Point::new(5, 5), Point::new(10, 15), Point::new(15, -5))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "          #####",
+                "         ######",
+                "        ###### ",
+                "       ####### ",
+                "      ######## ",
+                "     ######### ",
+                "     ########  ",
+                "      #######  ",
+                "      #######  ",
+                "       ######  ",
+                "       #####   ",
+                "        ####   ",
+                "        ####   ",
+                "         ###   ",
+                "         ##    ",
+                "          #    ",
+            ])
+        );
     }
 }

@@ -60,7 +60,8 @@ If you need more deeper/more personalized help, please check out the [embedded-g
 - [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
 - [TGA images - `tinytga`](https://crates.io/crates/tinytga)
 - [ProFont monospace font - `profont`](https://crates.io/crates/profont)
-- [Picofont Pico8 font - `picofont`](https://crates.io/crates/picofont)
+- [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
+- [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
@@ -70,6 +71,7 @@ issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
 ## Display drivers
 
 - [embedded-graphics-simulator](https://docs.rs/embedded-graphics-simulator/): Simulated display
+- [embedded-graphics-web-simulator](https://crates.io/crates/embedded-graphics-web-simulator): Simulated display in your browser via Webassembly
 - [epd-waveshare](https://crates.io/crates/epd-waveshare) Driver for various ePaper displays (EPD) from Waveshare
 - [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
 - [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
