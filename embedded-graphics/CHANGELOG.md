@@ -17,6 +17,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added stroke alignment to `PrimitiveStyle`.
 - [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added `Rectangle::with_center`.
 - [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added `From<&PrimitiveStyle>` for `PrimitiveStyleBuilder`.
+- [#292](https://github.com/jamwaffles/embedded-graphics/pull/292) Added the `Polyline` primitive.
 
 ### Changed
 
