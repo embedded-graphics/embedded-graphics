@@ -1,15 +1,15 @@
-//! The line primitive
+//! The polyline primitive
 
 // TODO: Group imports
 use crate::draw_target::DrawTarget;
 use crate::drawable::Drawable;
 use crate::drawable::Pixel;
 use crate::geometry::Dimensions;
-use crate::geometry::Size;
 use crate::pixelcolor::PixelColor;
 use crate::primitives::{Primitive, Rectangle};
 use crate::style::PrimitiveStyle;
 use crate::style::Styled;
+use crate::transform::Transform;
 use crate::{
     geometry::Point,
     primitives::{line::Line, thick_line_iterator::ThickLineIterator},
@@ -35,6 +35,8 @@ use crate::{
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Polyline<'a> {
+    translate: Point,
+
     /// All vertices in the line
     pub vertices: &'a [Point],
 }
@@ -50,24 +52,31 @@ impl<'a> Polyline<'a> {
             panic!("Polyline must contain at least two vertices");
         }
 
-        Self { vertices }
+        Self {
+            vertices,
+            translate: Point::zero(),
+        }
     }
 }
 
-impl<'a> Primitive for Polyline<'a> {}
+impl<'a> Primitive for Polyline<'a> {
+    type PointsIter = PolylineIterator<'a>;
+
+    fn points(&self) -> Self::PointsIter {
+        self.into_iter()
+    }
+}
 
 impl<'a> Dimensions for Polyline<'a> {
     fn bounding_box(&self) -> Rectangle {
         let top_left = self
-            .vertices
-            .iter()
+            .points()
             .fold(Point::new(core::i32::MAX, core::i32::MAX), |accum, v| {
                 Point::new(accum.x.min(v.x), accum.y.min(v.y))
             });
 
         let bottom_right = self
-            .vertices
-            .iter()
+            .points()
             .fold(Point::new(core::i32::MIN, core::i32::MIN), |accum, v| {
                 Point::new(accum.x.max(v.x), accum.y.max(v.y))
             });
@@ -76,13 +85,29 @@ impl<'a> Dimensions for Polyline<'a> {
     }
 }
 
-// TODO: Find a way to impl Transform
+impl Transform for Polyline<'_> {
+    /// TODO: Docs
+    fn translate(&self, by: Point) -> Self {
+        Self {
+            translate: by,
+            ..*self
+        }
+    }
+
+    /// TODO: Docs
+    fn translate_mut(&mut self, by: Point) -> &mut Self {
+        self.translate += by;
+
+        self
+    }
+}
 
 /// TODO: Docs
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct PolylineIterator<'a> {
     stop: bool,
     vertices: &'a [Point],
+    translate: Point,
     segment_iter: ThickLineIterator,
 }
 
@@ -102,7 +127,10 @@ impl<'a> Iterator for PolylineIterator<'a> {
 
             self.vertices = rest;
 
-            self.segment_iter = ThickLineIterator::new(&Line::new(*start, *end), 1);
+            self.segment_iter = ThickLineIterator::new(
+                &Line::new(*start + self.translate, *end + self.translate),
+                1,
+            );
 
             Self::next(self)
         }
@@ -121,7 +149,11 @@ impl<'a> IntoIterator for Polyline<'a> {
                 rest.get(0).map(|end| Self::IntoIter {
                     stop: false,
                     vertices: rest,
-                    segment_iter: ThickLineIterator::new(&Line::new(*start, *end), 1),
+                    translate: self.translate,
+                    segment_iter:ThickLineIterator::new(
+                        &Line::new(*start + self.translate, *end + self.translate),
+                        1,
+                    ),
                 })
             })
             .unwrap_or_else(||
@@ -130,6 +162,7 @@ impl<'a> IntoIterator for Polyline<'a> {
                 Self::IntoIter {
                     stop: true,
                     vertices: &[],
+                    translate: Point::zero(),
                     segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
                 })
     }
@@ -193,7 +226,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{drawable::Pixel, pixelcolor::BinaryColor};
+    use crate::geometry::Size;
 
     // A "heartbeat" shaped polyline
     const HEARTBEAT: [Point; 10] = [
@@ -213,9 +246,11 @@ mod tests {
     fn positive_dimensions() {
         let polyline = Polyline::new(&HEARTBEAT);
 
-        assert_eq!(polyline.top_left(), Point::new(10, 10));
-        assert_eq!(polyline.bottom_right(), Point::new(300, 84));
-        assert_eq!(polyline.size(), Size::new(290, 74));
+        let bb = polyline.bounding_box();
+
+        assert_eq!(bb.top_left, Point::new(10, 10));
+        assert_eq!(bb.top_left + bb.size, Point::new(301, 85));
+        assert_eq!(bb.size, Size::new(291, 75));
     }
 
     #[test]
@@ -228,17 +263,21 @@ mod tests {
 
         let polyline = Polyline::new(&negative);
 
-        assert_eq!(polyline.top_left(), Point::new(-90, -90));
-        assert_eq!(polyline.bottom_right(), Point::new(200, -16));
-        assert_eq!(polyline.size(), Size::new(290, 74));
+        let bb = polyline.bounding_box();
+
+        assert_eq!(bb.top_left, Point::new(-90, -90));
+        assert_eq!(bb.top_left + bb.size, Point::new(201, -15));
+        assert_eq!(bb.size, Size::new(291, 75));
     }
 
-    // #[test]
-    // fn transformed_dimensions() {
-    //     let polyline = Polyline::new(&HEARTBEAT).translate(Point::new(-100, -100));
+    #[test]
+    fn transformed_dimensions() {
+        let polyline = Polyline::new(&HEARTBEAT).translate(Point::new(-100, -100));
 
-    //     assert_eq!(polyline.top_left(), Point::new(-90, -90));
-    //     assert_eq!(polyline.bottom_right(), Point::new(200, -16));
-    //     assert_eq!(polyline.size(), Size::new(290, 74));
-    // }
+        let bb = polyline.bounding_box();
+
+        assert_eq!(bb.top_left, Point::new(-90, -90));
+        assert_eq!(bb.top_left + bb.size, Point::new(201, -15));
+        assert_eq!(bb.size, Size::new(291, 75));
+    }
 }
