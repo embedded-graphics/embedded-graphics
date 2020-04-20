@@ -176,6 +176,29 @@ some display drivers implement accelerated drawing of iterators."#,
 
     op!(
         display,
+        "Draw a polyline",
+        "This example draws a polyline with 1px cyan stroke.",
+        {
+            use embedded_graphics::{
+                pixelcolor::Rgb888, prelude::*, primitives::Polyline, style::PrimitiveStyle,
+            };
+            {}
+            let points: [Point; 5] = [
+                Point::new(8, 8),
+                Point::new(48, 16),
+                Point::new(32, 48),
+                Point::new(16, 32),
+                Point::new(32, 32),
+            ];
+            {}
+            Polyline::new(&points)
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
+                .draw(&mut display)?;
+        }
+    );
+
+    op!(
+        display,
         "Draw some text",
         "This example draws the text \"Hello,\\nRust!\" with the [`Font6x8`] font in green.",
         {
