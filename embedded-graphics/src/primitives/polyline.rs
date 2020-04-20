@@ -187,6 +187,9 @@ impl<'a> Iterator for PolylineIterator<'a> {
                 1,
             );
 
+            // Skip first point of next line, otherwise we overlap with the previous line
+            Self::next(self);
+
             Self::next(self)
         }
     }
