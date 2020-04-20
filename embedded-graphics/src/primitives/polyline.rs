@@ -1,36 +1,52 @@
 //! The polyline primitive
 
-// TODO: Group imports
-use crate::draw_target::DrawTarget;
-use crate::drawable::Drawable;
-use crate::drawable::Pixel;
-use crate::geometry::Dimensions;
-use crate::pixelcolor::PixelColor;
-use crate::primitives::{Primitive, Rectangle};
-use crate::style::PrimitiveStyle;
-use crate::style::Styled;
-use crate::transform::Transform;
 use crate::{
-    geometry::Point,
-    primitives::{line::Line, thick_line_iterator::ThickLineIterator},
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point},
+    pixelcolor::PixelColor,
+    primitives::{line::Line, thick_line_iterator::ThickLineIterator, Primitive, Rectangle},
+    style::{PrimitiveStyle, Styled},
+    transform::Transform,
 };
 
 /// Polyline primitive
 ///
-/// Creates an unfilled chained line shape
+/// Creates an unfilled chained line shape. Styles with a width greater than 1px are not currently
+/// supported.
 ///
 /// # Examples
 ///
-/// ## Create some lines with different styles
+/// ## Draw a "heartbeat" shaped polyline
+///
+/// This example draws a stylized cardiogram in
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     pixelcolor::Rgb565, prelude::*, primitives::Line, style::PrimitiveStyle,
+///     pixelcolor::Rgb565, prelude::*, primitives::Polyline, style::PrimitiveStyle,
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // TODO: Example
+/// // A "heartbeat" shaped polyline
+/// let points: [Point; 10] = [
+///     Point::new(10, 64),
+///     Point::new(50, 64),
+///     Point::new(60, 44),
+///     Point::new(70, 64),
+///     Point::new(80, 64),
+///     Point::new(90, 74),
+///     Point::new(100, 10),
+///     Point::new(110, 84),
+///     Point::new(120, 64),
+///     Point::new(300, 64),
+/// ];
+///
+/// let line_style = PrimitiveStyle::with_stroke(Rgb565::GREEN, 1);
+///
+/// Polyline::new(&points)
+///     .into_styled(line_style)
+///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -70,13 +86,17 @@ impl<'a> Primitive for Polyline<'a> {
 impl<'a> Dimensions for Polyline<'a> {
     fn bounding_box(&self) -> Rectangle {
         let top_left = self
-            .points()
+            .vertices
+            .iter()
+            .map(|v| *v + self.translate)
             .fold(Point::new(core::i32::MAX, core::i32::MAX), |accum, v| {
                 Point::new(accum.x.min(v.x), accum.y.min(v.y))
             });
 
         let bottom_right = self
-            .points()
+            .vertices
+            .iter()
+            .map(|v| *v + self.translate)
             .fold(Point::new(core::i32::MIN, core::i32::MIN), |accum, v| {
                 Point::new(accum.x.max(v.x), accum.y.max(v.y))
             });
@@ -85,8 +105,26 @@ impl<'a> Dimensions for Polyline<'a> {
     }
 }
 
-impl Transform for Polyline<'_> {
-    /// TODO: Docs
+impl<'a> Transform for Polyline<'a> {
+    /// Translate the polyline from its current position to a new position by (x, y) pixels, returning
+    /// a new `Polyline`. For a mutating transform, see `translate_mut`.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Polyline;
+    /// # use embedded_graphics::prelude::*;
+    /// let points = [
+    ///     Point::new(5, 10),
+    ///     Point::new(7, 7),
+    ///     Point::new(5, 8),
+    ///     Point::new(10, 10),
+    /// ];
+    ///
+    /// let polyline = Polyline::new(&points);
+    /// let moved = polyline.translate(Point::new(10, 12));
+    ///
+    /// assert_eq!(polyline.bounding_box().top_left, Point::new(5, 7));
+    /// assert_eq!(moved.bounding_box().top_left, Point::new(15, 19));
+    /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
             translate: by,
@@ -94,7 +132,24 @@ impl Transform for Polyline<'_> {
         }
     }
 
-    /// TODO: Docs
+    /// Translate the polyline from its current position to a new position by (x, y) pixels.
+    ///
+    /// ```
+    /// # use embedded_graphics::primitives::Polyline;
+    /// # use embedded_graphics::prelude::*;
+    /// let points = [
+    ///     Point::new(5, 10),
+    ///     Point::new(7, 7),
+    ///     Point::new(5, 8),
+    ///     Point::new(10, 10),
+    /// ];
+    ///
+    /// let mut polyline = Polyline::new(&points);
+    ///
+    /// polyline.translate_mut(Point::new(10, 12));
+    ///
+    /// assert_eq!(polyline.bounding_box().top_left, Point::new(15, 19));
+    /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.translate += by;
 
@@ -102,7 +157,7 @@ impl Transform for Polyline<'_> {
     }
 }
 
-/// TODO: Docs
+/// An iterator over all pixel positions on the polyline
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct PolylineIterator<'a> {
     stop: bool,
@@ -195,7 +250,6 @@ where
     line_iter: PolylineIterator<'a>,
 }
 
-// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
 impl<'a, C: PixelColor> Iterator for StyledPolylineIterator<'a, C> {
     type Item = Pixel<C>;
 
@@ -226,7 +280,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::Size;
+    use crate::{geometry::Size, pixelcolor::Rgb565, prelude::*};
 
     // A "heartbeat" shaped polyline
     const HEARTBEAT: [Point; 10] = [
@@ -279,5 +333,23 @@ mod tests {
         assert_eq!(bb.top_left, Point::new(-90, -90));
         assert_eq!(bb.top_left + bb.size, Point::new(201, -15));
         assert_eq!(bb.size, Size::new(291, 75));
+    }
+
+    #[test]
+    #[should_panic]
+    fn one_point() {
+        let _polyline = Polyline::new(&[Point::zero()]);
+    }
+
+    // Ensure that polylines only draw 1px wide due to lack of support for line joiners. This test
+    // should fail when joiners are supported and should be removed then.
+    #[test]
+    fn one_px_wide_only() {
+        let polyline = Polyline::new(&HEARTBEAT);
+
+        let thick = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 10));
+        let thin = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1));
+
+        assert!(thick.into_iter().eq(thin.into_iter()));
     }
 }
