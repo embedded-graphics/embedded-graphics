@@ -22,8 +22,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Fixed
 
-- [#309](https://github.com/jamwaffles/embedded-graphics/pull/309) Prevent triangles with off-screen vertices from infinitely looping.
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) The bounding box size for `Circle`s was off by one.
+
+## [0.6.2] - 2020-04-20
+
+### Fixed
+
+- [#309](https://github.com/jamwaffles/embedded-graphics/pull/309) Prevent triangles with off-screen vertices from infinitely looping.
 
 ## [0.6.1] - 2020-04-01
 
@@ -476,7 +481,8 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
 
 <!-- next-url -->
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.1...HEAD
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.2...HEAD
+[0.6.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.1...embedded-graphics-v0.6.2
 [0.6.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0...embedded-graphics-v0.6.1
 [0.6.0]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.2...embedded-graphics-v0.6.0
 [0.6.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.1...embedded-graphics-v0.6.0-beta.2
