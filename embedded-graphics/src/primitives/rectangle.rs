@@ -64,10 +64,9 @@ impl Primitive for Rectangle {
 impl ContainsPoint for Rectangle {
     fn contains(&self, point: Point) -> bool {
         if point.x >= self.top_left.x && point.y >= self.top_left.y {
-            // FIXME: use Rectangle::bottom_right
-            let delta = Size::from_bounding_box(self.top_left, point);
-
-            delta.width <= self.size.width && delta.height <= self.size.height
+            self.bottom_right().map_or(false, |bottom_right| {
+                point.x <= bottom_right.x && point.y <= bottom_right.y
+            })
         } else {
             false
         }
@@ -106,6 +105,19 @@ impl Rectangle {
         let dy = self.size.height.saturating_sub(1) / 2;
 
         self.top_left + Size::new(dx, dy)
+    }
+
+    /// Returns the bottom right corner of this rectangle.
+    ///
+    /// Because the smallest rectangle that can be represented by its corners
+    /// has a size of 1 x 1 pixel this functions returns `None` if the width or
+    /// height of the rectangle is zero.
+    pub fn bottom_right(&self) -> Option<Point> {
+        if self.size.width > 0 && self.size.height > 0 {
+            Some(self.top_left + self.size - Point::new(1, 1))
+        } else {
+            None
+        }
     }
 }
 
@@ -169,9 +181,14 @@ pub struct Points {
 
 impl Points {
     fn new(rectangle: &Rectangle) -> Self {
+        // This doesn't use rectangle.bottom_right() to intentionally set bottom_right
+        // to an coordinate outside the rectangle if the width or height is zero, which
+        // stops the iterator.
+        let bottom_right = rectangle.top_left + rectangle.size - Point::new(1, 1);
+
         Self {
             left: rectangle.top_left.x,
-            bottom_right: rectangle.top_left + rectangle.size - Point::new(1, 1),
+            bottom_right,
             current_point: rectangle.top_left,
         }
     }
@@ -369,6 +386,14 @@ mod tests {
     }
 
     #[test]
+    fn points_iter_zero_size() {
+        let rectangle = Rectangle::new(Point::new(1, 2), Size::zero());
+
+        let mut points = rectangle.points();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
     fn points_iter_empty() {
         let mut points = Points::empty();
         assert_eq!(points.next(), None);
@@ -393,5 +418,17 @@ mod tests {
 
         let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
         assert_eq!(even.center(), Point::new(21, 33));
+    }
+
+    #[test]
+    fn bottom_right() {
+        let zero = Rectangle::new(Point::new(10, 20), Size::zero());
+        assert_eq!(zero.bottom_right(), None);
+
+        let odd = Rectangle::new(Point::new(10, 20), Size::new(5, 7));
+        assert_eq!(odd.bottom_right(), Some(Point::new(14, 26)));
+
+        let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
+        assert_eq!(even.bottom_right(), Some(Point::new(23, 37)));
     }
 }
