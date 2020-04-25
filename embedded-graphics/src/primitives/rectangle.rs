@@ -110,7 +110,7 @@ impl Rectangle {
     /// Returns the bottom right corner of this rectangle.
     ///
     /// Because the smallest rectangle that can be represented by its corners
-    /// has a size of 1 x 1 pixel this functions returns `None` if the width or
+    /// has a size of 1 x 1 pixels, this function returns `None` if the width or
     /// height of the rectangle is zero.
     pub fn bottom_right(&self) -> Option<Point> {
         if self.size.width > 0 && self.size.height > 0 {
