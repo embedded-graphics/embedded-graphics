@@ -13,6 +13,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#318](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `ContainsPoint` trait to check if a point is inside a closed shape.
 - [#320](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Ellipse` primitive.
 - [#320](https://github.com/jamwaffles/embedded-graphics/pull/320) Added `DrawTarget::draw_ellipse`
+- [#333](https://github.com/jamwaffles/embedded-graphics/pull/333) Added `Rectangle::bottom_right` to get the bottom right corner of a rectangle.
 
 ### Changed
 
