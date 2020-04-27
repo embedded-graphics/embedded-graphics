@@ -68,9 +68,7 @@ impl Circle {
 
     /// Create a new circle centered around a given point with a specific diameter
     pub fn with_center(center: Point, diameter: u32) -> Self {
-        let d = diameter.saturating_sub(1) / 2;
-        let offset = Size::new(d, d);
-        let top_left = center - offset;
+        let top_left = center - Size::new(diameter, diameter).center_offset();
 
         Circle { top_left, diameter }
     }
@@ -89,6 +87,18 @@ impl Circle {
         let radius = self.diameter.saturating_sub(1);
 
         self.top_left * 2 + Size::new(radius, radius)
+    }
+
+    pub(crate) fn expand(&self, offset: u32) -> Self {
+        let diameter = self.diameter.saturating_add(2 * offset);
+
+        Self::with_center(self.center(), diameter)
+    }
+
+    pub(crate) fn shrink(&self, offset: u32) -> Self {
+        let diameter = self.diameter.saturating_sub(2 * offset);
+
+        Self::with_center(self.center(), diameter)
     }
 }
 
@@ -202,16 +212,16 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
-        let stroke_width = styled.style.effective_stroke_width();
+        let Styled { primitive, style } = styled;
 
-        let outer_diameter = styled.primitive.diameter;
-        let inner_diameter = outer_diameter.saturating_sub(2 * stroke_width);
+        let stroke_area = primitive.expand(style.outside_stroke_width());
+        let fill_area = primitive.shrink(style.inside_stroke_width());
 
-        let inner_threshold = diameter_to_threshold(inner_diameter);
-        let outer_threshold = diameter_to_threshold(outer_diameter);
+        let inner_threshold = diameter_to_threshold(fill_area.diameter);
+        let outer_threshold = diameter_to_threshold(stroke_area.diameter);
 
         let iter = if !styled.style.is_transparent() {
-            DistanceIterator::new(&styled.primitive)
+            DistanceIterator::new(&stroke_area)
         } else {
             DistanceIterator::empty()
         };
@@ -319,7 +329,11 @@ impl Iterator for DistanceIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, style::PrimitiveStyleBuilder};
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        style::{PrimitiveStyleBuilder, StrokeAlignment},
+    };
 
     #[test]
     fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
@@ -522,6 +536,43 @@ mod tests {
             .filter(|p| circle.contains(*p));
 
         assert!(contained_points.eq(circle.points()));
+    }
+
+    #[test]
+    fn stroke_alignment() {
+        const CENTER: Point = Point::new(15, 15);
+        const SIZE: u32 = 10;
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let mut display_center = MockDisplay::new();
+        Circle::with_center(CENTER, SIZE)
+            .into_styled(style)
+            .draw(&mut display_center)
+            .unwrap();
+
+        let mut display_inside = MockDisplay::new();
+        Circle::with_center(CENTER, SIZE + 2)
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Inside)
+                    .build(),
+            )
+            .draw(&mut display_inside)
+            .unwrap();
+
+        let mut display_outside = MockDisplay::new();
+        Circle::with_center(CENTER, SIZE - 4)
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Outside)
+                    .build(),
+            )
+            .draw(&mut display_outside)
+            .unwrap();
+
+        assert_eq!(display_center, display_inside);
+        assert_eq!(display_center, display_outside);
     }
 
     fn test_circle(diameter: u32, pattern: &[&str]) {

@@ -14,6 +14,9 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#320](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Ellipse` primitive.
 - [#320](https://github.com/jamwaffles/embedded-graphics/pull/320) Added `DrawTarget::draw_ellipse`
 - [#333](https://github.com/jamwaffles/embedded-graphics/pull/333) Added `Rectangle::bottom_right` to get the bottom right corner of a rectangle.
+- [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added stroke alignment to `PrimitiveStyle`.
+- [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added `Rectangle::with_center`.
+- [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added `From<&PrimitiveStyle>` for `PrimitiveStyleBuilder`.
 
 ### Changed
 

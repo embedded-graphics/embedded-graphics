@@ -80,6 +80,16 @@ impl Size {
         }
     }
 
+    /// Saturating addition.
+    ///
+    /// Returns `u32::max_value()` for `width` and/or `height` instead of overflowing.
+    pub(crate) fn saturating_add(self, other: Self) -> Self {
+        Self {
+            width: self.width.saturating_add(other.width),
+            height: self.height.saturating_add(other.height),
+        }
+    }
+
     /// Saturating subtraction.
     ///
     /// Returns `0` for `width` and/or `height` instead of overflowing, if the
@@ -97,6 +107,14 @@ impl Size {
         let height = (corner_1.y - corner_2.y).abs() as u32 + 1;
 
         Self { width, height }
+    }
+
+    /// Returns the center offset.
+    ///
+    /// The center offset is defined as the offset between the top left corner and
+    /// the center point of a rectangle with size `self`.
+    pub(crate) fn center_offset(self) -> Self {
+        self.saturating_sub(Size::new(1, 1)) / 2
     }
 }
 
