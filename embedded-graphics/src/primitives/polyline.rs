@@ -160,7 +160,6 @@ impl<'a> Transform for Polyline<'a> {
 /// An iterator over all pixel positions on the polyline
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points<'a> {
-    stop: bool,
     vertices: &'a [Point],
     translate: Point,
     segment_iter: ThickLineIterator,
@@ -176,7 +175,6 @@ impl<'a> Points<'a> {
             .and_then(|(start, rest)| {
                 // Polyline is 2 or more vertices long, return an iterator for it
                 rest.get(0).map(|end| Points {
-                    stop: false,
                     vertices: rest,
                     translate: polyline.translate,
                     segment_iter:ThickLineIterator::new(
@@ -189,7 +187,6 @@ impl<'a> Points<'a> {
                 // Polyline is less than 2 vertices long. Return a dummy iterator that will short
                 // circuit due to `stop: true`
                 Points {
-                    stop: true,
                     vertices: &[],
                     translate: Point::zero(),
                     segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
@@ -201,7 +198,7 @@ impl<'a> Iterator for Points<'a> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.stop {
+        if self.vertices.len() < 2 {
             return None;
         }
 
