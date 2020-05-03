@@ -79,7 +79,7 @@ impl<'a> Primitive for Polyline<'a> {
     type PointsIter = Points<'a>;
 
     fn points(&self) -> Self::PointsIter {
-        self.into_iter()
+        Points::new(self)
     }
 }
 
@@ -166,6 +166,37 @@ pub struct Points<'a> {
     segment_iter: ThickLineIterator,
 }
 
+impl<'a> Points<'a> {
+    fn new<'b>(polyline: &'b Polyline<'a>) -> Self
+    where
+        'a: 'b,
+    {
+        polyline.vertices
+            .split_first()
+            .and_then(|(start, rest)| {
+                // Polyline is 2 or more vertices long, return an iterator for it
+                rest.get(0).map(|end| Points {
+                    stop: false,
+                    vertices: rest,
+                    translate: polyline.translate,
+                    segment_iter:ThickLineIterator::new(
+                        &Line::new(*start + polyline.translate, *end + polyline.translate),
+                        1,
+                    ),
+                })
+            })
+            .unwrap_or_else(||
+                // Polyline is less than 2 vertices long. Return a dummy iterator that will short
+                // circuit due to `stop: true`
+                Points {
+                    stop: true,
+                    vertices: &[],
+                    translate: Point::zero(),
+                    segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
+                })
+    }
+}
+
 impl<'a> Iterator for Points<'a> {
     type Item = Point;
 
@@ -195,37 +226,6 @@ impl<'a> Iterator for Points<'a> {
     }
 }
 
-impl<'a> IntoIterator for Polyline<'a> {
-    type Item = Point;
-    type IntoIter = Points<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.vertices
-            .split_first()
-            .and_then(|(start, rest)| {
-                // Polyline is 2 or more vertices long, return an iterator for it
-                rest.get(0).map(|end| Self::IntoIter {
-                    stop: false,
-                    vertices: rest,
-                    translate: self.translate,
-                    segment_iter:ThickLineIterator::new(
-                        &Line::new(*start + self.translate, *end + self.translate),
-                        1,
-                    ),
-                })
-            })
-            .unwrap_or_else(||
-                // Polyline is less than 2 vertices long. Return a dummy iterator that will short
-                // circuit due to `stop: true`
-                Self::IntoIter {
-                    stop: true,
-                    vertices: &[],
-                    translate: Point::zero(),
-                    segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
-                })
-    }
-}
-
 impl<'a, C> IntoIterator for &'a Styled<Polyline<'a>, PrimitiveStyle<C>>
 where
     C: PixelColor,
@@ -237,7 +237,7 @@ where
         StyledPolylineIterator {
             style: self.style,
 
-            line_iter: self.primitive.into_iter(),
+            line_iter: self.primitive.points(),
         }
     }
 }
