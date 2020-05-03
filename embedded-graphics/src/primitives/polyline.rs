@@ -232,8 +232,8 @@ where
 
     fn into_iter(self) -> Self::IntoIter {
         StyledPolylineIterator {
-            style: self.style,
-
+            stroke_width: self.style.stroke_width,
+            stroke_color: self.style.stroke_color,
             line_iter: self.primitive.points(),
         }
     }
@@ -245,8 +245,8 @@ pub struct StyledPolylineIterator<'a, C>
 where
     C: PixelColor,
 {
-    style: PrimitiveStyle<C>,
-
+    stroke_width: u32,
+    stroke_color: Option<C>,
     line_iter: Points<'a>,
 }
 
@@ -255,12 +255,12 @@ impl<'a, C: PixelColor> Iterator for StyledPolylineIterator<'a, C> {
 
     fn next(&mut self) -> Option<Self::Item> {
         // Break if stroke width is zero
-        if self.style.stroke_width == 0 {
+        if self.stroke_width == 0 {
             return None;
         }
 
         // Return none if stroke color is none
-        let stroke_color = self.style.stroke_color?;
+        let stroke_color = self.stroke_color?;
 
         self.line_iter
             .next()
