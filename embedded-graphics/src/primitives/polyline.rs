@@ -279,9 +279,10 @@ mod tests {
 
         let bb = polyline.bounding_box();
 
-        assert_eq!(bb.top_left, Point::new(10, 10));
-        assert_eq!(bb.top_left + bb.size, Point::new(301, 85));
-        assert_eq!(bb.size, Size::new(291, 75));
+        assert_eq!(
+            bb,
+            Rectangle::with_corners(Point::new(10, 10), Point::new(300, 84))
+        );
     }
 
     #[test]
@@ -296,9 +297,10 @@ mod tests {
 
         let bb = polyline.bounding_box();
 
-        assert_eq!(bb.top_left, Point::new(-90, -90));
-        assert_eq!(bb.top_left + bb.size, Point::new(201, -15));
-        assert_eq!(bb.size, Size::new(291, 75));
+        assert_eq!(
+            bb,
+            Rectangle::with_corners(Point::new(-90, -90), Point::new(200, -16))
+        );
     }
 
     #[test]
@@ -307,9 +309,10 @@ mod tests {
 
         let bb = polyline.bounding_box();
 
-        assert_eq!(bb.top_left, Point::new(-90, -90));
-        assert_eq!(bb.top_left + bb.size, Point::new(201, -15));
-        assert_eq!(bb.size, Size::new(291, 75));
+        assert_eq!(
+            bb,
+            Rectangle::with_corners(Point::new(-90, -90), Point::new(200, -16))
+        );
     }
 
     #[test]
