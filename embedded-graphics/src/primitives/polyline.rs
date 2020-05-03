@@ -164,27 +164,11 @@ impl<'a> Points<'a> {
     where
         'a: 'b,
     {
-        polyline.vertices
-            .split_first()
-            .and_then(|(start, rest)| {
-                // Polyline is 2 or more vertices long, return an iterator for it
-                rest.get(0).map(|end| Points {
-                    vertices: rest,
-                    translate: polyline.translate,
-                    segment_iter:ThickLineIterator::new(
-                        &Line::new(*start + polyline.translate, *end + polyline.translate),
-                        1,
-                    ),
-                })
-            })
-            .unwrap_or_else(||
-                // Polyline is less than 2 vertices long. Return a dummy iterator that will short
-                // circuit due to `stop: true`
-                Points {
-                    vertices: &[],
-                    translate: Point::zero(),
-                    segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
-                })
+        Points {
+            vertices: polyline.vertices,
+            translate: polyline.translate,
+            segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
+        }
     }
 }
 
