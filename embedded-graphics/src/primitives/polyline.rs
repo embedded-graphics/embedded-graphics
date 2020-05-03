@@ -16,13 +16,13 @@ use crate::{
 /// Polyline primitive
 ///
 /// Creates an unfilled chained line shape. Styles with a width greater than 1px are not currently
-/// supported.
+/// supported and will always render as a 1px wide line.
 ///
 /// # Examples
 ///
 /// ## Draw a "heartbeat" shaped polyline
 ///
-/// This example draws a stylized cardiogram in
+/// This example draws a stylized cardiogram in a 1px green stroke.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -54,7 +54,8 @@ use crate::{
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Polyline<'a> {
-    translate: Point,
+    /// An offset to apply to the polyline as a whole
+    pub translate: Point,
 
     /// All vertices in the line
     pub vertices: &'a [Point],
