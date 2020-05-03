@@ -76,7 +76,7 @@ impl<'a> Polyline<'a> {
 }
 
 impl<'a> Primitive for Polyline<'a> {
-    type PointsIter = PolylineIterator<'a>;
+    type PointsIter = Points<'a>;
 
     fn points(&self) -> Self::PointsIter {
         self.into_iter()
@@ -159,14 +159,14 @@ impl<'a> Transform for Polyline<'a> {
 
 /// An iterator over all pixel positions on the polyline
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct PolylineIterator<'a> {
+pub struct Points<'a> {
     stop: bool,
     vertices: &'a [Point],
     translate: Point,
     segment_iter: ThickLineIterator,
 }
 
-impl<'a> Iterator for PolylineIterator<'a> {
+impl<'a> Iterator for Points<'a> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -197,7 +197,7 @@ impl<'a> Iterator for PolylineIterator<'a> {
 
 impl<'a> IntoIterator for Polyline<'a> {
     type Item = Point;
-    type IntoIter = PolylineIterator<'a>;
+    type IntoIter = Points<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.vertices
@@ -250,7 +250,7 @@ where
 {
     style: PrimitiveStyle<C>,
 
-    line_iter: PolylineIterator<'a>,
+    line_iter: Points<'a>,
 }
 
 impl<'a, C: PixelColor> Iterator for StyledPolylineIterator<'a, C> {
