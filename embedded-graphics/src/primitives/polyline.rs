@@ -168,11 +168,26 @@ impl<'a> Points<'a> {
     where
         'a: 'b,
     {
-        Points {
-            vertices: polyline.vertices,
-            translate: polyline.translate,
-            segment_iter: Line::new(Point::zero(), Point::zero()).points(),
-        }
+        polyline
+            .vertices
+            .split_first()
+            .and_then(|(start, rest)| {
+                // Polyline is 2 or more vertices long, return an iterator for it
+                rest.get(0).map(|end| Points {
+                    vertices: rest,
+                    translate: polyline.translate,
+                    segment_iter: Line::new(*start + polyline.translate, *end + polyline.translate)
+                        .points(),
+                })
+            })
+            .unwrap_or_else(||
+                // Polyline is less than 2 vertices long. Return a dummy iterator that will short
+                // circuit due to `stop: true`
+                Points {
+                    vertices: &[],
+                    translate: Point::zero(),
+                    segment_iter: Line::new(Point::zero(), Point::zero()).points()
+                })
     }
 }
 
@@ -180,10 +195,6 @@ impl<'a> Iterator for Points<'a> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.vertices.len() < 2 {
-            return None;
-        }
-
         if let Some(p) = self.segment_iter.next() {
             Some(p)
         } else {
