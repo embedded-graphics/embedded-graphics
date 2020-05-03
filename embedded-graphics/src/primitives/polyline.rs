@@ -60,14 +60,8 @@ pub struct Polyline<'a> {
 impl<'a> Polyline<'a> {
     /// Create a new polyline from a list of vertices
     ///
-    /// # Panics
-    ///
-    /// This method will panic if the number of vertices is less than 2
+    /// If fewer than two vertices are provided, the line will not render anything when drawn.
     pub fn new(vertices: &'a [Point]) -> Self {
-        if vertices.len() < 2 {
-            panic!("Polyline must contain at least two vertices");
-        }
-
         Self {
             vertices,
             translate: Point::zero(),
@@ -336,7 +330,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn one_point() {
         let _polyline = Polyline::new(&[Point::zero()]);
     }
