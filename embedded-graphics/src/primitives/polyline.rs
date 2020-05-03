@@ -5,7 +5,10 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::{line::Line, thick_line_iterator::ThickLineIterator, Primitive, Rectangle},
+    primitives::{
+        line::{self, Line},
+        Primitive, Rectangle,
+    },
     style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
@@ -156,7 +159,7 @@ impl<'a> Transform for Polyline<'a> {
 pub struct Points<'a> {
     vertices: &'a [Point],
     translate: Point,
-    segment_iter: ThickLineIterator,
+    segment_iter: line::Points,
 }
 
 impl<'a> Points<'a> {
@@ -167,7 +170,7 @@ impl<'a> Points<'a> {
         Points {
             vertices: polyline.vertices,
             translate: polyline.translate,
-            segment_iter: ThickLineIterator::new(&Line::new(Point::zero(), Point::zero()), 1),
+            segment_iter: Line::new(Point::zero(), Point::zero()).points(),
         }
     }
 }
@@ -188,10 +191,7 @@ impl<'a> Iterator for Points<'a> {
 
             self.vertices = rest;
 
-            self.segment_iter = ThickLineIterator::new(
-                &Line::new(*start + self.translate, *end + self.translate),
-                1,
-            );
+            self.segment_iter = Line::new(*start + self.translate, *end + self.translate).points();
 
             // Skip first point of next line, otherwise we overlap with the previous line
             self.nth(1)
