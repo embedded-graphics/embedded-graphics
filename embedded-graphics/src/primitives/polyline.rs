@@ -257,7 +257,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{geometry::Size, pixelcolor::Rgb565, prelude::*};
+    use crate::{
+        mock_display::MockDisplay,
+        pixelcolor::{BinaryColor, Rgb565},
+        prelude::*,
+    };
 
     // A "heartbeat" shaped polyline
     const HEARTBEAT: [Point; 10] = [
@@ -271,6 +275,14 @@ mod tests {
         Point::new(110, 84),
         Point::new(120, 64),
         Point::new(300, 64),
+    ];
+
+    // Smaller test pattern for mock display
+    const SMALL: [Point; 4] = [
+        Point::new(2, 5),
+        Point::new(5, 2),
+        Point::new(10, 5),
+        Point::new(15, 2),
     ];
 
     #[test]
@@ -330,5 +342,50 @@ mod tests {
         let thin = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1));
 
         assert!(thick.into_iter().eq(thin.into_iter()));
+    }
+
+    #[test]
+    fn mock_display() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Polyline::new(&SMALL)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "                ",
+                "                ",
+                "     #         #",
+                "    # ##     ## ",
+                "   #    ## ##   ",
+                "  #       #     ",
+            ])
+        );
+    }
+
+    // Ensure that consecutive points are always different
+    #[test]
+    fn no_duplicate_points() {
+        let expected: [Point; 14] = [
+            Point::new(2, 5),
+            Point::new(3, 4),
+            Point::new(4, 3),
+            Point::new(5, 2),
+            Point::new(6, 3),
+            Point::new(7, 3),
+            Point::new(8, 4),
+            Point::new(9, 4),
+            Point::new(10, 5),
+            Point::new(11, 4),
+            Point::new(12, 4),
+            Point::new(13, 3),
+            Point::new(14, 3),
+            Point::new(15, 2),
+        ];
+
+        assert!(Polyline::new(&SMALL).points().eq(expected.iter().copied()))
     }
 }
