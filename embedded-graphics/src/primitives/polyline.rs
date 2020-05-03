@@ -194,9 +194,7 @@ impl<'a> Iterator for Points<'a> {
             );
 
             // Skip first point of next line, otherwise we overlap with the previous line
-            Self::next(self);
-
-            Self::next(self)
+            self.nth(1)
         }
     }
 }
