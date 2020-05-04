@@ -118,11 +118,7 @@ where
     type IntoIter = StyledLineIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        StyledLineIterator {
-            style: self.style,
-
-            line_iter: ThickLineIterator::new(&self.primitive, self.style.stroke_width_i32()),
-        }
+        StyledLineIterator::new(self)
     }
 }
 
@@ -154,9 +150,22 @@ pub struct StyledLineIterator<C>
 where
     C: PixelColor,
 {
-    style: PrimitiveStyle<C>,
-
+    stroke_color: Option<C>,
     line_iter: ThickLineIterator,
+}
+
+impl<C: PixelColor> StyledLineIterator<C> {
+    fn new(styled: &Styled<Line, PrimitiveStyle<C>>) -> Self {
+        let Styled { primitive, style } = styled;
+
+        // Note: stroke color will be None if stroke width is 0
+        let stroke_color = style.effective_stroke_color();
+
+        StyledLineIterator {
+            stroke_color,
+            line_iter: ThickLineIterator::new(&primitive, style.stroke_width_i32()),
+        }
+    }
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -164,13 +173,8 @@ impl<C: PixelColor> Iterator for StyledLineIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Break if stroke width is zero
-        if self.style.stroke_width == 0 {
-            return None;
-        }
-
         // Return none if stroke color is none
-        let stroke_color = self.style.stroke_color?;
+        let stroke_color = self.stroke_color?;
 
         self.line_iter
             .next()

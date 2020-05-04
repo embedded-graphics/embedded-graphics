@@ -347,6 +347,40 @@
 //! </div>
 //! </div>
 //!
+//! ## Draw a polyline
+//!
+//! This example draws a polyline with 1px cyan stroke.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a polyline example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACb0lEQVR4nO3RgU7jQAwA0eP/P5qjrE7NEYiyydpj03kSCNF01/G8/RHKADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAmw/w/v7x6z9v84fon/ndGWCpFbvbJ9kyz6EV2zHADfHbMc+h+Pc3wCH6/V8+D/2GBvj4qesF8tR+BwOU9ivy9JjyewYorUmeKnOsZ4DSyuTJu6kWA5S2zxOWJOrc3gxQyIhhAIwBMMGrH2JP780AMAPADIBJWf2QcUc/BoAZAGYATOLqh7ybejAAzAAwA2DSVz9k31eXAWAGgBkAA61+YG6txQAwA8AMgEFXP5B38wwAMwDMAJgCqx/4CRgGgBkA9kIBxqtGO7/KMc/554PFzzFeONr5hY55zj8fLGuOOq9dZ5JPWXPUee06k3zKnYN9efb2H+ROw66Avf0HxDTUIqh7DxHTUIug7j3ETZO5jsy7JnEzZS4l865J9Ew5q8m55RJ6ppzV5NxySY2Z4hYUd/IiNSaLW1PcyYtUmixiWRFnLlVpsohlRZy5VL3JVq1s1TnB6s23anGrzglWdb7767t/Qoqq891f3/0TUtSe79oSr30LUnvKa6u89i1IhylnFzr7PKrDlLMLnX0e1WPKhzNrPfNMMX1mPbPcM88U02nWh+MVH39aUqdZH45XfPxpSZ1mfdovev+fJvpN/LBf9/4/TfSb+Gm79O3frfSb+Gm79O3frfSb+Ku2qx+6zv1kAN1hAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmANhfnlfkgaL6FZsAAAAASUVORK5CYII=" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Polyline,
+//!     style::PrimitiveStyle,
+//! };
+//!
+//! let points: [Point; 5] = [
+//!     Point::new(8, 8),
+//!     Point::new(48, 16),
+//!     Point::new(32, 48),
+//!     Point::new(16, 32),
+//!     Point::new(32, 32),
+//! ];
+//!
+//! Polyline::new(&points)
+//!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
 //! ## Draw some text
 //!
 //! This example draws the text "Hello,\nRust!" with the [`Font6x8`] font in green.
