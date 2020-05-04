@@ -116,6 +116,14 @@ where
     pub(crate) fn is_transparent(&self) -> bool {
         (self.stroke_color.is_none() || self.stroke_width == 0) && self.fill_color.is_none()
     }
+
+    /// Returns the effective stroke color of the style.
+    ///
+    /// If the stroke width is 0, this method will return `None` regardless of the value in
+    /// `stroke_color`.
+    pub(crate) fn effective_stroke_color(&self) -> Option<C> {
+        self.stroke_color.filter(|_| self.stroke_width > 0)
+    }
 }
 
 impl<C> Default for PrimitiveStyle<C>
@@ -390,6 +398,19 @@ mod tests {
                 .fill_color(BinaryColor::On)
                 .build(),
             PrimitiveStyle::with_fill(BinaryColor::On)
+        );
+    }
+
+    #[test]
+    fn effective_stroke_color() {
+        assert_eq!(
+            PrimitiveStyle::with_stroke(BinaryColor::On, 1).effective_stroke_color(),
+            Some(BinaryColor::On)
+        );
+
+        assert_eq!(
+            PrimitiveStyle::with_stroke(BinaryColor::On, 0).effective_stroke_color(),
+            None
         );
     }
 }
