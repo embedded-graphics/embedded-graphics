@@ -443,4 +443,14 @@ mod tests {
             .into_iter()
             .eq(core::iter::empty()));
     }
+
+    #[test]
+    #[ignore]
+    fn equal_points() {
+        let points: [Point; 3] = [Point::new(2, 5), Point::new(2, 5), Point::new(2, 5)];
+
+        assert!(Polyline::new(&points)
+            .points()
+            .eq(core::iter::once(Point::new(2, 5))));
+    }
 }
