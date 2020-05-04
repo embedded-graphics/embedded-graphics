@@ -223,17 +223,8 @@ where
     type IntoIter = StyledPolylineIterator<'a, C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        // If the stroke width is zero, short circuit the iterator by setting `stroke_color` to
-        // none.
-        let stroke_color = if self.style.stroke_width == 0 {
-            None
-        } else {
-            self.style.stroke_color
-        };
-
         StyledPolylineIterator {
-            stroke_width: self.style.stroke_width,
-            stroke_color,
+            stroke_color: self.style.effective_stroke_color(),
             line_iter: self.primitive.points(),
         }
     }
@@ -245,7 +236,6 @@ pub struct StyledPolylineIterator<'a, C>
 where
     C: PixelColor,
 {
-    stroke_width: u32,
     stroke_color: Option<C>,
     line_iter: Points<'a>,
 }
@@ -279,6 +269,7 @@ mod tests {
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565},
         prelude::*,
+        style::PrimitiveStyleBuilder,
     };
 
     // A "heartbeat" shaped polyline
@@ -422,5 +413,22 @@ mod tests {
         ];
 
         assert!(Polyline::new(&SMALL).points().eq(expected.iter().copied()))
+    }
+
+    #[test]
+    fn empty_styled_iterators() {
+        let points: [Point; 3] = [Point::new(2, 5), Point::new(3, 4), Point::new(4, 3)];
+
+        // No stroke width = no pixels
+        assert!(Polyline::new(&points)
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 0))
+            .into_iter()
+            .eq(core::iter::empty()));
+
+        // No stroke color = no pixels
+        assert!(Polyline::new(&points)
+            .into_styled::<Rgb565>(PrimitiveStyleBuilder::new().stroke_width(1).build())
+            .into_iter()
+            .eq(core::iter::empty()));
     }
 }
