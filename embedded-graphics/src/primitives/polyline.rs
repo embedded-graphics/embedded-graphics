@@ -15,8 +15,8 @@ use crate::{
 
 /// Polyline primitive
 ///
-/// Creates an unfilled chained line shape. Styles with a width greater than 1px are not currently
-/// supported and will always render as a 1px wide line.
+/// Creates an unfilled chained line shape. Styles with a stroke width greater than 1px are not
+/// currently supported and will always render as a 1px wide line.
 ///
 /// # Examples
 ///
