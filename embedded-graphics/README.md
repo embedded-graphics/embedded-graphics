@@ -255,8 +255,16 @@ rustup update
 # Ensure rustfmt is installed
 rustup component add rustfmt
 
-# Install SDL2 for simulator and PIP to install linkchecker
+# Install SDL2 for simulator and linkchecker for build script
+
+# Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
 sudo apt install libsdl2-dev linkchecker
+
+# OR
+
+# Python 3 systems (Ubuntu 20.04+, Linux Mint 20, etc)
+sudo apt install python3-pip
+sudo pip3 install git+https://github.com/linkchecker/linkchecker.git
 ```
 
 ## Attribution
