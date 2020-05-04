@@ -3,7 +3,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{
         line::{self, Line},
@@ -83,23 +83,27 @@ impl<'a> Primitive for Polyline<'a> {
 
 impl<'a> Dimensions for Polyline<'a> {
     fn bounding_box(&self) -> Rectangle {
-        let top_left = self
-            .vertices
-            .iter()
-            .map(|v| *v + self.translate)
-            .fold(Point::new(core::i32::MAX, core::i32::MAX), |accum, v| {
-                Point::new(accum.x.min(v.x), accum.y.min(v.y))
-            });
+        match self.vertices {
+            [] => Rectangle::new(Point::zero(), Size::zero()),
+            [v] => Rectangle::new(*v, Size::zero()),
+            vertices => {
+                let top_left = vertices
+                    .iter()
+                    .map(|v| *v + self.translate)
+                    .fold(Point::new(core::i32::MAX, core::i32::MAX), |accum, v| {
+                        Point::new(accum.x.min(v.x), accum.y.min(v.y))
+                    });
 
-        let bottom_right = self
-            .vertices
-            .iter()
-            .map(|v| *v + self.translate)
-            .fold(Point::new(core::i32::MIN, core::i32::MIN), |accum, v| {
-                Point::new(accum.x.max(v.x), accum.y.max(v.y))
-            });
+                let bottom_right = vertices
+                    .iter()
+                    .map(|v| *v + self.translate)
+                    .fold(Point::new(core::i32::MIN, core::i32::MIN), |accum, v| {
+                        Point::new(accum.x.max(v.x), accum.y.max(v.y))
+                    });
 
-        Rectangle::with_corners(top_left, bottom_right)
+                Rectangle::with_corners(top_left, bottom_right)
+            }
+        }
     }
 }
 
@@ -182,7 +186,7 @@ impl<'a> Points<'a> {
             })
             .unwrap_or_else(||
                 // Polyline is less than 2 vertices long. Return a dummy iterator that will short
-                // circuit due to `stop: true`
+                // circuit 
                 Points {
                     vertices: &[],
                     translate: Point::zero(),
@@ -219,9 +223,17 @@ where
     type IntoIter = StyledPolylineIterator<'a, C>;
 
     fn into_iter(self) -> Self::IntoIter {
+        // If the stroke width is zero, short circuit the iterator by setting `stroke_color` to
+        // none.
+        let stroke_color = if self.style.stroke_width == 0 {
+            None
+        } else {
+            self.style.stroke_color
+        };
+
         StyledPolylineIterator {
             stroke_width: self.style.stroke_width,
-            stroke_color: self.style.stroke_color,
+            stroke_color,
             line_iter: self.primitive.points(),
         }
     }
@@ -242,11 +254,6 @@ impl<'a, C: PixelColor> Iterator for StyledPolylineIterator<'a, C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Break if stroke width is zero
-        if self.stroke_width == 0 {
-            return None;
-        }
-
         // Return none if stroke color is none
         let stroke_color = self.stroke_color?;
 
@@ -297,6 +304,19 @@ mod tests {
     ];
 
     #[test]
+    fn special_case_dimensions() {
+        assert_eq!(
+            Polyline::new(&[]).bounding_box(),
+            Rectangle::new(Point::zero(), Size::zero())
+        );
+
+        assert_eq!(
+            Polyline::new(&[Point::new(15, 17)]).bounding_box(),
+            Rectangle::new(Point::new(15, 17), Size::zero())
+        );
+    }
+
+    #[test]
     fn positive_dimensions() {
         let polyline = Polyline::new(&HEARTBEAT);
 
@@ -340,7 +360,11 @@ mod tests {
 
     #[test]
     fn one_point() {
-        let _polyline = Polyline::new(&[Point::zero()]);
+        let points = &[Point::zero()];
+
+        let polyline = Polyline::new(points);
+
+        assert!(polyline.points().eq(core::iter::empty()));
     }
 
     // Ensure that polylines only draw 1px wide due to lack of support for line joiners. This test
