@@ -223,10 +223,7 @@ where
     type IntoIter = StyledPolylineIterator<'a, C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        StyledPolylineIterator {
-            stroke_color: self.style.effective_stroke_color(),
-            line_iter: self.primitive.points(),
-        }
+        StyledPolylineIterator::new(self)
     }
 }
 
@@ -240,7 +237,22 @@ where
     line_iter: Points<'a>,
 }
 
-impl<'a, C: PixelColor> Iterator for StyledPolylineIterator<'a, C> {
+impl<'a, C> StyledPolylineIterator<'a, C>
+where
+    C: PixelColor,
+{
+    fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
+        StyledPolylineIterator {
+            stroke_color: styled.style.effective_stroke_color(),
+            line_iter: styled.primitive.points(),
+        }
+    }
+}
+
+impl<'a, C> Iterator for StyledPolylineIterator<'a, C>
+where
+    C: PixelColor,
+{
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
