@@ -151,7 +151,6 @@ impl Transform for Triangle {
             p1: self.p1 + by,
             p2: self.p2 + by,
             p3: self.p3 + by,
-            ..*self
         }
     }
 

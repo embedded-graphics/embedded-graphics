@@ -63,22 +63,20 @@
 //!     0b0100_1111,
 //! ];
 //!
-//! fn main() {
-//!     // Create new image with RGBI colors.
-//!     let image: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
+//! // Create new image with RGBI colors.
+//! let image: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
 //!
-//!     // In a real application the image could now be drawn to a display:
-//!     // display.draw(&image);
+//! // In a real application the image could now be drawn to a display:
+//! // display.draw(&image);
 //! #
-//! #   // Convert image to iterator of colors to make testing easier.
-//! #   let mut iter = image.into_iter().map(|Pixel(_, color)| color);
+//! # // Convert image to iterator of colors to make testing easier.
+//! # let mut iter = image.into_iter().map(|Pixel(_, color)| color);
 //! #
-//! #   assert_eq!(iter.next(), Some(RGBI::new(false, false, true, false)));
-//! #   assert_eq!(iter.next(), Some(RGBI::new(false, true, false, false)));
-//! #   assert_eq!(iter.next(), Some(RGBI::new(true, false, false, false)));
-//! #   assert_eq!(iter.next(), Some(RGBI::new(true, true, true, true)));
-//! #   assert_eq!(iter.next(), None);
-//! }
+//! # assert_eq!(iter.next(), Some(RGBI::new(false, false, true, false)));
+//! # assert_eq!(iter.next(), Some(RGBI::new(false, true, false, false)));
+//! # assert_eq!(iter.next(), Some(RGBI::new(true, false, false, false)));
+//! # assert_eq!(iter.next(), Some(RGBI::new(true, true, true, true)));
+//! # assert_eq!(iter.next(), None);
 //! ```
 //!
 //! [`PixelColor`]: ../trait.PixelColor.html

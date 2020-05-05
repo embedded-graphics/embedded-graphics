@@ -255,9 +255,7 @@ where
     C: PixelColor,
 {
     fn from(style: &PrimitiveStyle<C>) -> Self {
-        Self {
-            style: style.clone(),
-        }
+        Self { style: *style }
     }
 }
 

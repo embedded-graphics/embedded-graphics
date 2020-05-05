@@ -87,7 +87,6 @@ impl Transform for Line {
         Self {
             start: self.start + by,
             end: self.end + by,
-            ..*self
         }
     }
 
