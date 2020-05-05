@@ -117,7 +117,7 @@ impl ContainsPoint for Circle {
 
         let threshold = diameter_to_threshold(self.diameter);
 
-        return distance < threshold;
+        distance < threshold
     }
 }
 

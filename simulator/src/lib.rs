@@ -43,38 +43,36 @@
 //! use std::thread;
 //! use std::time::Duration;
 //!
-//! fn main() {
-//!     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
-//!     let output_settings = OutputSettingsBuilder::new()
-//!         .theme(BinaryColorTheme::OledBlue)
-//!         .build();
-//!     let mut window = Window::new("Example", &output_settings);
+//! let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
+//! let output_settings = OutputSettingsBuilder::new()
+//!     .theme(BinaryColorTheme::OledBlue)
+//!     .build();
+//! let mut window = Window::new("Example", &output_settings);
 //!
-//!     egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8, text_color = BinaryColor::On)).draw(&mut display);
+//! egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8, text_color = BinaryColor::On)).draw(&mut display);
 //!
-//!     egcircle!(top_left = (65, 1), diameter = 63, style = primitive_style!(stroke_color = BinaryColor::On)).draw(&mut display);
+//! egcircle!(top_left = (65, 1), diameter = 63, style = primitive_style!(stroke_color = BinaryColor::On)).draw(&mut display);
 //!
-//!     egline!(start = (32, 32), end = (1, 32), style = primitive_style!(stroke_color = BinaryColor::On))
-//!         .translate(Point::new(64, 0))
-//!         .draw(&mut display);
-//!     egline!(start = (32, 32), end = (40, 40), style = primitive_style!(stroke_color = BinaryColor::On))
-//!         .translate(Point::new(64, 0))
-//!         .draw(&mut display);
+//! egline!(start = (32, 32), end = (1, 32), style = primitive_style!(stroke_color = BinaryColor::On))
+//!     .translate(Point::new(64, 0))
+//!     .draw(&mut display);
+//! egline!(start = (32, 32), end = (40, 40), style = primitive_style!(stroke_color = BinaryColor::On))
+//!     .translate(Point::new(64, 0))
+//!     .draw(&mut display);
 //!
-//!     'running: loop {
-//!         window.update(&display);
+//! 'running: loop {
+//!     window.update(&display);
 //!
-//!         for event in window.events() {
-//!             match event {
-//!                 SimulatorEvent::MouseButtonUp { point, .. } => {
-//!                     println!("Click event at ({}, {})", point.x, point.y);
-//!                 }
-//!                 SimulatorEvent::Quit => break 'running,
-//!                 _ => {}
+//!     for event in window.events() {
+//!         match event {
+//!             SimulatorEvent::MouseButtonUp { point, .. } => {
+//!                 println!("Click event at ({}, {})", point.x, point.y);
 //!             }
-//!
-//!             thread::sleep(Duration::from_millis(200));
+//!             SimulatorEvent::Quit => break 'running,
+//!             _ => {}
 //!         }
+//!
+//!         thread::sleep(Duration::from_millis(200));
 //!     }
 //! }
 //! ```

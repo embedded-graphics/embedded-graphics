@@ -65,7 +65,7 @@ impl<'a> Polyline<'a> {
     /// Create a new polyline from a list of vertices
     ///
     /// If fewer than two vertices are provided, the line will not render anything when drawn.
-    pub fn new(vertices: &'a [Point]) -> Self {
+    pub const fn new(vertices: &'a [Point]) -> Self {
         Self {
             vertices,
             translate: Point::zero(),

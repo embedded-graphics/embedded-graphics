@@ -214,7 +214,7 @@ impl Points {
         }
     }
 
-    fn empty() -> Self {
+    const fn empty() -> Self {
         Self {
             left: 0,
             bottom_right: Point::new(-1, -1),
