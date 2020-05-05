@@ -1,5 +1,4 @@
-use crate::geometry::Point;
-use crate::primitives::Line;
+use crate::{geometry::Point, primitives::Line};
 
 /// Which side of the center line to draw on
 ///

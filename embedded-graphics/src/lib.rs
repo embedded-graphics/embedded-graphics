@@ -199,10 +199,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//! };
+//! use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 //!
 //! Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
@@ -222,10 +219,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//!     primitives::Line,
-//!     style::PrimitiveStyle,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyle,
 //! };
 //!
 //! Line::new(Point::new(16, 24), Point::new(51, 34))
@@ -248,10 +242,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//!     primitives::Rectangle,
-//!     style::PrimitiveStyleBuilder,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
 //! };
 //!
 //! Rectangle::new(Point::new(16, 24), Size::new(32, 16))
@@ -280,10 +271,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//!     primitives::Circle,
-//!     style::PrimitiveStyle,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
 //! };
 //!
 //! Circle::new(Point::new(16, 16), 40)
@@ -306,10 +294,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//!     primitives::Ellipse,
-//!     style::PrimitiveStyle,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Ellipse, style::PrimitiveStyle,
 //! };
 //!
 //! Ellipse::new(Point::new(8, 16), Size::new(48, 32))
@@ -332,10 +317,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//!     primitives::Triangle,
-//!     style::PrimitiveStyle,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
 //! };
 //!
 //! Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
@@ -358,10 +340,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//!     primitives::Polyline,
-//!     style::PrimitiveStyle,
+//!     pixelcolor::Rgb888, prelude::*, primitives::Polyline, style::PrimitiveStyle,
 //! };
 //!
 //! let points: [Point; 5] = [
@@ -392,10 +371,7 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     fonts::{
-//!         Font6x8,
-//!         Text,
-//!     },
+//!     fonts::{Font6x8, Text},
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
 //!     style::TextStyle,
@@ -420,11 +396,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{
-//!     image::Image,
-//!     pixelcolor::Rgb888,
-//!     prelude::*,
-//! };
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 //! use tinytga::Tga;
 //!
 //! let tga = Tga::from_slice(include_bytes!(concat!(

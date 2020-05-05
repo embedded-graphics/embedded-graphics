@@ -72,7 +72,7 @@ where
     /// # Examples
     ///
     /// ```rust
-    /// use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+    /// use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
     /// use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
     ///
     /// let output_settings = OutputSettingsBuilder::new().scale(2).build();

@@ -2,14 +2,11 @@
 
 use crate::{
     draw_target::DrawTarget,
-    drawable::Drawable,
-    drawable::Pixel,
-    geometry::Dimensions,
-    geometry::Point,
+    drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{Primitive, Rectangle, ThickLineIterator},
-    style::PrimitiveStyle,
-    style::Styled,
+    style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
 

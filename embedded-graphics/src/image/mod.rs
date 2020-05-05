@@ -22,8 +22,10 @@
 //!
 //! let mut display: Display<Rgb565> = Display::default();
 //!
-//! let tga =
-//!     Tga::from_slice(include_bytes!("../../../simulator/examples/assets/rust-pride.tga")).unwrap();
+//! let tga = Tga::from_slice(include_bytes!(
+//!     "../../../simulator/examples/assets/rust-pride.tga"
+//! ))
+//! .unwrap();
 //!
 //! let image: Image<Tga, Rgb565> = Image::new(&tga, Point::zero());
 //!
@@ -50,8 +52,7 @@ use crate::{
     primitives::Rectangle,
     transform::Transform,
 };
-use core::fmt::Debug;
-use core::{fmt, marker::PhantomData};
+use core::{fmt, fmt::Debug, marker::PhantomData};
 
 /// Conversion into an iterator over the pixels of the image.
 pub trait IntoPixelIter<C>
