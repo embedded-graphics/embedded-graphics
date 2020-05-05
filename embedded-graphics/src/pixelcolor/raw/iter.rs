@@ -22,7 +22,7 @@ pub struct RawDataIter<'a, R, BO> {
 
 impl<'a, R, BO> RawDataIter<'a, R, BO> {
     /// Creates a new raw data iterator.
-    pub fn new(data: &'a [u8]) -> Self {
+    pub const fn new(data: &'a [u8]) -> Self {
         Self {
             data,
             byte_position: 0,

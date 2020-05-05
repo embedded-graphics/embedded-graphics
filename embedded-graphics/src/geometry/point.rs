@@ -92,7 +92,7 @@ impl Point {
     ///
     /// assert_eq!(point.abs(), Point::new(5, 10));
     /// ```
-    pub fn abs(self) -> Self {
+    pub const fn abs(self) -> Self {
         Point::new(self.x.abs(), self.y.abs())
     }
 }

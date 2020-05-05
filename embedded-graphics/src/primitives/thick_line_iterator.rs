@@ -36,7 +36,7 @@ struct ParallelLineState {
 }
 
 impl ParallelLineState {
-    fn new(start_point: Point, initial_length: u32, initial_error: i32) -> Self {
+    const fn new(start_point: Point, initial_length: u32, initial_error: i32) -> Self {
         Self {
             current_point: start_point,
             current_length: initial_length,
@@ -78,7 +78,7 @@ struct SideState {
 }
 
 impl SideState {
-    fn new(parallel_start: Point) -> Self {
+    const fn new(parallel_start: Point) -> Self {
         Self {
             parallel_start,
             error: 0,
