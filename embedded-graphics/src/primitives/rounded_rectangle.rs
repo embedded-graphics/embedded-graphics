@@ -4,7 +4,11 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{ContainsPoint, Primitive, Rectangle},
+    primitives::{
+        ellipse::{self, Ellipse, StyledEllipseIterator},
+        rectangle::{self, Rectangle, StyledRectangleIterator},
+        ContainsPoint, Primitive, Quadrant,
+    },
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -116,30 +120,50 @@ where
 /// Iterator over all points inside the rectangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
-    left: i32,
-    bottom_right: Point,
-    current_point: Point,
+    rect: rectangle::Points,
+    top_left: ellipse::Points,
+    top_right: ellipse::Points,
+    bottom_right: ellipse::Points,
+    bottom_left: ellipse::Points,
 }
 
 impl Points {
     fn new(shape: &RoundedRectangle) -> Self {
-        // This doesn't use rectangle.bottom_right() to intentionally set bottom_right
-        // to an coordinate outside the rectangle if the width or height is zero, which
-        // stops the iterator.
-        let bottom_right = shape.rectangle.top_left + shape.rectangle.size - Point::new(1, 1);
+        let top_left = Ellipse::new(shape.rectangle.top_left, shape.corner_radii[0]);
+
+        let top_right = Ellipse::new(
+            shape.rectangle.top_left + shape.rectangle.size.x_axis()
+                - shape.corner_radii[1].x_axis(),
+            shape.corner_radii[1],
+        );
+
+        let bottom_right = Ellipse::new(
+            shape.rectangle.bottom_right().unwrap() - shape.corner_radii[2],
+            shape.corner_radii[2],
+        );
+
+        let bottom_left = Ellipse::new(
+            shape.rectangle.top_left + shape.rectangle.size.y_axis()
+                - shape.corner_radii[3].y_axis(),
+            shape.corner_radii[3],
+        );
 
         Self {
-            left: shape.rectangle.top_left.x,
-            bottom_right,
-            current_point: shape.rectangle.top_left,
+            rect: shape.rectangle.points(),
+            top_left: ellipse::Points::with_quadrant(&top_left, Quadrant::TopLeft),
+            top_right: ellipse::Points::with_quadrant(&top_right, Quadrant::TopRight),
+            bottom_right: ellipse::Points::with_quadrant(&bottom_right, Quadrant::BottomRight),
+            bottom_left: ellipse::Points::with_quadrant(&bottom_left, Quadrant::BottomLeft),
         }
     }
 
-    const fn empty() -> Self {
+    fn empty() -> Self {
         Self {
-            left: 0,
-            bottom_right: Point::new(-1, -1),
-            current_point: Point::zero(),
+            rect: rectangle::Points::empty(),
+            top_left: ellipse::Points::empty(),
+            top_right: ellipse::Points::empty(),
+            bottom_right: ellipse::Points::empty(),
+            bottom_left: ellipse::Points::empty(),
         }
     }
 }
@@ -148,22 +172,12 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Finished, i.e. we're below the rect
-        if self.current_point.y > self.bottom_right.y {
-            return None;
-        }
-
-        let ret = self.current_point;
-
-        self.current_point.x += 1;
-
-        // Reached end of row? Jump down one line
-        if self.current_point.x > self.bottom_right.x {
-            self.current_point.x = self.left;
-            self.current_point.y += 1;
-        }
-
-        Some(ret)
+        self.rect
+            .next()
+            .or_else(|| self.top_left.next())
+            .or_else(|| self.top_right.next())
+            .or_else(|| self.bottom_right.next())
+            .or_else(|| self.bottom_left.next())
     }
 }
 
@@ -173,9 +187,17 @@ pub struct StyledRoundedRectangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    iter: Points,
-    stroke_color: Option<C>,
-    fill_color: Option<C>,
+    rect_iter: StyledRectangleIterator<C>,
+    top_left_corner: Ellipse,
+    top_right_corner: Ellipse,
+    bottom_right_corner: Ellipse,
+    bottom_left_corner: Ellipse,
+    top_left_iter: StyledEllipseIterator<C>,
+    top_right_iter: StyledEllipseIterator<C>,
+    bottom_right_iter: StyledEllipseIterator<C>,
+    bottom_left_iter: StyledEllipseIterator<C>,
+    corner_radii: [Size; 4],
+    top_left: Point,
 }
 
 impl<C> StyledRoundedRectangleIterator<C>
@@ -185,16 +207,52 @@ where
     fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
         let Styled { style, primitive } = styled;
 
-        let iter = if !style.is_transparent() {
-            Points::empty()
-        } else {
-            Points::empty()
-        };
+        // let iter = if !style.is_transparent() {
+        //     Points::empty()
+        // } else {
+        //     Points::empty()
+        // };
+
+        let top_left_corner = Ellipse::new(primitive.rectangle.top_left, primitive.corner_radii[0]);
+        let top_right_corner = Ellipse::new(
+            primitive.rectangle.top_left + primitive.rectangle.size.x_axis()
+                - primitive.corner_radii[1].x_axis(),
+            primitive.corner_radii[1],
+        );
+        let bottom_right_corner = Ellipse::new(
+            primitive.rectangle.bottom_right().unwrap() - primitive.corner_radii[2],
+            primitive.corner_radii[2],
+        );
+        let bottom_left_corner = Ellipse::new(
+            primitive.rectangle.top_left + primitive.rectangle.size.y_axis()
+                - primitive.corner_radii[3].y_axis(),
+            primitive.corner_radii[3],
+        );
 
         Self {
-            iter,
-            stroke_color: style.stroke_color,
-            fill_color: style.fill_color,
+            rect_iter: StyledRectangleIterator::new(&primitive.rectangle.into_styled(*style)),
+            top_left_iter: StyledEllipseIterator::with_quadrant(
+                &top_left_corner.into_styled(*style),
+                Quadrant::TopLeft,
+            ),
+            top_right_iter: StyledEllipseIterator::with_quadrant(
+                &top_right_corner.into_styled(*style),
+                Quadrant::TopRight,
+            ),
+            bottom_right_iter: StyledEllipseIterator::with_quadrant(
+                &bottom_right_corner.into_styled(*style),
+                Quadrant::BottomRight,
+            ),
+            bottom_left_iter: StyledEllipseIterator::with_quadrant(
+                &bottom_left_corner.into_styled(*style),
+                Quadrant::BottomLeft,
+            ),
+            top_left: primitive.rectangle.top_left,
+            corner_radii: primitive.corner_radii,
+            top_left_corner,
+            top_right_corner,
+            bottom_right_corner,
+            bottom_left_corner,
         }
     }
 }
@@ -206,19 +264,25 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // for point in &mut self.iter {
-        //     let color = if self.fill_area.contains(point) {
-        //         self.fill_color
-        //     } else {
-        //         self.stroke_color
-        //     };
+        let Self {
+            top_left_corner,
+            top_right_corner,
+            bottom_right_corner,
+            bottom_left_corner,
+            ..
+        } = self;
 
-        //     if let Some(color) = color {
-        //         return Some(Pixel(point, color));
-        //     }
-        // }
-
-        None
+        self.rect_iter
+            .find(|Pixel(pos, _)| {
+                !top_left_corner.bounding_box().contains(*pos)
+                    && !top_right_corner.bounding_box().contains(*pos)
+                    && !bottom_right_corner.bounding_box().contains(*pos)
+                    && !bottom_left_corner.bounding_box().contains(*pos)
+            })
+            .or_else(|| self.top_left_iter.next())
+            .or_else(|| self.top_right_iter.next())
+            .or_else(|| self.bottom_right_iter.next())
+            .or_else(|| self.bottom_left_iter.next())
     }
 }
 

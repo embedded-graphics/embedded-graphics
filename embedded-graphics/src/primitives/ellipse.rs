@@ -190,7 +190,7 @@ impl Points {
         }
     }
 
-    fn empty() -> Self {
+    pub(in crate::primitives) fn empty() -> Self {
         Self {
             iter: Rectangle::new(Point::zero(), Size::zero()).points(),
             center_2x: Point::zero(),
@@ -238,6 +238,32 @@ where
         let iter = if !styled.style.is_transparent() {
             let stroke_area = primitive.expand(style.outside_stroke_width());
             Points::new(&stroke_area)
+        } else {
+            Points::empty()
+        };
+
+        let fill_area = primitive.shrink(style.inside_stroke_width());
+        let (inner_size_sq, threshold) = compute_threshold(fill_area.size);
+
+        Self {
+            iter,
+            outer_color: styled.style.stroke_color,
+            inner_size_sq,
+            inner_color: styled.style.fill_color,
+            center: styled.primitive.center_2x(),
+            threshold,
+        }
+    }
+
+    pub(in crate::primitives) fn with_quadrant(
+        styled: &Styled<Ellipse, PrimitiveStyle<C>>,
+        quadrant: Quadrant,
+    ) -> Self {
+        let Styled { primitive, style } = styled;
+
+        let iter = if !styled.style.is_transparent() {
+            let stroke_area = primitive.expand(style.outside_stroke_width());
+            Points::with_quadrant(&stroke_area, quadrant)
         } else {
             Points::empty()
         };

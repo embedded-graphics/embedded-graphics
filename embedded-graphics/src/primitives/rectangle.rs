@@ -228,7 +228,7 @@ impl Points {
         }
     }
 
-    const fn empty() -> Self {
+    pub(in crate::primitives) const fn empty() -> Self {
         Self {
             left: 0,
             bottom_right: Point::new(-1, -1),
@@ -278,7 +278,7 @@ impl<C> StyledRectangleIterator<C>
 where
     C: PixelColor,
 {
-    fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
+    pub(in crate::primitives) fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
         let Styled { style, primitive } = styled;
 
         let iter = if !style.is_transparent() {
