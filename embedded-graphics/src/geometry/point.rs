@@ -78,6 +78,19 @@ impl Point {
         Point { x, y }
     }
 
+    /// Creates a point with X and Y values set to an equal value.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let point = Point::new_equal(11);
+    ///
+    /// assert_eq!(point, Point { x: 11, y: 11 });
+    /// ```
+    pub const fn new_equal(value: i32) -> Self {
+        Point { x: value, y: value }
+    }
+
     /// Creates a point with X and Y equal to zero.
     pub const fn zero() -> Self {
         Point { x: 0, y: 0 }
