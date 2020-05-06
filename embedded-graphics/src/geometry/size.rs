@@ -72,6 +72,22 @@ impl Size {
         Size { width, height }
     }
 
+    /// Creates a size with width and height set to an equal value.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::Size;
+    ///
+    /// let size = Size::new_equal(11);
+    ///
+    /// assert_eq!(size, Size { width: 11, height: 11 });
+    /// ```
+    pub const fn new_equal(value: u32) -> Self {
+        Size {
+            width: value,
+            height: value,
+        }
+    }
+
     /// Creates a size with width and height equal to zero.
     pub const fn zero() -> Self {
         Size {
