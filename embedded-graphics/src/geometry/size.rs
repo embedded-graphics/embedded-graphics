@@ -80,6 +80,54 @@ impl Size {
         }
     }
 
+    /// Returns a size with equal `width` value and `height` set to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ## Move a `Point` along the X axis.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::{Point, Size};
+    ///
+    /// let size = Size::new(20, 30);
+    ///
+    /// let point = Point::new(10, 15);
+    ///
+    /// let moved_x = point + size.x_axis();
+    ///
+    /// assert_eq!(moved_x, Point::new(30, 15));
+    /// ```
+    pub const fn x_axis(self) -> Self {
+        Self {
+            width: self.width,
+            height: 0,
+        }
+    }
+
+    /// Returns a size with equal `height` value and `width` set to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ## Move a `Point` along the Y axis.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::{Point, Size};
+    ///
+    /// let size = Size::new(20, 30);
+    ///
+    /// let point = Point::new(10, 15);
+    ///
+    /// let moved_y = point + size.y_axis();
+    ///
+    /// assert_eq!(moved_y, Point::new(10, 45));
+    /// ```
+    pub const fn y_axis(self) -> Self {
+        Self {
+            width: 0,
+            height: self.height,
+        }
+    }
+
     /// Saturating addition.
     ///
     /// Returns `u32::max_value()` for `width` and/or `height` instead of overflowing.
