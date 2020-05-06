@@ -83,6 +83,48 @@ impl Point {
         Point { x: 0, y: 0 }
     }
 
+    /// Returns a point with equal `x` value and `y` set to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ## Move a `Point` along the X axis.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let translate = Point::new(20, 30);
+    ///
+    /// let point = Point::new(10, 15);
+    ///
+    /// let moved_x = point + translate.x_axis();
+    ///
+    /// assert_eq!(moved_x, Point::new(30, 15));
+    /// ```
+    pub const fn x_axis(self) -> Self {
+        Self { x: self.x, y: 0 }
+    }
+
+    /// Returns a point with equal `y` value and `x` set to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ## Move a `Point` along the Y axis.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let translate = Point::new(20, 30);
+    ///
+    /// let point = Point::new(10, 15);
+    ///
+    /// let moved_y = point + translate.y_axis();
+    ///
+    /// assert_eq!(moved_y, Point::new(10, 45));
+    /// ```
+    pub const fn y_axis(self) -> Self {
+        Self { x: 0, y: self.y }
+    }
+
     /// Remove the sign from a coordinate
     ///
     /// ```

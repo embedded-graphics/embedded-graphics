@@ -222,17 +222,17 @@ impl ThickLineParameters {
             core::mem::swap(&mut dx, &mut dy);
 
             (
-                Point::new(0, direction.y),
-                Point::new(direction.x, 0),
-                Point::new(0, perp_direction.y),
-                Point::new(perp_direction.x, 0),
+                direction.y_axis(),
+                direction.x_axis(),
+                perp_direction.y_axis(),
+                perp_direction.x_axis(),
             )
         } else {
             (
-                Point::new(direction.x, 0),
-                Point::new(0, direction.y),
-                Point::new(perp_direction.x, 0),
-                Point::new(0, perp_direction.y),
+                direction.x_axis(),
+                direction.y_axis(),
+                perp_direction.x_axis(),
+                perp_direction.y_axis(),
             )
         };
 
