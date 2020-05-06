@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{circle, ContainsPoint, Primitive, Rectangle, Styled},
+    primitives::{circle, ContainsPoint, Primitive, Quadrant, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
     DrawTarget,
@@ -172,6 +172,18 @@ impl Points {
 
         Self {
             iter: ellipse.bounding_box().points(),
+            center_2x: ellipse.center_2x(),
+            size_sq,
+            threshold,
+        }
+    }
+
+    /// Iterate over the points in one quadrant of an ellipse
+    pub(in crate::primitives) fn with_quadrant(ellipse: &Ellipse, quadrant: Quadrant) -> Self {
+        let (size_sq, threshold) = compute_threshold(ellipse.size);
+
+        Self {
+            iter: ellipse.bounding_box().quadrant(quadrant).points(),
             center_2x: ellipse.center_2x(),
             size_sq,
             threshold,
@@ -436,6 +448,89 @@ mod tests {
             "   ##############   ",
             "      ########      ",
         ],);
+    }
+
+    #[test]
+    fn quadrants_even_size() {
+        let cases = [
+            (
+                Quadrant::TopLeft,
+                &[
+                    "      ####",
+                    "   #######",
+                    " #########",
+                    "##########",
+                    "##########",
+                    "          ",
+                    "          ",
+                    "          ",
+                    "          ",
+                    "          ",
+                    "          ",
+                ],
+            ),
+            (
+                Quadrant::TopRight,
+                &[
+                    "          ####      ",
+                    "          #######   ",
+                    "          ######### ",
+                    "          ##########",
+                    "          ##########",
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                ],
+            ),
+            (
+                Quadrant::BottomRight,
+                &[
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                    "                    ",
+                    "          ##########",
+                    "          ##########",
+                    "          ######### ",
+                    "          #######   ",
+                    "          ####      ",
+                    "                    ",
+                ],
+            ),
+            (
+                Quadrant::BottomLeft,
+                &[
+                    "          ",
+                    "          ",
+                    "          ",
+                    "          ",
+                    "          ",
+                    "##########",
+                    "##########",
+                    " #########",
+                    "   #######",
+                    "      ####",
+                    "          ",
+                ],
+            ),
+        ];
+
+        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(20, 10));
+
+        for (quadrant, expected) in cases.iter() {
+            let mut display = MockDisplay::new();
+
+            Points::with_quadrant(&ellipse, *quadrant)
+                .map(|p| Pixel(p, BinaryColor::On))
+                .draw(&mut display)
+                .unwrap();
+
+            assert_eq!(display, MockDisplay::from_pattern(*expected));
+        }
     }
 
     #[test]

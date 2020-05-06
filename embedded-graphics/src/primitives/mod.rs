@@ -44,6 +44,15 @@ pub trait ContainsPoint {
     fn contains(&self, point: Point) -> bool;
 }
 
+/// A quadrant around an origin
+#[derive(Copy, Clone, Debug)]
+enum Quadrant {
+    TopLeft = 0,
+    TopRight = 1,
+    BottomRight = 2,
+    BottomLeft = 3,
+}
+
 /// Create a [`Circle`](./primitives/circle/struct.Circle.html) with optional styling using a
 /// convenient macro.
 ///
