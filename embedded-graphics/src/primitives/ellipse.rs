@@ -88,12 +88,12 @@ impl Ellipse {
         self.top_left * 2 + radius
     }
 
-    fn expand(&self, offset: u32) -> Self {
+    pub(in crate::primitives) fn expand(&self, offset: u32) -> Self {
         let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
         Self::with_center(self.center(), size)
     }
 
-    fn shrink(&self, offset: u32) -> Self {
+    pub(in crate::primitives) fn shrink(&self, offset: u32) -> Self {
         let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
         Self::with_center(self.center(), size)
     }
@@ -557,6 +557,81 @@ mod tests {
 
             assert_eq!(display, MockDisplay::from_pattern(*expected));
         }
+    }
+
+    #[test]
+    fn quadrants_equal_even_ellipse() {
+        let mut display = MockDisplay::new();
+
+        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(20, 10));
+
+        Points::with_quadrant(&ellipse, Quadrant::TopLeft)
+            .chain(Points::with_quadrant(&ellipse, Quadrant::TopRight))
+            .chain(Points::with_quadrant(&ellipse, Quadrant::BottomRight))
+            .chain(Points::with_quadrant(&ellipse, Quadrant::BottomLeft))
+            .map(|p| Pixel(p, BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "      ########      ",
+                "   ##############   ",
+                " ################## ",
+                "####################",
+                "####################",
+                "####################",
+                "####################",
+                " ################## ",
+                "   ##############   ",
+                "      ########      ",
+            ])
+        );
+    }
+
+    #[test]
+    // TODO: Un-ignore
+    #[ignore]
+    fn quadrants_equal_odd_ellipse() {
+        let mut display = MockDisplay::new();
+
+        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(11, 21));
+
+        Points::with_quadrant(&ellipse, Quadrant::TopLeft)
+            .chain(Points::with_quadrant(&ellipse, Quadrant::TopRight))
+            .chain(Points::with_quadrant(&ellipse, Quadrant::BottomRight))
+            .chain(Points::with_quadrant(&ellipse, Quadrant::BottomLeft))
+            .map(|p| Pixel(p, BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "    ###    ",
+                "   #####   ",
+                "  #######  ",
+                " ######### ",
+                " ######### ",
+                " ######### ",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                " ######### ",
+                " ######### ",
+                " ######### ",
+                "  #######  ",
+                "   #####   ",
+                "    ###    ",
+            ])
+        );
     }
 
     #[test]

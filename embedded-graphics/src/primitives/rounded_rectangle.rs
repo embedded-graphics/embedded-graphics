@@ -188,10 +188,10 @@ where
     C: PixelColor,
 {
     rect_iter: StyledRectangleIterator<C>,
-    top_left_corner: Ellipse,
-    top_right_corner: Ellipse,
-    bottom_right_corner: Ellipse,
-    bottom_left_corner: Ellipse,
+    top_left_corner: Rectangle,
+    top_right_corner: Rectangle,
+    bottom_right_corner: Rectangle,
+    bottom_left_corner: Rectangle,
     top_left_iter: StyledEllipseIterator<C>,
     top_right_iter: StyledEllipseIterator<C>,
     bottom_right_iter: StyledEllipseIterator<C>,
@@ -213,42 +213,63 @@ where
         //     Points::empty()
         // };
 
-        let top_left_corner = Ellipse::new(primitive.rectangle.top_left, primitive.corner_radii[0]);
-        let top_right_corner = Ellipse::new(
-            primitive.rectangle.top_left + primitive.rectangle.size.x_axis()
-                - primitive.corner_radii[1].x_axis(),
+        let rect = primitive.rectangle;
+
+        let top_left_ellipse = Ellipse::new(rect.top_left, primitive.corner_radii[0]);
+        let top_right_ellipse = Ellipse::new(
+            rect.top_left + rect.size.x_axis() - primitive.corner_radii[1].x_axis(),
             primitive.corner_radii[1],
         );
-        let bottom_right_corner = Ellipse::new(
-            primitive.rectangle.bottom_right().unwrap() - primitive.corner_radii[2],
+        let bottom_right_ellipse = Ellipse::new(
+            rect.bottom_right().unwrap() + Size::new_equal(1) - primitive.corner_radii[2],
             primitive.corner_radii[2],
         );
-        let bottom_left_corner = Ellipse::new(
-            primitive.rectangle.top_left + primitive.rectangle.size.y_axis()
-                - primitive.corner_radii[3].y_axis(),
+        let bottom_left_ellipse = Ellipse::new(
+            rect.top_left + rect.size.y_axis() - primitive.corner_radii[3].y_axis(),
             primitive.corner_radii[3],
         );
 
+        let top_left_iter = StyledEllipseIterator::with_quadrant(
+            &top_left_ellipse.into_styled(*style),
+            Quadrant::TopLeft,
+        );
+        let top_right_iter = StyledEllipseIterator::with_quadrant(
+            &top_right_ellipse.into_styled(*style),
+            Quadrant::TopRight,
+        );
+        let bottom_right_iter = StyledEllipseIterator::with_quadrant(
+            &bottom_right_ellipse.into_styled(*style),
+            Quadrant::BottomRight,
+        );
+        let bottom_left_iter = StyledEllipseIterator::with_quadrant(
+            &bottom_left_ellipse.into_styled(*style),
+            Quadrant::BottomLeft,
+        );
+
+        let top_left_corner = top_left_ellipse
+            .bounding_box()
+            .expand(style.outside_stroke_width());
+        let top_right_corner = top_right_ellipse
+            .bounding_box()
+            .expand(style.outside_stroke_width());
+        let bottom_right_corner = bottom_right_ellipse
+            .bounding_box()
+            .expand(style.outside_stroke_width());
+        let bottom_left_corner = bottom_left_ellipse
+            .bounding_box()
+            .expand(style.outside_stroke_width());
+
         Self {
-            rect_iter: StyledRectangleIterator::new(&primitive.rectangle.into_styled(*style)),
-            top_left_iter: StyledEllipseIterator::with_quadrant(
-                &top_left_corner.into_styled(*style),
-                Quadrant::TopLeft,
-            ),
-            top_right_iter: StyledEllipseIterator::with_quadrant(
-                &top_right_corner.into_styled(*style),
-                Quadrant::TopRight,
-            ),
-            bottom_right_iter: StyledEllipseIterator::with_quadrant(
-                &bottom_right_corner.into_styled(*style),
-                Quadrant::BottomRight,
-            ),
-            bottom_left_iter: StyledEllipseIterator::with_quadrant(
-                &bottom_left_corner.into_styled(*style),
-                Quadrant::BottomLeft,
-            ),
+            rect_iter: primitive.rectangle.into_styled(*style).into_iter(),
+
+            top_left_iter,
+            top_right_iter,
+            bottom_right_iter,
+            bottom_left_iter,
+
             top_left: primitive.rectangle.top_left,
             corner_radii: primitive.corner_radii,
+
             top_left_corner,
             top_right_corner,
             bottom_right_corner,
@@ -274,10 +295,10 @@ where
 
         self.rect_iter
             .find(|Pixel(pos, _)| {
-                !top_left_corner.bounding_box().contains(*pos)
-                    && !top_right_corner.bounding_box().contains(*pos)
-                    && !bottom_right_corner.bounding_box().contains(*pos)
-                    && !bottom_left_corner.bounding_box().contains(*pos)
+                !top_left_corner.contains(*pos)
+                    && !top_right_corner.contains(*pos)
+                    && !bottom_right_corner.contains(*pos)
+                    && !bottom_left_corner.contains(*pos)
             })
             .or_else(|| self.top_left_iter.next())
             .or_else(|| self.top_right_iter.next())
