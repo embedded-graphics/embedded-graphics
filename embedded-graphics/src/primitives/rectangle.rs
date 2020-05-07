@@ -147,9 +147,9 @@ impl Rectangle {
 
         let top_left = match quadrant {
             Quadrant::TopLeft => self.top_left,
-            Quadrant::TopRight => self.top_left + Point::new(half_size.width as i32, 0),
+            Quadrant::TopRight => self.top_left + half_size.x_axis(),
             Quadrant::BottomRight => self.top_left + half_size,
-            Quadrant::BottomLeft => self.top_left + Point::new(0, half_size.height as i32),
+            Quadrant::BottomLeft => self.top_left + half_size.y_axis(),
         };
 
         Rectangle::new(top_left, half_size)
