@@ -48,17 +48,24 @@ impl Dimensions for RoundedRectangle {
 impl RoundedRectangle {
     /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for  all
     /// corners.
-    pub const fn new(rectangle: Rectangle, corner_radius: Size) -> Self {
-        Self {
+    pub fn new(rectangle: Rectangle, corner_radius: Size) -> Self {
+        let size = rectangle.size;
+
+        Self::with_corners(
             rectangle,
-            corner_radii: [corner_radius, corner_radius, corner_radius, corner_radius],
-        }
+            [
+                corner_radius.min(size),
+                corner_radius.min(size),
+                corner_radius.min(size),
+                corner_radius.min(size),
+            ],
+        )
     }
 
     /// Creates a new rounded rectangle with different corner radii.
     ///
     /// Corner radii are specified from the top-left corner in a clockwise direction
-    pub fn with_corners(rectangle: Rectangle, corner_radii: [Size; 4]) -> Self {
+    pub const fn with_corners(rectangle: Rectangle, corner_radii: [Size; 4]) -> Self {
         Self {
             rectangle,
             corner_radii,
