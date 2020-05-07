@@ -591,8 +591,6 @@ mod tests {
     }
 
     #[test]
-    // TODO: Un-ignore
-    #[ignore]
     fn quadrants_equal_odd_ellipse() {
         let mut display = MockDisplay::new();
 
