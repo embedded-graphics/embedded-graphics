@@ -143,7 +143,7 @@ impl Rectangle {
 
     /// Get a sub-rectangle containing one quadrant of the parent rectangle
     pub(in crate::primitives) fn quadrant(&self, quadrant: Quadrant) -> Rectangle {
-        let half_size = self.size / 2;
+        let half_size = self.size.saturating_add(Size::new(1, 1)) / 2;
 
         let top_left = match quadrant {
             Quadrant::TopLeft => self.top_left,

@@ -248,16 +248,20 @@ where
 
         let top_left_corner = top_left_ellipse
             .bounding_box()
-            .expand(style.outside_stroke_width());
+            .expand(style.outside_stroke_width())
+            .quadrant(Quadrant::TopLeft);
         let top_right_corner = top_right_ellipse
             .bounding_box()
-            .expand(style.outside_stroke_width());
+            .expand(style.outside_stroke_width())
+            .quadrant(Quadrant::TopRight);
         let bottom_right_corner = bottom_right_ellipse
             .bounding_box()
-            .expand(style.outside_stroke_width());
+            .expand(style.outside_stroke_width())
+            .quadrant(Quadrant::BottomRight);
         let bottom_left_corner = bottom_left_ellipse
             .bounding_box()
-            .expand(style.outside_stroke_width());
+            .expand(style.outside_stroke_width())
+            .quadrant(Quadrant::BottomLeft);
 
         Self {
             rect_iter: primitive.rectangle.into_styled(*style).into_iter(),
