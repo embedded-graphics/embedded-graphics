@@ -55,10 +55,10 @@ impl RoundedRectangle {
         Self::with_corners(
             rectangle,
             [
-                corner_radius.min(size),
-                corner_radius.min(size),
-                corner_radius.min(size),
-                corner_radius.min(size),
+                corner_radius.component_min(size),
+                corner_radius.component_min(size),
+                corner_radius.component_min(size),
+                corner_radius.component_min(size),
             ],
         )
     }
@@ -66,10 +66,17 @@ impl RoundedRectangle {
     /// Creates a new rounded rectangle with different corner radii.
     ///
     /// Corner radii are specified from the top-left corner in a clockwise direction
-    pub const fn with_corners(rectangle: Rectangle, corner_radii: [Size; 4]) -> Self {
+    pub fn with_corners(rectangle: Rectangle, corner_radii: [Size; 4]) -> Self {
+        let size = rectangle.size;
+
         Self {
             rectangle,
-            corner_radii,
+            corner_radii: [
+                corner_radii[0].component_min(size),
+                corner_radii[1].component_min(size),
+                corner_radii[2].component_min(size),
+                corner_radii[3].component_min(size),
+            ],
         }
     }
 
