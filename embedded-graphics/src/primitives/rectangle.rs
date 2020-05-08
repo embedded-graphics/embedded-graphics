@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{ContainsPoint, Primitive, Quadrant},
+    primitives::{ellipse_quadrant::Quadrant, ContainsPoint, Primitive},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,

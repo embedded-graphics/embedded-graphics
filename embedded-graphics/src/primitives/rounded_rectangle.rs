@@ -6,8 +6,9 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         ellipse::{self, Ellipse, StyledEllipseIterator},
+        ellipse_quadrant::Quadrant,
         rectangle::{self, Rectangle, StyledRectangleIterator},
-        ContainsPoint, Primitive, Quadrant,
+        ContainsPoint, Primitive,
     },
     style::{PrimitiveStyle, Styled},
     transform::Transform,

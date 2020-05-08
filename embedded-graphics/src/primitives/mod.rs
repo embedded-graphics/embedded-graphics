@@ -2,6 +2,7 @@
 
 pub mod circle;
 pub mod ellipse;
+mod ellipse_quadrant;
 pub mod line;
 pub mod polyline;
 pub mod rectangle;
@@ -42,15 +43,6 @@ pub trait Primitive: Dimensions {
 pub trait ContainsPoint {
     /// Returns `true` is the given point is inside the shape.
     fn contains(&self, point: Point) -> bool;
-}
-
-/// A quadrant around an origin
-#[derive(Copy, Clone, Debug)]
-enum Quadrant {
-    TopLeft = 0,
-    TopRight = 1,
-    BottomRight = 2,
-    BottomLeft = 3,
 }
 
 /// Create a [`Circle`](./primitives/circle/struct.Circle.html) with optional styling using a
