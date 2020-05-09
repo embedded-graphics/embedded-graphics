@@ -232,10 +232,10 @@ where
 
         let sw = style.outside_stroke_width();
 
-        let top_left_corner = corners[0].expand(sw).bounding_box();
-        let top_right_corner = corners[1].expand(sw).bounding_box();
-        let bottom_right_corner = corners[2].expand(sw).bounding_box();
-        let bottom_left_corner = corners[3].expand(sw).bounding_box();
+        let top_left_corner = corners[0].expand_curved_edge(sw).bounding_box();
+        let top_right_corner = corners[1].expand_curved_edge(sw).bounding_box();
+        let bottom_right_corner = corners[2].expand_curved_edge(sw).bounding_box();
+        let bottom_left_corner = corners[3].expand_curved_edge(sw).bounding_box();
 
         Self {
             rect_iter: if !style.is_transparent() {

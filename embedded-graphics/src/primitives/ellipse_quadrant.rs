@@ -46,13 +46,13 @@ impl EllipseQuadrant {
         }
     }
 
-    /// Expand the ellipse quadrant by a given offset
+    /// Expand the outer edge of the ellipse quadrant by a given offset
     ///
     /// This method will expand the ellipse quadrant in the direction of its outer edge. The center
     /// point will not be moved.
     ///
     /// If the radius of the ellipse quadrant is zero, no expand will be performed.
-    pub(crate) fn expand(&self, offset: u32) -> Self {
+    pub(crate) fn expand_curved_edge(&self, offset: u32) -> Self {
         if self.radius == Size::zero() {
             return *self;
         }
