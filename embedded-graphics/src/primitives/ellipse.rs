@@ -178,7 +178,7 @@ impl Points {
         }
     }
 
-    pub(in crate::primitives) fn empty() -> Self {
+    fn empty() -> Self {
         Self {
             iter: Rectangle::new(Point::zero(), Size::zero()).points(),
             center_2x: Point::zero(),
