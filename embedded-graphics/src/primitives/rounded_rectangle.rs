@@ -14,13 +14,42 @@ use crate::{
     DrawTarget,
 };
 
+/// The definition of each corner radius for a rounded rectangle.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct CornerRadii {
+    /// Top left corner radius
+    pub top_left: Size,
+
+    /// Top right corner radius
+    pub top_right: Size,
+
+    /// Bottom right corner radius
+    pub bottom_right: Size,
+
+    /// Bottom left corner radius
+    pub bottom_left: Size,
+}
+
+impl CornerRadii {
+    /// Create a new set of corner radii with all corners having equal values.
+    pub fn new_equal(radius: Size) -> Self {
+        Self {
+            top_left: radius,
+            top_right: radius,
+            bottom_right: radius,
+            bottom_left: radius,
+        }
+    }
+}
+
 /// Rounded rectangle primitive
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct RoundedRectangle {
     /// The base rectangle
     pub rectangle: Rectangle,
 
-    corners: [EllipseQuadrant; 4],
+    /// The radius of each corner
+    pub corners: CornerRadii,
 }
 
 impl Primitive for RoundedRectangle {
@@ -47,43 +76,48 @@ impl RoundedRectangle {
     /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for  all
     /// corners.
     pub fn new(rectangle: Rectangle, corner_radius: Size) -> Self {
-        Self::with_corners(
-            rectangle,
-            [corner_radius, corner_radius, corner_radius, corner_radius],
-        )
+        Self::with_corners(rectangle, CornerRadii::new_equal(corner_radius))
     }
 
     /// Creates a new rounded rectangle with different corner radii.
     ///
     /// Corner radii are specified from the top-left corner in a clockwise direction
-    pub fn with_corners(rectangle: Rectangle, corner_radii: [Size; 4]) -> Self {
+    pub fn with_corners(rectangle: Rectangle, corners: CornerRadii) -> Self {
         let Rectangle { size, top_left, .. } = rectangle;
 
-        let top_left_radius = corner_radii[0].component_min(size / 2);
-        let top_right_radius = corner_radii[1].component_min(size / 2);
-        let bottom_right_radius = corner_radii[2].component_min(size / 2);
-        let bottom_left_radius = corner_radii[3].component_min(size / 2);
+        let corners = CornerRadii {
+            top_left: corners.top_left.component_min(size / 2),
+            top_right: corners.top_right.component_min(size / 2),
+            bottom_right: corners.bottom_right.component_min(size / 2),
+            bottom_left: corners.bottom_left.component_min(size / 2),
+        };
+
+        // let top_left_radius = corner_radii[0].component_min(size / 2);
+        // let top_right_radius = corner_radii[1].component_min(size / 2);
+        // let bottom_right_radius = corner_radii[2].component_min(size / 2);
+        // let bottom_left_radius = corner_radii[3].component_min(size / 2);
 
         Self {
             rectangle,
-            corners: [
-                EllipseQuadrant::new(top_left, top_left_radius, Quadrant::TopLeft),
-                EllipseQuadrant::new(
-                    top_left + size.x_axis() - top_left_radius.x_axis(),
-                    top_right_radius,
-                    Quadrant::TopRight,
-                ),
-                EllipseQuadrant::new(
-                    top_left + size - bottom_right_radius,
-                    bottom_right_radius,
-                    Quadrant::BottomRight,
-                ),
-                EllipseQuadrant::new(
-                    top_left + size.y_axis() - bottom_left_radius.y_axis(),
-                    bottom_left_radius,
-                    Quadrant::BottomLeft,
-                ),
-            ],
+            corners
+            // corners: [
+            //     EllipseQuadrant::new(top_left, top_left_radius, Quadrant::TopLeft),
+            //     EllipseQuadrant::new(
+            //         top_left + size.x_axis() - top_left_radius.x_axis(),
+            //         top_right_radius,
+            //         Quadrant::TopRight,
+            //     ),
+            //     EllipseQuadrant::new(
+            //         top_left + size - bottom_right_radius,
+            //         bottom_right_radius,
+            //         Quadrant::BottomRight,
+            //     ),
+            //     EllipseQuadrant::new(
+            //         top_left + size.y_axis() - bottom_left_radius.y_axis(),
+            //         bottom_left_radius,
+            //         Quadrant::BottomLeft,
+            //     ),
+            // ],
         }
     }
 
@@ -152,18 +186,37 @@ impl Points {
             rectangle, corners, ..
         } = shape;
 
+        let Rectangle { top_left, size, .. } = *rectangle;
+
+        let top_left_ellipse = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
+        let top_right_ellipse = EllipseQuadrant::new(
+            top_left + size.x_axis() - corners.top_left.x_axis(),
+            corners.top_right,
+            Quadrant::TopRight,
+        );
+        let bottom_right_ellipse = EllipseQuadrant::new(
+            top_left + size - corners.bottom_right,
+            corners.bottom_right,
+            Quadrant::BottomRight,
+        );
+        let bottom_left_ellipse = EllipseQuadrant::new(
+            top_left + size.y_axis() - corners.bottom_left.y_axis(),
+            corners.bottom_left,
+            Quadrant::BottomLeft,
+        );
+
         Self {
             rect_iter: rectangle.points(),
 
-            top_left_iter: corners[0].points(),
-            top_right_iter: corners[1].points(),
-            bottom_right_iter: corners[2].points(),
-            bottom_left_iter: corners[3].points(),
+            top_left_iter: top_left_ellipse.points(),
+            top_right_iter: top_right_ellipse.points(),
+            bottom_right_iter: bottom_right_ellipse.points(),
+            bottom_left_iter: bottom_left_ellipse.points(),
 
-            top_left_corner: corners[0].bounding_box(),
-            top_right_corner: corners[1].bounding_box(),
-            bottom_right_corner: corners[2].bounding_box(),
-            bottom_left_corner: corners[3].bounding_box(),
+            top_left_corner: top_left_ellipse.bounding_box(),
+            top_right_corner: top_right_ellipse.bounding_box(),
+            bottom_right_corner: bottom_right_ellipse.bounding_box(),
+            bottom_left_corner: bottom_left_ellipse.bounding_box(),
         }
     }
 }
@@ -218,43 +271,78 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
-        let Styled {
-            style,
-            primitive: RoundedRectangle {
-                rectangle, corners, ..
-            },
-        } = styled;
+        // let top_left_iter = corners[0].into_styled(*style).into_iter();
+        // let top_right_iter = corners[1].into_styled(*style).into_iter();
+        // let bottom_right_iter = corners[2].into_styled(*style).into_iter();
+        // let bottom_left_iter = corners[3].into_styled(*style).into_iter();
 
-        let top_left_iter = corners[0].into_styled(*style).into_iter();
-        let top_right_iter = corners[1].into_styled(*style).into_iter();
-        let bottom_right_iter = corners[2].into_styled(*style).into_iter();
-        let bottom_left_iter = corners[3].into_styled(*style).into_iter();
+        // let top_left_corner = corners[0].expand_curved_edge(sw).bounding_box();
+        // let top_right_corner = corners[1].expand_curved_edge(sw).bounding_box();
+        // let bottom_right_corner = corners[2].expand_curved_edge(sw).bounding_box();
+        // let bottom_left_corner = corners[3].expand_curved_edge(sw).bounding_box();
+
+        // Self {
+        //     rect_iter: if !style.is_transparent() {
+        //         *rectangle
+        //     } else {
+        //         Rectangle::new(Point::zero(), Size::zero())
+        //     }
+        //     .into_styled(*style)
+        //     .into_iter(),
+
+        //     top_left_iter,
+        //     top_right_iter,
+        //     bottom_right_iter,
+        //     bottom_left_iter,
+
+        //     top_left_corner,
+        //     top_right_corner,
+        //     bottom_right_corner,
+        //     bottom_left_corner,
+        // }
+
+        let Styled { style, primitive } = styled;
+
+        let Rectangle { top_left, size, .. } = primitive.rectangle;
+        let corners = primitive.corners;
 
         let sw = style.outside_stroke_width();
 
-        let top_left_corner = corners[0].expand_curved_edge(sw).bounding_box();
-        let top_right_corner = corners[1].expand_curved_edge(sw).bounding_box();
-        let bottom_right_corner = corners[2].expand_curved_edge(sw).bounding_box();
-        let bottom_left_corner = corners[3].expand_curved_edge(sw).bounding_box();
+        let top_left_ellipse = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
+        let top_right_ellipse = EllipseQuadrant::new(
+            top_left + size.x_axis() - corners.top_left.x_axis(),
+            corners.top_right,
+            Quadrant::TopRight,
+        );
+        let bottom_right_ellipse = EllipseQuadrant::new(
+            top_left + size - corners.bottom_right,
+            corners.bottom_right,
+            Quadrant::BottomRight,
+        );
+        let bottom_left_ellipse = EllipseQuadrant::new(
+            top_left + size.y_axis() - corners.bottom_left.y_axis(),
+            corners.bottom_left,
+            Quadrant::BottomLeft,
+        );
 
         Self {
             rect_iter: if !style.is_transparent() {
-                *rectangle
+                primitive.rectangle
             } else {
                 Rectangle::new(Point::zero(), Size::zero())
             }
             .into_styled(*style)
             .into_iter(),
 
-            top_left_iter,
-            top_right_iter,
-            bottom_right_iter,
-            bottom_left_iter,
+            top_left_iter: top_left_ellipse.into_styled(*style).into_iter(),
+            top_right_iter: top_right_ellipse.into_styled(*style).into_iter(),
+            bottom_right_iter: bottom_right_ellipse.into_styled(*style).into_iter(),
+            bottom_left_iter: bottom_left_ellipse.into_styled(*style).into_iter(),
 
-            top_left_corner,
-            top_right_corner,
-            bottom_right_corner,
-            bottom_left_corner,
+            top_left_corner: top_left_ellipse.expand_curved_edge(sw).bounding_box(),
+            top_right_corner: top_right_ellipse.expand_curved_edge(sw).bounding_box(),
+            bottom_right_corner: bottom_right_ellipse.expand_curved_edge(sw).bounding_box(),
+            bottom_left_corner: bottom_left_ellipse.expand_curved_edge(sw).bounding_box(),
         }
     }
 }

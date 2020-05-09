@@ -167,7 +167,7 @@ where
         Self {
             iter: primitive.ellipse.into_styled(*style).into_iter(),
             bounding_box: primitive
-                .expand(style.outside_stroke_width())
+                .expand_curved_edge(style.outside_stroke_width())
                 .bounding_box(),
         }
     }

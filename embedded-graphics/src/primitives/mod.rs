@@ -11,8 +11,13 @@ mod thick_line_iterator;
 pub mod triangle;
 
 pub use self::{
-    circle::Circle, ellipse::Ellipse, line::Line, polyline::Polyline, rectangle::Rectangle,
-    rounded_rectangle::RoundedRectangle, triangle::Triangle,
+    circle::Circle,
+    ellipse::Ellipse,
+    line::Line,
+    polyline::Polyline,
+    rectangle::Rectangle,
+    rounded_rectangle::{CornerRadii, RoundedRectangle},
+    triangle::Triangle,
 };
 use crate::{
     geometry::{Dimensions, Point},

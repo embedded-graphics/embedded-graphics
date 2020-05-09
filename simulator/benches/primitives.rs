@@ -146,12 +146,12 @@ fn rounded_rectangle_corners(c: &mut Criterion) {
     c.bench_function("rounded_rectangle_corners", |b| {
         let object = &RoundedRectangle::with_corners(
             Rectangle::new(Point::zero(), Size::new(50, 40)),
-            [
-                Size::new(10, 12),
-                Size::new(14, 16),
-                Size::new(18, 20),
-                Size::new(22, 24),
-            ],
+            CornerRadii {
+                top_left: Size::new(10, 12),
+                top_right: Size::new(14, 16),
+                bottom_right: Size::new(18, 20),
+                bottom_left: Size::new(22, 24),
+            },
         )
         .into_styled(
             PrimitiveStyleBuilder::new()
