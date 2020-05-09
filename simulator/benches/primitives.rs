@@ -144,7 +144,7 @@ fn rounded_rectangle(c: &mut Criterion) {
 
 fn rounded_rectangle_corners(c: &mut Criterion) {
     c.bench_function("rounded_rectangle_corners", |b| {
-        let object = &RoundedRectangle::with_corners(
+        let object = &RoundedRectangle::with_radii(
             Rectangle::new(Point::zero(), Size::new(50, 40)),
             CornerRadii {
                 top_left: Size::new(10, 12),

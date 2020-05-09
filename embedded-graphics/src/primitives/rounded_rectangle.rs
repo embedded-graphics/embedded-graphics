@@ -76,13 +76,13 @@ impl RoundedRectangle {
     /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for  all
     /// corners.
     pub fn new(rectangle: Rectangle, corner_radius: Size) -> Self {
-        Self::with_corners(rectangle, CornerRadii::new_equal(corner_radius))
+        Self::with_radii(rectangle, CornerRadii::new_equal(corner_radius))
     }
 
     /// Creates a new rounded rectangle with different corner radii.
     ///
     /// Corner radii are specified from the top-left corner in a clockwise direction
-    pub fn with_corners(rectangle: Rectangle, corners: CornerRadii) -> Self {
+    pub fn with_radii(rectangle: Rectangle, corners: CornerRadii) -> Self {
         let Rectangle { size, top_left, .. } = rectangle;
 
         let corners = CornerRadii {
