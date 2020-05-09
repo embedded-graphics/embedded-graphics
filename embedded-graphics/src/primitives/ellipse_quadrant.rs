@@ -22,19 +22,59 @@ pub enum Quadrant {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct EllipseQuadrant {
-    ellipse: Ellipse,
-    quadrant: Quadrant,
-    bounding_box: Rectangle,
+pub(crate) struct EllipseQuadrant {
+    pub radius: Size,
+    pub quadrant: Quadrant,
+    pub bounding_box: Rectangle,
+    pub ellipse: Ellipse,
 }
 
 impl EllipseQuadrant {
-    pub fn new(ellipse: Ellipse, quadrant: Quadrant) -> Self {
+    pub fn new(top_left: Point, radius: Size, quadrant: Quadrant) -> Self {
+        let ellipse_top_left = match quadrant {
+            Quadrant::TopLeft => top_left,
+            Quadrant::TopRight => top_left - radius.x_axis(),
+            Quadrant::BottomRight => top_left - radius,
+            Quadrant::BottomLeft => top_left - radius.y_axis(),
+        };
+
         Self {
-            ellipse,
+            radius,
+            ellipse: Ellipse::new(ellipse_top_left, radius * 2),
             quadrant,
-            bounding_box: ellipse.bounding_box().quadrant(quadrant),
+            bounding_box: Rectangle::new(top_left, radius),
         }
+    }
+
+    /// Expand the ellipse quadrant by a given offset
+    ///
+    /// This method will expand the ellipse quadrant in the direction of its outer edge. The center
+    /// point will not be moved.
+    ///
+    /// If the radius of the ellipse quadrant is zero, no expand will be performed.
+    pub(crate) fn expand(&self, offset: u32) -> Self {
+        if self.radius == Size::zero() {
+            return *self;
+        }
+
+        let offset = Size::new_equal(offset);
+
+        let Self {
+            bounding_box,
+            quadrant,
+            ..
+        } = self;
+
+        let top_left = bounding_box.top_left;
+
+        let top_left = match quadrant {
+            Quadrant::TopLeft => top_left - offset,
+            Quadrant::TopRight => top_left - offset.y_axis(),
+            Quadrant::BottomRight => top_left,
+            Quadrant::BottomLeft => top_left - offset.x_axis(),
+        };
+
+        Self::new(top_left, self.radius + offset, self.quadrant)
     }
 }
 
@@ -67,7 +107,7 @@ impl ContainsPoint for EllipseQuadrant {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points {
+pub(crate) struct Points {
     ellipse: Ellipse,
     iter: rectangle::Points,
 }
@@ -77,13 +117,6 @@ impl Points {
         Self {
             ellipse: ellipse_quadrant.ellipse,
             iter: ellipse_quadrant.bounding_box().points(),
-        }
-    }
-
-    pub fn empty() -> Self {
-        Self {
-            ellipse: Ellipse::new(Point::zero(), Size::zero()),
-            iter: rectangle::Points::empty(),
         }
     }
 }
@@ -134,10 +167,8 @@ where
         Self {
             iter: primitive.ellipse.into_styled(*style).into_iter(),
             bounding_box: primitive
-                .ellipse
                 .expand(style.outside_stroke_width())
-                .bounding_box()
-                .quadrant(primitive.quadrant),
+                .bounding_box(),
         }
     }
 }
@@ -188,70 +219,44 @@ mod tests {
                     " #########",
                     "##########",
                     "##########",
-                    "          ",
-                    "          ",
-                    "          ",
-                    "          ",
-                    "          ",
-                    "          ",
                 ],
             ),
             (
                 Quadrant::TopRight,
                 &[
-                    "          ####      ",
-                    "          #######   ",
-                    "          ######### ",
-                    "          ##########",
-                    "          ##########",
-                    "                    ",
-                    "                    ",
-                    "                    ",
-                    "                    ",
-                    "                    ",
-                    "                    ",
+                    "####      ",
+                    "#######   ",
+                    "######### ",
+                    "##########",
+                    "##########",
                 ],
             ),
             (
                 Quadrant::BottomRight,
                 &[
-                    "                    ",
-                    "                    ",
-                    "                    ",
-                    "                    ",
-                    "                    ",
-                    "          ##########",
-                    "          ##########",
-                    "          ######### ",
-                    "          #######   ",
-                    "          ####      ",
-                    "                    ",
+                    "##########",
+                    "##########",
+                    "######### ",
+                    "#######   ",
+                    "####      ",
                 ],
             ),
             (
                 Quadrant::BottomLeft,
                 &[
-                    "          ",
-                    "          ",
-                    "          ",
-                    "          ",
-                    "          ",
                     "##########",
                     "##########",
                     " #########",
                     "   #######",
                     "      ####",
-                    "          ",
                 ],
             ),
         ];
 
-        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(20, 10));
-
         for (quadrant, expected) in cases.iter() {
             let mut display = MockDisplay::new();
 
-            EllipseQuadrant::new(ellipse, *quadrant)
+            EllipseQuadrant::new(Point::new(0, 0), Size::new(10, 5), *quadrant)
                 .points()
                 .map(|p| Pixel(p, BinaryColor::On))
                 .draw(&mut display)
@@ -265,13 +270,20 @@ mod tests {
     fn quadrants_equal_even_ellipse() {
         let mut display = MockDisplay::new();
 
-        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(20, 10));
+        let radius = Size::new(10, 5);
+        let top_left = Point::new(0, 0);
 
-        EllipseQuadrant::new(ellipse, Quadrant::TopLeft)
+        EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft)
             .points()
-            .chain(EllipseQuadrant::new(ellipse, Quadrant::TopRight).points())
-            .chain(EllipseQuadrant::new(ellipse, Quadrant::BottomRight).points())
-            .chain(EllipseQuadrant::new(ellipse, Quadrant::BottomLeft).points())
+            .chain(
+                EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight)
+                    .points(),
+            )
+            .chain(EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight).points())
+            .chain(
+                EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft)
+                    .points(),
+            )
             .map(|p| Pixel(p, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
@@ -297,13 +309,20 @@ mod tests {
     fn quadrants_equal_odd_ellipse() {
         let mut display = MockDisplay::new();
 
-        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(11, 21));
+        let radius = Size::new(7, 9);
+        let top_left = Point::new(0, 0);
 
-        EllipseQuadrant::new(ellipse, Quadrant::TopLeft)
+        EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft)
             .points()
-            .chain(EllipseQuadrant::new(ellipse, Quadrant::TopRight).points())
-            .chain(EllipseQuadrant::new(ellipse, Quadrant::BottomRight).points())
-            .chain(EllipseQuadrant::new(ellipse, Quadrant::BottomLeft).points())
+            .chain(
+                EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight)
+                    .points(),
+            )
+            .chain(EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight).points())
+            .chain(
+                EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft)
+                    .points(),
+            )
             .map(|p| Pixel(p, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
@@ -311,27 +330,24 @@ mod tests {
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
-                "    ###    ",
-                "   #####   ",
-                "  #######  ",
-                " ######### ",
-                " ######### ",
-                " ######### ",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                " ######### ",
-                " ######### ",
-                " ######### ",
-                "  #######  ",
-                "   #####   ",
-                "    ###    ",
+                "     ####     ",
+                "   ########   ",
+                "  ##########  ",
+                " ############ ",
+                " ############ ",
+                " ############ ",
+                "##############",
+                "##############",
+                "##############",
+                "##############",
+                "##############",
+                "##############",
+                " ############ ",
+                " ############ ",
+                " ############ ",
+                "  ##########  ",
+                "   ########   ",
+                "     ####     ",
             ])
         );
     }
@@ -340,8 +356,6 @@ mod tests {
     fn fill_and_stroke() {
         let mut display = MockDisplay::new();
 
-        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(20, 10));
-
         let style = PrimitiveStyleBuilder::new()
             .stroke_width(3)
             .stroke_color(BinaryColor::Off)
@@ -349,21 +363,24 @@ mod tests {
             .fill_color(BinaryColor::On)
             .build();
 
-        EllipseQuadrant::new(ellipse, Quadrant::TopLeft)
+        let radius = Size::new(10, 5);
+        let top_left = Point::new(0, 0);
+
+        EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft)
             .into_styled(style)
             .into_iter()
             .chain(
-                EllipseQuadrant::new(ellipse, Quadrant::TopRight)
+                EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight)
                     .into_styled(style)
                     .into_iter(),
             )
             .chain(
-                EllipseQuadrant::new(ellipse, Quadrant::BottomRight)
+                EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight)
                     .into_styled(style)
                     .into_iter(),
             )
             .chain(
-                EllipseQuadrant::new(ellipse, Quadrant::BottomLeft)
+                EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft)
                     .into_styled(style)
                     .into_iter(),
             )
@@ -391,8 +408,6 @@ mod tests {
     fn non_circular() {
         let mut display = MockDisplay::new();
 
-        let ellipse = Ellipse::new(Point::new(0, 0), Size::new(20, 10));
-
         let style = PrimitiveStyleBuilder::new()
             .stroke_width(3)
             .stroke_color(BinaryColor::Off)
@@ -400,7 +415,7 @@ mod tests {
             .fill_color(BinaryColor::On)
             .build();
 
-        EllipseQuadrant::new(ellipse, Quadrant::TopLeft)
+        EllipseQuadrant::new(Point::new(0, 0), Size::new(10, 5), Quadrant::TopLeft)
             .into_styled(style)
             .draw(&mut display)
             .unwrap();

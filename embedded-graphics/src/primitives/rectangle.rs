@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{ellipse_quadrant::Quadrant, ContainsPoint, Primitive},
+    primitives::{ContainsPoint, Primitive},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -139,20 +139,6 @@ impl Rectangle {
         } else {
             None
         }
-    }
-
-    /// Get a sub-rectangle containing one quadrant of the parent rectangle
-    pub(in crate::primitives) fn quadrant(&self, quadrant: Quadrant) -> Rectangle {
-        let half_size = self.size.saturating_add(Size::new(1, 1)) / 2;
-
-        let top_left = match quadrant {
-            Quadrant::TopLeft => self.top_left,
-            Quadrant::TopRight => self.top_left + half_size.x_axis(),
-            Quadrant::BottomRight => self.top_left + half_size,
-            Quadrant::BottomLeft => self.top_left + half_size.y_axis(),
-        };
-
-        Rectangle::new(top_left, half_size)
     }
 }
 

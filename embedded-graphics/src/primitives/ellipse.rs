@@ -4,7 +4,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{circle, ellipse_quadrant::Quadrant, ContainsPoint, Primitive, Rectangle, Styled},
+    primitives::{circle, ContainsPoint, Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
     DrawTarget,
@@ -88,12 +88,12 @@ impl Ellipse {
         self.top_left * 2 + radius
     }
 
-    pub(in crate::primitives) fn expand(&self, offset: u32) -> Self {
+    fn expand(&self, offset: u32) -> Self {
         let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
         Self::with_center(self.center(), size)
     }
 
-    pub(in crate::primitives) fn shrink(&self, offset: u32) -> Self {
+    fn shrink(&self, offset: u32) -> Self {
         let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
         Self::with_center(self.center(), size)
     }
@@ -178,18 +178,6 @@ impl Points {
         }
     }
 
-    /// Iterate over the points in one quadrant of an ellipse
-    pub(in crate::primitives) fn with_quadrant(ellipse: &Ellipse, quadrant: Quadrant) -> Self {
-        let (size_sq, threshold) = compute_threshold(ellipse.size);
-
-        Self {
-            iter: ellipse.bounding_box().quadrant(quadrant).points(),
-            center_2x: ellipse.center_2x(),
-            size_sq,
-            threshold,
-        }
-    }
-
     pub(in crate::primitives) fn empty() -> Self {
         Self {
             iter: Rectangle::new(Point::zero(), Size::zero()).points(),
@@ -238,32 +226,6 @@ where
         let iter = if !styled.style.is_transparent() {
             let stroke_area = primitive.expand(style.outside_stroke_width());
             Points::new(&stroke_area)
-        } else {
-            Points::empty()
-        };
-
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-        let (inner_size_sq, threshold) = compute_threshold(fill_area.size);
-
-        Self {
-            iter,
-            outer_color: styled.style.stroke_color,
-            inner_size_sq,
-            inner_color: styled.style.fill_color,
-            center: styled.primitive.center_2x(),
-            threshold,
-        }
-    }
-
-    pub(in crate::primitives) fn with_quadrant(
-        styled: &Styled<Ellipse, PrimitiveStyle<C>>,
-        quadrant: Quadrant,
-    ) -> Self {
-        let Styled { primitive, style } = styled;
-
-        let iter = if !styled.style.is_transparent() {
-            let stroke_area = primitive.expand(style.outside_stroke_width());
-            Points::with_quadrant(&stroke_area, quadrant)
         } else {
             Points::empty()
         };
