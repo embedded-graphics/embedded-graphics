@@ -1,6 +1,6 @@
 use crate::geometry::Dimensions;
 use crate::geometry::{Point, Size};
-use crate::primitives::ellipse::Ellipse;
+use crate::primitives::ellipse;
 use crate::primitives::rectangle::{self, Rectangle};
 use crate::primitives::ContainsPoint;
 use crate::primitives::Primitive;
@@ -16,10 +16,10 @@ pub enum Quadrant {
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(crate) struct EllipseQuadrant {
-    pub radius: Size,
-    pub quadrant: Quadrant,
-    pub bounding_box: Rectangle,
-    pub ellipse: Ellipse,
+    bounding_box: Rectangle,
+    size_sq: Size,
+    threshold: u32,
+    center_2x: Point,
 }
 
 impl EllipseQuadrant {
@@ -31,18 +31,19 @@ impl EllipseQuadrant {
             Quadrant::BottomLeft => top_left - radius.y_axis(),
         };
 
+        let (size_sq, threshold) = ellipse::compute_threshold(radius * 2);
+
         Self {
-            radius,
-            ellipse: Ellipse::new(ellipse_top_left, radius * 2),
-            quadrant,
             bounding_box: Rectangle::new(top_left, radius),
+            size_sq,
+            threshold,
+            center_2x: ellipse::center_2x(ellipse_top_left, radius * 2),
         }
     }
 }
 
 impl Dimensions for EllipseQuadrant {
     fn bounding_box(&self) -> Rectangle {
-        // TODO: Should we just calculate this on the fly?
         self.bounding_box
     }
 }
@@ -57,35 +58,34 @@ impl Primitive for EllipseQuadrant {
 
 impl ContainsPoint for EllipseQuadrant {
     fn contains(&self, point: Point) -> bool {
-        // Broad phase: check if point is inside bounding box
-        if !self.bounding_box.contains(point) {
-            return false;
-        }
-
-        // Narrow phase: check if point is within ellipse. The bounding box check above constrains
-        // this check to only the current quadrant.
-        self.ellipse.contains(point)
+        ellipse::is_point_inside_ellipse(self.size_sq, point * 2 - self.center_2x, self.threshold)
     }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(crate) struct Points {
-    ellipse: Ellipse,
     iter: rectangle::Points,
+    size_sq: Size,
+    threshold: u32,
+    center_2x: Point,
 }
 
 impl Points {
     pub fn new(ellipse_quadrant: &EllipseQuadrant) -> Self {
         Self {
-            ellipse: ellipse_quadrant.ellipse,
             iter: ellipse_quadrant.bounding_box().points(),
+            size_sq: ellipse_quadrant.size_sq,
+            threshold: ellipse_quadrant.threshold,
+            center_2x: ellipse_quadrant.center_2x,
         }
     }
 
     pub(crate) const fn empty() -> Self {
         Self {
-            ellipse: Ellipse::new(Point::zero(), Size::zero()),
             iter: rectangle::Points::empty(),
+            size_sq: Size::zero(),
+            threshold: 0,
+            center_2x: Point::zero(),
         }
     }
 }
@@ -94,9 +94,13 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for p in &mut self.iter {
-            if self.ellipse.contains(p) {
-                return Some(p);
+        for point in &mut self.iter {
+            if ellipse::is_point_inside_ellipse(
+                self.size_sq,
+                point * 2 - self.center_2x,
+                self.threshold,
+            ) {
+                return Some(point);
             }
         }
 
