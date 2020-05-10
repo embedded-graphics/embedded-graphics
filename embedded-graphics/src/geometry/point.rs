@@ -160,7 +160,6 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(15, 30));
     /// ```
-    // TODO: Remove `ignore` from doc example if these methods are made public
     pub(crate) fn component_min(self, other: Self) -> Self {
         Self::new(self.x.min(other.x), self.y.min(other.y))
     }
@@ -174,7 +173,6 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(20, 50));
     /// ```
-    // TODO: Remove `ignore` from doc example if these methods are made public
     pub(crate) fn component_max(self, other: Self) -> Self {
         Self::new(self.x.max(other.x), self.y.max(other.y))
     }
@@ -696,8 +694,6 @@ mod tests {
     }
 
     #[test]
-    // TODO: Delete this test if component_min/component_max are made public. It will be redundant
-    // with their respective doc comments.
     fn component_min_max() {
         let a = Point::new(20, 30);
         let b = Point::new(15, 50);

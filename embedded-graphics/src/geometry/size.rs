@@ -190,7 +190,6 @@ impl Size {
     ///
     /// assert_eq!(min, Size::new(15, 30));
     /// ```
-    // TODO: Remove `ignore` from doc example if these methods are made public
     pub(crate) fn component_min(self, other: Self) -> Self {
         Self::new(self.width.min(other.width), self.height.min(other.height))
     }
@@ -204,7 +203,6 @@ impl Size {
     ///
     /// assert_eq!(min, Size::new(20, 50));
     /// ```
-    // TODO: Remove `ignore` from doc example if these methods are made public
     pub(crate) fn component_max(self, other: Self) -> Self {
         Self::new(self.width.max(other.width), self.height.max(other.height))
     }
@@ -438,8 +436,6 @@ mod tests {
     }
 
     #[test]
-    // TODO: Delete this test if component_min/component_max are made public. It will be redundant
-    // with their respective doc comments.
     fn component_min_max() {
         let a = Size::new(20, 30);
         let b = Size::new(15, 50);
