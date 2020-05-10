@@ -68,6 +68,10 @@ impl ContainsPoint for RoundedRectangle {
 
         let Rectangle { top_left, size, .. } = *rectangle;
 
+        if !rectangle.contains(point) {
+            return false;
+        }
+
         let tl = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
         let tr = EllipseQuadrant::new(
             top_left + size.x_axis() - corners.top_right.x_axis(),
@@ -85,11 +89,24 @@ impl ContainsPoint for RoundedRectangle {
             Quadrant::BottomLeft,
         );
 
-        tl.bounding_box_contains(point)
-            .or_else(|| tr.bounding_box_contains(point))
-            .or_else(|| br.bounding_box_contains(point))
-            .or_else(|| bl.bounding_box_contains(point))
-            .unwrap_or_else(|| rectangle.contains(point))
+        if tl.bounding_box().contains(point) {
+            return tl.contains(point);
+        }
+
+        if tr.bounding_box().contains(point) {
+            return tr.contains(point);
+        }
+
+        if br.bounding_box().contains(point) {
+            return br.contains(point);
+        }
+
+        if bl.bounding_box().contains(point) {
+            return bl.contains(point);
+        }
+
+        // We're in the rest of the rectangle at this point
+        true
     }
 }
 

@@ -40,16 +40,6 @@ impl EllipseQuadrant {
             center_2x: ellipse::center_2x(ellipse_top_left, radius * 2),
         }
     }
-
-    /// Returns `None` if outside bounding box, `Some(true)` if inside the ellipse, `Some(false)` if
-    /// inside bounding box but outside ellipse.
-    pub fn bounding_box_contains(&self, point: Point) -> Option<bool> {
-        if !self.bounding_box.contains(point) {
-            None
-        } else {
-            Some(self.contains(point))
-        }
-    }
 }
 
 impl Dimensions for EllipseQuadrant {
