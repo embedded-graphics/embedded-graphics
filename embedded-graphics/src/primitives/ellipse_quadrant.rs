@@ -1,16 +1,9 @@
-use crate::draw_target::DrawTarget;
-use crate::drawable::Drawable;
-use crate::drawable::Pixel;
 use crate::geometry::Dimensions;
 use crate::geometry::{Point, Size};
-use crate::pixelcolor::PixelColor;
 use crate::primitives::ellipse::Ellipse;
-use crate::primitives::ellipse::StyledEllipseIterator;
 use crate::primitives::rectangle::{self, Rectangle};
 use crate::primitives::ContainsPoint;
 use crate::primitives::Primitive;
-use crate::style::PrimitiveStyle;
-use crate::style::Styled;
 
 /// A quadrant around an origin
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -44,37 +37,6 @@ impl EllipseQuadrant {
             quadrant,
             bounding_box: Rectangle::new(top_left, radius),
         }
-    }
-
-    /// Expand the outer edge of the ellipse quadrant by a given offset
-    ///
-    /// This method will expand the ellipse quadrant in the direction of its outer edge. The center
-    /// point will not be moved.
-    ///
-    /// If the radius of the ellipse quadrant is zero, no expand will be performed.
-    pub(crate) fn expand_curved_edge(&self, offset: u32) -> Self {
-        if self.radius == Size::zero() {
-            return *self;
-        }
-
-        let offset = Size::new_equal(offset);
-
-        let Self {
-            bounding_box,
-            quadrant,
-            ..
-        } = self;
-
-        let top_left = bounding_box.top_left;
-
-        let top_left = match quadrant {
-            Quadrant::TopLeft => top_left - offset,
-            Quadrant::TopRight => top_left - offset.y_axis(),
-            Quadrant::BottomRight => top_left,
-            Quadrant::BottomLeft => top_left - offset.x_axis(),
-        };
-
-        Self::new(top_left, self.radius + offset, self.quadrant)
     }
 }
 
@@ -119,6 +81,13 @@ impl Points {
             iter: ellipse_quadrant.bounding_box().points(),
         }
     }
+
+    pub(crate) const fn empty() -> Self {
+        Self {
+            ellipse: Ellipse::new(Point::zero(), Size::zero()),
+            iter: rectangle::Points::empty(),
+        }
+    }
 }
 
 impl Iterator for Points {
@@ -135,78 +104,10 @@ impl Iterator for Points {
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<EllipseQuadrant, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledEllipseQuadrantIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledEllipseQuadrantIterator::new(self)
-    }
-}
-
-/// Pixel iterator for each pixel in the ellipse border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledEllipseQuadrantIterator<C>
-where
-    C: PixelColor,
-{
-    iter: StyledEllipseIterator<C>,
-    bounding_box: Rectangle,
-}
-
-impl<C> StyledEllipseQuadrantIterator<C>
-where
-    C: PixelColor,
-{
-    pub(crate) fn new(styled: &Styled<EllipseQuadrant, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        Self {
-            iter: primitive.ellipse.into_styled(*style).into_iter(),
-            bounding_box: primitive
-                .expand_curved_edge(style.outside_stroke_width())
-                .bounding_box(),
-        }
-    }
-}
-
-impl<C> Iterator for StyledEllipseQuadrantIterator<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for pixel in &mut self.iter {
-            if self.bounding_box.contains(pixel.0) {
-                return Some(pixel);
-            }
-        }
-
-        None
-    }
-}
-
-impl<'a, C: 'a> Drawable<C> for &Styled<EllipseQuadrant, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        style::{PrimitiveStyleBuilder, StrokeAlignment},
-    };
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[test]
     fn quadrants_even_size() {
@@ -348,86 +249,6 @@ mod tests {
                 "  ##########  ",
                 "   ########   ",
                 "     ####     ",
-            ])
-        );
-    }
-
-    #[test]
-    fn fill_and_stroke() {
-        let mut display = MockDisplay::new();
-
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_width(3)
-            .stroke_color(BinaryColor::Off)
-            .stroke_alignment(StrokeAlignment::Inside)
-            .fill_color(BinaryColor::On)
-            .build();
-
-        let radius = Size::new(10, 5);
-        let top_left = Point::new(0, 0);
-
-        EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft)
-            .into_styled(style)
-            .into_iter()
-            .chain(
-                EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight)
-                    .into_styled(style)
-                    .into_iter(),
-            )
-            .chain(
-                EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight)
-                    .into_styled(style)
-                    .into_iter(),
-            )
-            .chain(
-                EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft)
-                    .into_styled(style)
-                    .into_iter(),
-            )
-            .draw(&mut display)
-            .unwrap();
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "      ........      ",
-                "   ..............   ",
-                " .................. ",
-                ".....##########.....",
-                "...##############...",
-                "...##############...",
-                ".....##########.....",
-                " .................. ",
-                "   ..............   ",
-                "      ........      ",
-            ])
-        );
-    }
-
-    #[test]
-    fn non_circular() {
-        let mut display = MockDisplay::new();
-
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_width(3)
-            .stroke_color(BinaryColor::Off)
-            .stroke_alignment(StrokeAlignment::Inside)
-            .fill_color(BinaryColor::On)
-            .build();
-
-        EllipseQuadrant::new(Point::new(0, 0), Size::new(10, 5), Quadrant::TopLeft)
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "      ....",
-                "   .......",
-                " .........",
-                ".....#####",
-                "...#######",
             ])
         );
     }

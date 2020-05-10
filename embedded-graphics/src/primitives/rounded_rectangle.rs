@@ -5,7 +5,7 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{
-        ellipse_quadrant::{self, EllipseQuadrant, Quadrant, StyledEllipseQuadrantIterator},
+        ellipse_quadrant::{self, EllipseQuadrant, Quadrant},
         rectangle::{self, Rectangle, StyledRectangleIterator},
         ContainsPoint, Primitive,
     },
@@ -127,7 +127,7 @@ impl RoundedRectangle {
     ///
     /// Corner radii are specified from the top-left corner in a clockwise direction
     pub fn with_radii(rectangle: Rectangle, corners: CornerRadii) -> Self {
-        let Rectangle { size, top_left, .. } = rectangle;
+        let Rectangle { size, .. } = rectangle;
 
         let corners = CornerRadii {
             top_left: corners.top_left.component_min(size / 2),
@@ -265,6 +265,20 @@ impl Points {
             bottom_left_corner: bottom_left_ellipse.bounding_box(),
         }
     }
+
+    fn empty() -> Self {
+        Self {
+            rect_iter: rectangle::Points::empty(),
+            top_left_iter: ellipse_quadrant::Points::empty(),
+            top_right_iter: ellipse_quadrant::Points::empty(),
+            bottom_right_iter: ellipse_quadrant::Points::empty(),
+            bottom_left_iter: ellipse_quadrant::Points::empty(),
+            top_left_corner: Rectangle::new(Point::zero(), Size::zero()),
+            top_right_corner: Rectangle::new(Point::zero(), Size::zero()),
+            bottom_right_corner: Rectangle::new(Point::zero(), Size::zero()),
+            bottom_left_corner: Rectangle::new(Point::zero(), Size::zero()),
+        }
+    }
 }
 
 impl Iterator for Points {
@@ -299,17 +313,10 @@ pub struct StyledRoundedRectangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    rect_iter: StyledRectangleIterator<C>,
-
-    top_left_corner: Rectangle,
-    top_right_corner: Rectangle,
-    bottom_right_corner: Rectangle,
-    bottom_left_corner: Rectangle,
-
-    top_left_iter: StyledEllipseQuadrantIterator<C>,
-    top_right_iter: StyledEllipseQuadrantIterator<C>,
-    bottom_right_iter: StyledEllipseQuadrantIterator<C>,
-    bottom_left_iter: StyledEllipseQuadrantIterator<C>,
+    iter: Points,
+    fill_area: RoundedRectangle,
+    stroke_color: Option<C>,
+    fill_color: Option<C>,
 }
 
 impl<C> StyledRoundedRectangleIterator<C>
@@ -319,46 +326,20 @@ where
     fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
         let Styled { style, primitive } = styled;
 
-        let Rectangle { top_left, size, .. } = primitive.rectangle;
-        let corners = primitive.corners;
+        let iter = if !styled.style.is_transparent() {
+            let stroke_area = primitive.expand(style.outside_stroke_width());
+            Points::new(&stroke_area)
+        } else {
+            Points::empty()
+        };
 
-        let sw = style.outside_stroke_width();
-
-        let top_left_ellipse = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
-        let top_right_ellipse = EllipseQuadrant::new(
-            top_left + size.x_axis() - corners.top_left.x_axis(),
-            corners.top_right,
-            Quadrant::TopRight,
-        );
-        let bottom_right_ellipse = EllipseQuadrant::new(
-            top_left + size - corners.bottom_right,
-            corners.bottom_right,
-            Quadrant::BottomRight,
-        );
-        let bottom_left_ellipse = EllipseQuadrant::new(
-            top_left + size.y_axis() - corners.bottom_left.y_axis(),
-            corners.bottom_left,
-            Quadrant::BottomLeft,
-        );
+        let fill_area = primitive.shrink(style.inside_stroke_width());
 
         Self {
-            rect_iter: if !style.is_transparent() {
-                primitive.rectangle
-            } else {
-                Rectangle::new(Point::zero(), Size::zero())
-            }
-            .into_styled(*style)
-            .into_iter(),
-
-            top_left_iter: top_left_ellipse.into_styled(*style).into_iter(),
-            top_right_iter: top_right_ellipse.into_styled(*style).into_iter(),
-            bottom_right_iter: bottom_right_ellipse.into_styled(*style).into_iter(),
-            bottom_left_iter: bottom_left_ellipse.into_styled(*style).into_iter(),
-
-            top_left_corner: top_left_ellipse.expand_curved_edge(sw).bounding_box(),
-            top_right_corner: top_right_ellipse.expand_curved_edge(sw).bounding_box(),
-            bottom_right_corner: bottom_right_ellipse.expand_curved_edge(sw).bounding_box(),
-            bottom_left_corner: bottom_left_ellipse.expand_curved_edge(sw).bounding_box(),
+            iter,
+            fill_area,
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
@@ -370,25 +351,15 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Self {
-            top_left_corner,
-            top_right_corner,
-            bottom_right_corner,
-            bottom_left_corner,
-            ..
-        } = self;
+        let point = self.iter.next()?;
 
-        self.rect_iter
-            .find(|Pixel(pos, _)| {
-                !top_left_corner.contains(*pos)
-                    && !top_right_corner.contains(*pos)
-                    && !bottom_right_corner.contains(*pos)
-                    && !bottom_left_corner.contains(*pos)
-            })
-            .or_else(|| self.top_left_iter.next())
-            .or_else(|| self.top_right_iter.next())
-            .or_else(|| self.bottom_right_iter.next())
-            .or_else(|| self.bottom_left_iter.next())
+        let color = if self.fill_area.contains(point) {
+            self.fill_color?
+        } else {
+            self.stroke_color?
+        };
+
+        Some(Pixel(point, color))
     }
 }
 
@@ -440,10 +411,10 @@ mod tests {
     }
 
     #[test]
-    fn zero_radius_equals_rectangle() {
+    fn thin_line_zero_radius_equals_rectangle() {
         let style = PrimitiveStyleBuilder::new()
             .stroke_color(Rgb565::RED)
-            .stroke_width(8)
+            .stroke_width(1)
             .fill_color(Rgb565::RED)
             .build();
 
@@ -460,6 +431,24 @@ mod tests {
 
     #[test]
     fn clamp_radius_at_rect_size() {
-        // TODO
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb565::RED)
+            .stroke_width(8)
+            .fill_color(Rgb565::GREEN)
+            .build();
+
+        let clamped = RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(20, 30)),
+            Size::new_equal(50),
+        )
+        .into_styled(style);
+
+        let expected = RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(20, 30)),
+            Size::new(10, 15),
+        )
+        .into_styled(style);
+
+        assert!(clamped.into_iter().eq(expected.into_iter()));
     }
 }
