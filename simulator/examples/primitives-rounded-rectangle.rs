@@ -1,4 +1,8 @@
-//! TODO: Doc
+//! # Example: Rounded rectangle
+//!
+//! This example draws a `RoundedRectangle`. Click and drag to move the lower-left corner around
+//! the screen. The up/down arrow keys adjust stroke width, left/right the corner radius. Space
+//! cycles the stroke alignment between center/outside/inside.
 
 use embedded_graphics::{
     pixelcolor::Rgb888,

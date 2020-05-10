@@ -1,9 +1,11 @@
-use crate::geometry::Dimensions;
-use crate::geometry::{Point, Size};
-use crate::primitives::ellipse;
-use crate::primitives::rectangle::{self, Rectangle};
-use crate::primitives::ContainsPoint;
-use crate::primitives::Primitive;
+use crate::{
+    geometry::{Dimensions, Point, Size},
+    primitives::{
+        ellipse,
+        rectangle::{self, Rectangle},
+        ContainsPoint, Primitive,
+    },
+};
 
 /// A quadrant around an origin
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

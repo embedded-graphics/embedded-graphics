@@ -1,4 +1,4 @@
-//! The rectangle primitive. Also good for drawing squares.
+//! The rounded rectangle primitive.
 
 use crate::{
     drawable::{Drawable, Pixel},
@@ -42,7 +42,77 @@ impl CornerRadii {
     }
 }
 
-/// Rounded rectangle primitive
+/// Rounded rectangle primitive.
+///
+/// Creates a rectangle with rounded corners. Corners can be circular or elliptical in shape, and
+/// each corner may have a separate radius applied to it.
+///
+/// # Examples
+///
+/// ## Create a uniform rounded rectangle
+///
+/// This example creates a rounded rectangle 50px wide by 60px tall. Using
+/// [`RoundedRectangle::with_equal_corners`], all corners are given the same 10px circular radius.
+/// The rectangle has a solid green fill with a 5px red stroke.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitives::{Rectangle, RoundedRectangle},
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+/// };
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
+///
+/// let style = PrimitiveStyleBuilder::new()
+///     .stroke_width(5)
+///     .stroke_color(Rgb565::RED)
+///     .fill_color(Rgb565::GREEN)
+///     .build();
+///
+/// RoundedRectangle::with_equal_corners(
+///     Rectangle::new(Point::new(5, 5), Size::new(50, 60)),
+///     Size::new(10, 10),
+/// )
+/// .into_styled(style)
+/// .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
+///
+/// ## Different corner radii
+///
+/// This example creates a rounded rectangle 50px wide by 60px tall. Using `RoundedRectangle::new()`
+/// , each corner is given a distinct X and Y radius.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+/// };
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
+///
+/// let style = PrimitiveStyleBuilder::new()
+///     .stroke_width(5)
+///     .stroke_color(Rgb565::RED)
+///     .fill_color(Rgb565::GREEN)
+///     .build();
+///
+/// let radii = CornerRadii {
+///     top_left: Size::new(10, 12),
+///     top_right: Size::new(14, 16),
+///     bottom_right: Size::new(18, 20),
+///     bottom_left: Size::new(22, 24),
+/// };
+///
+/// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
+///     .into_styled(style)
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct RoundedRectangle {
     /// The base rectangle
