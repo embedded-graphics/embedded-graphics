@@ -6,7 +6,7 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         ellipse_quadrant::{self, EllipseQuadrant, Quadrant},
-        rectangle::{self, Rectangle, StyledRectangleIterator},
+        rectangle::{self, Rectangle},
         ContainsPoint, Primitive,
     },
     style::{PrimitiveStyle, Styled},
@@ -119,14 +119,12 @@ impl Dimensions for RoundedRectangle {
 impl RoundedRectangle {
     /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for  all
     /// corners.
-    pub fn new(rectangle: Rectangle, corner_radius: Size) -> Self {
-        Self::with_radii(rectangle, CornerRadii::new_equal(corner_radius))
+    pub fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
+        Self::new(rectangle, CornerRadii::new_equal(corner_radius))
     }
 
     /// Creates a new rounded rectangle with different corner radii.
-    ///
-    /// Corner radii are specified from the top-left corner in a clockwise direction
-    pub fn with_radii(rectangle: Rectangle, corners: CornerRadii) -> Self {
+    pub fn new(rectangle: Rectangle, corners: CornerRadii) -> Self {
         let Rectangle { size, .. } = rectangle;
 
         let corners = CornerRadii {
@@ -150,7 +148,7 @@ impl RoundedRectangle {
     fn expand(&self, offset: u32) -> Self {
         let corner_offset = Size::new_equal(offset);
 
-        Self::with_radii(
+        Self::new(
             self.rectangle.expand(offset),
             CornerRadii {
                 top_left: self.corners.top_left.saturating_add(corner_offset),
@@ -164,7 +162,7 @@ impl RoundedRectangle {
     fn shrink(&self, offset: u32) -> Self {
         let corner_offset = Size::new_equal(offset);
 
-        Self::with_radii(
+        Self::new(
             self.rectangle.shrink(offset),
             CornerRadii {
                 top_left: self.corners.top_left.saturating_sub(corner_offset),
@@ -383,7 +381,7 @@ mod tests {
 
     #[test]
     fn transparent_style_no_render() {
-        let rounded_rect = RoundedRectangle::new(
+        let rounded_rect = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(10, 20)),
             Size::new(4, 8),
         )
@@ -394,7 +392,7 @@ mod tests {
 
     #[test]
     fn points_equals_filled() {
-        let rounded_rect = RoundedRectangle::new(
+        let rounded_rect = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(10, 20)),
             Size::new(4, 8),
         );
@@ -418,7 +416,7 @@ mod tests {
             .fill_color(Rgb565::RED)
             .build();
 
-        let rounded_rect = RoundedRectangle::new(
+        let rounded_rect = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
             Size::zero(),
         )
@@ -437,13 +435,13 @@ mod tests {
             .fill_color(Rgb565::GREEN)
             .build();
 
-        let clamped = RoundedRectangle::new(
+        let clamped = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
             Size::new_equal(50),
         )
         .into_styled(style);
 
-        let expected = RoundedRectangle::new(
+        let expected = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
             Size::new(10, 15),
         )

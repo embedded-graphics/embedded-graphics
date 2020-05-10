@@ -21,7 +21,7 @@ fn draw(
 ) {
     display.clear(Rgb888::BLACK).unwrap();
 
-    RoundedRectangle::new(Rectangle::new(top_left, size), radius)
+    RoundedRectangle::with_equal_corners(Rectangle::new(top_left, size), radius)
         .into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(stroke_width)
