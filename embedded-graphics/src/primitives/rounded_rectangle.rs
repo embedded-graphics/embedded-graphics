@@ -74,7 +74,7 @@ impl ContainsPoint for RoundedRectangle {
 
         let tl = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
         let tr = EllipseQuadrant::new(
-            top_left + size.x_axis() - corners.top_left.x_axis(),
+            top_left + size.x_axis() - corners.top_right.x_axis(),
             corners.top_right,
             Quadrant::TopRight,
         );
@@ -234,7 +234,7 @@ impl Points {
 
         let top_left_ellipse = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
         let top_right_ellipse = EllipseQuadrant::new(
-            top_left + size.x_axis() - corners.top_left.x_axis(),
+            top_left + size.x_axis() - corners.top_right.x_axis(),
             corners.top_right,
             Quadrant::TopRight,
         );
