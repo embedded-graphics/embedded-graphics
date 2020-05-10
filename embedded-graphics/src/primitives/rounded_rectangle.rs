@@ -92,33 +92,7 @@ impl RoundedRectangle {
             bottom_left: corners.bottom_left.component_min(size / 2),
         };
 
-        // let top_left_radius = corner_radii[0].component_min(size / 2);
-        // let top_right_radius = corner_radii[1].component_min(size / 2);
-        // let bottom_right_radius = corner_radii[2].component_min(size / 2);
-        // let bottom_left_radius = corner_radii[3].component_min(size / 2);
-
-        Self {
-            rectangle,
-            corners
-            // corners: [
-            //     EllipseQuadrant::new(top_left, top_left_radius, Quadrant::TopLeft),
-            //     EllipseQuadrant::new(
-            //         top_left + size.x_axis() - top_left_radius.x_axis(),
-            //         top_right_radius,
-            //         Quadrant::TopRight,
-            //     ),
-            //     EllipseQuadrant::new(
-            //         top_left + size - bottom_right_radius,
-            //         bottom_right_radius,
-            //         Quadrant::BottomRight,
-            //     ),
-            //     EllipseQuadrant::new(
-            //         top_left + size.y_axis() - bottom_left_radius.y_axis(),
-            //         bottom_left_radius,
-            //         Quadrant::BottomLeft,
-            //     ),
-            // ],
-        }
+        Self { rectangle, corners }
     }
 
     /// Returns the center of this rectangle.
@@ -271,36 +245,6 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
-        // let top_left_iter = corners[0].into_styled(*style).into_iter();
-        // let top_right_iter = corners[1].into_styled(*style).into_iter();
-        // let bottom_right_iter = corners[2].into_styled(*style).into_iter();
-        // let bottom_left_iter = corners[3].into_styled(*style).into_iter();
-
-        // let top_left_corner = corners[0].expand_curved_edge(sw).bounding_box();
-        // let top_right_corner = corners[1].expand_curved_edge(sw).bounding_box();
-        // let bottom_right_corner = corners[2].expand_curved_edge(sw).bounding_box();
-        // let bottom_left_corner = corners[3].expand_curved_edge(sw).bounding_box();
-
-        // Self {
-        //     rect_iter: if !style.is_transparent() {
-        //         *rectangle
-        //     } else {
-        //         Rectangle::new(Point::zero(), Size::zero())
-        //     }
-        //     .into_styled(*style)
-        //     .into_iter(),
-
-        //     top_left_iter,
-        //     top_right_iter,
-        //     bottom_right_iter,
-        //     bottom_left_iter,
-
-        //     top_left_corner,
-        //     top_right_corner,
-        //     bottom_right_corner,
-        //     bottom_left_corner,
-        // }
-
         let Styled { style, primitive } = styled;
 
         let Rectangle { top_left, size, .. } = primitive.rectangle;
@@ -420,7 +364,7 @@ mod tests {
 
     #[test]
     fn styled_unequal_corners() {
-        //
+        // TODO
     }
 
     #[test]
@@ -444,6 +388,6 @@ mod tests {
 
     #[test]
     fn clamp_radius_at_rect_size() {
-        //
+        // TODO
     }
 }
