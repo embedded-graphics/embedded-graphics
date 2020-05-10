@@ -374,7 +374,8 @@ where
 mod tests {
     use super::*;
     use crate::{
-        pixelcolor::{BinaryColor, Rgb565},
+        mock_display::MockDisplay,
+        pixelcolor::{BinaryColor, Rgb565, Rgb888},
         prelude::*,
         style::PrimitiveStyleBuilder,
     };
@@ -405,7 +406,56 @@ mod tests {
 
     #[test]
     fn styled_unequal_corners() {
-        // TODO
+        let mut display = MockDisplay::new();
+
+        RoundedRectangle::new(
+            Rectangle::new(Point::new_equal(2), Size::new(20, 20)),
+            CornerRadii {
+                top_left: Size::new(3, 4),
+                top_right: Size::new(5, 6),
+                bottom_right: Size::new(7, 8),
+                bottom_left: Size::new(9, 10),
+            },
+        )
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(5)
+                .fill_color(Rgb888::RED)
+                .stroke_color(Rgb888::GREEN)
+                .build(),
+        )
+        .draw(&mut display)
+        .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "   GGGGGGGGGGGGGGGG     ",
+                "  GGGGGGGGGGGGGGGGGGG   ",
+                " GGGGGGGGGGGGGGGGGGGGG  ",
+                "GGGGGGGGGGGGGGGGGGGGGGG ",
+                "GGGGGGGGGGGGGGGGGGGGGGG ",
+                "GGGGGRRRRRRRRRRRRRGGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGRRRRRRRRRRRRRRGGGGG",
+                "GGGGGGRRRRRRRRRRRRRGGGGG",
+                " GGGGGRRRRRRRRRRRRGGGGGG",
+                " GGGGGGRRRRRRRRRRRGGGGG ",
+                "  GGGGGGGRRRRRRRRGGGGGG ",
+                "  GGGGGGGGGGGGGGGGGGGGG ",
+                "   GGGGGGGGGGGGGGGGGGG  ",
+                "    GGGGGGGGGGGGGGGGG   ",
+                "      GGGGGGGGGGGGGG    ",
+                "        GGGGGGGGGG      ",
+            ])
+        );
     }
 
     #[test]
