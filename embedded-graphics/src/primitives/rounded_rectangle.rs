@@ -146,6 +146,34 @@ impl RoundedRectangle {
     pub fn center(&self) -> Point {
         self.rectangle.center()
     }
+
+    fn expand(&self, offset: u32) -> Self {
+        let corner_offset = Size::new_equal(offset);
+
+        Self::with_radii(
+            self.rectangle.expand(offset),
+            CornerRadii {
+                top_left: self.corners.top_left.saturating_add(corner_offset),
+                top_right: self.corners.top_right.saturating_add(corner_offset),
+                bottom_right: self.corners.bottom_right.saturating_add(corner_offset),
+                bottom_left: self.corners.bottom_left.saturating_add(corner_offset),
+            },
+        )
+    }
+
+    fn shrink(&self, offset: u32) -> Self {
+        let corner_offset = Size::new_equal(offset);
+
+        Self::with_radii(
+            self.rectangle.shrink(offset),
+            CornerRadii {
+                top_left: self.corners.top_left.saturating_sub(corner_offset),
+                top_right: self.corners.top_right.saturating_sub(corner_offset),
+                bottom_right: self.corners.bottom_right.saturating_sub(corner_offset),
+                bottom_left: self.corners.bottom_left.saturating_sub(corner_offset),
+            },
+        )
+    }
 }
 
 impl Transform for RoundedRectangle {
