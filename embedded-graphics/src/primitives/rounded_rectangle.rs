@@ -175,10 +175,22 @@ impl RoundedRectangle {
 }
 
 impl Transform for RoundedRectangle {
-    /// Translate the rect from its current position to a new position by (x, y) pixels, returning
-    /// a new `Rectangle`. For a mutating transform, see `translate_mut`.
+    /// Translate the rounded rectangle from its current position to a new position by (x, y)
+    /// pixels, returning a new `RoundedRectangle`. For a mutating transform, see `translate_mut`.
     ///
-    /// TODO: Example
+    /// ```
+    /// # use embedded_graphics::prelude::*;
+    /// use embedded_graphics::primitives::{Rectangle, RoundedRectangle};
+    ///
+    /// let original = RoundedRectangle::with_equal_corners(
+    ///     Rectangle::new(Point::new(5, 10), Size::new(20, 30)),
+    ///     Size::new(10, 15),
+    /// );
+    /// let moved = original.translate(Point::new(10, 12));
+    ///
+    /// assert_eq!(original.bounding_box().top_left, Point::new(5, 10));
+    /// assert_eq!(moved.bounding_box().top_left, Point::new(15, 22));
+    /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
             rectangle: self.rectangle.translate(by),
@@ -186,9 +198,21 @@ impl Transform for RoundedRectangle {
         }
     }
 
-    /// Translate the rect from its current position to a new position by (x, y) pixels.
+    /// Translate the rounded rectangle from its current position to a new position by (x, y) pixels.
     ///
-    /// TODO: Example
+    /// ```
+    /// # use embedded_graphics::prelude::*;
+    /// use embedded_graphics::primitives::{Rectangle, RoundedRectangle};
+    ///
+    /// let mut shape = RoundedRectangle::with_equal_corners(
+    ///     Rectangle::new(Point::new(5, 10), Size::new(20, 30)),
+    ///     Size::new(10, 15),
+    /// );
+    ///
+    /// shape.translate_mut(Point::new(10, 12));
+    ///
+    /// assert_eq!(shape.bounding_box().top_left, Point::new(15, 22));
+    /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
         self.rectangle.translate_mut(by);
 
