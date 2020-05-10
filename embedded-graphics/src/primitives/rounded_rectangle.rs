@@ -62,7 +62,51 @@ impl Primitive for RoundedRectangle {
 
 impl ContainsPoint for RoundedRectangle {
     fn contains(&self, point: Point) -> bool {
-        unimplemented!()
+        let Self {
+            rectangle, corners, ..
+        } = self;
+
+        let Rectangle { top_left, size, .. } = *rectangle;
+
+        if !rectangle.contains(point) {
+            return false;
+        }
+
+        let tl = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
+        let tr = EllipseQuadrant::new(
+            top_left + size.x_axis() - corners.top_left.x_axis(),
+            corners.top_right,
+            Quadrant::TopRight,
+        );
+        let br = EllipseQuadrant::new(
+            top_left + size - corners.bottom_right,
+            corners.bottom_right,
+            Quadrant::BottomRight,
+        );
+        let bl = EllipseQuadrant::new(
+            top_left + size.y_axis() - corners.bottom_left.y_axis(),
+            corners.bottom_left,
+            Quadrant::BottomLeft,
+        );
+
+        if tl.bounding_box().contains(point) {
+            return tl.contains(point);
+        }
+
+        if tr.bounding_box().contains(point) {
+            return tr.contains(point);
+        }
+
+        if br.bounding_box().contains(point) {
+            return br.contains(point);
+        }
+
+        if bl.bounding_box().contains(point) {
+            return bl.contains(point);
+        }
+
+        // We're in the rest of the rectangle at this point
+        true
     }
 }
 
