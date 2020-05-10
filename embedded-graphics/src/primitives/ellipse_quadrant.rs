@@ -10,10 +10,10 @@ use crate::{
 /// A quadrant around an origin
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum Quadrant {
-    TopLeft = 0,
-    TopRight = 1,
-    BottomRight = 2,
-    BottomLeft = 3,
+    TopLeft,
+    TopRight,
+    BottomRight,
+    BottomLeft,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

@@ -132,44 +132,29 @@ impl Primitive for RoundedRectangle {
 
 impl ContainsPoint for RoundedRectangle {
     fn contains(&self, point: Point) -> bool {
-        let Self {
-            rectangle, corners, ..
-        } = self;
-
-        let Rectangle { top_left, size, .. } = *rectangle;
-
-        if !rectangle.contains(point) {
+        if !self.rectangle.contains(point) {
             return false;
         }
 
-        let tl = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
-        let tr = EllipseQuadrant::new(
-            top_left + size.x_axis() - corners.top_right.x_axis(),
-            corners.top_right,
-            Quadrant::TopRight,
-        );
-        let br = EllipseQuadrant::new(
-            top_left + size - corners.bottom_right,
-            corners.bottom_right,
-            Quadrant::BottomRight,
-        );
-        let bl = EllipseQuadrant::new(
-            top_left + size.y_axis() - corners.bottom_left.y_axis(),
-            corners.bottom_left,
-            Quadrant::BottomLeft,
-        );
+        let tl = self.get_corner_quadrant(Quadrant::TopLeft);
 
         if tl.bounding_box().contains(point) {
             return tl.contains(point);
         }
 
+        let tr = self.get_corner_quadrant(Quadrant::TopRight);
+
         if tr.bounding_box().contains(point) {
             return tr.contains(point);
         }
 
+        let br = self.get_corner_quadrant(Quadrant::BottomRight);
+
         if br.bounding_box().contains(point) {
             return br.contains(point);
         }
+
+        let bl = self.get_corner_quadrant(Quadrant::BottomLeft);
 
         if bl.bounding_box().contains(point) {
             return bl.contains(point);
@@ -187,7 +172,7 @@ impl Dimensions for RoundedRectangle {
 }
 
 impl RoundedRectangle {
-    /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for  all
+    /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for all
     /// corners.
     pub fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
         Self::new(rectangle, CornerRadii::new_equal(corner_radius))
@@ -207,12 +192,33 @@ impl RoundedRectangle {
         Self { rectangle, corners }
     }
 
-    /// Returns the center of this rectangle.
-    ///
-    /// For rectangles with even width and/or height the returned value is rounded down
-    /// to the nearest integer coordinate.
-    pub fn center(&self) -> Point {
-        self.rectangle.center()
+    fn get_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
+        let Self {
+            rectangle, corners, ..
+        } = self;
+
+        let Rectangle { top_left, size, .. } = *rectangle;
+
+        match quadrant {
+            Quadrant::TopLeft => {
+                EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft)
+            }
+            Quadrant::TopRight => EllipseQuadrant::new(
+                top_left + size.x_axis() - corners.top_right.x_axis(),
+                corners.top_right,
+                Quadrant::TopRight,
+            ),
+            Quadrant::BottomRight => EllipseQuadrant::new(
+                top_left + size - corners.bottom_right,
+                corners.bottom_right,
+                Quadrant::BottomRight,
+            ),
+            Quadrant::BottomLeft => EllipseQuadrant::new(
+                top_left + size.y_axis() - corners.bottom_left.y_axis(),
+                corners.bottom_left,
+                Quadrant::BottomLeft,
+            ),
+        }
     }
 
     fn expand(&self, offset: u32) -> Self {
@@ -320,31 +326,13 @@ pub struct Points {
 
 impl Points {
     fn new(shape: &RoundedRectangle) -> Self {
-        let RoundedRectangle {
-            rectangle, corners, ..
-        } = shape;
-
-        let Rectangle { top_left, size, .. } = *rectangle;
-
-        let top_left_ellipse = EllipseQuadrant::new(top_left, corners.top_left, Quadrant::TopLeft);
-        let top_right_ellipse = EllipseQuadrant::new(
-            top_left + size.x_axis() - corners.top_right.x_axis(),
-            corners.top_right,
-            Quadrant::TopRight,
-        );
-        let bottom_right_ellipse = EllipseQuadrant::new(
-            top_left + size - corners.bottom_right,
-            corners.bottom_right,
-            Quadrant::BottomRight,
-        );
-        let bottom_left_ellipse = EllipseQuadrant::new(
-            top_left + size.y_axis() - corners.bottom_left.y_axis(),
-            corners.bottom_left,
-            Quadrant::BottomLeft,
-        );
+        let top_left_ellipse = shape.get_corner_quadrant(Quadrant::TopLeft);
+        let top_right_ellipse = shape.get_corner_quadrant(Quadrant::TopRight);
+        let bottom_right_ellipse = shape.get_corner_quadrant(Quadrant::BottomRight);
+        let bottom_left_ellipse = shape.get_corner_quadrant(Quadrant::BottomLeft);
 
         Self {
-            rect_iter: rectangle.points(),
+            rect_iter: shape.rectangle.points(),
 
             top_left_iter: top_left_ellipse.points(),
             top_right_iter: top_right_ellipse.points(),
