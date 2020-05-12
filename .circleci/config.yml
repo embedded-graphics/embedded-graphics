@@ -26,7 +26,6 @@ target_steps: &target_steps
     - restore_cache:
         keys:
           - v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
-          - v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}-{{ .Environment.TARGET }}
     - run: |
         SYSROOT=$(rustc --print sysroot)
 
@@ -38,7 +37,7 @@ target_steps: &target_steps
     - run: cargo update
     - run: ./build_target.sh --release
     - save_cache:
-        key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}-{{ .Environment.TARGET }}
+        key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
           - ./target
           - /usr/local/cargo/registry
