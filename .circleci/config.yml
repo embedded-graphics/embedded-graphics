@@ -15,7 +15,7 @@ precheck_steps: &precheck_steps
         key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
           - ./target
-          - /home/ubuntu/.cargo
+          - /usr/local/cargo/registry
 
 # Build crates for embedded target
 target_steps: &target_steps
@@ -41,7 +41,7 @@ target_steps: &target_steps
         key: v1-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}-{{ .Environment.TARGET }}
         paths:
           - ./target
-          - /home/ubuntu/.cargo
+          - /usr/local/cargo/registry
 
 version: 2
 jobs:
