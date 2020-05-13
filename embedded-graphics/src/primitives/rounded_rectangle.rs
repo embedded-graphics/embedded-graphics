@@ -40,12 +40,62 @@ impl CornerRadii {
             bottom_left: radius,
         }
     }
+
+    /// Confine corner radii that are too large to a given bounding rectangle
+    fn confine(self, bounding_box: Size) -> Self {
+        // Compute free space for each edge. If there is remaining free space, the call to
+        // checked_sub() will return `None`.
+        let free_space_top =
+            (self.top_left.width + self.top_right.width).checked_sub(bounding_box.width);
+        let free_space_right =
+            (self.top_right.height + self.bottom_right.height).checked_sub(bounding_box.height);
+        let free_space_bottom =
+            (self.bottom_left.width + self.bottom_right.width).checked_sub(bounding_box.width);
+        let free_space_left =
+            (self.top_left.height + self.bottom_left.height).checked_sub(bounding_box.height);
+
+        // Find the largest overlap for all edges that have one
+        let largest_overlap = [
+            free_space_top,
+            free_space_right,
+            free_space_bottom,
+            free_space_left,
+        ]
+        .iter()
+        .filter_map(|s| *s)
+        .max();
+
+        if let Some(largest_overlap) = largest_overlap {
+            // Reduce each corner radius by (largest overlap / 2)
+            let reduce_by = Size::new_equal(largest_overlap / 2);
+
+            Self {
+                top_left: self.top_left.saturating_sub(reduce_by),
+                top_right: self.top_right.saturating_sub(reduce_by),
+                bottom_right: self.bottom_right.saturating_sub(reduce_by),
+                bottom_left: self.bottom_left.saturating_sub(reduce_by),
+            }
+        } else {
+            self
+        }
+    }
 }
 
 /// Rounded rectangle primitive.
 ///
 /// Creates a rectangle with rounded corners. Corners can be circular or elliptical in shape, and
 /// each corner may have a separate radius applied to it.
+///
+/// # Overlapping corners
+///
+/// If one or more corner radii are too large to be contained along an edge of the rectangle, all
+/// corner radii will be reduced by half the largest overlap in pixels (rounded down).
+///
+/// The [example further down the page](#overlapping-corner-radii) demonstrates this behaviour.
+///
+/// This is similar but not identical to
+/// [how the CSS specification works](https://www.w3.org/TR/css-backgrounds-3/#corner-overlap) as it
+/// relies on floating point calculations.
 ///
 /// # Examples
 ///
@@ -111,6 +161,45 @@ impl CornerRadii {
 /// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
+///
+/// ## Overlapping corner radii
+///
+/// This example creates a rounded rectangle 50px wide by 60px tall. All corners are given a radius
+/// of (25px, 25px) except the top left corner which instead has a radius of (30px, 30px). This
+/// means the corner radii on the left edge of the rectangle add up to 55px, 5px greater than the
+/// 50px height of the rectangle.
+///
+/// All corner radii will now be reduced by 2px (5 / 2, rounded down) resulting in the corner radii
+/// of (28px, 28px) for the top left corner and (23px, 23px) for all others.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     prelude::*,
+///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
+/// };
+///
+/// let radii = CornerRadii {
+///     top_left: Size::new(30, 30),
+///     top_right: Size::new(25, 25),
+///     bottom_right: Size::new(25, 25),
+///     bottom_left: Size::new(25, 25),
+/// };
+///
+/// let rectangle =
+///     RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii);
+///
+/// assert_eq!(
+///     rectangle.corners,
+///     CornerRadii {
+///         top_left: Size::new(28, 28),
+///         top_right: Size::new(23, 23),
+///         bottom_right: Size::new(23, 23),
+///         bottom_left: Size::new(23, 23),
+///     }
+/// );
+///
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -180,16 +269,10 @@ impl RoundedRectangle {
 
     /// Creates a new rounded rectangle with different corner radii.
     pub fn new(rectangle: Rectangle, corners: CornerRadii) -> Self {
-        let Rectangle { size, .. } = rectangle;
-
-        let corners = CornerRadii {
-            top_left: corners.top_left.component_min(size / 2),
-            top_right: corners.top_right.component_min(size / 2),
-            bottom_right: corners.bottom_right.component_min(size / 2),
-            bottom_left: corners.bottom_left.component_min(size / 2),
-        };
-
-        Self { rectangle, corners }
+        Self {
+            rectangle,
+            corners: corners.confine(rectangle.size),
+        }
     }
 
     fn get_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
@@ -575,10 +658,111 @@ mod tests {
 
         let expected = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
-            Size::new(10, 15),
+            Size::new(10, 10),
         )
         .into_styled(style);
 
         assert!(clamped.into_iter().eq(expected.into_iter()));
+    }
+
+    #[test]
+    fn full_height_corners() {
+        let mut display = MockDisplay::new();
+
+        RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(40, 20)),
+            CornerRadii {
+                top_left: Size::new(20, 20),
+                top_right: Size::new(20, 20),
+                bottom_right: Size::new(0, 0),
+                bottom_left: Size::new(0, 0),
+            },
+        )
+        .into_styled(PrimitiveStyleBuilder::new().fill_color(Rgb888::RED).build())
+        .draw(&mut display)
+        .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "                RRRRRRRR                ",
+                "            RRRRRRRRRRRRRRRR            ",
+                "          RRRRRRRRRRRRRRRRRRRR          ",
+                "         RRRRRRRRRRRRRRRRRRRRRR         ",
+                "       RRRRRRRRRRRRRRRRRRRRRRRRRR       ",
+                "      RRRRRRRRRRRRRRRRRRRRRRRRRRRR      ",
+                "     RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR     ",
+                "    RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR    ",
+                "    RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR    ",
+                "   RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR   ",
+                "  RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR  ",
+                "  RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR  ",
+                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+            ])
+        );
+    }
+
+    #[test]
+    fn corner_radii_exact_size() {
+        let corners = CornerRadii {
+            top_left: Size::new(10, 15),
+            top_right: Size::new(10, 15),
+            bottom_right: Size::new(10, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(corners.confine(Size::new(20, 30)), corners);
+    }
+
+    #[test]
+    fn corner_radii_single_overlap() {
+        let corners = CornerRadii {
+            // Create an overlap of 5px in the Y direction
+            top_left: Size::new(10, 20),
+            top_right: Size::new(10, 15),
+            bottom_right: Size::new(10, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(
+            corners.confine(Size::new(20, 30)),
+            // All corners should be shrunk by half the overlap, rounded down
+            CornerRadii {
+                top_left: Size::new(8, 18),
+                top_right: Size::new(8, 13),
+                bottom_right: Size::new(8, 13),
+                bottom_left: Size::new(8, 13),
+            }
+        );
+    }
+
+    #[test]
+    fn corner_radii_multiple_overlap() {
+        let corners = CornerRadii {
+            // Create an overlap of 5px in the Y direction
+            top_left: Size::new(10, 20),
+            top_right: Size::new(10, 15),
+            // Create an overlap of 8px in the X direction
+            bottom_right: Size::new(18, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(
+            corners.confine(Size::new(20, 30)),
+            // Reduce all corners by (8px / 2) = 4px
+            CornerRadii {
+                top_left: Size::new(6, 16),
+                top_right: Size::new(6, 11),
+                bottom_right: Size::new(14, 11),
+                bottom_left: Size::new(6, 11),
+            }
+        );
     }
 }
