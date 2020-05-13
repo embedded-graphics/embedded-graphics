@@ -8,6 +8,7 @@
 //!     * [Circles](./primitives/circle/struct.Circle.html)
 //!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
+//!     * [Polylines](./primitives/polyline/struct.Polyline.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
 //! Additional functionality provided by external crates:
