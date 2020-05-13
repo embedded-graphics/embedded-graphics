@@ -9,6 +9,7 @@
 //!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //!     * [Polylines](./primitives/polyline/struct.Polyline.html)
+//!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
 //! Additional functionality provided by external crates:
