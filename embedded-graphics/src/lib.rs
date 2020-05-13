@@ -362,6 +362,44 @@
 //! </div>
 //! </div>
 //!
+//! ## Draw a rectangle with rounded corners
+//!
+//! This example draws a rectangle with rounded corners, red stroke and green fill.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a rectangle with rounded corners example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB8UlEQVR4nO3RwW7DIBQF0eb/PzqtBAtHDmDzIJPCHMkb27C48/gRygAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzACwiQGef88q5s0072YDXDLs5pXmvmLUcKPuMUCnAffsNv1RfL74DQYICd1Qn/5R//yvPKs7VT82RM4aIKt+bOg8W9p2pdFLSjEKrxv6ThngjcLrhtunSgvvMP3RqAx3/zdA9kUBdpv+6Jzh9KLh7v8GeGEAmAFgHw1w3nnn6Y8iGa7/aYAiA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMAPtQgOS8+c4ZItMnd/83wAsDwAwA+4oAyW4ZztMnhddFd/83QIYFSEpr75Bh1PRJ3ykDvFF43dB3KquvvVKM0uhJ9WND5KwBsurHhsjZbKGdb4vPF7/BACHxG7LdMowabtQ9Bug06p43Vkoyb6Z5Nxvgknk36xIDwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwH4B4Bq0gX3sDWQAAAAASUVORK5CYII=" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::{
+//!         Rectangle,
+//!         RoundedRectangle,
+//!     },
+//!     style::PrimitiveStyleBuilder,
+//! };
+//!
+//! let style = PrimitiveStyleBuilder::new()
+//!     .stroke_color(Rgb888::RED)
+//!     .stroke_width(3)
+//!     .fill_color(Rgb888::GREEN)
+//!     .build();
+//!
+//! RoundedRectangle::with_equal_corners(
+//!     Rectangle::new(Point::new(8, 16), Size::new(48, 32)),
+//!     Size::new(10, 10),
+//! )
+//! .into_styled(style)
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
 //! ## Draw some text
 //!
 //! This example draws the text "Hello,\nRust!" with the [`Font6x8`] font in green.
