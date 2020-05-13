@@ -80,10 +80,10 @@ fn main() -> Result<(), core::convert::Infallible> {
                 }
                 SimulatorEvent::KeyDown { keycode, .. } => match keycode {
                     Keycode::Up => stroke_width += 1,
-                    Keycode::Down => stroke_width = (stroke_width as i32 - 1).max(0) as u32,
+                    Keycode::Down => stroke_width = stroke_width.saturating_sub(1),
 
                     Keycode::Right => radius += 1,
-                    Keycode::Left => radius = (radius as i32 - 1).max(0) as u32,
+                    Keycode::Left => radius = radius.saturating_sub(1),
 
                     Keycode::Space => {
                         align = match align {

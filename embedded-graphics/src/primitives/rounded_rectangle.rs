@@ -43,31 +43,24 @@ impl CornerRadii {
 
     /// Confine corner radii that are too large to a given bounding rectangle
     fn confine(self, bounding_box: Size) -> Self {
-        // Compute free space for each edge. If there is remaining free space, the call to
-        // checked_sub() will return `None`.
-        let free_space_top =
-            (self.top_left.width + self.top_right.width).checked_sub(bounding_box.width);
-        let free_space_right =
-            (self.top_right.height + self.bottom_right.height).checked_sub(bounding_box.height);
-        let free_space_bottom =
-            (self.bottom_left.width + self.bottom_right.width).checked_sub(bounding_box.width);
-        let free_space_left =
-            (self.top_left.height + self.bottom_left.height).checked_sub(bounding_box.height);
+        // Compute overlap for each edge
+        let overlap_top =
+            (self.top_left.width + self.top_right.width).saturating_sub(bounding_box.width);
+        let overlap_right =
+            (self.top_right.height + self.bottom_right.height).saturating_sub(bounding_box.height);
+        let overlap_bottom =
+            (self.bottom_left.width + self.bottom_right.width).saturating_sub(bounding_box.width);
+        let overlap_left =
+            (self.top_left.height + self.bottom_left.height).saturating_sub(bounding_box.height);
 
-        // Find the largest overlap for all edges that have one
-        let largest_overlap = [
-            free_space_top,
-            free_space_right,
-            free_space_bottom,
-            free_space_left,
-        ]
-        .iter()
-        .filter_map(|s| *s)
-        .max();
+        let largest_overlap = overlap_top
+            .max(overlap_right)
+            .max(overlap_bottom)
+            .max(overlap_left);
 
-        if let Some(largest_overlap) = largest_overlap {
-            // Reduce each corner radius by (largest overlap / 2)
-            let reduce_by = Size::new_equal(largest_overlap / 2);
+        if largest_overlap > 0 {
+            // Reduce each corner radius by (largest overlap / 2), rounding up by adding 1
+            let reduce_by = Size::new_equal((largest_overlap + 1) / 2);
 
             Self {
                 top_left: self.top_left.saturating_sub(reduce_by),
@@ -89,7 +82,7 @@ impl CornerRadii {
 /// # Overlapping corners
 ///
 /// If one or more corner radii are too large to be contained along an edge of the rectangle, all
-/// corner radii will be reduced by half the largest overlap in pixels (rounded down).
+/// corner radii will be reduced by half the largest overlap in pixels (rounded up).
 ///
 /// The [example further down the page](#overlapping-corner-radii) demonstrates this behaviour.
 ///
@@ -171,8 +164,8 @@ impl CornerRadii {
 /// means the corner radii on the left edge of the rectangle add up to 55px, 5px greater than the
 /// 50px height of the rectangle.
 ///
-/// All corner radii will now be reduced by 2px (5 / 2, rounded down) resulting in the corner radii
-/// of (28px, 28px) for the top left corner and (23px, 23px) for all others.
+/// All corner radii will now be reduced by 3px (5px / 2, rounded up) resulting in the corner radii
+/// of (27px, 27px) for the top left corner and (22px, 22px) for all others.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -193,10 +186,10 @@ impl CornerRadii {
 /// assert_eq!(
 ///     rectangle.corners,
 ///     CornerRadii {
-///         top_left: Size::new(28, 28),
-///         top_right: Size::new(23, 23),
-///         bottom_right: Size::new(23, 23),
-///         bottom_left: Size::new(23, 23),
+///         top_left: Size::new(27, 27),
+///         top_right: Size::new(22, 22),
+///         bottom_right: Size::new(22, 22),
+///         bottom_left: Size::new(22, 22),
 ///     }
 /// );
 ///
@@ -209,55 +202,6 @@ pub struct RoundedRectangle {
 
     /// The radius of each corner
     pub corners: CornerRadii,
-}
-
-impl Primitive for RoundedRectangle {
-    type PointsIter = Points;
-
-    fn points(&self) -> Self::PointsIter {
-        Points::new(self)
-    }
-}
-
-impl ContainsPoint for RoundedRectangle {
-    fn contains(&self, point: Point) -> bool {
-        if !self.rectangle.contains(point) {
-            return false;
-        }
-
-        let tl = self.get_corner_quadrant(Quadrant::TopLeft);
-
-        if tl.bounding_box().contains(point) {
-            return tl.contains(point);
-        }
-
-        let tr = self.get_corner_quadrant(Quadrant::TopRight);
-
-        if tr.bounding_box().contains(point) {
-            return tr.contains(point);
-        }
-
-        let br = self.get_corner_quadrant(Quadrant::BottomRight);
-
-        if br.bounding_box().contains(point) {
-            return br.contains(point);
-        }
-
-        let bl = self.get_corner_quadrant(Quadrant::BottomLeft);
-
-        if bl.bounding_box().contains(point) {
-            return bl.contains(point);
-        }
-
-        // We're in the rest of the rectangle at this point
-        true
-    }
-}
-
-impl Dimensions for RoundedRectangle {
-    fn bounding_box(&self) -> Rectangle {
-        self.rectangle
-    }
 }
 
 impl RoundedRectangle {
@@ -330,6 +274,55 @@ impl RoundedRectangle {
                 bottom_left: self.corners.bottom_left.saturating_sub(corner_offset),
             },
         )
+    }
+}
+
+impl Primitive for RoundedRectangle {
+    type PointsIter = Points;
+
+    fn points(&self) -> Self::PointsIter {
+        Points::new(self)
+    }
+}
+
+impl ContainsPoint for RoundedRectangle {
+    fn contains(&self, point: Point) -> bool {
+        if !self.rectangle.contains(point) {
+            return false;
+        }
+
+        let tl = self.get_corner_quadrant(Quadrant::TopLeft);
+
+        if tl.bounding_box().contains(point) {
+            return tl.contains(point);
+        }
+
+        let tr = self.get_corner_quadrant(Quadrant::TopRight);
+
+        if tr.bounding_box().contains(point) {
+            return tr.contains(point);
+        }
+
+        let br = self.get_corner_quadrant(Quadrant::BottomRight);
+
+        if br.bounding_box().contains(point) {
+            return br.contains(point);
+        }
+
+        let bl = self.get_corner_quadrant(Quadrant::BottomLeft);
+
+        if bl.bounding_box().contains(point) {
+            return bl.contains(point);
+        }
+
+        // We're in the rest of the rectangle at this point
+        true
+    }
+}
+
+impl Dimensions for RoundedRectangle {
+    fn bounding_box(&self) -> Rectangle {
+        self.rectangle
     }
 }
 
@@ -733,12 +726,34 @@ mod tests {
 
         assert_eq!(
             corners.confine(Size::new(20, 30)),
-            // All corners should be shrunk by half the overlap, rounded down
+            // All corners should be shrunk by half the overlap, rounded up
             CornerRadii {
-                top_left: Size::new(8, 18),
-                top_right: Size::new(8, 13),
-                bottom_right: Size::new(8, 13),
-                bottom_left: Size::new(8, 13),
+                top_left: Size::new(7, 17),
+                top_right: Size::new(7, 12),
+                bottom_right: Size::new(7, 12),
+                bottom_left: Size::new(7, 12),
+            }
+        );
+    }
+
+    #[test]
+    fn corner_radii_1px_overlap() {
+        let corners = CornerRadii {
+            // 1px overlap in Y
+            top_left: Size::new(10, 16),
+            // 1px overlap in X
+            top_right: Size::new(11, 15),
+            bottom_right: Size::new(10, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(
+            corners.confine(Size::new(20, 30)),
+            CornerRadii {
+                top_left: Size::new(9, 15),
+                top_right: Size::new(10, 14),
+                bottom_right: Size::new(9, 14),
+                bottom_left: Size::new(9, 14),
             }
         );
     }

@@ -97,6 +97,10 @@ impl Ellipse {
     }
 }
 
+/// Return the center point of the ellipse scaled by a factor of 2
+///
+/// This method is used to accurately calculate the outside edge of the ellipse.
+/// The result is not equivalent to `Ellipse::center() * 2` because of rounding.
 pub(crate) fn center_2x(top_left: Point, size: Size) -> Point {
     let radius = size.saturating_sub(Size::new(1, 1));
 

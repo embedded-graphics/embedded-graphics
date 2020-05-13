@@ -201,7 +201,10 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//! };
 //!
 //! Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
@@ -221,7 +224,10 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Line,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! Line::new(Point::new(16, 24), Point::new(51, 34))
@@ -238,13 +244,16 @@
 //! This example draws a rectangle with a 2px thick red stroke and cyan fill color.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a rectangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABhUlEQVR4nO3RMWoDURAEUev+h5adyYomakqC92Bhf9LB1OOHlAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQGwe4Pn3fbP1gdb7AhzW+wIc1vsCHNb7bwEez/+vz/V8vM7y+ttY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvC3BY7wtwWO8LcFjvvwX4RusDrfcFOKz3BTis9wU4rPc5CBATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxH4By6BogfSjbAMAAAAASUVORK5CYII=" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a rectangle example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABkUlEQVR4nO3RMWoDURAEUev+h5adycomcFPIvAcL+5MOph5fpASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyA2DDA8+f7L3Zn2i0LcLJbFuBktyzAyW75LcDj+fv1GZ6P13Fef39ttyzAyW5ZgJPdsgAnu2UBTnbLApzslgU42S0LcLJbFuBktyzAyW5ZgJPdsgAnu2UBTnbLApzslgU42S0LcLJbFuBktyzAyW5ZgJPdsgAnu2UBTnbLApzslgU42S0LcLJbFuBktyzAyW5ZgJPdsgAnu+W3AJ9ud6bdsgAnu2UBTnbLApzsljkRICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWLfWYd4geVYJIUAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Rectangle,
+//!     style::PrimitiveStyleBuilder,
 //! };
 //!
 //! Rectangle::new(Point::new(16, 24), Size::new(32, 16))
@@ -273,7 +282,10 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Circle,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! Circle::new(Point::new(16, 16), 40)
@@ -290,13 +302,16 @@
 //! This example draws an ellipse with a 2px green stroke.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an ellipse example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAC6ElEQVR4nO3R3WrsQAwD4HPe/6FbwUII223JjGzLY/RB7jL+0/9/JuUAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ALHeAXzhi9B4y8ajgQMoEnXoVQ22bzACOIBSz88dNV19x8fKG0L9Oeo7PlbV8O8TVE3xrsFUJU2gwaofNJgqs8lv62X2ZJXPnFYYypcJUD5zTuGfa+T0yVWyRUJJKBk9XckW0SVLhi6VvFFoMUgeVyB5o7hiyYOKpW0XVAbSRmwhbbuIMvfhIup1F7ovXQBCBzpA6L5cgfsoL1y9M4RuTTyF0FGOEbr17tPQIY4UdIGtRxDU/mBBF9h6BPf2uzUmoO+w9QjoxkPQd9h6BHTjIeg7bD0CuvEQ9B3WH9EtByJusvg7EM3GIm6y+DsQzcYibrL4OxDNxiJusvg7EM3GIm6y+DsQzcYibrL4OxDNxiJusvg7EM3GIm6y+DsQzcYibrL4OxDNxiJusvg7EM3GIm6y+DsQzcYibrL4+4VoOQp9h61HQDcegr7D1iOgGw9B32HrEdCNh6DvsPUI7o1fdiudKugCW48gqP3Bgi6w9egSNMRhQrcmnkLoKMcI3Zp4erkPFFGvu9B96QIQOtABQvelC1zuY73E1dZL2y6oDKSN2ELadkFlLmmDyiRvFFoMkscVSN4otNgleegiJVsklISS0dOVbJFQ8vJzgZfMnqzymdMKQ/kyAcpnTiv85rfFXqqmeNdgqpIm0GDVDxpMVdLkzd9r30VNV9/xsfKGUH+O+o6PlTf86PmBYjXYvsEI4ACaigqm8ZaNRwMHYNkcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByD2DbG6eIHsabVuAAAAAElFTkSuQmCC" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an ellipse example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAADDklEQVR4nO3R26rlMAwD0Jn//+gZQaGU3X0OiWVbaaoFfXPji/7+MSkHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiDkDMAYg5ADEHIOYAxByAmAMQcwBiawfwD1+GhbdceDRwAE2yDj1rge0XGAEcQKvxc2dN199xWHtD6D9Hf8dhXQ1/P0HXFJ8WmKqlCSyw6hcLTFXZ5Kf1Knuy2mcuexjal0nQPnPNw/c1avrUatmi4EloGb1cyxZ5T97HPeR10CjeK+kZKB5UpnivjGfuI2a8uqKCTekHoGCsRRVsyj1QMNADpG5N/AqpozxG6tbEr3AdhXvpeZJ2J36FpCEeKWn36K9J7R+PvkPoJ6Abb4K+w/xP15aH+Tf2QV9jshzolluhrzFZDteW83/vibjJZDkQzbZF3GSyHIhm2yJuMlkORLNtETeZKSfavELoPsOFEGrwIqH7DBdCqMGLhO4zXAihBi8Sus9wIYQavEjoPsOFEGrwIqH7DBdCqMGLhO4zXAihBi8Sus9wIYQavEjoPsOFEGrwIqH7DBdCqMGLhO4zXAihBi8Sus9w4SnUZnPETSbLgWi2LeImk+VANNsWcZPJciCabYu4yWQ5XJsd5t/YB32NyXKgW26FvsZk+enaOPrGDug7hH4CuvEm6DuEfjrR7R8saXfiV0ga4pGSdid+hesQB+69Z0jdmvgVUkd5jNStiV9PqQMtrWBT+gEoGGtRBZvSD5zuwx3yOmgU75X0DBQPKlO8V9IzH+5D1/Sp1bJFwZPQMnq5li0KnjzdFzhU9mS1z1z2MLQvk6B95rKHP/y02KFrik8LTNXSBBZY9YsFpmpp8uH3ta+ypuvvOKy9IfSfo7/jsPaGX40fKNcC2y8wAjiARWUFs/CWC48GDsCqOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEHMAYg5AzAGIOQAxByDmAMQcgJgDEPsPGleAgfKjdjYAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Ellipse, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Ellipse,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! Ellipse::new(Point::new(8, 16), Size::new(48, 32))
@@ -319,7 +334,10 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Triangle,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
@@ -342,7 +360,10 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Polyline, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Polyline,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! let points: [Point; 5] = [
@@ -411,7 +432,10 @@
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     fonts::{
+//!         Font6x8,
+//!         Text,
+//!     },
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
 //!     style::TextStyle,
@@ -436,7 +460,11 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+//! use embedded_graphics::{
+//!     image::Image,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//! };
 //! use tinytga::Tga;
 //!
 //! let tga = Tga::from_slice(include_bytes!(concat!(
