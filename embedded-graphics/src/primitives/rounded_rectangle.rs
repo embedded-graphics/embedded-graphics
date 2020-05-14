@@ -81,10 +81,10 @@ impl CornerRadii {
 ///
 /// # Overlapping corners
 ///
-/// If one or more corner radii are too large to be contained along an edge of the rectangle, all
-/// corner radii will be reduced by half the largest overlap in pixels (rounded up).
-///
-/// The [example further down the page](#overlapping-corner-radii) demonstrates this behaviour.
+/// It is possible to create a `RoundedRectangle` with corner radii too large to be contained within
+/// its edges. When this happens, the corner radii will be confined to fit within the rounded
+/// rectangle before calls to `.points()`, `.contains()`, or when consuming pixels from the styled
+/// rectangle (i.e. `.into_styled(style).into_iter()`).
 ///
 /// This is similar but not identical to
 /// [how the CSS specification works](https://www.w3.org/TR/css-backgrounds-3/#corner-overlap) as it
@@ -156,45 +156,6 @@ impl CornerRadii {
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
-///
-/// ## Overlapping corner radii
-///
-/// This example creates a rounded rectangle 50px wide by 60px tall. All corners are given a radius
-/// of (25px, 25px) except the top left corner which instead has a radius of (30px, 30px). This
-/// means the corner radii on the left edge of the rectangle add up to 55px, 5px greater than the
-/// 50px height of the rectangle.
-///
-/// All corner radii will now be reduced by 3px (5px / 2, rounded up) resulting in the corner radii
-/// of (27px, 27px) for the top left corner and (22px, 22px) for all others.
-///
-/// ```rust
-/// use embedded_graphics::{
-///     prelude::*,
-///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
-/// };
-///
-/// let radii = CornerRadii {
-///     top_left: Size::new(30, 30),
-///     top_right: Size::new(25, 25),
-///     bottom_right: Size::new(25, 25),
-///     bottom_left: Size::new(25, 25),
-/// };
-///
-/// let rectangle =
-///     RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii);
-///
-/// assert_eq!(
-///     rectangle.corners,
-///     CornerRadii {
-///         top_left: Size::new(27, 27),
-///         top_right: Size::new(22, 22),
-///         bottom_right: Size::new(22, 22),
-///         bottom_left: Size::new(22, 22),
-///     }
-/// );
-///
-/// # Ok::<(), core::convert::Infallible>(())
-/// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct RoundedRectangle {
     /// The base rectangle
@@ -213,18 +174,17 @@ impl RoundedRectangle {
 
     /// Creates a new rounded rectangle with different corner radii.
     pub fn new(rectangle: Rectangle, corners: CornerRadii) -> Self {
-        Self {
-            rectangle,
-            corners: corners.confine(rectangle.size),
-        }
+        Self { rectangle, corners }
     }
 
-    fn get_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
+    fn get_confined_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
         let Self {
             rectangle, corners, ..
         } = self;
 
         let Rectangle { top_left, size, .. } = *rectangle;
+
+        let corners = corners.confine(size);
 
         match quadrant {
             Quadrant::TopLeft => {
@@ -291,25 +251,25 @@ impl ContainsPoint for RoundedRectangle {
             return false;
         }
 
-        let tl = self.get_corner_quadrant(Quadrant::TopLeft);
+        let tl = self.get_confined_corner_quadrant(Quadrant::TopLeft);
 
         if tl.bounding_box().contains(point) {
             return tl.contains(point);
         }
 
-        let tr = self.get_corner_quadrant(Quadrant::TopRight);
+        let tr = self.get_confined_corner_quadrant(Quadrant::TopRight);
 
         if tr.bounding_box().contains(point) {
             return tr.contains(point);
         }
 
-        let br = self.get_corner_quadrant(Quadrant::BottomRight);
+        let br = self.get_confined_corner_quadrant(Quadrant::BottomRight);
 
         if br.bounding_box().contains(point) {
             return br.contains(point);
         }
 
-        let bl = self.get_corner_quadrant(Quadrant::BottomLeft);
+        let bl = self.get_confined_corner_quadrant(Quadrant::BottomLeft);
 
         if bl.bounding_box().contains(point) {
             return bl.contains(point);
@@ -402,10 +362,10 @@ pub struct Points {
 
 impl Points {
     fn new(shape: &RoundedRectangle) -> Self {
-        let top_left_ellipse = shape.get_corner_quadrant(Quadrant::TopLeft);
-        let top_right_ellipse = shape.get_corner_quadrant(Quadrant::TopRight);
-        let bottom_right_ellipse = shape.get_corner_quadrant(Quadrant::BottomRight);
-        let bottom_left_ellipse = shape.get_corner_quadrant(Quadrant::BottomLeft);
+        let top_left_ellipse = shape.get_confined_corner_quadrant(Quadrant::TopLeft);
+        let top_right_ellipse = shape.get_confined_corner_quadrant(Quadrant::TopRight);
+        let bottom_right_ellipse = shape.get_confined_corner_quadrant(Quadrant::BottomRight);
+        let bottom_left_ellipse = shape.get_confined_corner_quadrant(Quadrant::BottomLeft);
 
         Self {
             rect_iter: shape.rectangle.points(),
