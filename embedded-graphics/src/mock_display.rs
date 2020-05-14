@@ -43,6 +43,7 @@
 //! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
 //! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
 //!
+//!
 //! # Characters used in RGB color patterns
 //!
 //! The following mappings are available for all RGB color types in the [`pixelcolor`] module,
@@ -193,6 +194,20 @@ where
         self.allow_overdraw = value;
     }
 
+    /// Returns the width of the display.
+    pub fn width(&self) -> usize {
+        SIZE
+    }
+
+    /// Returns the height of the display.
+    pub fn height(&self) -> usize {
+        SIZE
+    }
+
+    fn size(&self) -> Size {
+        Size::new(self.width() as u32, self.height() as u32)
+    }
+
     /// Returns the color of a pixel.
     pub fn get_pixel(&self, p: Point) -> Option<C> {
         let Point { x, y } = p;
@@ -201,10 +216,24 @@ where
     }
 
     /// Changes the color of a pixel.
-    pub fn set_pixel(&mut self, p: Point, color: Option<C>) {
-        let Point { x, y } = p;
+    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+        if !DISPLAY_AREA.contains(point) {
+            if self.allow_out_of_bounds_drawing {
+                return;
+            } else {
+                panic!(
+                    "tried to draw pixel outside the display area (x: {}, y: {})",
+                    point.x, point.y
+                );
+            }
+        }
 
-        self.pixels[x as usize + y as usize * SIZE] = color;
+        if !self.allow_overdraw && self.get_pixel(point).is_some() {
+            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
+        }
+
+        let i = point.x + point.y * SIZE as i32;
+        self.pixels[i as usize] = color;
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -400,31 +429,20 @@ where
     }
 }
 
-impl<C> DrawTarget<C> for MockDisplay<C>
+impl<C> DrawTarget for MockDisplay<C>
 where
-    C: PixelColor,
+    C: PixelColor + ColorMapping,
 {
+    type Color = C;
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
-        let Pixel(point, color) = pixel;
-
-        if !DISPLAY_AREA.contains(point) {
-            if self.allow_out_of_bounds_drawing {
-                return Ok(());
-            } else {
-                panic!(
-                    "tried to draw pixel outside the display area (x: {}, y: {})",
-                    point.x, point.y
-                );
-            }
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        for pixel in pixels.into_iter() {
+            self.set_pixel(pixel.0, Some(pixel.1));
         }
-
-        if !self.allow_overdraw && self.get_pixel(point).is_some() {
-            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
-        }
-
-        self.set_pixel(point, Some(color));
 
         Ok(())
     }

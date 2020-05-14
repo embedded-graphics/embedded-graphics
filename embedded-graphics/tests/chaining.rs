@@ -24,10 +24,14 @@ impl From<u8> for TestPixelColor {
     }
 }
 
-impl DrawTarget<TestPixelColor> for FakeDisplay {
+impl DrawTarget for FakeDisplay {
+    type Color = TestPixelColor;
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, _pixel: Pixel<TestPixelColor>) -> Result<(), Self::Error> {
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
         Ok(())
     }
 

@@ -28,7 +28,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 /// where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
-///     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+///     fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
 ///         Rectangle::new(self.top_left, self.size)
 ///             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
 ///             .draw(display)?;
@@ -61,7 +61,7 @@ where
     C: PixelColor,
 {
     /// Draw the graphics object using the supplied DrawTarget.
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error>;
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error>;
 }
 
 /// A single pixel.
@@ -103,8 +103,8 @@ impl<C> Drawable<C> for Pixel<C>
 where
     C: PixelColor,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_pixel(self)
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(core::iter::once(self))
     }
 }
 
@@ -113,7 +113,7 @@ where
     C: PixelColor,
     T: Iterator<Item = Pixel<C>>,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
         display.draw_iter(self)
     }
 }

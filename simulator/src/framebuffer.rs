@@ -88,34 +88,19 @@ impl Framebuffer {
     }
 }
 
-impl DrawTarget<Rgb888> for Framebuffer {
+impl DrawTarget for Framebuffer {
+    type Color = Rgb888;
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, pixel: Pixel<Rgb888>) -> Result<(), Self::Error> {
-        let Pixel(point, color) = pixel;
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        for Pixel(point, color) in pixels.into_iter() {
+            if let Some(pixel) = self.get_pixel_mut(point) {
+                let color = &[color.r(), color.g(), color.b()];
 
-        if let Some(pixel) = self.get_pixel_mut(point) {
-            pixel.copy_from_slice(&[color.r(), color.g(), color.b()]);
-        }
-
-        Ok(())
-    }
-
-    fn draw_rectangle(
-        &mut self,
-        item: &Styled<Rectangle, PrimitiveStyle<Rgb888>>,
-    ) -> Result<(), Self::Error> {
-        if item.style.stroke_color.is_some() && item.style.stroke_width != 0 {
-            return self.draw_iter(item);
-        }
-
-        if let Some(fill_color) = item.style.fill_color {
-            let color = &[fill_color.r(), fill_color.g(), fill_color.b()];
-
-            for p in item.primitive.bounding_box().points() {
-                if let Some(pixel) = self.get_pixel_mut(p) {
-                    pixel.copy_from_slice(color);
-                }
+                pixel.copy_from_slice(color)
             }
         }
 

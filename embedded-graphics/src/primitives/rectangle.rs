@@ -311,8 +311,52 @@ impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_rectangle(self)
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        // Noop if rectangle is zero sized
+        if self.primitive.size == Size::zero() {
+            return Ok(());
+        }
+
+        let fill_area = self.primitive.shrink(self.style.inside_stroke_width());
+
+        // Fill rectangle
+        if let Some(fill_color) = self.style.fill_color {
+            display.fill_solid(&fill_area, fill_color)?;
+        }
+
+        // Draw stroke
+        if let Some(stroke_color) = self.style.effective_stroke_color() {
+            let stroke_width = self.style.stroke_width;
+
+            let stroke_area = self.primitive.expand(self.style.outside_stroke_width());
+
+            let top_border = Rectangle::new(
+                stroke_area.top_left,
+                Size::new(stroke_area.size.width, stroke_width),
+            );
+
+            let bottom_border = top_border.translate(Point::new(
+                0,
+                fill_area.size.height.saturating_add(top_border.size.height) as i32,
+            ));
+
+            let left_border = Rectangle::new(
+                stroke_area.top_left + Size::new(0, top_border.size.height),
+                Size::new(stroke_width, fill_area.size.height),
+            );
+
+            let right_border = left_border.translate(Point::new(
+                fill_area.size.width.saturating_add(stroke_width) as i32,
+                0,
+            ));
+
+            display.fill_solid(&top_border, stroke_color)?;
+            display.fill_solid(&bottom_border, stroke_color)?;
+            display.fill_solid(&left_border, stroke_color)?;
+            display.fill_solid(&right_border, stroke_color)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -491,5 +535,66 @@ mod tests {
 
         assert_eq!(display_center, display_inside);
         assert_eq!(display_center, display_outside);
+    }
+
+    #[test]
+    fn stroke_iter_vs_draw() {
+        const TOP_LEFT: Point = Point::new(5, 6);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let rectangle_center = Rectangle::new(TOP_LEFT, SIZE).into_styled(style);
+
+        let mut drawn_center = MockDisplay::new();
+        let mut iter_center = MockDisplay::new();
+        rectangle_center.draw(&mut drawn_center).unwrap();
+        rectangle_center.into_iter().draw(&mut iter_center).unwrap();
+        assert_eq!(drawn_center, iter_center);
+
+        let rectangle_inside = Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Inside)
+                    .build(),
+            );
+
+        let mut drawn_inside = MockDisplay::new();
+        let mut iter_inside = MockDisplay::new();
+        rectangle_inside.draw(&mut drawn_inside).unwrap();
+        rectangle_inside.into_iter().draw(&mut iter_inside).unwrap();
+        assert_eq!(drawn_inside, iter_inside);
+
+        let rectangle_outside = Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Outside)
+                    .build(),
+            );
+
+        let mut drawn_outside = MockDisplay::new();
+        let mut iter_outside = MockDisplay::new();
+        rectangle_outside.draw(&mut drawn_outside).unwrap();
+        rectangle_outside
+            .into_iter()
+            .draw(&mut iter_outside)
+            .unwrap();
+        assert_eq!(drawn_outside, iter_outside);
+    }
+
+    #[test]
+    fn fill_iter_vs_draw() {
+        const TOP_LEFT: Point = Point::new(5, 6);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_fill(BinaryColor::On);
+
+        let rectangle = Rectangle::new(TOP_LEFT, SIZE).into_styled(style);
+
+        let mut drawn = MockDisplay::new();
+        let mut iter = MockDisplay::new();
+        rectangle.draw(&mut drawn).unwrap();
+        rectangle.into_iter().draw(&mut iter).unwrap();
+        assert_eq!(drawn, iter);
     }
 }

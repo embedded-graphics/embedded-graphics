@@ -32,15 +32,20 @@
 //! /// Mock EPD display.
 //! pub struct EpdDisplay {}
 //!
-//! impl DrawTarget<EpdColor> for EpdDisplay {
+//! impl DrawTarget for EpdDisplay {
+//!     type Color = EpdColor;
 //!     type Error = core::convert::Infallible;
 //!
-//!     fn draw_pixel(&mut self, item: Pixel<EpdColor>) -> Result<(), Self::Error> {
-//!         let Pixel(point, color) = item;
-//!         match color {
-//!             EpdColor::White => {} // draw white pixel at `point`
-//!             EpdColor::Black => {} // draw black pixel at `point`
-//!             EpdColor::Red => {}   // draw red pixel at `point`
+//!     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+//!     where
+//!         I: IntoIterator<Item = Pixel<Self::Color>>,
+//!     {
+//!         for Pixel(point, color) in pixels.into_iter() {
+//!             match color {
+//!                 EpdColor::White => {} // draw white pixel at `point`
+//!                 EpdColor::Black => {} // draw black pixel at `point`
+//!                 EpdColor::Red => {}   // draw red pixel at `point`
+//!             }
 //!         }
 //!
 //!         Ok(())
