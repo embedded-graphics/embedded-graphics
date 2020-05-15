@@ -449,15 +449,19 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let point = self.iter.next()?;
+        for point in &mut self.iter {
+            let color = if self.fill_area.contains(point) {
+                self.fill_color
+            } else {
+                self.stroke_color
+            };
 
-        let color = if self.fill_area.contains(point) {
-            self.fill_color?
-        } else {
-            self.stroke_color?
-        };
+            if let Some(color) = color {
+                return Some(Pixel(point, color));
+            }
+        }
 
-        Some(Pixel(point, color))
+        None
     }
 }
 
@@ -554,6 +558,55 @@ mod tests {
                 "    GGGGGGGGGGGGGGGGG   ",
                 "      GGGGGGGGGGGGGG    ",
                 "        GGGGGGGGGG      ",
+            ])
+        );
+    }
+
+    #[test]
+    fn styled_unfilled() {
+        let mut display = MockDisplay::new();
+
+        RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(20, 20)),
+            CornerRadii {
+                top_left: Size::new(3, 4),
+                top_right: Size::new(5, 6),
+                bottom_right: Size::new(7, 8),
+                bottom_left: Size::new(9, 10),
+            },
+        )
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(1)
+                .stroke_color(Rgb888::BLUE)
+                .build(),
+        )
+        .draw(&mut display)
+        .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "  BBBBBBBBBBBBBBB   ",
+                " B               B  ",
+                "B                 B ",
+                "B                 BB",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                "B                  B",
+                " B                 B",
+                " B                 B",
+                " BB               B ",
+                "  B               B ",
+                "   BB            B  ",
+                "    BB         BB   ",
+                "      BBBBBBBBB     ",
             ])
         );
     }
