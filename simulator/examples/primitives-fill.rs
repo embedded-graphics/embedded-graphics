@@ -5,7 +5,7 @@
 use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Ellipse, Rectangle, Triangle},
+    primitives::{Circle, CornerRadii, Ellipse, Rectangle, RoundedRectangle, Triangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
@@ -14,7 +14,7 @@ static CIRCLE_SIZE: i32 = 65;
 static ELLIPSE_SIZE: Size = Size::new(90, 65);
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(404, 128));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(512, 128));
 
     let stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
@@ -88,6 +88,30 @@ fn main() -> Result<(), core::convert::Infallible> {
         .translate(Point::new(96 * 3 + 32, 32))
         .into_styled(stroke_off_fill_off)
         .draw(&mut display)?;
+
+    RoundedRectangle::new(
+        Rectangle::new(Point::new(32, 0), Size::new(64, 64)),
+        CornerRadii::new(Size::new(16, 16)),
+    )
+    .translate(Point::new(96 * 4, 0))
+    .into_styled(stroke)
+    .draw(&mut display)?;
+
+    RoundedRectangle::new(
+        Rectangle::new(Point::new(32, 0), Size::new(64, 64)),
+        CornerRadii::new(Size::new(16, 16)),
+    )
+    .translate(Point::new(96 * 4 + 16, 16))
+    .into_styled(stroke_off_fill_on)
+    .draw(&mut display)?;
+
+    RoundedRectangle::new(
+        Rectangle::new(Point::new(32, 0), Size::new(64, 64)),
+        CornerRadii::new(Size::new(16, 16)),
+    )
+    .translate(Point::new(96 * 4 + 32, 32))
+    .into_styled(stroke_off_fill_off)
+    .draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new().scale(2).build();
     Window::new("Filled primitives", &output_settings).show_static(&display);
