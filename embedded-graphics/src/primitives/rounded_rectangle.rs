@@ -18,7 +18,9 @@ use crate::{
 /// Rounded rectangle primitive.
 ///
 /// Creates a rectangle with rounded corners. Corners can be circular or elliptical in shape, and
-/// each corner may have a separate radius applied to it.
+/// each corner may have a separate radius applied to it. Corner radii can be specified either by
+/// creating an instance of [`CornerRadii`], or using the
+/// [`CornerRadiiBuilder`](super::corner_radii::CornerRadiiBuilder) builder.
 ///
 /// # Overlapping corners
 ///
@@ -91,6 +93,40 @@ use crate::{
 ///     bottom_right: Size::new(18, 20),
 ///     bottom_left: Size::new(22, 24),
 /// };
+///
+/// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
+///     .into_styled(style)
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
+///
+/// ## Using `CornerRadiiBuilder`
+///
+/// This example creates a rounded rectangle 50px wide by 60px tall. Corner radii are set using the
+/// [`CornerRadiiBuilder`](super::corner_radii::CornerRadiiBuilder) builder.
+///
+/// ```rust
+/// use embedded_graphics::{
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitives::{CornerRadii, CornerRadiiBuilder, Rectangle, RoundedRectangle},
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+/// };
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::default();
+///
+/// let style = PrimitiveStyleBuilder::new()
+///     .stroke_width(5)
+///     .stroke_color(Rgb565::RED)
+///     .fill_color(Rgb565::GREEN)
+///     .build();
+///
+/// let radii = CornerRadiiBuilder::new()
+///     // Set the top left and top right corner radii to 10 x 20px
+///     .top(Size::new(10, 20))
+///     // Set the bottom right corner radius to 5 x 8px
+///     .bottom_right(Size::new(5, 8))
+///     .build();
 ///
 /// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
 ///     .into_styled(style)
