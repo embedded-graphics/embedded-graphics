@@ -20,7 +20,7 @@ pub struct CornerRadii {
 
 impl CornerRadii {
     /// Create a new set of corner radii with all corners having equal values.
-    pub fn new_equal(radius: Size) -> Self {
+    pub fn new(radius: Size) -> Self {
         Self {
             top_left: radius,
             top_right: radius,
@@ -99,7 +99,7 @@ impl CornerRadiiBuilder {
     /// );
     /// ```
     pub fn all(mut self, radius: Size) -> Self {
-        self.corners = CornerRadii::new_equal(radius);
+        self.corners = CornerRadii::new(radius);
 
         self
     }

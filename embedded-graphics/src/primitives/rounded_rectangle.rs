@@ -156,7 +156,7 @@ impl RoundedRectangle {
     /// The size and position of the rounded rectangle is determined by the given base
     /// rectangle.
     pub fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
-        Self::new(rectangle, CornerRadii::new_equal(corner_radius))
+        Self::new(rectangle, CornerRadii::new(corner_radius))
     }
 
     fn get_confined_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
