@@ -469,6 +469,161 @@ macro_rules! egtriangle {
     }};
 }
 
+/// Create a [`RoundedRectangle`](./primitives/rounded_rectangle/struct.RoundedRectangle.html) with
+/// optional styling using a convenient macro.
+///
+/// # Examples
+///
+/// ## Create rounded rectangles with equal and unequal radii
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egroundedrectangle,
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitive_style,
+///     primitives::{CornerRadii, RoundedRectangle},
+///     style::{PrimitiveStyle, Styled},
+/// };
+///
+/// let equal_radius: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+///     top_left = (10, 20),
+///     size = (20, 30),
+///     radius = (6, 8),
+///     style = primitive_style!(
+///         stroke_color = Rgb565::RED,
+///         stroke_width = 3,
+///         fill_color = Rgb565::GREEN
+///     )
+/// );
+///
+/// let unequal_radii: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+///     top_left = (10, 20),
+///     size = (20, 30),
+///     radii = CornerRadii {
+///         top_left: Size::new(5, 5),
+///         top_right: Size::new(10, 10),
+///         bottom_right: Size::new(8, 16),
+///         bottom_left: Size::new(16, 8),
+///     },
+///     style = primitive_style!(
+///         stroke_color = Rgb565::RED,
+///         stroke_width = 3,
+///         fill_color = Rgb565::GREEN
+///     )
+/// );
+/// ```
+///
+/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
+/// For example, the following code makes two identical rounded rectangles:
+///
+/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egroundedrectangle,
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitive_style,
+///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled},
+/// };
+///
+/// let rounded_rect_1: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+///     top_left = (10, 20),
+///     size = (30, 40),
+///     radius = (6, 8),
+///     style = primitive_style!(
+///         stroke_color = Rgb565::RED,
+///         fill_color = Rgb565::GREEN,
+///         stroke_width = 1
+///     )
+/// );
+///
+/// let style = PrimitiveStyleBuilder::new()
+///     .fill_color(Rgb565::GREEN)
+///     .stroke_color(Rgb565::RED)
+///     .stroke_width(1)
+///     .build();
+///
+/// let rounded_rect_2: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = RoundedRectangle::new(
+///     Rectangle::new(Point::new(10, 20), Size::new(30, 40)),
+///     CornerRadii::new(Size::new(6, 8)),
+/// )
+/// .into_styled(style);
+///
+/// assert_eq!(rounded_rect_1, rounded_rect_2);
+/// ```
+#[macro_export]
+macro_rules! egroundedrectangle {
+    (corners = [$corner_1:expr, $corner_2:expr], radii = $radii:expr $(,)?) => {{
+        $crate::egroundedrectangle!(
+            corners = [$corner_1, $corner_2],
+            radii = $radii,
+            style = $crate::style::PrimitiveStyle::default(),
+        )
+    }};
+    (corners = [$corner_1:expr, $corner_2:expr], radii = $radii:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::RoundedRectangle::new(
+            $crate::primitives::Rectangle::with_corners(
+                $crate::geometry::Point::from($corner_1),
+                $crate::geometry::Point::from($corner_2),
+            ),
+            $radii,
+        )
+        .into_styled($style)
+    }};
+    (top_left = $top_left:expr, size = $size:expr, radii = $radii:expr $(,)?) => {{
+        $crate::egroundedrectangle!(
+            top_left = $top_left,
+            size = $size,
+            radii = $radii,
+            style = $crate::style::PrimitiveStyle::default(),
+        )
+    }};
+    (top_left = $top_left:expr, size = $size:expr, radii = $radii:expr, style = $style:expr $(,)?) => {{
+        $crate::primitives::RoundedRectangle::new(
+            $crate::primitives::Rectangle::new(
+                $crate::geometry::Point::from($top_left),
+                $crate::geometry::Size::from($size),
+            ),
+            $radii,
+        )
+        .into_styled($style)
+    }};
+
+    (corners = [$corner_1:expr, $corner_2:expr], radius = $radius:expr $(,)?) => {{
+        $crate::egroundedrectangle!(
+            corners = [$corner_1, $corner_2],
+            radii = $crate::primitives::CornerRadii::new($crate::geometry::Size::from($radius)),
+            style = $crate::style::PrimitiveStyle::default(),
+        )
+    }};
+    (corners = [$corner_1:expr, $corner_2:expr], radius = $radius:expr, style = $style:expr $(,)?) => {{
+        $crate::egroundedrectangle!(
+            corners = [$corner_1, $corner_2],
+            radii = $crate::primitives::CornerRadii::new($crate::geometry::Size::from($radius)),
+            style = $style,
+        )
+    }};
+    (top_left = $top_left:expr, size = $size:expr, radius = $radius:expr $(,)?) => {{
+        $crate::egroundedrectangle!(
+            top_left = $top_left,
+            size = $size,
+            radii = $crate::primitives::CornerRadii::new($crate::geometry::Size::from($radius)),
+            style = $crate::style::PrimitiveStyle::default(),
+        )
+    }};
+    (top_left = $top_left:expr, size = $size:expr, radius = $radius:expr, style = $style:expr $(,)?) => {{
+        $crate::egroundedrectangle!(
+            top_left = $top_left,
+            size = $size,
+            radii = $crate::primitives::CornerRadii::new($crate::geometry::Size::from($radius)),
+            style = $style,
+        )
+    }};
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -560,6 +715,88 @@ mod tests {
         let _t: Styled<Triangle, PrimitiveStyle<Rgb565>> = egtriangle!(
             points = [(10, 20), (30, 40), (50, 60)],
             style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
+        );
+    }
+
+    #[test]
+    fn rounded_rectangle() {
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> =
+            egroundedrectangle!(corners = [(10, 20), (20, 30)], radius = (6, 8),);
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+            corners = [(10, 20), (20, 30)],
+            radii = CornerRadii {
+                top_left: Size::new(5, 5),
+                top_right: Size::new(10, 10),
+                bottom_right: Size::new(8, 16),
+                bottom_left: Size::new(16, 8),
+            },
+        );
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+            corners = [(10, 20), (20, 30)],
+            radius = (6, 8),
+            style = primitive_style!(
+                stroke_color = Rgb565::RED,
+                stroke_width = 3,
+                fill_color = Rgb565::GREEN
+            )
+        );
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+            corners = [(10, 20), (20, 30)],
+            radii = CornerRadii {
+                top_left: Size::new(5, 5),
+                top_right: Size::new(10, 10),
+                bottom_right: Size::new(8, 16),
+                bottom_left: Size::new(16, 8),
+            },
+            style = primitive_style!(
+                stroke_color = Rgb565::RED,
+                stroke_width = 3,
+                fill_color = Rgb565::GREEN
+            )
+        );
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> =
+            egroundedrectangle!(top_left = (10, 20), size = (20, 30), radius = (6, 8),);
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+            top_left = (10, 20),
+            size = (20, 30),
+            radii = CornerRadii {
+                top_left: Size::new(5, 5),
+                top_right: Size::new(10, 10),
+                bottom_right: Size::new(8, 16),
+                bottom_left: Size::new(16, 8),
+            },
+        );
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+            top_left = (10, 20),
+            size = (20, 30),
+            radius = (6, 8),
+            style = primitive_style!(
+                stroke_color = Rgb565::RED,
+                stroke_width = 3,
+                fill_color = Rgb565::GREEN
+            )
+        );
+
+        let _rr: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
+            top_left = (10, 20),
+            size = (20, 30),
+            radii = CornerRadii {
+                top_left: Size::new(5, 5),
+                top_right: Size::new(10, 10),
+                bottom_right: Size::new(8, 16),
+                bottom_left: Size::new(16, 8),
+            },
+            style = primitive_style!(
+                stroke_color = Rgb565::RED,
+                stroke_width = 3,
+                fill_color = Rgb565::GREEN
+            )
         );
     }
 }
