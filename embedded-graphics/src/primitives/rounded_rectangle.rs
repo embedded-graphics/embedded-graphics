@@ -19,15 +19,14 @@ use crate::{
 ///
 /// Creates a rectangle with rounded corners. Corners can be circular or elliptical in shape, and
 /// each corner may have a separate radius applied to it. Corner radii can be specified either by
-/// creating an instance of [`CornerRadii`], or using the
-/// [`CornerRadiiBuilder`](super::corner_radii::CornerRadiiBuilder) builder.
+/// creating an instance of [`CornerRadii`](../struct.CornerRadii.html), or using the
+/// [`CornerRadiiBuilder`](../struct.CornerRadiiBuilder.html) builder.
 ///
 /// # Overlapping corners
 ///
 /// It is possible to create a `RoundedRectangle` with corner radii too large to be contained within
 /// its edges. When this happens, the corner radii will be confined to fit within the rounded
-/// rectangle before calls to `.points()`, `.contains()`, or when consuming pixels from the styled
-/// rectangle (i.e. `.into_styled(style).into_iter()`).
+/// rectangle before use by other parts of embedded-graphics.
 ///
 /// This is similar but not identical to
 /// [how the CSS specification works](https://www.w3.org/TR/css-backgrounds-3/#corner-overlap) as it
@@ -38,8 +37,8 @@ use crate::{
 /// ## Create a uniform rounded rectangle
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Using
-/// [`RoundedRectangle::with_equal_corners`], all corners are given the same 10px circular radius.
-/// The rectangle has a solid green fill with a 5px red stroke.
+/// [`with_equal_corners`](#method.new), all corners are given the same 10px circular radius.
+/// The rectangle is drawn using a solid green fill with a 5px red stroke.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -68,8 +67,9 @@ use crate::{
 ///
 /// ## Different corner radii
 ///
-/// This example creates a rounded rectangle 50px wide by 60px tall. Using `RoundedRectangle::new()`
-/// , each corner is given a distinct X and Y radius.
+/// This example creates a rounded rectangle 50px wide by 60px tall. Each corner is given a distinct
+/// radius in the x and y direction by creating a [`CornerRadii`](../struct.CornerRadiiBuilder.html)
+/// object and passing that to [`RoundedRectangle::new`](#method.new).
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -103,7 +103,7 @@ use crate::{
 /// ## Using `CornerRadiiBuilder`
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Corner radii are set using the
-/// [`CornerRadiiBuilder`](super::corner_radii::CornerRadiiBuilder) builder.
+/// [`CornerRadiiBuilder`](../struct.CornerRadiiBuilder.html) builder.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -143,15 +143,20 @@ pub struct RoundedRectangle {
 }
 
 impl RoundedRectangle {
-    /// Creates a new rounded rectangle from a base rectangle and equal corner XY radius for all
-    /// corners.
-    pub fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
-        Self::new(rectangle, CornerRadii::new_equal(corner_radius))
-    }
-
-    /// Creates a new rounded rectangle with different corner radii.
+    /// Creates a new rounded rectangle with the given corner radii.
+    ///
+    /// The size and position of the rounded rectangle is determined by the given base
+    /// rectangle.
     pub fn new(rectangle: Rectangle, corners: CornerRadii) -> Self {
         Self { rectangle, corners }
+    }
+
+    /// Creates a new rounded rectangle with equal corner radius for all corners.
+    ///
+    /// The size and position of the rounded rectangle is determined by the given base
+    /// rectangle.
+    pub fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
+        Self::new(rectangle, CornerRadii::new_equal(corner_radius))
     }
 
     fn get_confined_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
@@ -321,7 +326,7 @@ where
     }
 }
 
-/// Iterator over all points inside the rectangle.
+/// Iterator over all points inside the rounded rectangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
     rect_iter: rectangle::Points,
@@ -402,7 +407,7 @@ impl Iterator for Points {
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledRoundedRectangleIterator<C: PixelColor>
+pub struct StyledRoundedRectangleIterator<C>
 where
     C: PixelColor,
 {

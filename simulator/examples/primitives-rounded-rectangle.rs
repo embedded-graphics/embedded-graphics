@@ -1,8 +1,8 @@
 //! # Example: Rounded rectangle
 //!
-//! This example draws a `RoundedRectangle`. Click and drag to move the lower-left corner around
-//! the screen. The up/down arrow keys adjust stroke width, left/right the corner radius. Space
-//! cycles the stroke alignment between center/outside/inside.
+//! This example draws a `RoundedRectangle`. Click and drag to move a corner of the rounded
+//! rectangle around the screen. The up/down arrow keys adjust stroke width, left/right the corner
+//! radius. Space cycles the stroke alignment between center/outside/inside.
 
 use embedded_graphics::{
     pixelcolor::Rgb888,
@@ -16,8 +16,7 @@ use embedded_graphics_simulator::{
 use sdl2::keyboard::Keycode;
 
 fn draw(
-    top_left: Point,
-    size: Size,
+    base_rectangle: Rectangle,
     radius: Size,
     stroke_width: u32,
     align: StrokeAlignment,
@@ -25,7 +24,7 @@ fn draw(
 ) {
     display.clear(Rgb888::BLACK).unwrap();
 
-    RoundedRectangle::with_equal_corners(Rectangle::new(top_left, size), radius)
+    RoundedRectangle::with_equal_corners(base_rectangle, radius)
         .into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(stroke_width)
@@ -50,7 +49,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut mouse_down = false;
 
-    let mut bounding_rect = Rectangle::with_corners(top_left, Point::new(100, 100));
+    let mut base_rectangle = Rectangle::with_corners(top_left, Point::new(100, 100));
 
     let mut stroke_width = 5;
 
@@ -59,8 +58,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut align = StrokeAlignment::Center;
 
     draw(
-        bounding_rect.top_left,
-        bounding_rect.size,
+        base_rectangle,
         Size::new(radius, radius),
         stroke_width,
         align,
@@ -76,7 +74,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 SimulatorEvent::MouseButtonDown { point, .. } => {
                     mouse_down = true;
 
-                    bounding_rect = Rectangle::with_corners(top_left, point);
+                    base_rectangle = Rectangle::with_corners(top_left, point);
                 }
                 SimulatorEvent::KeyDown { keycode, .. } => match keycode {
                     Keycode::Up => stroke_width += 1,
@@ -97,15 +95,14 @@ fn main() -> Result<(), core::convert::Infallible> {
                 SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
                 SimulatorEvent::MouseMove { point, .. } => {
                     if mouse_down {
-                        bounding_rect = Rectangle::with_corners(top_left, point);
+                        base_rectangle = Rectangle::with_corners(top_left, point);
                     }
                 }
                 _ => {}
             }
 
             draw(
-                bounding_rect.top_left,
-                bounding_rect.size,
+                base_rectangle,
                 Size::new(radius, radius),
                 stroke_width,
                 align,
