@@ -25,6 +25,10 @@ harness = false
 name = "primitives"
 [[bench]]
 harness = false
+name = "primitives_fixed_point"
+required-features = ["fixed_point"]
+[[bench]]
+harness = false
 name = "fonts"
 [[bench]]
 harness = false
@@ -50,4 +54,5 @@ tinybmp = { version = "0.2.2", features = [ "graphics" ] }
 
 [features]
 default = [ "with-sdl" ]
+fixed_point = [ "embedded-graphics/fixed_point" ]
 with-sdl = [ "sdl2" ]
