@@ -162,6 +162,51 @@ impl RoundedRectangle {
         Self::new(rectangle, CornerRadii::new(corner_radius))
     }
 
+    /// Return the rounded rectangle with confined corner radii.
+    ///
+    /// This method will return a rounded rectangle of the same width and height, but with all
+    /// corner radii confined to fit within its base rectangle.
+    ///
+    /// Calling this method is not necessary when using operations provided by embedded-graphics
+    /// (`.into_styled()`, `.contains()`, etc) as these confine the corner radii internally.
+    ///
+    /// # Examples
+    ///
+    /// ## Confine corner radii that are too large
+    ///
+    /// This example creates a rounded rectangle 50px x 60px in size. Each corner is set to an equal
+    /// radius of 40px x 40px. Each edge of the rectangle would thus need to be at least 80px long
+    /// to contain all corner radii completely. By using `confine_radii`, the corner radii are
+    /// reduced to 25px x 25px so that they fit within the 50px x 60px base rectangle.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     geometry::{Point, Size},
+    ///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
+    /// };
+    ///
+    /// let radii = CornerRadii::new(Size::new(40, 40));
+    ///
+    /// let base_rectangle = Rectangle::new(Point::zero(), Size::new(50, 60));
+    ///
+    /// let rounded_rectangle = RoundedRectangle::new(base_rectangle, radii);
+    ///
+    /// let confined = rounded_rectangle.confine_radii();
+    ///
+    /// assert_eq!(
+    ///     confined.corners,
+    ///     CornerRadii {
+    ///         top_left: Size::new(25, 25),
+    ///         top_right: Size::new(25, 25),
+    ///         bottom_right: Size::new(25, 25),
+    ///         bottom_left: Size::new(25, 25),
+    ///     }
+    /// );
+    /// ```
+    pub fn confine_radii(&self) -> Self {
+        Self::new(self.rectangle, self.corners.confine(self.rectangle.size))
+    }
+
     fn get_confined_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
         let Self {
             rectangle, corners, ..
