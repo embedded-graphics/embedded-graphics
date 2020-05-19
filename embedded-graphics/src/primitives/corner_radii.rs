@@ -3,6 +3,29 @@
 use crate::geometry::Size;
 
 /// The definition of each corner radius for a rounded rectangle.
+///
+/// # Examples
+///
+/// ## Create a radii configuration with equal corners
+///
+/// This example create a `CornerRadii` instance where each corner has an equal, elliptical radius
+/// of 10px x 8px.
+///
+/// ```rust
+/// use embedded_graphics::{geometry::Size, primitives::CornerRadii};
+///
+/// let radii = CornerRadii::new(Size::new(10, 8));
+///
+/// assert_eq!(
+///     radii,
+///     CornerRadii {
+///         top_left: Size::new(10, 8),
+///         top_right: Size::new(10, 8),
+///         bottom_right: Size::new(10, 8),
+///         bottom_left: Size::new(10, 8),
+///     }
+/// );
+/// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct CornerRadii {
     /// Top left corner radius
@@ -20,7 +43,10 @@ pub struct CornerRadii {
 
 impl CornerRadii {
     /// Create a new set of corner radii with all corners having equal values.
-    pub fn new(radius: Size) -> Self {
+    ///
+    /// To create a `CornerRadii` instance with different radii for each corner, use the
+    /// [`CornerRadiiBuilder`](./struct.CornerRadiiBuilder.html) builder.
+    pub const fn new(radius: Size) -> Self {
         Self {
             top_left: radius,
             top_right: radius,
@@ -62,7 +88,7 @@ impl CornerRadii {
     }
 }
 
-/// [`CornerRadii`] builder.
+/// [`CornerRadii`](./struct.CornerRadii.html) builder.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct CornerRadiiBuilder {
     corners: CornerRadii,
@@ -72,9 +98,9 @@ impl CornerRadiiBuilder {
     /// Create a new corner radii builder.
     ///
     /// All radii are defaulted to 0px x 0px.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
-            corners: CornerRadii::default(),
+            corners: CornerRadii::new(Size::zero()),
         }
     }
 
@@ -98,7 +124,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn all(mut self, radius: Size) -> Self {
+    pub const fn all(mut self, radius: Size) -> Self {
         self.corners = CornerRadii::new(radius);
 
         self
@@ -124,7 +150,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn top(mut self, radius: Size) -> Self {
+    pub const fn top(mut self, radius: Size) -> Self {
         self.corners.top_left = radius;
         self.corners.top_right = radius;
 
@@ -151,7 +177,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn right(mut self, radius: Size) -> Self {
+    pub const fn right(mut self, radius: Size) -> Self {
         self.corners.top_right = radius;
         self.corners.bottom_right = radius;
 
@@ -178,7 +204,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn bottom(mut self, radius: Size) -> Self {
+    pub const fn bottom(mut self, radius: Size) -> Self {
         self.corners.bottom_left = radius;
         self.corners.bottom_right = radius;
 
@@ -205,7 +231,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn left(mut self, radius: Size) -> Self {
+    pub const fn left(mut self, radius: Size) -> Self {
         self.corners.top_left = radius;
         self.corners.bottom_left = radius;
 
@@ -234,7 +260,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn top_left(mut self, radius: Size) -> Self {
+    pub const fn top_left(mut self, radius: Size) -> Self {
         self.corners.top_left = radius;
 
         self
@@ -262,7 +288,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn top_right(mut self, radius: Size) -> Self {
+    pub const fn top_right(mut self, radius: Size) -> Self {
         self.corners.top_right = radius;
 
         self
@@ -290,7 +316,7 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn bottom_right(mut self, radius: Size) -> Self {
+    pub const fn bottom_right(mut self, radius: Size) -> Self {
         self.corners.bottom_right = radius;
 
         self
@@ -318,14 +344,14 @@ impl CornerRadiiBuilder {
     ///     }
     /// );
     /// ```
-    pub fn bottom_left(mut self, radius: Size) -> Self {
+    pub const fn bottom_left(mut self, radius: Size) -> Self {
         self.corners.bottom_left = radius;
 
         self
     }
 
     /// Consume the builder and produce a [`CornerRadii`] configuration.
-    pub fn build(self) -> CornerRadii {
+    pub const fn build(self) -> CornerRadii {
         self.corners
     }
 }

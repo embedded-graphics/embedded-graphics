@@ -476,6 +476,10 @@ macro_rules! egtriangle {
 ///
 /// ## Create rounded rectangles with equal and unequal radii
 ///
+/// Rounded rectangles with equal corner radii can be constructed using the `radius = `
+/// (singular) property. To create rounded rectangles with unequal corners, the `radii = `
+/// (plural) property may be used instead.
+///
 /// ```rust
 /// use embedded_graphics::{
 ///     egroundedrectangle,
@@ -489,6 +493,7 @@ macro_rules! egtriangle {
 /// let equal_radius: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
 ///     top_left = (10, 20),
 ///     size = (20, 30),
+///     // Note: Radius, singular
 ///     radius = (6, 8),
 ///     style = primitive_style!(
 ///         stroke_color = Rgb565::RED,
@@ -500,6 +505,7 @@ macro_rules! egtriangle {
 /// let unequal_radii: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
 ///     top_left = (10, 20),
 ///     size = (20, 30),
+///     // Note: Radii, plural
 ///     radii = CornerRadii {
 ///         top_left: Size::new(5, 5),
 ///         top_right: Size::new(10, 10),

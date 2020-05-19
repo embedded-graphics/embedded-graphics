@@ -18,9 +18,12 @@ use crate::{
 /// Rounded rectangle primitive.
 ///
 /// Creates a rectangle with rounded corners. Corners can be circular or elliptical in shape, and
-/// each corner may have a separate radius applied to it. Corner radii can be specified either by
-/// creating an instance of [`CornerRadii`](../struct.CornerRadii.html), or using the
-/// [`CornerRadiiBuilder`](../struct.CornerRadiiBuilder.html) builder.
+/// each corner may have a separate radius applied to it. To create a rounded rectangle with the same
+/// radius for each corner, use the [`with_equal_corners`](#method.with_equal_corners) method.
+///
+/// Rounded rectangles with different radii for each corner can be created by passing a
+/// [`CornerRadii`](../struct.CornerRadii.html) configuration struct to the [`new`](#method.new)
+/// method.
 ///
 /// # Overlapping corners
 ///
@@ -37,8 +40,8 @@ use crate::{
 /// ## Create a uniform rounded rectangle
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Using
-/// [`with_equal_corners`](#method.new), all corners are given the same 10px circular radius.
-/// The rectangle is drawn using a solid green fill with a 5px red stroke.
+/// [`with_equal_corners`](#method.with_equal_corners), all corners are given the same 10px circular
+/// radius. The rectangle is drawn using a solid green fill with a 5px red stroke.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -68,7 +71,7 @@ use crate::{
 /// ## Different corner radii
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Each corner is given a distinct
-/// radius in the x and y direction by creating a [`CornerRadii`](../struct.CornerRadiiBuilder.html)
+/// radius in the x and y direction by creating a [`CornerRadii`](../struct.CornerRadii.html)
 /// object and passing that to [`RoundedRectangle::new`](#method.new).
 ///
 /// ```rust
@@ -147,7 +150,7 @@ impl RoundedRectangle {
     ///
     /// The size and position of the rounded rectangle is determined by the given base
     /// rectangle.
-    pub fn new(rectangle: Rectangle, corners: CornerRadii) -> Self {
+    pub const fn new(rectangle: Rectangle, corners: CornerRadii) -> Self {
         Self { rectangle, corners }
     }
 
@@ -155,7 +158,7 @@ impl RoundedRectangle {
     ///
     /// The size and position of the rounded rectangle is determined by the given base
     /// rectangle.
-    pub fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
+    pub const fn with_equal_corners(rectangle: Rectangle, corner_radius: Size) -> Self {
         Self::new(rectangle, CornerRadii::new(corner_radius))
     }
 
