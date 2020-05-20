@@ -519,47 +519,6 @@ macro_rules! egtriangle {
 ///     )
 /// );
 /// ```
-///
-/// Style properties like `stroke_color` map to methods on the [`PrimitiveStyleBuilder`] struct.
-/// For example, the following code makes two identical rounded rectangles:
-///
-/// [`PrimitiveStyleBuilder`]: style/struct.PrimitiveStyleBuilder.html
-///
-/// ```rust
-/// use embedded_graphics::{
-///     egroundedrectangle,
-///     pixelcolor::Rgb565,
-///     prelude::*,
-///     primitive_style,
-///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled},
-/// };
-///
-/// let rounded_rect_1: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = egroundedrectangle!(
-///     top_left = (10, 20),
-///     size = (30, 40),
-///     radius = (6, 8),
-///     style = primitive_style!(
-///         stroke_color = Rgb565::RED,
-///         fill_color = Rgb565::GREEN,
-///         stroke_width = 1
-///     )
-/// );
-///
-/// let style = PrimitiveStyleBuilder::new()
-///     .fill_color(Rgb565::GREEN)
-///     .stroke_color(Rgb565::RED)
-///     .stroke_width(1)
-///     .build();
-///
-/// let rounded_rect_2: Styled<RoundedRectangle, PrimitiveStyle<Rgb565>> = RoundedRectangle::new(
-///     Rectangle::new(Point::new(10, 20), Size::new(30, 40)),
-///     CornerRadii::new(Size::new(6, 8)),
-/// )
-/// .into_styled(style);
-///
-/// assert_eq!(rounded_rect_1, rounded_rect_2);
-/// ```
 #[macro_export]
 macro_rules! egroundedrectangle {
     (corners = [$corner_1:expr, $corner_2:expr], radii = $radii:expr $(,)?) => {{
