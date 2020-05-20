@@ -57,30 +57,51 @@ impl CornerRadii {
 
     /// Confine corner radii that are too large to a given bounding rectangle
     pub(crate) fn confine(self, bounding_box: Size) -> Self {
-        // Compute overlap for each edge
-        let overlap_top =
-            (self.top_left.width + self.top_right.width).saturating_sub(bounding_box.width);
-        let overlap_right =
+        let mut overlap = 0;
+        let mut size = 0;
+        let mut corner_size = 0;
+
+        // Top edge
+        let o = (self.top_left.width + self.top_right.width).saturating_sub(bounding_box.width);
+        if o > overlap {
+            size = bounding_box.width;
+            corner_size = self.top_left.width + self.top_right.width;
+            overlap = o;
+        }
+
+        // Right edge
+        let o =
             (self.top_right.height + self.bottom_right.height).saturating_sub(bounding_box.height);
-        let overlap_bottom =
+        if o > overlap {
+            size = bounding_box.height;
+            corner_size = self.top_right.height + self.bottom_right.height;
+            overlap = o;
+        }
+
+        // Bottom edge
+        let o =
             (self.bottom_left.width + self.bottom_right.width).saturating_sub(bounding_box.width);
-        let overlap_left =
+        if o > overlap {
+            size = bounding_box.width;
+            corner_size = self.bottom_left.width + self.bottom_right.width;
+            overlap = o;
+        }
+
+        // Left edge
+        let o =
             (self.top_left.height + self.bottom_left.height).saturating_sub(bounding_box.height);
+        if o > overlap {
+            size = bounding_box.height;
+            corner_size = self.top_left.height + self.bottom_left.height;
+            overlap = o;
+        }
 
-        let largest_overlap = overlap_top
-            .max(overlap_right)
-            .max(overlap_bottom)
-            .max(overlap_left);
-
-        if largest_overlap > 0 {
-            // Reduce each corner radius by (largest overlap / 2), rounding up by adding 1
-            let reduce_by = Size::new_equal((largest_overlap + 1) / 2);
-
+        if overlap > 0 && corner_size > 0 {
             Self {
-                top_left: self.top_left.saturating_sub(reduce_by),
-                top_right: self.top_right.saturating_sub(reduce_by),
-                bottom_right: self.bottom_right.saturating_sub(reduce_by),
-                bottom_left: self.bottom_left.saturating_sub(reduce_by),
+                top_left: (self.top_left * size) / corner_size,
+                top_right: (self.top_right * size) / corner_size,
+                bottom_right: (self.bottom_right * size) / corner_size,
+                bottom_left: (self.bottom_left * size) / corner_size,
             }
         } else {
             self

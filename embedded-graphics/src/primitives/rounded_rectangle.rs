@@ -529,6 +529,7 @@ mod tests {
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, Rgb888},
         prelude::*,
+        primitives::CornerRadiiBuilder,
         style::PrimitiveStyleBuilder,
     };
 
@@ -769,12 +770,11 @@ mod tests {
 
         assert_eq!(
             corners.confine(Size::new(20, 30)),
-            // All corners should be shrunk by half the overlap, rounded up
             CornerRadii {
-                top_left: Size::new(7, 17),
-                top_right: Size::new(7, 12),
-                bottom_right: Size::new(7, 12),
-                bottom_left: Size::new(7, 12),
+                top_left: Size::new(8, 17),
+                top_right: Size::new(8, 12),
+                bottom_right: Size::new(8, 12),
+                bottom_left: Size::new(8, 12)
             }
         );
     }
@@ -814,12 +814,38 @@ mod tests {
 
         assert_eq!(
             corners.confine(Size::new(20, 30)),
-            // Reduce all corners by (8px / 2) = 4px
             CornerRadii {
-                top_left: Size::new(6, 16),
-                top_right: Size::new(6, 11),
-                bottom_right: Size::new(14, 11),
-                bottom_left: Size::new(6, 11),
+                top_left: Size::new(7, 14),
+                top_right: Size::new(7, 10),
+                bottom_right: Size::new(12, 10),
+                bottom_left: Size::new(7, 10),
+            }
+        );
+    }
+
+    #[test]
+    fn large_bottom_right_corner() {
+        let radii = CornerRadiiBuilder::new()
+            .all(Size::new_equal(20))
+            .bottom_right(Size::new(200, 200))
+            .build();
+
+        let base_rectangle = Rectangle::with_corners(Point::new_equal(20), Point::new_equal(100));
+
+        let rounded_rectangle = RoundedRectangle::new(base_rectangle, radii);
+
+        let confined = rounded_rectangle.confine_radii();
+
+        assert_eq!(
+            confined,
+            RoundedRectangle {
+                rectangle: base_rectangle,
+                corners: CornerRadii {
+                    top_left: Size::new_equal(7),
+                    top_right: Size::new_equal(7),
+                    bottom_right: Size::new_equal(73),
+                    bottom_left: Size::new_equal(7),
+                }
             }
         );
     }
