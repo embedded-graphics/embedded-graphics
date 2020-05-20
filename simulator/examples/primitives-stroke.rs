@@ -5,7 +5,7 @@
 use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Ellipse, Line, Rectangle, Triangle},
+    primitives::{Circle, CornerRadii, Ellipse, Line, Rectangle, RoundedRectangle, Triangle},
     style::PrimitiveStyle,
 };
 use embedded_graphics_simulator::{OutputSettings, SimulatorDisplay, Window};
@@ -13,7 +13,7 @@ use embedded_graphics_simulator::{OutputSettings, SimulatorDisplay, Window};
 const PADDING: i32 = 16;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(420, 256));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(512, 256));
 
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
     let medium_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
@@ -25,8 +25,14 @@ fn main() -> Result<(), core::convert::Infallible> {
     let line = Line::new(Point::new(0, 0), Point::new(64, 64))
         .translate(Point::new((64 + PADDING) * 2, 0));
     let circle = Circle::new(Point::new(0, 0), 64).translate(Point::new((64 + PADDING) * 3, 0));
+    let rounded_rectangle = RoundedRectangle::new(
+        Rectangle::new(Point::new(0, 0), Size::new(64, 64)),
+        CornerRadii::new(Size::new(16, 16)),
+    )
+    .translate(Point::new((64 + PADDING) * 4, 0));
+
     let ellipse = Ellipse::new(Point::new(0, 0), Size::new(96, 64))
-        .translate(Point::new((64 + PADDING) * 4, 0));
+        .translate(Point::new((64 + PADDING) * 5, 0));
 
     circle
         .into_styled(thin_stroke)
@@ -35,6 +41,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         .chain(line.into_styled(thin_stroke).into_iter())
         .chain(triangle.into_styled(thin_stroke).into_iter())
         .chain(ellipse.into_styled(thin_stroke).into_iter())
+        .chain(rounded_rectangle.into_styled(thin_stroke).into_iter())
         .draw(&mut display)?;
 
     let offset = Point::new(0, 64 + PADDING);
@@ -65,6 +72,12 @@ fn main() -> Result<(), core::convert::Infallible> {
                 .into_styled(medium_stroke)
                 .into_iter(),
         )
+        .chain(
+            rounded_rectangle
+                .translate(offset)
+                .into_styled(medium_stroke)
+                .into_iter(),
+        )
         .draw(&mut display)?;
 
     let offset = Point::new(0, (64 + PADDING) * 2);
@@ -87,6 +100,12 @@ fn main() -> Result<(), core::convert::Infallible> {
         )
         .chain(
             ellipse
+                .translate(offset)
+                .into_styled(thick_stroke)
+                .into_iter(),
+        )
+        .chain(
+            rounded_rectangle
                 .translate(offset)
                 .into_styled(thick_stroke)
                 .into_iter(),

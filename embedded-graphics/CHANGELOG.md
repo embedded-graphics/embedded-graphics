@@ -20,6 +20,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#292](https://github.com/jamwaffles/embedded-graphics/pull/292) Added the `Polyline` primitive.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::x_axis`, `Point::y_axis`, `Size::x_axis` and `Size::y_axis`.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::new_equal` and `Size::new_equal`.
+- [#336](https://github.com/jamwaffles/embedded-graphics/pull/336) Add `RoundedRectangle` primitive and `egroundedrectangle!` macro.
 
 ### Changed
 

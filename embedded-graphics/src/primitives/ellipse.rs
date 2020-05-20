@@ -83,9 +83,7 @@ impl Ellipse {
     /// This method is used to accurately calculate the outside edge of the ellipse.
     /// The result is not equivalent to `self.center() * 2` because of rounding.
     fn center_2x(&self) -> Point {
-        let radius = self.size.saturating_sub(Size::new(1, 1));
-
-        self.top_left * 2 + radius
+        center_2x(self.top_left, self.size)
     }
 
     fn expand(&self, offset: u32) -> Self {
@@ -97,6 +95,16 @@ impl Ellipse {
         let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
         Self::with_center(self.center(), size)
     }
+}
+
+/// Return the center point of the ellipse scaled by a factor of 2
+///
+/// This method is used to accurately calculate the outside edge of the ellipse.
+/// The result is not equivalent to `Ellipse::center() * 2` because of rounding.
+pub(crate) fn center_2x(top_left: Point, size: Size) -> Point {
+    let radius = size.saturating_sub(Size::new(1, 1));
+
+    top_left * 2 + radius
 }
 
 impl Primitive for Ellipse {
@@ -282,7 +290,7 @@ where
     }
 }
 
-fn compute_threshold(size: Size) -> (Size, u32) {
+pub(crate) fn compute_threshold(size: Size) -> (Size, u32) {
     let Size { width, height } = size;
 
     let a = width.pow(2);
@@ -301,7 +309,7 @@ fn compute_threshold(size: Size) -> (Size, u32) {
 /// Uses the ellipse equation b^2 * x^2 + a^2 * y^2 - a^2 * b^2 to return a value signifying whether
 /// a given point lies inside (`true`) or outside (`false`) an ellipse centered around `(0, 0)` with
 /// width and height defined by the `size` parameter.
-fn is_point_inside_ellipse(size: Size, point: Point, threshold: u32) -> bool {
+pub(crate) fn is_point_inside_ellipse(size: Size, point: Point, threshold: u32) -> bool {
     let Size {
         width: a,
         height: b,

@@ -124,6 +124,47 @@ fn polyline(c: &mut Criterion) {
     });
 }
 
+fn rounded_rectangle(c: &mut Criterion) {
+    c.bench_function("rounded_rectangle", |b| {
+        let object = &RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(50, 40)),
+            CornerRadii::new(Size::new(10, 12)),
+        )
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(5)
+                .fill_color(Gray8::new(10))
+                .stroke_color(Gray8::new(60))
+                .build(),
+        );
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
+fn rounded_rectangle_corners(c: &mut Criterion) {
+    c.bench_function("rounded_rectangle_corners", |b| {
+        let object = &RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(50, 40)),
+            CornerRadii {
+                top_left: Size::new(10, 12),
+                top_right: Size::new(14, 16),
+                bottom_right: Size::new(18, 20),
+                bottom_left: Size::new(22, 24),
+            },
+        )
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(5)
+                .fill_color(Gray8::new(10))
+                .stroke_color(Gray8::new(60))
+                .build(),
+        );
+
+        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 criterion_group!(
     primitives,
     filled_circle,
@@ -136,6 +177,8 @@ criterion_group!(
     filled_triangle,
     ellipse,
     filled_ellipse,
-    polyline
+    polyline,
+    rounded_rectangle,
+    rounded_rectangle_corners
 );
 criterion_main!(primitives);

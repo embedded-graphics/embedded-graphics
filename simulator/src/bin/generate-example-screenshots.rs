@@ -199,6 +199,33 @@ some display drivers implement accelerated drawing of iterators."#,
 
     op!(
         display,
+        "Draw a rectangle with rounded corners",
+        "This example draws a rectangle with rounded corners, red stroke and green fill.",
+        {
+            use embedded_graphics::{
+                pixelcolor::Rgb888,
+                prelude::*,
+                primitives::{Rectangle, RoundedRectangle},
+                style::PrimitiveStyleBuilder,
+            };
+            {}
+            let style = PrimitiveStyleBuilder::new()
+                .stroke_color(Rgb888::RED)
+                .stroke_width(3)
+                .fill_color(Rgb888::GREEN)
+                .build();
+            {}
+            RoundedRectangle::with_equal_corners(
+                Rectangle::new(Point::new(8, 16), Size::new(48, 32)),
+                Size::new(10, 10),
+            )
+            .into_styled(style)
+            .draw(&mut display)?;
+        }
+    );
+
+    op!(
+        display,
         "Draw some text",
         "This example draws the text \"Hello,\\nRust!\" with the [`Font6x8`] font in green.",
         {

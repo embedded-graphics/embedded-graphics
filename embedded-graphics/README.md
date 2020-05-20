@@ -20,6 +20,7 @@ It contains built in items that make it easy to draw 2D graphics primitives:
   - Ellipses
   - Triangles
   - Polylines
+  - Rounded rectangles
 - Images
   - Built in support for images from raw data
   - Other image formats, like BMP and TGA images, are supported using an [external crate](#additional-functions-provided-by-external-crates)

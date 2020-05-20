@@ -150,6 +150,32 @@ impl Point {
     pub const fn abs(self) -> Self {
         Point::new(self.x.abs(), self.y.abs())
     }
+
+    /// Returns the componentwise minimum of two `Point`s
+    ///
+    /// ```rust,ignore
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let min = Point::new(20, 30).component_min(Point::new(15, 50));
+    ///
+    /// assert_eq!(min, Point::new(15, 30));
+    /// ```
+    pub(crate) fn component_min(self, other: Self) -> Self {
+        Self::new(self.x.min(other.x), self.y.min(other.y))
+    }
+
+    /// Returns the componentwise maximum of two `Point`s
+    ///
+    /// ```rust,ignore
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let min = Point::new(20, 30).component_max(Point::new(15, 50));
+    ///
+    /// assert_eq!(min, Point::new(20, 50));
+    /// ```
+    pub(crate) fn component_max(self, other: Self) -> Self {
+        Self::new(self.x.max(other.x), self.y.max(other.y))
+    }
 }
 
 impl Add for Point {
@@ -665,5 +691,14 @@ mod tests {
         let c = left - right;
 
         assert_eq!(Point::from(&c), Point::new(20, 20));
+    }
+
+    #[test]
+    fn component_min_max() {
+        let a = Point::new(20, 30);
+        let b = Point::new(15, 50);
+
+        assert_eq!(a.component_min(b), Point::new(15, 30));
+        assert_eq!(a.component_max(b), Point::new(20, 50));
     }
 }

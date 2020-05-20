@@ -185,10 +185,23 @@ where
         // Check pattern dimensions.
         let pattern_width = pattern.first().map_or(0, |row| row.len());
         let pattern_height = pattern.len();
-        assert!(pattern_width <= SIZE);
-        assert!(pattern_height <= SIZE);
+        assert!(
+            pattern_width <= SIZE,
+            "Test pattern must not be wider than {}",
+            SIZE
+        );
+        assert!(
+            pattern_height <= SIZE,
+            "Test pattern must not be taller than {}",
+            SIZE
+        );
         for row in pattern {
-            assert_eq!(row.len(), pattern_width);
+            assert_eq!(
+                row.len(),
+                pattern_width,
+                "Every row in the pattern must be {} characters wide",
+                pattern_width
+            );
         }
 
         // Convert pattern to colors and pad pattern with None.

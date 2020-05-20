@@ -214,7 +214,7 @@ impl Points {
         }
     }
 
-    const fn empty() -> Self {
+    pub(crate) const fn empty() -> Self {
         Self {
             left: 0,
             bottom_right: Point::new(-1, -1),

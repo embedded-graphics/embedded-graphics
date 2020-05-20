@@ -180,6 +180,32 @@ impl Size {
     pub(crate) fn center_offset(self) -> Self {
         self.saturating_sub(Size::new(1, 1)) / 2
     }
+
+    /// Returns the componentwise minimum of two `Size`s
+    ///
+    /// ```rust,ignore
+    /// use embedded_graphics::geometry::Size;
+    ///
+    /// let min = Size::new(20, 30).component_min(Size::new(15, 50));
+    ///
+    /// assert_eq!(min, Size::new(15, 30));
+    /// ```
+    pub(crate) fn component_min(self, other: Self) -> Self {
+        Self::new(self.width.min(other.width), self.height.min(other.height))
+    }
+
+    /// Returns the componentwise maximum of two `Size`s
+    ///
+    /// ```rust,ignore
+    /// use embedded_graphics::geometry::Size;
+    ///
+    /// let min = Size::new(20, 30).component_max(Size::new(15, 50));
+    ///
+    /// assert_eq!(min, Size::new(20, 50));
+    /// ```
+    pub(crate) fn component_max(self, other: Self) -> Self {
+        Self::new(self.width.max(other.width), self.height.max(other.height))
+    }
 }
 
 impl Add for Size {
@@ -407,5 +433,14 @@ mod tests {
         let right = nalgebra::Vector2::new(10, 20);
 
         assert_eq!(Size::from(left - right), Size::new(20, 20));
+    }
+
+    #[test]
+    fn component_min_max() {
+        let a = Size::new(20, 30);
+        let b = Size::new(15, 50);
+
+        assert_eq!(a.component_min(b), Size::new(15, 30));
+        assert_eq!(a.component_max(b), Size::new(20, 50));
     }
 }
