@@ -125,6 +125,8 @@ impl CornerRadiiBuilder {
 
     /// Set all corner radii to the same value.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Size,
@@ -150,6 +152,8 @@ impl CornerRadiiBuilder {
     }
 
     /// Set the top left and top right corner radii to the same value.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use embedded_graphics::{
@@ -178,6 +182,8 @@ impl CornerRadiiBuilder {
 
     /// Set the top right and bottom right corner radii to the same value.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Size,
@@ -204,6 +210,8 @@ impl CornerRadiiBuilder {
     }
 
     /// Set the bottom left and bottom right corner radii to the same value.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use embedded_graphics::{
@@ -232,6 +240,8 @@ impl CornerRadiiBuilder {
 
     /// Set the top left and bottom left corner radii to the same value.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Size,
@@ -258,6 +268,8 @@ impl CornerRadiiBuilder {
     }
 
     /// Set the top left corner radius.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use embedded_graphics::{
@@ -287,6 +299,8 @@ impl CornerRadiiBuilder {
 
     /// Set the top right corner radius.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Size,
@@ -315,6 +329,8 @@ impl CornerRadiiBuilder {
 
     /// Set the bottom right corner radius.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Size,
@@ -342,6 +358,8 @@ impl CornerRadiiBuilder {
     }
 
     /// Set the bottom left corner radius.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use embedded_graphics::{
