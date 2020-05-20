@@ -78,7 +78,7 @@ use crate::{
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
+///     primitives::{CornerRadiiBuilder, Rectangle, RoundedRectangle},
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
@@ -90,12 +90,12 @@ use crate::{
 ///     .fill_color(Rgb565::GREEN)
 ///     .build();
 ///
-/// let radii = CornerRadii {
-///     top_left: Size::new(10, 12),
-///     top_right: Size::new(14, 16),
-///     bottom_right: Size::new(18, 20),
-///     bottom_left: Size::new(22, 24),
-/// };
+/// let radii = CornerRadiiBuilder::new()
+///     .top_left(Size::new(10, 12))
+///     .top_right(Size::new(14, 16))
+///     .bottom_right(Size::new(18, 20))
+///     .bottom_left(Size::new(22, 24))
+///     .build();
 ///
 /// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
 ///     .into_styled(style)
@@ -182,10 +182,10 @@ impl RoundedRectangle {
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::{Point, Size},
-    ///     primitives::{CornerRadii, Rectangle, RoundedRectangle},
+    ///     primitives::{CornerRadii, CornerRadiiBuilder, Rectangle, RoundedRectangle},
     /// };
     ///
-    /// let radii = CornerRadii::new(Size::new(40, 40));
+    /// let radii = CornerRadiiBuilder::new().all(Size::new(40, 40)).build();
     ///
     /// let base_rectangle = Rectangle::new(Point::zero(), Size::new(50, 60));
     ///
