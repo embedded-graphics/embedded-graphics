@@ -61,38 +61,36 @@ impl CornerRadii {
         let mut size = 0;
         let mut corner_size = 0;
 
-        // Top edge
-        let o = (self.top_left.width + self.top_right.width).saturating_sub(bounding_box.width);
+        let top_radii = self.top_left.width + self.top_right.width;
+        let right_radii = self.top_right.height + self.bottom_right.height;
+        let bottom_radii = self.bottom_left.width + self.bottom_right.width;
+        let left_radii = self.top_left.height + self.bottom_left.height;
+
+        let o = top_radii.saturating_sub(bounding_box.width);
         if o > overlap {
             size = bounding_box.width;
-            corner_size = self.top_left.width + self.top_right.width;
+            corner_size = top_radii;
             overlap = o;
         }
 
-        // Right edge
-        let o =
-            (self.top_right.height + self.bottom_right.height).saturating_sub(bounding_box.height);
+        let o = right_radii.saturating_sub(bounding_box.height);
         if o > overlap {
             size = bounding_box.height;
-            corner_size = self.top_right.height + self.bottom_right.height;
+            corner_size = right_radii;
             overlap = o;
         }
 
-        // Bottom edge
-        let o =
-            (self.bottom_left.width + self.bottom_right.width).saturating_sub(bounding_box.width);
+        let o = bottom_radii.saturating_sub(bounding_box.width);
         if o > overlap {
             size = bounding_box.width;
-            corner_size = self.bottom_left.width + self.bottom_right.width;
+            corner_size = bottom_radii;
             overlap = o;
         }
 
-        // Left edge
-        let o =
-            (self.top_left.height + self.bottom_left.height).saturating_sub(bounding_box.height);
+        let o = left_radii.saturating_sub(bounding_box.height);
         if o > overlap {
             size = bounding_box.height;
-            corner_size = self.top_left.height + self.bottom_left.height;
+            corner_size = left_radii;
             overlap = o;
         }
 
