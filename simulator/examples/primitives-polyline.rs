@@ -3,7 +3,8 @@
 //! This example draws a crude "heartbeat" shape using the `Polyline` primitive
 
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Polyline, style::PrimitiveStyle,
+    egpolyline, pixelcolor::Rgb888, prelude::*, primitive_style, primitives::Polyline,
+    style::PrimitiveStyle,
 };
 use embedded_graphics_simulator::{OutputSettings, SimulatorDisplay, Window};
 
@@ -13,7 +14,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let (w, h) = (320i32, 256i32);
 
     let mut display: SimulatorDisplay<Rgb888> =
-        SimulatorDisplay::new(Size::new(w as u32, h as u32));
+        SimulatorDisplay::new(Size::new(w as u32, h as u32 * 2));
 
     let line_style = PrimitiveStyle::with_stroke(Rgb888::GREEN, 1);
 
@@ -33,6 +34,14 @@ fn main() -> Result<(), core::convert::Infallible> {
     Polyline::new(&points)
         .into_styled(line_style)
         .draw(&mut display)?;
+
+    // Draw an orange heartbeat below the green one using macros
+    egpolyline!(
+        points = &points,
+        style = primitive_style!(stroke_width = 1, stroke_color = Rgb888::new(247, 151, 17))
+    )
+    .translate(Point::new(0, h))
+    .draw(&mut display)?;
 
     Window::new("Polyline", &OutputSettings::default()).show_static(&display);
 

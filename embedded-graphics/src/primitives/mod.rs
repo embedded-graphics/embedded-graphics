@@ -308,6 +308,51 @@ macro_rules! egline {
     }};
 }
 
+/// Create a [`Polyline`](./primitives/polyline/struct.Polyline.html) with optional styling using a
+/// convenient macro.
+///
+/// Note that styled polylines currently only support the `stroke_color` and `stroke_width` style
+/// properties. The `stroke_width` property is currently clamped at 1px. All other style properties
+/// are ignored.
+///
+/// # Examples
+///
+/// ```rust
+/// use embedded_graphics::{
+///     egpolyline,
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     primitive_style,
+///     primitives::Polyline,
+///     style::{PrimitiveStyle, Styled},
+/// };
+///
+/// let points: [Point; 5] = [
+///     Point::new(8, 8),
+///     Point::new(48, 16),
+///     Point::new(32, 48),
+///     Point::new(16, 32),
+///     Point::new(32, 32),
+/// ];
+///
+/// let line: Styled<Polyline, PrimitiveStyle<Rgb565>> = egpolyline!(points = &points);
+///
+/// let stroke_line: Styled<Polyline, PrimitiveStyle<Rgb565>> = egpolyline!(
+///     points = &points,
+///     style = primitive_style!(stroke_width = 1, stroke_color = Rgb565::BLUE)
+/// );
+/// ```
+#[macro_export]
+macro_rules! egpolyline {
+    (points = $points:expr $(,)?) => {
+        $crate::primitives::Polyline::new($points)
+            .into_styled($crate::style::PrimitiveStyle::default())
+    };
+    (points = $points:expr, style = $style:expr $(,)?) => {
+        $crate::primitives::Polyline::new($points).into_styled($style)
+    };
+}
+
 /// Create a [`Rectangle`](./primitives/rectangle/struct.Rectangle.html) with optional styling using a
 /// convenient macro.
 ///
