@@ -79,7 +79,13 @@ impl Size {
     ///
     /// let size = Size::new_equal(11);
     ///
-    /// assert_eq!(size, Size { width: 11, height: 11 });
+    /// assert_eq!(
+    ///     size,
+    ///     Size {
+    ///         width: 11,
+    ///         height: 11
+    ///     }
+    /// );
     /// ```
     pub const fn new_equal(value: u32) -> Self {
         Size {

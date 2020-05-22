@@ -185,8 +185,10 @@ macro_rules! impl_rgb_color {
 /// Helper macro to calculate bit positions for RGB and BGR colors
 macro_rules! rgb_color {
     (
-        $type:ident, $data_type:ty, $storage_type:ty,
-        Rgb = ($r_bits:expr, $g_bits:expr, $b_bits:expr)
+        $type:ident,
+        $data_type:ty,
+        $storage_type:ty,Rgb =
+        ($r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_rgb_color!(
             $type,
@@ -198,8 +200,10 @@ macro_rules! rgb_color {
     };
 
     (
-        $type:ident, $data_type:ty, $storage_type:ty,
-        Bgr = ($r_bits:expr, $g_bits:expr, $b_bits:expr)
+        $type:ident,
+        $data_type:ty,
+        $storage_type:ty,Bgr =
+        ($r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_rgb_color!(
             $type,

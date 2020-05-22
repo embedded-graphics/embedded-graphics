@@ -9,7 +9,6 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     egrectangle,
 ///     fonts::{Font6x8, Text},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
@@ -30,12 +29,9 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///     C: PixelColor + From<BinaryColor>,
 /// {
 ///     fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-///         egrectangle!(
-///             top_left = self.top_left,
-///             size = self.size,
-///             style = primitive_style!(fill_color = self.bg_color)
-///         )
-///         .draw(display)?;
+///         Rectangle::new(self.top_left, self.size)
+///             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
+///             .draw(display)?;
 ///
 ///         Text::new(self.text, Point::new(20, 20))
 ///             .into_styled(TextStyle::new(Font6x8, self.fg_color))

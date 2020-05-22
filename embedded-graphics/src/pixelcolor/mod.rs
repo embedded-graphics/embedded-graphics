@@ -11,7 +11,9 @@
 //! 3 color EPD display.
 //!
 //! ```
-//! use embedded_graphics::{egrectangle, geometry::Size, prelude::*, primitive_style};
+//! use embedded_graphics::{
+//!     geometry::Size, prelude::*, primitives::Rectangle, style::PrimitiveStyle,
+//! };
 //!
 //! /// Color with 3 states.
 //! #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -51,26 +53,17 @@
 //!
 //! let mut display = EpdDisplay {};
 //!
-//! egrectangle!(
-//!     top_left = (0, 0),
-//!     size = (100, 100),
-//!     style = primitive_style!(fill_color = EpdColor::White)
-//! )
-//! .draw(&mut display)?;
+//! Rectangle::new(Point::new(0, 0), Size::new(100, 100))
+//!     .into_styled(PrimitiveStyle::with_fill(EpdColor::White))
+//!     .draw(&mut display)?;
 //!
-//! egrectangle!(
-//!     top_left = (100, 0),
-//!     size = (100, 100),
-//!     style = primitive_style!(fill_color = EpdColor::Black)
-//! )
-//! .draw(&mut display)?;
+//! Rectangle::new(Point::new(100, 0), Size::new(100, 100))
+//!     .into_styled(PrimitiveStyle::with_fill(EpdColor::Black))
+//!     .draw(&mut display)?;
 //!
-//! egrectangle!(
-//!     top_left = (200, 0),
-//!     size = (100, 100),
-//!     style = primitive_style!(fill_color = EpdColor::Red)
-//! )
-//! .draw(&mut display)?;
+//! Rectangle::new(Point::new(200, 0), Size::new(100, 100))
+//!     .into_styled(PrimitiveStyle::with_fill(EpdColor::Red))
+//!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!

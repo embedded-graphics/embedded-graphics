@@ -14,8 +14,6 @@ use crate::{
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.egellipse.html) make for more concise code.
-///
 /// ## Create some ellipses with different styles
 ///
 /// ```rust

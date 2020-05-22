@@ -18,8 +18,6 @@ use core::{
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.egtriangle.html) make for more concise code.
-///
 /// ## Create some triangles with different styles
 ///
 /// ```rust

@@ -34,7 +34,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Removed
 
-- **(breaking)** [#351](https://github.com/jamwaffles/embedded-graphics/pull/351) Removed the `egtext!` and `text_style!` macros. Use the `Text` and `TextStyleBuilder` respectively instead.
+- **(breaking)** [#351](https://github.com/jamwaffles/embedded-graphics/pull/351) Removed the `egtext!`, `text_style!` and `primitive_style!` macros. Use the `Text`, `TextStyleBuilder` and `PrimitiveStyleBuilder` respectively instead.
+- **(breaking)** [#351](https://github.com/jamwaffles/embedded-graphics/pull/351) Removed the `egcircle!`, `egrectangle!`, `egline!` and `egtriangle!` macros.
 
 ## [0.6.2] - 2020-04-20
 

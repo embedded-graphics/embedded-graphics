@@ -13,7 +13,6 @@ use embedded_graphics::{
     fonts::{Font6x8, Text},
     pixelcolor::Rgb888,
     prelude::*,
-    primitive_style,
     primitives::Line,
     style::{PrimitiveStyle, TextStyle},
 };
@@ -50,9 +49,9 @@ fn draw(
     .draw(display)?;
 
     Line::new(start, position)
-        .into_styled(primitive_style!(
-            stroke_width = stroke_width,
-            stroke_color = Rgb888::new(0x80, 0xf2, 0x91),
+        .into_styled(PrimitiveStyle::with_stroke(
+            Rgb888::new(0x80, 0xf2, 0x91),
+            stroke_width,
         ))
         .draw(display)?;
 

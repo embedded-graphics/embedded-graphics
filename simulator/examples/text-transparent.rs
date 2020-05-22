@@ -3,31 +3,27 @@
 //! Demonstrate the background styles and transparency behaviors of different font styles.
 
 use embedded_graphics::{
-    egcircle, egrectangle,
     fonts::{Font6x8, Text},
     pixelcolor::Rgb565,
     prelude::*,
-    primitive_style,
-    style::TextStyleBuilder,
+    primitives::{Circle, Rectangle},
+    style::{PrimitiveStyle, TextStyleBuilder},
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(256, 128));
 
-    egcircle!(
-        top_left = (0, 0),
-        diameter = 41,
-        style = primitive_style!(fill_color = Rgb565::RED)
-    )
-    .into_iter()
-    .chain(&egrectangle!(
-        top_left = (20, 20),
-        size = (80, 60),
-        style = primitive_style!(fill_color = Rgb565::RED)
-    ))
-    .draw(&mut display)
-    .unwrap();
+    Circle::new(Point::new(0, 0), 41)
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
+        .into_iter()
+        .draw(&mut display)
+        .unwrap();
+
+    Rectangle::new(Point::new(20, 20), Size::new(80, 60))
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
+        .draw(&mut display)
+        .unwrap();
 
     Text::new("Hello world! - no background", Point::new(15, 15))
         .into_styled(
