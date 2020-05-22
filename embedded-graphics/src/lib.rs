@@ -122,46 +122,18 @@
 //! t.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
-//!
-//! ## Draw a circle and some text
-//!
-//! To make life even easier, some handy [macros](#macros) are provided for drawing styled
-//! primitives and text. Converting the example above, we get this:
-//!
-//! ```rust
-//! use embedded_graphics::{
-//!     egcircle, egtext, fonts::Font6x8, mock_display::MockDisplay, pixelcolor::Rgb565,
-//!     prelude::*, primitive_style, text_style,
-//! };
-//!
-//! // Create a draw target using the builtin MockDisplay. In real applications this would be
-//! // replaced by a draw target that is provided by a display driver crate.
-//! let mut display = MockDisplay::default();
-//!
-//! let c = egcircle!(
-//!     top_left = (12, 12),
-//!     diameter = 17,
-//!     style = primitive_style!(fill_color = Rgb565::RED)
-//! );
-//! let t = egtext!(
-//!     text = "Hello Rust!",
-//!     top_left = (20, 16),
-//!     style = text_style!(font = Font6x8, text_color = Rgb565::GREEN)
-//! );
-//!
-//! c.draw(&mut display)?;
-//! t.draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
-//! ```
-//!
 //! ## Chaining
 //!
 //! Items can be chained to build more complex graphics objects.
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     egcircle, egrectangle, egtext, fonts::Font6x8, mock_display::MockDisplay,
-//!     pixelcolor::Rgb565, prelude::*, primitive_style, text_style,
+//!     fonts::{Font6x8, Text},
+//!     mock_display::MockDisplay,
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     primitives::{Circle, Rectangle},
+//!     style::{PrimitiveStyle, TextStyle},
 //! };
 //!
 //! // Create a draw target using the builtin MockDisplay. In real applications this would be
@@ -176,11 +148,10 @@
 //!             diameter = 17,
 //!             style = primitive_style!(fill_color = Rgb565::RED)
 //!         ))
-//!         .chain(&egtext!(
-//!             text = text,
-//!             top_left = (20, 16),
-//!             style = text_style!(font = Font6x8, text_color = Rgb565::GREEN)
-//!         ))
+//!         .chain(
+//!             &Text::new(text, Point::new(20, 16))
+//!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN)),
+//!         )
 //! }
 //!
 //! # let mut display = MockDisplay::default();

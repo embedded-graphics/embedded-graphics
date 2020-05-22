@@ -3,7 +3,7 @@
 //! Shows how to implement the `Font` trait for a custom `SeventSegmentFont` font. This font renders
 //! numbers only and emulates a classic 7 segment display.
 
-use embedded_graphics::{egtext, pixelcolor::BinaryColor, prelude::*, text_style};
+use embedded_graphics::{fonts::Text, pixelcolor::BinaryColor, prelude::*, style::TextStyle};
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
 };
@@ -29,19 +29,13 @@ fn main() -> Result<(), core::convert::Infallible> {
     let position = Point::new(27, 22);
     let row_offset = Point::new(0, 44);
 
-    egtext!(
-        text = "123",
-        top_left = position,
-        style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
-    )
-    .draw(&mut display)?;
+    Text::new("123", position)
+        .into_styled(TextStyle::new(SevenSegmentFont, BinaryColor::On))
+        .draw(&mut display)?;
 
-    egtext!(
-        text = "456",
-        top_left = position + row_offset,
-        style = text_style!(font = SevenSegmentFont, text_color = BinaryColor::On,)
-    )
-    .draw(&mut display)?;
+    Text::new("456", position + row_offset)
+        .into_styled(TextStyle::new(SevenSegmentFont, BinaryColor::On))
+        .draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new()
         .theme(BinaryColorTheme::OledBlue)

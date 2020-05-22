@@ -32,6 +32,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) The bounding box size for `Circle`s was off by one.
 
+### Removed
+
+- **(breaking)** [#351](https://github.com/jamwaffles/embedded-graphics/pull/351) Removed the `egtext!` and `text_style!` macros. Use the `Text` and `TextStyleBuilder` respectively instead.
+
 ## [0.6.2] - 2020-04-20
 
 ### Fixed

@@ -9,11 +9,12 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     egrectangle, egtext,
-///     fonts::Font6x8,
+///     egrectangle,
+///     fonts::{Font6x8, Text},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
-///     primitive_style, text_style,
+///     primitives::Rectangle,
+///     style::{PrimitiveStyle, TextStyle},
 /// };
 ///
 /// struct Button<'a, C: PixelColor> {
@@ -34,13 +35,11 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///             size = self.size,
 ///             style = primitive_style!(fill_color = self.bg_color)
 ///         )
-///         .draw(display);
-///         egtext!(
-///             text = self.text,
-///             top_left = (20, 20),
-///             style = text_style!(font = Font6x8, text_color = self.fg_color)
-///         )
-///         .draw(display)
+///         .draw(display)?;
+///
+///         Text::new(self.text, Point::new(20, 20))
+///             .into_styled(TextStyle::new(Font6x8, self.fg_color))
+///             .draw(display)
 ///     }
 /// }
 ///
