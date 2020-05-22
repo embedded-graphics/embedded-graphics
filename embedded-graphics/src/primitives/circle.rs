@@ -14,8 +14,6 @@ use crate::{
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.egcircle.html) make for more concise code.
-///
 /// ## Create some circles with different styles
 ///
 /// ```rust

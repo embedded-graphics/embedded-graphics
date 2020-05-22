@@ -34,11 +34,12 @@ use crate::{
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
 ///     drawable::Pixel,
-///     egcircle,
 ///     geometry::Size,
 ///     pixelcolor::{Gray8, GrayColor},
 ///     prelude::*,
-///     primitive_style, DrawTarget,
+///     primitives::Circle,
+///     style::PrimitiveStyle,
+///     DrawTarget,
 /// };
 /// #
 /// # struct SPI1;
@@ -92,11 +93,9 @@ use crate::{
 /// };
 ///
 /// // Draw a circle with top-left at `(22, 22)` with a diameter of `20` and a white stroke
-/// let circle = egcircle!(
-///     top_left = (22, 22),
-///     diameter = 20,
-///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
-/// );
+/// let circle = Circle::new(Point::new(22, 22), 20)
+///     .into_styled(PrimitiveStyle::with_stroke(Gray8::WHITE, 1));
+///
 /// circle.draw(&mut display)?;
 ///
 /// // Update the display
@@ -124,7 +123,6 @@ use crate::{
 /// ```rust
 /// # use embedded_graphics::prelude::*;
 /// # use embedded_graphics::DrawTarget;
-/// # use embedded_graphics::{egrectangle, primitive_style};
 /// # use embedded_graphics::primitives::rectangle::Rectangle;
 /// # use embedded_graphics::pixelcolor::{Gray8, GrayColor};
 /// # use embedded_graphics::drawable::Pixel;
@@ -191,11 +189,9 @@ use crate::{
 /// let mut display = FastExampleDisplay { iface: SPI1 };
 ///
 /// // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
-/// let rect = egrectangle!(
-///     corners = [(10, 20), (30, 40)],
-///     style = primitive_style!(stroke_color = Gray8::WHITE, stroke_width = 1)
-/// )
-/// .draw(&mut display)?;
+/// Rectangle::with_corners(Point::new(10, 20), Point::new(30, 40))
+///     .into_styled(PrimitiveStyle::with_stroke(Gray8::WHITE, 1))
+///     .draw(&mut display)?;
 ///
 /// // Draw a rectangle on the display using accelerated `draw_rectangle()` function
 /// # Ok::<(), CommError>(())

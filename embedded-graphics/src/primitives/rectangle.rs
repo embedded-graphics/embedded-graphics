@@ -15,8 +15,6 @@ use core::cmp::min;
 ///
 /// # Examples
 ///
-/// The [macro examples](../../macro.egrectangle.html) make for more concise code.
-///
 /// ## Create some rectangles with different styles
 ///
 /// ```rust

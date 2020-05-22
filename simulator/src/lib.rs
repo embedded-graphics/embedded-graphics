@@ -33,14 +33,13 @@
 //! ## Simulate a 128x64 SSD1306 OLED
 //!
 //! ```rust,no_run
+//! use embedded_graphics::fonts::{Font6x8, Text};
 //! use embedded_graphics::pixelcolor::BinaryColor;
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{egcircle, egline,  primitive_style};
-//! use embedded_graphics::fonts::{Text, Font6x8};
 //! use embedded_graphics::primitives::{Circle, Line};
 //! use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 //! use embedded_graphics_simulator::{
-//!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, Window, OutputSettingsBuilder,
+//!     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 //! };
 //! use std::thread;
 //! use std::time::Duration;
@@ -51,14 +50,20 @@
 //!     .build();
 //! let mut window = Window::new("Example", &output_settings);
 //!
-//! Text::new("Hello World!", Point::zero()).into_styled(TextStyle::new(Font6x8, BinaryColor::On)).draw(&mut display);
+//! Text::new("Hello World!", Point::zero())
+//!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+//!     .draw(&mut display);
 //!
-//! egcircle!(top_left = (65, 1), diameter = 63, style = primitive_style!(stroke_color = BinaryColor::On)).draw(&mut display);
+//! Circle::new(Point::new(65, 1), 63)
+//!     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+//!     .draw(&mut display);
 //!
-//! egline!(start = (32, 32), end = (1, 32), style = primitive_style!(stroke_color = BinaryColor::On))
+//! Line::new(Point::new(32, 32), Point::new(1, 32))
+//!     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
 //!     .translate(Point::new(64, 0))
 //!     .draw(&mut display);
-//! egline!(start = (32, 32), end = (40, 40), style = primitive_style!(stroke_color = BinaryColor::On))
+//! Line::new(Point::new(32, 32), Point::new(40, 40))
+//!     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
 //!     .translate(Point::new(64, 0))
 //!     .draw(&mut display);
 //!

@@ -9,11 +9,9 @@
 use chrono::{Local, Timelike};
 use core::f32::consts::{FRAC_PI_2, PI};
 use embedded_graphics::{
-    egcircle,
     fonts::{Font12x16, Text},
     pixelcolor::BinaryColor,
     prelude::*,
-    primitive_style,
     primitives::{Circle, Line, Rectangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder, Styled, TextStyle},
 };
@@ -43,12 +41,9 @@ fn polar(angle: f32, radius: f32) -> Point {
 fn draw_face() -> impl Iterator<Item = Pixel<BinaryColor>> {
     let tic_len = 10.0;
 
-    // Use the circle macro to create the outer face
-    let face = egcircle!(
-        center = CENTER,
-        diameter = 2 * SIZE + 1,
-        style = primitive_style!(stroke_color = BinaryColor::On, stroke_width = 2)
-    );
+    // Create the outer face
+    let face = Circle::with_center(CENTER, 2 * SIZE + 1)
+        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 2));
 
     // Create 12 `Line`s starting from the outer edge and drawing inwards by `tic_len` pixels
     let tics = (0..12).into_iter().map(move |index| {

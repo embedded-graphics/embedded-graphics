@@ -141,13 +141,13 @@
 //! let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
-//!     egrectangle!(top_left = (0, 0), size = (40, 40))
+//!     Rectangle::new(Point::new(0, 0), Size::new(40, 40))
+//!         .into_styled(PrimitiveStyle::with_stroke(Rgb565::CYAN, 1))
 //!         .into_iter()
-//!         .chain(&egcircle!(
-//!             top_left = (12, 12),
-//!             diameter = 17,
-//!             style = primitive_style!(fill_color = Rgb565::RED)
-//!         ))
+//!         .chain(
+//!             &Circle::new(Point::new(12, 12), 17)
+//!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED)),
+//!         )
 //!         .chain(
 //!             &Text::new(text, Point::new(20, 16))
 //!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN)),
