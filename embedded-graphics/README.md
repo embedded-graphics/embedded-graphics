@@ -180,7 +180,7 @@ use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
 use embedded_graphics::{
-    egcircle, egline, egrectangle, egtext, egtriangle, primitive_style, text_style,
+    egcircle, egline, egrectangle, egtriangle, primitive_style,
 };
 
 // Only used for examples - this would be replaced by the driver for your chosen display
@@ -223,13 +223,6 @@ fn main() {
     )
     .draw(&mut display);
 
-    // Print "Hello world!" in a white 6x8 pixel font with the top left corner positioned at (5, 50)
-    egtext!(
-        text = "Hello world!",
-        top_left = (5, 50),
-        style = text_style!(font = Font6x8, text_color = Rgb565::WHITE)
-    )
-    .draw(&mut display);
 }
 ```
 

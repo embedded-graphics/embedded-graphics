@@ -157,7 +157,6 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     egtext,
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     primitives::Circle,
@@ -180,7 +179,6 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     egtext,
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     primitives::Rectangle,

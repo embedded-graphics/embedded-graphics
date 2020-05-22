@@ -8,13 +8,11 @@
 //! rendering.
 
 use embedded_graphics::{
-    egtext,
-    fonts::Font6x8,
+    fonts::{Font6x8, Text},
     pixelcolor::Rgb888,
     prelude::*,
     primitives::*,
-    style::{PrimitiveStyle, PrimitiveStyleBuilder},
-    text_style,
+    style::{PrimitiveStyle, PrimitiveStyleBuilder, TextStyle},
 };
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
@@ -29,13 +27,10 @@ fn draw_ellipse(
 ) {
     display.clear(Rgb888::BLACK).unwrap();
 
-    egtext!(
-        text = &format!("S: {}\n{:?}", stroke_width, size),
-        top_left = Point::zero(),
-        style = text_style!(font = Font6x8, text_color = Rgb888::MAGENTA)
-    )
-    .draw(display)
-    .unwrap();
+    Text::new(&format!("S: {}\n{:?}", stroke_width, size), Point::zero())
+        .into_styled(TextStyle::new(Font6x8, Rgb888::MAGENTA))
+        .draw(display)
+        .unwrap();
 
     // Bounding rect
     Rectangle::new(top_left, size)

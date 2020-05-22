@@ -3,8 +3,12 @@
 //! Demonstrate the background styles and transparency behaviors of different font styles.
 
 use embedded_graphics::{
-    egcircle, egrectangle, egtext, fonts::Font6x8, pixelcolor::Rgb565, prelude::*, primitive_style,
-    text_style,
+    egcircle, egrectangle,
+    fonts::{Font6x8, Text},
+    pixelcolor::Rgb565,
+    prelude::*,
+    primitive_style,
+    style::TextStyleBuilder,
 };
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
 
@@ -25,36 +29,34 @@ fn main() -> Result<(), core::convert::Infallible> {
     .draw(&mut display)
     .unwrap();
 
-    egtext!(
-        text = "Hello world! - no background",
-        top_left = (15, 15),
-        style = text_style!(font = Font6x8, text_color = Rgb565::WHITE,)
-    )
-    .draw(&mut display)
-    .unwrap();
-
-    egtext!(
-        text = "Hello world! - filled background",
-        top_left = (15, 30),
-        style = text_style!(
-            font = Font6x8,
-            text_color = Rgb565::YELLOW,
-            background_color = Rgb565::BLUE
+    Text::new("Hello world! - no background", Point::new(15, 15))
+        .into_styled(
+            // Can also be written in the shorter form: TextStyle:new(Font6x8, Rgb565::WHITE)
+            TextStyleBuilder::new(Font6x8)
+                .text_color(Rgb565::WHITE)
+                .build(),
         )
-    )
-    .draw(&mut display)
-    .unwrap();
+        .draw(&mut display)
+        .unwrap();
 
-    egtext!(
-        text = "Hello world! - inverse background",
-        top_left = (15, 45),
-        style = text_style!(
-            font = Font6x8,
-            text_color = Rgb565::BLUE,
-            background_color = Rgb565::YELLOW
+    Text::new("Hello world! - filled background", Point::new(15, 30))
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .text_color(Rgb565::YELLOW)
+                .background_color(Rgb565::BLUE)
+                .build(),
         )
-    )
-    .draw(&mut display)?;
+        .draw(&mut display)
+        .unwrap();
+
+    Text::new("Hello world! - inverse background", Point::new(15, 45))
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .text_color(Rgb565::BLUE)
+                .background_color(Rgb565::YELLOW)
+                .build(),
+        )
+        .draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new().scale(3).build();
     Window::new("Fonts with transparent background", &output_settings).show_static(&display);

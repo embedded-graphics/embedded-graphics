@@ -5,12 +5,13 @@ use crate::{fonts::Font, pixelcolor::PixelColor};
 /// A `TextStyle` can be applied to a [`Text`] object to define how the text is drawn.
 ///
 /// Because `TextStyle` has the [`non_exhaustive`] attribute, it cannot be created using a struct
-/// literal. To create a `TextStyle`, use the [`text_style!`] macro or [`TextStyleBuilder`].
+/// literal. To create a `TextStyle` with a given text color and transparent background, use the
+/// [`new`] method. For more complex text styles, use the [`TextStyleBuilder`].
 ///
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
-/// [`text_style!`]: ../macro.text_style.html
 /// [`TextStyleBuilder`]: ./struct.TextStyleBuilder.html
+/// [`new`]: #method.new
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[non_exhaustive]
 pub struct TextStyle<C, F>
@@ -47,9 +48,6 @@ where
 ///
 /// Use this builder to create [`TextStyle`]s for [`Text`].
 ///
-/// The [`text_style!`] macro can also be used to create [`TextStyle`]s, but with a shorter syntax.
-/// See the [`text_style!`] documentation for examples.
-///
 /// # Examples
 ///
 /// ## Render yellow text on a blue background
@@ -72,30 +70,6 @@ where
 /// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
 /// ```
 ///
-/// ## Render black text on white background using macros
-///
-/// This uses the [`Font8x16`] font with the [`egtext!`] and [`text_style!`] macros for shorter
-/// code.
-///
-/// ```rust
-/// use embedded_graphics::{
-///     egtext,
-///     fonts::{Font8x16, Text},
-///     pixelcolor::Rgb565,
-///     prelude::*,
-///     style::TextStyle,
-///     text_style,
-/// };
-///
-/// let style = text_style!(
-///     font = Font8x16,
-///     text_color = Rgb565::WHITE,
-///     background_color = Rgb565::BLACK
-/// );
-///
-/// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
-/// ```
-///
 /// ## Transparent background
 ///
 /// If a property is ommitted, it will remain at its default value in the resulting `TextStyle`
@@ -103,12 +77,10 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     egtext,
 ///     fonts::{Font6x8, Text},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     style::{TextStyle, TextStyleBuilder},
-///     text_style,
 /// };
 ///
 /// let style: TextStyle<Rgb565, Font6x8> = TextStyleBuilder::new(Font6x8)
@@ -122,8 +94,6 @@ where
 /// [`Font6x8`]: ../fonts/struct.Font6x8.html
 /// [`Font8x16`]: ../fonts/struct.Font8x16.html
 /// [other fonts]: ../fonts/index.html
-/// [`text_style!`]: ../macro.text_style.html
-/// [`egtext!`]: ../macro.egtext.html
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`TextStyle`]: ./struct.TextStyle.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]

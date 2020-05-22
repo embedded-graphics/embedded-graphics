@@ -35,8 +35,10 @@
 //! ```rust,no_run
 //! use embedded_graphics::pixelcolor::BinaryColor;
 //! use embedded_graphics::prelude::*;
-//! use embedded_graphics::{egcircle, egline, egtext, primitive_style, text_style};
-//! use embedded_graphics::fonts::Font6x8;
+//! use embedded_graphics::{egcircle, egline,  primitive_style};
+//! use embedded_graphics::fonts::{Text, Font6x8};
+//! use embedded_graphics::primitives::{Circle, Line};
+//! use embedded_graphics::style::{PrimitiveStyle, TextStyle};
 //! use embedded_graphics_simulator::{
 //!     BinaryColorTheme, SimulatorDisplay, SimulatorEvent, Window, OutputSettingsBuilder,
 //! };
@@ -49,7 +51,7 @@
 //!     .build();
 //! let mut window = Window::new("Example", &output_settings);
 //!
-//! egtext!(text = "Hello World!", top_left = Point::zero(), style = text_style!(font = Font6x8, text_color = BinaryColor::On)).draw(&mut display);
+//! Text::new("Hello World!", Point::zero()).into_styled(TextStyle::new(Font6x8, BinaryColor::On)).draw(&mut display);
 //!
 //! egcircle!(top_left = (65, 1), diameter = 63, style = primitive_style!(stroke_color = BinaryColor::On)).draw(&mut display);
 //!

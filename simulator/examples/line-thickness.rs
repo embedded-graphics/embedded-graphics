@@ -10,8 +10,12 @@ extern crate embedded_graphics;
 extern crate embedded_graphics_simulator;
 
 use embedded_graphics::{
-    egtext, fonts::Font6x8, pixelcolor::Rgb888, prelude::*, primitive_style, primitives::Line,
-    text_style,
+    fonts::{Font6x8, Text},
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitive_style,
+    primitives::Line,
+    style::{PrimitiveStyle, TextStyle},
 };
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
@@ -32,20 +36,17 @@ fn draw(
         display.size().height as i32 / 2,
     );
 
-    egtext!(
-        text = &format!("W: {}", stroke_width),
-        top_left = Point::zero(),
-        style = text_style!(font = Font6x8, text_color = Rgb888::MAGENTA)
+    Text::new(
+        &format!(
+            "W: {}\nDX {}, DY {}",
+            stroke_width,
+            position.x - start.x,
+            position.y - start.y
+        ),
+        Point::zero(),
     )
+    .into_styled(TextStyle::new(Font6x8, Rgb888::MAGENTA))
     .into_iter()
-    .chain(
-        egtext!(
-            text = &format!("DX {}, DY {}", position.x - start.x, position.y - start.y),
-            top_left = Point::new(0, 8),
-            style = text_style!(font = Font6x8, text_color = Rgb888::MAGENTA)
-        )
-        .into_iter(),
-    )
     .draw(display)?;
 
     Line::new(start, position)
