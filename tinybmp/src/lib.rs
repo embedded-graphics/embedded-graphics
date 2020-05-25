@@ -205,16 +205,19 @@ impl<'a> Iterator for BmpIterator<'a> {
                 self.x = 0;
             }
 
-            // Byte and sub byte indexing
-            let byte = self.bit_idx / 8;
-            let bit_of_byte = self.bit_idx % 8;
+            let byte_idx = self.bit_idx / 8;
 
             let pixel_value = match self.pixel_stride {
-                1 => (px[byte] & 0b_1000_0000 >> bit_of_byte > 0) as u32,
-                8 => u32::from(px[byte]),
-                16 => u32::from_le_bytes([px[byte], px[byte + 1], 0, 0]),
-                24 => u32::from_le_bytes([px[byte], px[byte + 1], px[byte + 2], 0]),
-                32 => u32::from_le_bytes([px[byte], px[byte + 1], px[byte + 2], px[byte + 3]]),
+                1 => (px[byte_idx] & 0b_1000_0000 >> self.bit_idx % 8 > 0) as u32,
+                8 => u32::from(px[byte_idx]),
+                16 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], 0, 0]),
+                24 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], px[byte_idx + 2], 0]),
+                32 => u32::from_le_bytes([
+                    px[byte_idx],
+                    px[byte_idx + 1],
+                    px[byte_idx + 2],
+                    px[byte_idx + 3],
+                ]),
                 _ => unreachable!(),
             };
 
