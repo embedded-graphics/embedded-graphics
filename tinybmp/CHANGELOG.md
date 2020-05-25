@@ -12,6 +12,8 @@
 
 ### Added
 
+- Added support for decoding 1 bit pixel depth BMP images.
+
 - #244 Added `.into_iter()` support to the `Bmp` struct to get an iterator over every pixel in the image.
 
 ### Changed
