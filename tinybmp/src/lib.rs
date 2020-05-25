@@ -141,7 +141,7 @@ impl<'a> IntoIterator for &'a Bmp<'a> {
 
     fn into_iter(self) -> Self::IntoIter {
         let pixel_stride = match self.bpp() {
-            x @ 1 | x @ 8 | x @ 16 | x @ 24 | x @ 32 => x as usize,
+            1 | 8 | 16 | 24 | 32 => self.bpp() as usize,
             depth => panic!("Bit depth {} not supported", depth),
         };
 
