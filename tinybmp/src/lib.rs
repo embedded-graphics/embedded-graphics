@@ -208,7 +208,10 @@ impl<'a> Iterator for BmpIterator<'a> {
             let byte_idx = self.bit_idx / 8;
 
             let pixel_value = match self.pixel_stride {
-                1 => (px[byte_idx] & 0b_1000_0000 >> self.bit_idx % 8 > 0) as u32,
+                1 => {
+                    let mask = 0b_1000_0000 >> self.bit_idx % 8;
+                    (px[byte_idx] & mask != 0) as u32
+                }
                 8 => u32::from(px[byte_idx]),
                 16 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], 0, 0]),
                 24 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], px[byte_idx + 2], 0]),
