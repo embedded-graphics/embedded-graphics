@@ -141,10 +141,7 @@ impl<'a> IntoIterator for &'a Bmp<'a> {
 
     fn into_iter(self) -> Self::IntoIter {
         let pixel_stride = match self.bpp() {
-            8 => 1,
-            16 => 2,
-            24 => 3,
-            32 => 4,
+            1 | 8 | 16 | 24 | 32 => self.bpp() as usize,
             depth => panic!("Bit depth {} not supported", depth),
         };
 
@@ -154,7 +151,7 @@ impl<'a> IntoIterator for &'a Bmp<'a> {
             pixel_stride,
             x: 0,
             y: 0,
-            start_idx: 0,
+            bit_idx: 0,
         }
     }
 }
@@ -170,7 +167,7 @@ pub struct BmpIterator<'a> {
     /// Image pixel data as a byte slice, little endian ordering
     pixel_data: &'a [u8],
 
-    /// Number of bytes per pixel
+    /// Number of bits per pixel
     pixel_stride: usize,
 
     /// Current X position
@@ -179,10 +176,10 @@ pub struct BmpIterator<'a> {
     /// Current Y position
     y: u32,
 
-    /// Start byte index for the current pixel.
+    /// Start bit index for the current pixel.
     ///
-    /// This is incremented by `pixel_stride` bytes every iteration.
-    start_idx: usize,
+    /// This is incremented by `pixel_stride` bits every iteration.
+    bit_idx: usize,
 }
 
 impl<'a> Iterator for BmpIterator<'a> {
@@ -199,7 +196,7 @@ impl<'a> Iterator for BmpIterator<'a> {
                 let row_index = (self.bmp.height() - 1) - self.y;
                 let row_start = self.bmp.bytes_per_row() * row_index as usize;
 
-                self.start_idx = row_start;
+                self.bit_idx = row_start * 8;
             }
 
             self.x += 1;
@@ -208,18 +205,26 @@ impl<'a> Iterator for BmpIterator<'a> {
                 self.x = 0;
             }
 
-            // Shorter alias for easier to read code
-            let start = self.start_idx;
+            let byte_idx = self.bit_idx / 8;
 
             let pixel_value = match self.pixel_stride {
-                1 => u32::from(px[start]),
-                2 => u32::from_le_bytes([px[start], px[start + 1], 0, 0]),
-                3 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], 0]),
-                4 => u32::from_le_bytes([px[start], px[start + 1], px[start + 2], px[start + 3]]),
+                1 => {
+                    let mask = 0b_1000_0000 >> self.bit_idx % 8;
+                    (px[byte_idx] & mask != 0) as u32
+                }
+                8 => u32::from(px[byte_idx]),
+                16 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], 0, 0]),
+                24 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], px[byte_idx + 2], 0]),
+                32 => u32::from_le_bytes([
+                    px[byte_idx],
+                    px[byte_idx + 1],
+                    px[byte_idx + 2],
+                    px[byte_idx + 3],
+                ]),
                 _ => unreachable!(),
             };
 
-            self.start_idx += self.pixel_stride;
+            self.bit_idx += self.pixel_stride;
 
             Some(Pixel {
                 x,
