@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.3] - 2020-05-26
+
 ### Added
 
 - #352 Added support for decoding 1 bit pixel depth BMP images.
@@ -77,7 +79,8 @@
 - Release `tinybmp` crate to crates.io
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.3...HEAD
 
-[unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.2...HEAD
+[0.2.3]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.2...tinybmp-v0.2.3
 [0.2.2]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.0...tinybmp-v0.2.2
 [0.2.1]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...tinybmp-v0.2.1
