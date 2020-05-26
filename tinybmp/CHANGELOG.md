@@ -6,13 +6,13 @@
 
 ## [Unreleased] - ReleaseDate
 
-## [0.2.2] - 2020-03-20
-
-## [0.2.1] - 2020-02-17
-
 ### Added
 
 - #352 Added support for decoding 1 bit pixel depth BMP images.
+
+## [0.2.2] - 2020-03-20
+
+## [0.2.1] - 2020-02-17
 
 - #244 Added `.into_iter()` support to the `Bmp` struct to get an iterator over every pixel in the image.
 
@@ -77,7 +77,7 @@
 - Release `tinybmp` crate to crates.io
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.2...HEAD
 [0.2.2]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.0...tinybmp-v0.2.2
-
 [0.2.1]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...tinybmp-v0.2.1
