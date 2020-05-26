@@ -111,7 +111,7 @@ impl Primitive for Circle {
 impl ContainsPoint for Circle {
     fn contains(&self, point: Point) -> bool {
         let delta = self.center_2x() - point * 2;
-        let distance = delta.x.pow(2) as u32 + delta.y.pow(2) as u32;
+        let distance = delta.length_squared() as u32;
 
         let threshold = diameter_to_threshold(self.diameter);
 
@@ -317,7 +317,7 @@ impl Iterator for DistanceIterator {
     fn next(&mut self) -> Option<Self::Item> {
         self.points.next().map(|p| {
             let delta = self.center - p * 2;
-            let distance = delta.x.pow(2) as u32 + delta.y.pow(2) as u32;
+            let distance = delta.length_squared() as u32;
 
             (p, distance)
         })

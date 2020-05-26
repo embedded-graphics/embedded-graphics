@@ -5,10 +5,18 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::{Primitive, Rectangle, ThickLineIterator},
+    primitives::{Primitive, Rectangle},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
+
+mod bresenham;
+mod points;
+mod styled_iterator;
+mod thick_points;
+
+pub use points::Points;
+pub use styled_iterator::StyledIterator;
 
 /// Line primitive
 ///
@@ -63,6 +71,17 @@ impl Line {
     pub const fn new(start: Point, end: Point) -> Self {
         Self { start, end }
     }
+
+    /// Returns a perpendicular line.
+    ///
+    /// The returned line is rotated 90 degree counter clockwise and shares the start point with the
+    /// original line.
+    fn perpendicular(&self) -> Self {
+        let delta = self.end - self.start;
+        let delta = Point::new(delta.y, -delta.x);
+
+        Line::new(self.start, self.start + delta)
+    }
 }
 
 impl Transform for Line {
@@ -109,70 +128,10 @@ where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = StyledLineIterator<C>;
+    type IntoIter = StyledIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        StyledLineIterator::new(self)
-    }
-}
-
-/// Iterator over all points on the line.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points {
-    line_iter: ThickLineIterator,
-}
-
-impl Points {
-    fn new(line: &Line) -> Self {
-        Self {
-            line_iter: ThickLineIterator::new(line, 1),
-        }
-    }
-}
-
-impl Iterator for Points {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.line_iter.next()
-    }
-}
-
-/// Pixel iterator for each pixel in the line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledLineIterator<C>
-where
-    C: PixelColor,
-{
-    stroke_color: Option<C>,
-    line_iter: ThickLineIterator,
-}
-
-impl<C: PixelColor> StyledLineIterator<C> {
-    fn new(styled: &Styled<Line, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        // Note: stroke color will be None if stroke width is 0
-        let stroke_color = style.effective_stroke_color();
-
-        StyledLineIterator {
-            stroke_color,
-            line_iter: ThickLineIterator::new(&primitive, style.stroke_width_i32()),
-        }
-    }
-}
-
-// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<C: PixelColor> Iterator for StyledLineIterator<C> {
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // Return none if stroke color is none
-        let stroke_color = self.stroke_color?;
-
-        self.line_iter
-            .next()
-            .map(|point| Pixel(point, stroke_color))
+        StyledIterator::new(self)
     }
 }
 
@@ -185,27 +144,14 @@ where
     }
 }
 
+/// Pixel iterator for each pixel in the line
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
         drawable::Pixel, geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor,
     };
-
-    fn test_expected_line(start: Point, end: Point, expected: &[(i32, i32)]) {
-        let line =
-            Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
-        let mut expected_iter = expected.iter();
-        for Pixel(coord, _) in line.into_iter() {
-            match expected_iter.next() {
-                Some(point) => assert_eq!(coord, Point::from(*point)),
-                // expected runs out of points before line does
-                None => unreachable!(),
-            }
-        }
-        // check that expected has no points left
-        assert!(expected_iter.next().is_none())
-    }
+    use arrayvec::ArrayVec;
 
     #[test]
     fn bounding_box() {
@@ -226,14 +172,6 @@ mod tests {
     }
 
     #[test]
-    fn draws_no_dot() {
-        let start = Point::new(10, 10);
-        let end = Point::new(10, 10);
-        let expected = [];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
     fn no_stroke_width_no_line() {
         let start = Point::new(2, 3);
         let end = Point::new(3, 2);
@@ -242,78 +180,6 @@ mod tests {
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
 
         assert!(line.into_iter().eq(core::iter::empty()));
-    }
-
-    #[test]
-    fn draws_short_correctly() {
-        let start = Point::new(2, 3);
-        let end = Point::new(3, 2);
-        let expected = [(2, 3), (3, 2)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_1_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(15, 13);
-        let expected = [(10, 10), (11, 11), (12, 11), (13, 12), (14, 12), (15, 13)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_2_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(13, 15);
-        let expected = [(10, 10), (11, 11), (11, 12), (12, 13), (12, 14), (13, 15)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_3_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(7, 15);
-        let expected = [(10, 10), (9, 11), (9, 12), (8, 13), (8, 14), (7, 15)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_4_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(5, 13);
-        let expected = [(10, 10), (9, 11), (8, 11), (7, 12), (6, 12), (5, 13)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_5_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(5, 7);
-        let expected = [(10, 10), (9, 9), (8, 9), (7, 8), (6, 8), (5, 7)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_6_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(7, 5);
-        let expected = [(10, 10), (9, 9), (9, 8), (8, 7), (8, 6), (7, 5)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_7_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(13, 5);
-        let expected = [(10, 10), (11, 9), (11, 8), (12, 7), (12, 6), (13, 5)];
-        test_expected_line(start, end, &expected);
-    }
-
-    #[test]
-    fn draws_octant_8_correctly() {
-        let start = Point::new(10, 10);
-        let end = Point::new(15, 7);
-        let expected = [(10, 10), (11, 9), (12, 9), (13, 8), (14, 8), (15, 7)];
-        test_expected_line(start, end, &expected);
     }
 
     #[test]
@@ -332,12 +198,13 @@ mod tests {
                 "  #####                ",
                 "  ########             ",
                 "  ###########          ",
-                "    ############       ",
-                "       ############    ",
-                "          ############ ",
+                " ###############       ",
+                "    ###############    ",
+                "       ############### ",
+                "          ###########  ",
                 "             ########  ",
                 "                #####  ",
-                "                   ##  ",
+                "                   #   ",
             ])
         );
     }
@@ -440,6 +307,26 @@ mod tests {
     }
 
     #[test]
+    fn thick_line_0px() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Line::new(Point::new(2, 2), Point::new(2, 2))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 3))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "   ", //
+                "  #", //
+                "  #", //
+                "  #", //
+            ])
+        );
+    }
+
+    #[test]
     fn event_width_offset() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
@@ -477,12 +364,33 @@ mod tests {
     fn points_iter() {
         let line = Line::new(Point::new(10, 10), Point::new(20, 30));
 
-        let styled_points = line
+        let styled_points: ArrayVec<[_; 32]> = line
             .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter()
-            .map(|Pixel(p, _)| p);
+            .map(|Pixel(p, _)| p)
+            .collect();
 
-        assert!(line.points().eq(styled_points));
+        let points: ArrayVec<[_; 32]> = line.points().collect();
+
+        assert_eq!(points, styled_points);
+    }
+
+    #[test]
+    fn perpendicular() {
+        assert_eq!(
+            Line::new(Point::zero(), Point::new(10, 0)).perpendicular(),
+            Line::new(Point::zero(), Point::new(0, -10))
+        );
+
+        assert_eq!(
+            Line::new(Point::new(10, 20), Point::new(20, 10)).perpendicular(),
+            Line::new(Point::new(10, 20), Point::new(0, 10))
+        );
+
+        assert_eq!(
+            Line::new(Point::zero(), Point::new(0, -10)).perpendicular(),
+            Line::new(Point::zero(), Point::new(-10, 0))
+        );
     }
 }

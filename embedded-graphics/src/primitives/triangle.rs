@@ -4,7 +4,10 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::{line::Line, ContainsPoint, Primitive, Rectangle, ThickLineIterator},
+    primitives::{
+        line::{self, Line},
+        ContainsPoint, Primitive, Rectangle,
+    },
     style::{PrimitiveStyle, Styled},
     transform::Transform,
     DrawTarget,
@@ -197,28 +200,7 @@ where
     type IntoIter = StyledTriangleIterator<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let (v1, v2, v3) = sort_yx(self.primitive.p1, self.primitive.p2, self.primitive.p3);
-
-        let mut line_a = ThickLineIterator::new(&Line::new(v1, v2), 1);
-        let mut line_b = ThickLineIterator::new(&Line::new(v1, v3), 1);
-        let mut line_c = ThickLineIterator::new(&Line::new(v2, v3), 1);
-
-        let next_ac = line_a.next().or_else(|| line_c.next());
-        let next_b = line_b.next();
-
-        StyledTriangleIterator {
-            line_a,
-            line_b,
-            line_c,
-            cur_ac: None,
-            cur_b: None,
-            next_ac,
-            next_b,
-            x: 0,
-            min_y: v1.y,
-            max_y: v3.y,
-            style: self.style,
-        }
+        StyledTriangleIterator::new(self)
     }
 }
 
@@ -231,9 +213,9 @@ enum IterState {
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
-    line_a: ThickLineIterator,
-    line_b: ThickLineIterator,
-    line_c: ThickLineIterator,
+    line_a: line::Points,
+    line_b: line::Points,
+    line_c: line::Points,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
     next_ac: Option<Point>,
@@ -247,9 +229,9 @@ impl Points {
     fn new(triangle: &Triangle) -> Self {
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
-        let mut line_a = ThickLineIterator::new(&Line::new(v1, v2), 1);
-        let mut line_b = ThickLineIterator::new(&Line::new(v1, v3), 1);
-        let mut line_c = ThickLineIterator::new(&Line::new(v2, v3), 1);
+        let mut line_a = Line::new(v1, v2).points();
+        let mut line_b = Line::new(v1, v3).points();
+        let mut line_c = Line::new(v2, v3).points();
 
         let next_ac = line_a.next().or_else(|| line_c.next());
         let next_b = line_b.next();
@@ -359,9 +341,9 @@ pub struct StyledTriangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    line_a: ThickLineIterator,
-    line_b: ThickLineIterator,
-    line_c: ThickLineIterator,
+    line_a: line::Points,
+    line_b: line::Points,
+    line_c: line::Points,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
     next_ac: Option<Point>,
@@ -376,6 +358,34 @@ impl<C> StyledTriangleIterator<C>
 where
     C: PixelColor,
 {
+    fn new(styled: &Styled<Triangle, PrimitiveStyle<C>>) -> Self {
+        let (v1, v2, v3) = sort_yx(
+            styled.primitive.p1,
+            styled.primitive.p2,
+            styled.primitive.p3,
+        );
+
+        let mut line_a = Line::new(v1, v2).points();
+        let mut line_b = Line::new(v1, v3).points();
+        let mut line_c = Line::new(v2, v3).points();
+
+        let next_ac = line_a.next().or_else(|| line_c.next());
+        let next_b = line_b.next();
+
+        StyledTriangleIterator {
+            line_a,
+            line_b,
+            line_c,
+            cur_ac: None,
+            cur_b: None,
+            next_ac,
+            next_b,
+            x: 0,
+            min_y: v1.y,
+            max_y: v3.y,
+            style: styled.style,
+        }
+    }
     fn update_ac(&mut self) -> IterState {
         if let Some(ac) = self.next_ac {
             self.cur_ac = Some(ac);
@@ -580,6 +590,7 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
         assert_eq!(tri.next(), None);
     }
 
@@ -615,6 +626,7 @@ mod tests {
         assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(3, 2), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(3, 2), BinaryColor::On)));
+        assert_eq!(tri.next(), Some(Pixel(Point::new(4, 2), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(4, 2), BinaryColor::On)));
         assert_eq!(tri.next(), Some(Pixel(Point::new(4, 2), BinaryColor::On)));
         assert_eq!(tri.next(), None);

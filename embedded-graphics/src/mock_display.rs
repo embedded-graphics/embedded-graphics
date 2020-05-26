@@ -114,6 +114,8 @@ use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::{BinaryColor, Gray8, GrayColor, PixelColor, Rgb888, RgbColor},
+    prelude::Primitive,
+    primitives::Rectangle,
     DrawTarget,
 };
 use core::{
@@ -163,6 +165,47 @@ where
         let Point { x, y } = p;
 
         self.0[x as usize + y as usize * SIZE] = color;
+    }
+
+    /// Returns a copy of with the content mirrored by swapping x and y.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{mock_display::MockDisplay, pixelcolor::BinaryColor};
+    ///
+    /// let display: MockDisplay<BinaryColor> = MockDisplay::from_pattern(&[
+    ///     "#### ####",
+    ///     "#    #   ",
+    ///     "###  # ##",
+    ///     "#    #  #",
+    ///     "#### ####",
+    /// ]);
+    ///
+    /// let mirrored = display.swap_xy();
+    /// assert_eq!(
+    ///     mirrored,
+    ///     MockDisplay::from_pattern(&[
+    ///         "#####",
+    ///         "# # #",
+    ///         "# # #",
+    ///         "#   #",
+    ///         "     ",
+    ///         "#####",
+    ///         "#   #",
+    ///         "# # #",
+    ///         "# ###",
+    ///     ])
+    /// );
+    /// ```
+    pub fn swap_xy(&self) -> MockDisplay<C> {
+        let mut mirrored = MockDisplay::new();
+
+        for point in Rectangle::new(Point::zero(), self.size()).points() {
+            mirrored.set_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
+        }
+
+        mirrored
     }
 }
 
