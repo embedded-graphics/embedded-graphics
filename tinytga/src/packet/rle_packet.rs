@@ -30,10 +30,10 @@ pub fn rle_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], Packe
 
         Ok((
             input,
-            Packet::RlePacket(RlePacket {
+            Packet::RlePacket {
                 run_length,
                 pixel_data,
-            }),
+            },
         ))
     }
 }
@@ -59,10 +59,10 @@ mod tests {
         assert_eq!(remaining, &[]);
         assert_eq!(
             packet,
-            Packet::RlePacket(RlePacket {
+            Packet::RlePacket {
                 run_length: 2,
                 pixel_data: &[0xAA, 0xBB, 0xCC, 0xDD]
-            })
+            }
         );
     }
 
@@ -105,10 +105,10 @@ mod tests {
         assert_eq!(remaining, &[0x11, 0x22, 0x33, 0x44]);
         assert_eq!(
             packet,
-            Packet::RlePacket(RlePacket {
+            Packet::RlePacket {
                 run_length: 2,
                 pixel_data: &[0xAA, 0xBB, 0xCC, 0xDD]
-            })
+            }
         );
     }
 }

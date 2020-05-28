@@ -1,32 +1,44 @@
 mod raw_packet;
 mod rle_packet;
 
-pub use self::{
-    raw_packet::{raw_packet, RawPacket},
-    rle_packet::{rle_packet, RlePacket},
-};
+pub use self::{raw_packet::raw_packet, rle_packet::rle_packet};
 use nom::{bits::complete::take, branch::alt, combinator::map, IResult};
 
 /// A Run Length Encoded (RLE) packet
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum Packet<'a> {
     /// Data in this packet is Run Length Encoded
-    RlePacket(RlePacket<'a>),
+    RlePacket {
+        /// Number of pixels in this run
+        run_length: u8,
+
+        /// Pixel data
+        pixel_data: &'a [u8],
+    },
 
     /// Data is in a packet, but is not compressed at all
-    RawPacket(RawPacket<'a>),
+    RawPacket {
+        /// Number of pixels of this packet
+        num_pixels: u8,
+
+        /// Pixel data in this packet, up to 32 bits (4 bytes) per pixel
+        pixel_data: &'a [u8],
+    },
 
     /// File is not packeted. Contains reference to all image data in the file
     FullContents(&'a [u8]),
 }
 
 impl<'a> Packet<'a> {
-    /// Get the length in bytes of the pixel data in this packet
+    /// Get the number of pixels in this packet
     pub fn len(&self) -> usize {
         match self {
-            Packet::RlePacket(p) => p.len(),
-            Packet::RawPacket(p) => p.len(),
-            Packet::FullContents(p) => p.len(),
+            Self::RlePacket {
+                pixel_data,
+                run_length,
+            } => pixel_data.len() * *run_length as usize,
+            Self::RawPacket { pixel_data, .. } => pixel_data.len(),
+            Self::FullContents(data) => data.len(),
         }
     }
 

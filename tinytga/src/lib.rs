@@ -235,11 +235,11 @@ impl<'a> Iterator for TgaIterator<'a> {
         let (start, px): (usize, &[u8]) = match self.current_packet {
             // RLE packets use the same 4 bytes for the color of every pixel in the packet, so
             // there is no start offet like `RawPacket`s have
-            Packet::RlePacket(ref p) => (0, p.pixel_data),
+            Packet::RlePacket { pixel_data, .. } => (0, pixel_data),
             // Raw packets need to look within the byte array to find the correct bytes to
             // convert to a pixel value, hence the calculation of `start = position * stride`
-            Packet::RawPacket(ref p) => {
-                let px = p.pixel_data;
+            Packet::RawPacket { pixel_data, .. } => {
+                let px = pixel_data;
                 let start = self.current_packet_position * self.stride;
 
                 (start, px)
