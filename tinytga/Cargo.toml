@@ -18,9 +18,22 @@ exclude = [
 [badges]
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
+[[bench]]
+harness = false
+name = "tga"
+
+[[bench]]
+harness = false
+name = "embedded_graphics"
+required-features = [ "graphics" ]
+
+
 [[test]]
 name = "embedded_graphics"
 required-features = ["graphics"]
+
+[dependencies]
+criterion = "0.3.2"
 
 [dependencies.nom]
 version = "5.1.0"

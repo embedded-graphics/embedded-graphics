@@ -7,7 +7,7 @@ cargo clean --doc
 cargo fmt --all -- --check
 cargo test --release
 cargo test --release --all-features
-cargo bench --no-run
+cargo bench --no-run --features graphics
 
 pushd simulator
 cargo build --release --no-default-features
