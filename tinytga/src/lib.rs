@@ -144,6 +144,8 @@ impl<'a> IntoIterator for &'a Tga<'a> {
 
         let current_packet_len = current_packet.len();
 
+        let entry_size = usize::from(self.header.color_map_depth + 7) / 8;
+
         TgaIterator {
             tga: self,
             bytes_to_consume,
@@ -153,6 +155,7 @@ impl<'a> IntoIterator for &'a Tga<'a> {
             stride,
             x: 0,
             y: 0,
+            entry_size,
         }
     }
 }
@@ -185,6 +188,9 @@ pub struct TgaIterator<'a> {
 
     /// Current Y coordinate from top-left of image
     y: u32,
+
+    /// Bytes per pixel
+    entry_size: usize,
 }
 
 impl<'a> Iterator for TgaIterator<'a> {
@@ -262,10 +268,9 @@ impl<'a> Iterator for TgaIterator<'a> {
         };
 
         if let Some(color_map) = self.tga.color_map {
-            let entry_size = usize::from(self.tga.header.color_map_depth + 7) / 8;
-            let start = pixel_value as usize * entry_size;
+            let start = pixel_value as usize * self.entry_size;
 
-            pixel_value = match entry_size {
+            pixel_value = match self.entry_size {
                 1 => color_map[start] as u32,
                 2 => u32::from_le_bytes([color_map[start], color_map[start + 1], 0, 0]),
                 3 => u32::from_le_bytes([
