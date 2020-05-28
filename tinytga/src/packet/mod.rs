@@ -37,10 +37,7 @@ impl<'a> Packet<'a> {
 }
 
 pub fn next_packet(input: &[u8], bytes_per_pixel: u8) -> IResult<&[u8], Packet> {
-    alt((
-        map(rle_packet(bytes_per_pixel), Packet::RlePacket),
-        map(raw_packet(bytes_per_pixel), Packet::RawPacket),
-    ))(input)
+    alt((rle_packet(bytes_per_pixel), raw_packet(bytes_per_pixel)))(input)
 }
 
 /// Parse pixel count in raw and RLE packets.

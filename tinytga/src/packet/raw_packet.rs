@@ -1,4 +1,5 @@
 use super::pixel_count;
+use crate::packet::Packet;
 use nom::{
     bits::{bits, complete::tag},
     bytes::complete::take,
@@ -22,7 +23,7 @@ impl<'a> RawPacket<'a> {
     }
 }
 
-pub fn raw_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RawPacket> {
+pub fn raw_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], Packet> {
     move |input| {
         // 0x00 = raw packet, 0x01 = RLE packet
         let (input, num_pixels) = bits(preceded(tag(0, 1u8), pixel_count))(input)?;
@@ -30,10 +31,10 @@ pub fn raw_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RawPa
 
         Ok((
             input,
-            RawPacket {
+            Packet::RawPacket(RawPacket {
                 num_pixels,
                 pixel_data,
-            },
+            }),
         ))
     }
 }
@@ -64,13 +65,13 @@ mod tests {
         assert_eq!(remaining, &[]);
         assert_eq!(
             packet,
-            RawPacket {
+            Packet::RawPacket(RawPacket {
                 num_pixels: 2,
                 pixel_data: &[
                     0xAA, 0xBB, 0xCC, 0xDD, //
                     0x11, 0x22, 0x33, 0x44, //
                 ]
-            }
+            })
         );
     }
 
@@ -118,13 +119,13 @@ mod tests {
         assert_eq!(remaining, &[0x55, 0x66, 0x77, 0x88]);
         assert_eq!(
             packet,
-            RawPacket {
+            Packet::RawPacket(RawPacket {
                 num_pixels: 2,
                 pixel_data: &[
                     0xAA, 0xBB, 0xCC, 0xDD, //
                     0x11, 0x22, 0x33, 0x44, //
                 ]
-            }
+            })
         );
     }
 }

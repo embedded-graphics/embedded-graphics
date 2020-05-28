@@ -1,4 +1,4 @@
-use super::pixel_count;
+use super::{pixel_count, Packet};
 use nom::{
     bits::{bits, complete::tag},
     bytes::complete::take,
@@ -22,7 +22,7 @@ impl<'a> RlePacket<'a> {
     }
 }
 
-pub fn rle_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RlePacket> {
+pub fn rle_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], Packet> {
     move |input| {
         // 0x00 = raw packet, 0x01 = RLE packet
         let (input, run_length) = bits(preceded(tag(1, 1u8), pixel_count))(input)?;
@@ -30,10 +30,10 @@ pub fn rle_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], RlePa
 
         Ok((
             input,
-            RlePacket {
+            Packet::RlePacket(RlePacket {
                 run_length,
                 pixel_data,
-            },
+            }),
         ))
     }
 }
@@ -59,10 +59,10 @@ mod tests {
         assert_eq!(remaining, &[]);
         assert_eq!(
             packet,
-            RlePacket {
+            Packet::RlePacket(RlePacket {
                 run_length: 2,
                 pixel_data: &[0xAA, 0xBB, 0xCC, 0xDD]
-            }
+            })
         );
     }
 
@@ -105,10 +105,10 @@ mod tests {
         assert_eq!(remaining, &[0x11, 0x22, 0x33, 0x44]);
         assert_eq!(
             packet,
-            RlePacket {
+            Packet::RlePacket(RlePacket {
                 run_length: 2,
                 pixel_data: &[0xAA, 0xBB, 0xCC, 0xDD]
-            }
+            })
         );
     }
 }
