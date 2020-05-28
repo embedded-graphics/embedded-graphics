@@ -21,7 +21,7 @@ mod pixel;
 use crate::{
     footer::*,
     header::*,
-    packet::{next_rle_packet, Packet},
+    packet::{next_packet, Packet},
     parse_error::ParseError,
 };
 
@@ -126,7 +126,7 @@ impl<'a> IntoIterator for &'a Tga<'a> {
                 (Some(self.image_data()), data)
             }
             ImageType::RleMonochrome | ImageType::RleTruecolor | ImageType::RleColorMapped => {
-                next_rle_packet(self.image_data(), self.bpp() / 8)
+                next_packet(self.image_data(), self.bpp() / 8)
                     .map(|(remaining, packet)| (Some(remaining), packet))
                     .expect("Failed to parse first image RLE data packet")
             }
@@ -208,7 +208,7 @@ impl<'a> Iterator for TgaIterator<'a> {
                         self.current_packet_position = 0;
 
                         let (bytes_to_consume, current_packet) =
-                            next_rle_packet(bytes_to_consume, self.tga.bpp() / 8)
+                            next_packet(bytes_to_consume, self.tga.bpp() / 8)
                                 .map(|(remaining, packet)| {
                                     (
                                         if !remaining.is_empty() {
