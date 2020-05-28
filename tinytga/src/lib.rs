@@ -204,33 +204,32 @@ impl<'a> Iterator for TgaIterator<'a> {
                     return None;
                 }
                 ImageType::RleMonochrome | ImageType::RleTruecolor | ImageType::RleColorMapped => {
-                    if self.bytes_to_consume.is_none() {
-                        return None;
-                    } else {
+                    if let Some(bytes_to_consume) = self.bytes_to_consume {
                         self.current_packet_position = 0;
+
+                        let (bytes_to_consume, current_packet) =
+                            next_rle_packet(bytes_to_consume, self.tga.bpp() / 8)
+                                .map(|(remaining, packet)| {
+                                    (
+                                        if !remaining.is_empty() {
+                                            Some(remaining)
+                                        } else {
+                                            None
+                                        },
+                                        packet,
+                                    )
+                                })
+                                .expect("Failed to parse first image RLE data packet");
+
+                        self.bytes_to_consume = bytes_to_consume;
+                        self.current_packet_pixel_length = current_packet.len() / self.stride;
+                        self.current_packet = current_packet;
+                    } else {
+                        return None;
                     }
-
-                    let (bytes_to_consume, current_packet) =
-                        next_rle_packet(self.bytes_to_consume.unwrap(), self.tga.bpp() / 8)
-                            .map(|(remaining, packet)| {
-                                (
-                                    if !remaining.is_empty() {
-                                        Some(remaining)
-                                    } else {
-                                        None
-                                    },
-                                    packet,
-                                )
-                            })
-                            .expect("Failed to parse first image RLE data packet");
-
-                    self.bytes_to_consume = bytes_to_consume;
-                    self.current_packet_pixel_length = current_packet.len() / self.stride;
-                    self.current_packet = current_packet;
                 }
                 image_type => panic!("Image type {:?} not supported", image_type),
             };
-            // }
         }
 
         let (start, px): (usize, &[u8]) = match self.current_packet {
