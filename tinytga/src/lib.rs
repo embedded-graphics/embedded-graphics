@@ -184,10 +184,10 @@ pub struct TgaIterator<'a> {
     stride: usize,
 
     /// Current X coordinate from top-left of image
-    x: u32,
+    x: u16,
 
     /// Current Y coordinate from top-left of image
-    y: u32,
+    y: u16,
 
     /// Bytes per pixel
     entry_size: usize,
@@ -293,7 +293,7 @@ impl<'a> Iterator for TgaIterator<'a> {
 
         self.x += 1;
 
-        if self.x >= self.tga.width().into() {
+        if self.x >= self.tga.width() {
             self.x = 0;
             self.y += 1;
         }
