@@ -2,7 +2,7 @@ mod raw_packet;
 mod rle_packet;
 
 pub use self::{raw_packet::raw_packet, rle_packet::rle_packet};
-use nom::{bits::complete::take, branch::alt, combinator::map, IResult};
+use nom::{bits::complete::take, combinator::map, IResult};
 
 /// A Run Length Encoded (RLE) packet
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -49,7 +49,7 @@ impl<'a> Packet<'a> {
 }
 
 pub fn next_packet(input: &[u8], bytes_per_pixel: u8) -> IResult<&[u8], Packet> {
-    alt((rle_packet(bytes_per_pixel), raw_packet(bytes_per_pixel)))(input)
+    rle_packet(bytes_per_pixel)(input).or_else(|_| raw_packet(bytes_per_pixel)(input))
 }
 
 /// Parse pixel count in raw and RLE packets.
