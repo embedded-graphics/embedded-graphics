@@ -16,13 +16,6 @@ pub struct RawPacket<'a> {
     pub pixel_data: &'a [u8],
 }
 
-impl<'a> RawPacket<'a> {
-    /// Get the number of bytes in this packet
-    pub fn len(&self) -> usize {
-        self.pixel_data.len()
-    }
-}
-
 pub fn raw_packet(bytes_per_pixel: u8) -> impl Fn(&[u8]) -> IResult<&[u8], Packet> {
     move |input| {
         // 0x00 = raw packet, 0x01 = RLE packet
