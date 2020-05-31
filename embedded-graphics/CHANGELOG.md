@@ -21,12 +21,15 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::x_axis`, `Point::y_axis`, `Size::x_axis` and `Size::y_axis`.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::new_equal` and `Size::new_equal`.
 - [#336](https://github.com/jamwaffles/embedded-graphics/pull/336) Add `RoundedRectangle` primitive and `egroundedrectangle!` macro.
+- [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) Add `MockDisplay::swap_xy` method.
 
 ### Changed
 
 - **(breaking)** [#274](https://github.com/jamwaffles/embedded-graphics/pull/274) The `Circle` is now defined by its bounding box top-left corner and its diameter instead of its center and its radius. To convert your code, you can replace `Circle::new(point, radius)` by `Circle::with_center(point, 2 * radius + 1)`.
 - **(breaking)** [#306](https://github.com/jamwaffles/embedded-graphics/pull/306) The `Rectangle` is now defined by its top-left corner and its size instead of the top-left and bottom-right corner. To convert your code, you can replace `Rectangle::new` by `Rectangle::with_corners`.
 - **(breaking)** [#312](https://github.com/jamwaffles/embedded-graphics/pull/312) The methods in the `Dimension` trait are replaced by a single `bounding_box` method that returns a `Rectangle`.
+- **(breaking)** [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) Lines with equal start and end points are now drawn by assuming they are oriented horizontally. This means that they are now drawn as a `stroke_width` high and 1px wide rectangle, instead of not being drawn at all.
+- **(breaking)** [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) `primitives::line::StyledLineIterator` was renamed to `primitives::line::StyledIterator`.
 
 ### Fixed
 

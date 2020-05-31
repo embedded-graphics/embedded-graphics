@@ -8,7 +8,6 @@ pub mod line;
 pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
-mod thick_line_iterator;
 pub mod triangle;
 
 pub use self::{
@@ -26,7 +25,6 @@ use crate::{
     pixelcolor::PixelColor,
     style::{PrimitiveStyle, Styled},
 };
-pub(crate) use thick_line_iterator::ThickLineIterator;
 
 /// Primitive trait
 pub trait Primitive: Dimensions {

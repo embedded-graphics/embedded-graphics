@@ -190,7 +190,7 @@ impl<'a> Points<'a> {
                 Points {
                     vertices: &[],
                     translate: Point::zero(),
-                    segment_iter: Line::new(Point::zero(), Point::zero()).points()
+                    segment_iter: line::Points::empty(),
                 })
     }
 }
@@ -445,7 +445,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn equal_points() {
         let points: [Point; 3] = [Point::new(2, 5), Point::new(2, 5), Point::new(2, 5)];
 

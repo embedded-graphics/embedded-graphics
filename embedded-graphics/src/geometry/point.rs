@@ -80,6 +80,8 @@ impl Point {
 
     /// Creates a point with X and Y values set to an equal value.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// use embedded_graphics::geometry::Point;
     ///
@@ -140,6 +142,8 @@ impl Point {
 
     /// Remove the sign from a coordinate
     ///
+    /// # Examples
+    ///
     /// ```
     /// # use embedded_graphics::geometry::Point;
     /// #
@@ -152,6 +156,8 @@ impl Point {
     }
 
     /// Returns the componentwise minimum of two `Point`s
+    ///
+    /// # Examples
     ///
     /// ```rust,ignore
     /// use embedded_graphics::geometry::Point;
@@ -166,6 +172,8 @@ impl Point {
 
     /// Returns the componentwise maximum of two `Point`s
     ///
+    /// # Examples
+    ///
     /// ```rust,ignore
     /// use embedded_graphics::geometry::Point;
     ///
@@ -175,6 +183,24 @@ impl Point {
     /// ```
     pub(crate) fn component_max(self, other: Self) -> Self {
         Self::new(self.x.max(other.x), self.y.max(other.y))
+    }
+
+    /// Returns the squared length.
+    ///
+    /// The returned value is the square of the length of a vector from `(0, 0)`
+    /// to `(self.x, self.y)`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,ignore
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let p = Point::new(3, 4);
+    ///
+    /// assert_eq!(p.length_squared(), 25);
+    /// ```
+    pub(crate) fn length_squared(self) -> i32 {
+        self.x.pow(2) + self.y.pow(2)
     }
 }
 
