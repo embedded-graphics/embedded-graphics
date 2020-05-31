@@ -4,9 +4,13 @@ use crate::{geometry::Point, primitives::Line};
 /// Struct to hold major and minor values.
 pub struct MajorMinor<T> {
     /// Major value.
+    ///
+    /// Used to describe the change of a value when a major step is taken.
     pub major: T,
 
     /// Minor value.
+    ///
+    /// Used to describe the change of a value when a minor step is taken.
     pub minor: T,
 }
 

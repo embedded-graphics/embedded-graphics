@@ -19,6 +19,7 @@ pub struct Points {
 }
 
 impl Points {
+    /// Creates an iterator over all points on the given line.
     pub(in crate::primitives) fn new(line: &Line) -> Self {
         let length = bresenham::major_length(line);
         let parameters = BresenhamParameters::new(line);
@@ -31,6 +32,7 @@ impl Points {
         }
     }
 
+    /// Creates an empty iterator.
     pub(in crate::primitives) fn empty() -> Self {
         let dummy = Line::new(Point::zero(), Point::zero());
 

@@ -6,6 +6,8 @@ use crate::{
     },
 };
 
+const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
+
 /// Which side of the center line to draw on
 ///
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
@@ -25,26 +27,58 @@ impl Side {
     }
 }
 
+/// Iterator over the parallel lines used to draw a thick line.
+///
+/// Thick lines are drawn using multiple 1px wide lines, which are parallel to
+/// the original primitive line. The lines returned by the iterator are alternating
+/// between the left and right side of original line to keep the resulting thick
+/// line symmetric.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 struct ParallelsIterator {
+    /// Parameters used for moves along the parallel lines.
     parallel_parameters: BresenhamParameters,
+
+    /// Parameters used for moves perpendicular to the parallel lines.
     perpendicular_parameters: BresenhamParameters,
 
+    /// Accumulated thickness.
+    ///
+    /// The thickness accumulator is increased each time a parallel line is returned.
     thickness_accumulator: i32,
+
+    /// Thickness threshold.
+    ///
+    /// The thickness threshold is compared with the thickness accumulator to stop the iterator once
+    /// the desired line thickness is reached.
     thickness_threshold: i32,
 
+    /// Changes the sign of initial error variables.
+    ///
+    /// To keep the parallel lines in phase the sign of the error variables needs to be flipped in
+    /// some quadrants.
     flip: bool,
 
+    /// Starting point for parallels on the left side.
     left: Bresenham,
+
+    /// Initial error for parallels on the left side.
+    ///
+    /// The initial error for the parallels is used to keep adjacent parallels in phase and prevent
+    /// overlapping pixels.
     left_error: i32,
 
+    /// Starting point for parallels on the right side.
     right: Bresenham,
+
+    /// Initial error for parallels on the right side.
+    ///
+    /// The initial error for the parallels is used to keep adjacent parallels in phase and prevent
+    /// overlapping pixels.
     right_error: i32,
 
+    /// The next side which will be drawn.
     next_side: Side,
 }
-
-const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 
 impl ParallelsIterator {
     fn new(mut line: &Line, thickness: i32) -> Self {
@@ -90,6 +124,7 @@ impl ParallelsIterator {
         self_
     }
 
+    /// Returns the next parallel on the given side.
     fn next_parallel(&mut self, side: Side) -> (BresenhamPoint, i32) {
         let (error, decrease_error) = match side {
             Side::Left => (&mut self.left_error, self.flip),
@@ -113,10 +148,8 @@ impl ParallelsIterator {
                         if self.parallel_parameters.decrease_error(error) {
                             return (point, error_before_decrease);
                         }
-                    } else {
-                        if self.parallel_parameters.increase_error(error) {
-                            return (point, *error);
-                        }
+                    } else if self.parallel_parameters.increase_error(error) {
+                        return (point, *error);
                     };
                 }
             }
@@ -125,6 +158,7 @@ impl ParallelsIterator {
 }
 
 impl Iterator for ParallelsIterator {
+    /// The bresenham state (`Bresenham`) and the reduction in line length (`u32`).
     type Item = (Bresenham, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -138,11 +172,13 @@ impl Iterator for ParallelsIterator {
             BresenhamPoint::Normal(point) => {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.minor;
 
+                // Normal lines are the same length as the original primitive line.
                 (Bresenham::with_initial_error(point, error), 0)
             }
             BresenhamPoint::Extra(point) => {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.major;
 
+                // Extra lines are 1 pixel shorter than normal lines.
                 (Bresenham::with_initial_error(point, error), 1)
             }
         };
@@ -152,6 +188,8 @@ impl Iterator for ParallelsIterator {
         Some(ret)
     }
 }
+
+/// Iterator over all pixels in the stroke of a thick line.
 #[derive(Clone, Debug)]
 pub struct ThickPoints {
     parallel: Bresenham,
@@ -162,6 +200,7 @@ pub struct ThickPoints {
 }
 
 impl ThickPoints {
+    /// Creates a new iterator over the points in the stroke of a thick line.
     pub(in crate::primitives::line) fn new(line: &Line, thickness: i32) -> Self {
         Self {
             parallel: Bresenham::new(line.start),
