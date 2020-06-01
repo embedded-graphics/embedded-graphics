@@ -188,31 +188,37 @@ use crate::{
 ///     }
 ///
 ///     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-///         // Do not draw the rectangle if its size is zero
-///         let  bottom_right = if let Some(bottom_right) = area.bottom_right() {
-///             bottom_right
-///         } else {
-///             return Ok(())
-///         };
+///         // Clamp area coordinates to display size using Rectangle::intersection
+///         if let Some(area) = area.intersection(&Rectangle::new(Point::zero(), self.size())) {
+///             // Do not draw the rectangle if its size is zero
+///             let  bottom_right = if let Some(bottom_right) = area.bottom_right() {
+///                 bottom_right
+///             } else {
+///                 return Ok(())
+///             };
 ///
-///         self.send_commands(&[
-///             // Draw rectangle command
-///             0x22,
-///             // Top left X coordinate
-///             area.top_left.x as u8,
-///             // Top left Y coordinate
-///             area.top_left.y as u8,
-///             // Bottom right X coordinate
-///             bottom_right.x as u8,
-///             // Bottom right Y coordinate
-///             bottom_right.y as u8,
-///             // Fill color red channel
-///             color.r(),
-///             // Fill color green channel
-///             color.g(),
-///             // Fill color blue channel
-///             color.b(),
-///         ])
+///             self.send_commands(&[
+///                 // Draw rectangle command
+///                 0x22,
+///                 // Top left X coordinate
+///                 area.top_left.x as u8,
+///                 // Top left Y coordinate
+///                 area.top_left.y as u8,
+///                 // Bottom right X coordinate
+///                 bottom_right.x as u8,
+///                 // Bottom right Y coordinate
+///                 bottom_right.y as u8,
+///                 // Fill color red channel
+///                 color.r(),
+///                 // Fill color green channel
+///                 color.g(),
+///                 // Fill color blue channel
+///                 color.b(),
+///             ])
+///         } else {
+///             // If given area is completely outside the drawable area, do nothing
+///             Ok(())
+///         }
 ///     }
 /// }
 ///
