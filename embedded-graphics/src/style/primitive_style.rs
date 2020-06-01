@@ -409,11 +409,14 @@ mod tests {
     #[test]
     fn stroke_width_max_value() {
         assert_eq!(
-            PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, u32::MAX))
-                .stroke_alignment(StrokeAlignment::Center)
-                .build()
-                .inside_stroke_width(),
-            u32::MAX / 2
+            PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(
+                BinaryColor::On,
+                core::u32::MAX
+            ))
+            .stroke_alignment(StrokeAlignment::Center)
+            .build()
+            .inside_stroke_width(),
+            core::u32::MAX / 2
         );
     }
 }
