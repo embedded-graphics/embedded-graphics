@@ -189,7 +189,7 @@ use crate::{
 ///
 ///     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
 ///         // Clamp area coordinates to display size using Rectangle::intersection
-///         if let Some(area) = area.intersection(&Rectangle::new(Point::zero(), self.size())) {
+///         let area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
 ///             // Do not draw the rectangle if its size is zero
 ///             let  bottom_right = if let Some(bottom_right) = area.bottom_right() {
 ///                 bottom_right
@@ -215,10 +215,6 @@ use crate::{
 ///                 // Fill color blue channel
 ///                 color.b(),
 ///             ])
-///         } else {
-///             // If given area is completely outside the drawable area, do nothing
-///             Ok(())
-///         }
 ///     }
 /// }
 ///
@@ -359,15 +355,14 @@ pub trait DrawTarget {
     ///     where
     ///         I: IntoIterator<Item = Self::Color>,
     ///     {
-    ///         if let Some(area) = Rectangle::new(Point::zero(), self.size()).intersection(&area) {
-    ///             self.draw_iter(
-    ///                 area.points()
-    ///                     .zip(colors)
-    ///                     .map(|(pos, color)| Pixel(pos, color)),
-    ///             )
-    ///         } else {
-    ///             Ok(())
-    ///         }
+    ///         // Clamp area to drawable part of the display target
+    ///         let area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
+    ///
+    ///         self.draw_iter(
+    ///             area.points()
+    ///                 .zip(colors)
+    ///                 .map(|(pos, color)| Pixel(pos, color)),
+    ///         )
     ///     }
     /// }
     /// ```

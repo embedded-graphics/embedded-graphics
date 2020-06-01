@@ -142,9 +142,12 @@ impl Rectangle {
 
     /// Returns a new `Rectangle` containing the intersection of `self` and `other`.
     ///
-    /// If no intersection is present, this method will return `None`.
+    /// If no intersection is present, this method will return a zero sized rectangle with its top
+    /// left corner set to `(0, 0)`.
     ///
     /// # Examples
+    ///
+    /// ## Intersection
     ///
     /// This example draws two rectangles to a mock display using the `.` character, along with
     /// their intersection shown with `#` characters.
@@ -161,8 +164,7 @@ impl Rectangle {
     /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(2, 3), Size::new(10, 7));
     ///
-    /// // If there is no intersection, this unwrap() will panic
-    /// let intersection = rect1.intersection(&rect2).unwrap();
+    /// let intersection = rect1.intersection(&rect2);
     ///
     /// rect1
     ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 1))
@@ -193,9 +195,32 @@ impl Rectangle {
     /// );
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    pub fn intersection(&self, other: &Rectangle) -> Option<Rectangle> {
-        let other_bottom_right = other.bottom_right()?;
-        let self_bottom_right = self.bottom_right()?;
+    ///
+    /// ## No intersection
+    ///
+    /// This example creates two rectangles with no intersection between them. In this case,
+    /// `intersection` returns a zero-sized rectangle with its origin at `(0, 0)`.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
+    ///     style::PrimitiveStyle,
+    /// };
+    ///
+    /// let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+    ///
+    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect2 = Rectangle::new(Point::new(10, 15), Size::new(10, 7));
+    ///
+    /// let intersection = rect1.intersection(&rect2);
+    ///
+    /// assert_eq!(intersection.size, Size::zero());
+    /// assert_eq!(intersection.top_left, Point::zero());
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    pub fn intersection(&self, other: &Rectangle) -> Rectangle {
+        let other_bottom_right = other.bottom_right().unwrap_or_else(Point::zero);
+        let self_bottom_right = self.bottom_right().unwrap_or_else(Point::zero);
 
         // Check for overlap
         if self.contains(other.top_left)
@@ -203,13 +228,13 @@ impl Rectangle {
             || other.contains(self.top_left)
             || other.contains(self_bottom_right)
         {
-            Some(Rectangle::with_corners(
+            Rectangle::with_corners(
                 self.top_left.component_max(other.top_left),
                 self_bottom_right.component_min(other_bottom_right),
-            ))
+            )
         } else {
             // No overlap present
-            None
+            Rectangle::new(Point::zero(), Size::zero())
         }
     }
 }
@@ -678,7 +703,7 @@ mod tests {
 
         assert_eq!(
             rect1.intersection(&rect2),
-            Some(Rectangle::new(Point::new_equal(25), Size::new(5, 15)))
+            Rectangle::new(Point::new_equal(25), Size::new(5, 15))
         );
     }
 
@@ -687,7 +712,10 @@ mod tests {
         let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
         let rect2 = Rectangle::new(Point::new_equal(35), Size::new(30, 40));
 
-        assert_eq!(rect1.intersection(&rect2), None);
+        assert_eq!(
+            rect1.intersection(&rect2),
+            Rectangle::new(Point::zero(), Size::zero())
+        );
     }
 
     #[test]
@@ -695,7 +723,7 @@ mod tests {
         let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
         let rect2 = rect1;
 
-        assert_eq!(rect1.intersection(&rect2), Some(rect1));
+        assert_eq!(rect1.intersection(&rect2), rect1);
     }
 
     #[test]
@@ -703,6 +731,6 @@ mod tests {
         let rect1 = Rectangle::with_corners(Point::new_equal(10), Point::new(20, 30));
         let rect2 = Rectangle::with_corners(Point::new_equal(5), Point::new(30, 40));
 
-        assert_eq!(rect1.intersection(&rect2), Some(rect1));
+        assert_eq!(rect1.intersection(&rect2), rect1);
     }
 }

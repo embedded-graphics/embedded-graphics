@@ -24,8 +24,11 @@ fn draw(
         .draw(display)
         .unwrap();
 
-    if let Some(rect) = base_rectangle.intersection(&moving_rectangle) {
-        rect.into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
+    let intersection = base_rectangle.intersection(&moving_rectangle);
+
+    if intersection.size != Size::zero() {
+        intersection
+            .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
             .draw(display)
             .unwrap()
     }
