@@ -10,7 +10,19 @@
 //!
 //! The display is internally capped at 64x64px.
 //!
+//! # Additional out of bounds and overdraw checks
+//!
+//! [`MockDisplay`] implements additional checks during drawing operations that will cause a panic if
+//! any pixel is drawn outside the framebuffer or if a pixel is drawn more than once. These
+//! stricter checks were added to help with testing and shouldn't be implemented by normal
+//! [`DrawTarget`]s.
+//!
+//! If a test relies on out of bounds drawing or overdrawing the additional checks can explicitly
+//! be disabled  by using [`set_allow_out_of_bounds_drawing`] and [`set_allow_overdraw`].
+//!
 //! # Characters used in `BinaryColor` patterns
+//!
+//! The following mappings are available for [`BinaryColor`]:
 //!
 //! | Character | Color                    | Description                             |
 //! |-----------|--------------------------|-----------------------------------------|
@@ -18,7 +30,9 @@
 //! | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
 //! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
 //!
-//! # Characters used in `Gray8` patterns
+//! # Characters used in [`Gray8`] patterns
+//!
+//! The following mappings are available for [`Gray8`]:
 //!
 //! | Character | Color                    | Description                             |
 //! |-----------|--------------------------|-----------------------------------------|
@@ -29,19 +43,24 @@
 //! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
 //! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
 //!
-//! # Characters used in `Rgb888` patterns
+//! # Characters used in RGB color patterns
+//!
+//! The following mappings are available for all RGB color types in the [`pixelcolor`] module,
+//! like [`Rgb565`] or [`Rgb888`]:
 //!
 //! | Character | Color                    | Description                             |
 //! |-----------|--------------------------|-----------------------------------------|
 //! | `' '`     | `None`                   | No drawing operation changed the pixel  |
-//! | `'K'`     | `Some(Rgb888::BLACK)`    | Pixel was changed to `Rgb888::BLACK`    |
-//! | `'R'`     | `Some(Rgb888::RED)`      | Pixel was changed to `Rgb888::RED`      |
-//! | `'G'`     | `Some(Rgb888::GREEN)`    | Pixel was changed to `Rgb888::GREEN`    |
-//! | `'B'`     | `Some(Rgb888::BLUE)`     | Pixel was changed to `Rgb888::BLUE`     |
-//! | `'Y'`     | `Some(Rgb888::YELLOW)`   | Pixel was changed to `Rgb888::YELLOW`   |
-//! | `'M'`     | `Some(Rgb888::MAGENTA)`  | Pixel was changed to `Rgb888::MAGENTA`  |
-//! | `'C'`     | `Some(Rgb888::CYAN)`     | Pixel was changed to `Rgb888::CYAN`     |
-//! | `'W'`     | `Some(Rgb888::WHITE)`    | Pixel was changed to `Rgb888::WHITE`    |
+//! | `'K'`     | `Some(C::BLACK)`         | Pixel was changed to `C::BLACK`         |
+//! | `'R'`     | `Some(C::RED)`           | Pixel was changed to `C::RED`           |
+//! | `'G'`     | `Some(C::GREEN)`         | Pixel was changed to `C::GREEN`         |
+//! | `'B'`     | `Some(C::BLUE)`          | Pixel was changed to `C::BLUE`          |
+//! | `'Y'`     | `Some(C::YELLOW)`        | Pixel was changed to `C::YELLOW`        |
+//! | `'M'`     | `Some(C::MAGENTA)`       | Pixel was changed to `C::MAGENTA`       |
+//! | `'C'`     | `Some(C::CYAN)`          | Pixel was changed to `C::CYAN`          |
+//! | `'W'`     | `Some(C::WHITE)`         | Pixel was changed to `C::WHITE`         |
+//!
+//! Note: The table used `C` as a placeholder for the actual color type, like `Rgb565::BLACK`.
 //!
 //! # Examples
 //!
@@ -107,15 +126,26 @@
 //! );
 //! ```
 //!
+//! [`pixelcolor`]: ../pixelcolor/index.html#structs
+//! [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
+//! [`Gray8`]: ../pixelcolor/struct.Gray8.html
+//! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
+//! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
+//! [`DrawTarget`]: ../trait.DrawTarget.html
+//! [`MockDisplay`]: struct.MockDisplay.html
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
-//! [`MockDIsplay`]: struct.MockDisplay.html
+//! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw
+//! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
 
 use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
-    pixelcolor::{BinaryColor, Gray8, GrayColor, PixelColor, Rgb888, RgbColor},
+    pixelcolor::{
+        Bgr555, Bgr565, Bgr888, BinaryColor, Gray8, GrayColor, PixelColor, Rgb555, Rgb565, Rgb888,
+        RgbColor,
+    },
     prelude::Primitive,
-    primitives::Rectangle,
+    primitives::{ContainsPoint, Rectangle},
     DrawTarget,
 };
 use core::{
@@ -125,14 +155,20 @@ use core::{
 };
 
 const SIZE: usize = 64;
+const DISPLAY_AREA: Rectangle = Rectangle::new(Point::zero(), Size::new_equal(SIZE as u32));
 
 /// Mock display struct
 ///
 /// See the [module documentation](./index.html) for usage and examples.
 #[derive(Copy, Clone)]
-pub struct MockDisplay<C>([Option<C>; SIZE * SIZE])
+pub struct MockDisplay<C>
 where
-    C: PixelColor;
+    C: PixelColor,
+{
+    pixels: [Option<C>; SIZE * SIZE],
+    allow_overdraw: bool,
+    allow_out_of_bounds_drawing: bool,
+}
 
 impl<C> MockDisplay<C>
 where
@@ -143,28 +179,32 @@ where
         Self::default()
     }
 
-    /// Returns the width of the display.
-    pub fn width(&self) -> usize {
-        SIZE
+    /// Sets if out of bounds drawing is allowed.
+    ///
+    /// If this is set to `true` the bounds checks during drawing are disabled.
+    pub fn set_allow_out_of_bounds_drawing(&mut self, value: bool) {
+        self.allow_out_of_bounds_drawing = value;
     }
 
-    /// Returns the height of the display.
-    pub fn height(&self) -> usize {
-        SIZE
+    /// Sets if overdrawing is allowed.
+    ///
+    /// If this is set to `true` the overdrawing is allowed.
+    pub fn set_allow_overdraw(&mut self, value: bool) {
+        self.allow_overdraw = value;
     }
 
     /// Returns the color of a pixel.
     pub fn get_pixel(&self, p: Point) -> Option<C> {
         let Point { x, y } = p;
 
-        self.0[x as usize + y as usize * SIZE]
+        self.pixels[x as usize + y as usize * SIZE]
     }
 
     /// Changes the color of a pixel.
     pub fn set_pixel(&mut self, p: Point, color: Option<C>) {
         let Point { x, y } = p;
 
-        self.0[x as usize + y as usize * SIZE] = color;
+        self.pixels[x as usize + y as usize * SIZE] = color;
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -207,11 +247,46 @@ where
 
         mirrored
     }
+
+    /// Maps a `MockDisplay<C>' to a `MockDisplay<CT>` by applying a function
+    /// to each pixel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{mock_display::MockDisplay, pixelcolor::BinaryColor};
+    ///
+    /// let display: MockDisplay<BinaryColor> = MockDisplay::from_pattern(&[
+    ///     "####",
+    ///     "#  .",
+    ///     "....",
+    /// ]);
+    ///
+    /// let inverted = display.map(|c| c.invert());
+    /// assert_eq!(inverted, MockDisplay::from_pattern(&[
+    ///     "....",
+    ///     ".  #",
+    ///     "####",
+    /// ]));
+    /// ```
+    pub fn map<CT, F>(&self, f: F) -> MockDisplay<CT>
+    where
+        CT: PixelColor,
+        F: Fn(C) -> CT + Copy,
+    {
+        let mut target = MockDisplay::new();
+
+        for point in Rectangle::new(Point::zero(), self.size()).points() {
+            target.set_pixel(point, self.get_pixel(point).map(f))
+        }
+
+        target
+    }
 }
 
 impl<C> MockDisplay<C>
 where
-    C: PixelColor + ColorMapping<C>,
+    C: PixelColor + ColorMapping,
 {
     /// Creates a new mock display from a character pattern.
     ///
@@ -265,7 +340,7 @@ where
         // Copy pattern to display.
         let mut display = MockDisplay::new();
         for (i, color) in pattern_colors.enumerate() {
-            display.0[i] = color;
+            display.pixels[i] = color;
         }
 
         display
@@ -277,23 +352,27 @@ where
     C: PixelColor,
 {
     fn default() -> Self {
-        Self([None; SIZE * SIZE])
+        Self {
+            pixels: [None; SIZE * SIZE],
+            allow_overdraw: false,
+            allow_out_of_bounds_drawing: false,
+        }
     }
 }
 
 impl<C> fmt::Debug for MockDisplay<C>
 where
-    C: PixelColor + ColorMapping<C>,
+    C: PixelColor + ColorMapping,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let empty_rows = self
-            .0
+            .pixels
             .rchunks(SIZE)
             .take_while(|row| row.iter().all(Option::is_none))
             .count();
 
         writeln!(f, "MockDisplay[")?;
-        for row in self.0.chunks(SIZE).take(SIZE - empty_rows) {
+        for row in self.pixels.chunks(SIZE).take(SIZE - empty_rows) {
             for color in row {
                 f.write_char(color.map_or(' ', C::color_to_char))?;
             }
@@ -313,7 +392,7 @@ where
     C: PixelColor,
 {
     fn eq(&self, other: &MockDisplay<C>) -> bool {
-        self.0.iter().eq(other.0.iter())
+        self.pixels.iter().eq(other.pixels.iter())
     }
 }
 
@@ -324,19 +403,32 @@ where
     type Error = core::convert::Infallible;
 
     fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
-        let Pixel(Point { x, y }, color) = pixel;
-        if !(0..SIZE).contains(&(x as usize)) || !(0..SIZE).contains(&(y as usize)) {
-            return Ok(());
+        let Pixel(point, color) = pixel;
+
+        if !DISPLAY_AREA.contains(point) {
+            if self.allow_out_of_bounds_drawing {
+                return Ok(());
+            } else {
+                panic!(
+                    "tried to draw pixel outside the display area (x: {}, y: {})",
+                    point.x, point.y
+                );
+            }
         }
 
-        let i = x + y * SIZE as i32;
-        self.0[i as usize] = Some(color);
+        if !self.allow_overdraw {
+            if self.get_pixel(point).is_some() {
+                panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
+            }
+        }
+
+        self.set_pixel(point, Some(color));
 
         Ok(())
     }
 
     fn size(&self) -> Size {
-        Size::new(self.width() as u32, self.height() as u32)
+        DISPLAY_AREA.size
     }
 }
 
@@ -345,15 +437,15 @@ where
 /// See the [module-level documentation] for a table of implemented mappings.
 ///
 /// [module-level documentation]: index.html
-pub trait ColorMapping<C> {
+pub trait ColorMapping {
     /// Converts a char into a color of type `C`.
-    fn char_to_color(c: char) -> C;
+    fn char_to_color(c: char) -> Self;
 
     /// Converts a color of type `C` into a char.
-    fn color_to_char(color: C) -> char;
+    fn color_to_char(color: Self) -> char;
 }
 
-impl ColorMapping<BinaryColor> for BinaryColor {
+impl ColorMapping for BinaryColor {
     fn char_to_color(c: char) -> Self {
         match c {
             '.' => BinaryColor::Off,
@@ -362,7 +454,7 @@ impl ColorMapping<BinaryColor> for BinaryColor {
         }
     }
 
-    fn color_to_char(color: BinaryColor) -> char {
+    fn color_to_char(color: Self) -> char {
         match color {
             BinaryColor::Off => '.',
             BinaryColor::On => '#',
@@ -370,7 +462,7 @@ impl ColorMapping<BinaryColor> for BinaryColor {
     }
 }
 
-impl ColorMapping<Gray8> for Gray8 {
+impl ColorMapping for Gray8 {
     fn char_to_color(c: char) -> Self {
         let digit = match c {
             '0'..='9' | 'A'..='F' => c.to_digit(16).unwrap(),
@@ -395,32 +487,89 @@ impl ColorMapping<Gray8> for Gray8 {
     }
 }
 
-impl ColorMapping<Rgb888> for Rgb888 {
-    fn char_to_color(c: char) -> Self {
-        match c {
-            'K' => Rgb888::BLACK,
-            'R' => Rgb888::RED,
-            'G' => Rgb888::GREEN,
-            'B' => Rgb888::BLUE,
-            'Y' => Rgb888::YELLOW,
-            'M' => Rgb888::MAGENTA,
-            'C' => Rgb888::CYAN,
-            'W' => Rgb888::WHITE,
-            _ => panic!("Invalid char in pattern: '{}'", c),
+macro_rules! impl_rgb_color_mapping {
+    ($type:ident) => {
+        impl ColorMapping for $type {
+            fn char_to_color(c: char) -> Self {
+                match c {
+                    'K' => Self::BLACK,
+                    'R' => Self::RED,
+                    'G' => Self::GREEN,
+                    'B' => Self::BLUE,
+                    'Y' => Self::YELLOW,
+                    'M' => Self::MAGENTA,
+                    'C' => Self::CYAN,
+                    'W' => Self::WHITE,
+                    _ => panic!("Invalid char in pattern: '{}'", c),
+                }
+            }
+
+            fn color_to_char(color: Self) -> char {
+                match color {
+                    Self::BLACK => 'K',
+                    Self::RED => 'R',
+                    Self::GREEN => 'G',
+                    Self::BLUE => 'B',
+                    Self::YELLOW => 'Y',
+                    Self::MAGENTA => 'M',
+                    Self::CYAN => 'C',
+                    Self::WHITE => 'W',
+                    _ => '?',
+                }
+            }
         }
+    };
+}
+
+impl_rgb_color_mapping!(Rgb555);
+impl_rgb_color_mapping!(Bgr555);
+impl_rgb_color_mapping!(Rgb565);
+impl_rgb_color_mapping!(Bgr565);
+impl_rgb_color_mapping!(Rgb888);
+impl_rgb_color_mapping!(Bgr888);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::drawable::Drawable;
+
+    #[test]
+    #[should_panic(expected = "tried to draw pixel outside the display area (x: 65, y: 0)")]
+    fn panic_on_out_of_bounds_drawing() {
+        let mut display = MockDisplay::new();
+
+        Pixel(Point::new(65, 0), BinaryColor::On)
+            .draw(&mut display)
+            .unwrap();
     }
 
-    fn color_to_char(color: Rgb888) -> char {
-        match color {
-            Rgb888::BLACK => 'K',
-            Rgb888::RED => 'R',
-            Rgb888::GREEN => 'G',
-            Rgb888::BLUE => 'B',
-            Rgb888::YELLOW => 'Y',
-            Rgb888::MAGENTA => 'M',
-            Rgb888::CYAN => 'C',
-            Rgb888::WHITE => 'W',
-            _ => '?',
-        }
+    #[test]
+    fn allow_out_of_bounds_drawing() {
+        let mut display = MockDisplay::new();
+        display.set_allow_out_of_bounds_drawing(true);
+
+        Pixel(Point::new(65, 0), BinaryColor::On)
+            .draw(&mut display)
+            .unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "tried to draw pixel twice (x: 1, y: 2)")]
+    fn panic_on_overdraw() {
+        let mut display = MockDisplay::new();
+
+        let p = Pixel(Point::new(1, 2), BinaryColor::On);
+        p.draw(&mut display).unwrap();
+        p.draw(&mut display).unwrap();
+    }
+
+    #[test]
+    fn allow_overdraw() {
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        let p = Pixel(Point::new(1, 2), BinaryColor::On);
+        p.draw(&mut display).unwrap();
+        p.draw(&mut display).unwrap();
     }
 }

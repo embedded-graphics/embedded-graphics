@@ -38,7 +38,7 @@ pub use styled_iterator::StyledIterator;
 ///
 /// // Green 10 pixel wide line with translation applied
 /// Line::new(Point::new(50, 20), Point::new(60, 35))
-///     .translate(Point::new(65, 35))
+///     .translate(Point::new(-30, 10))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 10))
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())

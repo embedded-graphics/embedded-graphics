@@ -35,14 +35,10 @@ impl Font for Font8x16 {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
-        fonts::{Font, Text},
+        fonts::{tests::assert_text_from_pattern, Font, Text},
         geometry::{Dimensions, Point, Size},
-        mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::Rectangle,
         style::TextStyle,
-        transform::Transform,
     };
 
     const WIDTH: usize = Font8x16::CHARACTER_SIZE.width as usize;
@@ -63,38 +59,11 @@ mod tests {
     }
 
     #[test]
-    fn text_corners() {
-        let style = TextStyle::new(Font8x16, BinaryColor::On);
-        let hello = Text::new(HELLO_WORLD, Point::zero())
-            .into_styled(style)
-            .translate(Point::new(5, -20));
-        let empty = Text::new("", Point::zero())
-            .into_styled(style)
-            .translate(Point::new(10, 20));
-
-        assert_eq!(
-            hello.bounding_box(),
-            Rectangle::new(
-                Point::new(5, -20),
-                Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32)
-            )
-        );
-        assert_eq!(
-            empty.bounding_box(),
-            Rectangle::new(Point::new(10, 20), Size::zero())
-        );
-    }
-
-    #[test]
-    fn correct_m() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new("Mm", Point::zero())
-            .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
+    fn correct_m() {
+        assert_text_from_pattern(
+            "Mm",
+            Font8x16,
+            &[
                 "                ",
                 "                ",
                 "##   ##         ",
@@ -111,22 +80,16 @@ mod tests {
                 "                ",
                 "                ",
                 "                ",
-            ])
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn correct_ascii_borders() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new(" ~", Point::zero())
-            .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
+    fn correct_ascii_borders() {
+        assert_text_from_pattern(
+            " ~",
+            Font8x16,
+            &[
                 "                ",
                 "         ### ## ",
                 "        ## ###  ",
@@ -143,117 +106,85 @@ mod tests {
                 "                ",
                 "                ",
                 "                ",
-            ])
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn correct_dollar_y() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new("$y", Point::zero())
-            .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "   ##                   ",
-                "   ##                   ",
-                " #####                  ",
-                "##   ##                 ",
-                "##    #                 ",
-                "##      ##   ##         ",
-                " #####  ##   ##         ",
-                "     ## ##   ##         ",
-                "     ## ##   ##         ",
-                "#    ## ##   ##         ",
-                "##   ## ##   ##         ",
-                " #####   ######         ",
-                "   ##        ##         ",
-                "   ##       ##          ",
-                "        #####           ",
-                "                        ",
-            ])
+    fn correct_dollar_y() {
+        assert_text_from_pattern(
+            "$y",
+            Font8x16,
+            &[
+                "   ##           ",
+                "   ##           ",
+                " #####          ",
+                "##   ##         ",
+                "##    #         ",
+                "##      ##   ## ",
+                " #####  ##   ## ",
+                "     ## ##   ## ",
+                "     ## ##   ## ",
+                "#    ## ##   ## ",
+                "##   ## ##   ## ",
+                " #####   ###### ",
+                "   ##        ## ",
+                "   ##       ##  ",
+                "        #####   ",
+                "                ",
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn correct_latin1() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new("¡ÿ", Point::zero())
-            .into_styled(TextStyle::new(Font8x16, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "                        ",
-                "        ##   ##         ",
-                "   ##   ##   ##         ",
-                "   ##                   ",
-                "                        ",
-                "   ##   ##   ##         ",
-                "   ##   ##   ##         ",
-                "   ##   ##   ##         ",
-                "  ####  ##   ##         ",
-                "  ####  ##   ##         ",
-                "  ####  ##   ##         ",
-                "   ##    ######         ",
-                "             ##         ",
-                "            ##          ",
-                "        #####           ",
-                "                        ",
-            ])
+    fn correct_latin1() {
+        assert_text_from_pattern(
+            "¡ÿ",
+            Font8x16,
+            &[
+                "                ",
+                "        ##   ## ",
+                "   ##   ##   ## ",
+                "   ##           ",
+                "                ",
+                "   ##   ##   ## ",
+                "   ##   ##   ## ",
+                "   ##   ##   ## ",
+                "  ####  ##   ## ",
+                "  ####  ##   ## ",
+                "  ####  ##   ## ",
+                "   ##    ###### ",
+                "             ## ",
+                "            ##  ",
+                "        #####   ",
+                "                ",
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn dont_panic() -> Result<(), core::convert::Infallible> {
-        let two_question_marks = MockDisplay::from_pattern(&[
-            "                        ",
-            "                        ",
-            " #####   #####          ",
-            "##   ## ##   ##         ",
-            "##   ## ##   ##         ",
-            "    ##      ##          ",
-            "   ##      ##           ",
-            "   ##      ##           ",
-            "   ##      ##           ",
-            "                        ",
-            "   ##      ##           ",
-            "   ##      ##           ",
-            "                        ",
-            "                        ",
-            "                        ",
-            "                        ",
-        ]);
+    fn dont_panic() {
+        let two_question_marks = &[
+            "                ",
+            "                ",
+            " #####   #####  ",
+            "##   ## ##   ## ",
+            "##   ## ##   ## ",
+            "    ##      ##  ",
+            "   ##      ##   ",
+            "   ##      ##   ",
+            "   ##      ##   ",
+            "                ",
+            "   ##      ##   ",
+            "   ##      ##   ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+        ];
 
-        let style = TextStyle::new(Font8x16, BinaryColor::On);
-
-        let mut display = MockDisplay::new();
-        Text::new("\0\r", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
-        Text::new("\x7F\u{A0}", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
-        Text::new("Ā💣", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        Ok(())
+        assert_text_from_pattern("\0\r", Font8x16, two_question_marks);
+        assert_text_from_pattern("\x7F\u{A0}", Font8x16, two_question_marks);
+        assert_text_from_pattern("Ā💣", Font8x16, two_question_marks);
     }
 }

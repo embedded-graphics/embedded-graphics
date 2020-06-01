@@ -24,9 +24,9 @@ use crate::{
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::default();
 ///
 /// // Circle with 1 pixel wide white stroke with top-left point at (10, 20) with a diameter of 30
+/// # let mut display = MockDisplay::default();
 /// Circle::new(Point::new(10, 20), 30)
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
 ///     .draw(&mut display)?;
@@ -38,13 +38,15 @@ use crate::{
 ///     .fill_color(Rgb565::GREEN)
 ///     .build();
 ///
-/// Circle::new(Point::new(50, 20), 30)
+/// # let mut display = MockDisplay::default();
+/// Circle::new(Point::new(50, 20), 10)
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
 ///
 /// // Circle with blue fill and no stroke with a translation applied
+/// # let mut display = MockDisplay::default();
 /// Circle::new(Point::new(10, 20), 30)
-///     .translate(Point::new(65, 35))
+///     .translate(Point::new(20, 10))
 ///     .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())

@@ -113,6 +113,8 @@
 //! // Create a draw target using the builtin MockDisplay. In real applications this would be
 //! // replaced by a draw target that is provided by a display driver crate.
 //! let mut display = MockDisplay::default();
+//! display.set_allow_overdraw(true);
+//! display.set_allow_out_of_bounds_drawing(true);
 //!
 //! let c = Circle::new(Point::new(12, 12), 17).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
 //! let t = Text::new("Hello Rust!", Point::new(20, 16))
@@ -136,10 +138,6 @@
 //!     style::{PrimitiveStyle, TextStyle},
 //! };
 //!
-//! // Create a draw target using the builtin MockDisplay. In real applications this would be
-//! // replaced by a draw target that is provided by a display driver crate.
-//! let mut display: MockDisplay<Rgb565> = MockDisplay::default();
-//!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     Rectangle::new(Point::new(0, 0), Size::new(40, 40))
 //!         .into_styled(PrimitiveStyle::with_stroke(Rgb565::CYAN, 1))
@@ -155,6 +153,8 @@
 //! }
 //!
 //! # let mut display = MockDisplay::default();
+//! # display.set_allow_overdraw(true);
+//! # display.set_allow_out_of_bounds_drawing(true);
 //! build_thing("Hello Rust!").draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -173,6 +173,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -195,6 +196,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -221,6 +223,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -253,6 +256,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -279,6 +283,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -305,6 +310,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -331,6 +337,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -365,6 +372,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
@@ -403,6 +411,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     fonts::{
 //!         Font6x8,
@@ -432,6 +441,7 @@
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
 //!     image::Image,
 //!     pixelcolor::Rgb888,

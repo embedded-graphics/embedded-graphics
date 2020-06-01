@@ -55,6 +55,7 @@ macro_rules! op {
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! {}
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```

@@ -225,19 +225,25 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{fonts::Font6x8, mock_display::MockDisplay, pixelcolor::BinaryColor};
+    use crate::{
+        fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+    };
+
+    const HELLO_WORLD: &'static str = "Hello World!";
 
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct SpacedFont;
 
     impl Font for SpacedFont {
-        const FONT_IMAGE: &'static [u8] = &[0xF0, 0xA0, 0x50, 0x10];
-        const FONT_IMAGE_WIDTH: u32 = 8;
-        const CHARACTER_SIZE: Size = Size::new(4, 4);
+        const FONT_IMAGE: &'static [u8] = Font6x8::FONT_IMAGE;
+        const FONT_IMAGE_WIDTH: u32 = Font6x8::FONT_IMAGE_WIDTH;
+        const CHARACTER_SIZE: Size = Font6x8::CHARACTER_SIZE;
         const CHARACTER_SPACING: u32 = 5;
 
-        fn char_offset(_c: char) -> u32 {
-            0
+        fn char_offset(c: char) -> u32 {
+            Font6x8::char_offset(c)
         }
     }
 
@@ -255,59 +261,54 @@ mod tests {
     }
 
     #[test]
-    fn character_spacing() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-
-        Text::new("##", Point::zero())
-            .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "####     ####",
-                "# #      # # ",
-                " # #      # #",
-                "   #        #",
-            ])
+    fn character_spacing() {
+        assert_text_from_pattern(
+            "##",
+            SpacedFont,
+            &[
+                " # #        # #  ",
+                " # #        # #  ",
+                "#####      ##### ",
+                " # #        # #  ",
+                "#####      ##### ",
+                " # #        # #  ",
+                " # #        # #  ",
+                "                 ",
+            ],
         );
-
-        assert_eq!(
-            Text::new("#", Point::zero())
-                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-                .bounding_box()
-                .size,
-            Size::new(4, 4)
-        );
-        assert_eq!(
-            Text::new("##", Point::zero())
-                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-                .bounding_box()
-                .size,
-            Size::new(4 * 2 + 5, 4)
-        );
-        assert_eq!(
-            Text::new("###", Point::zero())
-                .into_styled(TextStyle::new(SpacedFont, BinaryColor::On))
-                .bounding_box()
-                .size,
-            Size::new(4 * 3 + 5 * 2, 4)
-        );
-
-        Ok(())
     }
 
     #[test]
-    fn multiline() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-
-        Text::new("AB\nC", Point::zero())
-            .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
-            .draw(&mut display)?;
+    fn character_spacing_dimensions() {
+        let style = TextStyle::new(SpacedFont, BinaryColor::On);
 
         assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
+            Text::new("#", Point::zero())
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6, 8)),
+        );
+
+        assert_eq!(
+            Text::new("##", Point::zero())
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6 * 2 + 5, 8)),
+        );
+        assert_eq!(
+            Text::new("###", Point::zero())
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 8)),
+        );
+    }
+
+    #[test]
+    fn multiline() {
+        assert_text_from_pattern(
+            "AB\nC",
+            Font6x8,
+            &[
                 " ###  ####  ",
                 "#   # #   # ",
                 "#   # #   # ",
@@ -324,17 +325,103 @@ mod tests {
                 "#   #       ",
                 " ###        ",
                 "            ",
-            ])
+            ],
         );
+    }
+
+    #[test]
+    fn multiline_dimensions() {
+        let style = TextStyle::new(Font6x8, BinaryColor::On);
+        let text = Text::new("AB\nC", Point::zero()).into_styled(style);
 
         assert_eq!(
-            Text::new("AB\nC", Point::zero())
-                .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
-                .bounding_box()
-                .size,
-            Size::new(2 * 6, 2 * 8)
+            text.bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(2 * 6, 2 * 8))
+        );
+    }
+
+    #[test]
+    fn position_and_translate() {
+        let style = TextStyle::new(Font6x8, BinaryColor::On);
+
+        let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
+
+        let hello_translated = hello.translate(Point::new(5, -20));
+        assert_eq!(
+            hello.bounding_box().size,
+            hello_translated.bounding_box().size
         );
 
-        Ok(())
+        let mut hello_with_point = Text::new(HELLO_WORLD, Point::new(5, -20)).into_styled(style);
+        assert_eq!(hello_translated, hello_with_point);
+
+        hello_with_point.translate_mut(Point::new(-5, 20));
+        assert_eq!(hello, hello_with_point);
+    }
+
+    #[test]
+    fn inverted_text() {
+        let mut display_inverse = MockDisplay::new();
+        let style_inverse = TextStyle {
+            font: Font6x8,
+            text_color: Some(BinaryColor::Off),
+            background_color: Some(BinaryColor::On),
+        };
+        Text::new("Mm", Point::zero())
+            .into_styled(style_inverse)
+            .draw(&mut display_inverse)
+            .unwrap();
+
+        let mut display_normal = MockDisplay::new();
+        let style_normal = TextStyle {
+            font: Font6x8,
+            text_color: Some(BinaryColor::On),
+            background_color: Some(BinaryColor::Off),
+        };
+        Text::new("Mm", Point::zero())
+            .into_styled(style_normal)
+            .draw(&mut display_normal)
+            .unwrap();
+
+        assert_eq!(display_inverse, display_normal.map(|c| c.invert()));
+    }
+
+    #[test]
+    fn no_fill_does_not_hang() {
+        let mut display = MockDisplay::new();
+        Text::new(" ", Point::zero())
+            .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(display, MockDisplay::new());
+    }
+
+    #[test]
+    fn negative_y_no_infinite_loop() {
+        let style = TextStyle {
+            font: Font6x12,
+            text_color: Some(BinaryColor::On),
+            background_color: Some(BinaryColor::Off),
+        };
+
+        let mut text = Text::new("Testing string", Point::zero()).into_styled(style);
+        text.translate_mut(Point::new(0, -12));
+
+        assert_eq!(text.into_iter().count(), 6 * 12 * "Testing string".len());
+    }
+
+    #[test]
+    fn negative_x_no_infinite_loop() {
+        let style = TextStyle {
+            font: Font6x12,
+            text_color: Some(BinaryColor::On),
+            background_color: Some(BinaryColor::Off),
+        };
+
+        let mut text = Text::new("A", Point::zero()).into_styled(style);
+        text.translate_mut(Point::new(-6, 0));
+
+        assert_eq!(text.into_iter().count(), 6 * 12);
     }
 }
