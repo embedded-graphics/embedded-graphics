@@ -307,7 +307,64 @@ pub trait DrawTarget {
     /// iterated over from the top left to the bottom right corner of the area. The provided
     /// iterator should provide pixel color values based on this ordering.
     ///
+    /// This method should not attempt to draw any pixels that fall outside the drawable area of the
+    /// target display. The `area` argument can be clipped to the drawable area using the
+    /// [`Rectangle::intersection`] method.
+    ///
     /// The default implementation of this method delegates to [`draw_iter`](#method.draw_iter).
+    ///
+    /// # Examples
+    ///
+    /// This is an example implementation of `fill_contiguous` that delegates to `draw_iter`. It
+    /// demonstrates the usage of [`Rectangle::intersection`] on the passed `area` argument to only
+    /// draw visible pixels. If there is no intersection between `area` and the display area, no
+    /// pixels will be drawn.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     drawable::Pixel,
+    ///     geometry::Size,
+    ///     pixelcolor::{Gray8, GrayColor},
+    ///     prelude::*,
+    ///     DrawTarget,
+    ///     primitives::Rectangle
+    /// };
+    ///
+    /// struct ExampleDisplay;
+    ///
+    /// impl DrawTarget for ExampleDisplay {
+    ///     type Color = Gray8;
+    ///     type Error = core::convert::Infallible;
+    ///
+    ///     fn size(&self) -> Size {
+    ///         Size::new(64, 64)
+    ///     }
+    ///
+    ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    ///     where
+    ///         I: IntoIterator<Item = Pixel<Self::Color>> {
+    ///         // Draw pixels to the display
+    ///
+    ///         Ok(())
+    ///     }
+    ///
+    ///      fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    ///         where
+    ///         I: IntoIterator<Item = Self::Color> {
+    ///         if let Some(area) = Rectangle::new(Point::zero(), self.size()).intersection(&area) {
+    ///            self.draw_iter(
+    ///                area.points()
+    ///                    .zip(colors)
+    ///                    .map(|(pos, color)| Pixel(pos, color)),
+    ///            )
+    ///        } else {
+    ///            Ok(())
+    ///        }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
