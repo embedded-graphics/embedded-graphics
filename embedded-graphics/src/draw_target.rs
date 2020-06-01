@@ -397,6 +397,8 @@ pub trait DrawTarget {
     /// is specified as `(0, 0)` to `(width, height)`. If the target hardware supports a more
     /// optimised way of filling the entire display with a solid color, this method should be
     /// overridden to use those commands.
+    ///
+    /// The default implementation of this method delegates to [`fill_solid`](#method.fill_solid).
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
     }
