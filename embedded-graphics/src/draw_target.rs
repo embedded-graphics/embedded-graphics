@@ -328,7 +328,7 @@ pub trait DrawTarget {
     ///     geometry::Size,
     ///     pixelcolor::{Gray8, GrayColor},
     ///     prelude::*,
-    ///     primitives::Rectangle,
+    ///     primitives::{ContainsPoint, Rectangle},
     ///     DrawTarget,
     /// };
     ///
@@ -356,11 +356,12 @@ pub trait DrawTarget {
     ///         I: IntoIterator<Item = Self::Color>,
     ///     {
     ///         // Clamp area to drawable part of the display target
-    ///         let area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
+    ///         let drawable_area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
     ///
     ///         self.draw_iter(
     ///             area.points()
     ///                 .zip(colors)
+    ///                 .filter(|(pos, _color)| drawable_area.contains(*pos))
     ///                 .map(|(pos, color)| Pixel(pos, color)),
     ///         )
     ///     }
