@@ -326,8 +326,8 @@ pub trait DrawTarget {
     ///     geometry::Size,
     ///     pixelcolor::{Gray8, GrayColor},
     ///     prelude::*,
+    ///     primitives::Rectangle,
     ///     DrawTarget,
-    ///     primitives::Rectangle
     /// };
     ///
     /// struct ExampleDisplay;
@@ -342,24 +342,26 @@ pub trait DrawTarget {
     ///
     ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     ///     where
-    ///         I: IntoIterator<Item = Pixel<Self::Color>> {
+    ///         I: IntoIterator<Item = Pixel<Self::Color>>,
+    ///     {
     ///         // Draw pixels to the display
     ///
     ///         Ok(())
     ///     }
     ///
-    ///      fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
-    ///         where
-    ///         I: IntoIterator<Item = Self::Color> {
+    ///     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    ///     where
+    ///         I: IntoIterator<Item = Self::Color>,
+    ///     {
     ///         if let Some(area) = Rectangle::new(Point::zero(), self.size()).intersection(&area) {
-    ///            self.draw_iter(
-    ///                area.points()
-    ///                    .zip(colors)
-    ///                    .map(|(pos, color)| Pixel(pos, color)),
-    ///            )
-    ///        } else {
-    ///            Ok(())
-    ///        }
+    ///             self.draw_iter(
+    ///                 area.points()
+    ///                     .zip(colors)
+    ///                     .map(|(pos, color)| Pixel(pos, color)),
+    ///             )
+    ///         } else {
+    ///             Ok(())
+    ///         }
     ///     }
     /// }
     /// ```
