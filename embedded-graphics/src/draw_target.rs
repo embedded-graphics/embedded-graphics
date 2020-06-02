@@ -120,11 +120,13 @@ use crate::{
 /// operation is the SSD1331 with it's "Draw Rectangle" (`22h`) command which this example
 /// is loosely based on.
 ///
-/// To leverage this feature in a `DrawTarget` the default implementation of `fill_solid` needs to be
-/// overridden by a custom implementation. Instead of drawing individual pixels the target specific
-/// version will only send a single command to the display controller. Because the command size
-/// is independent of the filled area all `fill_soild` calls will only transmit 8 bytes to the display, which
-/// is far less then what is required to transmit each pixel color inside the filled area.
+/// To leverage this feature in a `DrawTarget`, the default implementation of `fill_solid` can be
+/// overridden by a custom implementation. Instead of drawing individual pixels, this target
+/// specific version will only send a single command to the display controller in one transaction.
+/// Because the command size is independent of the filled area, all `fill_soild` calls will only
+/// transmit 8 bytes to the display, which is far less then what is required to transmit each pixel
+/// color inside the filled area.
+///
 /// ```rust
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
@@ -146,20 +148,25 @@ use crate::{
 /// # }
 /// #
 ///
-/// /// A fake 64px x 64px display where each pixel is stored as a single `u16`
+/// /// SPI communication error
+/// #[derive(Debug)]
+/// struct CommError;
+///
+/// /// An example display conneted over SPI
 /// struct ExampleDisplay {
-///     framebuffer: [u16; 64 * 64],
 ///     iface: SPI1,
 /// }
 ///
 /// impl ExampleDisplay {
-///     /// Send buffer to the display
-///     pub fn flush(&self) -> Result<(), ()> {
-///         self.iface.send_bytes(&self.framebuffer)
+///     /// Send a single pixel to the display
+///     pub fn set_pixel(&self, x: u32, y: u32, color: u16) -> Result<(), CommError> {
+///         // ...
+///
+///         Ok(())
 ///     }
 ///
 ///     /// Send commands to the display
-///     pub fn send_commands(&self, commands: &[u8]) -> Result<(), core::convert::Infallible> {
+///     pub fn send_commands(&self, commands: &[u8]) -> Result<(), CommError> {
 ///         // Send data marked as commands to the display.
 ///
 ///         Ok(())
@@ -168,7 +175,7 @@ use crate::{
 ///
 /// impl DrawTarget for ExampleDisplay {
 ///     type Color = Rgb565;
-///     type Error = core::convert::Infallible;
+///     type Error = CommError;
 ///
 ///     fn size(&self) -> Size {
 ///         Size::new(64, 64)
@@ -178,9 +185,10 @@ use crate::{
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
 ///         for Pixel(coord, color) in pixels.into_iter() {
+///             // Set a pixel at (x, y) to the given color. If the pixel coordinates are out of
+///             // bounds (negative or greater than (63, 63)), this operation will be a noop.
 ///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
-///                 let index: u32 = x + y * 64;
-///                 self.framebuffer[index as usize] = RawU16::from(color).into_inner();
+///                 self.set_pixel(x, y, RawU16::from(color).into_inner())?;
 ///             }
 ///         }
 ///
@@ -219,7 +227,6 @@ use crate::{
 /// }
 ///
 /// let mut display = ExampleDisplay {
-///     framebuffer: [0; 4096],
 ///     iface: SPI1,
 /// };
 ///
@@ -249,9 +256,7 @@ use crate::{
 ///     )
 ///     .draw(&mut display)?;
 ///
-/// // Update the display
-/// display.flush().expect("Failed to send data to display");
-/// # Ok::<(), core::convert::Infallible>(())
+/// # Ok::<(), CommError>(())
 /// ```
 pub trait DrawTarget {
     /// The pixel color type the targetted display supports.
