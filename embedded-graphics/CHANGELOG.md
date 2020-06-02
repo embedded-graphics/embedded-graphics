@@ -33,6 +33,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) Lines with equal start and end points are now drawn by assuming they are oriented horizontally. This means that they are now drawn as a `stroke_width` high and 1px wide rectangle, instead of not being drawn at all.
 - **(breaking)** [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) `primitives::line::StyledLineIterator` was renamed to `primitives::line::StyledIterator`.
 - **(breaking)** [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Additional checks for overdraw and out of bounds drawing were added to `MockDisplay` which can cause tests to panic. See the `mock_display` module docs for more information.
+- **(breaking)** [#342](https://github.com/jamwaffles/embedded-graphics/pull/342) Refactored the `DrawTarget` trait to better support common hardware capabilities.
 
 ### Fixed
 
