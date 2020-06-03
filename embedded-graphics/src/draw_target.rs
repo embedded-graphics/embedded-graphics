@@ -52,14 +52,18 @@ use crate::{
 /// # struct SPI1;
 /// #
 /// # impl SPI1 {
-/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
+/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), CommError> {
 /// #         Ok(())
 /// #     }
 /// # }
 /// #
 ///
+/// /// SPI communication error
+/// #[derive(Debug)]
+/// struct CommError;
+///
 /// /// A fake 64px x 64px display.
-/// struct Example Display {
+/// struct ExampleDisplay {
 ///     /// The framebuffer with one `u8` value per pixel.
 ///     framebuffer: [u8; 64 * 64],
 ///
@@ -69,7 +73,7 @@ use crate::{
 ///
 /// impl ExampleDisplay {
 ///     /// Updates the display from the framebuffer.
-///     pub fn flush(&self) -> Result<(), SpiError> {
+///     pub fn flush(&self) -> Result<(), CommError> {
 ///         self.iface.send_bytes(&self.framebuffer)
 ///     }
 /// }
@@ -130,7 +134,7 @@ use crate::{
 /// To leverage this feature in a `DrawTarget`, the default implementation of [`fill_solid`] can be
 /// overridden by a custom implementation. Instead of drawing individual pixels, this target
 /// specific version will only send a single command to the display controller in one transaction.
-/// Because the command size is independent of the filled area, all [`fill_soild`] calls will only
+/// Because the command size is independent of the filled area, all [`fill_solid`] calls will only
 /// transmit 8 bytes to the display, which is far less then what is required to transmit each pixel
 /// color inside the filled area.
 /// ```rust
@@ -273,8 +277,8 @@ use crate::{
 /// ```
 ///
 /// [`fill_solid`]: #method.fill_solid
-/// [`draw_iter`]: #method.draw_iter
-/// [`size`]: #method.size
+/// [`draw_iter`]: #tymethod.draw_iter
+/// [`size`]: #tymethod.size
 /// [`Error` type]: #associatedtype.Error
 pub trait DrawTarget {
     /// The pixel color type the targetted display supports.
@@ -328,22 +332,32 @@ pub trait DrawTarget {
 
     /// Fill a given area with an iterator providing a contiguous stream of pixel colors.
     ///
-    /// Use this method to fill an opaque area with given pixel colors. Pixel coordinates are
-    /// iterated over from the top left to the bottom right corner of the area. The provided
-    /// iterator should provide pixel color values based on this ordering.
+    /// Use this method to fill an area with contiguous, non-transparent pixel colors. Pixel
+    /// coordinates are iterated over from the top left to the bottom right corner of the area in
+    /// row-first order. The provided iterator must provide pixel color values based on this
+    /// ordering to produce correct output.
+    ///
+    /// As seen in the example below, the [`Points::points`] method can be used to get an
+    /// iterator over all points in the provided area.
+    ///
+    /// The provided iterator is not required to provide `width * height` pixels to completely fill
+    /// the area. In this case, `fill_contiguous` should return without error.
     ///
     /// This method should not attempt to draw any pixels that fall outside the drawable area of the
     /// target display. The `area` argument can be clipped to the drawable area using the
     /// [`Rectangle::intersection`] method.
     ///
-    /// The default implementation of this method delegates to [`draw_iter`](#method.draw_iter).
+    /// The default implementation of this method delegates to [`draw_iter`](#tymethod.draw_iter).
     ///
     /// # Examples
     ///
-    /// This is an example implementation of `fill_contiguous` that delegates to [`draw_iter`]. It
-    /// demonstrates the usage of [`Rectangle::intersection`] on the passed `area` argument to only
-    /// draw visible pixels. If there is no intersection between `area` and the display area, no
-    /// pixels will be drawn.
+    /// This is an example implementation of `fill_contiguous` that delegates to [`draw_iter`]. This
+    /// delegation behaviour is undesirable in a real application as it will be as slow as the
+    /// default trait implementation, however is shown here for demonstration purposes.
+    ///
+    /// The example demonstrates the usage of [`Rectangle::intersection`] on the passed `area`
+    /// argument to only draw visible pixels. If there is no intersection between `area` and the
+    /// display area, no pixels will be drawn.
     ///
     /// ```rust
     /// use embedded_graphics::{
@@ -381,18 +395,24 @@ pub trait DrawTarget {
     ///         // Clamp area to drawable part of the display target
     ///         let drawable_area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
     ///
-    ///         self.draw_iter(
-    ///             area.points()
-    ///                 .zip(colors)
-    ///                 .filter(|(pos, _color)| drawable_area.contains(*pos))
-    ///                 .map(|(pos, color)| Pixel(pos, color)),
-    ///         )
+    ///         // Check that there are visible pixels to be drawn
+    ///         if drawable_area.size != Size::zero() {
+    ///             self.draw_iter(
+    ///                 area.points()
+    ///                     .zip(colors)
+    ///                     .filter(|(pos, _color)| drawable_area.contains(*pos))
+    ///                     .map(|(pos, color)| Pixel(pos, color)),
+    ///             )
+    ///         } else {
+    ///             Ok(())
+    ///         }
     ///     }
     /// }
     /// ```
     ///
-    /// [`draw_iter`]: #method.draw_iter
+    /// [`draw_iter`]: #tymethod.draw_iter
     /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
+    /// [`Points::points`]: ../primitives/trait.Primitive.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
@@ -418,13 +438,13 @@ pub trait DrawTarget {
 
     /// Fill the entire display with a solid color.
     ///
+    /// If the target hardware supports a more optimized way of filling the entire display with a
+    /// solid color, this method should be overridden to use those commands.
+    ///
     /// The default implementation of this method delegates to [`fill_solid`] where the fill area
-    /// is specified as `(0, 0)` to `(width, height)`. If the target hardware supports a more
-    /// optimized way of filling the entire display with a solid color, this method should be
-    /// overridden to use those commands.
+    /// is specified as `(0, 0)` with size `(width, height)` as returned from the [`size`] method.
     ///
-    /// The default implementation of this method delegates to [`fill_solid`].
-    ///
+    /// [`size`]: #method.size
     /// [`fill_solid`]: #method.fill_solid
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
