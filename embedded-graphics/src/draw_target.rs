@@ -1,3 +1,5 @@
+//! A target for embedded-graphics drawing operations.
+
 use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
@@ -46,7 +48,7 @@ use crate::{
 ///     prelude::*,
 ///     primitives::Circle,
 ///     style::PrimitiveStyle,
-///     DrawTarget,
+///     draw_target::DrawTarget,
 /// };
 /// #
 /// # struct SPI1;
@@ -146,7 +148,7 @@ use crate::{
 ///     prelude::*,
 ///     primitives::{Rectangle, Circle},
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
-///     DrawTarget,
+///     draw_target::DrawTarget,
 /// };
 /// #
 /// # struct SPI1;
@@ -366,7 +368,7 @@ pub trait DrawTarget {
     ///     pixelcolor::{Gray8, GrayColor},
     ///     prelude::*,
     ///     primitives::{ContainsPoint, Rectangle},
-    ///     DrawTarget,
+    ///     draw_target::DrawTarget,
     /// };
     ///
     /// struct ExampleDisplay;

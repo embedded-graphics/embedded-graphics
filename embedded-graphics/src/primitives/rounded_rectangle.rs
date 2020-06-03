@@ -1,6 +1,7 @@
 //! The rounded rectangle primitive.
 
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
@@ -12,7 +13,6 @@ use crate::{
     },
     style::{PrimitiveStyle, Styled},
     transform::Transform,
-    DrawTarget,
 };
 
 /// Rounded rectangle primitive.

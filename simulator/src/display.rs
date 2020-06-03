@@ -1,9 +1,9 @@
 use crate::{framebuffer::Framebuffer, output_settings::OutputSettings};
 use embedded_graphics::{
+    draw_target::DrawTarget,
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::{BinaryColor, PixelColor, Rgb888},
-    DrawTarget,
 };
 use image::{ImageBuffer, Rgb};
 use std::convert::TryFrom;

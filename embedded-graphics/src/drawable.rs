@@ -1,5 +1,5 @@
 //! `Drawable` trait and helpers
-use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
+use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 
 /// Marks an object as "drawable". Must be implemented for all graphics objects
 ///
@@ -54,8 +54,8 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// [`DrawTarget`]: ../trait.DrawTarget.html
-/// [`draw_iter`]: ../trait.DrawTarget.html#method.draw_iter
+/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+/// [`draw_iter`]: ../draw_target/trait.DrawTarget.html#method.draw_iter
 pub trait Drawable<C>
 where
     C: PixelColor,
@@ -95,7 +95,7 @@ where
 /// ```
 ///
 /// [`Drawable`]: trait.Drawable.html
-/// [`DrawTarget`]: ../trait.DrawTarget.html
+/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Pixel<C: PixelColor>(pub Point, pub C);
 

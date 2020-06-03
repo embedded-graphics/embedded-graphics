@@ -1,6 +1,7 @@
 //! The triangle primitive.
 
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
@@ -10,7 +11,6 @@ use crate::{
     },
     style::{PrimitiveStyle, Styled},
     transform::Transform,
-    DrawTarget,
 };
 use core::{
     borrow::Borrow,

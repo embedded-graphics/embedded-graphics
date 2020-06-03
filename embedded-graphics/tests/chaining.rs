@@ -1,12 +1,12 @@
 extern crate embedded_graphics;
 
 use embedded_graphics::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
     pixelcolor::PixelColor,
     primitives::{Circle, Line, Primitive, Rectangle},
     style::PrimitiveStyle,
-    DrawTarget,
 };
 
 struct FakeDisplay {}

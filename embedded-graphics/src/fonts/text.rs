@@ -1,4 +1,5 @@
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     fonts::Font,
     geometry::{Dimensions, Point, Size},
@@ -6,7 +7,6 @@ use crate::{
     primitives::Rectangle,
     style::{Styled, TextStyle},
     transform::Transform,
-    DrawTarget,
 };
 
 /// A text object.

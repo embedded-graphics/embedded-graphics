@@ -1,13 +1,13 @@
 //! The rectangle primitive. Also good for drawing squares.
 
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{ContainsPoint, Primitive},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
-    DrawTarget,
 };
 use core::cmp::min;
 
