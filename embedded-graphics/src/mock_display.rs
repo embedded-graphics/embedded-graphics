@@ -132,14 +132,13 @@
 //! [`Gray8`]: ../pixelcolor/struct.Gray8.html
 //! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
-//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+//! [`DrawTarget`]: ../trait.DrawTarget.html
 //! [`MockDisplay`]: struct.MockDisplay.html
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
 //! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
 
 use crate::{
-    draw_target::DrawTarget,
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::{
@@ -148,6 +147,7 @@ use crate::{
     },
     prelude::Primitive,
     primitives::{ContainsPoint, Rectangle},
+    DrawTarget,
 };
 use core::{
     cmp::PartialEq,

@@ -1,13 +1,13 @@
 //! The ellipse primitive
 
 use crate::{
-    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{circle, ContainsPoint, Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
+    DrawTarget,
 };
 
 /// Ellipse primitive

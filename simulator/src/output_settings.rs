@@ -1,8 +1,8 @@
 use crate::{display::SimulatorDisplay, theme::BinaryColorTheme};
 use embedded_graphics::{
-    draw_target::DrawTarget,
     geometry::{Point, Size},
     pixelcolor::PixelColor,
+    DrawTarget,
 };
 
 /// Output settings.

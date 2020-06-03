@@ -1,11 +1,11 @@
 use crate::{display::SimulatorDisplay, output_settings::OutputSettings};
 use embedded_graphics::{
-    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::{PixelColor, Rgb888, RgbColor},
     primitives::{Primitive, Rectangle},
-    style::PrimitiveStyle,
+    style::{PrimitiveStyle, Styled},
+    DrawTarget,
 };
 use image::{ImageBuffer, Rgb};
 use std::convert::TryFrom;

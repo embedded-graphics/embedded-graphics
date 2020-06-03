@@ -488,7 +488,7 @@
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
 
-pub mod draw_target;
+mod draw_target;
 pub mod drawable;
 pub mod fonts;
 pub mod geometry;
@@ -499,3 +499,5 @@ pub mod prelude;
 pub mod primitives;
 pub mod style;
 pub mod transform;
+
+pub use draw_target::DrawTarget;

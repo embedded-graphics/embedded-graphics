@@ -1,8 +1,8 @@
 use crate::{display::SimulatorDisplay, framebuffer::Framebuffer, output_settings::OutputSettings};
 use embedded_graphics::{
-    draw_target::DrawTarget,
     geometry::{Point, Size},
     pixelcolor::{PixelColor, Rgb888},
+    DrawTarget,
 };
 use sdl2::{
     event::Event,

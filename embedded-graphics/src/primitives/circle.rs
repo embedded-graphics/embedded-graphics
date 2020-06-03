@@ -1,13 +1,13 @@
 //! The circle primitive
 
 use crate::{
-    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{ContainsPoint, Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
+    DrawTarget,
 };
 
 /// Circle primitive

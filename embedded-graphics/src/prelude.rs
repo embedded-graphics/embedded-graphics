@@ -1,7 +1,6 @@
 //! Prelude
 
 pub use crate::{
-    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     fonts::Font,
     geometry::{Dimensions, Point, Size},
@@ -9,4 +8,5 @@ pub use crate::{
     pixelcolor::{raw::RawData, GrayColor, IntoStorage, PixelColor, RgbColor},
     primitives::Primitive,
     transform::Transform,
+    DrawTarget,
 };
