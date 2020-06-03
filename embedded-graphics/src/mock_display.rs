@@ -253,6 +253,10 @@ where
     ///
     /// # Examples
     ///
+    /// Invert a `MockDisplay` by applying [`BinaryColor::invert`] to the color of each pixel.
+    ///
+    /// [`BinaryColor::invert`]: ../pixelcolor/enum.BinaryColor.html#method.invert
+    ///
     /// ```
     /// use embedded_graphics::{mock_display::MockDisplay, pixelcolor::BinaryColor};
     ///
@@ -416,10 +420,8 @@ where
             }
         }
 
-        if !self.allow_overdraw {
-            if self.get_pixel(point).is_some() {
-                panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
-            }
+        if !self.allow_overdraw && self.get_pixel(point).is_some() {
+            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
         }
 
         self.set_pixel(point, Some(color));

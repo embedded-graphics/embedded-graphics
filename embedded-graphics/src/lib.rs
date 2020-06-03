@@ -103,23 +103,23 @@
 //! ```rust
 //! use embedded_graphics::{
 //!     fonts::{Font6x8, Text},
-//!     mock_display::MockDisplay,
+//! #   mock_display::MockDisplay,
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     primitives::Circle,
 //!     style::{PrimitiveStyle, TextStyle},
 //! };
 //!
-//! // Create a draw target using the builtin MockDisplay. In real applications this would be
-//! // replaced by a draw target that is provided by a display driver crate.
-//! let mut display = MockDisplay::default();
-//! display.set_allow_overdraw(true);
-//! display.set_allow_out_of_bounds_drawing(true);
+//! # let mut display = MockDisplay::default();
+//! # display.set_allow_overdraw(true);
+//! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! let c = Circle::new(Point::new(12, 12), 17).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
 //! let t = Text::new("Hello Rust!", Point::new(20, 16))
 //!     .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
 //!
+//! // The `display` variable contains a `DrawTarget` implementation provided by the display driver
+//! // crate. See the driver crate documentation for more information about how it is constructed.
 //! c.draw(&mut display)?;
 //! t.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
