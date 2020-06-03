@@ -24,27 +24,29 @@ use crate::{
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::default();
 ///
-/// // Ellipse with 1 pixel wide white stroke with top-left point at (10, 20) with a size of (30, 50)
-/// Ellipse::new(Point::new(10, 20), Size::new(30, 50))
+/// // Ellipse with 1 pixel wide white stroke with top-left point at (10, 20) with a size of (30, 40)
+/// # let mut display = MockDisplay::default();
+/// Ellipse::new(Point::new(10, 20), Size::new(30, 40))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::WHITE, 1))
 ///     .draw(&mut display)?;
 ///
-/// // Ellipse with styled stroke and fill with top-left point at (50, 20) with a size of (40, 30)
+/// // Ellipse with styled stroke and fill with top-left point at (20, 30) with a size of (40, 30)
 /// let style = PrimitiveStyleBuilder::new()
 ///     .stroke_color(Rgb565::RED)
 ///     .stroke_width(3)
 ///     .fill_color(Rgb565::GREEN)
 ///     .build();
 ///
-/// Ellipse::new(Point::new(50, 20), Size::new(40, 30))
+/// # let mut display = MockDisplay::default();
+/// Ellipse::new(Point::new(20, 30), Size::new(40, 30))
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
 ///
 /// // Ellipse with blue fill and no stroke with a translation applied
+/// # let mut display = MockDisplay::default();
 /// Ellipse::new(Point::new(10, 20), Size::new(20, 40))
-///     .translate(Point::new(65, 35))
+///     .translate(Point::new(10, -15))
 ///     .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
@@ -361,14 +363,16 @@ mod tests {
 
     fn test_circles(style: PrimitiveStyle<BinaryColor>) {
         for diameter in 0..50 {
+            let top_left = Point::new_equal(style.stroke_width_i32());
+
             let mut expected = MockDisplay::new();
-            Circle::new(Point::new(0, 0), diameter)
+            Circle::new(top_left, diameter)
                 .into_styled(style)
                 .draw(&mut expected)
                 .unwrap();
 
             let mut display = MockDisplay::new();
-            Ellipse::new(Point::new(0, 0), Size::new(diameter, diameter))
+            Ellipse::new(top_left, Size::new(diameter, diameter))
                 .into_styled(style)
                 .draw(&mut display)
                 .unwrap();

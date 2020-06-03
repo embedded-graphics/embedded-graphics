@@ -24,20 +24,21 @@ use core::cmp::min;
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
 ///
-/// // Rectangle with red 3 pixel wide stroke and green fill from (50, 20) to (60, 35)
+/// // Rectangle with red 3 pixel wide stroke and green fill with the top left corner at (30, 20) and
+/// // a size of (10, 15)
 /// let style = PrimitiveStyleBuilder::new()
 ///     .stroke_color(Rgb565::RED)
 ///     .stroke_width(3)
 ///     .fill_color(Rgb565::GREEN)
 ///     .build();
 ///
-/// Rectangle::new(Point::new(50, 20), Size::new(10, 15))
+/// Rectangle::new(Point::new(30, 20), Size::new(10, 15))
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
 ///
 /// // Rectangle with translation applied
-/// Rectangle::new(Point::new(50, 20), Size::new(10, 15))
-///     .translate(Point::new(65, 35))
+/// Rectangle::new(Point::new(30, 20), Size::new(10, 15))
+///     .translate(Point::new(-20, -10))
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())

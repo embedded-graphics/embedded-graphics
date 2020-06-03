@@ -33,7 +33,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
 ///             .draw(display)?;
 ///
-///         Text::new(self.text, Point::new(20, 20))
+///         Text::new(self.text, Point::new(6, 6))
 ///             .into_styled(TextStyle::new(Font6x8, self.fg_color))
 ///             .draw(display)
 ///     }
@@ -41,7 +41,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// let mut button = Button {
 ///     top_left: Point::zero(),
-///     size: Size::new(100, 50),
+///     size: Size::new(60, 20),
 ///     bg_color: Rgb888::RED,
 ///     fg_color: Rgb888::BLUE,
 ///     text: "Click me!",
@@ -49,6 +49,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
+/// # display.set_allow_overdraw(true);
 /// button.draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
@@ -87,7 +88,7 @@ where
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::new();
 ///
-/// (0..100)
+/// (0..32)
 ///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())

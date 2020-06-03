@@ -29,15 +29,16 @@ use core::{
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
+/// # display.set_allow_overdraw(true);
 ///
 /// // Triangle with red 1 px wide stroke
-/// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
+/// Triangle::new(Point::new(40, 20), Point::new(50, 25), Point::new(60, 60))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
 ///     .draw(&mut display)?;
 ///
 /// // Triangle with translation applied
-/// Triangle::new(Point::new(50, 20), Point::new(60, 35), Point::new(70, 80))
-///     .translate(Point::new(65, 35))
+/// Triangle::new(Point::new(40, 20), Point::new(50, 25), Point::new(60, 60))
+///     .translate(Point::new(-10, -20))
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
@@ -538,6 +539,7 @@ mod tests {
     #[test]
     fn stroke_fill_colors() {
         let mut display: MockDisplay<Rgb888> = MockDisplay::new();
+        display.set_allow_overdraw(true);
 
         Triangle::new(Point::new(2, 2), Point::new(8, 2), Point::new(2, 8))
             .into_styled(
@@ -597,6 +599,7 @@ mod tests {
     #[test]
     fn it_draws_filled_strokeless_tri() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_overdraw(true);
 
         Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(4, 2))
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
@@ -674,6 +677,8 @@ mod tests {
     #[test]
     fn issue_308_infinite() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_overdraw(true);
+        display.set_allow_out_of_bounds_drawing(true);
 
         Triangle::new(Point::new(10, 10), Point::new(20, 30), Point::new(30, -10))
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
@@ -684,6 +689,8 @@ mod tests {
     #[test]
     fn off_screen() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_overdraw(true);
+        display.set_allow_out_of_bounds_drawing(true);
 
         Triangle::new(Point::new(5, 5), Point::new(10, 15), Point::new(15, -5))
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))

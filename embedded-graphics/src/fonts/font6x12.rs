@@ -32,14 +32,10 @@ impl Font for Font6x12 {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
-        fonts::{Font, Text},
+        fonts::{tests::assert_text_from_pattern, Font, Text},
         geometry::{Dimensions, Point, Size},
-        mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::Rectangle,
         style::TextStyle,
-        transform::Transform,
     };
 
     const WIDTH: usize = Font6x12::CHARACTER_SIZE.width as usize;
@@ -60,38 +56,11 @@ mod tests {
     }
 
     #[test]
-    fn text_corners() {
-        let style = TextStyle::new(Font6x12, BinaryColor::On);
-        let hello = Text::new(HELLO_WORLD, Point::zero())
-            .into_styled(style)
-            .translate(Point::new(5, -20));
-        let empty = Text::new("", Point::zero())
-            .into_styled(style)
-            .translate(Point::new(10, 20));
-
-        assert_eq!(
-            hello.bounding_box(),
-            Rectangle::new(
-                Point::new(5, -20),
-                Size::new((HELLO_WORLD.len() * WIDTH) as u32, HEIGHT as u32)
-            )
-        );
-        assert_eq!(
-            empty.bounding_box(),
-            Rectangle::new(Point::new(10, 20), Size::zero())
-        );
-    }
-
-    #[test]
-    fn correct_m() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new("Mm", Point::zero())
-            .into_styled(TextStyle::new(Font6x12, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
+    fn correct_m() {
+        assert_text_from_pattern(
+            "Mm",
+            Font6x12,
+            &[
                 "            ",
                 "#   #       ",
                 "## ##       ",
@@ -104,22 +73,16 @@ mod tests {
                 "#   # # # # ",
                 "            ",
                 "            ",
-            ])
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn correct_ascii_borders() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new(" ~", Point::zero())
-            .into_styled(TextStyle::new(Font6x12, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
+    fn correct_ascii_borders() {
+        assert_text_from_pattern(
+            " ~",
+            Font6x12,
+            &[
                 "        # # ",
                 "       #### ",
                 "       # #  ",
@@ -132,22 +95,16 @@ mod tests {
                 "            ",
                 "            ",
                 "            ",
-            ])
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn correct_dollar_y() -> Result<(), core::convert::Infallible> {
-        let mut display = MockDisplay::new();
-        Text::new("$y", Point::zero())
-            .into_styled(TextStyle::new(Font6x12, BinaryColor::On))
-            .draw(&mut display)?;
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
+    fn correct_dollar_y() {
+        assert_text_from_pattern(
+            "$y",
+            Font6x12,
+            &[
                 "            ",
                 "  #         ",
                 " ###        ",
@@ -160,15 +117,13 @@ mod tests {
                 " ###    ### ",
                 "  #       # ",
                 "        ##  ",
-            ])
+            ],
         );
-
-        Ok(())
     }
 
     #[test]
-    fn dont_panic() -> Result<(), core::convert::Infallible> {
-        let two_question_marks = MockDisplay::from_pattern(&[
+    fn dont_panic() {
+        let two_question_marks = &[
             "            ",
             "  ##    ##  ",
             " #  #  #  # ",
@@ -181,62 +136,11 @@ mod tests {
             "  #     #   ",
             "            ",
             "            ",
-        ]);
+        ];
 
-        let style = TextStyle::new(Font6x12, BinaryColor::On);
-
-        let mut display = MockDisplay::new();
-        Text::new("\0\r", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
-        Text::new("\x7F\u{A0}", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
-        Text::new("¡ÿ", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        let mut display = MockDisplay::new();
-        Text::new("Ā💣", Point::zero())
-            .into_styled(style)
-            .draw(&mut display)?;
-        assert_eq!(display, two_question_marks);
-
-        Ok(())
-    }
-
-    #[test]
-    fn negative_y_no_infinite_loop() {
-        let style = TextStyle {
-            font: Font6x12,
-            text_color: Some(BinaryColor::On),
-            background_color: Some(BinaryColor::Off),
-        };
-
-        let mut text = Text::new("Testing string", Point::zero()).into_styled(style);
-        text.translate_mut(Point::new(0, -12));
-
-        assert_eq!(text.into_iter().count(), 6 * 12 * "Testing string".len());
-    }
-
-    #[test]
-    fn negative_x_no_infinite_loop() {
-        let style = TextStyle {
-            font: Font6x12,
-            text_color: Some(BinaryColor::On),
-            background_color: Some(BinaryColor::Off),
-        };
-
-        let mut text = Text::new("A", Point::zero()).into_styled(style);
-        text.translate_mut(Point::new(-6, 0));
-
-        assert_eq!(text.into_iter().count(), 6 * 12);
+        assert_text_from_pattern("\0\r", Font6x12, two_question_marks);
+        assert_text_from_pattern("\x7F\u{A0}", Font6x12, two_question_marks);
+        assert_text_from_pattern("¡ÿ", Font6x12, two_question_marks);
+        assert_text_from_pattern("Ā💣", Font6x12, two_question_marks);
     }
 }

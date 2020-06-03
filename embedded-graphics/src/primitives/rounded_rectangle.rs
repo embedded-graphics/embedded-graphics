@@ -60,7 +60,7 @@ use crate::{
 ///     .build();
 ///
 /// RoundedRectangle::with_equal_corners(
-///     Rectangle::new(Point::new(5, 5), Size::new(50, 60)),
+///     Rectangle::new(Point::new(5, 5), Size::new(40, 50)),
 ///     Size::new(10, 10),
 /// )
 /// .into_styled(style)
@@ -91,13 +91,13 @@ use crate::{
 ///     .build();
 ///
 /// let radii = CornerRadiiBuilder::new()
-///     .top_left(Size::new(10, 12))
-///     .top_right(Size::new(14, 16))
-///     .bottom_right(Size::new(18, 20))
-///     .bottom_left(Size::new(22, 24))
+///     .top_left(Size::new(5, 6))
+///     .top_right(Size::new(7, 8))
+///     .bottom_right(Size::new(9, 10))
+///     .bottom_left(Size::new(11, 12))
 ///     .build();
 ///
-/// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
+/// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(40, 50)), radii)
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())
@@ -131,7 +131,7 @@ use crate::{
 ///     .bottom_right(Size::new(5, 8))
 ///     .build();
 ///
-/// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(50, 60)), radii)
+/// RoundedRectangle::new(Rectangle::new(Point::new(5, 5), Size::new(40, 50)), radii)
 ///     .into_styled(style)
 ///     .draw(&mut display)?;
 /// # Ok::<(), core::convert::Infallible>(())

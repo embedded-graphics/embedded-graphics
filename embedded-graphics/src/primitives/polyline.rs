@@ -30,6 +30,7 @@ use crate::{
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
+/// # display.set_allow_out_of_bounds_drawing(true);
 ///
 /// // A "heartbeat" shaped polyline
 /// let points: [Point; 10] = [
