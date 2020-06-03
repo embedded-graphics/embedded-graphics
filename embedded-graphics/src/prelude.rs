@@ -8,5 +8,7 @@ pub use crate::{
     pixelcolor::{raw::RawData, GrayColor, IntoStorage, PixelColor, RgbColor},
     primitives::Primitive,
     transform::Transform,
-    DrawTarget,
 };
+
+#[doc(no_inline)]
+pub use crate::draw_target::DrawTarget;
