@@ -194,18 +194,8 @@ where
         self.allow_overdraw = value;
     }
 
-    /// Returns the width of the display.
-    pub fn width(&self) -> usize {
-        SIZE
-    }
-
-    /// Returns the height of the display.
-    pub fn height(&self) -> usize {
-        SIZE
-    }
-
     fn size(&self) -> Size {
-        Size::new(self.width() as u32, self.height() as u32)
+        DISPLAY_AREA.size
     }
 
     /// Returns the color of a pixel.
