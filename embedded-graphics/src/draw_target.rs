@@ -27,7 +27,7 @@ use crate::{
 ///
 /// In this example `DrawTarget` is implemented for an an imaginary 64px x 64px 8-bit grayscale display
 /// that is connected using a simplified SPI interface. Because the hardware doesn't support any
-/// acceleration only the two required methods `size` and `draw_iter` need to be implemented.
+/// acceleration only the two required methods [`size`] and [`draw_iter`] need to be implemented.
 ///
 /// To reduce the overhead caused by communicating with the display for each drawing operation
 /// the display driver uses and framebuffer to store the pixel data in memory. This way all drawing
@@ -35,7 +35,7 @@ use crate::{
 /// by calling the `flush` method.
 ///
 /// Because all drawing operations are using a local framebuffer no communication error can occur
-/// while they are executed and the `Error` type can be set to `core::convert::Infallible`.
+/// while they are executed and the [`Error` type] can be set to `core::convert::Infallible`.
 ///
 /// ```rust
 /// use core::convert::TryInto;
@@ -58,24 +58,27 @@ use crate::{
 /// # }
 /// #
 ///
-/// /// A fake 64px x 64px display where each pixel is stored as a single `u8`
-/// struct ExampleDisplay {
+/// /// A fake 64px x 64px display.
+/// struct Example Display {
+///     /// The framebuffer with one `u8` value per pixel.
 ///     framebuffer: [u8; 64 * 64],
+///
+///     /// The interface to the display controller.
 ///     iface: SPI1,
 /// }
 ///
 /// impl ExampleDisplay {
-///     /// Send buffer to the display
-///     pub fn flush(&self) -> Result<(), ()> {
+///     /// Updates the display from the framebuffer.
+///     pub fn flush(&self) -> Result<(), SpiError> {
 ///         self.iface.send_bytes(&self.framebuffer)
 ///     }
 /// }
 ///
 /// impl DrawTarget for ExampleDisplay {
 ///     type Color = Gray8;
-///     // `ExampleDisplay` uses a framebuffer and doesn't need to communicate with the display controller
-///     // to draw pixel, which means that drawing operations can never fail. To reflect this the type `Infallible`
-///     // was chosen as the `Error` type.
+///     // `ExampleDisplay` uses a framebuffer and doesn't need to communicate with the display
+///     // controller to draw pixel, which means that drawing operations can never fail. To reflect
+///     // this the type `Infallible` was chosen as the `Error` type.
 ///     type Error = core::convert::Infallible;
 ///
 ///     fn size(&self) -> Size {
@@ -86,9 +89,9 @@ use crate::{
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
 ///         for Pixel(coord, color) in pixels.into_iter() {
-///             // Check if the pixel coordinates are out of bounds (negative or greater than (63,63)).
-///             // `DrawTarget` implementation are required to discard any out of bounds pixels without
-///             // returning an error or causing a panic.
+///             // Check if the pixel coordinates are out of bounds (negative or greater than
+///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
+///             // pixels without returning an error or causing a panic.
 ///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
 ///                 // Calculate the index in the framebuffer.
 ///                 let index: u32 = x + y * 64;
@@ -124,13 +127,12 @@ use crate::{
 /// operation is the SSD1331 with it's "Draw Rectangle" (`22h`) command which this example
 /// is loosely based on.
 ///
-/// To leverage this feature in a `DrawTarget`, the default implementation of `fill_solid` can be
+/// To leverage this feature in a `DrawTarget`, the default implementation of [`fill_solid`] can be
 /// overridden by a custom implementation. Instead of drawing individual pixels, this target
 /// specific version will only send a single command to the display controller in one transaction.
-/// Because the command size is independent of the filled area, all `fill_soild` calls will only
+/// Because the command size is independent of the filled area, all [`fill_soild`] calls will only
 /// transmit 8 bytes to the display, which is far less then what is required to transmit each pixel
 /// color inside the filled area.
-///
 /// ```rust
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
@@ -189,8 +191,9 @@ use crate::{
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
 ///         for Pixel(coord, color) in pixels.into_iter() {
-///             // Set a pixel at (x, y) to the given color. If the pixel coordinates are out of
-///             // bounds (negative or greater than (63, 63)), this operation will be a noop.
+///             // Check if the pixel coordinates are out of bounds (negative or greater than
+///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
+///             // pixels without returning an error or causing a panic.
 ///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
 ///                 self.set_pixel(x, y, RawU16::from(color).into_inner())?;
 ///             }
@@ -214,24 +217,24 @@ use crate::{
 ///             return Ok(())
 ///         };
 ///
-///             self.send_commands(&[
-///                 // Draw rectangle command
-///                 0x22,
-///                 // Top left X coordinate
-///                 area.top_left.x as u8,
-///                 // Top left Y coordinate
-///                 area.top_left.y as u8,
-///                 // Bottom right X coordinate
-///                 bottom_right.x as u8,
-///                 // Bottom right Y coordinate
-///                 bottom_right.y as u8,
-///                 // Fill color red channel
-///                 color.r(),
-///                 // Fill color green channel
-///                 color.g(),
-///                 // Fill color blue channel
-///                 color.b(),
-///             ])
+///         self.send_commands(&[
+///             // Draw rectangle command
+///             0x22,
+///             // Top left X coordinate
+///             area.top_left.x as u8,
+///             // Top left Y coordinate
+///             area.top_left.y as u8,
+///             // Bottom right X coordinate
+///             bottom_right.x as u8,
+///             // Bottom right Y coordinate
+///             bottom_right.y as u8,
+///             // Fill color red channel
+///             color.r(),
+///             // Fill color green channel
+///             color.g(),
+///             // Fill color blue channel
+///             color.b(),
+///         ])
 ///     }
 /// }
 ///
@@ -252,8 +255,8 @@ use crate::{
 ///     )
 ///     .draw(&mut display)?;
 ///
-/// // Draw a circle with top-left at `(5, 5)` with a diameter of `10` and a magenta stroke with cyan
-/// // fill. This shape cannot be optimized by calls to `fill_solid` as it contains transparent
+/// // Draw a circle with top-left at `(5, 5)` with a diameter of `10` and a magenta stroke with
+/// // cyan fill. This shape cannot be optimized by calls to `fill_solid` as it contains transparent
 /// // pixels as well as pixels of different colors. It will instead delegate to `draw_iter`
 /// // internally.
 /// Circle::new(Point::new(5, 5), 10)
@@ -268,6 +271,11 @@ use crate::{
 ///
 /// # Ok::<(), CommError>(())
 /// ```
+///
+/// [`fill_solid`]: #method.fill_solid
+/// [`draw_iter`]: #method.draw_iter
+/// [`size`]: #method.size
+/// [`Error` type]: #associatedtype.Error
 pub trait DrawTarget {
     /// The pixel color type the targetted display supports.
     type Color: PixelColor;
@@ -332,7 +340,7 @@ pub trait DrawTarget {
     ///
     /// # Examples
     ///
-    /// This is an example implementation of `fill_contiguous` that delegates to `draw_iter`. It
+    /// This is an example implementation of `fill_contiguous` that delegates to [`draw_iter`]. It
     /// demonstrates the usage of [`Rectangle::intersection`] on the passed `area` argument to only
     /// draw visible pixels. If there is no intersection between `area` and the display area, no
     /// pixels will be drawn.
@@ -383,6 +391,7 @@ pub trait DrawTarget {
     /// }
     /// ```
     ///
+    /// [`draw_iter`]: #method.draw_iter
     /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
@@ -414,7 +423,9 @@ pub trait DrawTarget {
     /// optimized way of filling the entire display with a solid color, this method should be
     /// overridden to use those commands.
     ///
-    /// The default implementation of this method delegates to [`fill_solid`](#method.fill_solid).
+    /// The default implementation of this method delegates to [`fill_solid`].
+    ///
+    /// [`fill_solid`]: #method.fill_solid
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
     }
