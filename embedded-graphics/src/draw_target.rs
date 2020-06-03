@@ -73,6 +73,9 @@ use crate::{
 ///
 /// impl DrawTarget for ExampleDisplay {
 ///     type Color = Gray8;
+///     // `ExampleDisplay` uses a framebuffer and doesn't need to communicate with the display controller
+///     // to draw pixel, which means that drawing operations can never fail. To reflect this the type `Infallible`
+///     // was chosen as the `Error` type.
 ///     type Error = core::convert::Infallible;
 ///
 ///     fn size(&self) -> Size {
@@ -83,10 +86,11 @@ use crate::{
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
 ///         for Pixel(coord, color) in pixels.into_iter() {
-///             // Place an (x, y) pixel at the right index in the framebuffer. If the pixel
-///             // coordinates are out of bounds (negative or greater than (63, 63)), this operation
-///             // will be a noop.
+///             // Check if the pixel coordinates are out of bounds (negative or greater than (63,63)).
+///             // `DrawTarget` implementation are required to discard any out of bounds pixels without
+///             // returning an error or causing a panic.
 ///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
+///                 // Calculate the index in the framebuffer.
 ///                 let index: u32 = x + y * 64;
 ///                 self.framebuffer[index as usize] = color.luma();
 ///             }
@@ -152,7 +156,7 @@ use crate::{
 /// #[derive(Debug)]
 /// struct CommError;
 ///
-/// /// An example display conneted over SPI
+/// /// An example display connected over SPI.
 /// struct ExampleDisplay {
 ///     iface: SPI1,
 /// }
@@ -196,14 +200,19 @@ use crate::{
 ///     }
 ///
 ///     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-///         // Clamp area coordinates to display size using Rectangle::intersection
+///         // Clamp the rectangle coordinates to the valid range by determining
+///         // the intersection of the fill area and the visible display area
+///         // by using Rectangle::intersection.
 ///         let area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
-///             // Do not draw the rectangle if its size is zero
-///             let  bottom_right = if let Some(bottom_right) = area.bottom_right() {
-///                 bottom_right
-///             } else {
-///                 return Ok(())
-///             };
+///
+///         // Do not send a draw rectangle command if the intersection size if zero.
+///         // The size is checked by using `Rectangle::bottom_right`, which returns `None`
+///         // if the size is zero.
+///         let bottom_right = if let Some(bottom_right) = area.bottom_right() {
+///             bottom_right
+///         } else {
+///             return Ok(())
+///         };
 ///
 ///             self.send_commands(&[
 ///                 // Draw rectangle command
@@ -230,8 +239,9 @@ use crate::{
 ///     iface: SPI1,
 /// };
 ///
-/// // Draw a rectangle with 5px red stroke and green fill. The stroke and fill can be broken down
-/// // into multiple individual rectangles, so uses `fill_solid` internally.
+/// // Draw a rectangle with 5px red stroke and green fill.
+/// // The stroke and fill can be broken down into multiple individual rectangles,
+/// // so this uses `fill_solid` internally.
 /// Rectangle::new(Point::new(20, 20), Size::new(50, 40))
 ///     .into_styled(
 ///         PrimitiveStyleBuilder::new()
@@ -243,7 +253,7 @@ use crate::{
 ///     .draw(&mut display)?;
 ///
 /// // Draw a circle with top-left at `(5, 5)` with a diameter of `10` and a magenta stroke with cyan
-/// // fill. This shape cannot be optimised by calls to `fill_solid` as it contains transparent
+/// // fill. This shape cannot be optimized by calls to `fill_solid` as it contains transparent
 /// // pixels as well as pixels of different colors. It will instead delegate to `draw_iter`
 /// // internally.
 /// Circle::new(Point::new(5, 5), 10)
@@ -387,7 +397,7 @@ pub trait DrawTarget {
 
     /// Fill a given area with a solid color.
     ///
-    /// If the target display provides optimised hardware commands for filling a rectangular area of
+    /// If the target display provides optimized hardware commands for filling a rectangular area of
     /// the display with a solid color, this method should be overridden to use those commands to
     /// improve performance.
     ///
@@ -401,7 +411,7 @@ pub trait DrawTarget {
     ///
     /// The default implementation of this method delegates to [`fill_solid`] where the fill area
     /// is specified as `(0, 0)` to `(width, height)`. If the target hardware supports a more
-    /// optimised way of filling the entire display with a solid color, this method should be
+    /// optimized way of filling the entire display with a solid color, this method should be
     /// overridden to use those commands.
     ///
     /// The default implementation of this method delegates to [`fill_solid`](#method.fill_solid).
