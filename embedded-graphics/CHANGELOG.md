@@ -24,6 +24,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) Add `MockDisplay::swap_xy` method.
 - [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Add `MockDisplay::map` method.
 - [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Allow usage of all RGB color types in `MockDisplay` patterns.
+- [#342](https://github.com/jamwaffles/embedded-graphics/pull/342) Added `Rectangle::intersection` method.
 
 ### Changed
 
