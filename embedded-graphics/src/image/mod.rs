@@ -193,8 +193,8 @@ where
     I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_image(self)
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.fill_contiguous(&self.bounding_box(), self.into_iter().map(|p| p.1))
     }
 }
 

@@ -107,7 +107,7 @@ where
 
         match self.stroke_alignment {
             StrokeAlignment::Inside => self.stroke_width,
-            StrokeAlignment::Center => (self.stroke_width + 1) / 2,
+            StrokeAlignment::Center => self.stroke_width.saturating_add(1) / 2,
             StrokeAlignment::Outside => 0,
         }
     }
@@ -403,6 +403,20 @@ mod tests {
         assert_eq!(
             PrimitiveStyle::with_stroke(BinaryColor::On, 0).effective_stroke_color(),
             None
+        );
+    }
+
+    #[test]
+    fn stroke_width_max_value() {
+        assert_eq!(
+            PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(
+                BinaryColor::On,
+                core::u32::MAX
+            ))
+            .stroke_alignment(StrokeAlignment::Center)
+            .build()
+            .inside_stroke_width(),
+            core::u32::MAX / 2
         );
     }
 }

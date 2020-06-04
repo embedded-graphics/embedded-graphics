@@ -1,23 +1,21 @@
 use crate::{
-    drawable::{self, Drawable},
+    drawable::Pixel,
     geometry::{Point, Size},
-    image::{Image, ImageDimensions, IntoPixelIter},
     pixelcolor::PixelColor,
-    primitives::{self, Primitive},
-    style::{PrimitiveStyle, Styled},
+    primitives::{rectangle::Rectangle, Primitive},
 };
 
-/// Defines a display that can be used to render [`Drawable`] objects.
+/// A target for embedded-graphics drawing operations.
 ///
-/// To to add embedded-graphics support to a display driver, `DrawTarget` must be implemented. Once
-/// a `DrawTarget` is defined, it can be used to render [`Drawable`]s. Note that any iterator over
-/// [`Pixel`]s can be drawn as [`Drawable`] is implemented for `Iterator<Item = Pixel<C:
-/// PixelColor>>`. See the [`Drawable`] trait documentation for more details.
+/// The `DrawTarget` trait is used to add embedded-graphics support to a display
+/// driver or similar targets like framebuffers or image files.
+/// Targets are required to at least implement the [`size`] and [`draw_iter`] methods. All other
+/// methods provide default implementations which use these methods internally.
 ///
-/// `DrawTarget` provides default implementations of methods to draw [`primitive`]s and clear the
-/// display which delegate to [`DrawTarget::draw_iter`]. If the target display supports accelerated
-/// drawing commands, these methods can be overridden with specialised implementations that take
-/// advantage of the hardware to speed up drawing operations.
+/// Because the default implementations cannot use features specific to the target hardware they
+/// can be overridden to improve performance. These target specific implementations might, for
+/// example, use hardware accelerated drawing operations provided by a display controller or
+/// specialized hardware modules in a microcontroller.
 ///
 /// Note that some displays require a "flush" operation to write changes from a framebuffer to the
 /// display. See docs associated with the chosen display driver for details on how to update the
@@ -25,10 +23,19 @@ use crate::{
 ///
 /// # Examples
 ///
-/// ## Implement `DrawTarget` for an 8 bit grayscale display
+/// ## Minimum implementation
 ///
-/// This example uses an imaginary display that has a 64x64px framebuffer of 8 bit values that
-/// is sent to the display over a (simplified) SPI interface.
+/// In this example `DrawTarget` is implemented for an an imaginary 64px x 64px 8-bit grayscale display
+/// that is connected using a simplified SPI interface. Because the hardware doesn't support any
+/// acceleration only the two required methods [`size`] and [`draw_iter`] need to be implemented.
+///
+/// To reduce the overhead caused by communicating with the display for each drawing operation
+/// the display driver uses and framebuffer to store the pixel data in memory. This way all drawing
+/// operations can be executed in local memory and the actual display is only updated on demand
+/// by calling the `flush` method.
+///
+/// Because all drawing operations are using a local framebuffer no communication error can occur
+/// while they are executed and the [`Error` type] can be set to `core::convert::Infallible`.
 ///
 /// ```rust
 /// use core::convert::TryInto;
@@ -45,45 +52,58 @@ use crate::{
 /// # struct SPI1;
 /// #
 /// # impl SPI1 {
-/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
+/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), CommError> {
 /// #         Ok(())
 /// #     }
 /// # }
 /// #
 ///
-/// /// A fake 64px x 64px display where each pixel is stored as a single `u8`
+/// /// SPI communication error
+/// #[derive(Debug)]
+/// struct CommError;
+///
+/// /// A fake 64px x 64px display.
 /// struct ExampleDisplay {
+///     /// The framebuffer with one `u8` value per pixel.
 ///     framebuffer: [u8; 64 * 64],
+///
+///     /// The interface to the display controller.
 ///     iface: SPI1,
 /// }
 ///
 /// impl ExampleDisplay {
-///     /// Send buffer to the display
-///     pub fn flush(&self) -> Result<(), ()> {
+///     /// Updates the display from the framebuffer.
+///     pub fn flush(&self) -> Result<(), CommError> {
 ///         self.iface.send_bytes(&self.framebuffer)
 ///     }
 /// }
 ///
-/// impl DrawTarget<Gray8> for ExampleDisplay {
+/// impl DrawTarget for ExampleDisplay {
+///     type Color = Gray8;
+///     // `ExampleDisplay` uses a framebuffer and doesn't need to communicate with the display
+///     // controller to draw pixel, which means that drawing operations can never fail. To reflect
+///     // this the type `Infallible` was chosen as the `Error` type.
 ///     type Error = core::convert::Infallible;
-///
-///     /// Draw a `Pixel` that has a color defined as `Gray8`.
-///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
-///         let Pixel(coord, color) = pixel;
-///
-///         // Place an (x, y) pixel at the right index in the framebuffer. If the pixel coordinates
-///         // are out of bounds (negative or greater than (63, 63)), this operation will be a
-///         // noop.
-///         if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
-///             let index: u32 = x + y * 64;
-///             self.framebuffer[index as usize] = color.luma();
-///         }
-///
-///         Ok(())
-///     }
 ///
 ///     fn size(&self) -> Size {
 ///         Size::new(64, 64)
+///     }
+///
+///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+///     where
+///         I: IntoIterator<Item = Pixel<Self::Color>> {
+///         for Pixel(coord, color) in pixels.into_iter() {
+///             // Check if the pixel coordinates are out of bounds (negative or greater than
+///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
+///             // pixels without returning an error or causing a panic.
+///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
+///                 // Calculate the index in the framebuffer.
+///                 let index: u32 = x + y * 64;
+///                 self.framebuffer[index as usize] = color.luma();
+///             }
+///         }
+///
+///         Ok(())
 ///     }
 /// }
 ///
@@ -99,118 +119,170 @@ use crate::{
 /// circle.draw(&mut display)?;
 ///
 /// // Update the display
-/// display.flush().expect("Failed to send data to display");
+/// display.flush().unwrap();
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// ## Hardware Acceleration
+/// # Hardware acceleration - solid rectangular fill
 ///
-/// In addition to defining [`draw_pixel`], an implementation of [`DrawTarget`] can also provide
-/// alternative implementations for hardware accelerated drawing operations. This example implements
-/// `DrawTarget` for a display without a framebuffer that supports hardware accelerated drawing of
-/// styled [`Rectangle`]s.
+/// This example uses an imaginary display with 16bpp RGB565 colors and hardware support for
+/// filling of rectangular areas with a solid color. A real display controller that supports this
+/// operation is the SSD1331 with it's "Draw Rectangle" (`22h`) command which this example
+/// is loosely based on.
 ///
-/// The default implementations of [`draw_rectangle`] as well as other shape drawing methods
-/// ([`draw_circle`], etc) defer to [`draw_iter`] internally. In this example, the default
-/// implementation of [`draw_rectangle`] is overridden to allow usage of accelerated draw commands
-/// specific to the targeted hardware.
-///
-/// As this example doesn't use a framebuffer, a "flush" operation is not required. All draw
-/// operations are performed in "immediate mode" directly on the display. As each drawing operation
-/// requires communication with the display that may fail, a custom error type `CommError` is
-/// introduced.
-///
+/// To leverage this feature in a `DrawTarget`, the default implementation of [`fill_solid`] can be
+/// overridden by a custom implementation. Instead of drawing individual pixels, this target
+/// specific version will only send a single command to the display controller in one transaction.
+/// Because the command size is independent of the filled area, all [`fill_solid`] calls will only
+/// transmit 8 bytes to the display, which is far less then what is required to transmit each pixel
+/// color inside the filled area.
 /// ```rust
-/// # use embedded_graphics::prelude::*;
-/// # use embedded_graphics::DrawTarget;
-/// # use embedded_graphics::primitives::rectangle::Rectangle;
-/// # use embedded_graphics::pixelcolor::{Gray8, GrayColor};
-/// # use embedded_graphics::drawable::Pixel;
-/// # use embedded_graphics::style::{PrimitiveStyle, Styled};
-/// # use core::convert::TryFrom;
+/// use core::convert::TryInto;
+/// use embedded_graphics::{
+///     drawable::Pixel,
+///     geometry::Size,
+///     pixelcolor::{raw::RawU16, Rgb565, RgbColor},
+///     prelude::*,
+///     primitives::{Rectangle, Circle},
+///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     DrawTarget,
+/// };
 /// #
 /// # struct SPI1;
 /// #
 /// # impl SPI1 {
-/// #     pub fn send_bytes(&self, buf: &[u8]) -> Result<(), ()> {
+/// #     pub fn send_bytes(&self, buf: &[u16]) -> Result<(), ()> {
 /// #         Ok(())
 /// #     }
 /// # }
 /// #
+///
 /// /// SPI communication error
 /// #[derive(Debug)]
 /// struct CommError;
 ///
-/// /// A fake display which uses hardware drawing commands instead of a framebuffer
-/// struct FastExampleDisplay {
+/// /// An example display connected over SPI.
+/// struct ExampleDisplay {
 ///     iface: SPI1,
 /// }
 ///
-/// impl FastExampleDisplay {
-///     /// Draw a rectangle using hardware accelerated commands
-///     pub fn fast_rectangle(
-///         &self,
-///         rect: &Styled<Rectangle, PrimitiveStyle<Gray8>>,
-///     ) -> Result<(), CommError> {
-///         // Send rectangle drawing commands to the display
+/// impl ExampleDisplay {
+///     /// Send a single pixel to the display
+///     pub fn set_pixel(&self, x: u32, y: u32, color: u16) -> Result<(), CommError> {
+///         // ...
+///
+///         Ok(())
+///     }
+///
+///     /// Send commands to the display
+///     pub fn send_commands(&self, commands: &[u8]) -> Result<(), CommError> {
+///         // Send data marked as commands to the display.
 ///
 ///         Ok(())
 ///     }
 /// }
 ///
-/// impl DrawTarget<Gray8> for FastExampleDisplay {
+/// impl DrawTarget for ExampleDisplay {
+///     type Color = Rgb565;
 ///     type Error = CommError;
-///
-///     /// Draw a `pixel` that has a color defined as `Gray8`
-///     fn draw_pixel(&mut self, pixel: Pixel<Gray8>) -> Result<(), Self::Error> {
-///         let Pixel(coord, color) = pixel;
-///
-///         // Send commands directly to the display to set an individual pixel to the given color
-///
-///         Ok(())
-///     }
 ///
 ///     fn size(&self) -> Size {
 ///         Size::new(64, 64)
 ///     }
 ///
-///     /// Use the accelerated method when drawing rectangles
-///     ///
-///     /// This method overrides the default implementation. If `fast_rectangle()` fails, the error
-///     /// will be propagated through this method.
-///     fn draw_rectangle(
-///         &mut self,
-///         item: &Styled<Rectangle, PrimitiveStyle<Gray8>>,
-///     ) -> Result<(), Self::Error> {
-///         self.fast_rectangle(item)
+///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+///     where
+///         I: IntoIterator<Item = Pixel<Self::Color>> {
+///         for Pixel(coord, color) in pixels.into_iter() {
+///             // Check if the pixel coordinates are out of bounds (negative or greater than
+///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
+///             // pixels without returning an error or causing a panic.
+///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
+///                 self.set_pixel(x, y, RawU16::from(color).into_inner())?;
+///             }
+///         }
+///
+///         Ok(())
+///     }
+///
+///     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+///         // Clamp the rectangle coordinates to the valid range by determining
+///         // the intersection of the fill area and the visible display area
+///         // by using Rectangle::intersection.
+///         let area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
+///
+///         // Do not send a draw rectangle command if the intersection size if zero.
+///         // The size is checked by using `Rectangle::bottom_right`, which returns `None`
+///         // if the size is zero.
+///         let bottom_right = if let Some(bottom_right) = area.bottom_right() {
+///             bottom_right
+///         } else {
+///             return Ok(())
+///         };
+///
+///         self.send_commands(&[
+///             // Draw rectangle command
+///             0x22,
+///             // Top left X coordinate
+///             area.top_left.x as u8,
+///             // Top left Y coordinate
+///             area.top_left.y as u8,
+///             // Bottom right X coordinate
+///             bottom_right.x as u8,
+///             // Bottom right Y coordinate
+///             bottom_right.y as u8,
+///             // Fill color red channel
+///             color.r(),
+///             // Fill color green channel
+///             color.g(),
+///             // Fill color blue channel
+///             color.b(),
+///         ])
 ///     }
 /// }
 ///
-/// let mut display = FastExampleDisplay { iface: SPI1 };
+/// let mut display = ExampleDisplay {
+///     iface: SPI1,
+/// };
 ///
-/// // Draw a rectangle from (10, 20) to (30, 40) with a white stroke
-/// Rectangle::with_corners(Point::new(10, 20), Point::new(30, 40))
-///     .into_styled(PrimitiveStyle::with_stroke(Gray8::WHITE, 1))
+/// // Draw a rectangle with 5px red stroke and green fill.
+/// // The stroke and fill can be broken down into multiple individual rectangles,
+/// // so this uses `fill_solid` internally.
+/// Rectangle::new(Point::new(20, 20), Size::new(50, 40))
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::RED)
+///             .stroke_width(5)
+///             .fill_color(Rgb565::GREEN)
+///             .build(),
+///     )
 ///     .draw(&mut display)?;
 ///
-/// // Draw a rectangle on the display using accelerated `draw_rectangle()` function
+/// // Draw a circle with top-left at `(5, 5)` with a diameter of `10` and a magenta stroke with
+/// // cyan fill. This shape cannot be optimized by calls to `fill_solid` as it contains transparent
+/// // pixels as well as pixels of different colors. It will instead delegate to `draw_iter`
+/// // internally.
+/// Circle::new(Point::new(5, 5), 10)
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::MAGENTA)
+///             .stroke_width(1)
+///             .fill_color(Rgb565::CYAN)
+///             .build(),
+///     )
+///     .draw(&mut display)?;
+///
 /// # Ok::<(), CommError>(())
 /// ```
 ///
-/// [`Drawable`]: ../drawable/trait.Drawable.html
-/// [`Pixel`]: ../drawable/struct.Pixel.html
-/// [`draw_pixel`]: ./trait.DrawTarget.html#method.draw_pixel
-/// [`DrawTarget::draw_iter`]: ./trait.DrawTarget.html#method.draw_iter
-/// [`DrawTarget`]: ./trait.DrawTarget.html
-/// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
-/// [`primitive`]: ../primitives/index.html
-/// [`draw_rectangle`]: ./trait.DrawTarget.html#method.draw_rectangle
-/// [`draw_circle`]: ./trait.DrawTarget.html#method.draw_circle
-/// [`draw_iter`]: ./trait.DrawTarget.html#method.draw_iter
-pub trait DrawTarget<C>
-where
-    C: PixelColor,
-{
+/// [`fill_solid`]: #method.fill_solid
+/// [`draw_iter`]: #tymethod.draw_iter
+/// [`size`]: #tymethod.size
+/// [`Error` type]: #associatedtype.Error
+pub trait DrawTarget {
+    /// The pixel color type the targetted display supports.
+    type Color: PixelColor;
+
     /// Error type to return when a drawing operation fails.
     ///
     /// This error is returned if an error occurred during a drawing operation. This mainly applies
@@ -222,161 +294,158 @@ where
     /// [`core::convert::Infallible`]: https://doc.rust-lang.org/stable/core/convert/enum.Infallible.html
     type Error;
 
-    /// Draws a pixel on the display.
-    fn draw_pixel(&mut self, item: drawable::Pixel<C>) -> Result<(), Self::Error>;
-
-    /// Draws an object from an iterator over its pixels.
-    fn draw_iter<T>(&mut self, item: T) -> Result<(), Self::Error>
-    where
-        T: IntoIterator<Item = drawable::Pixel<C>>,
-    {
-        for pixel in item {
-            self.draw_pixel(pixel)?;
-        }
-
-        Ok(())
-    }
-
     /// Returns the dimensions of the `DrawTarget` in pixels.
+    ///
+    /// This should return the size of the entire drawable area of the display. If a display
+    /// supports drawing to pixels outside the visible area, that area should also be reported in
+    /// the dimensions returned by `size`.
     fn size(&self) -> Size;
 
-    /// Clears the display with the supplied color.
+    // TODO: Reenable this in a new PR with modified primitives iterators
+    // // TODO: Mention performance
+    // // TODO: Mention default impl behaviour
+    // /// Fill a given area with a transparent pixel iterator.
+    // ///
+    // /// Iteration order is guaranteed from top left to bottom right, however some pixels may be
+    // /// transparent which are represented as `None`.
+    // fn fill_sparse<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    // where
+    //     I: IntoIterator<Item = Option<Self::Color>>,
+    // {
+    //     self.draw_iter(
+    //         area.points()
+    //             .zip(colors)
+    //             .filter_map(|(pos, color)| color.map(|c| Pixel(pos, c))),
+    //     )
+    // }
+
+    /// Draw individual pixels to the display without a defined order.
     ///
-    /// This default implementation can be replaced if the implementing driver provides an
-    /// accelerated clearing method.
-    fn clear(&mut self, color: C) -> Result<(), Self::Error>
+    /// Due to the unordered nature of the pixel iterator, this method is likely to be the slowest
+    /// drawing method for a display that writes data to the hardware immediately. If possible, the
+    /// other methods in this trait should be implemented to improve performance when rendering
+    /// more contiguous pixel patterns.
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        Self: Sized,
-    {
-        primitives::Rectangle::new(Point::zero(), self.size())
-            .into_styled(PrimitiveStyle::with_fill(color))
-            .draw(self)
-    }
+        I: IntoIterator<Item = Pixel<Self::Color>>;
 
-    /// Draws a styled line primitive.
+    /// Fill a given area with an iterator providing a contiguous stream of pixel colors.
     ///
-    /// This default trait method can be overridden if a display provides hardware-accelerated
-    /// methods for drawing lines.
+    /// Use this method to fill an area with contiguous, non-transparent pixel colors. Pixel
+    /// coordinates are iterated over from the top left to the bottom right corner of the area in
+    /// row-first order. The provided iterator must provide pixel color values based on this
+    /// ordering to produce correct output.
     ///
-    /// # Caution
+    /// As seen in the example below, the [`Points::points`] method can be used to get an
+    /// iterator over all points in the provided area.
     ///
-    /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Styled`] [`Line`] primitive. To draw a line,
-    /// call [`draw`] on a `Styled<Line>` object.
+    /// The provided iterator is not required to provide `width * height` pixels to completely fill
+    /// the area. In this case, `fill_contiguous` should return without error.
     ///
-    /// [`Line`]: ../primitives/line/struct.Line.html
-    /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    /// [`Styled`]: ../style/struct.Styled.html
-    fn draw_line(
-        &mut self,
-        item: &Styled<primitives::Line, PrimitiveStyle<C>>,
-    ) -> Result<(), Self::Error> {
-        self.draw_iter(item)
-    }
-
-    /// Draws a styled triangle primitive.
+    /// This method should not attempt to draw any pixels that fall outside the drawable area of the
+    /// target display. The `area` argument can be clipped to the drawable area using the
+    /// [`Rectangle::intersection`] method.
     ///
-    /// This default trait method can be overridden if a display provides hardware-accelerated
-    /// methods for drawing triangles.
+    /// The default implementation of this method delegates to [`draw_iter`](#tymethod.draw_iter).
     ///
-    /// # Caution
+    /// # Examples
     ///
-    /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Styled`] [`Triangle`] primitive. To draw a
-    /// triangle, call [`draw`] on a `Styled<Triangle>` object.
+    /// This is an example implementation of `fill_contiguous` that delegates to [`draw_iter`]. This
+    /// delegation behaviour is undesirable in a real application as it will be as slow as the
+    /// default trait implementation, however is shown here for demonstration purposes.
     ///
-    /// [`Triangle`]: ../primitives/triangle/struct.Triangle.html
-    /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    /// [`Styled`]: ../style/struct.Styled.html
-    fn draw_triangle(
-        &mut self,
-        item: &Styled<primitives::Triangle, PrimitiveStyle<C>>,
-    ) -> Result<(), Self::Error> {
-        self.draw_iter(item)
-    }
-
-    /// Draws a styled rectangle primitive.
+    /// The example demonstrates the usage of [`Rectangle::intersection`] on the passed `area`
+    /// argument to only draw visible pixels. If there is no intersection between `area` and the
+    /// display area, no pixels will be drawn.
     ///
-    /// This default trait method can be overridden if a display provides hardware-accelerated
-    /// methods for drawing rectangle.
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     drawable::Pixel,
+    ///     geometry::Size,
+    ///     pixelcolor::{Gray8, GrayColor},
+    ///     prelude::*,
+    ///     primitives::{ContainsPoint, Rectangle},
+    ///     DrawTarget,
+    /// };
     ///
-    /// # Caution
+    /// struct ExampleDisplay;
     ///
-    /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Styled`] [`Rectangle`] primitive. To draw a
-    /// rectangle, call [`draw`] on a `Styled<Rectangle>` object.
+    /// impl DrawTarget for ExampleDisplay {
+    ///     type Color = Gray8;
+    ///     type Error = core::convert::Infallible;
     ///
-    /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
-    /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    /// [`Styled`]: ../style/struct.Styled.html
-    fn draw_rectangle(
-        &mut self,
-        item: &Styled<primitives::Rectangle, PrimitiveStyle<C>>,
-    ) -> Result<(), Self::Error> {
-        self.draw_iter(item)
-    }
-
-    /// Draws a styled circle primitive.
+    ///     fn size(&self) -> Size {
+    ///         Size::new(64, 64)
+    ///     }
     ///
-    /// This default trait method can be overridden if a display provides hardware-accelerated
-    /// methods for drawing circles.
+    ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    ///     where
+    ///         I: IntoIterator<Item = Pixel<Self::Color>>,
+    ///     {
+    ///         // Draw pixels to the display
     ///
-    /// # Caution
+    ///         Ok(())
+    ///     }
     ///
-    /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Styled`] [`Circle`] primitive. To draw a
-    /// circle, call [`draw`] on a `Styled<Circle>` object.
+    ///     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    ///     where
+    ///         I: IntoIterator<Item = Self::Color>,
+    ///     {
+    ///         // Clamp area to drawable part of the display target
+    ///         let drawable_area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
     ///
-    /// [`Circle`]: ../primitives/circle/struct.Circle.html
-    /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    /// [`Styled`]: ../style/struct.Styled.html
-    fn draw_circle(
-        &mut self,
-        item: &Styled<primitives::Circle, PrimitiveStyle<C>>,
-    ) -> Result<(), Self::Error> {
-        self.draw_iter(item)
-    }
-
-    /// Draws a styled ellipse primitive.
+    ///         // Check that there are visible pixels to be drawn
+    ///         if drawable_area.size != Size::zero() {
+    ///             self.draw_iter(
+    ///                 area.points()
+    ///                     .zip(colors)
+    ///                     .filter(|(pos, _color)| drawable_area.contains(*pos))
+    ///                     .map(|(pos, color)| Pixel(pos, color)),
+    ///             )
+    ///         } else {
+    ///             Ok(())
+    ///         }
+    ///     }
+    /// }
+    /// ```
     ///
-    /// This default trait method can be overridden if a display provides hardware-accelerated
-    /// methods for drawing ellipses.
-    ///
-    /// # Caution
-    ///
-    /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Styled`] [`Ellipse`] primitive. To draw a
-    /// ellipse, call [`draw`] on a `Styled<Ellipse>` object.
-    ///
-    /// [`Ellipse`]: ../primitives/ellipse/struct.Ellipse.html
-    /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    /// [`Styled`]: ../style/struct.Styled.html
-    fn draw_ellipse(
-        &mut self,
-        item: &Styled<primitives::Ellipse, PrimitiveStyle<C>>,
-    ) -> Result<(), Self::Error> {
-        self.draw_iter(item)
-    }
-
-    /// Draws an image with known size
-    ///
-    /// This default trait method can be overridden if a display provides hardware-accelerated
-    /// methods for drawing an image with known size.
-    ///
-    /// # Caution
-    ///
-    /// This method should not be called directly from application code. It is used to define the
-    /// internals of the [`draw`] method used for the [`Image`] primitive. To draw an
-    /// image, call [`draw`] on a `Image` object.
-    ///
-    /// [`Image`]: ../image/struct.Image.html
-    /// [`draw`]: ./trait.DrawTarget.html#method.draw
-    fn draw_image<'a, 'b, I>(&mut self, item: &'a Image<'b, I, C>) -> Result<(), Self::Error>
+    /// [`draw_iter`]: #tymethod.draw_iter
+    /// [`Rectangle::intersection`]: ./primitives/rectangle/struct.Rectangle.html#method.intersection
+    /// [`Points::points`]: ./primitives/trait.Primitive.html#tymethod.points
+    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
-        &'b I: IntoPixelIter<C>,
-        I: ImageDimensions,
-        C: PixelColor + From<<C as PixelColor>::Raw>,
+        I: IntoIterator<Item = Self::Color>,
     {
-        self.draw_iter(item.into_iter())
+        self.draw_iter(
+            area.points()
+                .zip(colors)
+                .map(|(pos, color)| Pixel(pos, color)),
+        )
+    }
+
+    /// Fill a given area with a solid color.
+    ///
+    /// If the target display provides optimized hardware commands for filling a rectangular area of
+    /// the display with a solid color, this method should be overridden to use those commands to
+    /// improve performance.
+    ///
+    /// The default implementation of this method calls [`fill_contiguous`](#method.fill_contiguous)
+    /// with an iterator that repeats the given `color` for every point in `area`.
+    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+        self.fill_contiguous(area, core::iter::repeat(color))
+    }
+
+    /// Fill the entire display with a solid color.
+    ///
+    /// If the target hardware supports a more optimized way of filling the entire display with a
+    /// solid color, this method should be overridden to use those commands.
+    ///
+    /// The default implementation of this method delegates to [`fill_solid`] where the fill area
+    /// is specified as `(0, 0)` with size `(width, height)` as returned from the [`size`] method.
+    ///
+    /// [`size`]: #method.size
+    /// [`fill_solid`]: #method.fill_solid
+    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
     }
 }

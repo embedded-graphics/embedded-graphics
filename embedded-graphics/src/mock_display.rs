@@ -43,6 +43,7 @@
 //! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
 //! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
 //!
+//!
 //! # Characters used in RGB color patterns
 //!
 //! The following mappings are available for all RGB color types in the [`pixelcolor`] module,
@@ -201,10 +202,9 @@ where
     }
 
     /// Changes the color of a pixel.
-    pub fn set_pixel(&mut self, p: Point, color: Option<C>) {
-        let Point { x, y } = p;
-
-        self.pixels[x as usize + y as usize * SIZE] = color;
+    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+        let i = point.x + point.y * SIZE as i32;
+        self.pixels[i as usize] = color;
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -400,31 +400,37 @@ where
     }
 }
 
-impl<C> DrawTarget<C> for MockDisplay<C>
+impl<C> DrawTarget for MockDisplay<C>
 where
     C: PixelColor,
 {
+    type Color = C;
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, pixel: Pixel<C>) -> Result<(), Self::Error> {
-        let Pixel(point, color) = pixel;
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        for pixel in pixels.into_iter() {
+            let Pixel(point, color) = pixel;
 
-        if !DISPLAY_AREA.contains(point) {
-            if self.allow_out_of_bounds_drawing {
-                return Ok(());
-            } else {
-                panic!(
-                    "tried to draw pixel outside the display area (x: {}, y: {})",
-                    point.x, point.y
-                );
+            if !DISPLAY_AREA.contains(point) {
+                if self.allow_out_of_bounds_drawing {
+                    continue;
+                } else {
+                    panic!(
+                        "tried to draw pixel outside the display area (x: {}, y: {})",
+                        point.x, point.y
+                    );
+                }
             }
-        }
 
-        if !self.allow_overdraw && self.get_pixel(point).is_some() {
-            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
-        }
+            if !self.allow_overdraw && self.get_pixel(point).is_some() {
+                panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
+            }
 
-        self.set_pixel(point, Some(color));
+            self.set_pixel(point, Some(color));
+        }
 
         Ok(())
     }

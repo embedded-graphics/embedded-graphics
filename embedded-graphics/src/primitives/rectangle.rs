@@ -139,6 +139,100 @@ impl Rectangle {
             None
         }
     }
+
+    /// Returns a new `Rectangle` containing the intersection of `self` and `other`.
+    ///
+    /// If no intersection is present, this method will return a zero sized rectangle.
+    ///
+    /// # Examples
+    ///
+    /// ## Intersection
+    ///
+    /// This example draws two rectangles to a mock display using the `.` character, along with
+    /// their intersection shown with `#` characters.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
+    ///     style::PrimitiveStyle,
+    /// };
+    ///
+    /// let mut display = MockDisplay::new();
+    /// # display.set_allow_overdraw(true);
+    ///
+    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect2 = Rectangle::new(Point::new(2, 3), Size::new(10, 7));
+    ///
+    /// let intersection = rect1.intersection(&rect2);
+    ///
+    /// rect1
+    ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 1))
+    ///     .draw(&mut display)?;
+    ///
+    /// rect2
+    ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 1))
+    ///     .draw(&mut display)?;
+    ///
+    /// intersection
+    ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+    ///     .draw(&mut display)?;
+    ///
+    /// assert_eq!(
+    ///     display,
+    ///     MockDisplay::from_pattern(&[
+    ///         ".......     ",
+    ///         ".     .     ",
+    ///         ".     .     ",
+    ///         ". #####.....",
+    ///         ". #   #    .",
+    ///         ". #   #    .",
+    ///         ". #   #    .",
+    ///         "..#####    .",
+    ///         "  .        .",
+    ///         "  ..........",
+    ///     ])
+    /// );
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    ///
+    /// ## No intersection
+    ///
+    /// This example creates two rectangles with no intersection between them. In this case,
+    /// `intersection` returns a zero-sized rectangle.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     prelude::*, primitives::Rectangle, style::PrimitiveStyle,
+    /// };
+    ///
+    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect2 = Rectangle::new(Point::new(10, 15), Size::new(10, 7));
+    ///
+    /// let intersection = rect1.intersection(&rect2);
+    ///
+    /// assert_eq!(intersection.size, Size::zero());
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    pub fn intersection(&self, other: &Rectangle) -> Rectangle {
+        if let (Some(other_bottom_right), Some(self_bottom_right)) =
+            (other.bottom_right(), self.bottom_right())
+        {
+            // Check for overlap
+            if self.contains(other.top_left)
+                || self.contains(other_bottom_right)
+                || other.contains(self.top_left)
+                || other.contains(self_bottom_right)
+            {
+                return Rectangle::with_corners(
+                    self.top_left.component_max(other.top_left),
+                    self_bottom_right.component_min(other_bottom_right),
+                );
+            }
+        }
+
+        // No overlap present
+        Rectangle::new(Point::zero(), Size::zero())
+    }
 }
 
 impl Transform for Rectangle {
@@ -311,8 +405,66 @@ impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<D: DrawTarget<C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_rectangle(self)
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        let fill_area = self.primitive.shrink(self.style.inside_stroke_width());
+
+        // Fill rectangle
+        if let Some(fill_color) = self.style.fill_color {
+            display.fill_solid(&fill_area, fill_color)?;
+        }
+
+        // Draw stroke
+        if let Some(stroke_color) = self.style.effective_stroke_color() {
+            let stroke_width = self.style.stroke_width;
+
+            let stroke_area = self.primitive.expand(self.style.outside_stroke_width());
+
+            let top_border = Rectangle::new(
+                stroke_area.top_left,
+                Size::new(
+                    stroke_area.size.width,
+                    stroke_width.min(stroke_area.size.height / 2),
+                ),
+            );
+
+            let bottom_stroke_width =
+                stroke_width.min(stroke_area.size.height - top_border.size.height);
+
+            let bottom_border = Rectangle::new(
+                top_border.top_left
+                    + Size::new(
+                        0,
+                        stroke_area.size.height.saturating_sub(bottom_stroke_width),
+                    ),
+                Size::new(stroke_area.size.width, bottom_stroke_width),
+            );
+
+            display.fill_solid(&top_border, stroke_color)?;
+            display.fill_solid(&bottom_border, stroke_color)?;
+
+            if fill_area.size.height > 0 {
+                let left_border = Rectangle::new(
+                    stroke_area.top_left + top_border.size.y_axis(),
+                    Size::new(
+                        (stroke_width * 2).min(stroke_area.size.width + 1) / 2,
+                        fill_area.size.height,
+                    ),
+                );
+
+                let right_border = left_border.translate(Point::new(
+                    stroke_area
+                        .size
+                        .width
+                        .saturating_sub(left_border.size.width) as i32,
+                    0,
+                ));
+
+                display.fill_solid(&left_border, stroke_color)?;
+                display.fill_solid(&right_border, stroke_color)?;
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -322,6 +474,7 @@ mod tests {
     use crate::{
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
+        prelude::*,
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
@@ -491,5 +644,176 @@ mod tests {
 
         assert_eq!(display_center, display_inside);
         assert_eq!(display_center, display_outside);
+    }
+
+    #[test]
+    fn stroke_iter_vs_draw() {
+        const TOP_LEFT: Point = Point::new(5, 6);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let rectangle_center = Rectangle::new(TOP_LEFT, SIZE).into_styled(style);
+
+        let mut drawn_center = MockDisplay::new();
+        let mut iter_center = MockDisplay::new();
+        rectangle_center.draw(&mut drawn_center).unwrap();
+        rectangle_center.into_iter().draw(&mut iter_center).unwrap();
+        assert_eq!(drawn_center, iter_center);
+
+        let rectangle_inside = Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Inside)
+                    .build(),
+            );
+
+        let mut drawn_inside = MockDisplay::new();
+        let mut iter_inside = MockDisplay::new();
+        rectangle_inside.draw(&mut drawn_inside).unwrap();
+        rectangle_inside.into_iter().draw(&mut iter_inside).unwrap();
+        assert_eq!(drawn_inside, iter_inside);
+
+        let rectangle_outside = Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Outside)
+                    .build(),
+            );
+
+        let mut drawn_outside = MockDisplay::new();
+        let mut iter_outside = MockDisplay::new();
+        rectangle_outside.draw(&mut drawn_outside).unwrap();
+        rectangle_outside
+            .into_iter()
+            .draw(&mut iter_outside)
+            .unwrap();
+        assert_eq!(drawn_outside, iter_outside);
+    }
+
+    #[test]
+    fn fill_iter_vs_draw() {
+        const TOP_LEFT: Point = Point::new(5, 6);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_fill(BinaryColor::On);
+
+        let rectangle = Rectangle::new(TOP_LEFT, SIZE).into_styled(style);
+
+        let mut drawn = MockDisplay::new();
+        let mut iter = MockDisplay::new();
+        rectangle.draw(&mut drawn).unwrap();
+        rectangle.into_iter().draw(&mut iter).unwrap();
+        assert_eq!(drawn, iter);
+    }
+
+    #[test]
+    fn rectangle_intersection() {
+        let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
+        let rect2 = Rectangle::new(Point::new_equal(25), Size::new(30, 40));
+
+        assert_eq!(
+            rect1.intersection(&rect2),
+            Rectangle::new(Point::new_equal(25), Size::new(5, 15))
+        );
+    }
+
+    #[test]
+    fn rectangle_no_intersection() {
+        let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
+        let rect2 = Rectangle::new(Point::new_equal(35), Size::new(30, 40));
+
+        assert_eq!(
+            rect1.intersection(&rect2),
+            Rectangle::new(Point::zero(), Size::zero())
+        );
+    }
+
+    #[test]
+    fn rectangle_complete_intersection() {
+        let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
+        let rect2 = rect1;
+
+        assert_eq!(rect1.intersection(&rect2), rect1);
+    }
+
+    #[test]
+    fn rectangle_contained_intersection() {
+        let rect1 = Rectangle::with_corners(Point::new_equal(10), Point::new(20, 30));
+        let rect2 = Rectangle::with_corners(Point::new_equal(5), Point::new(30, 40));
+
+        assert_eq!(rect1.intersection(&rect2), rect1);
+    }
+
+    #[test]
+    fn zero_sized_intersection() {
+        let rect1 = Rectangle::new(Point::new(0, 0), Size::new(0, 0));
+        let rect2 = Rectangle::new(Point::new(-10, -10), Size::new(20, 20));
+
+        assert_eq!(rect1.intersection(&rect2).size, Size::zero());
+    }
+
+    /// Compare the output of the draw() call vs iterators across multiple styles and stroke
+    /// alignments.
+    fn compare_drawable_iter(rect: Rectangle) {
+        let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::RED, 1);
+        let stroke = PrimitiveStyle::with_stroke(Rgb565::RED, 5);
+        let stroke_fill = PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb565::RED)
+            .stroke_width(5)
+            .fill_color(Rgb565::GREEN)
+            .build();
+        let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
+
+        for (name, style) in [
+            ("thin_stroke", thin_stroke),
+            ("stroke", stroke),
+            ("stroke_fill", stroke_fill),
+            ("fill", fill),
+        ]
+        .iter()
+        {
+            for alignment in [
+                StrokeAlignment::Center,
+                StrokeAlignment::Inside,
+                StrokeAlignment::Outside,
+            ]
+            .iter()
+            {
+                let style = PrimitiveStyleBuilder::from(style)
+                    .stroke_alignment(*alignment)
+                    .build();
+
+                let mut display_drawable = MockDisplay::new();
+                let mut display_iter = MockDisplay::new();
+
+                // Calls draw() impl above using fill_solid()
+                rect.into_styled(style).draw(&mut display_drawable).unwrap();
+
+                // Calls draw_iter()
+                rect.into_styled(style)
+                    .into_iter()
+                    .draw(&mut display_iter)
+                    .unwrap();
+
+                assert_eq!(
+                    display_drawable, display_iter,
+                    "{} x {} rectangle with style '{}' and alignment {:?} does not match iterator",
+                    rect.size.width, rect.size.height, name, alignment
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn drawable_vs_iterator() {
+        compare_drawable_iter(Rectangle::new(Point::new(10, 20), Size::new(20, 30)))
+    }
+
+    #[test]
+    fn drawable_vs_iterator_squares() {
+        for i in 0..20 {
+            compare_drawable_iter(Rectangle::new(Point::new(7, 7), Size::new_equal(i)))
+        }
     }
 }
