@@ -194,10 +194,6 @@ where
         self.allow_overdraw = value;
     }
 
-    fn size(&self) -> Size {
-        DISPLAY_AREA.size
-    }
-
     /// Returns the color of a pixel.
     pub fn get_pixel(&self, p: Point) -> Option<C> {
         let Point { x, y } = p;
@@ -207,21 +203,6 @@ where
 
     /// Changes the color of a pixel.
     pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
-        if !DISPLAY_AREA.contains(point) {
-            if self.allow_out_of_bounds_drawing {
-                return;
-            } else {
-                panic!(
-                    "tried to draw pixel outside the display area (x: {}, y: {})",
-                    point.x, point.y
-                );
-            }
-        }
-
-        if !self.allow_overdraw && self.get_pixel(point).is_some() {
-            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
-        }
-
         let i = point.x + point.y * SIZE as i32;
         self.pixels[i as usize] = color;
     }
@@ -421,7 +402,7 @@ where
 
 impl<C> DrawTarget for MockDisplay<C>
 where
-    C: PixelColor + ColorMapping,
+    C: PixelColor,
 {
     type Color = C;
     type Error = core::convert::Infallible;
@@ -431,7 +412,24 @@ where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
         for pixel in pixels.into_iter() {
-            self.set_pixel(pixel.0, Some(pixel.1));
+            let Pixel(point, color) = pixel;
+
+            if !DISPLAY_AREA.contains(point) {
+                if self.allow_out_of_bounds_drawing {
+                    continue;
+                } else {
+                    panic!(
+                        "tried to draw pixel outside the display area (x: {}, y: {})",
+                        point.x, point.y
+                    );
+                }
+            }
+
+            if !self.allow_overdraw && self.get_pixel(point).is_some() {
+                panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
+            }
+
+            self.set_pixel(point, Some(color));
         }
 
         Ok(())

@@ -9,7 +9,7 @@ use crate::{
 ///
 /// The `DrawTarget` trait is used to add embedded-graphics support to a display
 /// driver or similar targets like framebuffers or image files.
-/// Targets are required to at least implement the `size` and `draw_iter` methods. All other
+/// Targets are required to at least implement the [`size`] and [`draw_iter`] methods. All other
 /// methods provide default implementations which use these methods internally.
 ///
 /// Because the default implementations cannot use features specific to the target hardware they
@@ -105,7 +105,6 @@ use crate::{
 ///
 ///         Ok(())
 ///     }
-
 /// }
 ///
 /// let mut display = ExampleDisplay {

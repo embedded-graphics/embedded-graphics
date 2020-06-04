@@ -142,8 +142,7 @@ impl Rectangle {
 
     /// Returns a new `Rectangle` containing the intersection of `self` and `other`.
     ///
-    /// If no intersection is present, this method will return a zero sized rectangle with its top
-    /// left corner set to `(0, 0)`.
+    /// If no intersection is present, this method will return a zero sized rectangle.
     ///
     /// # Examples
     ///
@@ -199,15 +198,12 @@ impl Rectangle {
     /// ## No intersection
     ///
     /// This example creates two rectangles with no intersection between them. In this case,
-    /// `intersection` returns a zero-sized rectangle with its origin at `(0, 0)`.
+    /// `intersection` returns a zero-sized rectangle.
     ///
     /// ```rust
     /// use embedded_graphics::{
-    ///     mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
-    ///     style::PrimitiveStyle,
+    ///     prelude::*, primitives::Rectangle, style::PrimitiveStyle,
     /// };
-    ///
-    /// let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
     ///
     /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(10, 15), Size::new(10, 7));
@@ -215,12 +211,16 @@ impl Rectangle {
     /// let intersection = rect1.intersection(&rect2);
     ///
     /// assert_eq!(intersection.size, Size::zero());
-    /// assert_eq!(intersection.top_left, Point::zero());
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
     pub fn intersection(&self, other: &Rectangle) -> Rectangle {
         let other_bottom_right = other.bottom_right().unwrap_or_else(Point::zero);
         let self_bottom_right = self.bottom_right().unwrap_or_else(Point::zero);
+
+        // Check for zero sized rectangles
+        if other.size == Size::zero() || self.size == Size::zero() {
+            return Rectangle::new(Point::zero(), Size::zero());
+        }
 
         // Check for overlap
         if self.contains(other.top_left)
@@ -747,6 +747,14 @@ mod tests {
         let rect2 = Rectangle::with_corners(Point::new_equal(5), Point::new(30, 40));
 
         assert_eq!(rect1.intersection(&rect2), rect1);
+    }
+
+    #[test]
+    fn zero_sized_intersection() {
+        let rect1 = Rectangle::new(Point::new(0, 0), Size::new(0, 0));
+        let rect2 = Rectangle::new(Point::new(-10, -10), Size::new(20, 20));
+
+        assert_eq!(rect1.intersection(&rect2).size, Size::zero());
     }
 
     /// Compare the output of the draw() call vs iterators across multiple styles and stroke

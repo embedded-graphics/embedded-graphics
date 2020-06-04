@@ -1,10 +1,10 @@
 use crate::{display::SimulatorDisplay, output_settings::OutputSettings};
 use embedded_graphics::{
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
+    geometry::{Point, Size},
     pixelcolor::{PixelColor, Rgb888, RgbColor},
     primitives::{Primitive, Rectangle},
-    style::{PrimitiveStyle, Styled},
+    style::PrimitiveStyle,
     DrawTarget,
 };
 use image::{ImageBuffer, Rgb};
