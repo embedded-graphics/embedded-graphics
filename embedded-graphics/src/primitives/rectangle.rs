@@ -214,28 +214,24 @@ impl Rectangle {
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
     pub fn intersection(&self, other: &Rectangle) -> Rectangle {
-        let other_bottom_right = other.bottom_right().unwrap_or_else(Point::zero);
-        let self_bottom_right = self.bottom_right().unwrap_or_else(Point::zero);
-
-        // Check for zero sized rectangles
-        if other.size == Size::zero() || self.size == Size::zero() {
-            return Rectangle::new(Point::zero(), Size::zero());
-        }
-
-        // Check for overlap
-        if self.contains(other.top_left)
-            || self.contains(other_bottom_right)
-            || other.contains(self.top_left)
-            || other.contains(self_bottom_right)
+        if let (Some(other_bottom_right), Some(self_bottom_right)) =
+            (other.bottom_right(), self.bottom_right())
         {
-            Rectangle::with_corners(
-                self.top_left.component_max(other.top_left),
-                self_bottom_right.component_min(other_bottom_right),
-            )
-        } else {
-            // No overlap present
-            Rectangle::new(Point::zero(), Size::zero())
+            // Check for overlap
+            if self.contains(other.top_left)
+                || self.contains(other_bottom_right)
+                || other.contains(self.top_left)
+                || other.contains(self_bottom_right)
+            {
+                return Rectangle::with_corners(
+                    self.top_left.component_max(other.top_left),
+                    self_bottom_right.component_min(other_bottom_right),
+                );
+            }
         }
+
+        // No overlap present
+        Rectangle::new(Point::zero(), Size::zero())
     }
 }
 
