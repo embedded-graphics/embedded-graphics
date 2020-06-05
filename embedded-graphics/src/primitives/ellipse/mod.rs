@@ -1,14 +1,19 @@
 //! The ellipse primitive
 
+mod points_iterator;
+mod styled_iterator;
+
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{circle, ContainsPoint, Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
-    DrawTarget,
 };
+pub use points_iterator::Points;
+pub use styled_iterator::StyledEllipseIterator;
 
 /// Ellipse primitive
 ///
@@ -165,131 +170,6 @@ impl Transform for Ellipse {
     }
 }
 
-/// Iterator over all points inside the ellipse
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points {
-    iter: super::rectangle::Points,
-    center_2x: Point,
-    size_sq: Size,
-    threshold: u32,
-}
-
-impl Points {
-    fn new(ellipse: &Ellipse) -> Self {
-        let (size_sq, threshold) = compute_threshold(ellipse.size);
-
-        Self {
-            iter: ellipse.bounding_box().points(),
-            center_2x: ellipse.center_2x(),
-            size_sq,
-            threshold,
-        }
-    }
-
-    fn empty() -> Self {
-        Self {
-            iter: Rectangle::new(Point::zero(), Size::zero()).points(),
-            center_2x: Point::zero(),
-            size_sq: Size::zero(),
-            threshold: 0,
-        }
-    }
-}
-
-impl Iterator for Points {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            if is_point_inside_ellipse(self.size_sq, point * 2 - self.center_2x, self.threshold) {
-                return Some(point);
-            }
-        }
-
-        None
-    }
-}
-
-/// Pixel iterator for each pixel in the ellipse border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledEllipseIterator<C>
-where
-    C: PixelColor,
-{
-    iter: Points,
-    outer_color: Option<C>,
-    inner_size_sq: Size,
-    inner_color: Option<C>,
-    center: Point,
-    threshold: u32,
-}
-
-impl<C> StyledEllipseIterator<C>
-where
-    C: PixelColor,
-{
-    fn new(styled: &Styled<Ellipse, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        let iter = if !styled.style.is_transparent() {
-            let stroke_area = primitive.expand(style.outside_stroke_width());
-            Points::new(&stroke_area)
-        } else {
-            Points::empty()
-        };
-
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-        let (inner_size_sq, threshold) = compute_threshold(fill_area.size);
-
-        Self {
-            iter,
-            outer_color: styled.style.stroke_color,
-            inner_size_sq,
-            inner_color: styled.style.fill_color,
-            center: styled.primitive.center_2x(),
-            threshold,
-        }
-    }
-}
-
-impl<C> Iterator for StyledEllipseIterator<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            let inside_border = is_point_inside_ellipse(
-                self.inner_size_sq,
-                point * 2 - self.center,
-                self.threshold,
-            );
-
-            let color = if inside_border {
-                self.inner_color
-            } else {
-                self.outer_color
-            };
-
-            if let Some(color) = color {
-                return Some(Pixel(point, color));
-            }
-        }
-
-        None
-    }
-}
-
-impl<'a, C: 'a> Drawable<C> for &Styled<Ellipse, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 pub(crate) fn compute_threshold(size: Size) -> (Size, u32) {
     let Size { width, height } = size;
 
@@ -340,12 +220,22 @@ where
     }
 }
 
+impl<'a, C: 'a> Drawable<C> for &Styled<Ellipse, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
+        prelude::*,
         primitives::Circle,
         style::{PrimitiveStyleBuilder, StrokeAlignment},
     };
@@ -402,18 +292,6 @@ mod tests {
             .unwrap();
 
         assert_eq!(display, expected);
-    }
-
-    #[test]
-    fn circles_points() {
-        for diameter in 0..50 {
-            let circle_points = Circle::new(Point::new(0, 0), diameter).points();
-
-            let ellipse_points =
-                Ellipse::new(Point::new(0, 0), Size::new(diameter, diameter)).points();
-
-            assert!(circle_points.eq(ellipse_points), "diameter = {}", diameter);
-        }
     }
 
     #[test]
