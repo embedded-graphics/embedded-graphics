@@ -55,7 +55,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 /// ```
 ///
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-/// [`draw_iter`]: ../draw_target/trait.DrawTarget.html#method.draw_iter
+/// [`draw_iter`]: ../draw_target/trait.DrawTarget.html#tymethod.draw_iter
 pub trait Drawable<C>
 where
     C: PixelColor,
