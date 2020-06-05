@@ -89,9 +89,24 @@ impl ContainsPoint for Triangle {
             return false;
         }
 
-        // This is inefficient and should be replaced by a better algorithm to
-        // determine if point is inside the triangle
-        self.points().any(|p| p == point)
+        // Point-inside-triangle algorithm lifted from this SO answer:
+        // https://stackoverflow.com/a/20861130/383609
+        let Self { p1, p2, p3 } = self;
+
+        let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * point.x + (p1.x - p3.x) * point.y;
+        let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * point.x + (p2.x - p1.x) * point.y;
+
+        if (s < 0) != (t < 0) {
+            return false;
+        }
+
+        let a = -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y;
+
+        if a < 0 {
+            s <= 0 && s + t >= a
+        } else {
+            s >= 0 && s + t <= a
+        }
     }
 }
 
