@@ -37,6 +37,38 @@ fn update(
 
     display.clear(Rgb888::BLACK)?;
 
+    let triangles = [
+        // No straight lines
+        Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64))
+            .translate(Point::new(PADDING, 64 + PADDING)),
+        // Flat top
+        Triangle::new(Point::new(5, 0), Point::new(30, 64), Point::new(64, 0))
+            .translate(Point::new(64 + PADDING, 64 + PADDING)),
+        // Flat left
+        Triangle::new(Point::new(0, 0), Point::new(0, 64), Point::new(64, 30))
+            .translate(Point::new((64 + PADDING) * 2, 64 + PADDING)),
+        // Flat bottom
+        Triangle::new(Point::new(22, 0), Point::new(0, 64), Point::new(64, 64))
+            .translate(Point::new((64 + PADDING) * 3, 64 + PADDING)),
+        // Flat right
+        Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64))
+            .translate(Point::new((64 + PADDING) * 4, 64 + PADDING)),
+        // Draw filled above stroke, should not be visible
+        Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64))
+            .translate(Point::new((64 + PADDING) * 5, 64 + PADDING)),
+        Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64))
+            .translate(Point::new((64 + PADDING) * 5, 64 + PADDING)),
+    ];
+
+    for tri in triangles.iter() {
+        tri.into_styled(if tri.contains(cursor) {
+            inside_style
+        } else {
+            style
+        })
+        .draw(display)?;
+    }
+
     triangle
         .into_styled(if triangle.contains(cursor) {
             inside_style
@@ -99,7 +131,7 @@ fn update(
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(430, 128));
+    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(430, 256));
 
     let mut cursor = Point::zero();
 
