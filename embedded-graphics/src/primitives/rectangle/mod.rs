@@ -1,5 +1,8 @@
 //! The rectangle primitive. Also good for drawing squares.
 
+mod points_iterator;
+mod styled_iterator;
+
 use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
@@ -10,6 +13,8 @@ use crate::{
     DrawTarget,
 };
 use core::cmp::min;
+pub use points_iterator::Points;
+pub use styled_iterator::StyledRectangleIterator;
 
 /// Rectangle primitive
 ///
@@ -201,9 +206,7 @@ impl Rectangle {
     /// `intersection` returns a zero-sized rectangle.
     ///
     /// ```rust
-    /// use embedded_graphics::{
-    ///     prelude::*, primitives::Rectangle, style::PrimitiveStyle,
-    /// };
+    /// use embedded_graphics::{prelude::*, primitives::Rectangle, style::PrimitiveStyle};
     ///
     /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(10, 15), Size::new(10, 7));
@@ -282,122 +285,6 @@ where
 
     fn into_iter(self) -> Self::IntoIter {
         StyledRectangleIterator::new(self)
-    }
-}
-
-/// Iterator over all points inside the rectangle.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points {
-    left: i32,
-    bottom_right: Point,
-    current_point: Point,
-}
-
-impl Points {
-    fn new(rectangle: &Rectangle) -> Self {
-        // This doesn't use rectangle.bottom_right() to intentionally set bottom_right
-        // to an coordinate outside the rectangle if the width or height is zero, which
-        // stops the iterator.
-        let bottom_right = rectangle.top_left + rectangle.size - Point::new(1, 1);
-
-        Self {
-            left: rectangle.top_left.x,
-            bottom_right,
-            current_point: rectangle.top_left,
-        }
-    }
-
-    pub(crate) const fn empty() -> Self {
-        Self {
-            left: 0,
-            bottom_right: Point::new(-1, -1),
-            current_point: Point::zero(),
-        }
-    }
-}
-
-impl Iterator for Points {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // Finished, i.e. we're below the rect
-        if self.current_point.y > self.bottom_right.y {
-            return None;
-        }
-
-        let ret = self.current_point;
-
-        self.current_point.x += 1;
-
-        // Reached end of row? Jump down one line
-        if self.current_point.x > self.bottom_right.x {
-            self.current_point.x = self.left;
-            self.current_point.y += 1;
-        }
-
-        Some(ret)
-    }
-}
-
-/// Pixel iterator for each pixel in the rect border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledRectangleIterator<C: PixelColor>
-where
-    C: PixelColor,
-{
-    iter: Points,
-
-    stroke_color: Option<C>,
-
-    fill_area: Rectangle,
-    fill_color: Option<C>,
-}
-
-impl<C> StyledRectangleIterator<C>
-where
-    C: PixelColor,
-{
-    fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
-        let Styled { style, primitive } = styled;
-
-        let iter = if !style.is_transparent() {
-            let stroke_area = primitive.expand(style.outside_stroke_width());
-            stroke_area.points()
-        } else {
-            Points::empty()
-        };
-
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-
-        Self {
-            iter,
-            stroke_color: style.stroke_color,
-            fill_area,
-            fill_color: style.fill_color,
-        }
-    }
-}
-
-impl<C> Iterator for StyledRectangleIterator<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            let color = if self.fill_area.contains(point) {
-                self.fill_color
-            } else {
-                self.stroke_color
-            };
-
-            if let Some(color) = color {
-                return Some(Pixel(point, color));
-            }
-        }
-
-        None
     }
 }
 
@@ -505,24 +392,6 @@ mod tests {
     }
 
     #[test]
-    fn it_draws_unfilled_rect() {
-        let mut rect = Rectangle::new(Point::new(2, 2), Size::new(3, 3))
-            .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-            .into_iter();
-
-        assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
-        assert_eq!(rect.next(), Some(Pixel(Point::new(3, 2), Rgb565::RED)));
-        assert_eq!(rect.next(), Some(Pixel(Point::new(4, 2), Rgb565::RED)));
-
-        assert_eq!(rect.next(), Some(Pixel(Point::new(2, 3), Rgb565::RED)));
-        assert_eq!(rect.next(), Some(Pixel(Point::new(4, 3), Rgb565::RED)));
-
-        assert_eq!(rect.next(), Some(Pixel(Point::new(2, 4), Rgb565::RED)));
-        assert_eq!(rect.next(), Some(Pixel(Point::new(3, 4), Rgb565::RED)));
-        assert_eq!(rect.next(), Some(Pixel(Point::new(4, 4), Rgb565::RED)));
-    }
-
-    #[test]
     fn it_can_be_negative() {
         let negative = Rectangle::new(Point::new(-2, -2), Size::new(4, 4))
             .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
@@ -546,34 +415,6 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(rectangle.points().eq(styled_points));
-    }
-
-    #[test]
-    fn points_iter() {
-        let rectangle = Rectangle::new(Point::new(10, 20), Size::new(2, 3));
-
-        let mut points = rectangle.points();
-        assert_eq!(points.next(), Some(Point::new(10, 20)));
-        assert_eq!(points.next(), Some(Point::new(11, 20)));
-        assert_eq!(points.next(), Some(Point::new(10, 21)));
-        assert_eq!(points.next(), Some(Point::new(11, 21)));
-        assert_eq!(points.next(), Some(Point::new(10, 22)));
-        assert_eq!(points.next(), Some(Point::new(11, 22)));
-        assert_eq!(points.next(), None);
-    }
-
-    #[test]
-    fn points_iter_zero_size() {
-        let rectangle = Rectangle::new(Point::new(1, 2), Size::zero());
-
-        let mut points = rectangle.points();
-        assert_eq!(points.next(), None);
-    }
-
-    #[test]
-    fn points_iter_empty() {
-        let mut points = Points::empty();
-        assert_eq!(points.next(), None);
     }
 
     #[test]
@@ -607,43 +448,6 @@ mod tests {
 
         let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
         assert_eq!(even.bottom_right(), Some(Point::new(23, 37)));
-    }
-
-    #[test]
-    fn stroke_alignment() {
-        const TOP_LEFT: Point = Point::new(5, 6);
-        const SIZE: Size = Size::new(10, 5);
-
-        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
-
-        let mut display_center = MockDisplay::new();
-        Rectangle::new(TOP_LEFT, SIZE)
-            .into_styled(style)
-            .draw(&mut display_center)
-            .unwrap();
-
-        let mut display_inside = MockDisplay::new();
-        Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Inside)
-                    .build(),
-            )
-            .draw(&mut display_inside)
-            .unwrap();
-
-        let mut display_outside = MockDisplay::new();
-        Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Outside)
-                    .build(),
-            )
-            .draw(&mut display_outside)
-            .unwrap();
-
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
     }
 
     #[test]
