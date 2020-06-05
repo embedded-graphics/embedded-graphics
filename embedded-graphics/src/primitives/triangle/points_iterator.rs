@@ -1,102 +1,15 @@
-use crate::geometry::Point;
-use crate::primitives::line::{self, Line};
-use crate::primitives::triangle::sort_two_yx;
-use crate::primitives::triangle::sort_yx;
-use crate::primitives::triangle::IterState;
-use crate::primitives::triangle::Triangle;
-use crate::primitives::Primitive;
+use crate::{
+    geometry::Point,
+    primitives::triangle::{scanline_iterator::ScanlineIterator, Triangle},
+};
 
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points {
-    line_a: line::Points,
-    line_b: line::Points,
-    line_c: line::Points,
-    cur_ac: Option<Point>,
-    cur_b: Option<Point>,
-    next_ac: Option<Point>,
-    next_b: Option<Point>,
-    x: i32,
-    max_y: i32,
-    min_y: i32,
-}
+pub struct Points(ScanlineIterator);
 
 impl Points {
     pub(crate) fn new(triangle: &Triangle) -> Self {
-        let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
-
-        let mut line_a = Line::new(v1, v2).points();
-        let mut line_b = Line::new(v1, v3).points();
-        let mut line_c = Line::new(v2, v3).points();
-
-        let next_ac = line_a.next().or_else(|| line_c.next());
-        let next_b = line_b.next();
-
-        Self {
-            line_a,
-            line_b,
-            line_c,
-            cur_ac: None,
-            cur_b: None,
-            next_ac,
-            next_b,
-            x: 0,
-            min_y: v1.y,
-            max_y: v3.y,
-        }
-    }
-
-    fn update_ac(&mut self) -> IterState {
-        if let Some(ac) = self.next_ac {
-            self.cur_ac = Some(ac);
-            self.next_ac = self.line_a.next().or_else(|| self.line_c.next());
-            self.x = 0;
-            IterState::Border(ac)
-        } else {
-            IterState::None
-        }
-    }
-
-    fn update_b(&mut self) -> IterState {
-        if let Some(b) = self.next_b {
-            self.cur_b = Some(b);
-            self.next_b = self.line_b.next();
-            self.x = 0;
-            IterState::Border(b)
-        } else {
-            IterState::None
-        }
-    }
-
-    pub(in crate::primitives::triangle) fn points(&mut self) -> IterState {
-        match (self.cur_ac, self.cur_b) {
-            // Point of ac line or b line is missing
-            (None, _) => self.update_ac(),
-            (_, None) => self.update_b(),
-            // Both points are present
-            (Some(ac), Some(b)) => {
-                match (self.next_ac, self.next_b) {
-                    (Some(n_ac), Some(n_b)) => {
-                        // If y component differs, take new points from edge until both side have
-                        // the same y
-                        if n_ac.y < n_b.y {
-                            self.update_ac()
-                        } else if n_ac.y > n_b.y {
-                            self.update_b()
-                        } else {
-                            let (l, r) = sort_two_yx(n_ac, n_b);
-                            IterState::LeftRight(l, r)
-                        }
-                    }
-                    (None, Some(_)) => self.update_b(),
-                    (Some(_), None) => self.update_ac(),
-                    (None, None) => {
-                        let (l, r) = sort_two_yx(ac, b);
-                        IterState::LeftRight(l, r)
-                    }
-                }
-            }
-        }
+        Self(ScanlineIterator::new(triangle))
     }
 }
 
@@ -104,37 +17,14 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.points() {
-                IterState::Border(point) => {
-                    // Draw edges of the triangle
-                    self.x += 1;
-                    return Some(point);
-                }
-                IterState::LeftRight(l, r) => {
-                    // Fill the space between the left and right points
-                    if l.x + self.x < r.x {
-                        let point = Point::new(l.x + self.x, l.y);
-                        self.x += 1;
-                        return Some(point);
-                    } else if l.x + self.x >= r.x {
-                        // We reached the right edge, move on to next row
-                        self.cur_ac = None;
-                        self.cur_b = None;
-                    }
-                }
-                IterState::None => return None,
-            }
-        }
+        self.0.next().map(|(_, p)| p)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        drawable::Pixel, pixelcolor::BinaryColor, style::PrimitiveStyle, transform::Transform,
-    };
+    use crate::{pixelcolor::BinaryColor, prelude::*, style::PrimitiveStyle};
 
     #[test]
     fn points_iter() {

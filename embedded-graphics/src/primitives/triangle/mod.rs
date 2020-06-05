@@ -1,6 +1,7 @@
 //! The triangle primitive.
 
 mod points_iterator;
+mod scanline_iterator;
 mod styled_iterator;
 
 use crate::{

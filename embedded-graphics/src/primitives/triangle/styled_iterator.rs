@@ -1,14 +1,12 @@
-use crate::drawable::Pixel;
-use crate::geometry::Point;
-use crate::pixelcolor::PixelColor;
-use crate::primitives::line::{self, Line};
-use crate::primitives::triangle::sort_two_yx;
-use crate::primitives::triangle::sort_yx;
-use crate::primitives::triangle::IterState;
-use crate::primitives::triangle::Triangle;
-use crate::primitives::Primitive;
-use crate::style::PrimitiveStyle;
-use crate::style::Styled;
+use crate::{
+    drawable::Pixel,
+    pixelcolor::PixelColor,
+    primitives::triangle::{
+        scanline_iterator::{PointType, ScanlineIterator},
+        Triangle,
+    },
+    style::{PrimitiveStyle, Styled},
+};
 
 /// Pixel iterator for each pixel in the triangle border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -16,17 +14,9 @@ pub struct StyledTriangleIterator<C: PixelColor>
 where
     C: PixelColor,
 {
-    line_a: line::Points,
-    line_b: line::Points,
-    line_c: line::Points,
-    cur_ac: Option<Point>,
-    cur_b: Option<Point>,
-    next_ac: Option<Point>,
-    next_b: Option<Point>,
-    x: i32,
-    max_y: i32,
-    min_y: i32,
-    style: PrimitiveStyle<C>,
+    iter: ScanlineIterator,
+    fill_color: Option<C>,
+    stroke_color: Option<C>,
 }
 
 impl<C> StyledTriangleIterator<C>
@@ -34,83 +24,16 @@ where
     C: PixelColor,
 {
     pub(crate) fn new(styled: &Styled<Triangle, PrimitiveStyle<C>>) -> Self {
-        let (v1, v2, v3) = sort_yx(
-            styled.primitive.p1,
-            styled.primitive.p2,
-            styled.primitive.p3,
-        );
-
-        let mut line_a = Line::new(v1, v2).points();
-        let mut line_b = Line::new(v1, v3).points();
-        let mut line_c = Line::new(v2, v3).points();
-
-        let next_ac = line_a.next().or_else(|| line_c.next());
-        let next_b = line_b.next();
-
-        StyledTriangleIterator {
-            line_a,
-            line_b,
-            line_c,
-            cur_ac: None,
-            cur_b: None,
-            next_ac,
-            next_b,
-            x: 0,
-            min_y: v1.y,
-            max_y: v3.y,
-            style: styled.style,
-        }
-    }
-    fn update_ac(&mut self) -> IterState {
-        if let Some(ac) = self.next_ac {
-            self.cur_ac = Some(ac);
-            self.next_ac = self.line_a.next().or_else(|| self.line_c.next());
-            self.x = 0;
-            IterState::Border(ac)
+        let iter = if !styled.style.is_transparent() {
+            ScanlineIterator::new(&styled.primitive)
         } else {
-            IterState::None
-        }
-    }
+            ScanlineIterator::empty()
+        };
 
-    fn update_b(&mut self) -> IterState {
-        if let Some(b) = self.next_b {
-            self.cur_b = Some(b);
-            self.next_b = self.line_b.next();
-            self.x = 0;
-            IterState::Border(b)
-        } else {
-            IterState::None
-        }
-    }
-
-    fn points(&mut self) -> IterState {
-        match (self.cur_ac, self.cur_b) {
-            // Point of ac line or b line is missing
-            (None, _) => self.update_ac(),
-            (_, None) => self.update_b(),
-            // Both points are present
-            (Some(ac), Some(b)) => {
-                match (self.next_ac, self.next_b) {
-                    (Some(n_ac), Some(n_b)) => {
-                        // If y component differs, take new points from edge until both side have
-                        // the same y
-                        if n_ac.y < n_b.y {
-                            self.update_ac()
-                        } else if n_ac.y > n_b.y {
-                            self.update_b()
-                        } else {
-                            let (l, r) = sort_two_yx(n_ac, n_b);
-                            IterState::LeftRight(l, r)
-                        }
-                    }
-                    (None, Some(_)) => self.update_b(),
-                    (Some(_), None) => self.update_ac(),
-                    (None, None) => {
-                        let (l, r) = sort_two_yx(ac, b);
-                        IterState::LeftRight(l, r)
-                    }
-                }
-            }
+        Self {
+            iter,
+            fill_color: styled.style.fill_color,
+            stroke_color: styled.style.effective_stroke_color(),
         }
     }
 }
@@ -122,45 +45,19 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.style.stroke_color.is_none() && self.style.fill_color.is_none() {
-            return None;
-        }
+        let Self {
+            ref stroke_color,
+            ref fill_color,
+            ..
+        } = self;
 
-        loop {
-            match self.points() {
-                IterState::Border(point) => {
-                    // Draw edges of the triangle
-                    if self.style.stroke_width > 0 {
-                        if let Some(stroke_color) = self.style.stroke_color {
-                            self.x += 1;
-                            return Some(Pixel(point, stroke_color));
-                        }
-                    } else if let Some(fill_color) = self.style.fill_color {
-                        self.x += 1;
-                        return Some(Pixel(point, fill_color));
-                    }
-                }
-                IterState::LeftRight(l, r) => {
-                    // Fill the space between the left and right points
-                    if let Some(color) = self.style.fill_color {
-                        if l.x + self.x < r.x {
-                            let point = Point::new(l.x + self.x, l.y);
-                            self.x += 1;
-                            return Some(Pixel(point, color));
-                        } else if l.x + self.x >= r.x {
-                            // We reached the right edge, move on to next row
-                            self.cur_ac = None;
-                            self.cur_b = None;
-                        }
-                    } else {
-                        // We don't want to fill the triangle
-                        self.cur_ac = None;
-                        self.cur_b = None;
-                    }
-                }
-                IterState::None => return None,
+        self.iter.find_map(|(point_type, point)| {
+            match point_type {
+                PointType::Border => stroke_color.or(*fill_color),
+                PointType::Inside => *fill_color,
             }
-        }
+            .map(|c| Pixel(point, c))
+        })
     }
 }
 
@@ -170,7 +67,9 @@ mod tests {
     use crate::{
         drawable::Drawable,
         mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        pixelcolor::{BinaryColor, Rgb888},
+        prelude::*,
+        primitives::Primitive,
         style::PrimitiveStyleBuilder,
         transform::Transform,
     };
