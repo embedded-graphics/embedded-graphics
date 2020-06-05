@@ -1,9 +1,7 @@
 //! Graphics primitives
 
 pub mod circle;
-mod corner_radii;
 pub mod ellipse;
-mod ellipse_quadrant;
 pub mod line;
 pub mod polyline;
 pub mod rectangle;
@@ -12,12 +10,11 @@ pub mod triangle;
 
 pub use self::{
     circle::Circle,
-    corner_radii::{CornerRadii, CornerRadiiBuilder},
     ellipse::Ellipse,
     line::Line,
     polyline::Polyline,
     rectangle::Rectangle,
-    rounded_rectangle::RoundedRectangle,
+    rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
     triangle::Triangle,
 };
 use crate::{

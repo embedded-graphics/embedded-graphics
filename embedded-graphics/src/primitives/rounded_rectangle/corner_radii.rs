@@ -416,4 +416,81 @@ mod tests {
 
         assert_eq!(builder.build(), radii);
     }
+
+    #[test]
+    fn corner_radii_exact_size() {
+        let corners = CornerRadii {
+            top_left: Size::new(10, 15),
+            top_right: Size::new(10, 15),
+            bottom_right: Size::new(10, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(corners.confine(Size::new(20, 30)), corners);
+    }
+
+    #[test]
+    fn corner_radii_single_overlap() {
+        let corners = CornerRadii {
+            // Create an overlap of 5px in the Y direction
+            top_left: Size::new(10, 20),
+            top_right: Size::new(10, 15),
+            bottom_right: Size::new(10, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(
+            corners.confine(Size::new(20, 30)),
+            CornerRadii {
+                top_left: Size::new(8, 17),
+                top_right: Size::new(8, 12),
+                bottom_right: Size::new(8, 12),
+                bottom_left: Size::new(8, 12)
+            }
+        );
+    }
+
+    #[test]
+    fn corner_radii_1px_overlap() {
+        let corners = CornerRadii {
+            // 1px overlap in Y
+            top_left: Size::new(10, 16),
+            // 1px overlap in X
+            top_right: Size::new(11, 15),
+            bottom_right: Size::new(10, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(
+            corners.confine(Size::new(20, 30)),
+            CornerRadii {
+                top_left: Size::new(9, 15),
+                top_right: Size::new(10, 14),
+                bottom_right: Size::new(9, 14),
+                bottom_left: Size::new(9, 14),
+            }
+        );
+    }
+
+    #[test]
+    fn corner_radii_multiple_overlap() {
+        let corners = CornerRadii {
+            // Create an overlap of 5px in the Y direction
+            top_left: Size::new(10, 20),
+            top_right: Size::new(10, 15),
+            // Create an overlap of 8px in the X direction
+            bottom_right: Size::new(18, 15),
+            bottom_left: Size::new(10, 15),
+        };
+
+        assert_eq!(
+            corners.confine(Size::new(20, 30)),
+            CornerRadii {
+                top_left: Size::new(7, 14),
+                top_right: Size::new(7, 10),
+                bottom_right: Size::new(12, 10),
+                bottom_left: Size::new(7, 10),
+            }
+        );
+    }
 }
