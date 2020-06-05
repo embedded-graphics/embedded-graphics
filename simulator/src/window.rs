@@ -1,9 +1,5 @@
 use crate::{display::SimulatorDisplay, framebuffer::Framebuffer, output_settings::OutputSettings};
-use embedded_graphics::{
-    geometry::{Point, Size},
-    pixelcolor::{PixelColor, Rgb888},
-    DrawTarget,
-};
+use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 use sdl2::{
     event::Event,
     keyboard::{Keycode, Mod},

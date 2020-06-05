@@ -242,10 +242,10 @@ mod e_g {
     use super::*;
     use core::marker::PhantomData;
     use embedded_graphics::{
-        drawable::Pixel as EgPixel,
         geometry::Point,
         image::{ImageDimensions, IntoPixelIter},
         pixelcolor::{raw::RawData, PixelColor},
+        Pixel as EgPixel,
     };
 
     /// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration

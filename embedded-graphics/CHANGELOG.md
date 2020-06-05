@@ -35,6 +35,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) `primitives::line::StyledLineIterator` was renamed to `primitives::line::StyledIterator`.
 - **(breaking)** [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Additional checks for overdraw and out of bounds drawing were added to `MockDisplay` which can cause tests to panic. See the `mock_display` module docs for more information.
 - **(breaking)** [#342](https://github.com/jamwaffles/embedded-graphics/pull/342) Refactored the `DrawTarget` trait to better support common hardware capabilities.
+- **(breaking)** [#360](https://github.com/jamwaffles/embedded-graphics/pull/360) Make the `drawable` module private. `drawable::Drawable` and `drawable::Pixel` are now exported from the crate root.
 
 ### Fixed
 

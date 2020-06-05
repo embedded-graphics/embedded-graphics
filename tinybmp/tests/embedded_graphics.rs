@@ -1,11 +1,9 @@
 use embedded_graphics::{
-    drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
     image::Image,
     mock_display::MockDisplay,
     pixelcolor::{BinaryColor, Gray8, GrayColor, Rgb555, Rgb565, Rgb888, RgbColor},
+    prelude::*,
     primitives::Rectangle,
-    transform::Transform,
 };
 use tinybmp::Bmp;
 

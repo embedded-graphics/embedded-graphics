@@ -489,7 +489,7 @@
 extern crate nalgebra;
 
 mod draw_target;
-pub mod drawable;
+mod drawable;
 pub mod fonts;
 pub mod geometry;
 pub mod image;
@@ -500,4 +500,7 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-pub use draw_target::DrawTarget;
+pub use crate::{
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
+};
