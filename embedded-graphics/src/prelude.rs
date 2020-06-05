@@ -1,6 +1,8 @@
 //! Prelude
 
+#[doc(no_inline)]
 pub use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     fonts::Font,
     geometry::{Dimensions, Point, Size},
@@ -9,6 +11,3 @@ pub use crate::{
     primitives::Primitive,
     transform::Transform,
 };
-
-#[doc(no_inline)]
-pub use crate::draw_target::DrawTarget;
