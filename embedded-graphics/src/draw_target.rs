@@ -1,3 +1,5 @@
+//! A target for embedded-graphics drawing operations.
+
 use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
@@ -410,8 +412,8 @@ pub trait DrawTarget {
     /// ```
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
-    /// [`Rectangle::intersection`]: ./primitives/rectangle/struct.Rectangle.html#method.intersection
-    /// [`Points::points`]: ./primitives/trait.Primitive.html#tymethod.points
+    /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
+    /// [`Points::points`]: ../primitives/trait.Primitive.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,

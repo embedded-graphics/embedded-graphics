@@ -76,7 +76,7 @@
 //! draw the specified color and doesn't depend on the raw data conversions,
 //! see the [`raw` module] documentation for an example that uses this feature.
 //!
-//! [`DrawTarget`]: ../trait.DrawTarget.html
+//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 //! [`PixelColor`]: trait.PixelColor.html
 //! [`Raw`]: trait.PixelColor.html#associatedtype.Raw
 //! [`raw` module]: raw/index.html
