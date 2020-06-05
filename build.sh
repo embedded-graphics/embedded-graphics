@@ -14,7 +14,7 @@ cargo build --release --no-default-features
 popd
 
 cargo doc --all-features
-linkchecker target/doc/embedded_graphics/index.html
-linkchecker target/doc/tinybmp/index.html
-linkchecker target/doc/tinytga/index.html
-linkchecker target/doc/embedded_graphics_simulator/index.html
+linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics/index.html
+linkchecker --check-extern --ignore-url=^http target/doc/tinybmp/index.html
+linkchecker --check-extern --ignore-url=^http target/doc/tinytga/index.html
+linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics_simulator/index.html
