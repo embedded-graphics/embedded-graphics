@@ -1,5 +1,10 @@
 //! The line primitive
 
+mod bresenham;
+mod points;
+mod styled_iterator;
+mod thick_points;
+
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
@@ -9,12 +14,6 @@ use crate::{
     style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
-
-mod bresenham;
-mod points;
-mod styled_iterator;
-mod thick_points;
-
 pub use points::Points;
 pub use styled_iterator::StyledIterator;
 
