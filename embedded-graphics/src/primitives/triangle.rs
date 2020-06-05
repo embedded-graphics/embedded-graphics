@@ -313,10 +313,8 @@ impl Iterator for Points {
             match self.points() {
                 IterState::Border(point) => {
                     // Draw edges of the triangle
-                    if point.x >= 0 && point.y >= 0 {
-                        self.x += 1;
-                        return Some(point);
-                    }
+                    self.x += 1;
+                    return Some(point);
                 }
                 IterState::LeftRight(l, r) => {
                     // Fill the space between the left and right points
@@ -456,16 +454,14 @@ where
             match self.points() {
                 IterState::Border(point) => {
                     // Draw edges of the triangle
-                    if point.x >= 0 && point.y >= 0 {
-                        if self.style.stroke_width > 0 {
-                            if let Some(stroke_color) = self.style.stroke_color {
-                                self.x += 1;
-                                return Some(Pixel(point, stroke_color));
-                            }
-                        } else if let Some(fill_color) = self.style.fill_color {
+                    if self.style.stroke_width > 0 {
+                        if let Some(stroke_color) = self.style.stroke_color {
                             self.x += 1;
-                            return Some(Pixel(point, fill_color));
+                            return Some(Pixel(point, stroke_color));
                         }
+                    } else if let Some(fill_color) = self.style.fill_color {
+                        self.x += 1;
+                        return Some(Pixel(point, fill_color));
                     }
                 }
                 IterState::LeftRight(l, r) => {
@@ -684,6 +680,27 @@ mod tests {
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .draw(&mut display)
             .unwrap();
+    }
+
+    #[test]
+    fn off_screen_still_draws_points() {
+        let off_screen = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30));
+        let on_screen = off_screen.translate(Point::new(0, 35));
+
+        assert!(off_screen
+            .points()
+            .eq(on_screen.points().map(|p| p - Point::new(0, 35))));
+    }
+
+    #[test]
+    fn styled_off_screen_still_draws_points() {
+        let off_screen = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+        let on_screen = off_screen.translate(Point::new(0, 35));
+
+        assert!(off_screen.into_iter().eq(on_screen
+            .into_iter()
+            .map(|Pixel(p, col)| Pixel(p - Point::new(0, 35), col))));
     }
 
     #[test]
