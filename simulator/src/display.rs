@@ -1,6 +1,6 @@
 use crate::{framebuffer::Framebuffer, output_settings::OutputSettings};
 use embedded_graphics::{
-    pixelcolor::{BinaryColor, PixelColor, Rgb888},
+    pixelcolor::{BinaryColor, Rgb888},
     prelude::*,
 };
 use image::{ImageBuffer, Rgb};

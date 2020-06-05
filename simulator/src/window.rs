@@ -1,8 +1,5 @@
 use crate::{display::SimulatorDisplay, framebuffer::Framebuffer, output_settings::OutputSettings};
-use embedded_graphics::{
-    pixelcolor::{PixelColor, Rgb888},
-    prelude::*,
-};
+use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 use sdl2::{
     event::Event,
     keyboard::{Keycode, Mod},

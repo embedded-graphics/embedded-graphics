@@ -1,7 +1,6 @@
 extern crate embedded_graphics;
 
 use embedded_graphics::{
-    pixelcolor::PixelColor,
     prelude::*,
     primitives::{Circle, Line, Primitive, Rectangle},
     style::PrimitiveStyle,

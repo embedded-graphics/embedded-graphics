@@ -1,6 +1,6 @@
 use crate::{display::SimulatorDisplay, output_settings::OutputSettings};
 use embedded_graphics::{
-    pixelcolor::{PixelColor, Rgb888, RgbColor},
+    pixelcolor::{Rgb888, RgbColor},
     prelude::*,
     primitives::{Primitive, Rectangle},
     style::PrimitiveStyle,

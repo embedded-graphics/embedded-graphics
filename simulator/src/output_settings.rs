@@ -1,5 +1,5 @@
 use crate::{display::SimulatorDisplay, theme::BinaryColorTheme};
-use embedded_graphics::{pixelcolor::PixelColor, prelude::*};
+use embedded_graphics::prelude::*;
 
 /// Output settings.
 #[derive(Debug, PartialEq, Eq, Clone)]
