@@ -54,8 +54,8 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-/// [`draw_iter`]: ../draw_target/trait.DrawTarget.html#tymethod.draw_iter
+/// [`DrawTarget`]: ./trait.DrawTarget.html
+/// [`draw_iter`]: ./trait.DrawTarget.html#tymethod.draw_iter
 pub trait Drawable<C>
 where
     C: PixelColor,
@@ -95,7 +95,7 @@ where
 /// ```
 ///
 /// [`Drawable`]: trait.Drawable.html
-/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+/// [`DrawTarget`]: ./trait.DrawTarget.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Pixel<C: PixelColor>(pub Point, pub C);
 

@@ -38,7 +38,7 @@
 //! [`IntoPixelIter`]: ./trait.IntoPixelIter.html
 //! [`ImageDimensions`]: ./trait.ImageDimensions.html
 //! [`Image`]: ./struct.Image.html
-//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+//! [`DrawTarget`]: ../trait.DrawTarget.html
 
 mod image_raw;
 
@@ -92,7 +92,7 @@ pub trait ImageDimensions {
 /// [module documentation]: ./index.html
 /// [`Transform::translate()`]: ../transform/trait.Transform.html#tymethod.translate
 /// [`Transform::translate_mut()`]: ../transform/trait.Transform.html#tymethod.translate_mut
-/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+/// [`DrawTarget`]: ../trait.DrawTarget.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, I, C> {
     image_data: &'a I,
