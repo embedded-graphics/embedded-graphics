@@ -1,14 +1,20 @@
 //! The circle primitive
 
+mod distance_iterator;
+mod points_iterator;
+mod styled_iterator;
+
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{ContainsPoint, Primitive, Rectangle, Styled},
     style::PrimitiveStyle,
     transform::Transform,
-    DrawTarget,
 };
+pub use points_iterator::Points;
+pub use styled_iterator::StyledCircleIterator;
 
 /// Circle primitive
 ///
@@ -163,113 +169,6 @@ impl Transform for Circle {
     }
 }
 
-/// Iterator over all points inside the circle.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points {
-    iter: DistanceIterator,
-    threshold: u32,
-}
-
-impl Points {
-    fn new(circle: &Circle) -> Self {
-        let threshold = diameter_to_threshold(circle.diameter);
-
-        Self {
-            iter: DistanceIterator::new(&circle),
-            threshold,
-        }
-    }
-}
-
-impl Iterator for Points {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let threshold = self.threshold;
-        self.iter
-            .find(|(_, distance)| *distance < threshold)
-            .map(|(point, _)| point)
-    }
-}
-
-/// Pixel iterator for each pixel in the circle border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledCircleIterator<C>
-where
-    C: PixelColor,
-{
-    iter: DistanceIterator,
-
-    outer_threshold: u32,
-    outer_color: Option<C>,
-
-    inner_threshold: u32,
-    inner_color: Option<C>,
-}
-
-impl<C> StyledCircleIterator<C>
-where
-    C: PixelColor,
-{
-    fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        let stroke_area = primitive.expand(style.outside_stroke_width());
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-
-        let inner_threshold = diameter_to_threshold(fill_area.diameter);
-        let outer_threshold = diameter_to_threshold(stroke_area.diameter);
-
-        let iter = if !styled.style.is_transparent() {
-            DistanceIterator::new(&stroke_area)
-        } else {
-            DistanceIterator::empty()
-        };
-
-        Self {
-            iter,
-            outer_threshold,
-            outer_color: styled.style.stroke_color,
-            inner_threshold,
-            inner_color: styled.style.fill_color,
-        }
-    }
-}
-
-impl<C> Iterator for StyledCircleIterator<C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for (point, distance) in &mut self.iter {
-            let color = if distance < self.inner_threshold {
-                self.inner_color
-            } else if distance < self.outer_threshold {
-                self.outer_color
-            } else {
-                None
-            };
-
-            if let Some(color) = color {
-                return Some(Pixel(point, color));
-            }
-        }
-
-        None
-    }
-}
-
-impl<'a, C: 'a> Drawable<C> for &Styled<Circle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 pub(in crate::primitives) fn diameter_to_threshold(diameter: u32) -> u32 {
     if diameter <= 4 {
         diameter.pow(2) - diameter / 2
@@ -290,50 +189,19 @@ where
     }
 }
 
-/// Iterator that returns the squared distance to the center for all points in the bounding box.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-struct DistanceIterator {
-    center: Point,
-    points: super::rectangle::Points,
-}
-
-impl DistanceIterator {
-    fn new(circle: &Circle) -> Self {
-        Self {
-            center: circle.center_2x(),
-            points: circle.bounding_box().points(),
-        }
-    }
-
-    fn empty() -> Self {
-        Self {
-            center: Point::zero(),
-            points: Rectangle::new(Point::zero(), Size::zero()).points(),
-        }
-    }
-}
-
-impl Iterator for DistanceIterator {
-    type Item = (Point, u32);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.points.next().map(|p| {
-            let delta = self.center - p * 2;
-            let distance = delta.length_squared() as u32;
-
-            (p, distance)
-        })
+impl<'a, C: 'a> Drawable<C> for &Styled<Circle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        style::{PrimitiveStyleBuilder, StrokeAlignment},
-    };
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*};
 
     #[test]
     fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
@@ -398,36 +266,6 @@ mod tests {
         Ok(())
     }
 
-    /// Test for issue #143
-    #[test]
-    fn issue_143_stroke_and_fill() {
-        for size in 0..10 {
-            let circle_no_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
-                Circle::new(Point::new(10, 16), size)
-                    .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
-
-            let style = PrimitiveStyleBuilder::new()
-                .fill_color(BinaryColor::On)
-                .stroke_color(BinaryColor::On)
-                .stroke_width(1)
-                .build();
-            let circle_stroke: Styled<Circle, PrimitiveStyle<BinaryColor>> =
-                Circle::new(Point::new(10, 16), size).into_styled(style);
-
-            assert_eq!(
-                circle_stroke.bounding_box(),
-                circle_no_stroke.bounding_box(),
-                "Filled and unfilled circle bounding boxes are unequal for radius {}",
-                size
-            );
-            assert!(
-                circle_no_stroke.into_iter().eq(circle_stroke.into_iter()),
-                "Filled and unfilled circle iters are unequal for radius {}",
-                size
-            );
-        }
-    }
-
     #[test]
     fn negative_dimensions() {
         let circle = Circle::new(Point::new(-15, -15), 20);
@@ -467,9 +305,7 @@ mod tests {
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .into_iter();
 
-        assert!(negative.into_iter().eq(positive
-            .into_iter()
-            .map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
+        assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
     }
 
     #[test]
@@ -492,42 +328,6 @@ mod tests {
     }
 
     #[test]
-    fn points_iter() {
-        let circle = Circle::with_center(Point::new(10, 10), 5);
-
-        let styled_points = circle
-            .clone()
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_iter()
-            .map(|Pixel(p, _)| p);
-
-        assert!(circle.points().eq(styled_points));
-    }
-
-    #[test]
-    fn distance_iter() {
-        let circle = Circle::new(Point::zero(), 3);
-
-        let mut iter = DistanceIterator::new(&circle);
-        assert_eq!(iter.next(), Some((Point::new(0, 0), 8)));
-        assert_eq!(iter.next(), Some((Point::new(1, 0), 4)));
-        assert_eq!(iter.next(), Some((Point::new(2, 0), 8)));
-        assert_eq!(iter.next(), Some((Point::new(0, 1), 4)));
-        assert_eq!(iter.next(), Some((Point::new(1, 1), 0)));
-        assert_eq!(iter.next(), Some((Point::new(2, 1), 4)));
-        assert_eq!(iter.next(), Some((Point::new(0, 2), 8)));
-        assert_eq!(iter.next(), Some((Point::new(1, 2), 4)));
-        assert_eq!(iter.next(), Some((Point::new(2, 2), 8)));
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
-    fn distance_iter_empty() {
-        let mut iter = DistanceIterator::empty();
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
     fn contains() {
         let circle = Circle::new(Point::zero(), 5);
 
@@ -536,43 +336,6 @@ mod tests {
             .filter(|p| circle.contains(*p));
 
         assert!(contained_points.eq(circle.points()));
-    }
-
-    #[test]
-    fn stroke_alignment() {
-        const CENTER: Point = Point::new(15, 15);
-        const SIZE: u32 = 10;
-
-        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
-
-        let mut display_center = MockDisplay::new();
-        Circle::with_center(CENTER, SIZE)
-            .into_styled(style)
-            .draw(&mut display_center)
-            .unwrap();
-
-        let mut display_inside = MockDisplay::new();
-        Circle::with_center(CENTER, SIZE + 2)
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Inside)
-                    .build(),
-            )
-            .draw(&mut display_inside)
-            .unwrap();
-
-        let mut display_outside = MockDisplay::new();
-        Circle::with_center(CENTER, SIZE - 4)
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Outside)
-                    .build(),
-            )
-            .draw(&mut display_outside)
-            .unwrap();
-
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
     }
 
     fn test_circle(diameter: u32, pattern: &[&str]) {
