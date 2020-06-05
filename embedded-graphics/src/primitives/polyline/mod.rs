@@ -1,17 +1,19 @@
 //! The polyline primitive
 
+mod points_iterator;
+mod styled_iterator;
+
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
+    drawable::Drawable,
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
-    primitives::{
-        line::{self, Line},
-        Primitive, Rectangle,
-    },
+    primitives::{Primitive, Rectangle},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
+pub use points_iterator::Points;
+pub use styled_iterator::StyledPolylineIterator;
 
 /// Polyline primitive
 ///
@@ -160,112 +162,6 @@ impl<'a> Transform for Polyline<'a> {
     }
 }
 
-/// An iterator over all pixel positions on the polyline
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points<'a> {
-    vertices: &'a [Point],
-    translate: Point,
-    segment_iter: line::Points,
-}
-
-impl<'a> Points<'a> {
-    fn new<'b>(polyline: &'b Polyline<'a>) -> Self
-    where
-        'a: 'b,
-    {
-        polyline
-            .vertices
-            .split_first()
-            .and_then(|(start, rest)| {
-                // Polyline is 2 or more vertices long, return an iterator for it
-                rest.get(0).map(|end| Points {
-                    vertices: rest,
-                    translate: polyline.translate,
-                    segment_iter: Line::new(*start + polyline.translate, *end + polyline.translate)
-                        .points(),
-                })
-            })
-            .unwrap_or_else(||
-                // Polyline is less than 2 vertices long. Return a dummy iterator that will short
-                // circuit 
-                Points {
-                    vertices: &[],
-                    translate: Point::zero(),
-                    segment_iter: line::Points::empty(),
-                })
-    }
-}
-
-impl<'a> Iterator for Points<'a> {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(p) = self.segment_iter.next() {
-            Some(p)
-        } else {
-            let (start, rest) = self.vertices.split_first()?;
-            let end = rest.get(0)?;
-
-            self.vertices = rest;
-
-            self.segment_iter = Line::new(*start + self.translate, *end + self.translate).points();
-
-            // Skip first point of next line, otherwise we overlap with the previous line
-            self.nth(1)
-        }
-    }
-}
-
-impl<'a, C> IntoIterator for &'a Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledPolylineIterator<'a, C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledPolylineIterator::new(self)
-    }
-}
-
-/// Pixel iterator for each pixel in the line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledPolylineIterator<'a, C>
-where
-    C: PixelColor,
-{
-    stroke_color: Option<C>,
-    line_iter: Points<'a>,
-}
-
-impl<'a, C> StyledPolylineIterator<'a, C>
-where
-    C: PixelColor,
-{
-    fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
-        StyledPolylineIterator {
-            stroke_color: styled.style.effective_stroke_color(),
-            line_iter: styled.primitive.points(),
-        }
-    }
-}
-
-impl<'a, C> Iterator for StyledPolylineIterator<'a, C>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // Return none if stroke color is none
-        let stroke_color = self.stroke_color?;
-
-        self.line_iter
-            .next()
-            .map(|point| Pixel(point, stroke_color))
-    }
-}
-
 impl<'a, C: 'a> Drawable<C> for &Styled<Polyline<'a>, PrimitiveStyle<C>>
 where
     C: PixelColor,
@@ -300,7 +196,7 @@ mod tests {
     ];
 
     // Smaller test pattern for mock display
-    const SMALL: [Point; 4] = [
+    pub(in crate::primitives::polyline) const SMALL: [Point; 4] = [
         Point::new(2, 5),
         Point::new(5, 2),
         Point::new(10, 5),
@@ -362,15 +258,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn one_point() {
-        let points = &[Point::zero()];
-
-        let polyline = Polyline::new(points);
-
-        assert!(polyline.points().eq(core::iter::empty()));
-    }
-
     // Ensure that polylines only draw 1px wide due to lack of support for line joiners. This test
     // should fail when joiners are supported and should be removed then.
     #[test]
@@ -405,29 +292,6 @@ mod tests {
         );
     }
 
-    // Ensure that consecutive points are always different
-    #[test]
-    fn no_duplicate_points() {
-        let expected: [Point; 14] = [
-            Point::new(2, 5),
-            Point::new(3, 4),
-            Point::new(4, 3),
-            Point::new(5, 2),
-            Point::new(6, 3),
-            Point::new(7, 3),
-            Point::new(8, 4),
-            Point::new(9, 4),
-            Point::new(10, 5),
-            Point::new(11, 4),
-            Point::new(12, 4),
-            Point::new(13, 3),
-            Point::new(14, 3),
-            Point::new(15, 2),
-        ];
-
-        assert!(Polyline::new(&SMALL).points().eq(expected.iter().copied()))
-    }
-
     #[test]
     fn empty_styled_iterators() {
         let points: [Point; 3] = [Point::new(2, 5), Point::new(3, 4), Point::new(4, 3)];
@@ -443,14 +307,5 @@ mod tests {
             .into_styled::<Rgb565>(PrimitiveStyleBuilder::new().stroke_width(1).build())
             .into_iter()
             .eq(core::iter::empty()));
-    }
-
-    #[test]
-    fn equal_points() {
-        let points: [Point; 3] = [Point::new(2, 5), Point::new(2, 5), Point::new(2, 5)];
-
-        assert!(Polyline::new(&points)
-            .points()
-            .eq(core::iter::once(Point::new(2, 5))));
     }
 }
