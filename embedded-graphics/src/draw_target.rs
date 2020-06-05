@@ -1,10 +1,10 @@
 //! A target for embedded-graphics drawing operations.
 
 use crate::{
-    drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::PixelColor,
     primitives::{rectangle::Rectangle, Primitive},
+    Pixel,
 };
 
 /// A target for embedded-graphics drawing operations.
@@ -42,13 +42,10 @@ use crate::{
 /// ```rust
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
-///     drawable::Pixel,
-///     geometry::Size,
 ///     pixelcolor::{Gray8, GrayColor},
 ///     prelude::*,
 ///     primitives::Circle,
 ///     style::PrimitiveStyle,
-///     DrawTarget,
 /// };
 /// #
 /// # struct SPI1;
@@ -141,13 +138,10 @@ use crate::{
 /// ```rust
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
-///     drawable::Pixel,
-///     geometry::Size,
 ///     pixelcolor::{raw::RawU16, Rgb565, RgbColor},
 ///     prelude::*,
 ///     primitives::{Rectangle, Circle},
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
-///     DrawTarget,
 /// };
 /// #
 /// # struct SPI1;
@@ -362,12 +356,9 @@ pub trait DrawTarget {
     ///
     /// ```rust
     /// use embedded_graphics::{
-    ///     drawable::Pixel,
-    ///     geometry::Size,
     ///     pixelcolor::{Gray8, GrayColor},
     ///     prelude::*,
     ///     primitives::{ContainsPoint, Rectangle},
-    ///     DrawTarget,
     /// };
     ///
     /// struct ExampleDisplay;

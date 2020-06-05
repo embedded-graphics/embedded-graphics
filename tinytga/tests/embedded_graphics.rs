@@ -1,9 +1,8 @@
 use embedded_graphics::{
-    drawable::{Drawable, Pixel},
-    geometry::Point,
     image::Image,
     mock_display::MockDisplay,
     pixelcolor::{Gray8, Rgb888, RgbColor},
+    prelude::*,
 };
 use tinytga::Tga;
 

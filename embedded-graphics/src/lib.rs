@@ -488,8 +488,8 @@
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
 
-pub mod draw_target;
-pub mod drawable;
+mod draw_target;
+mod drawable;
 pub mod fonts;
 pub mod geometry;
 pub mod image;
@@ -500,5 +500,7 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-#[doc(no_inline)]
-pub use crate::{draw_target::DrawTarget, drawable::Drawable};
+pub use crate::{
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
+};
