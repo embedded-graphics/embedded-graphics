@@ -207,7 +207,7 @@ impl RoundedRectangle {
         Self::new(self.rectangle, self.corners.confine(self.rectangle.size))
     }
 
-    fn get_confined_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
+    pub(crate) fn get_confined_corner_quadrant(&self, quadrant: Quadrant) -> EllipseQuadrant {
         let Self {
             rectangle, corners, ..
         } = self;
