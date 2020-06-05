@@ -62,10 +62,10 @@ impl Primitive for Rectangle {
 
 impl ContainsPoint for Rectangle {
     fn contains(&self, point: Point) -> bool {
-        if point.x >= self.top_left.x && point.y >= self.top_left.y {
-            self.bottom_right().map_or(false, |bottom_right| {
-                point.x <= bottom_right.x && point.y <= bottom_right.y
-            })
+        if point.x >= self.top_left.x && point.y >= self.top_left.y && self.size > Size::zero() {
+            let bottom_right = self.top_left + self.size;
+
+            point.x < bottom_right.x && point.y < bottom_right.y
         } else {
             false
         }
@@ -585,6 +585,19 @@ mod tests {
             let expected = p.x >= 2 && p.x < 2 + 3 && p.y >= 4 && p.y < 4 + 5;
 
             assert_eq!(inner.contains(p), expected, "{:?}", p);
+        }
+    }
+
+    #[test]
+    fn contains_zero_sized() {
+        let rect = Rectangle::new(Point::zero(), Size::zero());
+
+        // Test that all points around and "inside" the zero sized rectangle are never contained
+        // in it.
+        for x in -2..2 {
+            for y in -2..2 {
+                assert_eq!(rect.contains(Point::new(x, y)), false);
+            }
         }
     }
 
