@@ -201,7 +201,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*};
+    use crate::{
+        geometry::{Dimensions, Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::{ContainsPoint, Primitive},
+    };
 
     #[test]
     fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {

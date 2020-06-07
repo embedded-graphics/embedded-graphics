@@ -359,9 +359,10 @@ where
 mod tests {
     use super::*;
     use crate::{
+        geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
-        prelude::*,
+        primitives::{ContainsPoint, Primitive},
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 

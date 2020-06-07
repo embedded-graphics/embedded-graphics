@@ -113,7 +113,13 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{drawable::Pixel, mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*};
+    use crate::{
+        drawable::{Drawable, Pixel},
+        geometry::{Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::Primitive,
+    };
 
     #[test]
     fn quadrants_even_size() {

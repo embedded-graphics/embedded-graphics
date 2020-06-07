@@ -391,7 +391,9 @@ where
 mod tests {
     use super::*;
     use crate::{
-        pixelcolor::Rgb565, prelude::*, primitives::CornerRadiiBuilder,
+        geometry::{Point, Size},
+        pixelcolor::{Rgb565, RgbColor},
+        primitives::{CornerRadiiBuilder, Primitive},
         style::PrimitiveStyleBuilder,
     };
 

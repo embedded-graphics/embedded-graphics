@@ -1,9 +1,9 @@
 use crate::{
-    geometry::{Point, Size},
-    prelude::*,
+    geometry::{Dimensions, Point, Size},
     primitives::{
         ellipse::{compute_threshold, is_point_inside_ellipse, Ellipse},
         rectangle::{self, Rectangle},
+        Primitive,
     },
 };
 

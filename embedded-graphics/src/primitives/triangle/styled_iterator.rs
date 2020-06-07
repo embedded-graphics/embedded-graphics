@@ -66,9 +66,9 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable,
+        geometry::Point,
         mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Rgb888},
-        prelude::*,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::Primitive,
         style::PrimitiveStyleBuilder,
         transform::Transform,

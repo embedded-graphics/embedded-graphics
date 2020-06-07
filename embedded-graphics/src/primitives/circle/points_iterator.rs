@@ -35,7 +35,10 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{pixelcolor::BinaryColor, prelude::*, style::PrimitiveStyle};
+    use crate::{
+        drawable::Pixel, geometry::Point, pixelcolor::BinaryColor, primitives::Primitive,
+        style::PrimitiveStyle,
+    };
 
     #[test]
     fn points_iter() {

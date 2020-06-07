@@ -78,10 +78,11 @@ where
 mod tests {
     use super::*;
     use crate::{
-        geometry::Point,
+        drawable::Drawable,
+        geometry::{Dimensions, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        prelude::*,
+        primitives::Primitive,
         style::{PrimitiveStyleBuilder, StrokeAlignment},
     };
 

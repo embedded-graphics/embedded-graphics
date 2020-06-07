@@ -233,10 +233,10 @@ where
 mod tests {
     use super::*;
     use crate::{
+        geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        prelude::*,
-        primitives::Circle,
+        primitives::{Circle, ContainsPoint, Primitive},
         style::{PrimitiveStyleBuilder, StrokeAlignment},
     };
 

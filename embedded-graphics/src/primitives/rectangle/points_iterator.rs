@@ -57,7 +57,10 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{prelude::*, primitives::Rectangle};
+    use crate::{
+        geometry::{Point, Size},
+        primitives::{Primitive, Rectangle},
+    };
 
     #[test]
     fn points_iter() {
