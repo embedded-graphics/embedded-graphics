@@ -367,51 +367,24 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
-        pixelcolor::{Rgb565, RgbColor},
         primitives::{CornerRadiiBuilder, Primitive},
-        style::PrimitiveStyleBuilder,
     };
 
     #[test]
-    fn thin_line_zero_radius_equals_rectangle() {
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_color(Rgb565::RED)
-            .stroke_width(1)
-            .fill_color(Rgb565::RED)
-            .build();
-
-        let rounded_rect = RoundedRectangle::with_equal_corners(
-            Rectangle::new(Point::zero(), Size::new(20, 30)),
-            Size::zero(),
-        )
-        .into_styled(style);
-
-        let rect = Rectangle::new(Point::zero(), Size::new(20, 30)).into_styled(style);
-
-        assert!(rounded_rect.into_iter().eq(rect.into_iter()));
-    }
-
-    #[test]
     fn clamp_radius_at_rect_size() {
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_color(Rgb565::RED)
-            .stroke_width(8)
-            .fill_color(Rgb565::GREEN)
-            .build();
-
         let clamped = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
             Size::new_equal(50),
         )
-        .into_styled(style);
+        .points();
 
         let expected = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
-            Size::new(10, 10),
+            Size::new_equal(10),
         )
-        .into_styled(style);
+        .points();
 
-        assert!(clamped.into_iter().eq(expected.into_iter()));
+        assert!(clamped.eq(expected));
     }
 
     #[test]

@@ -114,6 +114,25 @@ mod tests {
     }
 
     #[test]
+    fn thin_line_zero_radius_equals_rectangle() {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb888::RED)
+            .stroke_width(1)
+            .fill_color(Rgb888::RED)
+            .build();
+
+        let rounded_rect = RoundedRectangle::with_equal_corners(
+            Rectangle::new(Point::zero(), Size::new(20, 30)),
+            Size::zero(),
+        )
+        .into_styled(style);
+
+        let rect = Rectangle::new(Point::zero(), Size::new(20, 30)).into_styled(style);
+
+        assert!(rounded_rect.into_iter().eq(rect.into_iter()));
+    }
+
+    #[test]
     fn styled_unequal_corners() {
         let mut display = MockDisplay::new();
 
