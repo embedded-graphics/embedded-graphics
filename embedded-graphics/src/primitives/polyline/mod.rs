@@ -161,17 +161,10 @@ impl<'a> Transform for Polyline<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        drawable::Drawable,
-        geometry::{Dimensions, Point, Size},
-        mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Rgb565, RgbColor},
-        primitives::Primitive,
-        style::{PrimitiveStyle, PrimitiveStyleBuilder},
-    };
+    use crate::geometry::{Point, Size};
 
     // A "heartbeat" shaped polyline
-    const HEARTBEAT: [Point; 10] = [
+    pub(in crate::primitives::polyline) const HEARTBEAT: [Point; 10] = [
         Point::new(10, 64),
         Point::new(50, 64),
         Point::new(60, 44),
@@ -245,56 +238,5 @@ mod tests {
             bb,
             Rectangle::with_corners(Point::new(-90, -90), Point::new(200, -16))
         );
-    }
-
-    // Ensure that polylines only draw 1px wide due to lack of support for line joiners. This test
-    // should fail when joiners are supported and should be removed then.
-    #[test]
-    fn one_px_wide_only() {
-        let polyline = Polyline::new(&HEARTBEAT);
-
-        let thick = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 10));
-        let thin = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1));
-
-        assert!(thick.into_iter().eq(thin.into_iter()));
-    }
-
-    #[test]
-    fn mock_display() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-
-        Polyline::new(&SMALL)
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .draw(&mut display)
-            .unwrap();
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "                ",
-                "                ",
-                "     #         #",
-                "    # ##     ## ",
-                "   #    ## ##   ",
-                "  #       #     ",
-            ])
-        );
-    }
-
-    #[test]
-    fn empty_styleds() {
-        let points: [Point; 3] = [Point::new(2, 5), Point::new(3, 4), Point::new(4, 3)];
-
-        // No stroke width = no pixels
-        assert!(Polyline::new(&points)
-            .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 0))
-            .into_iter()
-            .eq(core::iter::empty()));
-
-        // No stroke color = no pixels
-        assert!(Polyline::new(&points)
-            .into_styled::<Rgb565>(PrimitiveStyleBuilder::new().stroke_width(1).build())
-            .into_iter()
-            .eq(core::iter::empty()));
     }
 }
