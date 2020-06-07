@@ -1,7 +1,7 @@
 //! The polyline primitive
 
 mod points_iterator;
-mod styled_iterator;
+mod styled;
 
 use crate::{
     draw_target::DrawTarget,
@@ -13,7 +13,7 @@ use crate::{
     transform::Transform,
 };
 pub use points_iterator::Points;
-pub use styled_iterator::StyledPolylineIterator;
+pub use styled::StyledPolylineIterator;
 
 /// Polyline primitive
 ///
@@ -294,7 +294,7 @@ mod tests {
     }
 
     #[test]
-    fn empty_styled_iterators() {
+    fn empty_styleds() {
         let points: [Point; 3] = [Point::new(2, 5), Point::new(3, 4), Point::new(4, 3)];
 
         // No stroke width = no pixels

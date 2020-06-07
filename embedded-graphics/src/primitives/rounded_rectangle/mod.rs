@@ -3,7 +3,7 @@
 mod corner_radii;
 mod ellipse_quadrant;
 mod points_iterator;
-mod styled_iterator;
+mod styled;
 
 use crate::{
     drawable::{Drawable, Pixel},
@@ -17,7 +17,7 @@ use crate::{
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
 use ellipse_quadrant::{EllipseQuadrant, Quadrant};
 pub use points_iterator::Points;
-pub use styled_iterator::StyledRoundedRectangleIterator;
+pub use styled::StyledRoundedRectangleIterator;
 
 /// Rounded rectangle primitive.
 ///

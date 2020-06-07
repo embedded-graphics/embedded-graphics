@@ -2,7 +2,7 @@
 
 mod bresenham;
 mod points;
-mod styled_iterator;
+mod styled;
 mod thick_points;
 
 use crate::{
@@ -15,7 +15,7 @@ use crate::{
     transform::Transform,
 };
 pub use points::Points;
-pub use styled_iterator::StyledIterator;
+pub use styled::StyledIterator;
 
 /// Line primitive
 ///

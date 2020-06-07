@@ -2,7 +2,7 @@
 
 mod distance_iterator;
 mod points_iterator;
-mod styled_iterator;
+mod styled;
 
 use crate::{
     draw_target::DrawTarget,
@@ -14,7 +14,7 @@ use crate::{
     transform::Transform,
 };
 pub use points_iterator::Points;
-pub use styled_iterator::StyledCircleIterator;
+pub use styled::StyledCircleIterator;
 
 /// Circle primitive
 ///

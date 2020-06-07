@@ -2,7 +2,7 @@
 
 mod points_iterator;
 mod scanline_iterator;
-mod styled_iterator;
+mod styled;
 
 use crate::{
     drawable::{Drawable, Pixel},
@@ -18,7 +18,7 @@ use core::{
     cmp::{max, min},
 };
 pub use points_iterator::Points;
-pub use styled_iterator::StyledTriangleIterator;
+pub use styled::StyledTriangleIterator;
 
 /// Triangle primitive
 ///
