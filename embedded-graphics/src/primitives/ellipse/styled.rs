@@ -100,3 +100,194 @@ where
         display.draw_iter(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        drawable::Drawable,
+        geometry::{Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::{Circle, Primitive},
+        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+    };
+
+    fn test_circles(style: PrimitiveStyle<BinaryColor>) {
+        for diameter in 0..50 {
+            let top_left = Point::new_equal(style.stroke_width_i32());
+
+            let mut expected = MockDisplay::new();
+            Circle::new(top_left, diameter)
+                .into_styled(style)
+                .draw(&mut expected)
+                .unwrap();
+
+            let mut display = MockDisplay::new();
+            Ellipse::new(top_left, Size::new(diameter, diameter))
+                .into_styled(style)
+                .draw(&mut display)
+                .unwrap();
+
+            assert_eq!(display, expected, "diameter = {}", diameter);
+        }
+    }
+
+    fn test_ellipse(size: Size, style: PrimitiveStyle<BinaryColor>, pattern: &[&str]) {
+        let mut display = MockDisplay::new();
+
+        Ellipse::new(Point::new(0, 0), size)
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(display, MockDisplay::from_pattern(pattern));
+    }
+
+    #[test]
+    fn ellipse_equals_circle_fill() {
+        test_circles(PrimitiveStyle::with_fill(BinaryColor::On));
+    }
+
+    #[test]
+    fn ellipse_equals_circle_stroke_1px() {
+        test_circles(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
+    }
+
+    #[test]
+    fn ellipse_equals_circle_stroke_10px() {
+        test_circles(PrimitiveStyle::with_stroke(BinaryColor::On, 10));
+    }
+
+    #[test]
+    fn filled_ellipse() {
+        #[rustfmt::skip]
+        test_ellipse(Size::new(20, 10), PrimitiveStyle::with_fill(BinaryColor::On), &[
+            "      ########      ",
+            "   ##############   ",
+            " ################## ",
+            "####################",
+            "####################",
+            "####################",
+            "####################",
+            " ################## ",
+            "   ##############   ",
+            "      ########      ",
+        ],);
+    }
+
+    #[test]
+    fn thick_stroke_glitch() {
+        test_ellipse(
+            Size::new(11, 21),
+            PrimitiveStyleBuilder::new()
+                .stroke_width(10)
+                .stroke_color(BinaryColor::On)
+                .stroke_alignment(StrokeAlignment::Inside)
+                .fill_color(BinaryColor::Off)
+                .build(),
+            &[
+                "    ###    ",
+                "   #####   ",
+                "  #######  ",
+                " ######### ",
+                " ######### ",
+                " ######### ",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                "###########",
+                " ######### ",
+                " ######### ",
+                " ######### ",
+                "  #######  ",
+                "   #####   ",
+                "    ###    ",
+            ],
+        );
+    }
+
+    #[test]
+    fn thin_stroked_ellipse() {
+        #[rustfmt::skip]
+        test_ellipse(Size::new(20, 10), PrimitiveStyle::with_stroke(BinaryColor::On, 1), &[
+            "      ########      ",
+            "   ###        ###   ",
+            " ##              ## ",
+            "##                ##",
+            "#                  #",
+            "#                  #",
+            "##                ##",
+            " ##              ## ",
+            "   ###        ###   ",
+            "      ########      ",
+        ],);
+    }
+
+    #[test]
+    fn fill_and_stroke() {
+        test_ellipse(
+            Size::new(20, 10),
+            PrimitiveStyleBuilder::new()
+                .stroke_width(3)
+                .stroke_color(BinaryColor::Off)
+                .stroke_alignment(StrokeAlignment::Inside)
+                .fill_color(BinaryColor::On)
+                .build(),
+            &[
+                "      ........      ",
+                "   ..............   ",
+                " .................. ",
+                ".....##########.....",
+                "...##############...",
+                "...##############...",
+                ".....##########.....",
+                " .................. ",
+                "   ..............   ",
+                "      ........      ",
+            ],
+        );
+    }
+
+    #[test]
+    fn stroke_alignment() {
+        const CENTER: Point = Point::new(15, 15);
+        const SIZE: Size = Size::new(10, 5);
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let mut display_center = MockDisplay::new();
+        Ellipse::with_center(CENTER, SIZE)
+            .into_styled(style)
+            .draw(&mut display_center)
+            .unwrap();
+
+        let mut display_inside = MockDisplay::new();
+        Ellipse::with_center(CENTER, SIZE + Size::new(2, 2))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Inside)
+                    .build(),
+            )
+            .draw(&mut display_inside)
+            .unwrap();
+
+        let mut display_outside = MockDisplay::new();
+        Ellipse::with_center(CENTER, SIZE - Size::new(4, 4))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&style)
+                    .stroke_alignment(StrokeAlignment::Outside)
+                    .build(),
+            )
+            .draw(&mut display_outside)
+            .unwrap();
+
+        assert_eq!(display_center, display_inside);
+        assert_eq!(display_center, display_outside);
+    }
+}

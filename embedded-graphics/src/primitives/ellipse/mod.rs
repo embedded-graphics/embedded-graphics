@@ -208,248 +208,31 @@ pub(crate) fn is_point_inside_ellipse(size: Size, point: Point, threshold: u32) 
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
         geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::{Circle, ContainsPoint, Primitive},
-        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::ContainsPoint,
     };
-
-    fn test_ellipse(size: Size, style: PrimitiveStyle<BinaryColor>, pattern: &[&str]) {
-        let mut display = MockDisplay::new();
-
-        Ellipse::new(Point::new(0, 0), size)
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        assert_eq!(display, MockDisplay::from_pattern(pattern));
-    }
-
-    fn test_circles(style: PrimitiveStyle<BinaryColor>) {
-        for diameter in 0..50 {
-            let top_left = Point::new_equal(style.stroke_width_i32());
-
-            let mut expected = MockDisplay::new();
-            Circle::new(top_left, diameter)
-                .into_styled(style)
-                .draw(&mut expected)
-                .unwrap();
-
-            let mut display = MockDisplay::new();
-            Ellipse::new(top_left, Size::new(diameter, diameter))
-                .into_styled(style)
-                .draw(&mut display)
-                .unwrap();
-
-            assert_eq!(display, expected, "diameter = {}", diameter);
-        }
-    }
 
     #[test]
     fn contains() {
-        let mut expected = MockDisplay::new();
         let ellipse = Ellipse::new(Point::zero(), Size::new(40, 20));
 
-        let mut display = MockDisplay::new();
+        let display = MockDisplay::<BinaryColor>::from_points(
+            Rectangle::new(Point::zero(), Size::new(40, 20))
+                .points()
+                .filter(|p| ellipse.contains(*p)),
+        );
 
-        Rectangle::new(Point::zero(), Size::new(40, 20))
-            .points()
-            .filter(|p| ellipse.contains(*p))
-            .map(|p| Pixel(p, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
-
-        ellipse
-            .points()
-            .map(|p| Pixel(p, BinaryColor::On))
-            .draw(&mut expected)
-            .unwrap();
+        let expected = MockDisplay::from_points(ellipse.points());
 
         assert_eq!(display, expected);
     }
 
     #[test]
-    fn ellipse_equals_circle_fill() {
-        test_circles(PrimitiveStyle::with_fill(BinaryColor::On));
-    }
-
-    #[test]
-    fn ellipse_equals_circle_stroke_1px() {
-        test_circles(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
-    }
-
-    #[test]
-    fn ellipse_equals_circle_stroke_10px() {
-        test_circles(PrimitiveStyle::with_stroke(BinaryColor::On, 10));
-    }
-
-    #[test]
-    fn filled_ellipse() {
-        #[rustfmt::skip]
-        test_ellipse(Size::new(20, 10), PrimitiveStyle::with_fill(BinaryColor::On), &[
-            "      ########      ",
-            "   ##############   ",
-            " ################## ",
-            "####################",
-            "####################",
-            "####################",
-            "####################",
-            " ################## ",
-            "   ##############   ",
-            "      ########      ",
-        ],);
-    }
-
-    #[test]
-    fn thick_stroke_glitch() {
-        test_ellipse(
-            Size::new(11, 21),
-            PrimitiveStyleBuilder::new()
-                .stroke_width(10)
-                .stroke_color(BinaryColor::On)
-                .stroke_alignment(StrokeAlignment::Inside)
-                .fill_color(BinaryColor::Off)
-                .build(),
-            &[
-                "    ###    ",
-                "   #####   ",
-                "  #######  ",
-                " ######### ",
-                " ######### ",
-                " ######### ",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                "###########",
-                " ######### ",
-                " ######### ",
-                " ######### ",
-                "  #######  ",
-                "   #####   ",
-                "    ###    ",
-            ],
-        );
-    }
-
-    #[test]
-    fn thin_stroked_ellipse() {
-        #[rustfmt::skip]
-        test_ellipse(Size::new(20, 10), PrimitiveStyle::with_stroke(BinaryColor::On, 1), &[
-            "      ########      ",
-            "   ###        ###   ",
-            " ##              ## ",
-            "##                ##",
-            "#                  #",
-            "#                  #",
-            "##                ##",
-            " ##              ## ",
-            "   ###        ###   ",
-            "      ########      ",
-        ],);
-    }
-
-    #[test]
-    fn fill_and_stroke() {
-        test_ellipse(
-            Size::new(20, 10),
-            PrimitiveStyleBuilder::new()
-                .stroke_width(3)
-                .stroke_color(BinaryColor::Off)
-                .stroke_alignment(StrokeAlignment::Inside)
-                .fill_color(BinaryColor::On)
-                .build(),
-            &[
-                "      ........      ",
-                "   ..............   ",
-                " .................. ",
-                ".....##########.....",
-                "...##############...",
-                "...##############...",
-                ".....##########.....",
-                " .................. ",
-                "   ..............   ",
-                "      ........      ",
-            ],
-        );
-    }
-
-    #[test]
     fn translate() {
-        let mut display = MockDisplay::new();
+        let moved = Ellipse::new(Point::new(4, 6), Size::new(5, 8)).translate(Point::new(3, 5));
 
-        Ellipse::new(Point::new(4, 6), Size::new(5, 8))
-            .translate(Point::new(3, 5))
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .draw(&mut display)
-            .unwrap();
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "            ",
-                "        ### ",
-                "        # # ",
-                "       #   #",
-                "       #   #",
-                "       #   #",
-                "       #   #",
-                "        # # ",
-                "        ### ",
-            ])
-        );
-    }
-
-    #[test]
-    fn stroke_alignment() {
-        const CENTER: Point = Point::new(15, 15);
-        const SIZE: Size = Size::new(10, 5);
-
-        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
-
-        let mut display_center = MockDisplay::new();
-        Ellipse::with_center(CENTER, SIZE)
-            .into_styled(style)
-            .draw(&mut display_center)
-            .unwrap();
-
-        let mut display_inside = MockDisplay::new();
-        Ellipse::with_center(CENTER, SIZE + Size::new(2, 2))
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Inside)
-                    .build(),
-            )
-            .draw(&mut display_inside)
-            .unwrap();
-
-        let mut display_outside = MockDisplay::new();
-        Ellipse::with_center(CENTER, SIZE - Size::new(4, 4))
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Outside)
-                    .build(),
-            )
-            .draw(&mut display_outside)
-            .unwrap();
-
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
+        assert_eq!(moved, Ellipse::new(Point::new(7, 11), Size::new(5, 8)));
     }
 }
