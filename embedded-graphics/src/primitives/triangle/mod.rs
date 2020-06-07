@@ -5,13 +5,12 @@ mod scanline_iterator;
 mod styled;
 
 use crate::{
-    drawable::{Drawable, Pixel},
+    drawable::Pixel,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{ContainsPoint, Primitive, Rectangle},
     style::{PrimitiveStyle, Styled},
     transform::Transform,
-    DrawTarget,
 };
 use core::{
     borrow::Borrow,
@@ -214,19 +213,12 @@ enum IterState {
     None,
 }
 
-impl<'a, C: 'a> Drawable<C> for &Styled<Triangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor};
+    use crate::{
+        drawable::Drawable, geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor,
+    };
 
     #[test]
     fn dimensions() {

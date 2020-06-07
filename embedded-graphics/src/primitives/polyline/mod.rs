@@ -4,12 +4,8 @@ mod points_iterator;
 mod styled;
 
 use crate::{
-    draw_target::DrawTarget,
-    drawable::Drawable,
     geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
     primitives::{Primitive, Rectangle},
-    style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
 pub use points_iterator::Points;
@@ -162,24 +158,16 @@ impl<'a> Transform for Polyline<'a> {
     }
 }
 
-impl<'a, C: 'a> Drawable<C> for &Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self.into_iter())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
+        drawable::Drawable,
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::Primitive,
-        style::PrimitiveStyleBuilder,
+        style::{PrimitiveStyle, PrimitiveStyleBuilder},
     };
 
     // A "heartbeat" shaped polyline

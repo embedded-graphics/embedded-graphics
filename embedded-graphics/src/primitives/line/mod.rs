@@ -6,12 +6,8 @@ mod styled;
 mod thick_points;
 
 use crate::{
-    draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point},
-    pixelcolor::PixelColor,
     primitives::{Primitive, Rectangle},
-    style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
 pub use points::Points;
@@ -122,33 +118,16 @@ impl Transform for Line {
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Line, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledIterator::new(self)
-    }
-}
-
-impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 /// Pixel iterator for each pixel in the line
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel, geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor,
+        drawable::{Drawable, Pixel},
+        geometry::Size,
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        style::PrimitiveStyle,
     };
     use arrayvec::ArrayVec;
 

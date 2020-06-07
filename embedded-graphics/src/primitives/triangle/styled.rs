@@ -1,5 +1,6 @@
 use crate::{
-    drawable::Pixel,
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
     pixelcolor::PixelColor,
     primitives::triangle::{
         scanline_iterator::{PointType, ScanlineIterator},
@@ -58,6 +59,15 @@ where
             }
             .map(|c| Pixel(point, c))
         })
+    }
+}
+
+impl<'a, C: 'a> Drawable<C> for &Styled<Triangle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
     }
 }
 

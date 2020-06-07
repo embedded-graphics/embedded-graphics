@@ -1,5 +1,6 @@
 use crate::{
-    drawable::Pixel,
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
     pixelcolor::PixelColor,
     primitives::{polyline, polyline::Polyline, Primitive},
     style::{PrimitiveStyle, Styled},
@@ -40,5 +41,14 @@ where
         self.line_iter
             .next()
             .map(|point| Pixel(point, stroke_color))
+    }
+}
+
+impl<'a, C: 'a> Drawable<C> for &Styled<Polyline<'a>, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self.into_iter())
     }
 }

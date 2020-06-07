@@ -5,12 +5,8 @@ mod points_iterator;
 mod styled;
 
 use crate::{
-    draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
-    primitives::{ContainsPoint, Primitive, Rectangle, Styled},
-    style::PrimitiveStyle,
+    primitives::{ContainsPoint, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points_iterator::Points;
@@ -177,35 +173,16 @@ pub(in crate::primitives) fn diameter_to_threshold(diameter: u32) -> u32 {
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Circle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledCircleIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledCircleIterator::new(self)
-    }
-}
-
-impl<'a, C: 'a> Drawable<C> for &Styled<Circle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
+        drawable::{Drawable, Pixel},
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{ContainsPoint, Primitive},
+        style::{PrimitiveStyle, Styled},
     };
 
     #[test]

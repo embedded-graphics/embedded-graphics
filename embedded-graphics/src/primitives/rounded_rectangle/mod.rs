@@ -6,13 +6,9 @@ mod points_iterator;
 mod styled;
 
 use crate::{
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
     primitives::{rectangle::Rectangle, ContainsPoint, Primitive},
-    style::{PrimitiveStyle, Styled},
     transform::Transform,
-    DrawTarget,
 };
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
 use ellipse_quadrant::{EllipseQuadrant, Quadrant};
@@ -363,27 +359,6 @@ impl Transform for RoundedRectangle {
         self.rectangle.translate_mut(by);
 
         self
-    }
-}
-
-impl<C> IntoIterator for &Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledRoundedRectangleIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledRoundedRectangleIterator::new(self)
-    }
-}
-
-impl<C> Drawable<C> for &Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::{
-    drawable::Pixel,
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
     geometry::{Point, Size},
     pixelcolor::PixelColor,
     primitives::ellipse::{
@@ -76,5 +77,26 @@ where
         }
 
         None
+    }
+}
+
+impl<'a, C> IntoIterator for &'a Styled<Ellipse, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = StyledEllipseIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        StyledEllipseIterator::new(self)
+    }
+}
+
+impl<'a, C: 'a> Drawable<C> for &Styled<Ellipse, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
     }
 }

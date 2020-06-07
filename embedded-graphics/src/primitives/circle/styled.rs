@@ -1,5 +1,6 @@
 use crate::{
-    drawable::Pixel,
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
     pixelcolor::PixelColor,
     primitives::circle::{diameter_to_threshold, distance_iterator::DistanceIterator, Circle},
     style::{PrimitiveStyle, Styled},
@@ -71,6 +72,27 @@ where
         }
 
         None
+    }
+}
+
+impl<'a, C> IntoIterator for &'a Styled<Circle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = StyledCircleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        StyledCircleIterator::new(self)
+    }
+}
+
+impl<'a, C: 'a> Drawable<C> for &Styled<Circle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
     }
 }
 

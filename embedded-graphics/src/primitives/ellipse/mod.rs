@@ -4,12 +4,8 @@ mod points_iterator;
 mod styled;
 
 use crate::{
-    draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
-    primitives::{circle, ContainsPoint, Primitive, Rectangle, Styled},
-    style::PrimitiveStyle,
+    primitives::{circle, ContainsPoint, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points_iterator::Points;
@@ -208,36 +204,16 @@ pub(crate) fn is_point_inside_ellipse(size: Size, point: Point, threshold: u32) 
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Ellipse, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledEllipseIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledEllipseIterator::new(self)
-    }
-}
-
-impl<'a, C: 'a> Drawable<C> for &Styled<Ellipse, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        display.draw_iter(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
+        drawable::{Drawable, Pixel},
         geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{Circle, ContainsPoint, Primitive},
-        style::{PrimitiveStyleBuilder, StrokeAlignment},
+        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
     fn test_ellipse(size: Size, style: PrimitiveStyle<BinaryColor>, pattern: &[&str]) {

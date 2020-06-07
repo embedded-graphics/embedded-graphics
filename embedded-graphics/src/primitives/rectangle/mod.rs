@@ -4,13 +4,9 @@ mod points_iterator;
 mod styled;
 
 use crate::{
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
     primitives::{ContainsPoint, Primitive},
-    style::{PrimitiveStyle, Styled},
     transform::Transform,
-    DrawTarget,
 };
 use core::cmp::min;
 pub use points_iterator::Points;
@@ -276,89 +272,11 @@ impl Transform for Rectangle {
     }
 }
 
-impl<C> IntoIterator for &Styled<Rectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledRectangleIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledRectangleIterator::new(self)
-    }
-}
-
-impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
-        let fill_area = self.primitive.shrink(self.style.inside_stroke_width());
-
-        // Fill rectangle
-        if let Some(fill_color) = self.style.fill_color {
-            display.fill_solid(&fill_area, fill_color)?;
-        }
-
-        // Draw stroke
-        if let Some(stroke_color) = self.style.effective_stroke_color() {
-            let stroke_width = self.style.stroke_width;
-
-            let stroke_area = self.primitive.expand(self.style.outside_stroke_width());
-
-            let top_border = Rectangle::new(
-                stroke_area.top_left,
-                Size::new(
-                    stroke_area.size.width,
-                    stroke_width.min(stroke_area.size.height / 2),
-                ),
-            );
-
-            let bottom_stroke_width =
-                stroke_width.min(stroke_area.size.height - top_border.size.height);
-
-            let bottom_border = Rectangle::new(
-                top_border.top_left
-                    + Size::new(
-                        0,
-                        stroke_area.size.height.saturating_sub(bottom_stroke_width),
-                    ),
-                Size::new(stroke_area.size.width, bottom_stroke_width),
-            );
-
-            display.fill_solid(&top_border, stroke_color)?;
-            display.fill_solid(&bottom_border, stroke_color)?;
-
-            if fill_area.size.height > 0 {
-                let left_border = Rectangle::new(
-                    stroke_area.top_left + top_border.size.y_axis(),
-                    Size::new(
-                        (stroke_width * 2).min(stroke_area.size.width + 1) / 2,
-                        fill_area.size.height,
-                    ),
-                );
-
-                let right_border = left_border.translate(Point::new(
-                    stroke_area
-                        .size
-                        .width
-                        .saturating_sub(left_border.size.width) as i32,
-                    0,
-                ));
-
-                display.fill_solid(&left_border, stroke_color)?;
-                display.fill_solid(&right_border, stroke_color)?;
-            }
-        }
-
-        Ok(())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
+        drawable::{Drawable, Pixel},
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},

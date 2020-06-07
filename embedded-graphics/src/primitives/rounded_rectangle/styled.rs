@@ -1,7 +1,7 @@
-use crate::pixelcolor::PixelColor;
-
 use crate::{
-    drawable::Pixel,
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
+    pixelcolor::PixelColor,
     primitives::{
         rounded_rectangle::{Points, RoundedRectangle},
         ContainsPoint,
@@ -66,6 +66,27 @@ where
         }
 
         None
+    }
+}
+
+impl<C> IntoIterator for &Styled<RoundedRectangle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = StyledRoundedRectangleIterator<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        StyledRoundedRectangleIterator::new(self)
+    }
+}
+
+impl<C> Drawable<C> for &Styled<RoundedRectangle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
     }
 }
 
