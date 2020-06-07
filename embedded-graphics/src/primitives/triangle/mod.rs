@@ -216,9 +216,7 @@ enum IterState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        drawable::Drawable, geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor,
-    };
+    use crate::geometry::Size;
 
     #[test]
     fn dimensions() {
@@ -241,81 +239,10 @@ mod tests {
         let tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
         let moved = tri.translate(Point::new(5, 10));
 
-        assert_eq!(moved.p1, Point::new(10, 20));
-        assert_eq!(moved.p2, Point::new(20, 30));
-        assert_eq!(moved.p3, Point::new(15, 25));
-    }
-
-    #[test]
-    fn it_draws_unfilled_tri_line_y() {
-        let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4))
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter();
-
-        // Nodes are returned twice. first line a and b yield the same point.
-        // After that line a ends where line c starts.
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 3), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 4), BinaryColor::On)));
-        assert_eq!(tri.next(), None);
-    }
-
-    #[test]
-    fn it_draws_filled_strokeless_tri() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-        display.set_allow_overdraw(true);
-
-        Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(4, 2))
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
-
-        #[rustfmt::skip]
         assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "     ",
-                "     ",
-                "  ###",
-                "  ## ",
-                "  #  ",
-            ])
+            moved,
+            Triangle::new(Point::new(10, 20), Point::new(20, 30), Point::new(15, 25))
         );
-    }
-
-    #[test]
-    fn it_draws_unfilled_tri_line_x() {
-        let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2))
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter();
-
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(3, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(3, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(4, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(4, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(4, 2), BinaryColor::On)));
-        assert_eq!(tri.next(), None);
-    }
-
-    #[test]
-    #[ignore]
-    fn it_can_be_negative() {
-        let mut tri = Triangle::new(Point::new(-2, -2), Point::new(2, 0), Point::new(-2, 0))
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter();
-
-        // Only the bottom of the triangle should be visible
-        assert_eq!(tri.next(), Some(Pixel(Point::new(0, 0), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 0), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(1, 0), BinaryColor::On)));
-        assert_eq!(tri.next(), Some(Pixel(Point::new(2, 0), BinaryColor::On)));
-        assert_eq!(tri.next(), None);
     }
 
     #[test]
@@ -327,51 +254,5 @@ mod tests {
 
             assert_eq!(triangle.contains(point), expected, "{:?}", point);
         }
-    }
-
-    #[test]
-    fn issue_308_infinite() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-        display.set_allow_overdraw(true);
-        display.set_allow_out_of_bounds_drawing(true);
-
-        Triangle::new(Point::new(10, 10), Point::new(20, 30), Point::new(30, -10))
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    #[test]
-    fn off_screen() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-        display.set_allow_overdraw(true);
-        display.set_allow_out_of_bounds_drawing(true);
-
-        Triangle::new(Point::new(5, 5), Point::new(10, 15), Point::new(15, -5))
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
-
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "          #####",
-                "         ######",
-                "        ###### ",
-                "       ####### ",
-                "      ######## ",
-                "     ######### ",
-                "     ########  ",
-                "      #######  ",
-                "      #######  ",
-                "       ######  ",
-                "       #####   ",
-                "        ####   ",
-                "        ####   ",
-                "         ###   ",
-                "         ##    ",
-                "          #    ",
-            ])
-        );
     }
 }
