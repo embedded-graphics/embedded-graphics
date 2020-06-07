@@ -276,12 +276,8 @@ impl Transform for Rectangle {
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
         geometry::{Dimensions, Point, Size},
-        mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::{ContainsPoint, Primitive},
-        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
     #[test]
@@ -312,28 +308,11 @@ mod tests {
 
     #[test]
     fn it_can_be_negative() {
-        let negative = Rectangle::new(Point::new(-2, -2), Size::new(4, 4))
-            .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
-            .into_iter();
+        let negative = Rectangle::new(Point::new(-2, -2), Size::new(4, 4)).points();
 
-        let positive = Rectangle::new(Point::new(2, 2), Size::new(4, 4))
-            .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
-            .into_iter();
+        let positive = Rectangle::new(Point::new(2, 2), Size::new(4, 4)).points();
 
-        assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(4, 4), c))));
-    }
-
-    #[test]
-    fn points_iter_matches_filled_styled() {
-        let rectangle = Rectangle::new(Point::new(10, 10), Size::new(20, 30));
-
-        let styled_points = rectangle
-            .clone()
-            .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
-            .into_iter()
-            .map(|Pixel(p, _)| p);
-
-        assert!(rectangle.points().eq(styled_points));
+        assert!(negative.eq(positive.map(|p| p - Point::new(4, 4))));
     }
 
     #[test]
@@ -367,67 +346,6 @@ mod tests {
 
         let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
         assert_eq!(even.bottom_right(), Some(Point::new(23, 37)));
-    }
-
-    #[test]
-    fn stroke_iter_vs_draw() {
-        const TOP_LEFT: Point = Point::new(5, 6);
-        const SIZE: Size = Size::new(10, 5);
-
-        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
-
-        let rectangle_center = Rectangle::new(TOP_LEFT, SIZE).into_styled(style);
-
-        let mut drawn_center = MockDisplay::new();
-        let mut iter_center = MockDisplay::new();
-        rectangle_center.draw(&mut drawn_center).unwrap();
-        rectangle_center.into_iter().draw(&mut iter_center).unwrap();
-        assert_eq!(drawn_center, iter_center);
-
-        let rectangle_inside = Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Inside)
-                    .build(),
-            );
-
-        let mut drawn_inside = MockDisplay::new();
-        let mut iter_inside = MockDisplay::new();
-        rectangle_inside.draw(&mut drawn_inside).unwrap();
-        rectangle_inside.into_iter().draw(&mut iter_inside).unwrap();
-        assert_eq!(drawn_inside, iter_inside);
-
-        let rectangle_outside = Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
-            .into_styled(
-                PrimitiveStyleBuilder::from(&style)
-                    .stroke_alignment(StrokeAlignment::Outside)
-                    .build(),
-            );
-
-        let mut drawn_outside = MockDisplay::new();
-        let mut iter_outside = MockDisplay::new();
-        rectangle_outside.draw(&mut drawn_outside).unwrap();
-        rectangle_outside
-            .into_iter()
-            .draw(&mut iter_outside)
-            .unwrap();
-        assert_eq!(drawn_outside, iter_outside);
-    }
-
-    #[test]
-    fn fill_iter_vs_draw() {
-        const TOP_LEFT: Point = Point::new(5, 6);
-        const SIZE: Size = Size::new(10, 5);
-
-        let style = PrimitiveStyle::with_fill(BinaryColor::On);
-
-        let rectangle = Rectangle::new(TOP_LEFT, SIZE).into_styled(style);
-
-        let mut drawn = MockDisplay::new();
-        let mut iter = MockDisplay::new();
-        rectangle.draw(&mut drawn).unwrap();
-        rectangle.into_iter().draw(&mut iter).unwrap();
-        assert_eq!(drawn, iter);
     }
 
     #[test]
@@ -474,69 +392,5 @@ mod tests {
         let rect2 = Rectangle::new(Point::new(-10, -10), Size::new(20, 20));
 
         assert_eq!(rect1.intersection(&rect2).size, Size::zero());
-    }
-
-    /// Compare the output of the draw() call vs iterators across multiple styles and stroke
-    /// alignments.
-    fn compare_drawable_iter(rect: Rectangle) {
-        let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::RED, 1);
-        let stroke = PrimitiveStyle::with_stroke(Rgb565::RED, 5);
-        let stroke_fill = PrimitiveStyleBuilder::new()
-            .stroke_color(Rgb565::RED)
-            .stroke_width(5)
-            .fill_color(Rgb565::GREEN)
-            .build();
-        let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
-
-        for (name, style) in [
-            ("thin_stroke", thin_stroke),
-            ("stroke", stroke),
-            ("stroke_fill", stroke_fill),
-            ("fill", fill),
-        ]
-        .iter()
-        {
-            for alignment in [
-                StrokeAlignment::Center,
-                StrokeAlignment::Inside,
-                StrokeAlignment::Outside,
-            ]
-            .iter()
-            {
-                let style = PrimitiveStyleBuilder::from(style)
-                    .stroke_alignment(*alignment)
-                    .build();
-
-                let mut display_drawable = MockDisplay::new();
-                let mut display_iter = MockDisplay::new();
-
-                // Calls draw() impl above using fill_solid()
-                rect.into_styled(style).draw(&mut display_drawable).unwrap();
-
-                // Calls draw_iter()
-                rect.into_styled(style)
-                    .into_iter()
-                    .draw(&mut display_iter)
-                    .unwrap();
-
-                assert_eq!(
-                    display_drawable, display_iter,
-                    "{} x {} rectangle with style '{}' and alignment {:?} does not match iterator",
-                    rect.size.width, rect.size.height, name, alignment
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn drawable_vs_iterator() {
-        compare_drawable_iter(Rectangle::new(Point::new(10, 20), Size::new(20, 30)))
-    }
-
-    #[test]
-    fn drawable_vs_iterator_squares() {
-        for i in 0..20 {
-            compare_drawable_iter(Rectangle::new(Point::new(7, 7), Size::new_equal(i)))
-        }
     }
 }
