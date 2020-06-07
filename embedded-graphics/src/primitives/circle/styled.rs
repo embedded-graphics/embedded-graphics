@@ -109,6 +109,104 @@ mod tests {
     };
 
     #[test]
+    fn filled_styled_matches_points_iterator() {
+        let circle = Circle::with_center(Point::new(10, 10), 5);
+
+        let styled_points = circle
+            .clone()
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .into_iter()
+            .map(|Pixel(p, _)| p);
+
+        assert!(circle.points().eq(styled_points));
+    }
+
+    #[test]
+    fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
+        let mut expected = MockDisplay::new();
+        let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
+        Circle::new(Point::new(5, 5), 4)
+            .into_styled(style)
+            .draw(&mut expected)?;
+
+        let mut with_stroke_width = MockDisplay::new();
+        style.stroke_width = 1;
+        Circle::new(Point::new(5, 5), 4)
+            .into_styled(style)
+            .draw(&mut with_stroke_width)?;
+
+        assert_eq!(expected, with_stroke_width);
+
+        Ok(())
+    }
+
+    // Check that tiny circles render as a "+" shape with a hole in the center
+    #[test]
+    fn tiny_circle() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+
+        Circle::new(Point::new(0, 0), 3)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut display)?;
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " # ",
+                "# #",
+                " # "
+            ])
+        );
+
+        Ok(())
+    }
+
+    // Check that tiny filled circle render as a "+" shape with NO hole in the center
+    #[test]
+    fn tiny_circle_filled() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+
+        Circle::new(Point::new(0, 0), 3)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)?;
+
+        #[rustfmt::skip]
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                " # ",
+                "###",
+                " # "
+            ])
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn transparent_border() {
+        let circle: Styled<Circle, PrimitiveStyle<BinaryColor>> =
+            Circle::new(Point::new(-5, -5), 21)
+                .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
+
+        assert!(circle.into_iter().count() > 0);
+    }
+
+    #[test]
+    fn it_handles_negative_coordinates() {
+        let positive = Circle::new(Point::new(10, 10), 5)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter();
+
+        let negative = Circle::new(Point::new(-10, -10), 5)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .into_iter();
+
+        assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
+    }
+
+    #[test]
     fn stroke_alignment() {
         const CENTER: Point = Point::new(15, 15);
         const SIZE: u32 = 10;

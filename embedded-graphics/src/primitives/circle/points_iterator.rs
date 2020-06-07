@@ -36,20 +36,122 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel, geometry::Point, pixelcolor::BinaryColor, primitives::Primitive,
-        style::PrimitiveStyle,
+        geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor, primitives::Primitive,
     };
 
+    fn test_circle(diameter: u32, pattern: &[&str]) {
+        let display = MockDisplay::<BinaryColor>::from_points(
+            Circle::new(Point::new(0, 0), diameter).points(),
+        );
+
+        assert_eq!(display, MockDisplay::from_pattern(pattern));
+    }
+
     #[test]
-    fn points_iter() {
-        let circle = Circle::with_center(Point::new(10, 10), 5);
+    fn circle_1() {
+        #[rustfmt::skip]
+        test_circle(1, &[
+            "#",
+        ],);
+    }
 
-        let styled_points = circle
-            .clone()
-            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_iter()
-            .map(|Pixel(p, _)| p);
+    #[test]
+    fn circle_2() {
+        #[rustfmt::skip]
+        test_circle(2, &[
+            "##",
+            "##",
+        ],);
+    }
 
-        assert!(circle.points().eq(styled_points));
+    #[test]
+    fn circle_3() {
+        #[rustfmt::skip]
+        test_circle(3, &[
+            " # ",
+            "###",
+            " # ",
+        ],);
+    }
+
+    #[test]
+    fn circle_4() {
+        #[rustfmt::skip]
+        test_circle(4, &[
+            " ## ",
+            "####",
+            "####",
+            " ## ",
+        ],);
+    }
+
+    #[test]
+    fn circle_5() {
+        #[rustfmt::skip]
+        test_circle(5, &[
+            " ### ",
+            "#####",
+            "#####",
+            "#####",
+            " ### ",
+        ],);
+    }
+
+    #[test]
+    fn circle_6() {
+        #[rustfmt::skip]
+        test_circle(6, &[
+            " #### ",
+            "######",
+            "######",
+            "######",
+            "######",
+            " #### ",
+        ],);
+    }
+
+    #[test]
+    fn circle_7() {
+        #[rustfmt::skip]
+        test_circle(7, &[
+            "  ###  ",
+            " ##### ",
+            "#######",
+            "#######",
+            "#######",
+            " ##### ",
+            "  ###  ",
+        ],);
+    }
+
+    #[test]
+    fn circle_8() {
+        #[rustfmt::skip]
+        test_circle(8, &[
+            "  ####  ",
+            " ###### ",
+            "########",
+            "########",
+            "########",
+            "########",
+            " ###### ",
+            "  ####  ",
+        ],);
+    }
+
+    #[test]
+    fn circle_9() {
+        #[rustfmt::skip]
+        test_circle(9, &[
+            "  #####  ",
+            " ####### ",
+            "#########",
+            "#########",
+            "#########",
+            "#########",
+            "#########",
+            " ####### ",
+            "  #####  ",
+        ],);
     }
 }
