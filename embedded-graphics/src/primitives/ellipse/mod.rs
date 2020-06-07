@@ -102,7 +102,7 @@ impl Ellipse {
 ///
 /// This method is used to accurately calculate the outside edge of the ellipse.
 /// The result is not equivalent to `Ellipse::center() * 2` because of rounding.
-pub(crate) fn center_2x(top_left: Point, size: Size) -> Point {
+pub(in crate::primitives) fn center_2x(top_left: Point, size: Size) -> Point {
     let radius = size.saturating_sub(Size::new(1, 1));
 
     top_left * 2 + radius
@@ -166,7 +166,7 @@ impl Transform for Ellipse {
     }
 }
 
-pub(crate) fn compute_threshold(size: Size) -> (Size, u32) {
+pub(in crate::primitives) fn compute_threshold(size: Size) -> (Size, u32) {
     let Size { width, height } = size;
 
     let a = width.pow(2);
@@ -185,7 +185,11 @@ pub(crate) fn compute_threshold(size: Size) -> (Size, u32) {
 /// Uses the ellipse equation b^2 * x^2 + a^2 * y^2 - a^2 * b^2 to return a value signifying whether
 /// a given point lies inside (`true`) or outside (`false`) an ellipse centered around `(0, 0)` with
 /// width and height defined by the `size` parameter.
-pub(crate) fn is_point_inside_ellipse(size: Size, point: Point, threshold: u32) -> bool {
+pub(in crate::primitives) fn is_point_inside_ellipse(
+    size: Size,
+    point: Point,
+    threshold: u32,
+) -> bool {
     let Size {
         width: a,
         height: b,

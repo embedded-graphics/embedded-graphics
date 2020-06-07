@@ -27,7 +27,7 @@ impl<C> StyledEllipseIterator<C>
 where
     C: PixelColor,
 {
-    pub(crate) fn new(styled: &Styled<Ellipse, PrimitiveStyle<C>>) -> Self {
+    pub(in crate::primitives) fn new(styled: &Styled<Ellipse, PrimitiveStyle<C>>) -> Self {
         let Styled { primitive, style } = styled;
 
         let iter = if !styled.style.is_transparent() {

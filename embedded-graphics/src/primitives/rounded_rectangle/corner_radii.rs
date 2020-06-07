@@ -56,7 +56,7 @@ impl CornerRadii {
     }
 
     /// Confine corner radii that are too large to a given bounding rectangle
-    pub(crate) fn confine(self, bounding_box: Size) -> Self {
+    pub(in crate::primitives) fn confine(self, bounding_box: Size) -> Self {
         let mut overlap = 0;
         let mut size = 0;
         let mut corner_size = 0;

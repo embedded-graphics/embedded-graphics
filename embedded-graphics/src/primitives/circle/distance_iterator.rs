@@ -15,14 +15,14 @@ pub struct DistanceIterator {
 }
 
 impl DistanceIterator {
-    pub(crate) fn new(circle: &Circle) -> Self {
+    pub(in crate::primitives) fn new(circle: &Circle) -> Self {
         Self {
             center: circle.center_2x(),
             points: circle.bounding_box().points(),
         }
     }
 
-    pub(crate) fn empty() -> Self {
+    pub(in crate::primitives) fn empty() -> Self {
         Self {
             center: Point::zero(),
             points: Rectangle::new(Point::zero(), Size::zero()).points(),

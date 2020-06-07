@@ -9,7 +9,7 @@ pub struct Points {
 }
 
 impl Points {
-    pub(crate) fn new(rectangle: &Rectangle) -> Self {
+    pub(in crate::primitives) fn new(rectangle: &Rectangle) -> Self {
         // This doesn't use rectangle.bottom_right() to intentionally set bottom_right
         // to an coordinate outside the rectangle if the width or height is zero, which
         // stops the iterator.
@@ -22,7 +22,7 @@ impl Points {
         }
     }
 
-    pub(crate) const fn empty() -> Self {
+    pub(in crate::primitives) const fn empty() -> Self {
         Self {
             left: 0,
             bottom_right: Point::new(-1, -1),

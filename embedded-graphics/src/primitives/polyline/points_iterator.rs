@@ -19,7 +19,7 @@ pub struct Points<'a> {
 }
 
 impl<'a> Points<'a> {
-    pub(crate) fn new<'b>(polyline: &'b Polyline<'a>) -> Self
+    pub(in crate::primitives) fn new<'b>(polyline: &'b Polyline<'a>) -> Self
     where
         'a: 'b,
     {

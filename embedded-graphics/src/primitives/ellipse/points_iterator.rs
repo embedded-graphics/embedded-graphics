@@ -17,7 +17,7 @@ pub struct Points {
 }
 
 impl Points {
-    pub(crate) fn new(ellipse: &Ellipse) -> Self {
+    pub(in crate::primitives) fn new(ellipse: &Ellipse) -> Self {
         let (size_sq, threshold) = compute_threshold(ellipse.size);
 
         Self {
@@ -28,7 +28,7 @@ impl Points {
         }
     }
 
-    pub(crate) fn empty() -> Self {
+    pub(in crate::primitives) fn empty() -> Self {
         Self {
             iter: Rectangle::new(Point::zero(), Size::zero()).points(),
             center_2x: Point::zero(),

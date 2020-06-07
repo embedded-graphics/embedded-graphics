@@ -116,13 +116,13 @@ impl Rectangle {
         self.top_left + self.size.center_offset()
     }
 
-    pub(crate) fn expand(&self, offset: u32) -> Self {
+    pub(in crate::primitives) fn expand(&self, offset: u32) -> Self {
         let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
 
         Self::with_center(self.center(), size)
     }
 
-    pub(crate) fn shrink(&self, offset: u32) -> Self {
+    pub(in crate::primitives) fn shrink(&self, offset: u32) -> Self {
         let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
 
         Self::with_center(self.center(), size)

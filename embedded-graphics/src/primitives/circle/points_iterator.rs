@@ -11,7 +11,7 @@ pub struct Points {
 }
 
 impl Points {
-    pub(crate) fn new(circle: &Circle) -> Self {
+    pub(in crate::primitives) fn new(circle: &Circle) -> Self {
         let threshold = diameter_to_threshold(circle.diameter);
 
         Self {

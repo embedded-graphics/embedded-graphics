@@ -25,7 +25,7 @@ impl<C> StyledCircleIterator<C>
 where
     C: PixelColor,
 {
-    pub(crate) fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
+    pub(in crate::primitives) fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
         let Styled { primitive, style } = styled;
 
         let stroke_area = primitive.expand(style.outside_stroke_width());

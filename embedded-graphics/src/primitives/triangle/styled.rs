@@ -24,7 +24,7 @@ impl<C> StyledTriangleIterator<C>
 where
     C: PixelColor,
 {
-    pub(crate) fn new(styled: &Styled<Triangle, PrimitiveStyle<C>>) -> Self {
+    pub(in crate::primitives) fn new(styled: &Styled<Triangle, PrimitiveStyle<C>>) -> Self {
         let iter = if !styled.style.is_transparent() {
             ScanlineIterator::new(&styled.primitive)
         } else {

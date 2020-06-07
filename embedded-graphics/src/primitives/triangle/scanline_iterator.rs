@@ -29,7 +29,7 @@ pub struct ScanlineIterator {
 }
 
 impl ScanlineIterator {
-    pub(crate) fn new(triangle: &Triangle) -> Self {
+    pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
         let mut line_a = Line::new(v1, v2).points();
@@ -53,7 +53,7 @@ impl ScanlineIterator {
         }
     }
 
-    pub(crate) fn empty() -> Self {
+    pub(in crate::primitives) fn empty() -> Self {
         Self {
             line_a: line::Points::empty(),
             line_b: line::Points::empty(),

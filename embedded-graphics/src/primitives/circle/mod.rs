@@ -91,13 +91,13 @@ impl Circle {
         self.top_left * 2 + Size::new(radius, radius)
     }
 
-    pub(crate) fn expand(&self, offset: u32) -> Self {
+    pub(in crate::primitives) fn expand(&self, offset: u32) -> Self {
         let diameter = self.diameter.saturating_add(2 * offset);
 
         Self::with_center(self.center(), diameter)
     }
 
-    pub(crate) fn shrink(&self, offset: u32) -> Self {
+    pub(in crate::primitives) fn shrink(&self, offset: u32) -> Self {
         let diameter = self.diameter.saturating_sub(2 * offset);
 
         Self::with_center(self.center(), diameter)

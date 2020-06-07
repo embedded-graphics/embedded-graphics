@@ -29,7 +29,7 @@ impl<C> StyledRectangleIterator<C>
 where
     C: PixelColor,
 {
-    pub(crate) fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
+    pub(in crate::primitives) fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
         let Styled { style, primitive } = styled;
 
         let iter = if !style.is_transparent() {

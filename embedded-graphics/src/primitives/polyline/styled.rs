@@ -20,7 +20,7 @@ impl<'a, C> StyledPolylineIterator<'a, C>
 where
     C: PixelColor,
 {
-    pub(crate) fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
+    pub(in crate::primitives) fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
         StyledPolylineIterator {
             stroke_color: styled.style.effective_stroke_color(),
             line_iter: styled.primitive.points(),

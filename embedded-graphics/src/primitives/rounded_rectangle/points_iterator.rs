@@ -27,7 +27,7 @@ pub struct Points {
 }
 
 impl Points {
-    pub(crate) fn new(shape: &RoundedRectangle) -> Self {
+    pub(in crate::primitives) fn new(shape: &RoundedRectangle) -> Self {
         let top_left_ellipse = shape.get_confined_corner_quadrant(Quadrant::TopLeft);
         let top_right_ellipse = shape.get_confined_corner_quadrant(Quadrant::TopRight);
         let bottom_right_ellipse = shape.get_confined_corner_quadrant(Quadrant::BottomRight);
@@ -48,7 +48,7 @@ impl Points {
         }
     }
 
-    pub(crate) fn empty() -> Self {
+    pub(in crate::primitives) fn empty() -> Self {
         Self {
             rect_iter: rectangle::Points::empty(),
             top_left_iter: ellipse_quadrant::Points::empty(),

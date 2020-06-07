@@ -8,7 +8,7 @@ use crate::{
 pub struct Points(ScanlineIterator);
 
 impl Points {
-    pub(crate) fn new(triangle: &Triangle) -> Self {
+    pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
         Self(ScanlineIterator::new(triangle))
     }
 }
