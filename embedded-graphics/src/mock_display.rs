@@ -167,7 +167,7 @@
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
 
 use crate::{
-    drawable::Pixel,
+    drawable::{Drawable, Pixel},
     geometry::{Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
@@ -313,6 +313,23 @@ where
         }
 
         target
+    }
+}
+
+impl MockDisplay<BinaryColor> {
+    /// TODO: Docs
+    pub fn from_points<I>(points: I) -> Self
+    where
+        I: Iterator<Item = Point>,
+    {
+        let mut display = MockDisplay::new();
+
+        points
+            .map(|p| Pixel(p, BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        display
     }
 }
 
@@ -479,6 +496,9 @@ pub trait ColorMapping {
 
     /// Converts a color of type `C` into a char.
     fn color_to_char(color: Self) -> char;
+
+    /// Default color to show an "on" pixel with
+    fn on() -> Self;
 }
 
 impl ColorMapping for BinaryColor {
@@ -495,6 +515,10 @@ impl ColorMapping for BinaryColor {
             BinaryColor::Off => '.',
             BinaryColor::On => '#',
         }
+    }
+
+    fn on() -> Self {
+        BinaryColor::On
     }
 }
 
@@ -543,6 +567,10 @@ impl ColorMapping for Gray8 {
                 .to_ascii_uppercase()
         }
     }
+
+    fn on() -> Self {
+        Gray8::WHITE
+    }
 }
 
 macro_rules! impl_rgb_color_mapping {
@@ -574,6 +602,10 @@ macro_rules! impl_rgb_color_mapping {
                     Self::WHITE => 'W',
                     _ => '?',
                 }
+            }
+
+            fn on() -> Self {
+                Self::WHITE
             }
         }
     };
