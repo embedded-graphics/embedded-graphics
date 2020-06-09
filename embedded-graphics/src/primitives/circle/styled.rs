@@ -1,8 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::circle::{diameter_to_threshold, distance_iterator::DistanceIterator, Circle},
+    primitives::rectangle::{self, Rectangle},
+    primitives::Primitive,
     style::{PrimitiveStyle, Styled},
 };
 
@@ -12,7 +15,7 @@ pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: DistanceIterator,
+    iter: DistanceIterator<rectangle::Points>,
 
     outer_threshold: u32,
     outer_color: Option<C>,
@@ -35,9 +38,12 @@ where
         let outer_threshold = diameter_to_threshold(stroke_area.diameter);
 
         let iter = if !styled.style.is_transparent() {
-            DistanceIterator::new(&stroke_area)
+            DistanceIterator::new(stroke_area.center_2x(), stroke_area.bounding_box().points())
         } else {
-            DistanceIterator::empty()
+            DistanceIterator::new(
+                Point::zero(),
+                Rectangle::new(Point::zero(), Size::zero()).points(),
+            )
         };
 
         Self {
@@ -101,7 +107,7 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable,
-        geometry::{Dimensions, Point},
+        geometry::Dimensions,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::Primitive,

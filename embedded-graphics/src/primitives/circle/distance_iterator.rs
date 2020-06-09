@@ -1,36 +1,25 @@
-use crate::{
-    geometry::{Dimensions, Point, Size},
-    primitives::{
-        circle::Circle,
-        rectangle::{self, Rectangle},
-        Primitive,
-    },
-};
+use crate::geometry::Point;
 
 /// Iterator that returns the squared distance to the center for all points in the bounding box.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct DistanceIterator {
+pub struct DistanceIterator<I> {
     center: Point,
-    points: rectangle::Points,
+    points: I,
 }
 
-impl DistanceIterator {
-    pub(in crate::primitives) fn new(circle: &Circle) -> Self {
-        Self {
-            center: circle.center_2x(),
-            points: circle.bounding_box().points(),
-        }
-    }
-
-    pub(in crate::primitives) fn empty() -> Self {
-        Self {
-            center: Point::zero(),
-            points: Rectangle::new(Point::zero(), Size::zero()).points(),
-        }
+impl<I> DistanceIterator<I>
+where
+    I: Iterator<Item = Point>,
+{
+    pub(in crate::primitives) fn new(center: Point, points: I) -> Self {
+        Self { center, points }
     }
 }
 
-impl Iterator for DistanceIterator {
+impl<I> Iterator for DistanceIterator<I>
+where
+    I: Iterator<Item = Point>,
+{
     type Item = (Point, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -45,13 +34,13 @@ impl Iterator for DistanceIterator {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::super::*;
 
     #[test]
     fn distance_iter() {
         let circle = Circle::new(Point::zero(), 3);
 
-        let mut iter = DistanceIterator::new(&circle);
+        let mut iter = DistanceIterator::new(circle.center_2x(), circle.bounding_box().points());
         assert_eq!(iter.next(), Some((Point::new(0, 0), 8)));
         assert_eq!(iter.next(), Some((Point::new(1, 0), 4)));
         assert_eq!(iter.next(), Some((Point::new(2, 0), 8)));
@@ -66,7 +55,10 @@ mod tests {
 
     #[test]
     fn distance_iter_empty() {
-        let mut iter = DistanceIterator::empty();
+        let mut iter = DistanceIterator::new(
+            Point::zero(),
+            Rectangle::new(Point::zero(), Size::zero()).points(),
+        );
         assert_eq!(iter.next(), None);
     }
 }
