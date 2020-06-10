@@ -12,6 +12,7 @@ use crate::{
 };
 pub use points::Points;
 pub use styled::StyledPixels;
+pub use thick_points::ThickPoints;
 
 /// Line primitive
 ///
