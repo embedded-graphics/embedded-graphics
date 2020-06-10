@@ -229,10 +229,42 @@ where
         self.pixels[x as usize + y as usize * SIZE]
     }
 
-    /// Changes the color of a pixel.
+    /// Changes the value of a pixel without bounds checking.
     pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
         let i = point.x + point.y * SIZE as i32;
         self.pixels[i as usize] = color;
+    }
+
+    /// Changes the color of a pixel.
+    ///
+    /// # Panics
+    ///
+    /// If out of bounds draw checking is enabled (default), this method will panic if the point
+    /// lies outside the display area. This behaviour can be disabled by calling
+    /// [`set_allow_out_of_bounds_drawing(true)`].
+    ///
+    /// Similarly, overdraw is checked by default and will panic if a point is drawn to the same
+    /// coordinate twice. This behaviour can be disabled by calling [`set_allow_overdraw(true)`].
+    ///
+    /// [`set_allow_out_of_bounds_drawing(true)`]: #method.set_allow_out_of_bounds_drawing
+    /// [`set_allow_overdraw(true)`]: #method.set_allow_overdraw
+    pub fn draw_pixel(&mut self, point: Point, color: C) {
+        if !DISPLAY_AREA.contains(point) {
+            if !self.allow_out_of_bounds_drawing {
+                panic!(
+                    "tried to draw pixel outside the display area (x: {}, y: {})",
+                    point.x, point.y
+                );
+            } else {
+                return;
+            }
+        }
+
+        if !self.allow_overdraw && self.get_pixel(point).is_some() {
+            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
+        }
+
+        self.set_pixel(point, Some(color));
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -313,6 +345,50 @@ where
         }
 
         target
+    }
+}
+
+impl MockDisplay<BinaryColor> {
+    /// Create a mock display from an iterator of [`Point`]s.
+    ///
+    /// This method can be used to create a mock display from the iterator produced by the
+    /// [`Primitive::points`] method.
+    ///
+    /// The color type used in the returned display is [`BinaryColor`], which can be mapped to
+    /// another color type using the [`map`] method.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use embedded_graphics::{prelude::*, primitives::Circle, mock_display::MockDisplay};
+    ///
+    /// let circle = Circle::new(Point::new(0, 0), 4);
+    ///
+    /// let mut display = MockDisplay::from_points(circle.points());
+    ///
+    /// assert_eq!(display, MockDisplay::from_pattern(&[
+    ///     " ## ",
+    ///     "####",
+    ///     "####",
+    ///     " ## ",
+    /// ]));
+    /// ```
+    ///
+    /// [`Point`]: ../geometry/struct.Point.html
+    /// [`Primitive::points`]: ../primitives/trait.Primitive.html#tymethod.points
+    /// [`map`]: #method.map
+    /// [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
+    pub fn from_points<I>(points: I) -> Self
+    where
+        I: IntoIterator<Item = Point>,
+    {
+        let mut display = MockDisplay::new();
+
+        for point in points.into_iter() {
+            display.set_pixel(point, Some(BinaryColor::On));
+        }
+
+        display
     }
 }
 
@@ -442,22 +518,7 @@ where
         for pixel in pixels.into_iter() {
             let Pixel(point, color) = pixel;
 
-            if !DISPLAY_AREA.contains(point) {
-                if self.allow_out_of_bounds_drawing {
-                    continue;
-                } else {
-                    panic!(
-                        "tried to draw pixel outside the display area (x: {}, y: {})",
-                        point.x, point.y
-                    );
-                }
-            }
-
-            if !self.allow_overdraw && self.get_pixel(point).is_some() {
-                panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
-            }
-
-            self.set_pixel(point, Some(color));
+            self.draw_pixel(point, color);
         }
 
         Ok(())

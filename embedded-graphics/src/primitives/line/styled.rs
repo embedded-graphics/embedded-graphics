@@ -1,5 +1,6 @@
 use crate::{
-    drawable::Pixel,
+    draw_target::DrawTarget,
+    drawable::{Drawable, Pixel},
     pixelcolor::PixelColor,
     primitives::line::{thick_points::ThickPoints, Line},
     style::{PrimitiveStyle, Styled},
@@ -7,7 +8,7 @@ use crate::{
 
 /// Styled line iterator.
 #[derive(Clone, Debug)]
-pub struct StyledIterator<C>
+pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -15,7 +16,7 @@ where
     line_iter: ThickPoints,
 }
 
-impl<C: PixelColor> StyledIterator<C> {
+impl<C: PixelColor> StyledPixels<C> {
     pub(in crate::primitives::line) fn new(styled: &Styled<Line, PrimitiveStyle<C>>) -> Self {
         let Styled { primitive, style } = styled;
 
@@ -30,7 +31,7 @@ impl<C: PixelColor> StyledIterator<C> {
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<C: PixelColor> Iterator for StyledIterator<C> {
+impl<C: PixelColor> Iterator for StyledPixels<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -40,5 +41,26 @@ impl<C: PixelColor> Iterator for StyledIterator<C> {
         self.line_iter
             .next()
             .map(|point| Pixel(point, stroke_color))
+    }
+}
+
+impl<'a, C> IntoIterator for &'a Styled<Line, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = StyledPixels<C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        StyledPixels::new(self)
+    }
+}
+
+impl<'a, C: 'a> Drawable<C> for &Styled<Line, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+        display.draw_iter(self)
     }
 }

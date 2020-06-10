@@ -17,7 +17,7 @@ pub enum Quadrant {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) struct EllipseQuadrant {
+pub(in crate::primitives) struct EllipseQuadrant {
     bounding_box: Rectangle,
     size_sq: Size,
     threshold: u32,
@@ -65,7 +65,7 @@ impl ContainsPoint for EllipseQuadrant {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) struct Points {
+pub(in crate::primitives) struct Points {
     iter: rectangle::Points,
     size_sq: Size,
     threshold: u32,
@@ -82,7 +82,7 @@ impl Points {
         }
     }
 
-    pub(crate) const fn empty() -> Self {
+    pub(in crate::primitives) const fn empty() -> Self {
         Self {
             iter: rectangle::Points::empty(),
             size_sq: Size::zero(),
@@ -113,7 +113,13 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{drawable::Pixel, mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*};
+    use crate::{
+        drawable::{Drawable, Pixel},
+        geometry::{Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::Primitive,
+    };
 
     #[test]
     fn quadrants_even_size() {
