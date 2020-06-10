@@ -167,7 +167,7 @@
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
 
 use crate::{
-    drawable::{Drawable, Pixel},
+    drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
@@ -230,7 +230,34 @@ where
     }
 
     /// Changes the color of a pixel.
-    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+    ///
+    /// # Panics
+    ///
+    /// If out of bounds draw checking is enabled (default), this method will panic if the point
+    /// lies outside the display area. This behaviour can be disabled by calling
+    /// [`set_allow_out_of_bounds_drawing(true)`].
+    ///
+    /// Similarly, overdraw is checked by default and will panic if a point is drawn to the same
+    /// coordinate twice. This behaviour can be disabled by calling [`set_allow_overdraw(true)`].
+    ///
+    /// [`set_allow_out_of_bounds_drawing(true)`]: #method.set_allow_out_of_bounds_drawing
+    /// [`set_allow_overdraw(true)`]: #method.set_allow_overdraw
+    pub fn draw_pixel(&mut self, point: Point, color: Option<C>) {
+        if !DISPLAY_AREA.contains(point) {
+            if !self.allow_out_of_bounds_drawing {
+                panic!(
+                    "tried to draw pixel outside the display area (x: {}, y: {})",
+                    point.x, point.y
+                );
+            } else {
+                return;
+            }
+        }
+
+        if !self.allow_overdraw && self.get_pixel(point).is_some() {
+            panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
+        }
+
         let i = point.x + point.y * SIZE as i32;
         self.pixels[i as usize] = color;
     }
@@ -270,7 +297,7 @@ where
         let mut mirrored = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            mirrored.set_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
+            mirrored.draw_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
         }
 
         mirrored
@@ -309,7 +336,7 @@ where
         let mut target = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            target.set_pixel(point, self.get_pixel(point).map(f))
+            target.draw_pixel(point, self.get_pixel(point).map(f))
         }
 
         target
@@ -317,17 +344,44 @@ where
 }
 
 impl MockDisplay<BinaryColor> {
-    /// TODO: Docs
+    /// Create a mock display from an iterator of [`Point`]s.
+    ///
+    /// This method can be used to create a mock display from the iterator produced by the
+    /// [`Primitive::points`] method.
+    ///
+    /// The color type used in the returned display is [`BinaryColor`], which can be mapped to
+    /// another color type using the [`map`] method.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use embedded_graphics::{prelude::*, primitives::Circle, mock_display::MockDisplay};
+    ///
+    /// let circle = Circle::new(Point::new(0, 0), 4);
+    ///
+    /// let mut display = MockDisplay::from_points(circle.points());
+    ///
+    /// assert_eq!(display, MockDisplay::from_pattern(&[
+    ///     " ## ",
+    ///     "####",
+    ///     "####",
+    ///     " ## ",
+    /// ]));
+    /// ```
+    ///
+    /// [`Point`]: ../geometry/struct.Point.html
+    /// [`Primitive::points`]: ../primitives/trait.Primitive.html#tymethod.points
+    /// [`map`]: #method.map
+    /// [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
     pub fn from_points<I>(points: I) -> Self
     where
-        I: Iterator<Item = Point>,
+        I: IntoIterator<Item = Point>,
     {
         let mut display = MockDisplay::new();
 
-        points
-            .map(|p| Pixel(p, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+        for point in points.into_iter() {
+            display.draw_pixel(point, Some(BinaryColor::On));
+        }
 
         display
     }
@@ -459,22 +513,7 @@ where
         for pixel in pixels.into_iter() {
             let Pixel(point, color) = pixel;
 
-            if !DISPLAY_AREA.contains(point) {
-                if self.allow_out_of_bounds_drawing {
-                    continue;
-                } else {
-                    panic!(
-                        "tried to draw pixel outside the display area (x: {}, y: {})",
-                        point.x, point.y
-                    );
-                }
-            }
-
-            if !self.allow_overdraw && self.get_pixel(point).is_some() {
-                panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
-            }
-
-            self.set_pixel(point, Some(color));
+            self.draw_pixel(point, Some(color));
         }
 
         Ok(())

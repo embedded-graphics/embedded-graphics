@@ -262,7 +262,7 @@ mod tests {
                     Gray8::new(line_number * 0x11)
                 };
 
-                display.set_pixel(point, Some(color));
+                display.draw_pixel(point, Some(color));
             }
         }
 
