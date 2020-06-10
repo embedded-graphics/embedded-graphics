@@ -1,6 +1,6 @@
 //! The rectangle primitive. Also good for drawing squares.
 
-mod points_iterator;
+mod points;
 mod styled;
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
     transform::Transform,
 };
 use core::cmp::min;
-pub use points_iterator::Points;
+pub use points::Points;
 pub use styled::StyledRectangleIterator;
 
 /// Rectangle primitive

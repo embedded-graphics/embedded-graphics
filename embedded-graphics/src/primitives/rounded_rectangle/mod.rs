@@ -2,7 +2,7 @@
 
 mod corner_radii;
 mod ellipse_quadrant;
-mod points_iterator;
+mod points;
 mod styled;
 
 use crate::{
@@ -12,7 +12,7 @@ use crate::{
 };
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
 use ellipse_quadrant::{EllipseQuadrant, Quadrant};
-pub use points_iterator::Points;
+pub use points::Points;
 pub use styled::StyledRoundedRectangleIterator;
 
 /// Rounded rectangle primitive.

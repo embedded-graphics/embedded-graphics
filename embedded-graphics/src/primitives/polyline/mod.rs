@@ -1,6 +1,6 @@
 //! The polyline primitive
 
-mod points_iterator;
+mod points;
 mod styled;
 
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
     primitives::{Primitive, Rectangle},
     transform::Transform,
 };
-pub use points_iterator::Points;
+pub use points::Points;
 pub use styled::StyledPolylineIterator;
 
 /// Polyline primitive

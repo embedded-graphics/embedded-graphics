@@ -109,7 +109,7 @@ mod tests {
     };
 
     #[test]
-    fn filled_styled_matches_points_iterator() {
+    fn filled_styled_matches_points() {
         let circle = Circle::with_center(Point::new(10, 10), 5);
 
         let styled_points = circle

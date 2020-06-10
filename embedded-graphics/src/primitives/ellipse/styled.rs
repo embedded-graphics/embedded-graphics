@@ -3,9 +3,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
     pixelcolor::PixelColor,
-    primitives::ellipse::{
-        compute_threshold, is_point_inside_ellipse, points_iterator::Points, Ellipse,
-    },
+    primitives::ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
     style::{PrimitiveStyle, Styled},
 };
 

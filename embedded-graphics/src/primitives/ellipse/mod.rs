@@ -1,6 +1,6 @@
 //! The ellipse primitive
 
-mod points_iterator;
+mod points;
 mod styled;
 
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
     primitives::{circle, ContainsPoint, Primitive, Rectangle},
     transform::Transform,
 };
-pub use points_iterator::Points;
+pub use points::Points;
 pub use styled::StyledEllipseIterator;
 
 /// Ellipse primitive

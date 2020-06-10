@@ -1,7 +1,7 @@
 //! The circle primitive
 
 mod distance_iterator;
-mod points_iterator;
+mod points;
 mod styled;
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
     primitives::{ContainsPoint, Primitive, Rectangle},
     transform::Transform,
 };
-pub use points_iterator::Points;
+pub use points::Points;
 pub use styled::StyledCircleIterator;
 
 /// Circle primitive

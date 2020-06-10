@@ -1,6 +1,6 @@
 //! The triangle primitive.
 
-mod points_iterator;
+mod points;
 mod scanline_iterator;
 mod styled;
 
@@ -16,7 +16,7 @@ use core::{
     borrow::Borrow,
     cmp::{max, min},
 };
-pub use points_iterator::Points;
+pub use points::Points;
 pub use styled::StyledTriangleIterator;
 
 /// Triangle primitive
