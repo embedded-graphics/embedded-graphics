@@ -30,6 +30,31 @@
 //! | `'.'`     | `Some(BinaryColor::Off)` | Pixel was changed to `BinaryColor::Off` |
 //! | `'#'`     | `Some(BinaryColor::On)`  | Pixel was changed to `BinaryColor::On`  |
 //!
+//! # Characters used in [`Gray2`] patterns
+//!
+//! The following mappings are available for [`Gray2`]:
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'0'`     | `Some(Gray2::new(0x0))`  | Pixel was changed to `Gray2::new(0x0)`  |
+//! | `'1'`     | `Some(Gray2::new(0x1))`  | Pixel was changed to `Gray2::new(0x1)`  |
+//! | `'2'`     | `Some(Gray2::new(0x2))`  | Pixel was changed to `Gray2::new(0x2)`  |
+//! | `'3'`     | `Some(Gray2::new(0x3))`  | Pixel was changed to `Gray2::new(0x3)`  |
+//!
+//! # Characters used in [`Gray4`] patterns
+//!
+//! The following mappings are available for [`Gray4`]:
+//!
+//! | Character | Color                    | Description                             |
+//! |-----------|--------------------------|-----------------------------------------|
+//! | `' '`     | `None`                   | No drawing operation changed the pixel  |
+//! | `'0'`     | `Some(Gray4::new(0x0))`  | Pixel was changed to `Gray4::new(0x0)`  |
+//! | `'1'`     | `Some(Gray4::new(0x1))`  | Pixel was changed to `Gray4::new(0x1)`  |
+//! | ⋮         | ⋮                        | ⋮                                      |
+//! | `'E'`     | `Some(Gray4::new(0xE))`  | Pixel was changed to `Gray4::new(0xE)`  |
+//! | `'F'`     | `Some(Gray4::new(0xF))`  | Pixel was changed to `Gray4::new(0xF)`  |
+//!
 //! # Characters used in [`Gray8`] patterns
 //!
 //! The following mappings are available for [`Gray8`]:
@@ -43,6 +68,9 @@
 //! | `'E'`     | `Some(Gray8::new(0xEE))` | Pixel was changed to `Gray8::new(0xEE)` |
 //! | `'F'`     | `Some(Gray8::new(0xFF))` | Pixel was changed to `Gray8::new(0xFF)` |
 //!
+//! Note: `Gray8` uses a different mapping than `Gray2` and `Gray4`, by duplicating the pattern
+//! value into the high and low nibble. This allows using a single digit to test luma values ranging
+//! from 0 to 255.
 //!
 //! # Characters used in RGB color patterns
 //!
@@ -142,8 +170,8 @@ use crate::{
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::{
-        Bgr555, Bgr565, Bgr888, BinaryColor, Gray8, GrayColor, PixelColor, Rgb555, Rgb565, Rgb888,
-        RgbColor,
+        Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
+        Rgb565, Rgb888, RgbColor,
     },
     prelude::Primitive,
     primitives::{ContainsPoint, Rectangle},
@@ -470,17 +498,39 @@ impl ColorMapping for BinaryColor {
     }
 }
 
+macro_rules! impl_gray_color_mapping {
+    ($type:ident, $radix:expr) => {
+        impl ColorMapping for $type {
+            fn char_to_color(c: char) -> Self {
+                if let Some(digit) = c.to_digit($radix) {
+                    Self::new(digit as u8)
+                } else {
+                    panic!("invalid char in pattern: '{}'", c)
+                }
+            }
+
+            fn color_to_char(color: Self) -> char {
+                core::char::from_digit(color.luma() as u32, $radix)
+                    .unwrap()
+                    .to_ascii_uppercase()
+            }
+        }
+    };
+}
+
+impl_gray_color_mapping!(Gray2, 4);
+impl_gray_color_mapping!(Gray4, 16);
+
 impl ColorMapping for Gray8 {
     fn char_to_color(c: char) -> Self {
-        let digit = match c {
-            '0'..='9' | 'A'..='F' => c.to_digit(16).unwrap(),
-            _ => panic!("Invalid char in pattern: '{}'", c),
-        };
-
-        Gray8::new(digit as u8 * 0x11)
+        if let Some(digit) = c.to_digit(16) {
+            Self::new(digit as u8 * 0x11)
+        } else {
+            panic!("invalid char in pattern: '{}'", c);
+        }
     }
 
-    fn color_to_char(color: Gray8) -> char {
+    fn color_to_char(color: Self) -> char {
         let luma = color.luma();
         let lower = luma & 0xF;
         let upper = luma >> 4;
@@ -579,5 +629,56 @@ mod tests {
         let p = Pixel(Point::new(1, 2), BinaryColor::On);
         p.draw(&mut display).unwrap();
         p.draw(&mut display).unwrap();
+    }
+
+    #[test]
+    fn gray2_mapping() {
+        for luma in 0..4 {
+            let color = Gray2::new(luma);
+
+            assert_eq!(color, Gray2::char_to_color(Gray2::color_to_char(color)));
+        }
+    }
+
+    #[test]
+    fn gray4_mapping() {
+        for luma in 0..16 {
+            let color = Gray4::new(luma);
+
+            assert_eq!(color, Gray4::char_to_color(Gray4::color_to_char(color)));
+        }
+    }
+
+    #[test]
+    fn gray8_mapping() {
+        for luma in 0..16 {
+            let color = Gray8::new(luma * 0x11);
+
+            assert_eq!(color, Gray8::char_to_color(Gray8::color_to_char(color)));
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid char in pattern: '4'")]
+    fn invalid_gray2_char_4() {
+        Gray2::char_to_color('4');
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid char in pattern: 'A'")]
+    fn invalid_gray2_char_a() {
+        Gray2::char_to_color('A');
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid char in pattern: 'G'")]
+    fn invalid_gray4_char_g() {
+        Gray2::char_to_color('G');
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid char in pattern: 'G'")]
+    fn invalid_gray8_char_g() {
+        Gray8::char_to_color('G');
     }
 }

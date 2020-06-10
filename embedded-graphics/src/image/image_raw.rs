@@ -243,12 +243,10 @@ where
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel,
-        geometry::Dimensions,
+        drawable::{Drawable, Pixel},
         image::Image,
+        mock_display::{ColorMapping, MockDisplay},
         pixelcolor::{raw::RawU32, *},
-        primitives::Rectangle,
-        transform::Transform,
     };
 
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -264,185 +262,131 @@ mod tests {
         }
     }
 
-    fn assert_next<I, C>(iter: &mut I, x: i32, y: i32, color: C)
+    /// Tests if the given image data matches an excepted `MockDisplay` pattern.
+    fn assert_pattern<C, BO>(image_data: ImageRaw<C, BO>, expected_pattern: &[&str])
     where
-        I: Iterator<Item = Pixel<C>>,
-        C: PixelColor + core::fmt::Debug,
+        C: PixelColor + From<<C as PixelColor>::Raw> + ColorMapping,
+        BO: ByteOrder,
+        for<'a> RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
     {
-        let p = Point::new(x, y);
-        assert_eq!(iter.next(), Some(Pixel(p, color)));
+        let image = Image::new(&image_data, Point::zero());
+        let mut display = MockDisplay::new();
+        image.draw(&mut display).unwrap();
+
+        let expected = MockDisplay::from_pattern(expected_pattern);
+        assert_eq!(display, expected);
     }
 
     #[test]
-    fn negative_top_left() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+    fn image_dimensions() {
+        let data = [0xAA, 0x00, 0x55, 0xFF, 0xAA, 0x80];
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9, 3);
 
-        let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
-
-        assert_eq!(
-            image.bounding_box(),
-            Rectangle::new(Point::new(-1, -1), Size::new(4, 4))
-        );
-    }
-
-    #[test]
-    fn dimensions() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4);
-
-        let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
-
-        assert_eq!(
-            image.bounding_box(),
-            Rectangle::new(Point::new(100, 200), Size::new(4, 4))
-        );
-    }
-
-    #[test]
-    fn it_can_have_negative_offsets() {
-        let image: ImageRaw<Gray8> = ImageRaw::new(
-            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
-            3,
-            3,
-        );
-
-        let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
-
-        let mut iter = image.into_iter();
-
-        assert_next(&mut iter, -1, -1, Gray8::WHITE);
-        assert_next(&mut iter, 0, -1, Gray8::BLACK);
-        assert_next(&mut iter, 1, -1, Gray8::new(0xbb));
-        assert_next(&mut iter, -1, 0, Gray8::BLACK);
-        assert_next(&mut iter, 0, 0, Gray8::new(0xcc));
-        assert_next(&mut iter, 1, 0, Gray8::BLACK);
-        assert_next(&mut iter, -1, 1, Gray8::new(0xee));
-        assert_next(&mut iter, 0, 1, Gray8::BLACK);
-        assert_next(&mut iter, 1, 1, Gray8::new(0xaa));
-        assert!(iter.next().is_none());
+        assert_eq!(image_data.width(), 9);
+        assert_eq!(image_data.height(), 3);
     }
 
     #[test]
     fn bpp1() {
-        let data = [0xAA, 0x00, 0x55, 0xFF, 0xAA, 0x00];
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9, 3);
+        let data = [0xAA, 0x00, 0x55, 0xFF, 0xAA, 0x80];
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9, 3);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, BinaryColor::On);
-        assert_next(&mut iter, 1, 0, BinaryColor::Off);
-        assert_next(&mut iter, 2, 0, BinaryColor::On);
-        assert_next(&mut iter, 3, 0, BinaryColor::Off);
-        assert_next(&mut iter, 4, 0, BinaryColor::On);
-        assert_next(&mut iter, 5, 0, BinaryColor::Off);
-        assert_next(&mut iter, 6, 0, BinaryColor::On);
-        assert_next(&mut iter, 7, 0, BinaryColor::Off);
-
-        assert_next(&mut iter, 8, 0, BinaryColor::Off);
-
-        assert_next(&mut iter, 0, 1, BinaryColor::Off);
-        assert_next(&mut iter, 1, 1, BinaryColor::On);
-        assert_next(&mut iter, 2, 1, BinaryColor::Off);
-        assert_next(&mut iter, 3, 1, BinaryColor::On);
-        assert_next(&mut iter, 4, 1, BinaryColor::Off);
-        assert_next(&mut iter, 5, 1, BinaryColor::On);
-        assert_next(&mut iter, 6, 1, BinaryColor::Off);
-        assert_next(&mut iter, 7, 1, BinaryColor::On);
-
-        assert_next(&mut iter, 8, 1, BinaryColor::On);
-
-        assert_next(&mut iter, 0, 2, BinaryColor::On);
-        assert_next(&mut iter, 1, 2, BinaryColor::Off);
-        assert_next(&mut iter, 2, 2, BinaryColor::On);
-        assert_next(&mut iter, 3, 2, BinaryColor::Off);
-        assert_next(&mut iter, 4, 2, BinaryColor::On);
-        assert_next(&mut iter, 5, 2, BinaryColor::Off);
-        assert_next(&mut iter, 6, 2, BinaryColor::On);
-        assert_next(&mut iter, 7, 2, BinaryColor::Off);
-
-        assert_next(&mut iter, 8, 2, BinaryColor::Off);
-
-        assert!(iter.next().is_none());
+        assert_pattern(
+            image_data,
+            &[
+                "#.#.#.#..", //
+                ".#.#.#.##", //
+                "#.#.#.#.#", //
+            ],
+        );
     }
 
     #[test]
     fn bpp2() {
         let data = [0b00011011, 0x0, 0b11100100, 0xFF];
-        let image: ImageRaw<Gray2> = ImageRaw::new(&data, 5, 2);
+        let image_data: ImageRaw<Gray2> = ImageRaw::new(&data, 5, 2);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Gray2::new(0));
-        assert_next(&mut iter, 1, 0, Gray2::new(1));
-        assert_next(&mut iter, 2, 0, Gray2::new(2));
-        assert_next(&mut iter, 3, 0, Gray2::new(3));
-        assert_next(&mut iter, 4, 0, Gray2::new(0));
-
-        assert_next(&mut iter, 0, 1, Gray2::new(3));
-        assert_next(&mut iter, 1, 1, Gray2::new(2));
-        assert_next(&mut iter, 2, 1, Gray2::new(1));
-        assert_next(&mut iter, 3, 1, Gray2::new(0));
-        assert_next(&mut iter, 4, 1, Gray2::new(3));
-
-        assert!(iter.next().is_none());
+        assert_pattern(
+            image_data,
+            &[
+                "01230", //
+                "32103", //
+            ],
+        );
     }
 
     #[test]
     fn bpp4() {
         let data = [0b00011000, 0b11110000, 0b01011010, 0x0];
-        let image: ImageRaw<Gray4> = ImageRaw::new(&data, 3, 2);
+        let image_data: ImageRaw<Gray4> = ImageRaw::new(&data, 3, 2);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Gray4::new(0x1));
-        assert_next(&mut iter, 1, 0, Gray4::new(0x8));
-        assert_next(&mut iter, 2, 0, Gray4::new(0xF));
-
-        assert_next(&mut iter, 0, 1, Gray4::new(0x5));
-        assert_next(&mut iter, 1, 1, Gray4::new(0xA));
-        assert_next(&mut iter, 2, 1, Gray4::new(0x0));
-
-        assert!(iter.next().is_none());
+        assert_pattern(
+            image_data,
+            &[
+                "18F", //
+                "5A0", //
+            ],
+        );
     }
 
     #[test]
-    fn bpp8() {
-        let data = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06];
-        let image: ImageRaw<Gray8> = ImageRaw::new(&data, 2, 3);
+    fn bpp8_1() {
+        let data = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
+        let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, 2, 3);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Gray8::new(1));
-        assert_next(&mut iter, 1, 0, Gray8::new(2));
-        assert_next(&mut iter, 0, 1, Gray8::new(3));
-        assert_next(&mut iter, 1, 1, Gray8::new(4));
-        assert_next(&mut iter, 0, 2, Gray8::new(5));
-        assert_next(&mut iter, 1, 2, Gray8::new(6));
+        assert_pattern(
+            image_data,
+            &[
+                "12", //
+                "34", //
+                "56", //
+            ],
+        );
+    }
 
-        assert!(iter.next().is_none());
+    /// Additional test for luma values with different low and high nibbles,
+    /// which are not supported by `MockDisplay` patterns.
+    #[test]
+    fn bpp8_2() {
+        let data = [0x01, 0x08, 0x10, 0x80];
+        let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, 4, 1);
+
+        let expected = data
+            .iter()
+            .enumerate()
+            .map(|(x, luma)| Pixel(Point::new(x as i32, 0), Gray8::new(*luma)));
+
+        assert!(image_data.into_iter().eq(expected));
     }
 
     #[test]
     fn bpp16_little_endian() {
         let data = [0x00, 0xF8, 0xE0, 0x07, 0x1F, 0x00, 0x00, 0x00];
-        let image: ImageRawLE<Rgb565> = ImageRaw::new(&data, 1, 4);
+        let image_data: ImageRawLE<Rgb565> = ImageRaw::new(&data, 1, 4);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Rgb565::RED);
-        assert_next(&mut iter, 0, 1, Rgb565::GREEN);
-        assert_next(&mut iter, 0, 2, Rgb565::BLUE);
-        assert_next(&mut iter, 0, 3, Rgb565::BLACK);
-
-        assert!(iter.next().is_none());
+        assert_pattern(
+            image_data,
+            &[
+                "R", //
+                "G", //
+                "B", //
+                "K", //
+            ],
+        );
     }
 
     #[test]
     fn bpp16_big_endian() {
         let data = [0xF8, 0x00, 0x07, 0xE0, 0x00, 0x1F, 0x00, 0x00];
-        let image: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2, 2);
+        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2, 2);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Rgb565::RED);
-        assert_next(&mut iter, 1, 0, Rgb565::GREEN);
-        assert_next(&mut iter, 0, 1, Rgb565::BLUE);
-        assert_next(&mut iter, 1, 1, Rgb565::BLACK);
-
-        assert!(iter.next().is_none());
+        assert_pattern(
+            image_data,
+            &[
+                "RG", //
+                "BK", //
+            ],
+        );
     }
 
     #[test]
@@ -450,15 +394,17 @@ mod tests {
         let data = [
             0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
         ];
-        let image: ImageRawLE<Bgr888> = ImageRaw::new(&data, 1, 4);
+        let image_data: ImageRawLE<Bgr888> = ImageRaw::new(&data, 1, 4);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Bgr888::RED);
-        assert_next(&mut iter, 0, 1, Bgr888::GREEN);
-        assert_next(&mut iter, 0, 2, Bgr888::BLUE);
-        assert_next(&mut iter, 0, 3, Bgr888::BLACK);
-
-        assert!(iter.next().is_none());
+        assert_pattern(
+            image_data,
+            &[
+                "R", //
+                "G", //
+                "B", //
+                "K", //
+            ],
+        );
     }
 
     #[test]
@@ -466,15 +412,9 @@ mod tests {
         let data = [
             0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
         ];
-        let image: ImageRawBE<Rgb888> = ImageRaw::new(&data, 4, 1);
+        let image_data: ImageRawBE<Rgb888> = ImageRaw::new(&data, 4, 1);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, Rgb888::RED);
-        assert_next(&mut iter, 1, 0, Rgb888::GREEN);
-        assert_next(&mut iter, 2, 0, Rgb888::BLUE);
-        assert_next(&mut iter, 3, 0, Rgb888::BLACK);
-
-        assert!(iter.next().is_none());
+        assert_pattern(image_data, &["RGBK"]);
     }
 
     #[test]
@@ -486,15 +426,16 @@ mod tests {
             0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF,
         ];
-        let image: ImageRawLE<TestColorU32> = ImageRaw::new(&data, 2, 2);
+        let image_data: ImageRawLE<TestColorU32> = ImageRaw::new(&data, 2, 2);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, TestColorU32(RawU32::new(0x78563412)));
-        assert_next(&mut iter, 1, 0, TestColorU32(RawU32::new(0xF0DEBC9A)));
-        assert_next(&mut iter, 0, 1, TestColorU32(RawU32::new(0x00000000)));
-        assert_next(&mut iter, 1, 1, TestColorU32(RawU32::new(0xFFFFFFFF)));
+        let expected = [
+            Pixel(Point::new(0, 0), TestColorU32(RawU32::new(0x78563412))),
+            Pixel(Point::new(1, 0), TestColorU32(RawU32::new(0xF0DEBC9A))),
+            Pixel(Point::new(0, 1), TestColorU32(RawU32::new(0x00000000))),
+            Pixel(Point::new(1, 1), TestColorU32(RawU32::new(0xFFFFFFFF))),
+        ];
 
-        assert!(iter.next().is_none());
+        assert!(image_data.into_iter().eq(expected.iter().copied()));
     }
 
     #[test]
@@ -506,15 +447,16 @@ mod tests {
             0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF,
         ];
-        let image: ImageRawBE<TestColorU32> = ImageRaw::new(&data, 4, 1);
+        let image_data: ImageRawBE<TestColorU32> = ImageRaw::new(&data, 4, 1);
 
-        let mut iter = image.into_iter();
-        assert_next(&mut iter, 0, 0, TestColorU32(RawU32::new(0x12345678)));
-        assert_next(&mut iter, 1, 0, TestColorU32(RawU32::new(0x9ABCDEF0)));
-        assert_next(&mut iter, 2, 0, TestColorU32(RawU32::new(0x00000000)));
-        assert_next(&mut iter, 3, 0, TestColorU32(RawU32::new(0xFFFFFFFF)));
+        let expected = [
+            Pixel(Point::new(0, 0), TestColorU32(RawU32::new(0x12345678))),
+            Pixel(Point::new(1, 0), TestColorU32(RawU32::new(0x9ABCDEF0))),
+            Pixel(Point::new(2, 0), TestColorU32(RawU32::new(0x00000000))),
+            Pixel(Point::new(3, 0), TestColorU32(RawU32::new(0xFFFFFFFF))),
+        ];
 
-        assert!(iter.next().is_none());
+        assert!(image_data.into_iter().eq(expected.iter().copied()));
     }
 
     #[test]

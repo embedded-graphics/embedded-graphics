@@ -262,3 +262,58 @@ where
         self.it.next().map(|p| Pixel(p.0 + self.image.offset, p.1))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::pixelcolor::{BinaryColor, Gray8, GrayColor};
+
+    #[test]
+    fn it_can_have_negative_offsets() {
+        let image_data: ImageRaw<Gray8> = ImageRaw::new(
+            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
+            3,
+            3,
+        );
+
+        let image = Image::new(&image_data, Point::zero()).translate(Point::new(-1, -1));
+
+        let expected = [
+            Pixel(Point::new(-1, -1), Gray8::WHITE),
+            Pixel(Point::new(0, -1), Gray8::BLACK),
+            Pixel(Point::new(1, -1), Gray8::new(0xbb)),
+            Pixel(Point::new(-1, 0), Gray8::BLACK),
+            Pixel(Point::new(0, 0), Gray8::new(0xcc)),
+            Pixel(Point::new(1, 0), Gray8::BLACK),
+            Pixel(Point::new(-1, 1), Gray8::new(0xee)),
+            Pixel(Point::new(0, 1), Gray8::BLACK),
+            Pixel(Point::new(1, 1), Gray8::new(0xaa)),
+        ];
+
+        assert!(image.into_iter().eq(expected.iter().copied()));
+    }
+
+    #[test]
+    fn negative_top_left() {
+        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
+
+        let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
+
+        assert_eq!(
+            image.bounding_box(),
+            Rectangle::new(Point::new(-1, -1), Size::new(4, 4))
+        );
+    }
+
+    #[test]
+    fn dimensions() {
+        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4, 4);
+
+        let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
+
+        assert_eq!(
+            image.bounding_box(),
+            Rectangle::new(Point::new(100, 200), Size::new(4, 4))
+        );
+    }
+}
