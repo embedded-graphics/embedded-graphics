@@ -58,7 +58,7 @@ mod tests {
     use crate::primitives::Circle;
 
     #[test]
-    fn circles_points() {
+    fn matches_circles_points_iterator() {
         for diameter in 0..50 {
             let circle_points = Circle::new(Point::new(0, 0), diameter).points();
 
