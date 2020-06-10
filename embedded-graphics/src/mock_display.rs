@@ -229,6 +229,12 @@ where
         self.pixels[x as usize + y as usize * SIZE]
     }
 
+    /// Changes the value of a pixel without bounds checking.
+    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+        let i = point.x + point.y * SIZE as i32;
+        self.pixels[i as usize] = color;
+    }
+
     /// Changes the color of a pixel.
     ///
     /// # Panics
@@ -242,7 +248,7 @@ where
     ///
     /// [`set_allow_out_of_bounds_drawing(true)`]: #method.set_allow_out_of_bounds_drawing
     /// [`set_allow_overdraw(true)`]: #method.set_allow_overdraw
-    pub fn draw_pixel(&mut self, point: Point, color: Option<C>) {
+    pub fn draw_pixel(&mut self, point: Point, color: C) {
         if !DISPLAY_AREA.contains(point) {
             if !self.allow_out_of_bounds_drawing {
                 panic!(
@@ -258,8 +264,7 @@ where
             panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
         }
 
-        let i = point.x + point.y * SIZE as i32;
-        self.pixels[i as usize] = color;
+        self.set_pixel(point, Some(color));
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -297,7 +302,7 @@ where
         let mut mirrored = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            mirrored.draw_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
+            mirrored.set_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
         }
 
         mirrored
@@ -336,7 +341,7 @@ where
         let mut target = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            target.draw_pixel(point, self.get_pixel(point).map(f))
+            target.set_pixel(point, self.get_pixel(point).map(f))
         }
 
         target
@@ -380,7 +385,7 @@ impl MockDisplay<BinaryColor> {
         let mut display = MockDisplay::new();
 
         for point in points.into_iter() {
-            display.draw_pixel(point, Some(BinaryColor::On));
+            display.set_pixel(point, Some(BinaryColor::On));
         }
 
         display
@@ -513,7 +518,7 @@ where
         for pixel in pixels.into_iter() {
             let Pixel(point, color) = pixel;
 
-            self.draw_pixel(point, Some(color));
+            self.draw_pixel(point, color);
         }
 
         Ok(())
@@ -535,9 +540,6 @@ pub trait ColorMapping {
 
     /// Converts a color of type `C` into a char.
     fn color_to_char(color: Self) -> char;
-
-    /// Default color to show an "on" pixel with
-    fn on() -> Self;
 }
 
 impl ColorMapping for BinaryColor {
@@ -554,10 +556,6 @@ impl ColorMapping for BinaryColor {
             BinaryColor::Off => '.',
             BinaryColor::On => '#',
         }
-    }
-
-    fn on() -> Self {
-        BinaryColor::On
     }
 }
 
@@ -606,10 +604,6 @@ impl ColorMapping for Gray8 {
                 .to_ascii_uppercase()
         }
     }
-
-    fn on() -> Self {
-        Gray8::WHITE
-    }
 }
 
 macro_rules! impl_rgb_color_mapping {
@@ -641,10 +635,6 @@ macro_rules! impl_rgb_color_mapping {
                     Self::WHITE => 'W',
                     _ => '?',
                 }
-            }
-
-            fn on() -> Self {
-                Self::WHITE
             }
         }
     };
