@@ -8,7 +8,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledPolylineIterator<'a, C>
+pub struct StyledPixels<'a, C>
 where
     C: PixelColor,
 {
@@ -16,19 +16,19 @@ where
     line_iter: polyline::Points<'a>,
 }
 
-impl<'a, C> StyledPolylineIterator<'a, C>
+impl<'a, C> StyledPixels<'a, C>
 where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
-        StyledPolylineIterator {
+        StyledPixels {
             stroke_color: styled.style.effective_stroke_color(),
             line_iter: styled.primitive.points(),
         }
     }
 }
 
-impl<'a, C> Iterator for StyledPolylineIterator<'a, C>
+impl<'a, C> Iterator for StyledPixels<'a, C>
 where
     C: PixelColor,
 {
@@ -41,6 +41,18 @@ where
         self.line_iter
             .next()
             .map(|point| Pixel(point, stroke_color))
+    }
+}
+
+impl<'a, C> IntoIterator for &'a Styled<Polyline<'a>, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Item = Pixel<C>;
+    type IntoIter = StyledPixels<'a, C>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        StyledPixels::new(self)
     }
 }
 

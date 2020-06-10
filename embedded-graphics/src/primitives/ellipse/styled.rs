@@ -9,7 +9,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the ellipse border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledEllipseIterator<C>
+pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -21,7 +21,7 @@ where
     threshold: u32,
 }
 
-impl<C> StyledEllipseIterator<C>
+impl<C> StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -49,7 +49,7 @@ where
     }
 }
 
-impl<C> Iterator for StyledEllipseIterator<C>
+impl<C> Iterator for StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -83,10 +83,10 @@ where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = StyledEllipseIterator<C>;
+    type IntoIter = StyledPixels<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        StyledEllipseIterator::new(self)
+        StyledPixels::new(self)
     }
 }
 

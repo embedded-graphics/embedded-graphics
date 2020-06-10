@@ -1,13 +1,10 @@
 use crate::{
-    drawable::Pixel,
     geometry::Point,
-    pixelcolor::PixelColor,
     primitives::{
         line::{self, Line},
-        polyline::{Polyline, StyledPolylineIterator},
+        polyline::Polyline,
         Primitive,
     },
-    style::{PrimitiveStyle, Styled},
 };
 
 /// An iterator over all pixel positions on the polyline
@@ -63,18 +60,6 @@ impl<'a> Iterator for Points<'a> {
             // Skip first point of next line, otherwise we overlap with the previous line
             self.nth(1)
         }
-    }
-}
-
-impl<'a, C> IntoIterator for &'a Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledPolylineIterator<'a, C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledPolylineIterator::new(self)
     }
 }
 

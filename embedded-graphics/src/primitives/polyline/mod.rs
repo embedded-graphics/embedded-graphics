@@ -9,7 +9,7 @@ use crate::{
     transform::Transform,
 };
 pub use points::Points;
-pub use styled::StyledPolylineIterator;
+pub use styled::StyledPixels;
 
 /// Polyline primitive
 ///

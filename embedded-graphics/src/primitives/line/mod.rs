@@ -11,7 +11,7 @@ use crate::{
     transform::Transform,
 };
 pub use points::Points;
-pub use styled::StyledIterator;
+pub use styled::StyledPixels;
 
 /// Line primitive
 ///

@@ -10,7 +10,7 @@ use crate::{
     transform::Transform,
 };
 pub use points::Points;
-pub use styled::StyledCircleIterator;
+pub use styled::StyledPixels;
 
 /// Circle primitive
 ///

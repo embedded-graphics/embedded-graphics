@@ -11,7 +11,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledRoundedRectangleIterator<C>
+pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -21,7 +21,7 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledRoundedRectangleIterator<C>
+impl<C> StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -46,7 +46,7 @@ where
     }
 }
 
-impl<C> Iterator for StyledRoundedRectangleIterator<C>
+impl<C> Iterator for StyledPixels<C>
 where
     C: PixelColor,
 {
@@ -74,10 +74,10 @@ where
     C: PixelColor,
 {
     type Item = Pixel<C>;
-    type IntoIter = StyledRoundedRectangleIterator<C>;
+    type IntoIter = StyledPixels<C>;
 
     fn into_iter(self) -> Self::IntoIter {
-        StyledRoundedRectangleIterator::new(self)
+        StyledPixels::new(self)
     }
 }
 

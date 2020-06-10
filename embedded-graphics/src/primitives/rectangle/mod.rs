@@ -10,7 +10,7 @@ use crate::{
 };
 use core::cmp::min;
 pub use points::Points;
-pub use styled::StyledRectangleIterator;
+pub use styled::StyledPixels;
 
 /// Rectangle primitive
 ///

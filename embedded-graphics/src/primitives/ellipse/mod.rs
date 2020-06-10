@@ -9,7 +9,7 @@ use crate::{
     transform::Transform,
 };
 pub use points::Points;
-pub use styled::StyledEllipseIterator;
+pub use styled::StyledPixels;
 
 /// Ellipse primitive
 ///

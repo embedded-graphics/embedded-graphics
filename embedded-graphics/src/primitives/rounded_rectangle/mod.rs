@@ -13,7 +13,7 @@ use crate::{
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
 use ellipse_quadrant::{EllipseQuadrant, Quadrant};
 pub use points::Points;
-pub use styled::StyledRoundedRectangleIterator;
+pub use styled::StyledPixels;
 
 /// Rounded rectangle primitive.
 ///
