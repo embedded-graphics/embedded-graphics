@@ -18,6 +18,8 @@ It contains built in items that make it easy to draw 2D graphics primitives:
   - Rectangles
   - Circles
   - Ellipses
+  - Arcs
+  - Sectors
   - Triangles
   - Polylines
   - Rounded rectangles
@@ -175,6 +177,9 @@ Additional examples can be found in the [simulator](./simulator/examples) crate.
 
 - `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
   support to enable conversions from `nalgebra::Vector2` to `Coord` and `UnsignedCoord`.
+
+- `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
+  calculation.
 
 ## Migrating from 0.5 to 0.6
 

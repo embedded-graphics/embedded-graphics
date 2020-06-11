@@ -7,6 +7,8 @@
 //!     * [Rectangles (and squares)](./primitives/rectangle/struct.Rectangle.html)
 //!     * [Circles](./primitives/circle/struct.Circle.html)
 //!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
+//!     * [Arcs](./primitives/arc/struct.Arc.html)
+//!     * [Sectors](./primitives/sector/struct.Sector.html)
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //!     * [Polylines](./primitives/polyline/struct.Polyline.html)
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
@@ -87,6 +89,9 @@
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 //! support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
+//!
+//! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
+//! calculation.
 //!
 //! # Implementing `embedded_graphics` in a driver
 //!
@@ -293,6 +298,52 @@
 //!
 //! Ellipse::new(Point::new(8, 16), Size::new(48, 32))
 //!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
+//! ## Draw an arc
+//!
+//! This example draws an arc with a 2px green stroke.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an arc example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABTUlEQVR42u3cQQ6DMAxFQRvl/lcOOzaIDYqEHWYu0Ba9/gapbUbEDH7rcAkEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAqC/se0rW/1d57QAbCij++8CZoEraAGwAFXf8dns8SwAFuDNOzKLPI9mi2ABLEDTBciiz6vZElgAC+D/AbY+q1gALIAlsABYAEtgAbAAlsACYAEsgQVAAF9vbwoAAXA7G0wBIABnAQEgAGcBASAAZwEBIAAEgADcDQgAAbgbEAACQAAIAAEgAASAABAAAkAACAABIAAEwKPhEhQzLQAWgEtaAASAAHAGcPq3AFgAp38LgAAQAIs+afxXsAVAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACIDvnG3zIPeb6boNAAAAAElFTkSuQmCC" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Arc, style::PrimitiveStyle,
+//! };
+//!
+//! Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
+//!     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
+//!     .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! </div>
+//! </div>
+//!
+//! ## Draw a sector
+//!
+//! This example draws a sector with no stroke and a solid blue fill.
+//!
+//! <div style="display: flex">
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a sector example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABbElEQVR42u3dgYkCQRBE0W4x/5TbCISFXcHpei8D9V85I+h1VU0R6+UpEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAATvbe/xDvfu2hLQB7dR3/zaD5g6fQAmABUv7idy2CBXAN5PmFGgHgDBB+FjjjbGABnAFIPhsIwBnAJ4HJZwILYAG2/EqYJbAACAABkHkGcBawAAjg7OUaASCAB95L2ytrARCAs4AAiA3AWcACIABLYAEQAALg6xtk2P8N9H0CC4AAEACZAfhcwAIgAARARfxO4NX79VgALECwzEWwABaA5EWwAK6BXF+EFgD7sh5Pwx3zw5fGAuAW4LZgAbAAFsECIIBTF6EFgM8BuHQ2aAuAW4DbggXAGQALgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABCAABIAAEAACQAAIAAEgAATAfh9WESP9yc4uqgAAAABJRU5ErkJggg==" />
+//! <div style="flex-grow: 1;">
+//!
+//! ```rust
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{
+//!     pixelcolor::Rgb888, prelude::*, primitives::Sector, style::PrimitiveStyle,
+//! };
+//!
+//! Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
+//!     .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```

@@ -289,7 +289,7 @@ impl<'a> Iterator for TgaIterator<'a> {
 
         self.x += 1;
 
-        if self.x >= self.tga.width().into() {
+        if self.x >= u32::from(self.tga.width()) {
             self.x = 0;
             self.y += 1;
         }

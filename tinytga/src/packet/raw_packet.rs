@@ -61,7 +61,7 @@ mod tests {
 
         let (remaining, packet) = raw_packet(4)(&input).unwrap();
 
-        assert_eq!(remaining, &[]);
+        assert_eq!(remaining.len(), 0);
         assert_eq!(
             packet,
             RawPacket {

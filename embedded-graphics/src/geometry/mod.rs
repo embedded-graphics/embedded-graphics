@@ -1,9 +1,15 @@
 //! Geometry module.
 
+mod angle;
 mod point;
+mod real;
 mod size;
 
+pub(crate) use angle::angle_consts;
+pub(crate) use angle::Trigonometry;
+pub use angle::{Angle, AngleUnit};
 pub use point::Point;
+pub(crate) use real::Real;
 pub use size::Size;
 
 use crate::primitives::Rectangle;

@@ -1,20 +1,24 @@
 //! Graphics primitives
 
+pub mod arc;
 pub mod circle;
 pub mod ellipse;
 pub mod line;
 pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
+pub mod sector;
 pub mod triangle;
 
 pub use self::{
+    arc::Arc,
     circle::Circle,
     ellipse::Ellipse,
     line::Line,
     polyline::Polyline,
     rectangle::Rectangle,
     rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
+    sector::Sector,
     triangle::Triangle,
 };
 use crate::{

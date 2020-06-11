@@ -27,6 +27,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#366](https://github.com/jamwaffles/embedded-graphics/pull/366) Allow usage of all grayscale color types in `MockDisplay` patterns.
 - [#342](https://github.com/jamwaffles/embedded-graphics/pull/342) Added `Rectangle::intersection` method.
 - [#363](https://github.com/jamwaffles/embedded-graphics/pull/363) Export `primitives::ContainsPoint` trait in prelude.
+- [#310](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Arc` primitive.
+- [#310](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Sector` primitive.
 
 ### Changed
 

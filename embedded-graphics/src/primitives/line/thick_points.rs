@@ -190,7 +190,7 @@ impl Iterator for ParallelsIterator {
 }
 
 /// Iterator over all pixels in the stroke of a thick line.
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ThickPoints {
     parallel: Bresenham,
     parallel_length: u32,
@@ -201,7 +201,7 @@ pub struct ThickPoints {
 
 impl ThickPoints {
     /// Creates a new iterator over the points in the stroke of a thick line.
-    pub(in crate::primitives::line) fn new(line: &Line, thickness: i32) -> Self {
+    pub(in crate::primitives) fn new(line: &Line, thickness: i32) -> Self {
         Self {
             parallel: Bresenham::new(line.start),
             parallel_length: bresenham::major_length(line),
