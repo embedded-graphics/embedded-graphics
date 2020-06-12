@@ -13,7 +13,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct StyledPixels<C: PixelColor>
+pub struct StyledPixels<C>
 where
     C: PixelColor,
 {

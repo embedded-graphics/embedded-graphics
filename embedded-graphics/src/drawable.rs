@@ -97,7 +97,9 @@ where
 /// [`Drawable`]: trait.Drawable.html
 /// [`DrawTarget`]: ./trait.DrawTarget.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct Pixel<C: PixelColor>(pub Point, pub C);
+pub struct Pixel<C>(pub Point, pub C)
+where
+    C: PixelColor;
 
 impl<C> Drawable<C> for Pixel<C>
 where
