@@ -16,7 +16,10 @@ where
     line_iter: ThickPoints,
 }
 
-impl<C: PixelColor> StyledPixels<C> {
+impl<C> StyledPixels<C>
+where
+    C: PixelColor,
+{
     pub(in crate::primitives::line) fn new(styled: &Styled<Line, PrimitiveStyle<C>>) -> Self {
         let Styled { primitive, style } = styled;
 
@@ -31,7 +34,10 @@ impl<C: PixelColor> StyledPixels<C> {
 }
 
 // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<C: PixelColor> Iterator for StyledPixels<C> {
+impl<C> Iterator for StyledPixels<C>
+where
+    C: PixelColor,
+{
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
