@@ -105,10 +105,7 @@ impl Iterator for PlaneSectorIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        geometry::AngleUnit,
-        primitives::{circle::DistanceIterator, Arc},
-    };
+    use crate::{geometry::AngleUnit, primitives::Arc};
 
     #[test]
     fn plane_sector_iter() {
@@ -126,27 +123,6 @@ mod tests {
     #[test]
     fn plane_sector_iter_empty() {
         let mut iter = PlaneSectorIterator::empty();
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
-    fn distance_iter() {
-        let arc = Arc::new(Point::zero(), 3, 0.0.deg(), 90.0.deg());
-
-        let mut iter = DistanceIterator::new(
-            arc.center_2x(),
-            PlaneSectorIterator::new(&arc, arc.center(), arc.angle_start, arc.angle_sweep),
-        );
-        assert_eq!(iter.next(), Some((Point::new(1, 0), 4)));
-        assert_eq!(iter.next(), Some((Point::new(2, 0), 8)));
-        assert_eq!(iter.next(), Some((Point::new(1, 1), 0)));
-        assert_eq!(iter.next(), Some((Point::new(2, 1), 4)));
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
-    fn distance_iter_empty() {
-        let mut iter = DistanceIterator::new(Point::zero(), PlaneSectorIterator::empty());
         assert_eq!(iter.next(), None);
     }
 }
