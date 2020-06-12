@@ -28,8 +28,8 @@ impl LinearEquation {
         LinearEquation { a, b, c }
     }
 
-    /// Create a flat line equation
-    pub(in crate::primitives) fn flat() -> Self {
+    /// Create a horizontal line equation
+    pub(in crate::primitives) fn new_horizontal() -> Self {
         LinearEquation {
             a: Real::from(0.0),
             b: Real::from(1.0),

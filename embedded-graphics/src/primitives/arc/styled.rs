@@ -39,19 +39,18 @@ where
         let inner_threshold = circle::diameter_to_threshold(fill_area.diameter);
         let outer_threshold = circle::diameter_to_threshold(stroke_area.diameter);
 
-        let iter = if !styled.style.is_transparent() {
-            DistanceIterator::new(
-                stroke_area.center_2x(),
-                PlaneSectorIterator::new(
-                    &stroke_area,
-                    stroke_area.center(),
-                    stroke_area.angle_start,
-                    stroke_area.angle_sweep,
-                ),
+        let points = if !styled.style.is_transparent() {
+            PlaneSectorIterator::new(
+                &stroke_area,
+                stroke_area.center(),
+                stroke_area.angle_start,
+                stroke_area.angle_sweep,
             )
         } else {
-            DistanceIterator::new(Point::zero(), PlaneSectorIterator::empty())
+            PlaneSectorIterator::empty()
         };
+        
+        let iter = DistanceIterator::new(stroke_area.center_2x(), points);
 
         Self {
             iter,

@@ -6,6 +6,12 @@ use crate::{
     },
 };
 
+/// Sector shaped part of a plane.
+///
+/// The shape is described by two half-planes that divide the XY plane along the two
+/// lines from the center point to the arc's end points. For sweep angles < 180° the
+/// intersection of both half-planes is used and for angles >= 180° the union of both
+/// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub(in crate::primitives) struct PlaneSector {
     line_a: LinearEquation,
@@ -38,8 +44,8 @@ impl PlaneSector {
 
     fn empty() -> Self {
         Self {
-            line_a: LinearEquation::flat(),
-            line_b: LinearEquation::flat(),
+            line_a: LinearEquation::new_horizontal(),
+            line_b: LinearEquation::new_horizontal(),
             draw_above_a: true,
             draw_above_b: true,
             sweep: Angle::zero(),
@@ -63,7 +69,7 @@ impl PlaneSector {
     }
 }
 
-/// Iterator that returns only the points which are inside a plane sector defined by two lines.
+/// Iterator over the points in the intersection of a plane sector and the bounding box of a primitive.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub(in crate::primitives) struct PlaneSectorIterator {
     plane_sector: PlaneSector,
@@ -109,7 +115,7 @@ mod tests {
     };
 
     #[test]
-    fn plane_arc_iter() {
+    fn plane_sector_iter() {
         let arc = Arc::new(Point::zero(), 3, 0.0.deg(), 90.0.deg());
 
         let mut iter =
