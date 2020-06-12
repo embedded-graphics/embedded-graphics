@@ -165,7 +165,7 @@ impl ContainsPoint for Sector {
             return false;
         }
 
-        PlaneSector::new(self.center(), self.angle_start, self.angle_sweep).contains(&point)
+        PlaneSector::new(self.center(), self.angle_start, self.angle_sweep).contains(point)
     }
 }
 

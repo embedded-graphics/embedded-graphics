@@ -38,7 +38,7 @@ impl LinearEquation {
     }
 
     /// Check on which side of the line a point is
-    pub(in crate::primitives) fn side(&self, point: &Point) -> LineSide {
+    pub(in crate::primitives) fn side(&self, point: Point) -> LineSide {
         if self.a * point.x.into() + self.b * point.y.into() + self.c < Real::from(0.0) {
             LineSide::Below
         } else {

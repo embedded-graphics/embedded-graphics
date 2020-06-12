@@ -46,7 +46,7 @@ impl PlaneSector {
         }
     }
 
-    pub(in crate::primitives) fn contains(&self, point: &Point) -> bool {
+    pub(in crate::primitives) fn contains(&self, point: Point) -> bool {
         let side_a = self.line_a.side(point);
         let side_b = self.line_b.side(point);
 
@@ -96,7 +96,7 @@ impl Iterator for PlaneSectorIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         let plane_sector = self.plane_sector;
-        self.points.find(|p| plane_sector.contains(p))
+        self.points.find(|p| plane_sector.contains(*p))
     }
 }
 
