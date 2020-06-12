@@ -9,7 +9,7 @@ use crate::{
     primitives::{ContainsPoint, Primitive, Rectangle},
     transform::Transform,
 };
-pub use distance_iterator::DistanceIterator;
+pub(in crate::primitives) use distance_iterator::DistanceIterator;
 pub use points::Points;
 pub use styled::StyledPixels;
 
