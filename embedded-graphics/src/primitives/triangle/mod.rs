@@ -5,11 +5,8 @@ mod scanline_iterator;
 mod styled;
 
 use crate::{
-    drawable::Pixel,
     geometry::{Dimensions, Point},
-    pixelcolor::PixelColor,
     primitives::{ContainsPoint, Primitive, Rectangle},
-    style::{PrimitiveStyle, Styled},
     transform::Transform,
 };
 use core::{
@@ -17,7 +14,7 @@ use core::{
     cmp::{max, min},
 };
 pub use points::Points;
-pub use styled::StyledTriangleIterator;
+pub use styled::StyledPixels;
 
 /// Triangle primitive
 ///
@@ -193,18 +190,6 @@ fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     let (y2, y3) = sort_two_yx(y3, y2);
 
     (y1, y2, y3)
-}
-
-impl<C> IntoIterator for &Styled<Triangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Item = Pixel<C>;
-    type IntoIter = StyledTriangleIterator<C>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        StyledTriangleIterator::new(self)
-    }
 }
 
 enum IterState {
