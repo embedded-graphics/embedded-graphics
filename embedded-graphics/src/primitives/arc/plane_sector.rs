@@ -13,7 +13,7 @@ use crate::{
 /// intersection of both half-planes is used and for angles >= 180° the union of both
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub(in crate::primitives) struct PlaneSector {
+pub struct PlaneSector {
     line_a: LinearEquation,
     line_b: LinearEquation,
     draw_above_a: bool,
@@ -22,11 +22,7 @@ pub(in crate::primitives) struct PlaneSector {
 }
 
 impl PlaneSector {
-    pub(in crate::primitives) fn new(
-        center: Point,
-        angle_start: Angle,
-        angle_sweep: Angle,
-    ) -> Self {
+    pub fn new(center: Point, angle_start: Angle, angle_sweep: Angle) -> Self {
         let angle_end = angle_start + angle_sweep;
 
         let angle_start_norm = angle_start.normalize_from(-ANGLE_90DEG);
@@ -52,7 +48,7 @@ impl PlaneSector {
         }
     }
 
-    pub(in crate::primitives) fn contains(&self, point: Point) -> bool {
+    pub fn contains(&self, point: Point) -> bool {
         let side_a = self.line_a.side(point);
         let side_b = self.line_b.side(point);
 
@@ -71,13 +67,13 @@ impl PlaneSector {
 
 /// Iterator over the points in the intersection of a plane sector and the bounding box of a primitive.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub(in crate::primitives) struct PlaneSectorIterator {
+pub struct PlaneSectorIterator {
     plane_sector: PlaneSector,
     points: rectangle::Points,
 }
 
 impl PlaneSectorIterator {
-    pub(in crate::primitives) fn new<D: Dimensions>(
+    pub fn new<D: Dimensions>(
         primitive: &D,
         center: Point,
         angle_start: Angle,
@@ -89,7 +85,7 @@ impl PlaneSectorIterator {
         }
     }
 
-    pub(in crate::primitives) fn empty() -> Self {
+    pub fn empty() -> Self {
         Self {
             plane_sector: PlaneSector::empty(),
             points: Rectangle::new(Point::zero(), Size::zero()).points(),

@@ -1,6 +1,5 @@
 use crate::{
     drawable::{Drawable, Pixel},
-    geometry::Point,
     pixelcolor::PixelColor,
     primitives::{
         arc::{plane_sector::PlaneSectorIterator, Arc},
@@ -49,7 +48,7 @@ where
         } else {
             PlaneSectorIterator::empty()
         };
-        
+
         let iter = DistanceIterator::new(stroke_area.center_2x(), points);
 
         Self {
@@ -103,7 +102,7 @@ where
 mod tests {
     use super::*;
     use crate::{
-        geometry::AngleUnit,
+        geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::Primitive,

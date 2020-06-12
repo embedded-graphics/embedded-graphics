@@ -2,7 +2,7 @@ use crate::geometry::{Angle, Point, Real, Trigonometry};
 
 /// Define one side of a line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(in crate::primitives) enum LineSide {
+pub enum LineSide {
     Above,
     Below,
 }
@@ -11,7 +11,7 @@ pub(in crate::primitives) enum LineSide {
 ///
 /// The equation is stored as the a, b and c coefficients of the ax + by + c = 0 equation
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub(in crate::primitives) struct LinearEquation {
+pub struct LinearEquation {
     a: Real,
     b: Real,
     c: Real,
@@ -19,7 +19,7 @@ pub(in crate::primitives) struct LinearEquation {
 
 impl LinearEquation {
     /// Create a new linear equation based on one point and one angle
-    pub(in crate::primitives) fn from_point_angle(point: Point, angle: Angle) -> Self {
+    pub fn from_point_angle(point: Point, angle: Angle) -> Self {
         let (a, b) = match angle.tan() {
             None => (Real::from(1.0), Real::from(0.0)),
             Some(a) => (-a, Real::from(-1.0)),
@@ -29,7 +29,7 @@ impl LinearEquation {
     }
 
     /// Create a horizontal line equation
-    pub(in crate::primitives) fn new_horizontal() -> Self {
+    pub fn new_horizontal() -> Self {
         LinearEquation {
             a: Real::from(0.0),
             b: Real::from(1.0),
@@ -38,7 +38,7 @@ impl LinearEquation {
     }
 
     /// Check on which side of the line a point is
-    pub(in crate::primitives) fn side(&self, point: Point) -> LineSide {
+    pub fn side(&self, point: Point) -> LineSide {
         if self.a * point.x.into() + self.b * point.y.into() + self.c < Real::from(0.0) {
             LineSide::Below
         } else {
