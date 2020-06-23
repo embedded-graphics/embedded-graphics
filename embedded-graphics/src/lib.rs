@@ -21,6 +21,7 @@
 //! * [ProFont monospace font - `profont`](https://crates.io/crates/profont)
 //! * [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
 //! * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
+//! * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 //!
 //! If you know of a crate that is not in this list, please [open an
 //! issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
