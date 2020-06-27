@@ -11,6 +11,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Fixed
 
 - [#309](https://github.com/jamwaffles/embedded-graphics/pull/309) Prevent triangles with off-screen vertices from infinitely looping.
+- `Line`, `Rectangle` and `Triangle` size was one less than expected.
 
 ## [0.6.1] - 2020-04-01
 
