@@ -1,5 +1,3 @@
-//! # Embedded graphics simulator
-//!
 //! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 //!
 //! The simulator can be used to test and debug
@@ -83,6 +81,43 @@
 //!     }
 //! }
 //! ```
+//!
+//! # Creating screenshots
+//!
+//! Screenshots of programs, that use `Window` to display a simulated display, can be created by
+//! setting the `EG_SIMULATOR_DUMP` environment variable:
+//!
+//! ```bash
+//! EG_SIMULATOR_DUMP=screenshot.png cargo run
+//! ```
+//!
+//! By setting the variable the display passed to the first `Window::update` call gets exported as a
+//! PNG file to the specified path. After the file is exported the process is terminated.
+//!
+//! # Exporting images
+//!
+//! If a program doesn't require to display a window and only needs to export one or more images, a
+//! `SimulatorDisplay` can also be converted to an `image` crate `ImageBuffer` by using the
+//! `to_image_buffer` method. The resulting buffer can then be used to save the display content to
+//! any format supported by `image`.
+//!
+//! # Usage without SDL2
+//!
+//! When the simulator is used in headless/CI environments that don't require showing a window, SDL2
+//! support can be disabled. This removes the requirement of SDL2 being installed on the target machine,
+//! but still allows the simulator to be used to generate images.
+//!
+//! The `with-sdl` feature is enabled by default and can be disabled by adding `default-features = false` to the dependency:
+//!
+//! ```toml
+//! [dependencies.embedded-graphics-simulator]
+//! version = "0.2.0"
+//! default-features = false
+//! ```
+//!
+//! See the [Choosing
+//! Features](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#choosing-features)
+//! Cargo manifest documentation for more details.
 
 #![deny(missing_docs)]
 

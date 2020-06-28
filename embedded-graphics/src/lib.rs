@@ -1,5 +1,12 @@
-//! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
-//! following built in items:
+//! Embedded-graphics is a 2D graphics library that is focused on memory constrained embedded devices.
+//!
+//! A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
+//! `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating
+//! large chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel
+//! values and positions are calculated on the fly, with the minimum of saved state. This allows the
+//! consuming application to use far less RAM at little to no performance penalty.
+//!
+//! It contains built in items that make it easy to draw 2D graphics primitives:
 //!
 //! * [Raw data images](./image/struct.ImageRaw.html)
 //! * [Primitives](./primitives/index.html)
@@ -14,7 +21,10 @@
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
-//! Additional functionality provided by external crates:
+//! # Additional functions provided by external crates
+//!
+//! Embedded-graphics is designed to be extended by the application or other crates. Examples of
+//! this are adding support for different image formats or implementing custom fonts.
 //!
 //! * [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
 //! * [TGA images - `tinytga`](https://crates.io/crates/tinytga)
@@ -23,24 +33,22 @@
 //! * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
 //! * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 //!
-//! If you know of a crate that is not in this list, please [open an
-//! issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
-//!
 //! Note that some of these crates may not support the latest version of embedded-graphics.
 //!
-//! You can also add your own objects by implementing [`Drawable`] on them. Additionally, all
-//! iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default [`Drawable`] implementation
-//! already created.
+//! If you know of a crate that is not in this list, please [open an
+//! issue](https://github.com/jamwaffles/embedded-graphics/issues/new) to add it.
 //!
-//! A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
-//! `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating
-//! large chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel
-//! values and positions are calculated on the fly, with the minimum of saved state. This allows the
-//! consuming application to use far less RAM at little to no performance penalty.
+//! # Display drivers
 //!
-//! # Supported displays
+//! To support many different kinds of display, embedded-graphics doesn't include any drivers
+//! directly but provides the [`DrawTarget`] API that can be implemented by external crates. In
+//! addition to the drivers for real displays, the
+//! [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
+//! development.
 //!
-//! These are just some of the displays the community has added embedded_graphics support to. This
+//! ![Embedded graphics on real hardware](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/banner-photo.jpg)
+//!
+//! These are just some of the displays the community has added embedded-graphics support to. This
 //! list is taken from the [dependent crates
 //! list](https://crates.io/crates/embedded-graphics/reverse_dependencies) on crates.io so might be
 //! missing some unpublished entries. Please [open an
@@ -71,7 +79,7 @@
 //! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 //!
 //! Take a look at the [simulator examples] to see what
-//! embedded_graphics can do, and how it might look on a display. You can run the examples like
+//! embedded-graphics can do, and how it might look on a display. You can run the examples like
 //! this:
 //!
 //! ```bash
@@ -94,10 +102,14 @@
 //! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 //! calculation.
 //!
+//! # Migrating from 0.5 to 0.6
+//!
+//! Please read [the migration guide](https://github.com/jamwaffles/embedded-graphics/blob/master/embedded-graphics/MIGRATING-0.5-0.6.md).
+//!
 //! # Implementing `embedded_graphics` in a driver
 //!
-//! To add support for embedded_graphics to a display driver, [`DrawTarget`] should be implemented.
-//! This allows all embedded_graphics objects to be rendered by the display. See the [`DrawTarget`]
+//! To add support for embedded-graphics to a display driver, [`DrawTarget`] should be implemented.
+//! This allows all embedded-graphics objects to be rendered by the display. See the [`DrawTarget`]
 //! documentation for implementation details.
 //!
 //! # Examples
