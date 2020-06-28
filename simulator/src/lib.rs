@@ -121,7 +121,6 @@
 
 #![deny(missing_docs)]
 
-mod check_readme;
 mod display;
 mod framebuffer;
 mod output_settings;
