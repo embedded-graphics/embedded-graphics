@@ -15,6 +15,8 @@
 //! This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
 //! using the [`Image`] wrapper. The image is positioned at the top left corner of the display.
 //!
+//! The `graphics` feature of `tinytga` is required to enable embedded-graphics support.
+//!
 //! ```rust
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;

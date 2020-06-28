@@ -276,7 +276,9 @@ some display drivers implement accelerated drawing of iterators."#,
     op!(
         display,
         "Display a TGA image",
-        "This example uses [tinytga](https://crates.io/crates/tinytga) to draw an image to the display.",
+        "This example uses [tinytga](https://crates.io/crates/tinytga) to draw an image to the display.
+
+The `graphics` feature of `tinytga` is required to enable embedded-graphics support.",
         {
             use embedded_graphics::{
                 image::Image,

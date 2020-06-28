@@ -122,6 +122,8 @@
 //! This example loads the following test image (scaled 10x to make it visible) and tests the
 //! returned pixels against an expected pattern.
 //!
+//! The `graphics` feature of `tinytga` is required to enable embedded-graphics support.
+//!
 //! ![TGA test image, scaled 1000%]( data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAAyBAMAAAAuIdEGAAAAGFBMVEUAAAD/AAAA/wD//wAAAP//AP8A//////8V3DX3AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5AEODTI3wavPmgAAAEtJREFUSMdjKAcBBhAQBAElEHABAWMQCAWBNBCAqBtVPZhVI8Co6qGuejR9D8d8OQqGOkDEKJgFjmVwfINjHpwGwKkBnC5GVQ9m1QAE0rmq9y8gWgAAAABJRU5ErkJggg==)
 //!
 //! ```rust
