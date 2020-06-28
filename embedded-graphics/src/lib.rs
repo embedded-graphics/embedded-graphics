@@ -311,13 +311,17 @@
 //! This example draws an arc with a 2px green stroke.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an arc example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABTUlEQVR42u3cQQ6DMAxFQRvl/lcOOzaIDYqEHWYu0Ba9/gapbUbEDH7rcAkEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAqC/se0rW/1d57QAbCij++8CZoEraAGwAFXf8dns8SwAFuDNOzKLPI9mi2ABLEDTBciiz6vZElgAC+D/AbY+q1gALIAlsABYAEtgAbAAlsACYAEsgQVAAF9vbwoAAXA7G0wBIABnAQEgAGcBASAAZwEBIAAEgADcDQgAAbgbEAACQAAIAAEgAASAABAAAkAACAABIAAEwKPhEhQzLQAWgEtaAASAAHAGcPq3AFgAp38LgAAQAIs+afxXsAVAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACIDvnG3zIPeb6boNAAAAAElFTkSuQmCC" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw an arc example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB60lEQVR4nO3RwW6EMAwA0fb/P7pFm0u09EA3tseEeRJXO3i+v4QyAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAOwOAX6O71Pt/6/9Aw8GKLVy7iua/XGz5xwMALhy9P++NGNmggZPOGQcK2NmggZPOJyPlfGu85ZZxsYLoLVvzqfJeNd5yyxj4wXQ2jfjNJVvGRvPKt/wUr7wT+MclW8ZG88q3/BSvrChc4zCqxSuassALUAZSpbcggFaKM+QPP52DNBCYYa0wbdmgBZKMiSM3IYBWpgzJFwrYeRmDACbAwyhNwsdtiUDtDBnCL1Z6LCNGQA2BxiCLhc0ZnsGaGHOEHS5oDEPYQCYAWAGgM0BhuX7LQ94FAO0MGdYvt/ygAcyAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMANg5tMPy/dbHvAoBoDNAYIuFzTmIQwAMwDMAJj59EPQ5YLGbM8AsDlA6M1Ch23MADADwAywKwPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAMwAMAPADAAzAOwXfVdEgW6vkuoAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Arc, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Arc,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
@@ -334,13 +338,17 @@
 //! This example draws a sector with no stroke and a solid blue fill.
 //!
 //! <div style="display: flex">
-//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a sector example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABbElEQVR42u3dgYkCQRBE0W4x/5TbCISFXcHpei8D9V85I+h1VU0R6+UpEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAATvbe/xDvfu2hLQB7dR3/zaD5g6fQAmABUv7idy2CBXAN5PmFGgHgDBB+FjjjbGABnAFIPhsIwBnAJ4HJZwILYAG2/EqYJbAACAABkHkGcBawAAjg7OUaASCAB95L2ytrARCAs4AAiA3AWcACIABLYAEQAALg6xtk2P8N9H0CC4AAEACZAfhcwAIgAARARfxO4NX79VgALECwzEWwABaA5EWwAK6BXF+EFgD7sh5Pwx3zw5fGAuAW4LZgAbAAFsECIIBTF6EFgM8BuHQ2aAuAW4DbggXAGQALgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABCAABIAAEAACQAAIAAEgAATAfh9WESP9yc4uqgAAAABJRU5ErkJggg==" />
+//! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="Draw a sector example screenshot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB2UlEQVR4nO3RQU7EMBQEUbj/oQGNN0gIlDBtV9tTT8r2J+l6fxPKADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwA2yjAx9dzxx6/tsdXPhhgkbtD39X1y11f82AAwOzRf8P/Pv8FDwaAUQEGcgTy3d8YoAKbYVg9yOr3/ckAsIYAw7pZ1r3pAgNUeK0MK95xkwEqvEqGudefYACYAWAGqHB+hll3QwwA6wkw5OfKX4wyQIWeDPm58hcnMACsJ8CQHC15axoDVOjJkBwteWsyA1RoyJAcLXlrCQPADAAzQIVzMmSuLGcAmAFgBqjAZshMl7kCMQDMADADFFkfIzNd5koBAxRZEyMzXeZKGQMUmRcjM13mSjEDVJiRITNd5ko9AxR5PkZytOStTRigyP9iJEdL3tqQAYpcj5EcLXlrcwaocCVDcrTkrSMYoMjPGPm58hcPYoAiI0Z+rvzFQxngUAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmANgnZDg8gckdIYgAAAAASUVORK5CYII=" />
 //! <div style="flex-grow: 1;">
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! # display.set_allow_overdraw(true);
 //! use embedded_graphics::{
-//!     pixelcolor::Rgb888, prelude::*, primitives::Sector, style::PrimitiveStyle,
+//!     pixelcolor::Rgb888,
+//!     prelude::*,
+//!     primitives::Sector,
+//!     style::PrimitiveStyle,
 //! };
 //!
 //! Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())

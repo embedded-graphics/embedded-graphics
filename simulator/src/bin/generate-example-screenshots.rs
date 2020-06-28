@@ -162,6 +162,36 @@ some display drivers implement accelerated drawing of iterators."#,
 
     op!(
         display,
+        "Draw an arc",
+        "This example draws an arc with a 2px green stroke.",
+        {
+            use embedded_graphics::{
+                pixelcolor::Rgb888, prelude::*, primitives::Arc, style::PrimitiveStyle,
+            };
+            {}
+            Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 2))
+                .draw(&mut display)?;
+        }
+    );
+
+    op!(
+        display,
+        "Draw a sector",
+        "This example draws a sector with no stroke and a solid blue fill.",
+        {
+            use embedded_graphics::{
+                pixelcolor::Rgb888, prelude::*, primitives::Sector, style::PrimitiveStyle,
+            };
+            {}
+            Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
+                .into_styled(PrimitiveStyle::with_fill(Rgb888::BLUE))
+                .draw(&mut display)?;
+        }
+    );
+
+    op!(
+        display,
         "Draw a triangle",
         "This example draws a triangle with a solid 1px magenta stroke and no fill.",
         {
