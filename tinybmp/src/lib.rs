@@ -1,5 +1,6 @@
-//! Small BMP format image parser supporting no-std environments. Specifically designed to work with
-//! [embedded-graphics]
+//! A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
+//! parsing the image header, no other allocations are made. A reference to the input image data is
+//! kept and slices are returned from it.
 //!
 //! # Examples
 //!
@@ -57,9 +58,12 @@
 //! let image = Image::new(&bmp, Point::zero());
 //!
 //! image.draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
-//! # } }
+//! # Ok::<(), core::convert::Infallible>(()) } }
 //! ```
+//!
+//! # Features
+//!
+//! * `graphics` - enables [`embedded-graphics`] integration.
 //!
 //! [embedded-graphics]: https://crates.io/crates/embedded-graphics
 //! [`Header`]: ./header/struct.Header.html
