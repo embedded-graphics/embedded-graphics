@@ -1,6 +1,12 @@
 //! A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
-//! parsing the image header, no other allocations are made. A reference to the input image data is
-//! kept and slices are returned from it.
+//! parsing the image header, no other allocations are made.
+//!
+//! To access the individual pixels in an image, the [`Bmp`] struct implements `IntoIterator`. It is
+//! also possible to access the raw image data by reading the [`pixel_data`] field.
+//!
+//! # Features
+//!
+//! * `graphics` - enables [embedded-graphics] integration.
 //!
 //! # Examples
 //!
@@ -61,12 +67,10 @@
 //! # Ok::<(), core::convert::Infallible>(()) } }
 //! ```
 //!
-//! # Features
-//!
-//! * `graphics` - enables [`embedded-graphics`] integration.
-//!
 //! [embedded-graphics]: https://crates.io/crates/embedded-graphics
 //! [`Header`]: ./header/struct.Header.html
+//! [`Bmp`]: ./struct.Bmp.html
+//! [`pixel_data`]: ./struct.Bmp.html#structfield.pixel_data
 
 #![no_std]
 #![deny(missing_docs)]
