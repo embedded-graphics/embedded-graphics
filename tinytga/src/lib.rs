@@ -58,7 +58,8 @@
 //! This example demonstrates [`embedded-graphics`] support by rendering a TGA image to a mock
 //! display.
 //!
-//! The `graphics` feature of `tinytga` is required to enable embedded-graphics support.
+//! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
+//! with embedded-graphics.
 //!
 //! ```rust
 //! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {

@@ -5,7 +5,8 @@
 //! This example uses the [tinytga](https://crates.io/crates/tinytga) crate to load the TGA from a
 //! byte slice read in at compile time.
 //!
-//! The `graphics` feature of `tinytga` is required to enable embedded-graphics support.
+//! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
+//! with embedded-graphics.
 
 use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
