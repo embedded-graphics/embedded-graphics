@@ -4,6 +4,9 @@
 //!
 //! This example uses the [tinybmp](https://crates.io/crates/tinybmp) crate to load the BMP from a
 //! byte slice read in at compile time.
+//!
+//! The `graphics` feature of `tinybmp` needs to be enabled in `Cargo.toml` to use the `Bmp` object
+//! with embedded-graphics.
 
 use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
