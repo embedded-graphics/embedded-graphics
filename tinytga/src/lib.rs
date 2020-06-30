@@ -2,7 +2,8 @@
 //! parsing the image header, no other allocations are made.
 //!
 //! To access the individual pixels in an image, the [`Tga`] struct implements `IntoIterator`. It is
-//! also possible to access the raw image data by reading the [`pixel_data`] field.
+//! also possible to access the unaltered raw image data by reading the [`pixel_data`] field. This
+//! data will need to be interpreted according to the [`image_type`] specified in the header.
 //!
 //! # Features
 //!
@@ -77,6 +78,7 @@
 //!
 //! [`embedded-graphics`]: https://docs.rs/embedded-graphics
 //! [`Tga`]: ./struct.Tga.html
+//! [`image_type`]: ./struct.TgaHeader.html#structfield.image_type
 //! [`pixel_data`]: ./struct.Tga.html#structfield.pixel_data
 
 #![no_std]
