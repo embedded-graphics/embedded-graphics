@@ -29,7 +29,8 @@ for crate in "${CRATES[@]}"; do
 done
 
 cargo doc --all-features
-linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics/index.html
-linkchecker --check-extern --ignore-url=^http target/doc/tinybmp/index.html
-linkchecker --check-extern --ignore-url=^http target/doc/tinytga/index.html
-linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics_simulator/index.html
+linkchecker --check-extern --ignore-url=^http \
+    target/doc/embedded_graphics/index.html \
+    target/doc/tinybmp/index.html \
+    target/doc/tinytga/index.html \
+    target/doc/embedded_graphics_simulator/index.html
