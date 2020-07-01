@@ -7,6 +7,7 @@ precheck_steps: &precheck_steps
     - restore_cache:
         key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: sudo apt update && sudo apt install -qq libsdl2-dev linkchecker
+    - run: cargo install cargo-readme
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update
