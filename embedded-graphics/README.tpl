@@ -12,6 +12,22 @@
 
 {{readme}}
 
+## Generating readmes
+
+The various `README.md` files in this project are generated from each crate's `lib.rs` comment. To
+regenerate a readme, ensure [`cargo-readme`](https://crates.io/crates/cargo-readme) is installed
+then run:
+
+```bash
+./readme.sh <crate>
+
+# e.g.
+./readme.sh simulator
+```
+
+Running `./build.sh` will check if the readme was successfully updated. The updated `README.md`
+should be committed into git.
+
 ## Development setup
 
 ### Minimum supported Rust version
