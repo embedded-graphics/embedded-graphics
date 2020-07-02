@@ -120,34 +120,83 @@
 //!
 //! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/drawing-examples.md).
 //!
-//! ## Draw a circle and some text
+//! ## Shapes and text
 //!
-//! This example uses the [`Circle`] primitive and the [`Font6x8`] font to draw a filled circle and  some text over it on the screen.
+//! The following example uses the [simulator](https://docs.rs/embedded-graphics-simulator/) to
+//! demonstrate some of the built in drawing functions:
 //!
-//! ```rust
+//! ```rust,no_run
 //! use embedded_graphics::{
 //!     fonts::{Font6x8, Text},
-//! #   mock_display::MockDisplay,
-//!     pixelcolor::Rgb565,
+//!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::Circle,
+//!     primitives::{Circle, Rectangle, Triangle},
 //!     style::{PrimitiveStyle, TextStyle},
 //! };
+//! use embedded_graphics_simulator::{
+//!     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
+//! };
 //!
-//! # let mut display = MockDisplay::default();
-//! # display.set_allow_overdraw(true);
-//! # display.set_allow_out_of_bounds_drawing(true);
+//! fn main() -> Result<(), std::convert::Infallible> {
+//!     // Create a new monochrome simulator display with 128x64 pixels.
+//!     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 //!
-//! let c = Circle::new(Point::new(12, 12), 17).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
-//! let t = Text::new("Hello Rust!", Point::new(20, 16))
-//!     .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
+//!     // Create styles used by the drawing operations.
+//!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
+//!     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+//!     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
+//!     let text_style = TextStyle::new(Font6x8, BinaryColor::On);
 //!
-//! // The `display` variable contains a `DrawTarget` implementation provided by the display driver
-//! // crate. See the driver crate documentation for more information about how it is constructed.
-//! c.draw(&mut display)?;
-//! t.draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
+//!     let yoffset = 10;
+//!
+//!     // Draw a 3px wide outline around the display.
+//!     let bottom_right = Point::zero() + display.size() - Point::new(1, 1);
+//!     Rectangle::new(Point::zero(), bottom_right)
+//!         .into_styled(thick_stroke)
+//!         .draw(&mut display)?;
+//!
+//!     // Draw a triangle.
+//!     Triangle::new(
+//!         Point::new(16, 16 + yoffset),
+//!         Point::new(16 + 16, 16 + yoffset),
+//!         Point::new(16 + 8, yoffset),
+//!     )
+//!     .into_styled(thin_stroke)
+//!     .draw(&mut display)?;
+//!
+//!     // Draw a filled square
+//!     Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+//!         .into_styled(fill)
+//!         .draw(&mut display)?;
+//!
+//!     // Draw a circle with a 3px wide stroke.
+//!     Circle::new(Point::new(88, yoffset), 17)
+//!         .into_styled(thick_stroke)
+//!         .draw(&mut display)?;
+//!
+//!     // Draw centered text.
+//!     let text = "embedded-graphics";
+//!     let width = text.len() as i32 * 6;
+//!     Text::new(text, Point::new(64 - width / 2, 40))
+//!         .into_styled(text_style)
+//!         .draw(&mut display)?;
+//!
+//!     let output_settings = OutputSettingsBuilder::new()
+//!         .theme(BinaryColorTheme::OledBlue)
+//!         .build();
+//!     Window::new("Hello World", &output_settings).show_static(&display);
+//!
+//!     Ok(())
+//! }
 //! ```
+//!
+//! This example is also included in the [simulator](./simulator/examples) crate and
+//! can be run using `cargo run --example hello-world`.
+//!
+//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
+//!
+//! Additional examples can be found in the [simulator](./simulator/examples) crate.
+//!
 //! ## Chaining
 //!
 //! Items can be chained to build more complex graphics objects.
