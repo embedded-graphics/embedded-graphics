@@ -162,8 +162,8 @@ fn main() -> Result<(), std::convert::Infallible> {
     let yoffset = 10;
 
     // Draw a 3px wide outline around the display.
-    let bottom_right = Point::zero() + display.size() - Point::new(1, 1);
-    Rectangle::new(Point::zero(), bottom_right)
+    let display_size = display.size() - Size::new(1, 1);
+    Rectangle::new(Point::zero(), display_size)
         .into_styled(thick_stroke)
         .draw(&mut display)?;
 
@@ -177,7 +177,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     .draw(&mut display)?;
 
     // Draw a filled square
-    Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+    Rectangle::new(Point::new(52, yoffset), Size::new(16, 16))
         .into_styled(fill)
         .draw(&mut display)?;
 
@@ -202,12 +202,12 @@ fn main() -> Result<(), std::convert::Infallible> {
 }
 ```
 
-This example is also included in the [simulator](./simulator/examples) crate and
+This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/simulator/tree/master/simulator/examples) crate and
 can be run using `cargo run --example hello-world`.
 
 ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
 
-Additional examples can be found in the [simulator](./simulator/examples) crate.
+Additional examples can be found in the [simulator](https://github.com/jamwaffles/embedded-graphics/simulator/tree/master/simulator) crate.
 
 ### Chaining
 
