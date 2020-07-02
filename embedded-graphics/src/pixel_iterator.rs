@@ -1,6 +1,7 @@
 //! Pixel iterator
 
 use crate::drawable::Pixel;
+use crate::primitives::rectangle::Rectangle;
 use crate::{pixelcolor::PixelColor, DrawTarget};
 
 /// Extension trait for pixel iterators.
@@ -37,4 +38,16 @@ where
 
     /// TODO: Doc
     fn pixels(self) -> Self::Iter;
+}
+
+/// Sparse pixel iterator
+pub trait SparsePixelIterator<C>
+where
+    C: PixelColor,
+{
+    ///  TODO: Doc
+    type Iter: Iterator<Item = Option<C>>;
+
+    /// TODO: Doc
+    fn sparse_pixels(self) -> (Rectangle, Self::Iter);
 }
