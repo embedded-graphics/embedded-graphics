@@ -1,3 +1,4 @@
+use crate::pixel_iterator::PixelIterator;
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
@@ -73,15 +74,14 @@ where
     }
 }
 
-impl<C> IntoIterator for &Styled<Rectangle, PrimitiveStyle<C>>
+impl<C> PixelIterator<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Iter = StyledPixels<C>;
 
-    fn into_iter(self) -> Self::IntoIter {
-        StyledPixels::new(self)
+    fn pixels(self) -> Self::Iter {
+        Self::Iter::new(self)
     }
 }
 
@@ -172,7 +172,7 @@ mod tests {
     fn it_draws_unfilled_rect() {
         let mut rect = Rectangle::new(Point::new(2, 2), Size::new(3, 3))
             .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-            .into_iter();
+            .pixels();
 
         assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
         assert_eq!(rect.next(), Some(Pixel(Point::new(3, 2), Rgb565::RED)));
@@ -193,7 +193,7 @@ mod tests {
         let styled_points = rectangle
             .clone()
             .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
-            .into_iter()
+            .pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(rectangle.points().eq(styled_points));
@@ -248,7 +248,7 @@ mod tests {
         let mut drawn_center = MockDisplay::new();
         let mut iter_center = MockDisplay::new();
         rectangle_center.draw(&mut drawn_center).unwrap();
-        rectangle_center.into_iter().draw(&mut iter_center).unwrap();
+        rectangle_center.pixels().draw(&mut iter_center).unwrap();
         assert_eq!(drawn_center, iter_center);
 
         let rectangle_inside = Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
@@ -261,7 +261,7 @@ mod tests {
         let mut drawn_inside = MockDisplay::new();
         let mut iter_inside = MockDisplay::new();
         rectangle_inside.draw(&mut drawn_inside).unwrap();
-        rectangle_inside.into_iter().draw(&mut iter_inside).unwrap();
+        rectangle_inside.pixels().draw(&mut iter_inside).unwrap();
         assert_eq!(drawn_inside, iter_inside);
 
         let rectangle_outside = Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
@@ -274,10 +274,7 @@ mod tests {
         let mut drawn_outside = MockDisplay::new();
         let mut iter_outside = MockDisplay::new();
         rectangle_outside.draw(&mut drawn_outside).unwrap();
-        rectangle_outside
-            .into_iter()
-            .draw(&mut iter_outside)
-            .unwrap();
+        rectangle_outside.pixels().draw(&mut iter_outside).unwrap();
         assert_eq!(drawn_outside, iter_outside);
     }
 
@@ -293,7 +290,7 @@ mod tests {
         let mut drawn = MockDisplay::new();
         let mut iter = MockDisplay::new();
         rectangle.draw(&mut drawn).unwrap();
-        rectangle.into_iter().draw(&mut iter).unwrap();
+        rectangle.pixels().draw(&mut iter).unwrap();
         assert_eq!(drawn, iter);
     }
 
@@ -336,7 +333,7 @@ mod tests {
 
                 // Calls draw_iter()
                 rect.into_styled(style)
-                    .into_iter()
+                    .pixels()
                     .draw(&mut display_iter)
                     .unwrap();
 

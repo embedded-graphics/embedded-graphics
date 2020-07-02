@@ -43,7 +43,7 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
 
     let chained = Rectangle::new(Point::new(0, 0), Size::new(1, 1))
         .into_styled(PrimitiveStyle::default())
-        .into_iter()
+        .pixels()
         .chain(
             Circle::new(Point::new(1, 1), 3)
                 .into_styled(PrimitiveStyle::default())
@@ -80,7 +80,7 @@ fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
 
     let chained = Rectangle::new(Point::new(0, 0), Size::new(1, 1))
         .into_styled(PrimitiveStyle::default())
-        .into_iter()
+        .pixels()
         .chain(
             Circle::new(Point::new(1, 1), 3)
                 .into_styled(PrimitiveStyle::default())

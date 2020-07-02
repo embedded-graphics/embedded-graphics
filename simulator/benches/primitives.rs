@@ -30,7 +30,7 @@ fn filled_rect(c: &mut Criterion) {
 
         let object = &Rectangle::new(Point::new(100, 100), Size::new(100, 100)).into_styled(style);
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -39,7 +39,7 @@ fn empty_rect(c: &mut Criterion) {
         let object = &Rectangle::new(Point::new(100, 100), Size::new(100, 100))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 

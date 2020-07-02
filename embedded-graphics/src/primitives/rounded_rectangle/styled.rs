@@ -100,6 +100,7 @@ mod tests {
         drawable::Drawable,
         geometry::{Point, Size},
         mock_display::MockDisplay,
+        pixel_iterator::PixelIterator,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{rectangle::Rectangle, CornerRadii, Primitive},
         style::PrimitiveStyleBuilder,
@@ -132,7 +133,7 @@ mod tests {
 
         let rect = Rectangle::new(Point::zero(), Size::new(20, 30)).into_styled(style);
 
-        assert!(rounded_rect.into_iter().eq(rect.into_iter()));
+        assert!(rounded_rect.into_iter().eq(rect.pixels()));
     }
 
     #[test]
