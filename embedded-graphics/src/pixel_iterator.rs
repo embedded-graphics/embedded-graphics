@@ -26,3 +26,15 @@ where
         target.draw_iter(self)
     }
 }
+
+/// Pixel iterator trait
+pub trait PixelIterator<C>
+where
+    C: PixelColor,
+{
+    /// TODO: Doc
+    type Iter: Iterator<Item = Pixel<C>>;
+
+    /// TODO: Doc
+    fn pixels(self) -> Self::Iter;
+}
