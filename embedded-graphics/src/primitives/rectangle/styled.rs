@@ -1,8 +1,8 @@
-use crate::pixel_iterator::PixelIterator;
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
+    pixel_iterator::IntoPixelIterator,
     pixelcolor::PixelColor,
     primitives::{
         rectangle::{Points, Rectangle},
@@ -74,7 +74,7 @@ where
     }
 }
 
-impl<C> PixelIterator<C> for &Styled<Rectangle, PrimitiveStyle<C>>
+impl<C> IntoPixelIterator<C> for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
