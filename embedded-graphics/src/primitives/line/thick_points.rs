@@ -14,8 +14,11 @@ const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
+pub enum Side {
+    /// Left side of the line
     Left,
+
+    /// Right side of the line
     Right,
 }
 
@@ -107,8 +110,7 @@ impl ParallelsIterator {
 
         // Thickness threshold, taking into account that fewer pixels are required to draw a
         // diagonal line of the same perceived width.
-        let delta = (line.end - line.start).abs();
-        let thickness_threshold = 4 * thickness.pow(2) * delta.length_squared();
+        let thickness_threshold = (thickness * 2).pow(2) * line.length_squared() as i32;
         let thickness_accumulator =
             (parallel_parameters.error_step.minor + parallel_parameters.error_step.major) / 2;
 
@@ -187,7 +189,6 @@ impl Iterator for ParallelsIterator {
         }
 
         let (point, error) = self.next_parallel(self.next_side);
-        // let (point, error) = self.next_parallel(Side::Left);
 
         let ret = match point {
             BresenhamPoint::Normal(point) => {

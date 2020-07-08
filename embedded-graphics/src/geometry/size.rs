@@ -187,6 +187,11 @@ impl Size {
         self.saturating_sub(Size::new(1, 1)) / 2
     }
 
+    /// Get the area of this size
+    pub fn area(self) -> u32 {
+        self.width * self.height
+    }
+
     /// Returns the componentwise minimum of two `Size`s.
     ///
     /// ```rust

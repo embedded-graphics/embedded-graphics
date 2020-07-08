@@ -10,6 +10,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
+- [#386](https://github.com/jamwaffles/embedded-graphics/pull/386) Added `Line::midpoint` to get the midpoint of a line.
+- [#386](https://github.com/jamwaffles/embedded-graphics/pull/386) `Polyline` now supports stroke widths greater than 1. Stroke alignment is not supported.
+
+## [0.7.0-alpha.1] - 2020-09-19
+
+### Added
+
 - [#307](https://github.com/jamwaffles/embedded-graphics/pull/307) Added `Primitive::points` to get an iterator over all points inside a primitive.
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `Rectangle::center` to get the center point of a rectangle.
 - [#318](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `ContainsPoint` trait to check if a point is inside a closed shape.
