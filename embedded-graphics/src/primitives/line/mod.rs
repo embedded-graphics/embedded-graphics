@@ -139,9 +139,11 @@ impl Line {
 
     /// Integer-only line segment intersection
     ///
+    /// If the point lies on both line segments, the second tuple argument will return `true`.
+    ///
     /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
     /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
-    pub fn segment_intersection(&self, other: &Self) -> Option<Point> {
+    pub fn intersection(&self, other: &Self) -> Option<(Point, bool)> {
         let Point { x: x1, y: y1 } = self.start;
         let Point { x: x2, y: y2 } = self.end;
         let Point { x: x3, y: y3 } = other.start;
@@ -152,33 +154,10 @@ impl Line {
         let b1 = x1 - x2;
         let c1 = x2 * y1 - x1 * y2;
 
-        // Compute sign values
-        let r3 = a1 * x3 + b1 * y3 + c1;
-        let r4 = a1 * x4 + b1 * y4 + c1;
-
-        // Check signs of r3 and r4.  If both point 3 and point 4 lie on same side of line 1, the
-        // line segments do not intersect.
-        if r3 != 0 && r4 != 0 && same_signs(r3, r4) {
-            return None;
-        }
-
         // Second line coefficients
         let a2 = y4 - y3;
         let b2 = x3 - x4;
         let c2 = x4 * y3 - x3 * y4;
-
-        // Sign values for second line
-        let r1 = a2 * x1 + b2 * y1 + c2;
-        let r2 = a2 * x2 + b2 * y2 + c2;
-
-        // Check signs of r1 and r2.  If both point 1 and point 2 lie on same side of second line
-        // segment, the line segments do not intersect.
-        if r1 != 0 && r2 != 0 && same_signs(r1, r2) {
-            return None;
-        }
-
-        // If we got here, line segments intersect. Compute intersection point using method similar
-        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
 
         let denom = a1 * b2 - a2 * b1;
 
@@ -186,6 +165,28 @@ impl Line {
         if denom == 0 {
             return None;
         }
+
+        // Compute sign values
+        let r3 = a1 * x3 + b1 * y3 + c1;
+        let r4 = a1 * x4 + b1 * y4 + c1;
+
+        // Sign values for second line
+        let r1 = a2 * x1 + b2 * y1 + c2;
+        let r2 = a2 * x2 + b2 * y2 + c2;
+
+        // Flag denoting whether intersection point is on passed line segments. If this is false,
+        // the intersection occurs somewhere along the two mathematical, infinite lines instead.
+        //
+        // Check signs of r3 and r4.  If both point 3 and point 4 lie on same side of line 1, the
+        // line segments do not intersect.
+        //
+        // Check signs of r1 and r2.  If both point 1 and point 2 lie on same side of second line
+        // segment, the line segments do not intersect.
+        let is_on_segments = (r3 != 0 && r4 != 0 && same_signs(r3, r4))
+            || (r1 != 0 && r2 != 0 && same_signs(r1, r2));
+
+        // If we got here, line segments intersect. Compute intersection point using method similar
+        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
 
         // The denom/2 is to get rounding instead of truncating. It is added or subtracted to the
         // numerator, depending upon the sign of the numerator.
@@ -197,7 +198,7 @@ impl Line {
         let num = a2 * c1 - a1 * c2;
         let y = if num < 0 { num - offset } else { num + offset } / denom;
 
-        Some(Point::new(x, y))
+        Some((Point::new(x, y), is_on_segments))
     }
 }
 
