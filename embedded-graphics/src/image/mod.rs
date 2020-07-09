@@ -51,6 +51,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
+    pixel_iterator::Pixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
@@ -200,7 +201,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.fill_contiguous(&self.bounding_box(), self.into_iter().map(|p| p.1))
+        display.fill_contiguous(&self.bounding_box(), self.pixels().map(|p| p.1))
     }
 }
 
@@ -216,15 +217,14 @@ where
     }
 }
 
-impl<'a, 'b, I, C> IntoIterator for &'a Image<'b, I, C>
+impl<'a, 'b: 'a, I, C> Pixels<'a, C> for Image<'b, I, C>
 where
     &'b I: IntoPixelIter<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor + From<<C as PixelColor>::Raw> + 'a,
 {
-    type Item = Pixel<C>;
-    type IntoIter = ImageIterator<'a, 'b, I, C>;
+    type Iter = ImageIterator<'a, 'b, I, C>;
 
-    fn into_iter(self) -> Self::IntoIter {
+    fn pixels(&'a self) -> Self::Iter {
         ImageIterator {
             it: self.image_data.pixel_iter(),
             image: self,
@@ -296,7 +296,7 @@ mod tests {
             Pixel(Point::new(1, 1), Gray8::new(0xaa)),
         ];
 
-        assert!(image.into_iter().eq(expected.iter().copied()));
+        assert!(image.pixels().eq(expected.iter().copied()));
     }
 
     #[test]

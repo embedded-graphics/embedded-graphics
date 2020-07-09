@@ -35,9 +35,9 @@ fn it_can_have_negative_offsets() {
     let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
     let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
-    assert_eq!(image.into_iter().count(), 9);
+    assert_eq!(image.pixels().count(), 9);
 
-    let it = image.into_iter();
+    let it = image.pixels();
 
     let expected: [Pixel<Rgb565>; 9] = [
         Pixel(Point::new(0, 0), Rgb565::RED),
@@ -77,7 +77,7 @@ macro_rules! test_pattern {
 
         assert_eq!(image.bounding_box().size, Size::new(4, 2));
 
-        let mut iter = image.into_iter();
+        let mut iter = image.pixels();
         for (y, row) in pattern.iter().enumerate() {
             for (x, &expected_color) in row.iter().enumerate() {
                 let pos = Point::new(x as i32, y as i32);
@@ -119,7 +119,7 @@ fn colors_grey8() {
 
     assert_eq!(image.bounding_box().size, Size::new(3, 1));
 
-    let mut iter = image.into_iter();
+    let mut iter = image.pixels();
 
     let p = iter.next().unwrap();
     assert_eq!(p.0, Point::new(0, 0));
@@ -144,7 +144,7 @@ fn issue_136_row_size_is_multiple_of_4_bytes() {
 
     let mut display = MockDisplay::new();
     image
-        .into_iter()
+        .pixels()
         .map(|Pixel(p, c)| {
             Pixel(
                 p,
