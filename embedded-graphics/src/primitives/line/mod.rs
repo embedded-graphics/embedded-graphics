@@ -8,7 +8,10 @@ mod thick_points;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        line::thick_points::{ParallelLineType, ParallelsIterator},
+        line::{
+            bresenham::{Bresenham, BresenhamParameters},
+            thick_points::{ParallelLineType, ParallelsIterator, Side},
+        },
         Primitive, Rectangle,
     },
     transform::Transform,

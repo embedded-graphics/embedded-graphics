@@ -13,7 +13,7 @@ const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
+pub(in crate::primitives) enum Side {
     Left,
     Right,
 }
@@ -132,7 +132,7 @@ impl ParallelsIterator {
     }
 
     /// Returns the next parallel on the given side.
-    fn next_parallel(&mut self, side: Side) -> (BresenhamPoint, i32) {
+    pub fn next_parallel(&mut self, side: Side) -> (BresenhamPoint, i32) {
         let (error, decrease_error) = match side {
             Side::Left => (&mut self.left_error, self.flip),
             Side::Right => (&mut self.right_error, !self.flip),
