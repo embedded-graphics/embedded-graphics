@@ -7,7 +7,13 @@ mod thick_points;
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{Primitive, Rectangle},
+    primitives::{
+        line::{
+            bresenham::{Bresenham, BresenhamParameters},
+            thick_points::{ParallelsIterator, Side},
+        },
+        Primitive, Rectangle,
+    },
     transform::Transform,
 };
 pub use points::Points;
@@ -148,6 +154,93 @@ impl Line {
         let y = if num < 0 { num - offset } else { num + offset } / denom;
 
         Some((Point::new(x, y), is_on_segments))
+    }
+
+    /// Get two lines representing the left and right edges of the thick line.
+    pub fn extents(&self, thickness: i32) -> (Line, Line) {
+        // let parallel_parameters = BresenhamParameters::new(self);
+
+        // // Thickness threshold, taking into account that fewer pixels are required to draw a
+        // // diagonal line of the same perceived width.
+        // let delta = (self.end - self.start).abs();
+        // let thickness_threshold = 4 * thickness.pow(2) * delta.length_squared();
+        // let mut thickness_accumulator =
+        //     (parallel_parameters.error_step.minor + parallel_parameters.error_step.major) / 2;
+        // let mut side = Side::Right;
+
+        // let mut l = *self;
+        // let mut r = *self;
+
+        // while thickness_accumulator.pow(2) <= thickness_threshold {
+        //     //
+        // }
+
+        let mut it = ParallelsIterator::new(self, thickness);
+
+        let mut start_l = self.start;
+        let mut bres_l = Bresenham::with_initial_error(self.start, 0);
+        let mut par_points_l = 0;
+
+        let mut start_r = self.start;
+        let mut bres_r = Bresenham::with_initial_error(self.start, 0);
+        let mut par_points_r = 0;
+
+        while let Some((bres, length_reduction, side)) = it.next() {
+            match side {
+                Side::Left => {
+                    start_l = bres.point;
+                    bres_l = bres;
+                    par_points_l = bresenham::major_length(self) - length_reduction;
+                }
+                Side::Right => {
+                    start_r = bres.point;
+                    bres_r = bres;
+                    par_points_r = bresenham::major_length(self) - length_reduction;
+                }
+            }
+        }
+
+        let mut end_l = self.end;
+        let mut end_r = self.end;
+
+        for _ in 0..par_points_l {
+            end_l = bres_l.next(&it.parallel_parameters);
+        }
+
+        for _ in 0..par_points_r {
+            end_r = bres_r.next(&it.parallel_parameters);
+        }
+
+        let l = Line::new(start_l, end_l);
+        let r = Line::new(start_r, end_r);
+
+        // // Left and right start points
+        // let mut ext_l_start = self.start;
+        // let mut ext_r_start = self.start;
+
+        // while let Some((bres, length_reduction, side)) = it.next() {
+        //     match side {
+        //         Side::Left => ext_l_start = bres.point,
+        //         Side::Right => ext_r_start = bres.point,
+        //     }
+        // }
+
+        // // Left and right end points
+        // let mut ext_l_end = self.end;
+        // let mut ext_r_end = self.end;
+
+        // // let delta_ext_l = self.start - ext_l_start;
+        // // let delta_ext_r = self.start - ext_r_start;
+
+        // // let ext_l_end = self.end - delta_ext_l;
+        // // let ext_r_end = self.end - delta_ext_r;
+
+        // let ext_l = Line::new(ext_l_start, ext_l_end);
+        // let ext_r = Line::new(ext_r_start, ext_r_end);
+
+        // (ext_l, ext_r)
+
+        (l, r)
     }
 }
 

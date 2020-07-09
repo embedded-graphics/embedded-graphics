@@ -13,7 +13,7 @@ const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
+pub(in crate::primitives) enum Side {
     Left,
     Right,
 }
@@ -34,9 +34,9 @@ impl Side {
 /// between the left and right side of original line to keep the resulting thick
 /// line symmetric.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-struct ParallelsIterator {
+pub(in crate::primitives) struct ParallelsIterator {
     /// Parameters used for moves along the parallel lines.
-    parallel_parameters: BresenhamParameters,
+    pub parallel_parameters: BresenhamParameters,
 
     /// Parameters used for moves perpendicular to the parallel lines.
     perpendicular_parameters: BresenhamParameters,
@@ -81,7 +81,7 @@ struct ParallelsIterator {
 }
 
 impl ParallelsIterator {
-    fn new(mut line: &Line, thickness: i32) -> Self {
+    pub fn new(mut line: &Line, thickness: i32) -> Self {
         let start_point = line.start;
 
         // The lines orientation is undefined if start and end point are equal.
@@ -125,7 +125,7 @@ impl ParallelsIterator {
     }
 
     /// Returns the next parallel on the given side.
-    fn next_parallel(&mut self, side: Side) -> (BresenhamPoint, i32) {
+    pub fn next_parallel(&mut self, side: Side) -> (BresenhamPoint, i32) {
         let (error, decrease_error) = match side {
             Side::Left => (&mut self.left_error, self.flip),
             Side::Right => (&mut self.right_error, !self.flip),
@@ -159,7 +159,7 @@ impl ParallelsIterator {
 
 impl Iterator for ParallelsIterator {
     /// The bresenham state (`Bresenham`) and the reduction in line length (`u32`).
-    type Item = (Bresenham, u32);
+    type Item = (Bresenham, u32, Side);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.thickness_accumulator.pow(2) > self.thickness_threshold {
@@ -173,13 +173,21 @@ impl Iterator for ParallelsIterator {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.minor;
 
                 // Normal lines are the same length as the original primitive line.
-                (Bresenham::with_initial_error(point, error), 0)
+                (
+                    Bresenham::with_initial_error(point, error),
+                    0,
+                    self.next_side,
+                )
             }
             BresenhamPoint::Extra(point) => {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.major;
 
                 // Extra lines are 1 pixel shorter than normal lines.
-                (Bresenham::with_initial_error(point, error), 1)
+                (
+                    Bresenham::with_initial_error(point, error),
+                    1,
+                    self.next_side,
+                )
             }
         };
 
@@ -221,7 +229,7 @@ impl Iterator for ThickPoints {
 
                 return Some(self.parallel.next(&self.iter.parallel_parameters));
             } else {
-                let (parallel, length_reduction) = self.iter.next()?;
+                let (parallel, length_reduction, _) = self.iter.next()?;
 
                 self.parallel = parallel;
                 self.parallel_points_remaining = self.parallel_length - length_reduction;
