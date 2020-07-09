@@ -17,29 +17,33 @@ use embedded_graphics::{
     fonts::{Font6x8, Text},
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Line},
+    primitives::{Circle, Line, Rectangle},
     style::{PrimitiveStyle, TextStyle},
 };
 use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, Window, OutputSettingsBuilder};
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(129, 129));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 
     let line_style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
-    Circle::new(Point::new(0, 0), 129)
+    Circle::new(Point::new(72, 8), 48)
         .into_styled(line_style)
         .draw(&mut display)?;
 
-    Line::new(Point::new(64, 64), Point::new(0, 64))
+    Line::new(Point::new(48, 16), Point::new(8, 16))
         .into_styled(line_style)
         .draw(&mut display)?;
 
-    Line::new(Point::new(64, 64), Point::new(80, 80))
+    Line::new(Point::new(48, 16), Point::new(64, 32))
         .into_styled(line_style)
         .draw(&mut display)?;
 
-    Text::new("Hello World!", Point::new(5, 50))
+    Rectangle::new(Point::new(79, 15), Size::new(34, 34))
+        .into_styled(line_style)
+        .draw(&mut display)?;
+
+    Text::new("Hello World!", Point::new(5, 5))
         .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
         .draw(&mut display)?;
 
