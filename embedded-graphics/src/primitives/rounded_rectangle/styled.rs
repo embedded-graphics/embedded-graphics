@@ -100,7 +100,7 @@ mod tests {
         drawable::Drawable,
         geometry::{Point, Size},
         mock_display::MockDisplay,
-        pixel_iterator::IntoPixelIterator,
+        pixel_iterator::Pixels,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{rectangle::Rectangle, CornerRadii, Primitive},
         style::PrimitiveStyleBuilder,

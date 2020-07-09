@@ -29,25 +29,25 @@ where
 }
 
 /// Pixel iterator trait
-pub trait IntoPixelIterator<C>
+pub trait Pixels<'a, C>
 where
     C: PixelColor,
 {
     /// TODO: Doc
-    type Iter: Iterator<Item = Pixel<C>>;
+    type Iter: Iterator<Item = Pixel<C>> + 'a;
 
     /// TODO: Doc
-    fn pixels(self) -> Self::Iter;
+    fn pixels(&'a self) -> Self::Iter;
 }
 
 /// Sparse pixel iterator
-pub trait IntoSparsePixelIterator<C>
+pub trait SparsePixels<'a, C>
 where
     C: PixelColor,
 {
     ///  TODO: Doc
-    type Iter: Iterator<Item = Option<C>> + Dimensions;
+    type Iter: Iterator<Item = Option<C>> + Dimensions + 'a;
 
     /// TODO: Doc
-    fn sparse_pixels(self) -> Self::Iter;
+    fn sparse_pixels(&'a self) -> Self::Iter;
 }
