@@ -25,12 +25,28 @@ fn draw(e2: Point, display: &mut SimulatorDisplay<Rgb888>) {
         .draw(display)
         .unwrap();
 
-    // Draw intersection point
-    if let Some(i) = l1.segment_intersection(&l2) {
-        Circle::with_center(i, 5)
-            .into_styled(PrimitiveStyle::with_fill(Rgb888::CYAN))
+    if let Some((point, is_on_lines)) = l1.intersection(&l2) {
+        // Draw intersection point
+        Circle::with_center(point, 5)
+            .into_styled(PrimitiveStyle::with_fill(if is_on_lines {
+                Rgb888::CYAN
+            } else {
+                Rgb888::MAGENTA
+            }))
             .draw(display)
-            .unwrap()
+            .unwrap();
+
+        // Marker
+        Circle::new(Point::zero(), 5)
+            .into_styled(PrimitiveStyle::with_fill(Rgb888::GREEN))
+            .draw(display)
+            .unwrap();
+    } else {
+        // Marker
+        Circle::new(Point::zero(), 5)
+            .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
+            .draw(display)
+            .unwrap();
     }
 }
 
