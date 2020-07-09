@@ -47,6 +47,6 @@ pub trait Primitive: Dimensions {
 
 /// Trait to check if a point is inside a closed shape.
 pub trait ContainsPoint {
-    /// Returns `true` is the given point is inside the shape.
+    /// Returns `true` if the given point is inside the shape.
     fn contains(&self, point: Point) -> bool;
 }
