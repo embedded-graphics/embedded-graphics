@@ -56,6 +56,8 @@ fn main() -> Result<(), core::convert::Infallible> {
 }
 ```
 
+![Screenshot of the simple hello world example](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-hello-world.png)
+
 # Creating screenshots
 
 Screenshots of programs, that use `Window` to display a simulated display, can be created by
