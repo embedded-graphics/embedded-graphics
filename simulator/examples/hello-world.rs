@@ -7,7 +7,7 @@ use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,
     primitives::{Circle, Rectangle, Triangle},
-    style::{PrimitiveStyle, TextStyle},
+    style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, TextStyle},
 };
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
@@ -19,7 +19,11 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
-    let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+    let thick_stroke = PrimitiveStyleBuilder::new()
+        .stroke_color(BinaryColor::On)
+        .stroke_width(3)
+        .stroke_alignment(StrokeAlignment::Inside)
+        .build();
     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
     let text_style = TextStyle::new(Font6x8, BinaryColor::On);
 
@@ -40,7 +44,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     .draw(&mut display)?;
 
     // Draw a filled square
-    Rectangle::new(Point::new(52, yoffset), Size::new(16, 16))
+    Rectangle::new(Point::new(52, yoffset), Size::new(17, 17))
         .into_styled(fill)
         .draw(&mut display)?;
 
