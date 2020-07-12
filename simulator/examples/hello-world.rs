@@ -36,20 +36,20 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     // Draw a triangle.
     Triangle::new(
-        Point::new(16, 16 + yoffset),
-        Point::new(16 + 16, 16 + yoffset),
-        Point::new(16 + 8, yoffset),
+        Point::new(17, 17 + yoffset),
+        Point::new(17 + 18, 17 + yoffset),
+        Point::new(17 + 9, yoffset),
     )
     .into_styled(thin_stroke)
     .draw(&mut display)?;
 
     // Draw a filled square
-    Rectangle::new(Point::new(52, yoffset), Size::new(17, 17))
+    Rectangle::new(Point::new(52, yoffset), Size::new(18, 18))
         .into_styled(fill)
         .draw(&mut display)?;
 
     // Draw a circle with a 3px wide stroke.
-    Circle::new(Point::new(88, yoffset), 17)
+    Circle::new(Point::new(88, yoffset), 18)
         .into_styled(thick_stroke)
         .draw(&mut display)?;
 
