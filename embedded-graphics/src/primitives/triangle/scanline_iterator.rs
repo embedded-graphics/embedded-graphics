@@ -16,8 +16,13 @@ pub enum PointType {
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ScanlineIterator {
+    /// Left-most edge of the triangle
     line_a: line::Points,
+
+    /// Right-most edge of the triangle
     line_b: line::Points,
+
+    /// Bottom edge of the triangle
     line_c: line::Points,
     cur_ac: Option<Point>,
     cur_b: Option<Point>,
