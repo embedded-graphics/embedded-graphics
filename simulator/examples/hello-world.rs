@@ -27,7 +27,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
     let text_style = TextStyle::new(Font6x8, BinaryColor::On);
 
-    let yoffset = 10;
+    let yoffset = 14;
 
     // Draw a 3px wide outline around the display.
     Rectangle::new(Point::zero(), display.size())
@@ -36,27 +36,27 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     // Draw a triangle.
     Triangle::new(
-        Point::new(17, 17 + yoffset),
-        Point::new(17 + 16, 17 + yoffset),
-        Point::new(17 + 8, yoffset),
+        Point::new(18, 17 + yoffset),
+        Point::new(18 + 16, 17 + yoffset),
+        Point::new(18 + 8, yoffset),
     )
     .into_styled(thin_stroke)
     .draw(&mut display)?;
 
     // Draw a filled square
-    Rectangle::new(Point::new(52, yoffset), Size::new(18, 18))
+    Rectangle::new(Point::new(55, yoffset), Size::new(18, 18))
         .into_styled(fill)
         .draw(&mut display)?;
 
     // Draw a circle with a 3px wide stroke.
-    Circle::new(Point::new(88, yoffset), 18)
+    Circle::new(Point::new(92, yoffset), 18)
         .into_styled(thick_stroke)
         .draw(&mut display)?;
 
     // Draw centered text.
     let text = "embedded-graphics";
     let width = text.len() as i32 * 6;
-    Text::new(text, Point::new(64 - width / 2, 40))
+    Text::new(text, Point::new(64 - width / 2, 43))
         .into_styled(text_style)
         .draw(&mut display)?;
 
