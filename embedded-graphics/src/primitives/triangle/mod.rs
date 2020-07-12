@@ -6,7 +6,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{ContainsPoint, Primitive, Rectangle},
+    primitives::{ContainsPoint, Line, Primitive, Rectangle},
     transform::Transform,
 };
 use core::{
@@ -88,9 +88,48 @@ impl ContainsPoint for Triangle {
             return false;
         }
 
-        // This is inefficient and should be replaced by a better algorithm to
-        // determine if point is inside the triangle
-        self.points().any(|p| p == point)
+        let p = point;
+        let Self { p1, p2, p3 } = *self;
+
+        // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
+        // Works for any point ordering.
+        let is_inside = {
+            let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
+            let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
+
+            if (s < 0) != (t < 0) {
+                false
+            } else {
+                // Determinant
+                let a = -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y;
+
+                // This check allows this algorithm to work with clockwise or counterclockwise
+                // triangles.
+                if a < 0 {
+                    s <= 0 && s + t >= a
+                } else {
+                    s >= 0 && s + t <= a
+                }
+            }
+        };
+
+        // Skip expensive point-on-line check below if point is definitely inside triangle
+        if is_inside {
+            return true;
+        }
+
+        // Sort points into same order as `ScanlineIterator` so this check produces the same results
+        // as a rendered triangle would.
+        let (p1, p2, p3) = sort_yx(p1, p2, p3);
+
+        // Special case: due to the Bresenham algorithm being used to render triangles, some pixel
+        // centers on a Styled<Triangle> lie outside the mathematical triangle. This check
+        // inefficiently checks to see if the point lies on any of the border edges.
+        Line::new(p1, p2)
+            .points()
+            .chain(Line::new(p1, p3).points())
+            .chain(Line::new(p2, p3).points())
+            .any(|line_point| line_point == p)
     }
 }
 
@@ -236,12 +275,29 @@ mod tests {
 
     #[test]
     fn contains() {
-        let triangle = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
+        let triangles = [
+            // Colinear triangle. Mathematically, zero sized, in e-g land however this draws pixels
+            // along a line, therefore it is possible to contain a point.
+            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15)),
+            Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64)),
+            Triangle::new(Point::new(5, 0), Point::new(30, 64), Point::new(64, 0)),
+            Triangle::new(Point::new(0, 0), Point::new(0, 64), Point::new(64, 30)),
+            Triangle::new(Point::new(22, 0), Point::new(0, 64), Point::new(64, 64)),
+            Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64)),
+        ];
 
-        for point in Rectangle::new(Point::new(0, 5), Size::new(15, 25)).points() {
-            let expected = triangle.points().any(|p| p == point);
+        for triangle in triangles.iter() {
+            for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
+                let expected = triangle.points().any(|p| p == point);
 
-            assert_eq!(triangle.contains(point), expected, "{:?}", point);
+                assert_eq!(
+                    triangle.contains(point),
+                    expected,
+                    "{:?}, {:?}",
+                    point,
+                    triangle
+                );
+            }
         }
     }
 }
