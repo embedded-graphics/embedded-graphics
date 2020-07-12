@@ -37,8 +37,8 @@ fn main() -> Result<(), std::convert::Infallible> {
     // Draw a triangle.
     Triangle::new(
         Point::new(17, 17 + yoffset),
-        Point::new(17 + 18, 17 + yoffset),
-        Point::new(17 + 9, yoffset),
+        Point::new(17 + 16, 17 + yoffset),
+        Point::new(17 + 8, yoffset),
     )
     .into_styled(thin_stroke)
     .draw(&mut display)?;
