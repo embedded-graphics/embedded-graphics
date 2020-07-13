@@ -1,17 +1,25 @@
-//! Generate example screenshots for the embedded-graphics documentation
+//! Generate example screenshots for the `EXAMPLES.md` file.
 //!
 //! Run from the workspace root with:
 //!
 //! ```bash
-//! cargo run --bin generate-example-screenshots | rustfmt +nightly --config-path rustfmt.examples.toml
+//! cargo run --bin generate-example-screenshots | rustfmt +nightly --config-path rustfmt.examples.toml | sed -E -e 's@//! ?@@g' -e '/^# .*/d' -e '/pub mod dummy \{\}/d' - > EXAMPLES.md
 //! ```
 //!
-//! Screenshots are output to `target/drawing-ops`.
+//! The `generate_examples_md.sh` script contains this command as a convenience method.
+//!
+//! The various `sed` expressions:
+//!
+//! 1. Strip `//!` from the beginning of lines
+//! 2. Remove hidden code block lines that start with `#`
+//! 3. Removes the trailing `pub mod dummy {}` required to make `rustfmt` work on the file
+//!
+//! Screenshots are output to `assets/doc`.
 
 use embedded_graphics::{pixelcolor, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 
-const OUTPUT_BASE: &str = "./target/drawing-ops";
+const IMAGE_OUTPUT_BASE: &str = "./assets/doc";
 
 macro_rules! op {
     ($display:ident, $title:expr, $description:expr, $code:block) => {
@@ -21,63 +29,61 @@ macro_rules! op {
             $code;
 
             Ok::<(), core::convert::Infallible>(())
-        })().unwrap();
+        })()
+        .unwrap();
+
+        let cleansed_title = $title.replace(" ", "_").to_lowercase();
 
         let output_settings = OutputSettingsBuilder::new().scale(2).build();
 
-        let path = format!("{}/{}.png", OUTPUT_BASE, $title);
+        let path = format!("{}/{}.png", IMAGE_OUTPUT_BASE, cleansed_title);
         $display
             .to_image_buffer(&output_settings)
             .save(&path)
             .unwrap();
 
-        let screenshot = base64::encode(std::fs::read(&path).expect("Couldn't open screenshot"));
-
         // Newlines in the code block aren't preserved by the stringify macro.
         // Use {} in the code block to insert newlines in the generated output.
         let doc_lines: Vec<_> = stringify!($code)
-                .trim_matches(|c| c == '{' || c == '}')
-                .trim()
-                .lines()
-                .map(|l| l.trim())
-                .map(|l| if l == "{ }" { "" } else { l }).collect();
+            .trim_matches(|c| c == '{' || c == '}')
+            .trim()
+            .lines()
+            .map(|l| l.trim())
+            .map(|l| if l == "{ }" { "" } else { l })
+            .collect();
 
-        // Note: empty lines must remain between HTML elements and inner Markdown for the Markdown
-        // to be parsed correctly.
         println!(
-            r#"//! ## {}
-            //!
-            //! {}
-            //!
-            //! <div style="display: flex">
-            //! <img style="width: 128px; height: 128px; margin-right: 8px;" alt="{} example screenshot" src="data:image/png;base64,{}" />
-            //! <div style="flex-grow: 1;">
+            r#"//!
+//! ## {}
+//!
+//! {}
+//!
+//! ![{} example screenshot]({})
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! # display.set_allow_overdraw(true);
 //! {}
 //! # Ok::<(), core::convert::Infallible>(())
-//! ```
-//!
-//! </div>
-//! </div>
-//!"#,
+//! ```"#,
             $title,
             $description.lines().collect::<Vec<_>>().join("\n//! "),
             $title,
-            screenshot,
+            path,
             doc_lines.join("\n//! ")
         );
     };
 }
 
 fn main() {
-    let output_base = "./target/drawing-ops";
-    std::fs::create_dir_all(output_base).expect("Output directory could not be created");
+    std::fs::create_dir_all(IMAGE_OUTPUT_BASE).expect("Output directory could not be created");
 
     let mut display: SimulatorDisplay<pixelcolor::Rgb888> =
         SimulatorDisplay::new(Size::new(64, 64));
+
+    // Note: Alternative header syntax here as lines beginning with `//! #` are stripped as hidden
+    // code lines.
+    println!("//! Embedded graphics examples\n//! ===");
 
     op!(
         display,
