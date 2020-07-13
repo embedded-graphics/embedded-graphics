@@ -17,58 +17,30 @@ use embedded_graphics::{
     fonts::{Font6x8, Text},
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Rectangle, Triangle},
-    style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, TextStyle},
+    primitives::{Circle, Line},
+    style::{PrimitiveStyle, TextStyle},
 };
-use embedded_graphics_simulator::{
-    BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
-};
+use embedded_graphics_simulator::{BinaryColorTheme, SimulatorDisplay, Window, OutputSettingsBuilder};
 
-fn main() -> Result<(), std::convert::Infallible> {
-    // Create a new simulator display with 128x64 pixels.
-    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
+fn main() -> Result<(), core::convert::Infallible> {
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(129, 129));
 
-    // Create styles used by the drawing operations.
-    let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
-    let thick_stroke = PrimitiveStyleBuilder::new()
-        .stroke_color(BinaryColor::On)
-        .stroke_width(3)
-        .stroke_alignment(StrokeAlignment::Inside)
-        .build();
-    let fill = PrimitiveStyle::with_fill(BinaryColor::On);
-    let text_style = TextStyle::new(Font6x8, BinaryColor::On);
+    let line_style = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 
-    let yoffset = 14;
-
-    // Draw a 3px wide outline around the display.
-    Rectangle::new(Point::zero(), display.size())
-        .into_styled(thick_stroke)
+    Circle::new(Point::new(0, 0), 129)
+        .into_styled(line_style)
         .draw(&mut display)?;
 
-    // Draw a triangle.
-    Triangle::new(
-        Point::new(18, 17 + yoffset),
-        Point::new(18 + 16, 17 + yoffset),
-        Point::new(18 + 8, yoffset),
-    )
-    .into_styled(thin_stroke)
-    .draw(&mut display)?;
-
-    // Draw a filled square
-    Rectangle::new(Point::new(55, yoffset), Size::new(18, 18))
-        .into_styled(fill)
+    Line::new(Point::new(64, 64), Point::new(0, 64))
+        .into_styled(line_style)
         .draw(&mut display)?;
 
-    // Draw a circle with a 3px wide stroke.
-    Circle::new(Point::new(92, yoffset), 18)
-        .into_styled(thick_stroke)
+    Line::new(Point::new(64, 64), Point::new(80, 80))
+        .into_styled(line_style)
         .draw(&mut display)?;
 
-    // Draw centered text.
-    let text = "embedded-graphics";
-    let width = text.len() as i32 * 6;
-    Text::new(text, Point::new(64 - width / 2, 43))
-        .into_styled(text_style)
+    Text::new("Hello World!", Point::new(5, 50))
+        .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
         .draw(&mut display)?;
 
     let output_settings = OutputSettingsBuilder::new()
