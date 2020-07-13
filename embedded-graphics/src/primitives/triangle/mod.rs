@@ -101,7 +101,12 @@ impl ContainsPoint for Triangle {
                 false
             } else {
                 // Determinant
-                let a = -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y;
+                let a = self.area_doubled();
+
+                // If determinant is zero, triangle is colinear and can never contain a point.
+                if a == 0 {
+                    return false;
+                }
 
                 // This check allows this algorithm to work with clockwise or counterclockwise
                 // triangles.
@@ -169,6 +174,16 @@ impl Triangle {
             p2: points[1].into(),
             p3: points[2].into(),
         }
+    }
+
+    /// Return the area of the triangle, doubled.
+    ///
+    /// This method can be used to determine if the triangle is colinear by checking if the returned
+    /// value is equal to zero.
+    fn area_doubled(&self) -> i32 {
+        let Self { p1, p2, p3 } = self;
+
+        -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y
     }
 }
 
@@ -276,9 +291,6 @@ mod tests {
     #[test]
     fn contains() {
         let triangles = [
-            // Colinear triangle. Mathematically, zero sized, in e-g land however this draws pixels
-            // along a line, therefore it is possible to contain a point.
-            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15)),
             Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64)),
             Triangle::new(Point::new(5, 0), Point::new(30, 64), Point::new(64, 0)),
             Triangle::new(Point::new(0, 0), Point::new(0, 64), Point::new(64, 30)),
@@ -297,6 +309,21 @@ mod tests {
                     point,
                     triangle
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn colinear_never_contains() {
+        let triangles = [
+            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15)),
+            Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4)),
+            Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2)),
+        ];
+
+        for triangle in triangles.iter() {
+            for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
+                assert_eq!(triangle.contains(point), false);
             }
         }
     }
