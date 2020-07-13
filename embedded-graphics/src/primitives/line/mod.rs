@@ -6,7 +6,7 @@ mod styled;
 mod thick_points;
 
 use crate::{
-    geometry::{Dimensions, Point},
+    geometry::{Dimensions, Point, Size},
     primitives::{
         line::{
             bresenham::{Bresenham, BresenhamParameters},
@@ -90,6 +90,18 @@ impl Line {
         let delta = Point::new(delta.y, -delta.x);
 
         Line::new(self.start, self.start + delta)
+    }
+
+    /// Split the line in half at the midpoint, producing two new lines.
+    ///
+    /// The end of the first line and the start of the second line lay on the same point.
+    pub fn split_in_half(self) -> (Self, Self) {
+        let midpoint = self.bounding_box().center();
+
+        (
+            Self::new(self.start, midpoint),
+            Self::new(midpoint, self.end),
+        )
     }
 
     /// Integer-only line segment intersection
@@ -241,6 +253,14 @@ impl Line {
         // (ext_l, ext_r)
 
         (l, r)
+    }
+
+    /// Get the squared length of the line
+    pub fn length_squared(&self) -> Size {
+        let delta = self.end - self.start;
+
+        // Note: squaring result is always positive. `as u32` casts should be safe here.
+        Size::new(delta.x.pow(2) as u32, delta.y.pow(2) as u32)
     }
 }
 
