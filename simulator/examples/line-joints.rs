@@ -45,40 +45,87 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
 
     let fixed = Line::new(start, mid);
 
-    // First static line
-    fixed
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, width))
-        .draw(display)
-        .unwrap();
+    // let tstyle = PrimitiveStyle::with_stroke(Rgb888::RED, 1);
+    let tstyle = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb888::RED)
+        .stroke_width(1)
+        .fill_color(Rgb888::GREEN)
+        .build();
 
-    // Second movable line
     let l = Line::new(mid, end_point);
 
-    l.into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, width))
-        .draw(display)
-        .unwrap();
+    // {
+    //     // Draw first static line
+    //     fixed
+    //         .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, width))
+    //         .draw(display)
+    //         .unwrap();
+
+    //     // Draw second movable line
+    //     l.into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, width))
+    //         .draw(display)
+    //         .unwrap();
+    // }
+
+    // The maximum length of a mitered corner. After this point, the corner should be come beveled
+    let min_len_sq = fixed.length_squared().component_min(l.length_squared()) / 2;
 
     let (ext_l, ext_r) = l.extents(width as i32);
     let (fixed_ext_l, fixed_ext_r) = fixed.extents(width as i32);
 
-    if let Some((intersection, _)) = ext_l.intersection(&fixed_ext_l) {
-        Circle::with_center(intersection, 5)
-            .into_styled(PrimitiveStyle::with_fill(Rgb888::YELLOW))
+    if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
+        ext_l.intersection(&fixed_ext_l),
+        ext_r.intersection(&fixed_ext_r),
+    ) {
+        let is_degenerate = !l_on_lines && !r_on_lines;
+
+        // Fixed (first) line triangles
+        {
+            Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
+                .into_styled(tstyle)
+                .draw(display)
+                .unwrap();
+            Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
+                .into_styled(tstyle)
+                .draw(display)
+                .unwrap();
+        }
+
+        // Movable (second) line triangles
+        {
+            Triangle::new(ext_l.end, l_intersection, r_intersection)
+                .into_styled(tstyle)
+                .draw(display)
+                .unwrap();
+            Triangle::new(ext_l.end, ext_r.end, r_intersection)
+                .into_styled(tstyle)
+                .draw(display)
+                .unwrap();
+        }
+
+        Circle::with_center(l_intersection, 5)
+            .into_styled(if l_on_lines {
+                PrimitiveStyle::with_fill(Rgb888::YELLOW)
+            } else {
+                PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1)
+            })
+            .draw(display)
+            .unwrap();
+
+        Circle::with_center(r_intersection, 5)
+            .into_styled(if r_on_lines {
+                PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255))
+            } else {
+                PrimitiveStyle::with_stroke(Rgb888::new(0, 127, 255), 1)
+            })
             .draw(display)
             .unwrap();
     }
 
-    if let Some((intersection, _)) = ext_r.intersection(&fixed_ext_r) {
-        Circle::with_center(intersection, 5)
-            .into_styled(PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255)))
-            .draw(display)
-            .unwrap();
-    }
-
-    empty_crosshair(ext_l.start, Rgb888::RED, display);
-    empty_crosshair(ext_l.end, Rgb888::RED, display);
-    empty_crosshair(ext_r.start, Rgb888::new(255, 127, 0), display);
-    empty_crosshair(ext_r.end, Rgb888::new(255, 127, 0), display);
+    // empty_crosshair(ext_l.start, Rgb888::RED, display);
+    // empty_crosshair(ext_l.end, Rgb888::RED, display);
+    // empty_crosshair(ext_r.start, Rgb888::new(255, 127, 0), display);
+    // empty_crosshair(ext_r.end, Rgb888::new(255, 127, 0), display);
 }
 
 fn main() -> Result<(), core::convert::Infallible> {

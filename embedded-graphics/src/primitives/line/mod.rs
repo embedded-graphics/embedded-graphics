@@ -6,7 +6,7 @@ mod styled;
 mod thick_points;
 
 use crate::{
-    geometry::{Dimensions, Point},
+    geometry::{Dimensions, Point, Size},
     primitives::{
         line::{
             bresenham::{Bresenham, BresenhamParameters},
@@ -202,6 +202,14 @@ impl Line {
         let y = if num < 0 { num - offset } else { num + offset } / denom;
 
         Some((Point::new(x, y), is_on_segments))
+    }
+
+    /// Get the squared length of the line
+    pub fn length_squared(&self) -> Size {
+        let delta = self.end - self.start;
+
+        // Note: squaring result is always positive. `as u32` casts should be safe here.
+        Size::new(delta.x.pow(2) as u32, delta.y.pow(2) as u32)
     }
 }
 
