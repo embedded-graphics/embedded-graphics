@@ -219,12 +219,11 @@ mod tests {
 
     #[test]
     fn styled_stroke_equals_lines() {
-        let triangle = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30));
+        let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
 
         let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
 
         let mut tri_display: MockDisplay<BinaryColor> = MockDisplay::new();
-        tri_display.set_allow_out_of_bounds_drawing(true);
         // FIXME: Triangles should not be overdrawing
         tri_display.set_allow_overdraw(true);
         styled.draw(&mut tri_display).unwrap();
