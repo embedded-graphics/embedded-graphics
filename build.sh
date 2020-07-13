@@ -13,6 +13,13 @@ pushd simulator
 cargo build --release --no-default-features
 popd
 
+# Ensure that examples file is up to date
+./generate_examples_md.sh
+git diff --quiet EXAMPLES.md || (
+    echo "EXAMPLES.md is not up to date"
+    echo "Try running ./generate_examples_md.sh"
+)
+
 cargo doc --all-features
 linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics/index.html
 linkchecker --check-extern --ignore-url=^http target/doc/tinybmp/index.html
