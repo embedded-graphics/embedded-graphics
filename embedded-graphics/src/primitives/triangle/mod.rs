@@ -6,7 +6,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{ContainsPoint, Primitive, Rectangle},
+    primitives::{ContainsPoint, Line, Primitive, Rectangle},
     transform::Transform,
 };
 use core::{
@@ -88,9 +88,53 @@ impl ContainsPoint for Triangle {
             return false;
         }
 
-        // This is inefficient and should be replaced by a better algorithm to
-        // determine if point is inside the triangle
-        self.points().any(|p| p == point)
+        let p = point;
+        let Self { p1, p2, p3 } = *self;
+
+        // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
+        // Works for any point ordering.
+        let is_inside = {
+            let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
+            let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
+
+            if (s < 0) != (t < 0) {
+                false
+            } else {
+                // Determinant
+                let a = self.area_doubled();
+
+                // If determinant is zero, triangle is colinear and can never contain a point.
+                if a == 0 {
+                    return false;
+                }
+
+                // This check allows this algorithm to work with clockwise or counterclockwise
+                // triangles.
+                if a < 0 {
+                    s <= 0 && s + t >= a
+                } else {
+                    s >= 0 && s + t <= a
+                }
+            }
+        };
+
+        // Skip expensive point-on-line check below if point is definitely inside triangle
+        if is_inside {
+            return true;
+        }
+
+        // Sort points into same order as `ScanlineIterator` so this check produces the same results
+        // as a rendered triangle would.
+        let (p1, p2, p3) = sort_yx(p1, p2, p3);
+
+        // Special case: due to the Bresenham algorithm being used to render triangles, some pixel
+        // centers on a Styled<Triangle> lie outside the mathematical triangle. This check
+        // inefficiently checks to see if the point lies on any of the border edges.
+        Line::new(p1, p2)
+            .points()
+            .chain(Line::new(p1, p3).points())
+            .chain(Line::new(p2, p3).points())
+            .any(|line_point| line_point == p)
     }
 }
 
@@ -130,6 +174,16 @@ impl Triangle {
             p2: points[1].into(),
             p3: points[2].into(),
         }
+    }
+
+    /// Return the area of the triangle, doubled.
+    ///
+    /// This method can be used to determine if the triangle is colinear by checking if the returned
+    /// value is equal to zero.
+    fn area_doubled(&self) -> i32 {
+        let Self { p1, p2, p3 } = self;
+
+        -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y
     }
 }
 
@@ -177,6 +231,8 @@ impl Transform for Triangle {
 }
 
 fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
+    // If p1.y is less than p2.y, return it first. Otherwise, if they have the same Y coordinate,
+    // the first point becomes the one with the lesser X coordinate.
     if p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x) {
         (p1, p2)
     } else {
@@ -184,6 +240,8 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
     }
 }
 
+/// Sort 3 points in order of increasing Y value. If two points have the same Y value, the one with
+/// the lesser X value is put before.
 fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     let (y1, y2) = sort_two_yx(p1, p2);
     let (y1, y3) = sort_two_yx(p3, y1);
@@ -232,12 +290,41 @@ mod tests {
 
     #[test]
     fn contains() {
-        let triangle = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
+        let triangles = [
+            Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64)),
+            Triangle::new(Point::new(5, 0), Point::new(30, 64), Point::new(64, 0)),
+            Triangle::new(Point::new(0, 0), Point::new(0, 64), Point::new(64, 30)),
+            Triangle::new(Point::new(22, 0), Point::new(0, 64), Point::new(64, 64)),
+            Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64)),
+        ];
 
-        for point in Rectangle::new(Point::new(0, 5), Size::new(15, 25)).points() {
-            let expected = triangle.points().any(|p| p == point);
+        for triangle in triangles.iter() {
+            for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
+                let expected = triangle.points().any(|p| p == point);
 
-            assert_eq!(triangle.contains(point), expected, "{:?}", point);
+                assert_eq!(
+                    triangle.contains(point),
+                    expected,
+                    "{:?}, {:?}",
+                    point,
+                    triangle
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn colinear_never_contains() {
+        let triangles = [
+            Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15)),
+            Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4)),
+            Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2)),
+        ];
+
+        for triangle in triangles.iter() {
+            for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
+                assert_eq!(triangle.contains(point), false);
+            }
         }
     }
 }

@@ -91,7 +91,7 @@ mod tests {
         geometry::Point,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::Primitive,
+        primitives::{Line, Primitive},
         style::PrimitiveStyleBuilder,
         transform::Transform,
     };
@@ -215,5 +215,35 @@ mod tests {
         assert!(off_screen.into_iter().eq(on_screen
             .into_iter()
             .map(|Pixel(p, col)| Pixel(p - Point::new(0, 35), col))));
+    }
+
+    #[test]
+    fn styled_stroke_equals_lines() {
+        let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
+
+        let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
+
+        let mut tri_display: MockDisplay<BinaryColor> = MockDisplay::new();
+        // FIXME: Triangles should not be overdrawing
+        tri_display.set_allow_overdraw(true);
+        styled.draw(&mut tri_display).unwrap();
+
+        let mut lines_display: MockDisplay<BinaryColor> = MockDisplay::new();
+        lines_display.set_allow_out_of_bounds_drawing(true);
+        lines_display.set_allow_overdraw(true);
+        Line::new(triangle.p1, triangle.p2)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut lines_display)
+            .unwrap();
+        Line::new(triangle.p2, triangle.p3)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut lines_display)
+            .unwrap();
+        Line::new(triangle.p3, triangle.p1)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut lines_display)
+            .unwrap();
+
+        assert_eq!(tri_display, lines_display);
     }
 }
