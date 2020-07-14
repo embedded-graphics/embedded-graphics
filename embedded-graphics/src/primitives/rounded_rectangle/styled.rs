@@ -81,11 +81,14 @@ where
     }
 }
 
-impl<C> Drawable<C> for &Styled<RoundedRectangle, PrimitiveStyle<C>>
+impl<C> Drawable<C> for Styled<RoundedRectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
         display.draw_iter(self)
     }
 }

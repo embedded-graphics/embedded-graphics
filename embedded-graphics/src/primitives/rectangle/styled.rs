@@ -85,11 +85,14 @@ where
     }
 }
 
-impl<C> Drawable<C> for &Styled<Rectangle, PrimitiveStyle<C>>
+impl<C> Drawable<C> for Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
         let fill_area = self.primitive.shrink(self.style.inside_stroke_width());
 
         // Fill rectangle
@@ -159,6 +162,7 @@ mod tests {
         drawable::Drawable,
         geometry::{Point, Size},
         mock_display::MockDisplay,
+        pixel_iterator::PixelIteratorExt,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::Primitive,
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
