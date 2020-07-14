@@ -557,6 +557,7 @@ pub mod fonts;
 pub mod geometry;
 pub mod image;
 pub mod mock_display;
+pub mod pixel_iterator;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;

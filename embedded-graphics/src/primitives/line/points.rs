@@ -61,10 +61,8 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
-        mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        primitives::Primitive,
+        drawable::Pixel, mock_display::MockDisplay, pixel_iterator::PixelIteratorExt,
+        pixelcolor::BinaryColor, primitives::Primitive,
     };
 
     fn test_points(start: Point, end: Point, expected: &[(i32, i32)]) {

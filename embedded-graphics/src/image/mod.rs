@@ -190,13 +190,16 @@ impl<I, C> Transform for Image<'_, I, C> {
     }
 }
 
-impl<'a, 'b, I, C> Drawable<C> for &'a Image<'b, I, C>
+impl<'a, I, C> Drawable<C> for Image<'a, I, C>
 where
-    &'b I: IntoPixelIter<C>,
+    &'a I: IntoPixelIter<C>,
     I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
         display.fill_contiguous(&self.bounding_box(), self.into_iter().map(|p| p.1))
     }
 }

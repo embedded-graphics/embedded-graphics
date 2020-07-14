@@ -64,12 +64,15 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<C, F> Drawable<C> for &Styled<Text<'_>, TextStyle<C, F>>
+impl<C, F> Drawable<C> for Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font + Copy,
 {
-    fn draw<D: DrawTarget<Color = C>>(self, display: &mut D) -> Result<(), D::Error> {
+    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
         display.draw_iter(self.into_iter())
     }
 }
