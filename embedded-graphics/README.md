@@ -54,6 +54,12 @@ contains a list of crates that provide reusable extensions to embedded-graphics.
 
 More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
 
+## Drawing examples
+
+[![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/split-generated-examples/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/split-generated-examples/doc/drawing-examples.md)
+
+Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/split-generated-examples/doc/drawing-examples.md).
+
 ## Getting help/reporting an issue
 
 If you think you've found a bug, or would like to suggest a new feature to add to embedded-graphics, please [open an issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
@@ -205,14 +211,16 @@ rustup update
 rustup component add rustfmt
 
 # Install SDL2 for simulator and linkchecker for build script
+# Imagemagick is also installed, but is optional if not running the 
+# "generate_examples_montage.sh" script.
 
 # Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
-sudo apt install libsdl2-dev linkchecker
+sudo apt install libsdl2-dev linkchecker imagemagick
 
 # OR
 
 # Python 3 systems (Ubuntu 20.04+, Linux Mint 20, etc)
-sudo apt install python3-pip
+sudo apt install python3-pip libsdl2-dev imagemagick
 sudo pip3 install git+https://github.com/linkchecker/linkchecker.git
 ```
 
