@@ -1,20 +1,16 @@
 //! Generate example screenshots for the `doc/drawing-examples.md` file.
 //!
-//! Run from the workspace root with:
+//! To properly generate the correct files, a script that uses this binary (among other things) can
+//! be run from the workspace root:
 //!
 //! ```bash
-//! cargo run --bin generate-example-screenshots | rustfmt +nightly --config-path rustfmt.examples.toml | sed -E -e 's@//! ?@@g' -e '/^# .*/d' -e '/pub mod dummy \{\}/d' - > EXAMPLES.md
+//! ./generate_drawing_examples.sh
 //! ```
 //!
-//! The `generate_examples_md.sh` script contains this command as a convenience method.
+//! The `generate_drawing_examples.sh` script will process the output of this binary into a Markdown
+//! file.
 //!
-//! The various `sed` expressions:
-//!
-//! 1. Strip `//!` from the beginning of lines
-//! 2. Remove hidden code block lines that start with `#`
-//! 3. Removes the trailing `pub mod dummy {}` required to make `rustfmt` work on the file
-//!
-//! Screenshots are output to `assets/doc`.
+//! Screenshots are output to `doc/assets`.
 
 use embedded_graphics::{pixelcolor, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
