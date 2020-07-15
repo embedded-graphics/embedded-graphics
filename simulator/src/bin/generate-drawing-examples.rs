@@ -42,7 +42,7 @@ macro_rules! op {
             .save(&file_path)
             .unwrap();
 
-        let md_path = format!("./assets/{}.png", cleansed_title);
+        let doc_assets_path = format!("./assets/{}.png", cleansed_title);
 
         // Newlines in the code block aren't preserved by the stringify macro.
         // Use {} in the code block to insert newlines in the generated output.
@@ -71,7 +71,7 @@ macro_rules! op {
             $title,
             $description.lines().collect::<Vec<_>>().join("\n//! "),
             $title,
-            md_path,
+            doc_assets_path,
             doc_lines.join("\n//! ")
         );
     };
