@@ -54,6 +54,12 @@ contains a list of crates that provide reusable extensions to embedded-graphics.
 
 More information and up to date docs can be found on [docs.rs](https://docs.rs/embedded-graphics).
 
+## Drawing examples
+
+[![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/primitives.md)
+
+Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/primitives.md).
+
 ## Getting help/reporting an issue
 
 If you think you've found a bug, or would like to suggest a new feature to add to embedded-graphics, please [open an issue](https://github.com/jamwaffles/embedded-graphics/issues/new).

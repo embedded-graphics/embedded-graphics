@@ -15,8 +15,8 @@ popd
 
 # Ensure that examples file is up to date
 ./generate_examples_md.sh
-git diff --quiet EXAMPLES.md || (
-    echo "EXAMPLES.md is not up to date"
+git diff --quiet doc/ || (
+    echo "doc/ folder is not up to date"
     echo "Try running ./generate_examples_md.sh"
 )
 

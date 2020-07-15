@@ -102,6 +102,12 @@
 //!
 //! # Examples
 //!
+//! ## Drawing examples
+//!
+//! [![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/primitives.md)
+//!
+//! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/primitives.md).
+//!
 //! ## Draw a circle and some text
 //!
 //! This example uses the [`Circle`] primitive and the [`Font6x8`] font to draw a filled circle and  some text over it on the screen.

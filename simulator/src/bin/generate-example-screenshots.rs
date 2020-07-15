@@ -19,7 +19,7 @@
 use embedded_graphics::{pixelcolor, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 
-const IMAGE_OUTPUT_BASE: &str = "./assets/doc";
+const IMAGE_OUTPUT_BASE: &str = "./doc/assets";
 
 macro_rules! op {
     ($display:ident, $title:expr, $description:expr, $code:block) => {
@@ -36,11 +36,13 @@ macro_rules! op {
 
         let output_settings = OutputSettingsBuilder::new().scale(2).build();
 
-        let path = format!("{}/{}.png", IMAGE_OUTPUT_BASE, cleansed_title);
+        let file_path = format!("{}/{}.png", IMAGE_OUTPUT_BASE, cleansed_title);
         $display
             .to_image_buffer(&output_settings)
-            .save(&path)
+            .save(&file_path)
             .unwrap();
+
+        let md_path = format!("./assets/{}.png", cleansed_title);
 
         // Newlines in the code block aren't preserved by the stringify macro.
         // Use {} in the code block to insert newlines in the generated output.
@@ -69,7 +71,7 @@ macro_rules! op {
             $title,
             $description.lines().collect::<Vec<_>>().join("\n//! "),
             $title,
-            path,
+            md_path,
             doc_lines.join("\n//! ")
         );
     };
