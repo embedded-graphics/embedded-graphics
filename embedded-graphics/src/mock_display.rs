@@ -428,7 +428,7 @@ where
             assert_eq!(
                 row.len(),
                 pattern_width,
-                "Row #{} is {} characters wide instead of {}",
+                "Row #{} is {} characters wide (must be {} characters to match previous rows)",
                 row_idx + 1,
                 row.len(),
                 pattern_width
