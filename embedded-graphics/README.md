@@ -212,7 +212,7 @@ rustup component add rustfmt
 
 # Install SDL2 for simulator and linkchecker for build script
 # Imagemagick is also installed, but is optional if not running the 
-# "generate_drawing_examples.sh" script.
+# "generate_examples_montage.sh" script.
 
 # Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
 sudo apt install libsdl2-dev linkchecker imagemagick
