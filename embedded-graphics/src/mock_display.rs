@@ -416,19 +416,21 @@ where
         let pattern_height = pattern.len();
         assert!(
             pattern_width <= SIZE,
-            "Test pattern must not be wider than {}",
+            "Test pattern must not be wider than {} columns",
             SIZE
         );
         assert!(
             pattern_height <= SIZE,
-            "Test pattern must not be taller than {}",
+            "Test pattern must not be taller than {} rows",
             SIZE
         );
-        for row in pattern {
+        for (row_idx, row) in pattern.iter().enumerate() {
             assert_eq!(
                 row.len(),
                 pattern_width,
-                "Every row in the pattern must be {} characters wide",
+                "Row #{} is {} characters wide instead of {}",
+                row_idx + 1,
+                row.len(),
                 pattern_width
             );
         }
