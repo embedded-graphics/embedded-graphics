@@ -18,6 +18,7 @@ popd
 git diff --quiet doc/ || (
     echo "doc/ folder is not up to date"
     echo "Try running ./generate_drawing_examples.sh"
+    echo "If any images have changed, run ./generate_examples_montage.sh to update the collage image too"
 )
 
 cargo doc --all-features
