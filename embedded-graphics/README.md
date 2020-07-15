@@ -56,9 +56,9 @@ More information and up to date docs can be found on [docs.rs](https://docs.rs/e
 
 ## Drawing examples
 
-[![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/split-generated-examples/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/split-generated-examples/doc/drawing-examples.md)
+[![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/drawing-examples.md)
 
-Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/split-generated-examples/doc/drawing-examples.md).
+Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/drawing-examples.md).
 
 ## Getting help/reporting an issue
 
