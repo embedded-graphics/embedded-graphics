@@ -13,11 +13,11 @@ pushd simulator
 cargo build --release --no-default-features
 popd
 
-# Ensure that examples file is up to date
-./generate_examples_md.sh
+# Ensure that examples files are up to date
+./generate_drawing_examples.sh
 git diff --quiet doc/ || (
     echo "doc/ folder is not up to date"
-    echo "Try running ./generate_examples_md.sh"
+    echo "Try running ./generate_drawing_examples.sh"
 )
 
 cargo doc --all-features

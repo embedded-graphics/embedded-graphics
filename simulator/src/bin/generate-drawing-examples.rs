@@ -1,4 +1,4 @@
-//! Generate example screenshots for the `EXAMPLES.md` file.
+//! Generate example screenshots for the `doc/drawing-examples.md` file.
 //!
 //! Run from the workspace root with:
 //!

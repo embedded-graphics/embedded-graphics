@@ -56,9 +56,9 @@ More information and up to date docs can be found on [docs.rs](https://docs.rs/e
 
 ## Drawing examples
 
-[![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/primitives.md)
+[![Collage of drawing examples](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/drawing-examples.md)
 
-Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/primitives.md).
+Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/drawing-examples.md).
 
 ## Getting help/reporting an issue
 
@@ -212,7 +212,7 @@ rustup component add rustfmt
 
 # Install SDL2 for simulator and linkchecker for build script
 # Imagemagick is also installed, but is optional if not running the 
-# "generate_examples_md.sh" script.
+# "generate_drawing_examples.sh" script.
 
 # Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
 sudo apt install libsdl2-dev linkchecker imagemagick
