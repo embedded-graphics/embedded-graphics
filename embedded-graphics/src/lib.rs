@@ -171,17 +171,12 @@
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
-//! ## Further examples
-//!
-//! More examples can be found [in the main repository].
-//!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/struct.Font6x8.html
 //! [`DrawTarget`]: ./draw_target/trait.DrawTarget.html
 //! [`Drawable`]: ./drawable/trait.Drawable.html
-//! [in the main repository]: https://github.com/jamwaffles/embedded-graphics/blob/master/EXAMPLES.md
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/jamwaffles/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"
