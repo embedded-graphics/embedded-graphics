@@ -56,7 +56,7 @@
 //!
 //! ## Use with `embedded-graphics`
 //!
-//! This example demonstrates [`embedded-graphics`] support by rendering a TGA image to a mock
+//! This example demonstrates [embedded-graphics] support by rendering a TGA image to a mock
 //! display.
 //!
 //! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
@@ -76,7 +76,7 @@
 //! # Ok::<(), core::convert::Infallible>(()) } }
 //! ```
 //!
-//! [`embedded-graphics`]: https://docs.rs/embedded-graphics
+//! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Tga`]: ./struct.Tga.html
 //! [`image_type`]: ./struct.TgaHeader.html#structfield.image_type
 //! [`pixel_data`]: ./struct.Tga.html#structfield.pixel_data

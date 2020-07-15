@@ -64,7 +64,7 @@ let pixels = img.into_iter().collect::<Vec<Pixel>>();
 
 ### Use with `embedded-graphics`
 
-This example demonstrates `embedded-graphics` support by rendering a TGA image to a mock
+This example demonstrates [embedded-graphics] support by rendering a TGA image to a mock
 display.
 
 The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
@@ -81,7 +81,7 @@ let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
 image.draw(&mut display)?;
 ```
 
-[`embedded-graphics`]: https://docs.rs/embedded-graphics
+[embedded-graphics]: https://docs.rs/embedded-graphics
 
 ## License
 
