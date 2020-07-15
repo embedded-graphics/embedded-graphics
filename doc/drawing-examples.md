@@ -9,7 +9,7 @@ For cases where many pixels are drawn it is preferable to implement
 a custom iterator instead of calling `Pixel::draw` for each pixel, because
 some display drivers implement accelerated drawing of iterators.
 
-![Draw a single pixel example screenshot](./assets/draw_a_single_pixel.png)
+<img align="left" alt="Draw a single pixel example screenshot" src="./assets/draw_a_single_pixel.png" />
 
 ```rust
 use embedded_graphics::{
@@ -24,7 +24,7 @@ Pixel(Point::new(32, 32), Rgb888::GREEN).draw(&mut display)?;
 
 This example draws a red line with 8px stroke.
 
-![Draw a line example screenshot](./assets/draw_a_line.png)
+<img align="left" alt="Draw a line example screenshot" src="./assets/draw_a_line.png" />
 
 ```rust
 use embedded_graphics::{
@@ -43,7 +43,7 @@ Line::new(Point::new(16, 24), Point::new(51, 34))
 
 This example draws a rectangle with a 2px thick red stroke and cyan fill color.
 
-![Draw a rectangle example screenshot](./assets/draw_a_rectangle.png)
+<img align="left" alt="Draw a rectangle example screenshot" src="./assets/draw_a_rectangle.png" />
 
 ```rust
 use embedded_graphics::{
@@ -68,7 +68,7 @@ Rectangle::new(Point::new(16, 24), Size::new(32, 16))
 
 This example draws a circle with no stroke and a solid blue fill.
 
-![Draw a circle example screenshot](./assets/draw_a_circle.png)
+<img align="left" alt="Draw a circle example screenshot" src="./assets/draw_a_circle.png" />
 
 ```rust
 use embedded_graphics::{
@@ -87,7 +87,7 @@ Circle::new(Point::new(16, 16), 40)
 
 This example draws an ellipse with a 2px green stroke.
 
-![Draw an ellipse example screenshot](./assets/draw_an_ellipse.png)
+<img align="left" alt="Draw an ellipse example screenshot" src="./assets/draw_an_ellipse.png" />
 
 ```rust
 use embedded_graphics::{
@@ -106,7 +106,7 @@ Ellipse::new(Point::new(8, 16), Size::new(48, 32))
 
 This example draws an arc with a 2px green stroke.
 
-![Draw an arc example screenshot](./assets/draw_an_arc.png)
+<img align="left" alt="Draw an arc example screenshot" src="./assets/draw_an_arc.png" />
 
 ```rust
 use embedded_graphics::{
@@ -125,7 +125,7 @@ Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
 
 This example draws a sector with no stroke and a solid blue fill.
 
-![Draw a sector example screenshot](./assets/draw_a_sector.png)
+<img align="left" alt="Draw a sector example screenshot" src="./assets/draw_a_sector.png" />
 
 ```rust
 use embedded_graphics::{
@@ -144,7 +144,7 @@ Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
 
 This example draws a triangle with a solid 1px magenta stroke and no fill.
 
-![Draw a triangle example screenshot](./assets/draw_a_triangle.png)
+<img align="left" alt="Draw a triangle example screenshot" src="./assets/draw_a_triangle.png" />
 
 ```rust
 use embedded_graphics::{
@@ -163,7 +163,7 @@ Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
 
 This example draws a polyline with 1px cyan stroke.
 
-![Draw a polyline example screenshot](./assets/draw_a_polyline.png)
+<img align="left" alt="Draw a polyline example screenshot" src="./assets/draw_a_polyline.png" />
 
 ```rust
 use embedded_graphics::{
@@ -190,7 +190,7 @@ Polyline::new(&points)
 
 This example draws a rectangle with rounded corners, red stroke and green fill.
 
-![Draw a rectangle with rounded corners example screenshot](./assets/draw_a_rectangle_with_rounded_corners.png)
+<img align="left" alt="Draw a rectangle with rounded corners example screenshot" src="./assets/draw_a_rectangle_with_rounded_corners.png" />
 
 ```rust
 use embedded_graphics::{
@@ -221,7 +221,7 @@ RoundedRectangle::with_equal_corners(
 
 This example draws the text "Hello,\nRust!" with the [`Font6x8`] font in green.
 
-![Draw some text example screenshot](./assets/draw_some_text.png)
+<img align="left" alt="Draw some text example screenshot" src="./assets/draw_some_text.png" />
 
 ```rust
 use embedded_graphics::{
@@ -246,7 +246,7 @@ This example uses [tinytga](https://crates.io/crates/tinytga) to draw an image t
 The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga`
 object with embedded-graphics.
 
-![Display a TGA image example screenshot](./assets/display_a_tga_image.png)
+<img align="left" alt="Display a TGA image example screenshot" src="./assets/display_a_tga_image.png" />
 
 ```rust
 use embedded_graphics::{

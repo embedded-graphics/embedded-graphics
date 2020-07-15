@@ -60,7 +60,7 @@ macro_rules! op {
 //!
 //! {}
 //!
-//! ![{} example screenshot]({})
+//! <img align="left" alt="{} example screenshot" src="{}" />
 //!
 //! ```rust
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
