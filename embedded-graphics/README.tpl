@@ -25,6 +25,8 @@ then run:
 ./readme.sh simulator
 ```
 
+All readmes can be generated at the same time by running the `./generate_readmes.sh` script in the project root.
+
 Running `./build.sh` will check if the readme was successfully updated. The updated `README.md`
 should be committed into git.
 
