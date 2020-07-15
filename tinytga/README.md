@@ -9,13 +9,13 @@
 A small TGA parser designed for embedded, no-std environments but usable anywhere. Beyond
 parsing the image header, no other allocations are made.
 
-To access the individual pixels in an image, the Tga struct implements `IntoIterator`. It is
-also possible to access the unaltered raw image data by reading the pixel_data field. This
-data will need to be interpreted according to the image_type specified in the header.
+To access the individual pixels in an image, the `Tga` struct implements `IntoIterator`. It is
+also possible to access the unaltered raw image data by reading the `pixel_data` field. This
+data will need to be interpreted according to the `image_type` specified in the header.
 
 ## Features
 
-* `graphics` - enables embedded-graphics integration.
+* `graphics` - enables `embedded-graphics` integration.
 
 ## Examples
 
@@ -64,7 +64,7 @@ let pixels = img.into_iter().collect::<Vec<Pixel>>();
 
 ### Use with `embedded-graphics`
 
-This example demonstrates embedded-graphics support by rendering a TGA image to a mock
+This example demonstrates `embedded-graphics` support by rendering a TGA image to a mock
 display.
 
 The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
@@ -81,7 +81,7 @@ let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
 image.draw(&mut display)?;
 ```
 
-embedded-graphics: https://docs.rs/embedded-graphics
+[`embedded-graphics`]: https://docs.rs/embedded-graphics
 
 ## License
 

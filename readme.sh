@@ -15,9 +15,12 @@ if [ "$1" = "--check" ]; then   # ./readme.sh --check <crate>
        exit 1
     )
 elif [ "$1" = "--filter" ]; then    # ./readme.sh --filter
-    sed -E '/\[`.*`\]: .*(struct|enum|trait|type|fn|index)\./d' |
-    sed -e 's/\[`\([^]]*\)`\]/\1/g' |
-    sed -E 's/\[(.*)\]\(.*(struct|enum|trait|type|fn|index).*\)/\1/g'
+    # Remove footer-reference-style doc links like "[`Foo`]: ./foo/trait.Foo.html"
+    sed -E '/\[.+\]: .*(struct|enum|trait|type|fn|index)\./d'|
+    # Remove inline-style doc links like "[`Foo`](./foo/trait.Foo.html)", leaving just "`Foo`" in its place
+    sed -E 's/\[(.+)\]\(.*(struct|enum|trait|type|fn|index).*\)/\1/g' |
+    # Remove square braces from footer-reference-style inline links like "[`Foo`]", leaving "`Foo`" in its place
+    sed -E 's/\[(`[^]]*`)\]([^\(:]|$)/\1 /g' 
 else    # ./readme.sh <crate>
     crate=$1
 

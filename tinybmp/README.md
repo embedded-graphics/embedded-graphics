@@ -9,8 +9,8 @@
 A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
 parsing the image header, no other allocations are made.
 
-To access the individual pixels in an image, the Bmp struct implements `IntoIterator`. It is
-also possible to access the raw image data by reading the pixel_data field.
+To access the individual pixels in an image, the `Bmp` struct implements `IntoIterator`. It is
+also possible to access the raw image data by reading the `pixel_data` field.
 
 ## Features
 
@@ -18,7 +18,7 @@ also possible to access the raw image data by reading the pixel_data field.
 
 ## Examples
 
-### Load a BMP image and check its Header and returned pixels.
+### Load a BMP image and check its `Header` and returned pixels.
 
 ```rust
 use tinybmp::{Bmp, FileType, Header, Pixel};

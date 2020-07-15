@@ -53,7 +53,7 @@ issue](https://github.com/jamwaffles/embedded-graphics/issues/new) to add it.
 ## Display drivers
 
 To support many different kinds of display, embedded-graphics doesn't include any drivers
-directly but provides the DrawTarget API that can be implemented by external crates. In
+directly but provides the `DrawTarget` API that can be implemented by external crates. In
 addition to the drivers for real displays, the
 [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
 development.
@@ -109,7 +109,7 @@ cargo run -p embedded-graphics-simulator --example hello
 Add these to your `Cargo.toml` to turn on extra bits of functionality.
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-support to enable conversions from `nalgebra::Vector2` to Point and Size.
+support to enable conversions from `nalgebra::Vector2` to `Point` and `Size` 
 
 * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 calculation.
@@ -120,8 +120,8 @@ Please read [the migration guide](https://github.com/jamwaffles/embedded-graphic
 
 ## Implementing `embedded_graphics` in a driver
 
-To add support for embedded-graphics to a display driver, DrawTarget should be implemented.
-This allows all embedded-graphics objects to be rendered by the display. See the DrawTarget
+To add support for embedded-graphics to a display driver, `DrawTarget` should be implemented.
+This allows all embedded-graphics objects to be rendered by the display. See the `DrawTarget` 
 documentation for implementation details.
 
 ## Examples
@@ -202,12 +202,12 @@ fn main() -> Result<(), std::convert::Infallible> {
 }
 ```
 
-This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/simulator/tree/master/simulator/examples) crate and
+This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator/examples) crate and
 can be run using `cargo run --example hello-world`.
 
 ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
 
-Additional examples can be found in the [simulator](https://github.com/jamwaffles/embedded-graphics/simulator/tree/master/simulator) crate.
+Additional examples can be found in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator) crate.
 
 ### Chaining
 
@@ -244,7 +244,7 @@ build_thing("Hello Rust!").draw(&mut display)?;
 ## Generating readmes
 
 The various `README.md` files in this project are generated from each crate's `lib.rs` comment. To
-regenerate a readme, ensure cargo-readme(https://crates.io/crates/cargo-readme) is installed
+regenerate a readme, ensure [`cargo-readme`](https://crates.io/crates/cargo-readme) is installed
 then run:
 
 ```bash
@@ -253,6 +253,8 @@ then run:
 # e.g.
 ./readme.sh simulator
 ```
+
+All readmes can be generated at the same time by running the `./generate_readmes.sh` script in the project root.
 
 Running `./build.sh` will check if the readme was successfully updated. The updated `README.md`
 should be committed into git.
