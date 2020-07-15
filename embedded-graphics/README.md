@@ -211,14 +211,16 @@ rustup update
 rustup component add rustfmt
 
 # Install SDL2 for simulator and linkchecker for build script
+# Imagemagick is also installed, but is optional if not running the 
+# "generate_examples_md.sh" script.
 
 # Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
-sudo apt install libsdl2-dev linkchecker
+sudo apt install libsdl2-dev linkchecker imagemagick
 
 # OR
 
 # Python 3 systems (Ubuntu 20.04+, Linux Mint 20, etc)
-sudo apt install python3-pip
+sudo apt install python3-pip libsdl2-dev imagemagick
 sudo pip3 install git+https://github.com/linkchecker/linkchecker.git
 ```
 
