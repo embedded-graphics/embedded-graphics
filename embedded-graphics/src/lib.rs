@@ -190,12 +190,12 @@
 //! }
 //! ```
 //!
-//! This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/simulator/tree/master/simulator/examples) crate and
+//! This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator/examples) crate and
 //! can be run using `cargo run --example hello-world`.
 //!
 //! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
 //!
-//! Additional examples can be found in the [simulator](https://github.com/jamwaffles/embedded-graphics/simulator/tree/master/simulator) crate.
+//! Additional examples can be found in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator) crate.
 //!
 //! ## Chaining
 //!
