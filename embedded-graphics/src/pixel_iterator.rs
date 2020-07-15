@@ -28,26 +28,62 @@ where
     }
 }
 
-/// Pixel iterator trait
-pub trait Pixels<'a, C>
-where
-    C: PixelColor,
-{
-    /// TODO: Doc
-    type Iter: Iterator<Item = Pixel<C>> + 'a;
+// /// Pixel iterator trait
+// pub trait Pixels<'a, C>
+// where
+//     C: PixelColor,
+// {
+//     /// TODO: Doc
+//     type Iter: Iterator<Item = Pixel<C>> + 'a;
 
-    /// TODO: Doc
-    fn pixels(&'a self) -> Self::Iter;
-}
+//     /// TODO: Doc
+//     fn pixels(&'a self) -> Self::Iter;
+// }
 
-/// Sparse pixel iterator
-pub trait SparsePixels<'a, C>
+// /// Sparse pixel iterator
+// pub trait SparsePixels<'a, C>
+// where
+//     C: PixelColor,
+// {
+//     ///  TODO: Doc
+//     type Iter: Iterator<Item = Option<C>> + Dimensions + 'a;
+
+//     /// TODO: Doc
+//     fn sparse_pixels(&'a self) -> Self::Iter;
+// }
+
+///  TODO: Doc
+pub trait Pixels<C>
 where
     C: PixelColor,
 {
     ///  TODO: Doc
-    type Iter: Iterator<Item = Option<C>> + Dimensions + 'a;
+    type Iter: Iterator<Item = Pixel<C>>;
 
-    /// TODO: Doc
-    fn sparse_pixels(&'a self) -> Self::Iter;
+    ///  TODO: Doc
+    fn pixels(&self) -> Self::Iter;
+}
+
+///  TODO: Doc
+pub trait IntoPixels<C>
+where
+    C: PixelColor,
+{
+    ///  TODO: Doc
+    type Iter: Iterator<Item = Pixel<C>>;
+
+    ///  TODO: Doc
+    fn into_pixels(self) -> Self::Iter;
+}
+
+impl<'a, C, T> Pixels<C> for &'a T
+where
+    &'a T: IntoPixels<C>,
+    C: PixelColor,
+{
+    type Iter = <Self as IntoPixels<C>>::Iter;
+
+    fn pixels(&self) -> Self::Iter {
+        self.into_pixels()
+    }
 }

@@ -51,7 +51,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
-    pixel_iterator::Pixels,
+    pixel_iterator::{IntoPixels, Pixels},
     pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
@@ -217,14 +217,14 @@ where
     }
 }
 
-impl<'a, 'b: 'a, I, C> Pixels<'a, C> for Image<'b, I, C>
+impl<'a, 'b: 'a, I, C> IntoPixels<C> for &'a Image<'b, I, C>
 where
     &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw> + 'a,
 {
     type Iter = ImageIterator<'a, 'b, I, C>;
 
-    fn pixels(&'a self) -> Self::Iter {
+    fn into_pixels(self) -> Self::Iter {
         ImageIterator {
             it: self.image_data.pixel_iter(),
             image: self,
@@ -272,6 +272,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pixel_iterator::Pixels;
     use crate::pixelcolor::{BinaryColor, Gray8, GrayColor};
 
     #[test]
@@ -296,7 +297,7 @@ mod tests {
             Pixel(Point::new(1, 1), Gray8::new(0xaa)),
         ];
 
-        assert!(image.pixels().eq(expected.iter().copied()));
+        assert!(image.into_pixels().eq(expected.iter().copied()));
     }
 
     #[test]
