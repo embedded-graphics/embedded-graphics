@@ -13,8 +13,11 @@ const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(in crate::primitives) enum Side {
+pub enum Side {
+    /// Left side of the line
     Left,
+
+    /// Right side of the line
     Right,
 }
 
