@@ -5,12 +5,13 @@ mod points;
 mod styled;
 mod thick_points;
 
+pub use crate::primitives::line::thick_points::Side;
 use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{
         line::{
             bresenham::{Bresenham, BresenhamParameters},
-            thick_points::{ParallelsIterator, Side},
+            thick_points::ParallelsIterator,
         },
         Primitive, Rectangle,
     },
