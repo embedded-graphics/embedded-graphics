@@ -52,23 +52,9 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
         .fill_color(Rgb888::GREEN)
         .build();
 
+    let linestyle = PrimitiveStyle::with_stroke(Rgb888::GREEN, width);
+
     let l = Line::new(mid, end_point);
-
-    // {
-    //     // Draw first static line
-    //     fixed
-    //         .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, width))
-    //         .draw(display)
-    //         .unwrap();
-
-    //     // Draw second movable line
-    //     l.into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, width))
-    //         .draw(display)
-    //         .unwrap();
-    // }
-
-    // The maximum length of a mitered corner. After this point, the corner should be come beveled
-    let min_len_sq = fixed.length_squared().component_min(l.length_squared()) / 2;
 
     // Left and right edges of thick second segment
     let (ext_l, ext_r) = l.extents(width as i32);
@@ -79,17 +65,17 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
         ext_l.intersection(&fixed_ext_l),
         ext_r.intersection(&fixed_ext_r),
     ) {
-        let is_degenerate = {
+        let (is_degenerate_l, is_degenerate_r) = {
             let first_segment_start_cap = Line::new(fixed_ext_l.start, fixed_ext_r.start);
 
-            let is_degenerate = first_segment_start_cap
+            let is_degenerate_l = first_segment_start_cap
                 .intersection(&ext_l)
                 .filter(|(_, on_both)| *on_both)
-                .or_else(|| {
-                    first_segment_start_cap
-                        .intersection(&ext_r)
-                        .filter(|(_, on_both)| *on_both)
-                })
+                .is_some();
+
+            let is_degenerate_r = first_segment_start_cap
+                .intersection(&ext_r)
+                .filter(|(_, on_both)| *on_both)
                 .is_some();
 
             first_segment_start_cap
@@ -107,8 +93,10 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
                 .draw(display)
                 .unwrap();
 
-            is_degenerate
+            (is_degenerate_l, is_degenerate_r)
         };
+
+        let is_degenerate = is_degenerate_l || is_degenerate_r;
 
         // Degenerate debugger
         if is_degenerate {
@@ -118,28 +106,49 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
                 .unwrap();
         }
 
-        // Fixed (first) line triangles
-        {
-            Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
-                .into_styled(tstyle)
-                .draw(display)
-                .unwrap();
-            Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
-                .into_styled(tstyle)
-                .draw(display)
-                .unwrap();
-        }
+        if !is_degenerate {
+            // Fixed (first) line triangles
+            {
+                Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
+                    .into_styled(tstyle)
+                    .draw(display)
+                    .unwrap();
+                Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
+                    .into_styled(tstyle)
+                    .draw(display)
+                    .unwrap();
+            }
 
-        // Movable (second) line triangles
-        {
-            Triangle::new(ext_l.end, l_intersection, r_intersection)
-                .into_styled(tstyle)
-                .draw(display)
-                .unwrap();
-            Triangle::new(ext_l.end, ext_r.end, r_intersection)
-                .into_styled(tstyle)
-                .draw(display)
-                .unwrap();
+            // Movable (second) line triangles
+            {
+                Triangle::new(ext_l.end, l_intersection, r_intersection)
+                    .into_styled(tstyle)
+                    .draw(display)
+                    .unwrap();
+                Triangle::new(ext_l.end, ext_r.end, r_intersection)
+                    .into_styled(tstyle)
+                    .draw(display)
+                    .unwrap();
+            }
+        } else {
+            // Fixed (first) line
+            fixed.into_styled(linestyle).draw(display).unwrap();
+
+            // Moving (second) line
+            l.into_styled(linestyle).draw(display).unwrap();
+
+            // Bevel cap
+            if is_degenerate_r {
+                Triangle::new(fixed_ext_l.end, mid, ext_l.start)
+                    .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
+                    .draw(display)
+                    .unwrap();
+            } else if is_degenerate_l {
+                Triangle::new(fixed_ext_r.end, mid, ext_r.start)
+                    .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
+                    .draw(display)
+                    .unwrap();
+            }
         }
 
         Circle::with_center(l_intersection, 5)
@@ -176,7 +185,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let mut window = Window::new("Rounded rectangle debugger", &output_settings);
 
     let mut end_point = Point::new(20, 20);
-    let mut width = 1u32;
+    let mut width = 15u32;
 
     let mut mouse_down = false;
 
