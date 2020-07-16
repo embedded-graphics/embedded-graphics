@@ -220,7 +220,7 @@ where
 impl<'a, 'b: 'a, I, C> IntoPixels<C> for &'a Image<'b, I, C>
 where
     &'b I: IntoPixelIter<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw> + 'a,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Iter = ImageIterator<'a, 'b, I, C>;
 

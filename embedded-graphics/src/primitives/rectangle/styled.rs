@@ -76,7 +76,7 @@ where
 
 impl<'a, C> IntoPixels<C> for &'a Styled<Rectangle, PrimitiveStyle<C>>
 where
-    C: PixelColor + 'a,
+    C: PixelColor,
 {
     type Iter = StyledPixels<C>;
 

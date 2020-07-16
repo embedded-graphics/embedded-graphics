@@ -1,7 +1,6 @@
 //! Pixel iterator
 
 use crate::drawable::Pixel;
-use crate::geometry::Dimensions;
 use crate::{pixelcolor::PixelColor, DrawTarget};
 
 /// Extension trait for pixel iterators.
