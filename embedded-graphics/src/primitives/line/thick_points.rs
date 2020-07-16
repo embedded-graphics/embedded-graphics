@@ -257,7 +257,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         for line_number in 0..count {
-            let (mut parallel, length_reduction) = parallels.next().unwrap();
+            let (mut parallel, length_reduction, _) = parallels.next().unwrap();
             let length = bresenham::major_length(&line) - length_reduction;
 
             for _ in 0..length {
