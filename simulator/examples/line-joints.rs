@@ -70,14 +70,53 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
     // The maximum length of a mitered corner. After this point, the corner should be come beveled
     let min_len_sq = fixed.length_squared().component_min(l.length_squared()) / 2;
 
+    // Left and right edges of thick second segment
     let (ext_l, ext_r) = l.extents(width as i32);
+    // Left and right edges of thick first segment
     let (fixed_ext_l, fixed_ext_r) = fixed.extents(width as i32);
 
     if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
         ext_l.intersection(&fixed_ext_l),
         ext_r.intersection(&fixed_ext_r),
     ) {
-        let is_degenerate = !l_on_lines && !r_on_lines;
+        let is_degenerate = {
+            let first_segment_start_cap = Line::new(fixed_ext_l.start, fixed_ext_r.start);
+
+            let is_degenerate = first_segment_start_cap
+                .intersection(&ext_l)
+                .filter(|(_, on_both)| *on_both)
+                .or_else(|| {
+                    first_segment_start_cap
+                        .intersection(&ext_r)
+                        .filter(|(_, on_both)| *on_both)
+                })
+                .is_some();
+
+            first_segment_start_cap
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
+                .draw(display)
+                .unwrap();
+
+            ext_r
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1))
+                .draw(display)
+                .unwrap();
+
+            ext_l
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
+                .draw(display)
+                .unwrap();
+
+            is_degenerate
+        };
+
+        // Degenerate debugger
+        if is_degenerate {
+            Rectangle::new(Point::zero(), Size::new_equal(5))
+                .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
+                .draw(display)
+                .unwrap();
+        }
 
         // Fixed (first) line triangles
         {
