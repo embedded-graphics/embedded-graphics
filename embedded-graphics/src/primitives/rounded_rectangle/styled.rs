@@ -133,7 +133,7 @@ mod tests {
 
         let rect = Rectangle::new(Point::zero(), Size::new(20, 30)).into_styled(style);
 
-        assert!(rounded_rect.into_iter().eq(rect.into_pixels()));
+        assert!(rounded_rect.into_iter().eq(rect.pixels()));
     }
 
     #[test]

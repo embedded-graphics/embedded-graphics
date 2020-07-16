@@ -61,7 +61,7 @@ where
     type Iter: Iterator<Item = Pixel<C>>;
 
     ///  TODO: Doc
-    fn pixels(&self) -> Self::Iter;
+    fn pixels(self) -> Self::Iter;
 }
 
 ///  TODO: Doc
@@ -83,7 +83,7 @@ where
 {
     type Iter = <Self as IntoPixels<C>>::Iter;
 
-    fn pixels(&self) -> Self::Iter {
+    fn pixels(self) -> Self::Iter {
         self.into_pixels()
     }
 }

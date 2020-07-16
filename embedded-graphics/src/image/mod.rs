@@ -297,7 +297,7 @@ mod tests {
             Pixel(Point::new(1, 1), Gray8::new(0xaa)),
         ];
 
-        assert!(image.into_pixels().eq(expected.iter().copied()));
+        assert!(image.pixels().eq(expected.iter().copied()));
     }
 
     #[test]
