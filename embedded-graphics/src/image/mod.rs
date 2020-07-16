@@ -51,7 +51,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
-    pixel_iterator::{IntoPixels, Pixels},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
@@ -201,7 +201,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.fill_contiguous(&self.bounding_box(), self.pixels().map(|p| p.1))
+        display.fill_contiguous(&self.bounding_box(), self.into_pixels().map(|p| p.1))
     }
 }
 
@@ -272,7 +272,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixel_iterator::Pixels;
     use crate::pixelcolor::{BinaryColor, Gray8, GrayColor};
 
     #[test]
@@ -297,7 +296,7 @@ mod tests {
             Pixel(Point::new(1, 1), Gray8::new(0xaa)),
         ];
 
-        assert!(image.pixels().eq(expected.iter().copied()));
+        assert!(image.into_pixels().eq(expected.iter().copied()));
     }
 
     #[test]

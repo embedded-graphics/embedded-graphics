@@ -30,7 +30,7 @@ fn chessboard_compressed() {
     let im = Tga::from_slice(include_bytes!("./chessboard_4px_rle.tga")).unwrap();
     let im: Image<_, Rgb888> = Image::new(&im, Point::zero());
 
-    let mut pixels = im.pixels();
+    let mut pixels = im.into_pixels();
 
     for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
         assert_eq!(
@@ -50,7 +50,7 @@ fn chessboard_uncompressed() {
     let im = Tga::from_slice(include_bytes!("./chessboard_raw.tga")).unwrap();
     let im: Image<_, Rgb888> = Image::new(&im, Point::zero());
 
-    let mut pixels = im.pixels();
+    let mut pixels = im.into_pixels();
 
     for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
         assert_eq!(

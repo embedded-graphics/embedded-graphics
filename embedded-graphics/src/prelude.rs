@@ -5,7 +5,7 @@ pub use crate::{
     fonts::Font,
     geometry::{Angle, AngleUnit, Dimensions, Point, Size},
     image::{ImageDimensions, IntoPixelIter},
-    pixel_iterator::{IntoPixels, PixelIteratorExt, Pixels},
+    pixel_iterator::{IntoPixels, PixelIteratorExt},
     pixelcolor::{raw::RawData, GrayColor, IntoStorage, PixelColor, RgbColor},
     primitives::{ContainsPoint, Primitive},
     transform::Transform,

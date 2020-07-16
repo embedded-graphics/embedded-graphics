@@ -37,7 +37,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     circle
         .into_styled(thin_stroke)
         .into_iter()
-        .chain(rectangle.into_styled(thin_stroke).pixels())
+        .chain(rectangle.into_styled(thin_stroke).into_pixels())
         .chain(line.into_styled(thin_stroke).into_iter())
         .chain(triangle.into_styled(thin_stroke).into_iter())
         .chain(ellipse.into_styled(thin_stroke).into_iter())
@@ -53,7 +53,7 @@ fn main() -> Result<(), core::convert::Infallible> {
             rectangle
                 .translate(offset)
                 .into_styled(medium_stroke)
-                .pixels(),
+                .into_pixels(),
         )
         .chain(
             line.translate(offset)
@@ -89,7 +89,7 @@ fn main() -> Result<(), core::convert::Infallible> {
             rectangle
                 .translate(offset)
                 .into_styled(thick_stroke)
-                .pixels(),
+                .into_pixels(),
         )
         .chain(line.translate(offset).into_styled(thick_stroke).into_iter())
         .chain(

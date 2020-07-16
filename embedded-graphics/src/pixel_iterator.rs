@@ -28,42 +28,6 @@ where
     }
 }
 
-// /// Pixel iterator trait
-// pub trait Pixels<'a, C>
-// where
-//     C: PixelColor,
-// {
-//     /// TODO: Doc
-//     type Iter: Iterator<Item = Pixel<C>> + 'a;
-
-//     /// TODO: Doc
-//     fn pixels(&'a self) -> Self::Iter;
-// }
-
-// /// Sparse pixel iterator
-// pub trait SparsePixels<'a, C>
-// where
-//     C: PixelColor,
-// {
-//     ///  TODO: Doc
-//     type Iter: Iterator<Item = Option<C>> + Dimensions + 'a;
-
-//     /// TODO: Doc
-//     fn sparse_pixels(&'a self) -> Self::Iter;
-// }
-
-///  TODO: Doc
-pub trait Pixels<C>
-where
-    C: PixelColor,
-{
-    ///  TODO: Doc
-    type Iter: Iterator<Item = Pixel<C>>;
-
-    ///  TODO: Doc
-    fn pixels(self) -> Self::Iter;
-}
-
 ///  TODO: Doc
 pub trait IntoPixels<C>
 where
@@ -76,14 +40,15 @@ where
     fn into_pixels(self) -> Self::Iter;
 }
 
-impl<'a, C, T> Pixels<C> for &'a T
-where
-    &'a T: IntoPixels<C>,
-    C: PixelColor,
-{
-    type Iter = <Self as IntoPixels<C>>::Iter;
+// TODO: Implement as part of a new PR for sparse pixel iterators
+// ///  TODO: Doc
+// pub trait IntoSparsePixels<C>
+// where
+//     C: PixelColor,
+// {
+//     ///  TODO: Doc
+//     type Iter: Iterator<Item = Option<C>> + Dimensions;
 
-    fn pixels(self) -> Self::Iter {
-        self.into_pixels()
-    }
-}
+//     ///  TODO: Doc
+//     fn into_sparse_pixels(self) -> Self::Iter;
+// }

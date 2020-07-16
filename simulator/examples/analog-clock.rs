@@ -136,7 +136,7 @@ fn draw_digital_clock<'a>(time_str: &'a str) -> impl Iterator<Item = Pixel<Binar
     .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
     // Draw the white background first, then the black text. Order matters here
-    background.pixels().chain(&text)
+    background.into_pixels().chain(&text)
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
