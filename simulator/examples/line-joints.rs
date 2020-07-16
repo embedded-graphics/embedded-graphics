@@ -1,8 +1,5 @@
 use embedded_graphics::{
-    pixelcolor::Rgb888,
-    prelude::*,
-    primitives::*,
-    style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+    fonts::*, pixelcolor::Rgb888, prelude::*, primitives::line::Side, primitives::*, style::*,
 };
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
@@ -56,6 +53,9 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
 
     let l = Line::new(mid, end_point);
 
+    // Miter length limit is the line width (but squared to avoid sqrt() costs)
+    let miter_limit = (width * 2).pow(2);
+
     // Left and right edges of thick second segment
     let (ext_l, ext_r) = l.extents(width as i32);
     // Left and right edges of thick first segment
@@ -67,16 +67,25 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
     ) {
         let (is_degenerate_l, is_degenerate_r) = {
             let first_segment_start_cap = Line::new(fixed_ext_l.start, fixed_ext_r.start);
+            let second_segment_end_cap = Line::new(ext_l.end, ext_r.end);
 
             let is_degenerate_l = first_segment_start_cap
                 .intersection(&ext_l)
                 .filter(|(_, on_both)| *on_both)
-                .is_some();
+                .is_some()
+                || second_segment_end_cap
+                    .intersection(&fixed_ext_l)
+                    .filter(|(_, on_both)| *on_both)
+                    .is_some();
 
             let is_degenerate_r = first_segment_start_cap
                 .intersection(&ext_r)
                 .filter(|(_, on_both)| *on_both)
-                .is_some();
+                .is_some()
+                || second_segment_end_cap
+                    .intersection(&fixed_ext_r)
+                    .filter(|(_, on_both)| *on_both)
+                    .is_some();
 
             first_segment_start_cap
                 .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
@@ -98,15 +107,41 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
 
         let is_degenerate = is_degenerate_l || is_degenerate_r;
 
-        // Degenerate debugger
-        if is_degenerate {
-            Rectangle::new(Point::zero(), Size::new_equal(5))
-                .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                .draw(display)
-                .unwrap();
-        }
+        // The side that will have the miter/bevel on it
+        let outer_side = if l_on_lines || is_degenerate_l {
+            Side::Right
+        } else if r_on_lines || is_degenerate_r {
+            Side::Left
+        } else {
+            Side::Right
+        };
 
-        if !is_degenerate {
+        // Distance from midpoint to miter end point
+        let miter_length_squared = Line::new(
+            mid,
+            match outer_side {
+                Side::Left => l_intersection,
+                Side::Right => r_intersection,
+            },
+        )
+        .length_squared();
+
+        // Degenerate debugger
+        Text::new(
+            &format!(
+                "L: {} R: {}",
+                if is_degenerate_l { "X" } else { "-" },
+                if is_degenerate_r { "X" } else { "-" },
+            ),
+            Point::zero(),
+        )
+        .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
+        .draw(display)
+        .unwrap();
+
+        // Normal line: not degenerate (overlapping) and miter length is less than thickness. In
+        // this case, draw the full miter as it won't stretch out for miles.
+        if !is_degenerate && miter_length_squared <= miter_limit {
             // Fixed (first) line triangles
             {
                 Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
@@ -130,6 +165,7 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
                     .draw(display)
                     .unwrap();
             }
+        // Line segments overlap (degenerate) or miter is too long
         } else {
             // Fixed (first) line
             fixed.into_styled(linestyle).draw(display).unwrap();
@@ -138,16 +174,15 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
             l.into_styled(linestyle).draw(display).unwrap();
 
             // Bevel cap
-            if is_degenerate_r {
-                Triangle::new(fixed_ext_l.end, mid, ext_l.start)
+            match outer_side {
+                Side::Left => Triangle::new(fixed_ext_l.end, mid, ext_l.start)
                     .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
                     .draw(display)
-                    .unwrap();
-            } else if is_degenerate_l {
-                Triangle::new(fixed_ext_r.end, mid, ext_r.start)
+                    .unwrap(),
+                Side::Right => Triangle::new(fixed_ext_r.end, mid, ext_r.start)
                     .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
                     .draw(display)
-                    .unwrap();
+                    .unwrap(),
             }
         }
 
@@ -168,6 +203,16 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
             })
             .draw(display)
             .unwrap();
+    }
+    // Lines are colinear (probably)
+    else {
+        Text::new("Colinear!", Point::zero())
+            .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
+            .draw(display)
+            .unwrap();
+
+        fixed.into_styled(linestyle).draw(display).unwrap();
+        l.into_styled(linestyle).draw(display).unwrap();
     }
 
     // empty_crosshair(ext_l.start, Rgb888::RED, display);
