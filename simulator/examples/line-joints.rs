@@ -116,22 +116,25 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
             Side::Right
         };
 
+        let (inside_intersection, outside_intersection) = match outer_side {
+            Side::Right => (l_intersection, r_intersection),
+            Side::Left => (r_intersection, l_intersection),
+        };
+
         // Distance from midpoint to miter end point
-        let miter_length_squared = Line::new(
-            mid,
-            match outer_side {
-                Side::Left => l_intersection,
-                Side::Right => r_intersection,
-            },
-        )
-        .length_squared();
+        let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
 
         // Degenerate debugger
         Text::new(
             &format!(
-                "L: {} R: {}",
+                "L: {} R: {}: over m lim: {}",
                 if is_degenerate_l { "X" } else { "-" },
                 if is_degenerate_r { "X" } else { "-" },
+                if miter_length_squared <= miter_limit {
+                    "N"
+                } else {
+                    "Y"
+                },
             ),
             Point::zero(),
         )
@@ -140,33 +143,122 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
         .unwrap();
 
         // Normal line: not degenerate (overlapping) and miter length is less than thickness. In
-        // this case, draw the full miter as it won't stretch out for miles.
-        if !is_degenerate && miter_length_squared <= miter_limit {
-            // Fixed (first) line triangles
-            {
-                Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
-                    .into_styled(tstyle)
-                    .draw(display)
-                    .unwrap();
-                Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
-                    .into_styled(tstyle)
-                    .draw(display)
-                    .unwrap();
-            }
+        // this case, draw the full miter as it won't stretch out really far.
+        if !is_degenerate {
+            if miter_length_squared <= miter_limit {
+                // Fixed (first) line triangles
+                {
+                    Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
+                        .into_styled(tstyle)
+                        .draw(display)
+                        .unwrap();
+                    Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
+                        .into_styled(tstyle)
+                        .draw(display)
+                        .unwrap();
+                }
 
-            // Movable (second) line triangles
-            {
-                Triangle::new(ext_l.end, l_intersection, r_intersection)
-                    .into_styled(tstyle)
-                    .draw(display)
-                    .unwrap();
-                Triangle::new(ext_l.end, ext_r.end, r_intersection)
-                    .into_styled(tstyle)
-                    .draw(display)
-                    .unwrap();
+                // Movable (second) line triangles
+                {
+                    Triangle::new(ext_l.end, l_intersection, r_intersection)
+                        .into_styled(tstyle)
+                        .draw(display)
+                        .unwrap();
+                    Triangle::new(ext_l.end, ext_r.end, r_intersection)
+                        .into_styled(tstyle)
+                        .draw(display)
+                        .unwrap();
+                }
+            } else {
+                match outer_side {
+                    Side::Left => {
+                        // Fixed (first) line triangles
+                        {
+                            // 1
+                            Triangle::new(
+                                fixed_ext_l.start,
+                                fixed_ext_r.start,
+                                inside_intersection,
+                            )
+                            .into_styled(tstyle)
+                            .draw(display)
+                            .unwrap();
+
+                            // 2
+                            Triangle::new(fixed_ext_l.start, fixed_ext_l.end, inside_intersection)
+                                .into_styled(tstyle)
+                                .draw(display)
+                                .unwrap();
+                        }
+
+                        // Bevel/joint fill (3)
+                        Triangle::new(fixed_ext_l.end, inside_intersection, ext_l.start)
+                            .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
+                            .draw(display)
+                            .unwrap();
+
+                        // Movable (second) line triangles
+                        {
+                            // 4
+                            Triangle::new(ext_l.start, ext_l.end, inside_intersection)
+                                .into_styled(tstyle)
+                                .draw(display)
+                                .unwrap();
+
+                            // 5
+                            Triangle::new(ext_l.end, ext_r.end, inside_intersection)
+                                .into_styled(tstyle)
+                                .draw(display)
+                                .unwrap();
+                        }
+                    }
+                    Side::Right => {
+                        // Fixed (first) line triangles
+                        {
+                            // 1
+                            Triangle::new(
+                                fixed_ext_l.start,
+                                fixed_ext_r.start,
+                                inside_intersection,
+                            )
+                            .into_styled(tstyle)
+                            .draw(display)
+                            .unwrap();
+
+                            // 2
+                            Triangle::new(fixed_ext_r.start, fixed_ext_r.end, inside_intersection)
+                                .into_styled(tstyle)
+                                .draw(display)
+                                .unwrap();
+                        }
+
+                        // Bevel/joint fill (3)
+                        Triangle::new(fixed_ext_r.end, inside_intersection, ext_r.start)
+                            .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
+                            .draw(display)
+                            .unwrap();
+
+                        // Movable (second) line triangles
+                        {
+                            // 4
+                            Triangle::new(ext_r.start, ext_r.end, inside_intersection)
+                                .into_styled(tstyle)
+                                .draw(display)
+                                .unwrap();
+
+                            // 5
+                            Triangle::new(ext_l.end, ext_r.end, inside_intersection)
+                                .into_styled(tstyle)
+                                .draw(display)
+                                .unwrap();
+                        }
+                    }
+                }
             }
-        // Line segments overlap (degenerate) or miter is too long
-        } else {
+        }
+        // Line segments overlap (degenerate). Draw normal but overlapping thick lines with extra
+        // triangle for bevel cap.
+        else {
             // Fixed (first) line
             fixed.into_styled(linestyle).draw(display).unwrap();
 
