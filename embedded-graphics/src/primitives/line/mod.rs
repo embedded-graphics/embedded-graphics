@@ -188,41 +188,34 @@ impl Line {
         //     //
         // }
 
-        let mut it = ParallelsIterator::new(self, thickness);
-
+        let it = ParallelsIterator::new(self, thickness);
         let mut start_l = self.start;
-        let mut bres_l = Bresenham::with_initial_error(self.start, 0);
-        let mut par_points_l = 0;
-
         let mut start_r = self.start;
-        let mut bres_r = Bresenham::with_initial_error(self.start, 0);
-        let mut par_points_r = 0;
 
-        while let Some((bres, length_reduction, side)) = it.next() {
+        for (bres, _, side) in it {
             match side {
                 Side::Left => {
                     start_l = bres.point;
-                    bres_l = bres;
-                    par_points_l = bresenham::major_length(self) - length_reduction;
                 }
                 Side::Right => {
                     start_r = bres.point;
-                    bres_r = bres;
-                    par_points_r = bresenham::major_length(self) - length_reduction;
                 }
             }
         }
 
-        let mut end_l = self.end;
-        let mut end_r = self.end;
+        let l_delta = start_l - self.start;
+        let r_delta = start_r - self.start;
 
-        for _ in 0..par_points_l {
-            end_l = bres_l.next(&it.parallel_parameters);
-        }
+        let end_l = self.end + l_delta;
+        let end_r = self.end + r_delta;
 
-        for _ in 0..par_points_r {
-            end_r = bres_r.next(&it.parallel_parameters);
-        }
+        // for _ in 0..par_points_l {
+        //     end_l = bres_l.next(&it.parallel_parameters);
+        // }
+
+        // for _ in 0..par_points_r {
+        //     end_r = bres_r.next(&it.parallel_parameters);
+        // }
 
         let l = Line::new(start_l, end_l);
         let r = Line::new(start_r, end_r);
