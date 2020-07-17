@@ -204,7 +204,6 @@ impl Line {
 
         Some((Point::new(x, y), is_on_segments))
     }
-
     /// Get the squared length of the line
     pub fn length_squared(&self) -> u32 {
         let delta = self.end - self.start;
