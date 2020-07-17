@@ -87,15 +87,12 @@ where
 
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter {
-            current_char: self.primitive.text.chars().next(),
             idx: 0,
             text: self.primitive.text,
-            char_width: 0,
-            char_walk_x: 0,
-            char_walk_y: 0,
             top_left: self.primitive.position,
             pos: self.primitive.position,
             style: self.style,
+            state: IteratorState::NextChar,
         }
     }
 }
@@ -134,6 +131,157 @@ where
     }
 }
 
+/// Pixel iterator to render a styled character
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct StyledCharacterIterator<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    character: char,
+    style: TextStyle<C, F>,
+    pos: Point,
+    char_walk: Point,
+    max_x: i32,
+}
+
+impl<C, F> StyledCharacterIterator<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    pub fn new(character: char, pos: Point, style: TextStyle<C, F>) -> Self {
+        Self {
+            character,
+            style,
+            pos,
+            char_walk: Point::zero(),
+            max_x: F::char_width(character) as i32 - 1,
+        }
+    }
+}
+
+impl<C, F> Iterator for StyledCharacterIterator<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    type Item = Pixel<C>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.char_walk.y >= F::CHARACTER_SIZE.height as i32 {
+                // Done with this char, move on to the next one
+                break None;
+            } else {
+                let color = if F::character_pixel(
+                    self.character,
+                    self.char_walk.x as u32,
+                    self.char_walk.y as u32,
+                ) {
+                    self.style.text_color.or(self.style.background_color)
+                } else {
+                    self.style.background_color
+                };
+
+                let p = self.pos + self.char_walk;
+
+                if self.char_walk.x < self.max_x {
+                    self.char_walk.x += 1;
+                } else {
+                    self.char_walk.x = 0;
+                    self.char_walk.y += 1;
+                }
+
+                // Skip to next point if pixel is transparent
+                if let Some(color) = color {
+                    break Some(Pixel(p, color));
+                }
+            }
+        }
+    }
+}
+
+/// Pixel iterator to render font spacing
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct EmptySpaceIterator<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    style: TextStyle<C, F>,
+    pos: Point,
+    char_walk: Point,
+}
+
+impl<C, F> EmptySpaceIterator<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    pub fn new(pos: Point, style: TextStyle<C, F>) -> Self {
+        Self {
+            style,
+            pos,
+            char_walk: Point::zero(),
+        }
+    }
+}
+
+impl<C, F> Iterator for EmptySpaceIterator<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    type Item = Pixel<C>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if F::CHARACTER_SPACING == 0 {
+            None
+        } else if let Some(color) = self.style.background_color {
+            if self.char_walk.y >= F::CHARACTER_SIZE.height as i32 {
+                // Done with filling this space
+                None
+            } else {
+                let p = self.pos + self.char_walk;
+
+                if self.char_walk.x < F::CHARACTER_SPACING as i32 - 1 {
+                    self.char_walk.x += 1;
+                } else {
+                    self.char_walk.x = 0;
+                    self.char_walk.y += 1;
+                }
+
+                // Skip to next point if pixel is transparent
+                Some(Pixel(p, color))
+            }
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum IteratorState<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    NextChar,
+    DrawCharacter(StyledCharacterIterator<C, F>),
+    DrawSpace(EmptySpaceIterator<C, F>),
+}
+
+impl<C, F> Default for IteratorState<C, F>
+where
+    C: PixelColor,
+    F: Font,
+{
+    fn default() -> Self {
+        Self::NextChar
+    }
+}
+
 /// Pixel iterator for styled text.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct StyledTextIterator<'a, C, F>
@@ -141,15 +289,12 @@ where
     C: PixelColor,
     F: Font,
 {
-    char_width: u32,
-    char_walk_x: i32,
-    char_walk_y: i32,
-    current_char: Option<char>,
-    idx: usize,
     top_left: Point,
     pos: Point,
+    idx: usize,
     text: &'a str,
     style: TextStyle<C, F>,
+    state: IteratorState<C, F>,
 }
 
 impl<C, F> Iterator for StyledTextIterator<'_, C, F>
@@ -161,70 +306,52 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.current_char == Some('\n') {
-                self.pos.x = self.top_left.x;
-                self.pos.y += F::CHARACTER_SIZE.height as i32;
-                self.idx += 1;
-                self.current_char = self.text.chars().nth(self.idx);
-            } else if self.char_walk_x < 0 {
-                let x = self.pos.x + self.char_walk_x;
-                let y = self.pos.y + self.char_walk_y;
-
-                self.char_walk_y += 1;
-
-                if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
-                    self.char_walk_y = 0;
-                    self.char_walk_x += 1;
-                }
-
-                if let Some(color) = self.style.background_color {
-                    break Some(Pixel(Point::new(x, y), color));
-                }
-            } else if let Some(current_char) = self.current_char {
-                if self.char_width == 0 {
-                    self.char_width = F::char_width(current_char);
-                }
-
-                let color = if F::character_pixel(
-                    current_char,
-                    self.char_walk_x as u32,
-                    self.char_walk_y as u32,
-                ) {
-                    self.style.text_color.or(self.style.background_color)
-                } else {
-                    self.style.background_color
-                };
-
-                let x = self.pos.x + self.char_walk_x;
-                let y = self.pos.y + self.char_walk_y;
-
-                self.char_walk_x += 1;
-
-                if self.char_walk_x >= self.char_width as i32 {
-                    self.char_walk_x = 0;
-                    self.char_walk_y += 1;
-
-                    // Done with this char, move on to the next one
-                    if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
-                        self.pos.x += (self.char_width + F::CHARACTER_SPACING) as i32;
-                        self.char_width = 0;
-                        self.char_walk_y = 0;
-                        self.char_walk_x -= F::CHARACTER_SPACING as i32;
+            match self.state {
+                IteratorState::NextChar => {
+                    if let Some(c) = self.text.chars().nth(self.idx) {
                         self.idx += 1;
-                        self.current_char = self.text.chars().nth(self.idx);
+                        match c {
+                            '\n' => {
+                                self.pos.x = self.top_left.x;
+                                self.pos.y += F::CHARACTER_SIZE.height as i32;
+                            }
+                            c => {
+                                let char_pos = self.pos;
+
+                                self.pos.x += F::char_width(c) as i32;
+
+                                self.state = IteratorState::DrawCharacter(
+                                    StyledCharacterIterator::new(c, char_pos, self.style),
+                                );
+                            }
+                        };
+                    } else {
+                        break None;
                     }
                 }
 
-                // Skip to next point if pixel is transparent
-                if let Some(color) = color {
-                    break Some(Pixel(Point::new(x, y), color));
+                IteratorState::DrawSpace(ref mut iterator) => {
+                    let pixel = iterator.next();
+                    if pixel.is_some() {
+                        break pixel;
+                    }
+                    self.state = IteratorState::NextChar;
                 }
-            } else {
-                break None;
-            }
+
+                IteratorState::DrawCharacter(ref mut iterator) => {
+                    let pixel = iterator.next();
+                    if pixel.is_some() {
+                        break pixel;
+                    }
+                    let pos = self.pos;
+                    self.pos.x += F::CHARACTER_SPACING as i32;
+                    self.state = IteratorState::DrawSpace(EmptySpaceIterator::new(pos, self.style));
+                }
+            };
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

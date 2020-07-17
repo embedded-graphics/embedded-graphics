@@ -151,7 +151,7 @@ pub use font8x16::Font8x16;
 use crate::geometry::Size;
 
 /// Monospaced bitmap font.
-pub trait Font {
+pub trait Font: Copy {
     /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
 
