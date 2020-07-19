@@ -7,7 +7,7 @@ use crate::{
     primitives::circle::{diameter_to_threshold, distance_iterator::DistanceIterator, Circle},
     primitives::rectangle::{self, Rectangle},
     primitives::Primitive,
-    style::{PrimitiveStyle, Styled},
+    style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
 };
 
 /// Pixel iterator for each pixel in the circle border
@@ -30,12 +30,9 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
+        let stroke_area = styled.stroke_area();
 
-        let stroke_area = primitive.expand(style.outside_stroke_width());
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-
-        let inner_threshold = diameter_to_threshold(fill_area.diameter);
+        let inner_threshold = diameter_to_threshold(styled.fill_area().diameter);
         let outer_threshold = diameter_to_threshold(stroke_area.diameter);
 
         let iter = if !styled.style.is_transparent() {

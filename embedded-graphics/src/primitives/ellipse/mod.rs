@@ -5,7 +5,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{circle, ContainsPoint, Primitive, Rectangle},
+    primitives::{circle, ContainsPoint, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -86,14 +86,17 @@ impl Ellipse {
     fn center_2x(&self) -> Point {
         center_2x(self.top_left, self.size)
     }
+}
 
-    fn expand(&self, offset: u32) -> Self {
-        let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
-        Self::with_center(self.center(), size)
-    }
+impl OffsetOutline for Ellipse {
+    fn offset(&self, offset: i32) -> Self {
+        let size = if offset >= 0 {
+            self.size.saturating_add(Size::new_equal(2 * offset as u32))
+        } else {
+            self.size
+                .saturating_sub(Size::new_equal(2 * (-offset) as u32))
+        };
 
-    fn shrink(&self, offset: u32) -> Self {
-        let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
         Self::with_center(self.center(), size)
     }
 }
@@ -238,5 +241,35 @@ mod tests {
         let moved = Ellipse::new(Point::new(4, 6), Size::new(5, 8)).translate(Point::new(3, 5));
 
         assert_eq!(moved, Ellipse::new(Point::new(7, 11), Size::new(5, 8)));
+    }
+
+    #[test]
+    fn offset() {
+        let center = Point::new(5, 6);
+        let ellipse = Ellipse::with_center(center, Size::new(3, 4));
+
+        assert_eq!(ellipse.offset(0), ellipse);
+
+        assert_eq!(
+            ellipse.offset(1),
+            Ellipse::with_center(center, Size::new(5, 6))
+        );
+        assert_eq!(
+            ellipse.offset(2),
+            Ellipse::with_center(center, Size::new(7, 8))
+        );
+
+        assert_eq!(
+            ellipse.offset(-1),
+            Ellipse::with_center(center, Size::new(1, 2))
+        );
+        assert_eq!(
+            ellipse.offset(-2),
+            Ellipse::with_center(center, Size::new(0, 0))
+        );
+        assert_eq!(
+            ellipse.offset(-3),
+            Ellipse::with_center(center, Size::new(0, 0))
+        );
     }
 }

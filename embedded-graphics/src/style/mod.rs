@@ -5,5 +5,5 @@ mod styled;
 mod text_style;
 
 pub use primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment};
-pub use styled::Styled;
+pub use styled::{Styled, StyledPrimitiveAreas};
 pub use text_style::{TextStyle, TextStyleBuilder};

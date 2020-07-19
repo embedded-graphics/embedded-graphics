@@ -5,7 +5,9 @@ mod styled;
 
 use crate::{
     geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
-    primitives::{arc::PlaneSector, circle, line::Line, ContainsPoint, Primitive, Rectangle},
+    primitives::{
+        arc::PlaneSector, circle, line::Line, ContainsPoint, OffsetOutline, Primitive, Rectangle,
+    },
     transform::Transform,
 };
 pub use points::Points;
@@ -132,15 +134,15 @@ impl Sector {
 
         Line::new(center, point)
     }
+}
 
-    pub(crate) fn expand(&self, offset: u32) -> Self {
-        let diameter = self.diameter.saturating_add(2 * offset);
-
-        Self::with_center(self.center(), diameter, self.angle_start, self.angle_sweep)
-    }
-
-    pub(crate) fn shrink(&self, offset: u32) -> Self {
-        let diameter = self.diameter.saturating_sub(2 * offset);
+impl OffsetOutline for Sector {
+    fn offset(&self, offset: i32) -> Self {
+        let diameter = if offset >= 0 {
+            self.diameter.saturating_add(2 * offset as u32)
+        } else {
+            self.diameter.saturating_sub(2 * (-offset) as u32)
+        };
 
         Self::with_center(self.center(), diameter, self.angle_start, self.angle_sweep)
     }
@@ -273,5 +275,35 @@ mod tests {
             .filter(|p| sector.contains(*p));
 
         assert!(contained_points.eq(sector.points()));
+    }
+
+    #[test]
+    fn offset() {
+        let center = Point::new(5, 7);
+        let sector = Sector::with_center(center, 3, 0.0.deg(), 90.0.deg());
+
+        assert_eq!(sector.offset(0), sector);
+
+        assert_eq!(
+            sector.offset(1),
+            Sector::with_center(center, 5, 0.0.deg(), 90.0.deg())
+        );
+        assert_eq!(
+            sector.offset(2),
+            Sector::with_center(center, 7, 0.0.deg(), 90.0.deg())
+        );
+
+        assert_eq!(
+            sector.offset(-1),
+            Sector::with_center(center, 1, 0.0.deg(), 90.0.deg())
+        );
+        assert_eq!(
+            sector.offset(-2),
+            Sector::with_center(center, 0, 0.0.deg(), 90.0.deg())
+        );
+        assert_eq!(
+            sector.offset(-3),
+            Sector::with_center(center, 0, 0.0.deg(), 90.0.deg())
+        );
     }
 }
