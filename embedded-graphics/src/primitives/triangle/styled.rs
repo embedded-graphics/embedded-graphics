@@ -229,7 +229,6 @@ mod tests {
         let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
 
         let mut tri_display: MockDisplay<BinaryColor> = MockDisplay::new();
-        tri_display.set_allow_overdraw(true);
         styled.draw(&mut tri_display).unwrap();
 
         let mut lines_display: MockDisplay<BinaryColor> = MockDisplay::new();
