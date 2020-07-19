@@ -166,7 +166,7 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(15, 30));
     /// ```
-    pub(crate) fn component_min(self, other: Self) -> Self {
+    pub fn component_min(self, other: Self) -> Self {
         Self::new(self.x.min(other.x), self.y.min(other.y))
     }
 
@@ -181,7 +181,7 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(20, 50));
     /// ```
-    pub(crate) fn component_max(self, other: Self) -> Self {
+    pub fn component_max(self, other: Self) -> Self {
         Self::new(self.x.max(other.x), self.y.max(other.y))
     }
 

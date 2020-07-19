@@ -196,7 +196,7 @@ impl Size {
     ///
     /// assert_eq!(min, Size::new(15, 30));
     /// ```
-    pub(crate) fn component_min(self, other: Self) -> Self {
+    pub fn component_min(self, other: Self) -> Self {
         Self::new(self.width.min(other.width), self.height.min(other.height))
     }
 
@@ -209,7 +209,7 @@ impl Size {
     ///
     /// assert_eq!(min, Size::new(20, 50));
     /// ```
-    pub(crate) fn component_max(self, other: Self) -> Self {
+    pub fn component_max(self, other: Self) -> Self {
         Self::new(self.width.max(other.width), self.height.max(other.height))
     }
 }
