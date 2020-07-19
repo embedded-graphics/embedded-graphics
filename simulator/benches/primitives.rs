@@ -16,7 +16,7 @@ fn filled_circle(c: &mut Criterion) {
 
         let object = &Circle::new(Point::new(100, 100), 100).into_styled(style);
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -30,7 +30,7 @@ fn filled_rect(c: &mut Criterion) {
 
         let object = &Rectangle::new(Point::new(100, 100), Size::new(100, 100)).into_styled(style);
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -39,7 +39,7 @@ fn empty_rect(c: &mut Criterion) {
         let object = &Rectangle::new(Point::new(100, 100), Size::new(100, 100))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -48,7 +48,7 @@ fn line(c: &mut Criterion) {
         let object = &Line::new(Point::new(100, 100), Point::new(200, 200))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -57,7 +57,7 @@ fn thick_line(c: &mut Criterion) {
         let object = &Line::new(Point::new(100, 100), Point::new(150, 200))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 10));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -66,7 +66,7 @@ fn thicker_line(c: &mut Criterion) {
         let object = &Line::new(Point::new(20, 20), Point::new(150, 200))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 50));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -75,7 +75,7 @@ fn triangle(c: &mut Criterion) {
         let object = &Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -84,7 +84,7 @@ fn filled_triangle(c: &mut Criterion) {
         let object = &Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
             .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -93,7 +93,7 @@ fn ellipse(c: &mut Criterion) {
         let object = &Ellipse::new(Point::new(10, 10), Size::new(50, 30))
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -102,7 +102,7 @@ fn filled_ellipse(c: &mut Criterion) {
         let object = &Ellipse::new(Point::new(10, 10), Size::new(50, 30))
             .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -111,7 +111,7 @@ fn arc(c: &mut Criterion) {
         let object = &Arc::new(Point::new(100, 100), 100, -30.0.deg(), 150.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -120,7 +120,7 @@ fn sector(c: &mut Criterion) {
         let object = &Sector::new(Point::new(100, 100), 100, -30.0.deg(), 150.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -129,7 +129,7 @@ fn filled_sector(c: &mut Criterion) {
         let object = &Sector::new(Point::new(100, 100), 100, -30.0.deg(), 150.0.deg())
             .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -146,7 +146,7 @@ fn polyline(c: &mut Criterion) {
         let object =
             &Polyline::new(&points).into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -164,7 +164,7 @@ fn rounded_rectangle(c: &mut Criterion) {
                 .build(),
         );
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -187,7 +187,7 @@ fn rounded_rectangle_corners(c: &mut Criterion) {
                 .build(),
         );
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 

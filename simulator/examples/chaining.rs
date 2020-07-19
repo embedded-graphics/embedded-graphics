@@ -30,7 +30,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     // Draw an 3px wide outline around the display.
     Rectangle::new(Point::zero(), display.size())
         .into_styled(thick_stroke)
-        .into_iter()
+        .into_pixels()
         .chain(
             // Draw a triangle.
             Triangle::new(
@@ -39,19 +39,19 @@ fn main() -> Result<(), core::convert::Infallible> {
                 Point::new(16 + 8, yoffset),
             )
             .into_styled(thin_stroke)
-            .into_iter(),
+            .into_pixels(),
         )
         .chain(
             // Draw a filled square
             Rectangle::new(Point::new(52, yoffset), Size::new(16, 16))
                 .into_styled(fill)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain(
             // Draw a circle with a 3px wide stroke.
             Circle::new(Point::new(88, yoffset), 17)
                 .into_styled(thick_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain({
             // Draw centered text.
@@ -60,7 +60,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
             Text::new(text, Point::new(64 - width / 2, 40))
                 .into_styled(text_style)
-                .into_iter()
+                .into_pixels()
         })
         .draw(&mut display)?;
 

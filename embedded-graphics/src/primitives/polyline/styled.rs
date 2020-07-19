@@ -1,6 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{polyline, polyline::Polyline, Primitive},
     style::{PrimitiveStyle, Styled},
@@ -44,14 +45,15 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Polyline<'a>, PrimitiveStyle<C>>
+impl<'a, C> IntoPixels for &Styled<Polyline<'a>, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<'a, C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<'a, C>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -64,7 +66,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_iter())
+        display.draw_iter(self.into_pixels())
     }
 }
 
@@ -91,7 +93,7 @@ mod tests {
         let thick = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 10));
         let thin = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1));
 
-        assert!(thick.into_iter().eq(thin.into_iter()));
+        assert!(thick.into_pixels().eq(thin.into_pixels()));
     }
 
     #[test]
@@ -123,13 +125,13 @@ mod tests {
         // No stroke width = no pixels
         assert!(Polyline::new(&points)
             .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 0))
-            .into_iter()
+            .into_pixels()
             .eq(core::iter::empty()));
 
         // No stroke color = no pixels
         assert!(Polyline::new(&points)
             .into_styled::<Rgb565>(PrimitiveStyleBuilder::new().stroke_width(1).build())
-            .into_iter()
+            .into_pixels()
             .eq(core::iter::empty()));
     }
 }

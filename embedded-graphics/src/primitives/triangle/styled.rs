@@ -1,6 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::triangle::{
         scanline_iterator::{PointType, ScanlineIterator},
@@ -62,14 +63,15 @@ where
     }
 }
 
-impl<C> IntoIterator for &Styled<Triangle, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Triangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -82,7 +84,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }
 
@@ -103,7 +105,7 @@ mod tests {
     fn unfilled_no_stroke_width_no_triangle() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(2, 4))
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0))
-            .into_iter();
+            .into_pixels();
 
         assert_eq!(tri.next(), None);
     }
@@ -215,8 +217,8 @@ mod tests {
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
         let on_screen = off_screen.translate(Point::new(0, 35));
 
-        assert!(off_screen.into_iter().eq(on_screen
-            .into_iter()
+        assert!(off_screen.into_pixels().eq(on_screen
+            .into_pixels()
             .map(|Pixel(p, col)| Pixel(p - Point::new(0, 35), col))));
     }
 

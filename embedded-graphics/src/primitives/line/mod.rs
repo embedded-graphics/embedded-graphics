@@ -127,6 +127,7 @@ mod tests {
         drawable::{Drawable, Pixel},
         geometry::Size,
         mock_display::MockDisplay,
+        pixel_iterator::IntoPixels,
         pixelcolor::BinaryColor,
         style::PrimitiveStyle,
     };
@@ -158,7 +159,7 @@ mod tests {
         let line =
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
 
-        assert!(line.into_iter().eq(core::iter::empty()));
+        assert!(line.into_pixels().eq(core::iter::empty()));
     }
 
     #[test]
@@ -346,7 +347,7 @@ mod tests {
         let styled_points: ArrayVec<[_; 32]> = line
             .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter()
+            .into_pixels()
             .map(|Pixel(p, _)| p)
             .collect();
 

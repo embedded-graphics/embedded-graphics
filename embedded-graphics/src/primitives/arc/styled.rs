@@ -1,5 +1,6 @@
 use crate::{
     drawable::{Drawable, Pixel},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         arc::{plane_sector::PlaneSectorIterator, Arc},
@@ -85,18 +86,19 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Arc, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Arc, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }

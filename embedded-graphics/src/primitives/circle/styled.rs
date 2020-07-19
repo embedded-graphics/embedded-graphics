@@ -2,6 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::circle::{diameter_to_threshold, distance_iterator::DistanceIterator, Circle},
     primitives::rectangle::{self, Rectangle},
@@ -81,14 +82,15 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Circle, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Circle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -101,7 +103,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }
 
@@ -124,7 +126,7 @@ mod tests {
         let styled_points = circle
             .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_iter()
+            .into_pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(circle.points().eq(styled_points));
@@ -199,18 +201,18 @@ mod tests {
             Circle::new(Point::new(-5, -5), 21)
                 .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        assert!(circle.into_iter().count() > 0);
+        assert!(circle.into_pixels().count() > 0);
     }
 
     #[test]
     fn it_handles_negative_coordinates() {
         let positive = Circle::new(Point::new(10, 10), 5)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter();
+            .into_pixels();
 
         let negative = Circle::new(Point::new(-10, -10), 5)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter();
+            .into_pixels();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
     }
@@ -275,7 +277,9 @@ mod tests {
                 size
             );
             assert!(
-                circle_no_stroke.into_iter().eq(circle_stroke.into_iter()),
+                circle_no_stroke
+                    .into_pixels()
+                    .eq(circle_stroke.into_pixels()),
                 "Filled and unfilled circle iters are unequal for radius {}",
                 size
             );

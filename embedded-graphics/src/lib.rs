@@ -153,14 +153,16 @@
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 //!     Rectangle::new(Point::new(0, 0), Size::new(40, 40))
 //!         .into_styled(PrimitiveStyle::with_stroke(Rgb565::CYAN, 1))
-//!         .into_iter()
+//!         .into_pixels()
 //!         .chain(
-//!             &Circle::new(Point::new(12, 12), 17)
-//!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED)),
+//!             Circle::new(Point::new(12, 12), 17)
+//!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
+//!                 .into_pixels(),
 //!         )
 //!         .chain(
-//!             &Text::new(text, Point::new(20, 16))
-//!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN)),
+//!             Text::new(text, Point::new(20, 16))
+//!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN))
+//!                 .into_pixels(),
 //!         )
 //! }
 //!

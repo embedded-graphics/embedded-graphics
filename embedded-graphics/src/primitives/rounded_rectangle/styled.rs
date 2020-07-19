@@ -1,6 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         rounded_rectangle::{Points, RoundedRectangle},
@@ -69,14 +70,15 @@ where
     }
 }
 
-impl<C> IntoIterator for &Styled<RoundedRectangle, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<RoundedRectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -89,7 +91,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }
 
@@ -100,6 +102,7 @@ mod tests {
         drawable::Drawable,
         geometry::{Point, Size},
         mock_display::MockDisplay,
+        pixel_iterator::IntoPixels,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{rectangle::Rectangle, CornerRadii, Primitive},
         style::PrimitiveStyleBuilder,
@@ -113,7 +116,7 @@ mod tests {
         )
         .into_styled(PrimitiveStyleBuilder::<BinaryColor>::new().build());
 
-        assert!(rounded_rect.into_iter().eq(core::iter::empty()));
+        assert!(rounded_rect.into_pixels().eq(core::iter::empty()));
     }
 
     #[test]
@@ -132,7 +135,7 @@ mod tests {
 
         let rect = Rectangle::new(Point::zero(), Size::new(20, 30)).into_styled(style);
 
-        assert!(rounded_rect.into_iter().eq(rect.into_iter()));
+        assert!(rounded_rect.into_pixels().eq(rect.into_pixels()));
     }
 
     #[test]
