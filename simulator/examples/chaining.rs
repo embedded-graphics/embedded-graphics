@@ -60,7 +60,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
             Text::new(text, Point::new(64 - width / 2, 40))
                 .into_styled(text_style)
-                .into_iter()
+                .into_pixels()
         })
         .draw(&mut display)?;
 

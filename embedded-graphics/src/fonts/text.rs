@@ -2,6 +2,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     fonts::Font,
     geometry::{Dimensions, Point, Size},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
     style::{Styled, TextStyle},
@@ -73,20 +74,19 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_iter())
+        display.draw_iter(self.into_pixels())
     }
 }
 
-impl<'a, C, F> IntoIterator for &Styled<Text<'a>, TextStyle<C, F>>
+impl<'a, C, F> IntoPixels<C> for &Styled<Text<'a>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font + Copy,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledTextIterator<'a, C, F>;
+    type Iter = StyledTextIterator<'a, C, F>;
 
-    fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter {
+    fn into_pixels(self) -> Self::Iter {
+        Self::Iter {
             current_char: self.primitive.text.chars().next(),
             idx: 0,
             text: self.primitive.text,
@@ -411,7 +411,7 @@ mod tests {
         let mut text = Text::new("Testing string", Point::zero()).into_styled(style);
         text.translate_mut(Point::new(0, -12));
 
-        assert_eq!(text.into_iter().count(), 6 * 12 * "Testing string".len());
+        assert_eq!(text.into_pixels().count(), 6 * 12 * "Testing string".len());
     }
 
     #[test]
@@ -425,6 +425,6 @@ mod tests {
         let mut text = Text::new("A", Point::zero()).into_styled(style);
         text.translate_mut(Point::new(-6, 0));
 
-        assert_eq!(text.into_iter().count(), 6 * 12);
+        assert_eq!(text.into_pixels().count(), 6 * 12);
     }
 }

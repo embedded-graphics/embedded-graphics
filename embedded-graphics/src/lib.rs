@@ -159,8 +159,9 @@
 //!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED)),
 //!         )
 //!         .chain(
-//!             &Text::new(text, Point::new(20, 16))
-//!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN)),
+//!             Text::new(text, Point::new(20, 16))
+//!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN))
+//!                 .into_pixels(),
 //!         )
 //! }
 //!

@@ -12,7 +12,7 @@ fn font_6x8(c: &mut Criterion) {
         let object = Text::new("Hello world!", Point::zero())
             .into_styled(TextStyle::new(Font6x8, Gray8::new(10)));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 
@@ -21,7 +21,7 @@ fn font_12x16(c: &mut Criterion) {
         let object = Text::new("Hello world!", Point::zero())
             .into_styled(TextStyle::new(Font12x16, Gray8::new(10)));
 
-        b.iter(|| object.into_iter().collect::<Vec<Pixel<Gray8>>>())
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
     });
 }
 

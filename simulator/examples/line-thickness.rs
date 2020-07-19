@@ -45,7 +45,6 @@ fn draw(
         Point::zero(),
     )
     .into_styled(TextStyle::new(Font6x8, Rgb888::MAGENTA))
-    .into_iter()
     .draw(display)?;
 
     Line::new(start, position)
