@@ -42,6 +42,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#360](https://github.com/jamwaffles/embedded-graphics/pull/360) Make the `drawable` module private. `drawable::Drawable` and `drawable::Pixel` are now exported from the crate root.
 - **(breaking)** [#390](https://github.com/jamwaffles/embedded-graphics/pull/390) `Triangle.contains` now always returns `false` for colinear triangles.
 - **(breaking)** [#393](https://github.com/jamwaffles/embedded-graphics/pull/393) `DrawTarget::draw` now uses a reference to `self` instead of taking ownership of `self`. Because of this change `DrawTarget` can no longer be implemented for pixel iterators (`Iterator<Item = C>`), which can now be drawn using the `draw` method provided by the `PixelIteratorExt` extension trait.
+- **(breaking)** [#383](https://github.com/jamwaffles/embedded-graphics/pull/383) Replaced all `IntoIterator` impls with a custom `IntoPixels` trait. To get an iterator over pixels in an item, replace calls to `into_iter()` with `into_pixels()`.
 
 ### Fixed
 
