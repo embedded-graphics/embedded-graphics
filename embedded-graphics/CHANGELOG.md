@@ -49,6 +49,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Fixed
 
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) The bounding box size for `Circle`s was off by one.
+- [#401](https://github.com/jamwaffles/embedded-graphics/pull/401) Triangle pixel iterators no longer produce a pixel for each node twice.
 
 ### Removed
 
