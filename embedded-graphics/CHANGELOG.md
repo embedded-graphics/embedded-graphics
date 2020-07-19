@@ -30,6 +30,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#310](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Arc` primitive.
 - [#310](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Sector` primitive.
 - [#398](https://github.com/jamwaffles/embedded-graphics/pull/398) Added `Point::length_squared` and `component_min`, `component_max`, `component_mul` and `component_div` for `Point` and `Size`.
+- [#400](https://github.com/jamwaffles/embedded-graphics/pull/400) Added `OffsetOutline` and `StyledPrimitiveAreas` traits.
 
 ### Changed
 

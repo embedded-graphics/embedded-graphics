@@ -7,7 +7,7 @@ use crate::{
         rounded_rectangle::{Points, RoundedRectangle},
         ContainsPoint,
     },
-    style::{PrimitiveStyle, Styled},
+    style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
 };
 
 /// Pixel iterator for each pixel in the rect border
@@ -27,22 +27,17 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
-        let Styled { style, primitive } = styled;
-
         let iter = if !styled.style.is_transparent() {
-            let stroke_area = primitive.expand(style.outside_stroke_width());
-            Points::new(&stroke_area)
+            Points::new(&styled.stroke_area())
         } else {
             Points::empty()
         };
 
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-
         Self {
             iter,
-            fill_area,
-            stroke_color: style.stroke_color,
-            fill_color: style.fill_color,
+            fill_area: styled.fill_area(),
+            stroke_color: styled.style.stroke_color,
+            fill_color: styled.style.fill_color,
         }
     }
 }

@@ -7,7 +7,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{rectangle::Rectangle, ContainsPoint, Primitive},
+    primitives::{rectangle::Rectangle, ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
@@ -237,33 +237,33 @@ impl RoundedRectangle {
             ),
         }
     }
+}
 
-    fn expand(&self, offset: u32) -> Self {
-        let corner_offset = Size::new_equal(offset);
+impl OffsetOutline for RoundedRectangle {
+    fn offset(&self, offset: i32) -> Self {
+        let rectangle = self.rectangle.offset(offset);
 
-        Self::new(
-            self.rectangle.expand(offset),
+        let corners = if offset >= 0 {
+            let corner_offset = Size::new_equal(offset as u32);
+
             CornerRadii {
                 top_left: self.corners.top_left.saturating_add(corner_offset),
                 top_right: self.corners.top_right.saturating_add(corner_offset),
                 bottom_right: self.corners.bottom_right.saturating_add(corner_offset),
                 bottom_left: self.corners.bottom_left.saturating_add(corner_offset),
-            },
-        )
-    }
+            }
+        } else {
+            let corner_offset = Size::new_equal((-offset) as u32);
 
-    fn shrink(&self, offset: u32) -> Self {
-        let corner_offset = Size::new_equal(offset);
-
-        Self::new(
-            self.rectangle.shrink(offset),
             CornerRadii {
                 top_left: self.corners.top_left.saturating_sub(corner_offset),
                 top_right: self.corners.top_right.saturating_sub(corner_offset),
                 bottom_right: self.corners.bottom_right.saturating_sub(corner_offset),
                 bottom_left: self.corners.bottom_left.saturating_sub(corner_offset),
-            },
-        )
+            }
+        };
+
+        Self::new(rectangle, corners)
     }
 }
 
@@ -411,6 +411,52 @@ mod tests {
                     bottom_left: Size::new_equal(7),
                 }
             }
+        );
+    }
+
+    #[test]
+    fn offset() {
+        let center = Point::new(10, 20);
+        let rect = Rectangle::with_center(center, Size::new(3, 4));
+        let rounded = RoundedRectangle::with_equal_corners(rect, Size::new(2, 3));
+
+        assert_eq!(rounded.offset(0), rounded);
+
+        assert_eq!(
+            rounded.offset(1),
+            RoundedRectangle::with_equal_corners(
+                Rectangle::with_center(center, Size::new(5, 6)),
+                Size::new(3, 4)
+            ),
+        );
+        assert_eq!(
+            rounded.offset(2),
+            RoundedRectangle::with_equal_corners(
+                Rectangle::with_center(center, Size::new(7, 8)),
+                Size::new(4, 5)
+            ),
+        );
+
+        assert_eq!(
+            rounded.offset(-1),
+            RoundedRectangle::with_equal_corners(
+                Rectangle::with_center(center, Size::new(1, 2)),
+                Size::new(1, 2)
+            ),
+        );
+        assert_eq!(
+            rounded.offset(-2),
+            RoundedRectangle::with_equal_corners(
+                Rectangle::with_center(center, Size::new(0, 0)),
+                Size::new(0, 1)
+            ),
+        );
+        assert_eq!(
+            rounded.offset(-3),
+            RoundedRectangle::with_equal_corners(
+                Rectangle::with_center(center, Size::new(0, 0)),
+                Size::new(0, 0)
+            ),
         );
     }
 }

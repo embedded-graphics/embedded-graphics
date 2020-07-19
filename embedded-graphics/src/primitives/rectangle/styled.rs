@@ -8,7 +8,7 @@ use crate::{
         rectangle::{Points, Rectangle},
         ContainsPoint, Primitive,
     },
-    style::{PrimitiveStyle, Styled},
+    style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     transform::Transform,
 };
 
@@ -31,22 +31,17 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
-        let Styled { style, primitive } = styled;
-
-        let iter = if !style.is_transparent() {
-            let stroke_area = primitive.expand(style.outside_stroke_width());
-            stroke_area.points()
+        let iter = if !styled.style.is_transparent() {
+            styled.stroke_area().points()
         } else {
             Points::empty()
         };
 
-        let fill_area = primitive.shrink(style.inside_stroke_width());
-
         Self {
             iter,
-            stroke_color: style.stroke_color,
-            fill_area,
-            fill_color: style.fill_color,
+            fill_area: styled.fill_area(),
+            stroke_color: styled.style.stroke_color,
+            fill_color: styled.style.fill_color,
         }
     }
 }
@@ -95,18 +90,18 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        let fill_area = self.primitive.shrink(self.style.inside_stroke_width());
+        let fill_area = self.fill_area();
 
         // Fill rectangle
         if let Some(fill_color) = self.style.fill_color {
-            display.fill_solid(&fill_area, fill_color)?;
+            display.fill_solid(&self.fill_area(), fill_color)?;
         }
 
         // Draw stroke
         if let Some(stroke_color) = self.style.effective_stroke_color() {
             let stroke_width = self.style.stroke_width;
 
-            let stroke_area = self.primitive.expand(self.style.outside_stroke_width());
+            let stroke_area = self.stroke_area();
 
             let top_border = Rectangle::new(
                 stroke_area.top_left,

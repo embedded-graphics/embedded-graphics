@@ -6,7 +6,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{ContainsPoint, Primitive, Rectangle},
+    primitives::{ContainsPoint, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
 pub(in crate::primitives) use distance_iterator::DistanceIterator;
@@ -91,15 +91,15 @@ impl Circle {
 
         self.top_left * 2 + Size::new(radius, radius)
     }
+}
 
-    pub(in crate::primitives) fn expand(&self, offset: u32) -> Self {
-        let diameter = self.diameter.saturating_add(2 * offset);
-
-        Self::with_center(self.center(), diameter)
-    }
-
-    pub(in crate::primitives) fn shrink(&self, offset: u32) -> Self {
-        let diameter = self.diameter.saturating_sub(2 * offset);
+impl OffsetOutline for Circle {
+    fn offset(&self, offset: i32) -> Self {
+        let diameter = if offset >= 0 {
+            self.diameter.saturating_add(2 * offset as u32)
+        } else {
+            self.diameter.saturating_sub(2 * (-offset) as u32)
+        };
 
         Self::with_center(self.center(), diameter)
     }
@@ -230,5 +230,20 @@ mod tests {
             .filter(|p| circle.contains(*p));
 
         assert!(contained_points.eq(circle.points()));
+    }
+
+    #[test]
+    fn offset() {
+        let center = Point::new(1, 2);
+        let circle = Circle::with_center(center, 3);
+
+        assert_eq!(circle.offset(0), circle);
+
+        assert_eq!(circle.offset(1), Circle::with_center(center, 5));
+        assert_eq!(circle.offset(2), Circle::with_center(center, 7));
+
+        assert_eq!(circle.offset(-1), Circle::with_center(center, 1));
+        assert_eq!(circle.offset(-2), Circle::with_center(center, 0));
+        assert_eq!(circle.offset(-3), Circle::with_center(center, 0));
     }
 }

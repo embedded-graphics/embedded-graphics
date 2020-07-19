@@ -7,7 +7,7 @@ use crate::{
         arc::PlaneSectorIterator, circle, circle::DistanceIterator, line::ThickPoints, Sector,
         Styled,
     },
-    style::PrimitiveStyle,
+    style::{PrimitiveStyle, StyledPrimitiveAreas},
     DrawTarget,
 };
 
@@ -43,10 +43,8 @@ where
     C: PixelColor,
 {
     fn new(styled: &Styled<Sector, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        let stroke_area = primitive.expand(style.outside_stroke_width());
-        let fill_area = primitive.shrink(style.inside_stroke_width());
+        let stroke_area = styled.stroke_area();
+        let fill_area = styled.fill_area();
 
         let inner_threshold = circle::diameter_to_threshold(fill_area.diameter);
         let outer_threshold = circle::diameter_to_threshold(stroke_area.diameter);

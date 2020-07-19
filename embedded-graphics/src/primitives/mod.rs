@@ -50,3 +50,13 @@ pub trait ContainsPoint {
     /// Returns `true` if the given point is inside the shape.
     fn contains(&self, point: Point) -> bool;
 }
+
+/// Offset outline trait.
+pub trait OffsetOutline {
+    /// Offsets the outline of the shape.
+    ///
+    /// The offset is applied perpendicular to each element of the outline.
+    /// Offset values greater than zero will expand the shape and values less
+    /// than zero will shrink the shape.
+    fn offset(&self, offset: i32) -> Self;
+}

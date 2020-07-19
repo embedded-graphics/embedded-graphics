@@ -5,7 +5,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{ContainsPoint, Primitive},
+    primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
 use core::cmp::min;
@@ -116,18 +116,6 @@ impl Rectangle {
         self.top_left + self.size.center_offset()
     }
 
-    pub(in crate::primitives) fn expand(&self, offset: u32) -> Self {
-        let size = self.size.saturating_add(Size::new(offset * 2, offset * 2));
-
-        Self::with_center(self.center(), size)
-    }
-
-    pub(in crate::primitives) fn shrink(&self, offset: u32) -> Self {
-        let size = self.size.saturating_sub(Size::new(offset * 2, offset * 2));
-
-        Self::with_center(self.center(), size)
-    }
-
     /// Returns the bottom right corner of this rectangle.
     ///
     /// Because the smallest rectangle that can be represented by its corners
@@ -231,6 +219,19 @@ impl Rectangle {
 
         // No overlap present
         Rectangle::new(Point::zero(), Size::zero())
+    }
+}
+
+impl OffsetOutline for Rectangle {
+    fn offset(&self, offset: i32) -> Self {
+        let size = if offset >= 0 {
+            self.size.saturating_add(Size::new_equal(offset as u32 * 2))
+        } else {
+            self.size
+                .saturating_sub(Size::new_equal((-offset) as u32 * 2))
+        };
+
+        Self::with_center(self.center(), size)
     }
 }
 
@@ -392,5 +393,35 @@ mod tests {
         let rect2 = Rectangle::new(Point::new(-10, -10), Size::new(20, 20));
 
         assert_eq!(rect1.intersection(&rect2).size, Size::zero());
+    }
+
+    #[test]
+    fn offset() {
+        let center = Point::new(10, 20);
+        let rect = Rectangle::with_center(center, Size::new(3, 4));
+
+        assert_eq!(rect.offset(0), rect);
+
+        assert_eq!(
+            rect.offset(1),
+            Rectangle::with_center(center, Size::new(5, 6))
+        );
+        assert_eq!(
+            rect.offset(2),
+            Rectangle::with_center(center, Size::new(7, 8))
+        );
+
+        assert_eq!(
+            rect.offset(-1),
+            Rectangle::with_center(center, Size::new(1, 2))
+        );
+        assert_eq!(
+            rect.offset(-2),
+            Rectangle::with_center(center, Size::new(0, 0))
+        );
+        assert_eq!(
+            rect.offset(-3),
+            Rectangle::with_center(center, Size::new(0, 0))
+        );
     }
 }
