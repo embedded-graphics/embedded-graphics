@@ -128,7 +128,7 @@ where
     }
 }
 
-impl<'a, C> IntoPixels for &'a Styled<Sector, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Sector, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {

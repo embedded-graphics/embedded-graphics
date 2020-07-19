@@ -79,7 +79,7 @@ where
     }
 }
 
-impl<'a, C> IntoPixels for &'a Styled<Ellipse, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Ellipse, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {

@@ -74,7 +74,7 @@ where
     }
 }
 
-impl<'a, C> IntoPixels for &'a Styled<Rectangle, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {

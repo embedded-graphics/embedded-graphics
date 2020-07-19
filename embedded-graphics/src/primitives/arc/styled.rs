@@ -90,7 +90,7 @@ where
     }
 }
 
-impl<'a, C> IntoPixels for &'a Styled<Arc, PrimitiveStyle<C>>
+impl<C> IntoPixels for &Styled<Arc, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
