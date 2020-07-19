@@ -64,7 +64,6 @@ mod tests {
         assert_eq!(tri.next(), Some(Point::new(2, 3)));
         assert_eq!(tri.next(), Some(Point::new(2, 4)));
         assert_eq!(tri.next(), Some(Point::new(2, 4)));
-        assert_eq!(tri.next(), Some(Point::new(2, 4)));
         assert_eq!(tri.next(), None);
     }
 
@@ -76,7 +75,6 @@ mod tests {
         assert_eq!(tri.next(), Some(Point::new(2, 2)));
         assert_eq!(tri.next(), Some(Point::new(3, 2)));
         assert_eq!(tri.next(), Some(Point::new(3, 2)));
-        assert_eq!(tri.next(), Some(Point::new(4, 2)));
         assert_eq!(tri.next(), Some(Point::new(4, 2)));
         assert_eq!(tri.next(), Some(Point::new(4, 2)));
         assert_eq!(tri.next(), None);
