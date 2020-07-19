@@ -159,14 +159,14 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ```rust,ignore
+    /// ```rust
     /// use embedded_graphics::geometry::Point;
     ///
     /// let min = Point::new(20, 30).component_min(Point::new(15, 50));
     ///
     /// assert_eq!(min, Point::new(15, 30));
     /// ```
-    pub(crate) fn component_min(self, other: Self) -> Self {
+    pub fn component_min(self, other: Self) -> Self {
         Self::new(self.x.min(other.x), self.y.min(other.y))
     }
 
@@ -174,14 +174,14 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ```rust,ignore
+    /// ```rust
     /// use embedded_graphics::geometry::Point;
     ///
     /// let min = Point::new(20, 30).component_max(Point::new(15, 50));
     ///
     /// assert_eq!(min, Point::new(20, 50));
     /// ```
-    pub(crate) fn component_max(self, other: Self) -> Self {
+    pub fn component_max(self, other: Self) -> Self {
         Self::new(self.x.max(other.x), self.y.max(other.y))
     }
 
@@ -192,15 +192,45 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ```rust,ignore
+    /// ```rust
     /// use embedded_graphics::geometry::Point;
     ///
     /// let p = Point::new(3, 4);
     ///
     /// assert_eq!(p.length_squared(), 25);
     /// ```
-    pub(crate) fn length_squared(self) -> i32 {
+    pub fn length_squared(self) -> i32 {
         self.x.pow(2) + self.y.pow(2)
+    }
+
+    /// Returns the componentwise multiplication of two `Point`s.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let result = Point::new(20, 30).component_mul(Point::new(-2, 3));
+    ///
+    /// assert_eq!(result, Point::new(-40, 90));
+    /// ```
+    pub fn component_mul(self, other: Self) -> Self {
+        Self::new(self.x * other.x, self.y * other.y)
+    }
+
+    /// Returns the componentwise division of two `Points`s.
+    ///
+    /// # Panics
+    ///
+    /// Panics if one of the components of `other` equals zero.
+    ///
+    /// ```rust
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let result = Point::new(20, 30).component_div(Point::new(10, -3));
+    ///
+    /// assert_eq!(result, Point::new(2, -10));
+    /// ```
+    pub fn component_div(self, other: Self) -> Self {
+        Self::new(self.x / other.x, self.y / other.y)
     }
 }
 
