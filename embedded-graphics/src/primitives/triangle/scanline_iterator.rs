@@ -30,8 +30,6 @@ pub struct ScanlineIterator {
     next_ac: Option<Point>,
     next_b: Option<Point>,
     x: i32,
-    max_y: i32,
-    min_y: i32,
 }
 
 impl ScanlineIterator {
@@ -54,8 +52,6 @@ impl ScanlineIterator {
             next_ac,
             next_b,
             x: 0,
-            min_y: v1.y,
-            max_y: v3.y,
         }
     }
 
@@ -69,8 +65,6 @@ impl ScanlineIterator {
             next_ac: None,
             next_b: None,
             x: 0,
-            max_y: 0,
-            min_y: 0,
         }
     }
 
