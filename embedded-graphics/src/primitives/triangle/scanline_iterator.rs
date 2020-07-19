@@ -6,6 +6,7 @@ use crate::{
         Primitive,
     },
 };
+use core::cmp::Ordering;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum PointType {
@@ -106,13 +107,13 @@ impl ScanlineIterator {
                     (Some(n_ac), Some(n_b)) => {
                         // If y component differs, take new points from edge until both side have
                         // the same y
-                        if n_ac.y < n_b.y {
-                            self.update_ac()
-                        } else if n_ac.y > n_b.y {
-                            self.update_b()
-                        } else {
-                            let (l, r) = sort_two_yx(n_ac, n_b);
-                            IterState::LeftRight(l, r)
+                        match n_ac.y.cmp(&n_b.y) {
+                            Ordering::Less => self.update_ac(),
+                            Ordering::Greater => self.update_b(),
+                            Ordering::Equal => {
+                                let (l, r) = sort_two_yx(n_ac, n_b);
+                                IterState::LeftRight(l, r)
+                            }
                         }
                     }
                     (None, Some(_)) => self.update_b(),
