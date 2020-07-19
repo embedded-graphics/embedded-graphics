@@ -6,6 +6,7 @@ use crate::{
         Primitive,
     },
 };
+use core::cmp::Ordering;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum PointType {
@@ -29,8 +30,6 @@ pub struct ScanlineIterator {
     next_ac: Option<Point>,
     next_b: Option<Point>,
     x: i32,
-    max_y: i32,
-    min_y: i32,
 }
 
 impl ScanlineIterator {
@@ -40,6 +39,9 @@ impl ScanlineIterator {
         let mut line_a = Line::new(v1, v2).points();
         let mut line_b = Line::new(v1, v3).points();
         let mut line_c = Line::new(v2, v3).points();
+
+        // Skip first point of line C as this overlaps with the last point of line A
+        line_c.next();
 
         let next_ac = line_a.next().or_else(|| line_c.next());
         let next_b = line_b.next();
@@ -53,8 +55,6 @@ impl ScanlineIterator {
             next_ac,
             next_b,
             x: 0,
-            min_y: v1.y,
-            max_y: v3.y,
         }
     }
 
@@ -68,8 +68,6 @@ impl ScanlineIterator {
             next_ac: None,
             next_b: None,
             x: 0,
-            max_y: 0,
-            min_y: 0,
         }
     }
 
@@ -78,6 +76,7 @@ impl ScanlineIterator {
             self.cur_ac = Some(ac);
             self.next_ac = self.line_a.next().or_else(|| self.line_c.next());
             self.x = 0;
+
             IterState::Border(ac)
         } else {
             IterState::None
@@ -89,6 +88,7 @@ impl ScanlineIterator {
             self.cur_b = Some(b);
             self.next_b = self.line_b.next();
             self.x = 0;
+
             IterState::Border(b)
         } else {
             IterState::None
@@ -106,13 +106,13 @@ impl ScanlineIterator {
                     (Some(n_ac), Some(n_b)) => {
                         // If y component differs, take new points from edge until both side have
                         // the same y
-                        if n_ac.y < n_b.y {
-                            self.update_ac()
-                        } else if n_ac.y > n_b.y {
-                            self.update_b()
-                        } else {
-                            let (l, r) = sort_two_yx(n_ac, n_b);
-                            IterState::LeftRight(l, r)
+                        match n_ac.y.cmp(&n_b.y) {
+                            Ordering::Less => self.update_ac(),
+                            Ordering::Greater => self.update_b(),
+                            Ordering::Equal => {
+                                let (l, r) = sort_two_yx(n_ac, n_b);
+                                IterState::LeftRight(l, r)
+                            }
                         }
                     }
                     (None, Some(_)) => self.update_b(),
@@ -134,9 +134,12 @@ impl Iterator for ScanlineIterator {
         loop {
             match self.points() {
                 IterState::Border(point) => {
-                    // Draw edges of the triangle
-                    self.x += 1;
-                    return Some((PointType::Border, point));
+                    // Skip overlapping left/right border points
+                    if Some(point) != self.next_b {
+                        // Draw edges of the triangle
+                        self.x += 1;
+                        return Some((PointType::Border, point));
+                    }
                 }
                 IterState::LeftRight(l, r) => {
                     // Fill the space between the left and right points

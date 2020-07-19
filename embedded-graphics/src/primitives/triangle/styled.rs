@@ -229,8 +229,6 @@ mod tests {
         let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
 
         let mut tri_display: MockDisplay<BinaryColor> = MockDisplay::new();
-        // FIXME: Triangles should not be overdrawing
-        tri_display.set_allow_overdraw(true);
         styled.draw(&mut tri_display).unwrap();
 
         let mut lines_display: MockDisplay<BinaryColor> = MockDisplay::new();
@@ -250,5 +248,16 @@ mod tests {
             .unwrap();
 
         assert_eq!(tri_display, lines_display);
+    }
+
+    #[test]
+    fn no_stroke_overdraw() {
+        let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
+
+        let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1));
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        styled.draw(&mut display).unwrap();
     }
 }
