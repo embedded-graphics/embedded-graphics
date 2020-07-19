@@ -89,12 +89,6 @@ impl ScanlineIterator {
             self.next_b = self.line_b.next();
             self.x = 0;
 
-            // // Check if the left line(s) overlap the right lines. If this check is true, it means
-            // // the AC line already drew it, so skip this pixel for line B.
-            // if self.cur_b == self.cur_ac {
-            //     return self.update_b();
-            // }
-
             IterState::Border(b)
         } else {
             IterState::None
@@ -102,7 +96,6 @@ impl ScanlineIterator {
     }
 
     pub(in crate::primitives::triangle) fn points(&mut self) -> IterState {
-        // dbg!(self.cur_ac, self.next_ac);
         match (self.cur_ac, self.cur_b) {
             // Point of ac line or b line is missing
             (None, _) => self.update_ac(),
@@ -141,9 +134,12 @@ impl Iterator for ScanlineIterator {
         loop {
             match self.points() {
                 IterState::Border(point) => {
-                    // Draw edges of the triangle
-                    self.x += 1;
-                    return Some((PointType::Border, point));
+                    // Skip overlapping left/right border points
+                    if Some(point) != self.next_b {
+                        // Draw edges of the triangle
+                        self.x += 1;
+                        return Some((PointType::Border, point));
+                    }
                 }
                 IterState::LeftRight(l, r) => {
                     // Fill the space between the left and right points

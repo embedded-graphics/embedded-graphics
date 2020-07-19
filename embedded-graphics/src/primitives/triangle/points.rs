@@ -56,13 +56,8 @@ mod tests {
     fn it_draws_unfilled_tri_line_y() {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(2, 4), Point::new(2, 4)).points();
 
-        // Nodes are returned twice. first line a and b yield the same point.
-        // After that line a ends where line c starts.
-        assert_eq!(tri.next(), Some(Point::new(2, 2)));
         assert_eq!(tri.next(), Some(Point::new(2, 2)));
         assert_eq!(tri.next(), Some(Point::new(2, 3)));
-        assert_eq!(tri.next(), Some(Point::new(2, 3)));
-        assert_eq!(tri.next(), Some(Point::new(2, 4)));
         assert_eq!(tri.next(), Some(Point::new(2, 4)));
         assert_eq!(tri.next(), None);
     }
@@ -72,10 +67,7 @@ mod tests {
         let mut tri = Triangle::new(Point::new(2, 2), Point::new(4, 2), Point::new(4, 2)).points();
 
         assert_eq!(tri.next(), Some(Point::new(2, 2)));
-        assert_eq!(tri.next(), Some(Point::new(2, 2)));
         assert_eq!(tri.next(), Some(Point::new(3, 2)));
-        assert_eq!(tri.next(), Some(Point::new(3, 2)));
-        assert_eq!(tri.next(), Some(Point::new(4, 2)));
         assert_eq!(tri.next(), Some(Point::new(4, 2)));
         assert_eq!(tri.next(), None);
     }
