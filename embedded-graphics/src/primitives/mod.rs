@@ -56,7 +56,7 @@ pub trait OffsetOutline {
     /// Offsets the outline of the shape.
     ///
     /// The offset is applied perpendicular to each element of the outline.
-    /// Offset values larger than zero will expand the shape and values smaller
+    /// Offset values greater than zero will expand the shape and values less
     /// than zero will shrink the shape.
     fn offset(&self, offset: i32) -> Self;
 }
