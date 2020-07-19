@@ -199,7 +199,7 @@ impl Point {
     ///
     /// assert_eq!(p.length_squared(), 25);
     /// ```
-    pub(crate) fn length_squared(self) -> i32 {
+    pub fn length_squared(self) -> i32 {
         self.x.pow(2) + self.y.pow(2)
     }
 }
