@@ -36,19 +36,19 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     circle
         .into_styled(thin_stroke)
-        .into_iter()
+        .into_pixels()
         .chain(rectangle.into_styled(thin_stroke).into_pixels())
-        .chain(line.into_styled(thin_stroke).into_iter())
-        .chain(triangle.into_styled(thin_stroke).into_iter())
-        .chain(ellipse.into_styled(thin_stroke).into_iter())
-        .chain(rounded_rectangle.into_styled(thin_stroke).into_iter())
+        .chain(line.into_styled(thin_stroke).into_pixels())
+        .chain(triangle.into_styled(thin_stroke).into_pixels())
+        .chain(ellipse.into_styled(thin_stroke).into_pixels())
+        .chain(rounded_rectangle.into_styled(thin_stroke).into_pixels())
         .draw(&mut display)?;
 
     let offset = Point::new(0, 64 + PADDING);
     circle
         .translate(offset)
         .into_styled(medium_stroke)
-        .into_iter()
+        .into_pixels()
         .chain(
             rectangle
                 .translate(offset)
@@ -58,25 +58,25 @@ fn main() -> Result<(), core::convert::Infallible> {
         .chain(
             line.translate(offset)
                 .into_styled(medium_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain(
             triangle
                 .translate(offset)
                 .into_styled(medium_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain(
             ellipse
                 .translate(offset)
                 .into_styled(medium_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain(
             rounded_rectangle
                 .translate(offset)
                 .into_styled(medium_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .draw(&mut display)?;
 
@@ -84,31 +84,35 @@ fn main() -> Result<(), core::convert::Infallible> {
     circle
         .translate(offset)
         .into_styled(thick_stroke)
-        .into_iter()
+        .into_pixels()
         .chain(
             rectangle
                 .translate(offset)
                 .into_styled(thick_stroke)
                 .into_pixels(),
         )
-        .chain(line.translate(offset).into_styled(thick_stroke).into_iter())
+        .chain(
+            line.translate(offset)
+                .into_styled(thick_stroke)
+                .into_pixels(),
+        )
         .chain(
             triangle
                 .translate(offset)
                 .into_styled(thick_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain(
             ellipse
                 .translate(offset)
                 .into_styled(thick_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain(
             rounded_rectangle
                 .translate(offset)
                 .into_styled(thick_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .draw(&mut display)?;
 

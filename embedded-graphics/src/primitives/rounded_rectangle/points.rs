@@ -92,7 +92,7 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{pixelcolor::BinaryColor, style::PrimitiveStyle};
+    use crate::{pixel_iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle};
 
     #[test]
     fn points_equals_filled() {
@@ -103,7 +103,7 @@ mod tests {
 
         assert!(rounded_rect.points().eq(rounded_rect
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_iter()
+            .into_pixels()
             .map(|pixel| pixel.0)));
     }
 }

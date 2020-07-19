@@ -155,8 +155,9 @@
 //!         .into_styled(PrimitiveStyle::with_stroke(Rgb565::CYAN, 1))
 //!         .into_pixels()
 //!         .chain(
-//!             &Circle::new(Point::new(12, 12), 17)
-//!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED)),
+//!             Circle::new(Point::new(12, 12), 17)
+//!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
+//!                 .into_pixels(),
 //!         )
 //!         .chain(
 //!             Text::new(text, Point::new(20, 16))

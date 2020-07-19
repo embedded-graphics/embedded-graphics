@@ -16,7 +16,6 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     Circle::new(Point::new(0, 0), 41)
         .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
-        .into_iter()
         .draw(&mut display)
         .unwrap();
 

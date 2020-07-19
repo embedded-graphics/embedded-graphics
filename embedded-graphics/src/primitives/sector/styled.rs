@@ -1,6 +1,7 @@
 use crate::{
     drawable::{Drawable, Pixel},
     geometry::Point,
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         arc::PlaneSectorIterator, circle, circle::DistanceIterator, line::ThickPoints, Sector,
@@ -127,14 +128,15 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Sector, PrimitiveStyle<C>>
+impl<'a, C> IntoPixels for &'a Styled<Sector, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -147,7 +149,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }
 
@@ -238,7 +240,7 @@ mod tests {
             Sector::new(Point::new(-5, -5), 21, 0.0.deg(), 90.0.deg())
                 .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        assert!(sector.into_iter().count() > 0);
+        assert!(sector.into_pixels().count() > 0);
     }
 
     #[test]

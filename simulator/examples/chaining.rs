@@ -39,7 +39,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 Point::new(16 + 8, yoffset),
             )
             .into_styled(thin_stroke)
-            .into_iter(),
+            .into_pixels(),
         )
         .chain(
             // Draw a filled square
@@ -51,7 +51,7 @@ fn main() -> Result<(), core::convert::Infallible> {
             // Draw a circle with a 3px wide stroke.
             Circle::new(Point::new(88, yoffset), 17)
                 .into_styled(thick_stroke)
-                .into_iter(),
+                .into_pixels(),
         )
         .chain({
             // Draw centered text.

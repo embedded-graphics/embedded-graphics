@@ -47,7 +47,7 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
         .chain(
             Circle::new(Point::new(1, 1), 3)
                 .into_styled(PrimitiveStyle::default())
-                .into_iter(),
+                .into_pixels(),
         );
 
     chained.draw(&mut display)
@@ -56,11 +56,11 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
     let line = Line::new(Point::new(0, 1), Point::new(2, 3))
         .into_styled(PrimitiveStyle::with_stroke(1u8.into(), 1))
-        .into_iter();
+        .into_pixels();
 
     let circle = Circle::new(Point::new(2, 2), 7)
         .into_styled(PrimitiveStyle::with_stroke(1u8.into(), 1))
-        .into_iter();
+        .into_pixels();
 
     line.chain(circle)
 }
@@ -70,22 +70,6 @@ fn return_from_fn() -> Result<(), core::convert::Infallible> {
     let mut display = FakeDisplay {};
 
     let chained = multi();
-
-    chained.draw(&mut display)
-}
-
-#[test]
-fn implicit_into_iter() -> Result<(), core::convert::Infallible> {
-    let mut display = FakeDisplay {};
-
-    let chained = Rectangle::new(Point::new(0, 0), Size::new(1, 1))
-        .into_styled(PrimitiveStyle::default())
-        .into_pixels()
-        .chain(
-            Circle::new(Point::new(1, 1), 3)
-                .into_styled(PrimitiveStyle::default())
-                .into_iter(),
-        );
 
     chained.draw(&mut display)
 }

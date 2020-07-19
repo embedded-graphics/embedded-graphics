@@ -48,8 +48,8 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel, geometry::AngleUnit, pixelcolor::BinaryColor, primitives::Primitive,
-        style::PrimitiveStyle,
+        drawable::Pixel, geometry::AngleUnit, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
+        primitives::Primitive, style::PrimitiveStyle,
     };
 
     #[test]
@@ -59,7 +59,7 @@ mod tests {
         let styled_points = sector
             .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_iter()
+            .into_pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(sector.points().eq(styled_points));

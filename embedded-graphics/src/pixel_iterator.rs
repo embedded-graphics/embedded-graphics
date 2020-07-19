@@ -28,12 +28,14 @@ where
 }
 
 ///  TODO: Doc
-pub trait IntoPixels<C>
-where
-    C: PixelColor,
-{
+pub trait IntoPixels {
+    /// The type of color for each pixel produced by the iterator returned from [`into_pixels`].
+    ///
+    /// [`into_pixels`]: #tymethod.into_pixels
+    type Color: PixelColor;
+
     ///  TODO: Doc
-    type Iter: Iterator<Item = Pixel<C>>;
+    type Iter: Iterator<Item = Pixel<Self::Color>>;
 
     ///  TODO: Doc
     fn into_pixels(self) -> Self::Iter;

@@ -1,6 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::line::{thick_points::ThickPoints, Line},
     style::{PrimitiveStyle, Styled},
@@ -50,14 +51,15 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Line, PrimitiveStyle<C>>
+impl<'a, C> IntoPixels for &'a Styled<Line, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -70,6 +72,6 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }

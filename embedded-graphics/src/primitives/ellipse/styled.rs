@@ -2,6 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
+    pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
     style::{PrimitiveStyle, Styled},
@@ -78,14 +79,15 @@ where
     }
 }
 
-impl<'a, C> IntoIterator for &'a Styled<Ellipse, PrimitiveStyle<C>>
+impl<'a, C> IntoPixels for &'a Styled<Ellipse, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
-    type IntoIter = StyledPixels<C>;
+    type Color = C;
 
-    fn into_iter(self) -> Self::IntoIter {
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -98,7 +100,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self)
+        display.draw_iter(self.into_pixels())
     }
 }
 

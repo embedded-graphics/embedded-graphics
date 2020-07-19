@@ -74,10 +74,12 @@ where
     }
 }
 
-impl<'a, C> IntoPixels<C> for &'a Styled<Rectangle, PrimitiveStyle<C>>
+impl<'a, C> IntoPixels for &'a Styled<Rectangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
+    type Color = C;
+
     type Iter = StyledPixels<C>;
 
     fn into_pixels(self) -> Self::Iter {

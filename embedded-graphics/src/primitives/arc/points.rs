@@ -54,8 +54,8 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel, geometry::AngleUnit, pixelcolor::BinaryColor, primitives::Primitive,
-        style::PrimitiveStyle,
+        drawable::Pixel, geometry::AngleUnit, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
+        primitives::Primitive, style::PrimitiveStyle,
     };
 
     #[test]
@@ -65,7 +65,7 @@ mod tests {
         let styled_points = arc
             .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_iter()
+            .into_pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(arc.points().eq(styled_points));

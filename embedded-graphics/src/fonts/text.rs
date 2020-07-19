@@ -78,11 +78,13 @@ where
     }
 }
 
-impl<'a, C, F> IntoPixels<C> for &Styled<Text<'a>, TextStyle<C, F>>
+impl<'a, C, F> IntoPixels for &Styled<Text<'a>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font + Copy,
 {
+    type Color = C;
+
     type Iter = StyledTextIterator<'a, C, F>;
 
     fn into_pixels(self) -> Self::Iter {

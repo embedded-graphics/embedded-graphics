@@ -217,11 +217,13 @@ where
     }
 }
 
-impl<'a, 'b: 'a, I, C> IntoPixels<C> for &'a Image<'b, I, C>
+impl<'a, 'b: 'a, I, C> IntoPixels for &'a Image<'b, I, C>
 where
     &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
+    type Color = C;
+
     type Iter = ImageIterator<'a, 'b, I, C>;
 
     fn into_pixels(self) -> Self::Iter {
