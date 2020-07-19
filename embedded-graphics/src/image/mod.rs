@@ -217,7 +217,7 @@ where
     }
 }
 
-impl<'a, 'b: 'a, I, C> IntoPixels for &'a Image<'b, I, C>
+impl<'a, 'b, I, C> IntoPixels for &'a Image<'b, I, C>
 where
     &'b I: IntoPixelIter<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
