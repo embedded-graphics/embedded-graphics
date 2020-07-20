@@ -86,7 +86,9 @@ Note that some drivers may not support the latest version of embedded-graphics.
 
 ## Simulator
 
-Embedded graphics comes with a [simulator]!
+Embedded graphics comes with a [simulator]! The simulator can be used to test and debug
+embedded graphics code, or produce examples and interactive demos to show of embedded graphics
+features.
 
 ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 
@@ -101,12 +103,12 @@ cd embedded-graphics
 cargo run -p embedded-graphics-simulator --example hello
 ```
 
-[simulator]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator
-[simulator examples]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator/examples
+[simulator]: https://github.com/jamwaffles/embedded-graphics/tree/master/simulator
+[simulator examples]: https://github.com/jamwaffles/embedded-graphics/tree/master/simulator/examples
 
 ## Crate features
 
-Add these to your `Cargo.toml` to turn on extra bits of functionality.
+Additional features can be enabled by adding the following features to your `Cargo.toml`.
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 support to enable conversions from `nalgebra::Vector2` to `Point` and `Size` 
@@ -118,7 +120,7 @@ calculation.
 
 Please read [the migration guide](https://github.com/jamwaffles/embedded-graphics/blob/master/embedded-graphics/MIGRATING-0.5-0.6.md).
 
-## Implementing `embedded_graphics` in a driver
+## Implementing `embedded_graphics` supprot for a driver
 
 To add support for embedded-graphics to a display driver, `DrawTarget` should be implemented.
 This allows all embedded-graphics objects to be rendered by the display. See the `DrawTarget` 
