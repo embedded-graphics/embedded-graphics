@@ -122,8 +122,9 @@
 //!
 //! ## Shapes and text
 //!
-//! The following example uses the [simulator](https://docs.rs/embedded-graphics-simulator/) to
-//! demonstrate some of the built in drawing functions:
+//! The following example draws some shapes and text to a [`MockDisplay`] in place of target
+//! hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
+//! debugging, development or if hardware is not available.
 //!
 //! ```rust,no_run
 //! use embedded_graphics::{
@@ -132,14 +133,13 @@
 //!     prelude::*,
 //!     primitives::{Circle, Rectangle, Triangle},
 //!     style::{PrimitiveStyle, TextStyle},
-//! };
-//! use embedded_graphics_simulator::{
-//!     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
+//!     mock_display::MockDisplay,
 //! };
 //!
 //! fn main() -> Result<(), std::convert::Infallible> {
-//!     // Create a new monochrome simulator display with 128x64 pixels.
-//!     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
+//!     // Create a new mock display
+//!     let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+//!     # display.set_allow_overdraw(true);
 //!
 //!     // Create styles used by the drawing operations.
 //!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
@@ -181,17 +181,12 @@
 //!         .into_styled(text_style)
 //!         .draw(&mut display)?;
 //!
-//!     let output_settings = OutputSettingsBuilder::new()
-//!         .theme(BinaryColorTheme::OledBlue)
-//!         .build();
-//!     Window::new("Hello World", &output_settings).show_static(&display);
-//!
 //!     Ok(())
 //! }
 //! ```
 //!
 //! This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator/examples) crate and
-//! can be run using `cargo run --example hello-world`.
+//! can be run using `cargo run --example hello-world`. It produces this output:
 //!
 //! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
 //!
