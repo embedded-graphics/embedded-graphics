@@ -186,8 +186,8 @@ impl Line {
         //
         // Check signs of r1 and r2.  If both point 1 and point 2 lie on same side of second line
         // segment, the line segments do not intersect.
-        let is_on_segments = !(r3 != 0 && r4 != 0 && same_signs(r3, r4))
-            && !(r1 != 0 && r2 != 0 && same_signs(r1, r2));
+        let is_on_segments = (r3 == 0 || r4 == 0 || !same_signs(r3, r4))
+            && (r1 == 0 || r2 == 0 || !same_signs(r1, r2));
 
         // If we got here, line segments intersect. Compute intersection point using method similar
         // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
