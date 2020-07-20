@@ -1,8 +1,8 @@
 //! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 //!
 //! The simulator can be used to test and debug
-//! [embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce snazzy examples
-//! for people to try drivers out without needing physical hardware to run on.
+//! [embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce examples and
+//! interactive demos to show of embedded graphics features.
 //!
 //! # Setup
 //!

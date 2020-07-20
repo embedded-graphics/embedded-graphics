@@ -3,14 +3,15 @@
 [![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/embedded-graphics-simulator.svg)](https://crates.io/crates/embedded-graphics-simulator)
 [![Docs.rs](https://docs.rs/embedded-graphics-simulator/badge.svg)](https://docs.rs/embedded-graphics-simulator)
+[![embedded-graphics on Matrix](https://img.shields.io/matrix/rust-embedded-graphics:matrix.org)](https://matrix.to/#/#rust-embedded-graphics:matrix.org)
 
 ## [Documentation](https://docs.rs/embedded-graphics-simulator)
 
 ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 
 The simulator can be used to test and debug
-[embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce snazzy examples
-for people to try drivers out without needing physical hardware to run on.
+[embedded-graphics](https://crates.io/crates/embedded-graphics) code, or produce examples and
+interactive demos to show of embedded graphics features.
 
 ## Setup
 

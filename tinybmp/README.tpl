@@ -3,6 +3,7 @@
 [![Build Status](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/embedded-graphics/tree/master)
 [![Crates.io](https://img.shields.io/crates/v/tinybmp.svg)](https://crates.io/crates/tinybmp)
 [![Docs.rs](https://docs.rs/tinybmp/badge.svg)](https://docs.rs/tinybmp)
+[![embedded-graphics on Matrix](https://img.shields.io/matrix/rust-embedded-graphics:matrix.org)](https://matrix.to/#/#rust-embedded-graphics:matrix.org)
 
 ## [Documentation](https://docs.rs/tinybmp)
 
