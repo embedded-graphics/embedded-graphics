@@ -1,5 +1,12 @@
-//! This crate aims to make drawing 2D graphics primitives super easy. It currently supports the
-//! following built in items:
+//! Embedded-graphics is a 2D graphics library that is focused on memory constrained embedded devices.
+//!
+//! A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
+//! `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating
+//! large chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel
+//! colors and positions are calculated on the fly, with the minimum of saved state. This allows the
+//! consuming application to use far less RAM at little to no performance penalty.
+//!
+//! It contains built in items that make it easy to draw 2D graphics primitives:
 //!
 //! * [Raw data images](./image/struct.ImageRaw.html)
 //! * [Primitives](./primitives/index.html)
@@ -14,7 +21,10 @@
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
 //! * [Text with multiple fonts](./fonts/index.html#types)
 //!
-//! Additional functionality provided by external crates:
+//! # Additional functions provided by external crates
+//!
+//! Embedded-graphics is designed to be extended by the application or other crates. Examples of
+//! this are adding support for different image formats or implementing custom fonts.
 //!
 //! * [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
 //! * [TGA images - `tinytga`](https://crates.io/crates/tinytga)
@@ -23,24 +33,22 @@
 //! * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
 //! * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 //!
-//! If you know of a crate that is not in this list, please [open an
-//! issue](https://github.com/jamwaffles/embedded-graphics/issues/new).
-//!
 //! Note that some of these crates may not support the latest version of embedded-graphics.
 //!
-//! You can also add your own objects by implementing [`Drawable`] on them. Additionally, all
-//! iterators over pixels (`Iterator<Item = Pixel<C>>`) have a default [`Drawable`] implementation
-//! already created.
+//! If you know of a crate that is not in this list, please [open an
+//! issue](https://github.com/jamwaffles/embedded-graphics/issues/new) to add it.
 //!
-//! A core goal of embedded-graphics is to draw graphics without using any buffers; the crate is
-//! `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating
-//! large chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel
-//! values and positions are calculated on the fly, with the minimum of saved state. This allows the
-//! consuming application to use far less RAM at little to no performance penalty.
+//! # Display drivers
 //!
-//! # Supported displays
+//! To support many different kinds of display, embedded-graphics doesn't include any drivers
+//! directly but provides the [`DrawTarget`] API that can be implemented by external crates. In
+//! addition to the drivers for real displays, the
+//! [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
+//! development.
 //!
-//! These are just some of the displays the community has added embedded_graphics support to. This
+//! ![Embedded graphics on real hardware](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/banner-photo.jpg)
+//!
+//! These are just some of the displays the community has added embedded-graphics support to. This
 //! list is taken from the [dependent crates
 //! list](https://crates.io/crates/embedded-graphics/reverse_dependencies) on crates.io so might be
 //! missing some unpublished entries. Please [open an
@@ -66,12 +74,14 @@
 //!
 //! # Simulator
 //!
-//! Embedded graphics comes with a [simulator]!
+//! Embedded graphics comes with a [simulator]! The simulator can be used to test and debug
+//! embedded graphics code, or produce examples and interactive demos to show of embedded graphics
+//! features.
 //!
 //! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/simulator-demo.png)
 //!
 //! Take a look at the [simulator examples] to see what
-//! embedded_graphics can do, and how it might look on a display. You can run the examples like
+//! embedded-graphics can do, and how it might look on a display. You can run the examples like
 //! this:
 //!
 //! ```bash
@@ -81,12 +91,12 @@
 //! cargo run -p embedded-graphics-simulator --example hello
 //! ```
 //!
-//! [simulator]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator
-//! [simulator examples]: https://github.com/jamwaffles/embedded-graphics/tree/c4f74c12dae9f0a0193fa48192f905a002bf8c9d/simulator/examples
+//! [simulator]: https://github.com/jamwaffles/embedded-graphics/tree/master/simulator
+//! [simulator examples]: https://github.com/jamwaffles/embedded-graphics/tree/master/simulator/examples
 //!
 //! # Crate features
 //!
-//! Add these to your `Cargo.toml` to turn on extra bits of functionality.
+//! Additional features can be enabled by adding the following features to your `Cargo.toml`.
 //!
 //! * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
 //! support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
@@ -94,10 +104,14 @@
 //! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 //! calculation.
 //!
-//! # Implementing `embedded_graphics` in a driver
+//! # Migrating from 0.5 to 0.6
 //!
-//! To add support for embedded_graphics to a display driver, [`DrawTarget`] should be implemented.
-//! This allows all embedded_graphics objects to be rendered by the display. See the [`DrawTarget`]
+//! Please read [the migration guide](https://github.com/jamwaffles/embedded-graphics/blob/master/embedded-graphics/MIGRATING-0.5-0.6.md).
+//!
+//! # Implementing `embedded_graphics` support for a display driver
+//!
+//! To add support for embedded-graphics to a display driver, [`DrawTarget`] must be implemented.
+//! This allows all embedded-graphics items to be rendered by the display. See the [`DrawTarget`]
 //! documentation for implementation details.
 //!
 //! # Examples
@@ -108,34 +122,78 @@
 //!
 //! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/jamwaffles/embedded-graphics/blob/master/doc/drawing-examples.md).
 //!
-//! ## Draw a circle and some text
+//! ## Shapes and text
 //!
-//! This example uses the [`Circle`] primitive and the [`Font6x8`] font to draw a filled circle and  some text over it on the screen.
+//! The following example draws some shapes and text to a [`MockDisplay`] in place of target
+//! hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
+//! debugging, development or if hardware is not available.
 //!
-//! ```rust
+//! ```rust,no_run
 //! use embedded_graphics::{
 //!     fonts::{Font6x8, Text},
-//! #   mock_display::MockDisplay,
-//!     pixelcolor::Rgb565,
+//!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::Circle,
+//!     primitives::{Circle, Rectangle, Triangle},
 //!     style::{PrimitiveStyle, TextStyle},
+//!     mock_display::MockDisplay,
 //! };
 //!
-//! # let mut display = MockDisplay::default();
-//! # display.set_allow_overdraw(true);
-//! # display.set_allow_out_of_bounds_drawing(true);
+//! fn main() -> Result<(), std::convert::Infallible> {
+//!     // Create a new mock display
+//!     let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+//!     # display.set_allow_overdraw(true);
 //!
-//! let c = Circle::new(Point::new(12, 12), 17).into_styled(PrimitiveStyle::with_fill(Rgb565::RED));
-//! let t = Text::new("Hello Rust!", Point::new(20, 16))
-//!     .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN));
+//!     // Create styles used by the drawing operations.
+//!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
+//!     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+//!     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
+//!     let text_style = TextStyle::new(Font6x8, BinaryColor::On);
 //!
-//! // The `display` variable contains a `DrawTarget` implementation provided by the display driver
-//! // crate. See the driver crate documentation for more information about how it is constructed.
-//! c.draw(&mut display)?;
-//! t.draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
+//!     let yoffset = 10;
+//!
+//!     // Draw a 3px wide outline around the display.
+//!     let display_size = display.size() - Size::new(1, 1);
+//!     Rectangle::new(Point::zero(), display_size)
+//!         .into_styled(thick_stroke)
+//!         .draw(&mut display)?;
+//!
+//!     // Draw a triangle.
+//!     Triangle::new(
+//!         Point::new(16, 16 + yoffset),
+//!         Point::new(16 + 16, 16 + yoffset),
+//!         Point::new(16 + 8, yoffset),
+//!     )
+//!     .into_styled(thin_stroke)
+//!     .draw(&mut display)?;
+//!
+//!     // Draw a filled square
+//!     Rectangle::new(Point::new(52, yoffset), Size::new(16, 16))
+//!         .into_styled(fill)
+//!         .draw(&mut display)?;
+//!
+//!     // Draw a circle with a 3px wide stroke.
+//!     Circle::new(Point::new(88, yoffset), 17)
+//!         .into_styled(thick_stroke)
+//!         .draw(&mut display)?;
+//!
+//!     // Draw centered text.
+//!     let text = "embedded-graphics";
+//!     let width = text.len() as i32 * 6;
+//!     Text::new(text, Point::new(64 - width / 2, 40))
+//!         .into_styled(text_style)
+//!         .draw(&mut display)?;
+//!
+//!     Ok(())
+//! }
 //! ```
+//!
+//! This example is also included in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator/examples) crate and
+//! can be run using `cargo run --example hello-world`. It produces this output:
+//!
+//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/jamwaffles/embedded-graphics/master/assets/hello-world-simulator.png)
+//!
+//! Additional examples can be found in the [simulator](https://github.com/jamwaffles/embedded-graphics/tree/master/simulator) crate.
+//!
 //! ## Chaining
 //!
 //! Items can be chained to build more complex graphics objects.

@@ -2,6 +2,8 @@
 
 set -xe
 
+CRATES=("embedded-graphics" "simulator" "tinybmp" "tinytga")
+
 cargo clean --doc
 
 cargo fmt --all -- --check
@@ -21,8 +23,14 @@ git diff --quiet doc/ || (
     echo "If any images have changed, run ./generate_examples_montage.sh to update the collage image too"
 )
 
+# Generate and check readmes. If generated readme has changed from what's committed, this will fail.
+for crate in "${CRATES[@]}"; do
+    ./readme.sh --check "$crate"
+done
+
 cargo doc --all-features
-linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics/index.html
-linkchecker --check-extern --ignore-url=^http target/doc/tinybmp/index.html
-linkchecker --check-extern --ignore-url=^http target/doc/tinytga/index.html
-linkchecker --check-extern --ignore-url=^http target/doc/embedded_graphics_simulator/index.html
+linkchecker --check-extern --ignore-url=^http \
+    target/doc/embedded_graphics/index.html \
+    target/doc/tinybmp/index.html \
+    target/doc/tinytga/index.html \
+    target/doc/embedded_graphics_simulator/index.html
