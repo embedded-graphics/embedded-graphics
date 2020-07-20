@@ -38,7 +38,7 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
     display.clear(Rgb888::BLACK).unwrap();
 
     let mid = Point::new(100, 100);
-    let start = Point::new(50, 100);
+    let start = Point::new(50, 130);
 
     let fixed = Line::new(start, mid);
 
