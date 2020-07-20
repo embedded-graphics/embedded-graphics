@@ -109,7 +109,7 @@ impl Arc {
         Circle::new(self.top_left, self.diameter)
     }
 
-    /// Return the center point of the arc
+    /// Return the center point of the arc.
     pub fn center(&self) -> Point {
         self.bounding_box().center()
     }
