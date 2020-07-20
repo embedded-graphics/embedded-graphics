@@ -1,10 +1,5 @@
 # Development setup
 
-## Minimum supported Rust version
-
-The minimum supported Rust version for embedded-graphics is `1.40.0` or greater.
-Ensure you have the latest stable version of Rust installed, preferably through <https://rustup.rs>.
-
 ## Ubuntu/Linux Mint
 
 ```bash
