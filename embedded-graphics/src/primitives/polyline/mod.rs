@@ -83,7 +83,7 @@ impl<'a> Primitive for Polyline<'a> {
 impl<'a> Dimensions for Polyline<'a> {
     fn bounding_box(&self) -> Rectangle {
         match self.vertices {
-            [] => Rectangle::new(Point::zero(), Size::zero()),
+            [] => Rectangle::zero(),
             [v] => Rectangle::new(*v, Size::zero()),
             vertices => {
                 let top_left = vertices
@@ -187,10 +187,7 @@ mod tests {
 
     #[test]
     fn special_case_dimensions() {
-        assert_eq!(
-            Polyline::new(&[]).bounding_box(),
-            Rectangle::new(Point::zero(), Size::zero())
-        );
+        assert_eq!(Polyline::new(&[]).bounding_box(), Rectangle::zero(),);
 
         assert_eq!(
             Polyline::new(&[Point::new(15, 17)]).bounding_box(),

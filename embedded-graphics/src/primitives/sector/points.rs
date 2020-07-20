@@ -1,10 +1,6 @@
 use crate::{
     geometry::Point,
-    primitives::{
-        arc::PlaneSectorIterator,
-        circle::{self, DistanceIterator},
-        sector::Sector,
-    },
+    primitives::{arc::PlaneSectorIterator, circle::DistanceIterator, sector::Sector},
 };
 
 /// Iterator over all points inside the sector.
@@ -16,19 +12,17 @@ pub struct Points {
 
 impl Points {
     pub(in crate::primitives) fn new(sector: &Sector) -> Self {
-        let threshold = circle::diameter_to_threshold(sector.diameter);
+        let circle = sector.to_circle();
+        let points = PlaneSectorIterator::new(
+            sector,
+            sector.center(),
+            sector.angle_start,
+            sector.angle_sweep,
+        );
 
         Self {
-            iter: DistanceIterator::new(
-                sector.center_2x(),
-                PlaneSectorIterator::new(
-                    sector,
-                    sector.center(),
-                    sector.angle_start,
-                    sector.angle_sweep,
-                ),
-            ),
-            threshold,
+            iter: circle.distances(points),
+            threshold: circle.threshold(),
         }
     }
 }

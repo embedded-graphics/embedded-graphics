@@ -71,7 +71,7 @@ impl Circle {
 
     /// Create a new circle centered around a given point with a specific diameter
     pub fn with_center(center: Point, diameter: u32) -> Self {
-        let top_left = center - Size::new(diameter, diameter).center_offset();
+        let top_left = center - Size::new_equal(diameter).center_offset();
 
         Circle { top_left, diameter }
     }
@@ -90,6 +90,19 @@ impl Circle {
         let radius = self.diameter.saturating_sub(1);
 
         self.top_left * 2 + Size::new(radius, radius)
+    }
+
+    /// Returns the threshold for this circles diameter.
+    pub(in crate::primitives) fn threshold(&self) -> u32 {
+        diameter_to_threshold(self.diameter)
+    }
+
+    /// Returns the squared distance for every point returned by the iterator.
+    pub(in crate::primitives) fn distances<I>(&self, points: I) -> DistanceIterator<I>
+    where
+        I: Iterator<Item = Point>,
+    {
+        DistanceIterator::new(self.center_2x(), points)
     }
 }
 
@@ -118,15 +131,13 @@ impl ContainsPoint for Circle {
         let delta = self.center_2x() - point * 2;
         let distance = delta.length_squared() as u32;
 
-        let threshold = diameter_to_threshold(self.diameter);
-
-        distance < threshold
+        distance < self.threshold()
     }
 }
 
 impl Dimensions for Circle {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter))
+        Rectangle::new(self.top_left, Size::new_equal(self.diameter))
     }
 }
 

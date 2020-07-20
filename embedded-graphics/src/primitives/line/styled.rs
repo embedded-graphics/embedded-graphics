@@ -5,6 +5,7 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::line::{thick_points::ThickPoints, Line},
     style::{PrimitiveStyle, Styled},
+    SaturatingCast,
 };
 
 /// Styled line iterator.
@@ -26,10 +27,11 @@ where
 
         // Note: stroke color will be None if stroke width is 0
         let stroke_color = style.effective_stroke_color();
+        let stroke_width = style.stroke_width.saturating_cast();
 
         Self {
             stroke_color,
-            line_iter: ThickPoints::new(&primitive, style.stroke_width_i32()),
+            line_iter: ThickPoints::new(&primitive, stroke_width),
         }
     }
 }

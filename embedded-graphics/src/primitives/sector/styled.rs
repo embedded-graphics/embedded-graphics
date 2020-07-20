@@ -1,14 +1,12 @@
 use crate::{
     drawable::{Drawable, Pixel},
-    geometry::Point,
     pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        arc::PlaneSectorIterator, circle, circle::DistanceIterator, line::ThickPoints, Sector,
-        Styled,
+        arc::PlaneSectorIterator, circle::DistanceIterator, line::ThickPoints, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
-    DrawTarget,
+    DrawTarget, SaturatingCast,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -46,34 +44,30 @@ where
         let stroke_area = styled.stroke_area();
         let fill_area = styled.fill_area();
 
-        let inner_threshold = circle::diameter_to_threshold(fill_area.diameter);
-        let outer_threshold = circle::diameter_to_threshold(stroke_area.diameter);
-
         let line_a = stroke_area.line_from_angle(styled.primitive.angle_start);
         let line_b = stroke_area.line_from_angle(styled.primitive.angle_end());
 
-        let line_a_iter = ThickPoints::new(&line_a, styled.style.stroke_width_i32());
-        let line_b_iter = ThickPoints::new(&line_b, styled.style.stroke_width_i32());
+        let line_a_iter = ThickPoints::new(&line_a, styled.style.stroke_width.saturating_cast());
+        let line_b_iter = ThickPoints::new(&line_b, styled.style.stroke_width.saturating_cast());
 
-        let iter = if !styled.style.is_transparent() {
-            DistanceIterator::new(
-                stroke_area.center_2x(),
-                PlaneSectorIterator::new(
-                    &stroke_area,
-                    stroke_area.center(),
-                    stroke_area.angle_start,
-                    stroke_area.angle_sweep,
-                ),
+        let points = if !styled.style.is_transparent() {
+            PlaneSectorIterator::new(
+                &stroke_area,
+                stroke_area.center(),
+                stroke_area.angle_start,
+                stroke_area.angle_sweep,
             )
         } else {
-            DistanceIterator::new(Point::zero(), PlaneSectorIterator::empty())
+            PlaneSectorIterator::empty()
         };
 
+        let stroke_area_circle = stroke_area.to_circle();
+
         Self {
-            iter,
-            outer_threshold,
+            iter: stroke_area_circle.distances(points),
+            outer_threshold: stroke_area_circle.threshold(),
             outer_color: styled.style.stroke_color,
-            inner_threshold,
+            inner_threshold: fill_area.to_circle().threshold(),
             inner_color: styled.style.fill_color,
             line_a_iter,
             line_b_iter,
@@ -157,7 +151,7 @@ where
 mod tests {
     use super::*;
     use crate::{
-        geometry::AngleUnit,
+        geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::Primitive,

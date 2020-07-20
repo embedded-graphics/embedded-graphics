@@ -2,8 +2,8 @@ use crate::{
     geometry::Point,
     primitives::{
         arc::{Arc, PlaneSectorIterator},
-        circle,
         circle::DistanceIterator,
+        OffsetOutline,
     },
 };
 
@@ -18,21 +18,15 @@ pub struct Points {
 
 impl Points {
     pub(in crate::primitives) fn new(arc: &Arc) -> Self {
-        let outer_diameter = arc.diameter;
-        let inner_diameter = outer_diameter.saturating_sub(2);
+        let outer_circle = arc.to_circle();
+        let inner_circle = outer_circle.offset(-1);
 
-        let inner_threshold = circle::diameter_to_threshold(inner_diameter);
-        let outer_threshold = circle::diameter_to_threshold(outer_diameter);
-
-        let iter = DistanceIterator::new(
-            arc.center_2x(),
-            PlaneSectorIterator::new(arc, arc.center(), arc.angle_start, arc.angle_sweep),
-        );
+        let points = PlaneSectorIterator::new(arc, arc.center(), arc.angle_start, arc.angle_sweep);
 
         Self {
-            iter,
-            outer_threshold,
-            inner_threshold,
+            iter: outer_circle.distances(points),
+            outer_threshold: outer_circle.threshold(),
+            inner_threshold: inner_circle.threshold(),
         }
     }
 }

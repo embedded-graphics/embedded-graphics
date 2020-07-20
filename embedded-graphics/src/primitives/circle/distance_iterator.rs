@@ -3,7 +3,7 @@ use crate::geometry::Point;
 /// Iterator that returns the squared distance to the center for all points in the bounding box.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct DistanceIterator<I> {
-    center: Point,
+    center_2x: Point,
     points: I,
 }
 
@@ -11,8 +11,8 @@ impl<I> DistanceIterator<I>
 where
     I: Iterator<Item = Point>,
 {
-    pub(in crate::primitives) fn new(center: Point, points: I) -> Self {
-        Self { center, points }
+    pub(super) fn new(center_2x: Point, points: I) -> Self {
+        Self { center_2x, points }
     }
 }
 
@@ -24,7 +24,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         self.points.next().map(|p| {
-            let delta = self.center - p * 2;
+            let delta = self.center_2x - p * 2;
             let distance = delta.length_squared() as u32;
 
             (p, distance)
@@ -55,10 +55,7 @@ mod tests {
 
     #[test]
     fn distance_iter_empty() {
-        let mut iter = DistanceIterator::new(
-            Point::zero(),
-            Rectangle::new(Point::zero(), Size::zero()).points(),
-        );
+        let mut iter = DistanceIterator::new(Point::zero(), Rectangle::zero().points());
         assert_eq!(iter.next(), None);
     }
 }

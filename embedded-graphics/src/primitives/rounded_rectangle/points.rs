@@ -1,5 +1,5 @@
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     primitives::{
         rectangle::{self, Rectangle},
         rounded_rectangle::{
@@ -55,10 +55,10 @@ impl Points {
             top_right_iter: ellipse_quadrant::Points::empty(),
             bottom_right_iter: ellipse_quadrant::Points::empty(),
             bottom_left_iter: ellipse_quadrant::Points::empty(),
-            top_left_corner: Rectangle::new(Point::zero(), Size::zero()),
-            top_right_corner: Rectangle::new(Point::zero(), Size::zero()),
-            bottom_right_corner: Rectangle::new(Point::zero(), Size::zero()),
-            bottom_left_corner: Rectangle::new(Point::zero(), Size::zero()),
+            top_left_corner: Rectangle::zero(),
+            top_right_corner: Rectangle::zero(),
+            bottom_right_corner: Rectangle::zero(),
+            bottom_left_corner: Rectangle::zero(),
         }
     }
 }
@@ -92,7 +92,9 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{pixel_iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle};
+    use crate::{
+        geometry::Size, pixel_iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle,
+    };
 
     #[test]
     fn points_equals_filled() {

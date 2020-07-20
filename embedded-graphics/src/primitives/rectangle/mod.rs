@@ -108,6 +108,11 @@ impl Rectangle {
         }
     }
 
+    /// Returns a zero sized rectangle.
+    pub(crate) fn zero() -> Rectangle {
+        Rectangle::new(Point::zero(), Size::zero())
+    }
+
     /// Returns the center of this rectangle.
     ///
     /// For rectangles with even width and/or height the returned value is rounded down
@@ -218,7 +223,7 @@ impl Rectangle {
         }
 
         // No overlap present
-        Rectangle::new(Point::zero(), Size::zero())
+        Rectangle::zero()
     }
 }
 

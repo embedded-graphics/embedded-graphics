@@ -1,5 +1,4 @@
 use crate::pixelcolor::PixelColor;
-use core::convert::TryFrom;
 
 /// Style properties for primitives.
 ///
@@ -70,14 +69,6 @@ where
             fill_color: Some(fill_color),
             ..PrimitiveStyle::default()
         }
-    }
-
-    /// Returns the stroke width as an `i32`.
-    ///
-    /// If the stroke width is too large to fit into an `i32` the maximum value
-    /// for an `i32` is returned instead.
-    pub(crate) fn stroke_width_i32(&self) -> i32 {
-        i32::try_from(self.stroke_width).unwrap_or(i32::max_value())
     }
 
     /// Returns the stroke width on the outside of the shape.
@@ -303,22 +294,6 @@ mod tests {
         assert_eq!(style.fill_color, None);
         assert_eq!(style.stroke_color, Some(Rgb888::GREEN));
         assert_eq!(style.stroke_width, 123);
-    }
-
-    #[test]
-    fn stroke_width_i32() {
-        let mut style: PrimitiveStyle<BinaryColor> = PrimitiveStyle::default();
-        style.stroke_width = 1;
-        assert_eq!(style.stroke_width_i32(), 1);
-
-        style.stroke_width = 0x7FFFFFFF;
-        assert_eq!(style.stroke_width_i32(), 0x7FFFFFFF);
-
-        style.stroke_width = 0x80000000;
-        assert_eq!(style.stroke_width_i32(), 0x7FFFFFFF);
-
-        style.stroke_width = 0xFFFFFFFF;
-        assert_eq!(style.stroke_width_i32(), 0x7FFFFFFF);
     }
 
     #[test]

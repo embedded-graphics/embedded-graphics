@@ -6,7 +6,7 @@ mod styled;
 use crate::{
     geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
     primitives::{
-        arc::PlaneSector, circle, line::Line, ContainsPoint, OffsetOutline, Primitive, Rectangle,
+        arc::PlaneSector, line::Line, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle,
     },
     transform::Transform,
 };
@@ -101,20 +101,26 @@ impl Sector {
         }
     }
 
+    /// Creates an arc based on a circle.
+    ///
+    /// The resulting sector will match the `top_left` and `diameter` of the base circle.
+    pub fn from_circle(circle: Circle, angle_start: Angle, angle_sweep: Angle) -> Self {
+        Sector {
+            top_left: circle.top_left,
+            diameter: circle.diameter,
+            angle_start,
+            angle_sweep,
+        }
+    }
+
+    /// Returns a circle with the same `top_left` and `diameter` as this sector.
+    pub fn to_circle(&self) -> Circle {
+        Circle::new(self.top_left, self.diameter)
+    }
+
     /// Return the center point of the sector
     pub fn center(&self) -> Point {
         self.bounding_box().center()
-    }
-
-    /// Return the center point of the sector scaled by a factor of 2
-    ///
-    /// This method is used to accurately calculate the outside edge of the sector.
-    /// The result is not equivalent to `self.center() * 2` because of rounding.
-    fn center_2x(&self) -> Point {
-        // The radius scaled up by a factor of 2 is equal to the diameter
-        let radius = self.diameter.saturating_sub(1);
-
-        self.top_left * 2 + Size::new(radius, radius)
     }
 
     /// Return the end angle of the sector
@@ -138,13 +144,9 @@ impl Sector {
 
 impl OffsetOutline for Sector {
     fn offset(&self, offset: i32) -> Self {
-        let diameter = if offset >= 0 {
-            self.diameter.saturating_add(2 * offset as u32)
-        } else {
-            self.diameter.saturating_sub(2 * (-offset) as u32)
-        };
+        let circle = self.to_circle().offset(offset);
 
-        Self::with_center(self.center(), diameter, self.angle_start, self.angle_sweep)
+        Self::from_circle(circle, self.angle_start, self.angle_sweep)
     }
 }
 
@@ -158,16 +160,11 @@ impl Primitive for Sector {
 
 impl ContainsPoint for Sector {
     fn contains(&self, point: Point) -> bool {
-        let delta = self.center_2x() - point * 2;
-        let distance = delta.length_squared() as u32;
-
-        let threshold = circle::diameter_to_threshold(self.diameter);
-
-        if distance >= threshold {
-            return false;
+        if self.to_circle().contains(point) {
+            PlaneSector::new(self.center(), self.angle_start, self.angle_sweep).contains(point)
+        } else {
+            false
         }
-
-        PlaneSector::new(self.center(), self.angle_start, self.angle_sweep).contains(point)
     }
 }
 

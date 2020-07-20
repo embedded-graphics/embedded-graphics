@@ -30,7 +30,7 @@ impl Points {
 
     pub(in crate::primitives) fn empty() -> Self {
         Self {
-            iter: Rectangle::new(Point::zero(), Size::zero()).points(),
+            iter: Rectangle::zero().points(),
             center_2x: Point::zero(),
             size_sq: Size::zero(),
             threshold: 0,
