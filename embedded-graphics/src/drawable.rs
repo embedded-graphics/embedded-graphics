@@ -24,10 +24,12 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///     text: &'a str,
 /// }
 ///
-/// impl<C> Drawable<C> for Button<'_, C>
+/// impl<C> Drawable for Button<'_, C>
 /// where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
+///     type Color = C;
+///
 ///     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
 ///     where
 ///         D: DrawTarget<Color = C>,
@@ -59,14 +61,14 @@ use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
 ///
 /// [`DrawTarget`]: ./trait.DrawTarget.html
 /// [`draw_iter`]: ./trait.DrawTarget.html#tymethod.draw_iter
-pub trait Drawable<C>
-where
-    C: PixelColor,
-{
+pub trait Drawable {
+    /// The pixel color type.
+    type Color: PixelColor;
+
     /// Draw the graphics object using the supplied DrawTarget.
     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
     where
-        D: DrawTarget<Color = C>;
+        D: DrawTarget<Color = Self::Color>;
 }
 
 /// A single pixel.
@@ -106,10 +108,12 @@ pub struct Pixel<C>(pub Point, pub C)
 where
     C: PixelColor;
 
-impl<C> Drawable<C> for Pixel<C>
+impl<C> Drawable for Pixel<C>
 where
     C: PixelColor,
 {
+    type Color = C;
+
     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,

@@ -191,12 +191,14 @@ impl<I, C> Transform for Image<'_, I, C> {
     }
 }
 
-impl<'a, I, C> Drawable<C> for Image<'a, I, C>
+impl<'a, I, C> Drawable for Image<'a, I, C>
 where
     &'a I: IntoPixelIter<C>,
     I: ImageDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
+    type Color = C;
+
     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,

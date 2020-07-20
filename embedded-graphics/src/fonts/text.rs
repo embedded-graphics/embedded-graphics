@@ -65,11 +65,13 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<C, F> Drawable<C> for Styled<Text<'_>, TextStyle<C, F>>
+impl<C, F> Drawable for Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
     F: Font + Copy,
 {
+    type Color = C;
+
     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,

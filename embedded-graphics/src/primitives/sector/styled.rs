@@ -139,10 +139,12 @@ where
     }
 }
 
-impl<C> Drawable<C> for Styled<Sector, PrimitiveStyle<C>>
+impl<C> Drawable for Styled<Sector, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
+    type Color = C;
+
     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,
