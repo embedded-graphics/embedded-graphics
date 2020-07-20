@@ -113,11 +113,12 @@ mod tests {
         pixelcolor::BinaryColor,
         primitives::{Circle, Primitive},
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        SaturatingCast,
     };
 
     fn test_circles(style: PrimitiveStyle<BinaryColor>) {
         for diameter in 0..50 {
-            let top_left = Point::new_equal(style.stroke_width_i32());
+            let top_left = Point::new_equal(style.stroke_width.saturating_cast());
 
             let mut expected = MockDisplay::new();
             Circle::new(top_left, diameter)

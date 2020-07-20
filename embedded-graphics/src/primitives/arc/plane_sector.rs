@@ -1,5 +1,5 @@
 use crate::{
-    geometry::{angle_consts::*, Angle, Dimensions, Point, Size},
+    geometry::{angle_consts::*, Angle, Dimensions, Point},
     primitives::{
         arc::{linear_equation::LineSide, LinearEquation},
         rectangle, Primitive, Rectangle,
@@ -88,7 +88,7 @@ impl PlaneSectorIterator {
     pub fn empty() -> Self {
         Self {
             plane_sector: PlaneSector::empty(),
-            points: Rectangle::new(Point::zero(), Size::zero()).points(),
+            points: Rectangle::zero().points(),
         }
     }
 }

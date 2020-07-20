@@ -1,10 +1,10 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
+    geometry::Dimensions,
     pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::circle::{diameter_to_threshold, distance_iterator::DistanceIterator, Circle},
+    primitives::circle::{distance_iterator::DistanceIterator, Circle},
     primitives::rectangle::{self, Rectangle},
     primitives::Primitive,
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
@@ -31,24 +31,19 @@ where
 {
     pub(in crate::primitives) fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
         let stroke_area = styled.stroke_area();
+        let fill_area = styled.fill_area();
 
-        let inner_threshold = diameter_to_threshold(styled.fill_area().diameter);
-        let outer_threshold = diameter_to_threshold(stroke_area.diameter);
-
-        let iter = if !styled.style.is_transparent() {
-            DistanceIterator::new(stroke_area.center_2x(), stroke_area.bounding_box().points())
+        let points = if !styled.style.is_transparent() {
+            stroke_area.bounding_box().points()
         } else {
-            DistanceIterator::new(
-                Point::zero(),
-                Rectangle::new(Point::zero(), Size::zero()).points(),
-            )
+            Rectangle::zero().points()
         };
 
         Self {
-            iter,
-            outer_threshold,
+            iter: stroke_area.distances(points),
+            outer_threshold: stroke_area.threshold(),
             outer_color: styled.style.stroke_color,
-            inner_threshold,
+            inner_threshold: fill_area.threshold(),
             inner_color: styled.style.fill_color,
         }
     }
@@ -111,7 +106,7 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable,
-        geometry::Dimensions,
+        geometry::{Dimensions, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::Primitive,

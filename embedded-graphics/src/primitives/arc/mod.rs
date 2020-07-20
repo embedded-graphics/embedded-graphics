@@ -7,7 +7,7 @@ mod styled;
 
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
-    primitives::{Primitive, Rectangle},
+    primitives::{Circle, Primitive, Rectangle},
     transform::Transform,
 };
 pub(in crate::primitives) use linear_equation::LinearEquation;
@@ -85,42 +85,33 @@ impl Arc {
         angle_start: Angle,
         angle_sweep: Angle,
     ) -> Self {
-        let top_left = center - Size::new_equal(diameter).center_offset();
+        Self::from_circle(
+            Circle::with_center(center, diameter),
+            angle_start,
+            angle_sweep,
+        )
+    }
 
-        Arc {
-            top_left,
-            diameter,
+    /// Creates an arc based on a circle.
+    ///
+    /// The resulting arc will match the `top_left` and `diameter` of the base circle.
+    pub fn from_circle(circle: Circle, angle_start: Angle, angle_sweep: Angle) -> Self {
+        Self {
+            top_left: circle.top_left,
+            diameter: circle.diameter,
             angle_start,
             angle_sweep,
         }
     }
 
+    /// Returns a circle with the same `top_left` and `diameter` as this arc.
+    pub fn to_circle(&self) -> Circle {
+        Circle::new(self.top_left, self.diameter)
+    }
+
     /// Return the center point of the arc
     pub fn center(&self) -> Point {
         self.bounding_box().center()
-    }
-
-    /// Return the center point of the arc scaled by a factor of 2
-    ///
-    /// This method is used to accurately calculate the outside edge of the arc.
-    /// The result is not equivalent to `self.center() * 2` because of rounding.
-    fn center_2x(&self) -> Point {
-        // The radius scaled up by a factor of 2 is equal to the diameter
-        let radius = self.diameter.saturating_sub(1);
-
-        self.top_left * 2 + Size::new(radius, radius)
-    }
-
-    pub(crate) fn expand(&self, offset: u32) -> Self {
-        let diameter = self.diameter.saturating_add(2 * offset);
-
-        Self::with_center(self.center(), diameter, self.angle_start, self.angle_sweep)
-    }
-
-    pub(crate) fn shrink(&self, offset: u32) -> Self {
-        let diameter = self.diameter.saturating_sub(2 * offset);
-
-        Self::with_center(self.center(), diameter, self.angle_start, self.angle_sweep)
     }
 }
 

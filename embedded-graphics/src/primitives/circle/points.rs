@@ -1,6 +1,6 @@
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::circle::{diameter_to_threshold, distance_iterator::DistanceIterator, Circle},
+    primitives::circle::{distance_iterator::DistanceIterator, Circle},
     primitives::rectangle,
     primitives::Primitive,
 };
@@ -14,11 +14,9 @@ pub struct Points {
 
 impl Points {
     pub(in crate::primitives) fn new(circle: &Circle) -> Self {
-        let threshold = diameter_to_threshold(circle.diameter);
-
         Self {
-            iter: DistanceIterator::new(circle.center_2x(), circle.bounding_box().points()),
-            threshold,
+            iter: circle.distances(circle.bounding_box().points()),
+            threshold: circle.threshold(),
         }
     }
 }

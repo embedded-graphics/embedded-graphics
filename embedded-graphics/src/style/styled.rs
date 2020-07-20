@@ -5,8 +5,8 @@ use crate::{
     primitives::{OffsetOutline, Rectangle},
     style::PrimitiveStyle,
     transform::Transform,
+    SaturatingCast,
 };
-use core::convert::TryFrom;
 
 /// Styled.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -74,15 +74,15 @@ where
 
     fn stroke_area(&self) -> Self::Primitive {
         // saturate offset at i32::max_value() if stroke width is to large
-        let offset = i32::try_from(self.style.outside_stroke_width()).unwrap_or(i32::max_value());
+        let offset = self.style.outside_stroke_width().saturating_cast();
 
         self.primitive.offset(offset)
     }
 
     fn fill_area(&self) -> Self::Primitive {
-        // saturate offset at i32::max_value() if stroke width is to large
-        let offset = i32::try_from(self.style.inside_stroke_width()).unwrap_or(i32::max_value());
+        // saturate offset at i32::min_value() if stroke width is to large
+        let offset = self.style.inside_stroke_width().saturating_cast_neg();
 
-        self.primitive.offset(-offset)
+        self.primitive.offset(offset)
     }
 }

@@ -4,12 +4,11 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         arc::{plane_sector::PlaneSectorIterator, Arc},
-        circle,
         circle::DistanceIterator,
-        Styled,
+        OffsetOutline, Styled,
     },
     style::PrimitiveStyle,
-    DrawTarget,
+    DrawTarget, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the arc border
@@ -33,29 +32,26 @@ where
     fn new(styled: &Styled<Arc, PrimitiveStyle<C>>) -> Self {
         let Styled { primitive, style } = styled;
 
-        let stroke_area = primitive.expand(style.outside_stroke_width());
-        let fill_area = primitive.shrink(style.inside_stroke_width());
+        let circle = primitive.to_circle();
 
-        let inner_threshold = circle::diameter_to_threshold(fill_area.diameter);
-        let outer_threshold = circle::diameter_to_threshold(stroke_area.diameter);
+        let outside_edge = circle.offset(style.outside_stroke_width().saturating_cast());
+        let inside_edge = circle.offset(style.inside_stroke_width().saturating_cast_neg());
 
         let points = if !styled.style.is_transparent() {
             PlaneSectorIterator::new(
-                &stroke_area,
-                stroke_area.center(),
-                stroke_area.angle_start,
-                stroke_area.angle_sweep,
+                &outside_edge,
+                primitive.center(),
+                primitive.angle_start,
+                primitive.angle_sweep,
             )
         } else {
             PlaneSectorIterator::empty()
         };
 
-        let iter = DistanceIterator::new(stroke_area.center_2x(), points);
-
         Self {
-            iter,
-            outer_threshold,
-            inner_threshold,
+            iter: outside_edge.distances(points),
+            outer_threshold: outside_edge.threshold(),
+            inner_threshold: inside_edge.threshold(),
             stroke_color: styled.style.stroke_color,
         }
     }
