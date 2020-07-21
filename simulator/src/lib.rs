@@ -6,7 +6,7 @@
 //!
 //! # Setup
 //!
-//! The simulator uses SDL and its development libraries which must be installed to build and run
+//! The simulator uses SDL2 and its development libraries which must be installed to build and run
 //! it.
 //!
 //! ## Linux (`apt`)
@@ -23,8 +23,10 @@
 //!
 //! ## Windows
 //!
-//! The Windows install process is a bit more involved, but it _does_ work. See [the SDL2
-//! wiki](https://wiki.libsdl.org/Installation#WinRT.2FWindows_8.2FWinPhone) for instructions.
+//! The Windows install process is a bit more involved, but it _does_ work. See [the Rust-SDL2
+//! crate's README](https://github.com/Rust-SDL2/rust-sdl2) for instructions. There are multiple
+//! ways to get it working, but probably the simplest method is copying the binaries as shown
+//! [here](https://github.com/Rust-SDL2/rust-sdl2#windows-msvc).
 //!
 //! # Examples
 //!
