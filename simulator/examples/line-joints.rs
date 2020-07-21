@@ -53,191 +53,154 @@ fn draw(
 
     let linestyle = PrimitiveStyle::with_stroke(Rgb888::GREEN, width);
 
-    // Miter length limit is the line width (but squared to avoid sqrt() costs)
+    // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
     let miter_limit = (width * 2).pow(2);
 
-    // Left and right edges of thick second segment
-    let (ext_l, ext_r) = l.extents(width as i32);
     // Left and right edges of thick first segment
     let (fixed_ext_l, fixed_ext_r) = fixed.extents(width as i32);
+    // Left and right edges of thick second segment
+    let (ext_l, ext_r) = l.extents(width as i32);
 
     if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
         ext_l.intersection(&fixed_ext_l),
         ext_r.intersection(&fixed_ext_r),
     ) {
-        let (is_degenerate_l, is_degenerate_r) = {
-            let first_segment_start_cap = Line::new(fixed_ext_l.start, fixed_ext_r.start);
-            let second_segment_end_cap = Line::new(ext_l.end, ext_r.end);
+        let (outer_side, is_self_intersecting) = {
+            let first_segment_start_edge = Line::new(fixed_ext_l.start, fixed_ext_r.start);
+            let second_segment_end_edge = Line::new(ext_l.end, ext_r.end);
 
-            let is_degenerate_l = first_segment_start_cap
+            let self_intersection_l = first_segment_start_edge
                 .intersection(&ext_l)
                 .filter(|(_, on_both)| *on_both)
-                .is_some()
-                || second_segment_end_cap
-                    .intersection(&fixed_ext_l)
-                    .filter(|(_, on_both)| *on_both)
-                    .is_some();
+                .or_else(|| {
+                    second_segment_end_edge
+                        .intersection(&fixed_ext_l)
+                        .filter(|(_, on_both)| *on_both)
+                });
 
-            let is_degenerate_r = first_segment_start_cap
+            let self_intersection_r = first_segment_start_edge
                 .intersection(&ext_r)
                 .filter(|(_, on_both)| *on_both)
-                .is_some()
-                || second_segment_end_cap
-                    .intersection(&fixed_ext_r)
-                    .filter(|(_, on_both)| *on_both)
-                    .is_some();
+                .or_else(|| {
+                    second_segment_end_edge
+                        .intersection(&fixed_ext_r)
+                        .filter(|(_, on_both)| *on_both)
+                });
 
-            first_segment_start_cap
-                .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
-                .draw(display)
-                .unwrap();
+            let (self_intersection_l, self_intersection_r) =
+                (self_intersection_l.is_some(), self_intersection_r.is_some());
 
-            ext_r
-                .into_styled(PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1))
-                .draw(display)
-                .unwrap();
+            // The side that will have the miter/bevel on it, relative to first line
+            let outer_side = if l_on_lines || self_intersection_l {
+                Side::Right
+            } else if r_on_lines || self_intersection_r {
+                Side::Left
+            } else {
+                // Default to some randomly chosen side when lines are colinear
+                Side::Right
+            };
 
-            ext_l
-                .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
-                .draw(display)?;
-
-            (is_degenerate_l, is_degenerate_r)
+            (outer_side, self_intersection_l || self_intersection_r)
         };
 
-        let is_degenerate = is_degenerate_l || is_degenerate_r;
-
-        // The side that will have the miter/bevel on it
-        let outer_side = if l_on_lines || is_degenerate_l {
-            Side::Right
-        } else if r_on_lines || is_degenerate_r {
-            Side::Left
-        } else {
-            Side::Right
-        };
-
-        let (inside_intersection, outside_intersection) = match outer_side {
-            Side::Right => (l_intersection, r_intersection),
-            Side::Left => (r_intersection, l_intersection),
+        let (
+            outside_intersection,
+            inside_intersection,
+            ext_outside,
+            ext_inside,
+            fixed_outside,
+            fixed_inside,
+        ) = match outer_side {
+            Side::Right => (
+                r_intersection,
+                l_intersection,
+                ext_r,
+                ext_l,
+                fixed_ext_r,
+                fixed_ext_l,
+            ),
+            Side::Left => (
+                l_intersection,
+                r_intersection,
+                ext_l,
+                ext_r,
+                fixed_ext_l,
+                fixed_ext_r,
+            ),
         };
 
         // Distance from midpoint to miter end point
         let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
 
-        // Degenerate debugger
-        Text::new(
-            &format!(
-                "L: {} R: {}: over m lim: {}",
-                if is_degenerate_l { "X" } else { "-" },
-                if is_degenerate_r { "X" } else { "-" },
-                if miter_length_squared <= miter_limit {
-                    "N"
-                } else {
-                    "Y"
-                },
-            ),
-            Point::zero(),
-        )
-        .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
-        .draw(display)?;
+        // // Degenerate debugger
+        // Text::new(
+        //     &format!(
+        //         "L: {} R: {}: over m lim: {}",
+        //         if is_degenerate_l { "X" } else { "-" },
+        //         if is_degenerate_r { "X" } else { "-" },
+        //         if miter_length_squared <= miter_limit {
+        //             "N"
+        //         } else {
+        //             "Y"
+        //         },
+        //     ),
+        //     Point::zero(),
+        // )
+        // .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
+        // .draw(display)?;
 
         // Normal line: not degenerate (overlapping) and miter length is less than thickness. In
         // this case, draw the full miter as it won't stretch out really far.
-        if !is_degenerate {
+        if !is_self_intersecting {
             if miter_length_squared <= miter_limit {
                 // Fixed (first) line triangles
                 {
-                    Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
-                        .into_styled(tstyle)
-                        .draw(display)?;
-                    Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
+                    Triangle::new(
+                        fixed_outside.start,
+                        outside_intersection,
+                        inside_intersection,
+                    )
+                    .into_styled(tstyle)
+                    .draw(display)?;
+                    Triangle::new(fixed_outside.start, inside_intersection, fixed_inside.start)
                         .into_styled(tstyle)
                         .draw(display)?;
                 }
 
                 // Movable (second) line triangles
                 {
-                    Triangle::new(ext_l.end, l_intersection, r_intersection)
+                    Triangle::new(outside_intersection, ext_outside.end, inside_intersection)
                         .into_styled(tstyle)
                         .draw(display)?;
-                    Triangle::new(ext_l.end, ext_r.end, r_intersection)
+                    Triangle::new(ext_outside.end, ext_inside.end, inside_intersection)
                         .into_styled(tstyle)
                         .draw(display)?;
                 }
             } else {
-                match outer_side {
-                    Side::Left => {
-                        // Fixed (first) line triangles
-                        {
-                            // 1
-                            Triangle::new(
-                                fixed_ext_l.start,
-                                fixed_ext_r.start,
-                                inside_intersection,
-                            )
-                            .into_styled(tstyle)
-                            .draw(display)?;
+                // 1 (fill in beginning of first line)
+                Triangle::new(fixed_outside.start, fixed_inside.start, inside_intersection)
+                    .into_styled(tstyle)
+                    .draw(display)?;
 
-                            // 2
-                            Triangle::new(fixed_ext_l.start, fixed_ext_l.end, inside_intersection)
-                                .into_styled(tstyle)
-                                .draw(display)?;
-                        }
+                // 2 (adjacent to bevel)
+                Triangle::new(fixed_outside.start, fixed_outside.end, inside_intersection)
+                    .into_styled(tstyle)
+                    .draw(display)?;
 
-                        // Bevel/joint fill (3)
-                        Triangle::new(fixed_ext_l.end, inside_intersection, ext_l.start)
-                            .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                            .draw(display)?;
+                // 3 (bevel)
+                Triangle::new(fixed_outside.end, ext_outside.start, inside_intersection)
+                    .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
+                    .draw(display)?;
 
-                        // Movable (second) line triangles
-                        {
-                            // 4
-                            Triangle::new(ext_l.start, ext_l.end, inside_intersection)
-                                .into_styled(tstyle)
-                                .draw(display)?;
+                // 4 (adjacent to bevel)
+                Triangle::new(ext_outside.start, inside_intersection, ext_outside.end)
+                    .into_styled(tstyle)
+                    .draw(display)?;
 
-                            // 5
-                            Triangle::new(ext_l.end, ext_r.end, inside_intersection)
-                                .into_styled(tstyle)
-                                .draw(display)?;
-                        }
-                    }
-                    Side::Right => {
-                        // Fixed (first) line triangles
-                        {
-                            // 1
-                            Triangle::new(
-                                fixed_ext_l.start,
-                                fixed_ext_r.start,
-                                inside_intersection,
-                            )
-                            .into_styled(tstyle)
-                            .draw(display)?;
-
-                            // 2
-                            Triangle::new(fixed_ext_r.start, fixed_ext_r.end, inside_intersection)
-                                .into_styled(tstyle)
-                                .draw(display)?;
-                        }
-
-                        // Bevel/joint fill (3)
-                        Triangle::new(fixed_ext_r.end, inside_intersection, ext_r.start)
-                            .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
-                            .draw(display)?;
-
-                        // Movable (second) line triangles
-                        {
-                            // 4
-                            Triangle::new(ext_r.start, ext_r.end, inside_intersection)
-                                .into_styled(tstyle)
-                                .draw(display)?;
-
-                            // 5
-                            Triangle::new(ext_l.end, ext_r.end, inside_intersection)
-                                .into_styled(tstyle)
-                                .draw(display)?;
-                        }
-                    }
-                }
+                // 5 (fill in end of second line)
+                Triangle::new(inside_intersection, ext_outside.end, ext_inside.end)
+                    .into_styled(tstyle)
+                    .draw(display)?;
             }
         }
         // Line segments overlap (degenerate). Draw normal but overlapping thick lines with extra
@@ -260,30 +223,35 @@ fn draw(
             }
         }
 
-        Circle::with_center(l_intersection, 5)
-            .into_styled(if l_on_lines {
-                PrimitiveStyle::with_fill(Rgb888::YELLOW)
-            } else {
-                PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1)
-            })
-            .draw(display)?;
+        // Debugging points
+        {
+            Circle::with_center(l_intersection, 5)
+                .into_styled(if l_on_lines {
+                    PrimitiveStyle::with_fill(Rgb888::YELLOW)
+                } else {
+                    PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1)
+                })
+                .draw(display)?;
 
-        Circle::with_center(r_intersection, 5)
-            .into_styled(if r_on_lines {
-                PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255))
-            } else {
-                PrimitiveStyle::with_stroke(Rgb888::new(0, 127, 255), 1)
-            })
-            .draw(display)?;
+            Circle::with_center(r_intersection, 5)
+                .into_styled(if r_on_lines {
+                    PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255))
+                } else {
+                    PrimitiveStyle::with_stroke(Rgb888::new(0, 127, 255), 1)
+                })
+                .draw(display)?;
+        }
     }
-    // Lines are colinear (probably)
+    // Lines are colinear (probably). Draw a single thick line from start of first line to end of
+    // second line.
     else {
         Text::new("Colinear!", Point::zero())
             .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
             .draw(display)?;
 
-        fixed.into_styled(linestyle).draw(display)?;
-        l.into_styled(linestyle).draw(display)?;
+        Line::new(fixed.start, l.end)
+            .into_styled(linestyle)
+            .draw(display)?;
     }
 
     // empty_crosshair(ext_l.start, Rgb888::RED, display);
