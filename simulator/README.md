@@ -37,9 +37,6 @@ crate's README](https://github.com/Rust-SDL2/rust-sdl2) for instructions. There 
 ways to get it working, but probably the simplest method is copying the binaries as shown
 [here](https://github.com/Rust-SDL2/rust-sdl2#windows-msvc).
 
-**Note:** The precompiled binaries need to be added to _all_ Rust versions you use. For example,
-this means that you will need to copy the files after every update to a new stable Rust version.
-
 ## Examples
 
 ### Simulate a 128x64 SSD1306 OLED
