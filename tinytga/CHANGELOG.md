@@ -6,6 +6,9 @@
 
 ## [Unreleased] - ReleaseDate
 
+- **(breaking)** #407 The `image_descriptor` in `TgaHeader` was replaced by `image_origin` and `alpha_channel_bits`.
+- #407 Added support for bottom-left origin images to `TgaIterator`.
+
 ## [0.3.2] - 2020-03-20
 
 ## [0.3.1] - 2020-02-17
