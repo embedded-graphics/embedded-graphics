@@ -198,6 +198,11 @@ impl Line {
         (l, r)
     }
 
+    /// Get the midpoint of this line
+    pub fn midpoint(&self) -> Point {
+        (self.start + self.end) / 2
+    }
+
     /// Get the squared length of the line
     pub fn length_squared(&self) -> u32 {
         let delta = self.end - self.start;

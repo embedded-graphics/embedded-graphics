@@ -34,13 +34,15 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .unwrap();
 }
 
-fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
-    display.clear(Rgb888::BLACK).unwrap();
-
-    let mid = Point::new(100, 100);
-    let start = Point::new(50, 130);
-
+fn draw(
+    start: Point,
+    mid: Point,
+    end: Point,
+    width: u32,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
     let fixed = Line::new(start, mid);
+    let l = Line::new(mid, end);
 
     // let tstyle = PrimitiveStyle::with_stroke(Rgb888::RED, 1);
     let tstyle = PrimitiveStyleBuilder::new()
@@ -50,8 +52,6 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
         .build();
 
     let linestyle = PrimitiveStyle::with_stroke(Rgb888::GREEN, width);
-
-    let l = Line::new(mid, end_point);
 
     // Miter length limit is the line width (but squared to avoid sqrt() costs)
     let miter_limit = (width * 2).pow(2);
@@ -99,8 +99,7 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
 
             ext_l
                 .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
-                .draw(display)
-                .unwrap();
+                .draw(display)?;
 
             (is_degenerate_l, is_degenerate_r)
         };
@@ -139,8 +138,7 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
             Point::zero(),
         )
         .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
-        .draw(display)
-        .unwrap();
+        .draw(display)?;
 
         // Normal line: not degenerate (overlapping) and miter length is less than thickness. In
         // this case, draw the full miter as it won't stretch out really far.
@@ -150,24 +148,20 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
                 {
                     Triangle::new(fixed_ext_l.start, l_intersection, r_intersection)
                         .into_styled(tstyle)
-                        .draw(display)
-                        .unwrap();
+                        .draw(display)?;
                     Triangle::new(fixed_ext_l.start, fixed_ext_r.start, r_intersection)
                         .into_styled(tstyle)
-                        .draw(display)
-                        .unwrap();
+                        .draw(display)?;
                 }
 
                 // Movable (second) line triangles
                 {
                     Triangle::new(ext_l.end, l_intersection, r_intersection)
                         .into_styled(tstyle)
-                        .draw(display)
-                        .unwrap();
+                        .draw(display)?;
                     Triangle::new(ext_l.end, ext_r.end, r_intersection)
                         .into_styled(tstyle)
-                        .draw(display)
-                        .unwrap();
+                        .draw(display)?;
                 }
             } else {
                 match outer_side {
@@ -181,35 +175,30 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
                                 inside_intersection,
                             )
                             .into_styled(tstyle)
-                            .draw(display)
-                            .unwrap();
+                            .draw(display)?;
 
                             // 2
                             Triangle::new(fixed_ext_l.start, fixed_ext_l.end, inside_intersection)
                                 .into_styled(tstyle)
-                                .draw(display)
-                                .unwrap();
+                                .draw(display)?;
                         }
 
                         // Bevel/joint fill (3)
                         Triangle::new(fixed_ext_l.end, inside_intersection, ext_l.start)
                             .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                            .draw(display)
-                            .unwrap();
+                            .draw(display)?;
 
                         // Movable (second) line triangles
                         {
                             // 4
                             Triangle::new(ext_l.start, ext_l.end, inside_intersection)
                                 .into_styled(tstyle)
-                                .draw(display)
-                                .unwrap();
+                                .draw(display)?;
 
                             // 5
                             Triangle::new(ext_l.end, ext_r.end, inside_intersection)
                                 .into_styled(tstyle)
-                                .draw(display)
-                                .unwrap();
+                                .draw(display)?;
                         }
                     }
                     Side::Right => {
@@ -222,35 +211,30 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
                                 inside_intersection,
                             )
                             .into_styled(tstyle)
-                            .draw(display)
-                            .unwrap();
+                            .draw(display)?;
 
                             // 2
                             Triangle::new(fixed_ext_r.start, fixed_ext_r.end, inside_intersection)
                                 .into_styled(tstyle)
-                                .draw(display)
-                                .unwrap();
+                                .draw(display)?;
                         }
 
                         // Bevel/joint fill (3)
                         Triangle::new(fixed_ext_r.end, inside_intersection, ext_r.start)
                             .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
-                            .draw(display)
-                            .unwrap();
+                            .draw(display)?;
 
                         // Movable (second) line triangles
                         {
                             // 4
                             Triangle::new(ext_r.start, ext_r.end, inside_intersection)
                                 .into_styled(tstyle)
-                                .draw(display)
-                                .unwrap();
+                                .draw(display)?;
 
                             // 5
                             Triangle::new(ext_l.end, ext_r.end, inside_intersection)
                                 .into_styled(tstyle)
-                                .draw(display)
-                                .unwrap();
+                                .draw(display)?;
                         }
                     }
                 }
@@ -260,21 +244,19 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
         // triangle for bevel cap.
         else {
             // Fixed (first) line
-            fixed.into_styled(linestyle).draw(display).unwrap();
+            fixed.into_styled(linestyle).draw(display)?;
 
             // Moving (second) line
-            l.into_styled(linestyle).draw(display).unwrap();
+            l.into_styled(linestyle).draw(display)?;
 
             // Bevel cap
             match outer_side {
                 Side::Left => Triangle::new(fixed_ext_l.end, mid, ext_l.start)
                     .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                    .draw(display)
-                    .unwrap(),
+                    .draw(display)?,
                 Side::Right => Triangle::new(fixed_ext_r.end, mid, ext_r.start)
                     .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
-                    .draw(display)
-                    .unwrap(),
+                    .draw(display)?,
             }
         }
 
@@ -284,8 +266,7 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
             } else {
                 PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1)
             })
-            .draw(display)
-            .unwrap();
+            .draw(display)?;
 
         Circle::with_center(r_intersection, 5)
             .into_styled(if r_on_lines {
@@ -293,24 +274,52 @@ fn draw(end_point: Point, width: u32, display: &mut SimulatorDisplay<Rgb888>) {
             } else {
                 PrimitiveStyle::with_stroke(Rgb888::new(0, 127, 255), 1)
             })
-            .draw(display)
-            .unwrap();
+            .draw(display)?;
     }
     // Lines are colinear (probably)
     else {
         Text::new("Colinear!", Point::zero())
             .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
-            .draw(display)
-            .unwrap();
+            .draw(display)?;
 
-        fixed.into_styled(linestyle).draw(display).unwrap();
-        l.into_styled(linestyle).draw(display).unwrap();
+        fixed.into_styled(linestyle).draw(display)?;
+        l.into_styled(linestyle).draw(display)?;
     }
 
     // empty_crosshair(ext_l.start, Rgb888::RED, display);
     // empty_crosshair(ext_l.end, Rgb888::RED, display);
     // empty_crosshair(ext_r.start, Rgb888::new(255, 127, 0), display);
     // empty_crosshair(ext_r.end, Rgb888::new(255, 127, 0), display);
+
+    Ok(())
+}
+
+fn trongle(
+    moving_point: Point,
+    width: u32,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    display.clear(Rgb888::BLACK).unwrap();
+
+    let p1 = Point::new(100, 100);
+    let p2 = Point::new(50, 130);
+    let p3 = moving_point;
+
+    let trongle = Triangle::new(p1, p2, p3);
+
+    let l1 = Line::new(trongle.p1, trongle.p2);
+    let l2 = Line::new(trongle.p1, trongle.p3);
+    let l3 = Line::new(trongle.p2, trongle.p3);
+
+    let l1_mid = l1.midpoint();
+    let l2_mid = l2.midpoint();
+    let l3_mid = l3.midpoint();
+
+    draw(l1_mid, p1, l2_mid, width, display)?;
+    draw(l1_mid, p2, l3_mid, width, display)?;
+    draw(l2_mid, p3, l3_mid, width, display)?;
+
+    Ok(())
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
@@ -319,14 +328,17 @@ fn main() -> Result<(), core::convert::Infallible> {
         .scale(4)
         .pixel_spacing(1)
         .build();
-    let mut window = Window::new("Rounded rectangle debugger", &output_settings);
+    let mut window = Window::new("Line joints debugger", &output_settings);
 
     let mut end_point = Point::new(20, 20);
     let mut width = 15u32;
 
     let mut mouse_down = false;
 
-    draw(end_point, width, &mut display);
+    let mid = Point::new(100, 100);
+    let start = Point::new(50, 130);
+
+    trongle(end_point, width, &mut display);
 
     'running: loop {
         window.update(&display);
@@ -353,7 +365,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            draw(end_point, width, &mut display);
+            trongle(end_point, width, &mut display);
         }
     }
 
