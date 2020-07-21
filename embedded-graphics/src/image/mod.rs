@@ -203,7 +203,12 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.fill_contiguous(&self.bounding_box(), self.into_pixels().map(|p| p.1))
+        // FIXME: fill_contiguous should be used whenever possible,
+        //        but the current implementation assumes an top-left to bottom-right
+        //        iteration order that isn't guaranteed
+        //display.fill_contiguous(&self.bounding_box(), self.into_pixels().map(|p| p.1))
+
+        display.draw_iter(self.into_pixels())
     }
 }
 

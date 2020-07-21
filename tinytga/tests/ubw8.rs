@@ -1,7 +1,6 @@
-use tinytga::{ImageType, Pixel, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Pixel, Tga, TgaFooter, TgaHeader};
 
 #[test]
-#[ignore]
 fn ubw8() {
     let data = include_bytes!("./ubw8.tga");
 
@@ -25,7 +24,8 @@ fn ubw8() {
             width: 128,
             height: 128,
             pixel_depth: 8,
-            image_descriptor: 0
+            image_origin: ImageOrigin::BottomLeft,
+            alpha_channel_bits: 0
         }
     );
 

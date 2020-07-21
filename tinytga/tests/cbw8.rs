@@ -1,7 +1,6 @@
-use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Tga, TgaFooter, TgaHeader};
 
 #[test]
-#[ignore]
 fn cbw8() {
     let data = include_bytes!("./cbw8.tga");
 
@@ -10,7 +9,6 @@ fn cbw8() {
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);
     println!("Pixel data len {:#?}", img.pixel_data.len());
-    println!("Pixel data {:#?}", img.pixel_data);
 
     assert_eq!(
         img.header,
@@ -26,7 +24,8 @@ fn cbw8() {
             width: 128,
             height: 128,
             pixel_depth: 8,
-            image_descriptor: 0
+            image_origin: ImageOrigin::BottomLeft,
+            alpha_channel_bits: 0,
         }
     );
 

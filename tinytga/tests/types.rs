@@ -1,4 +1,4 @@
-use tinytga::{ImageType, Tga, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Tga, TgaHeader};
 
 const HEADER_DEFAULT: TgaHeader = TgaHeader {
     id_len: 0,
@@ -12,7 +12,8 @@ const HEADER_DEFAULT: TgaHeader = TgaHeader {
     width: 9,
     height: 5,
     pixel_depth: 8,
-    image_descriptor: 0,
+    image_origin: ImageOrigin::BottomLeft,
+    alpha_channel_bits: 0,
 };
 
 #[test]
@@ -45,7 +46,7 @@ fn type1_tl() {
             color_map_start: 0,
             color_map_len: 8,
             color_map_depth: 24,
-            image_descriptor: 32,
+            image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
@@ -76,7 +77,7 @@ fn type2_tl() {
         TgaHeader {
             image_type: ImageType::Truecolor,
             pixel_depth: 24,
-            image_descriptor: 32,
+            image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
@@ -105,7 +106,7 @@ fn type3_tl() {
         tga.header,
         TgaHeader {
             image_type: ImageType::Monochrome,
-            image_descriptor: 32,
+            image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
@@ -142,7 +143,7 @@ fn type9_tl() {
             color_map_start: 0,
             color_map_len: 8,
             color_map_depth: 24,
-            image_descriptor: 32,
+            image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
@@ -173,7 +174,7 @@ fn type10_tl() {
         TgaHeader {
             image_type: ImageType::RleTruecolor,
             pixel_depth: 24,
-            image_descriptor: 32,
+            image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
@@ -202,7 +203,7 @@ fn type11_tl() {
         tga.header,
         TgaHeader {
             image_type: ImageType::RleMonochrome,
-            image_descriptor: 32,
+            image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );

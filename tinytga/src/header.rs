@@ -34,6 +34,37 @@ pub enum ImageType {
     RleMonochrome = 11,
 }
 
+/// Image origin
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum ImageOrigin {
+    /// Bottom left
+    BottomLeft,
+    /// Bottom right
+    BottomRight,
+    /// Top left
+    TopLeft,
+    /// Top right
+    TopRight,
+}
+
+impl ImageOrigin {
+    fn from_image_descriptor(value: u8) -> Self {
+        match (value & 0x30) >> 4 {
+            0 => Self::BottomLeft,
+            1 => Self::BottomRight,
+            2 => Self::TopLeft,
+            _ => Self::TopRight,
+        }
+    }
+
+    pub(crate) fn is_bottom(self) -> bool {
+        match self {
+            Self::BottomLeft | Self::BottomRight => true,
+            _ => false,
+        }
+    }
+}
+
 /// TGA header structure, referenced from <https://www.fileformat.info/format/tga/egff.htm>
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct TgaHeader {
@@ -70,16 +101,11 @@ pub struct TgaHeader {
     /// Pixel bit depth (8, 16, 24, 32 bits)
     pub pixel_depth: u8,
 
-    /// Image descriptor (unused)
-    ///
-    /// Bits 0:3: Number of bits per pixel designated to alpha channel
-    /// Bits 4:5: Image origin:
-    ///
-    /// * `00` = bottom left
-    /// * `01` = bottom right
-    /// * `10` = top left
-    /// * `11` = top right
-    pub image_descriptor: u8,
+    /// Image origin
+    pub image_origin: ImageOrigin,
+
+    /// Alpha channel bits
+    pub alpha_channel_bits: u8,
 }
 
 fn has_color_map(input: &[u8]) -> IResult<&[u8], bool> {
@@ -115,7 +141,11 @@ pub fn header(input: &[u8]) -> IResult<&[u8], TgaHeader> {
     let (input, width) = le_u16(input)?;
     let (input, height) = le_u16(input)?;
     let (input, pixel_depth) = le_u8(input)?;
+
     let (input, image_descriptor) = le_u8(input)?;
+    let image_origin = ImageOrigin::from_image_descriptor(image_descriptor);
+    let alpha_channel_bits = image_descriptor & 0xF;
+
     let (input, _image_ident) = take(id_len)(input)?;
 
     Ok((
@@ -132,7 +162,8 @@ pub fn header(input: &[u8]) -> IResult<&[u8], TgaHeader> {
             width,
             height,
             pixel_depth,
-            image_descriptor,
+            image_origin,
+            alpha_channel_bits,
         },
     ))
 }

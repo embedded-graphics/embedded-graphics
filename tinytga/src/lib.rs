@@ -14,7 +14,7 @@
 //! ## Load a Run Length Encoded (RLE) TGA image
 //!
 //! ```rust
-//! use tinytga::{ImageType, Pixel, Tga, TgaFooter, TgaHeader};
+//! use tinytga::{ImageOrigin, ImageType, Pixel, Tga, TgaFooter, TgaHeader};
 //!
 //! // Include an image from a local path as bytes
 //! let data = include_bytes!("../tests/chessboard_4px_rle.tga");
@@ -37,7 +37,8 @@
 //!         width: 4,
 //!         height: 4,
 //!         pixel_depth: 24,
-//!         image_descriptor: 32,
+//!         image_origin: ImageOrigin::TopLeft,
+//!         alpha_channel_bits: 0,
 //!     }
 //! );
 //!
@@ -107,7 +108,7 @@ use crate::{
 
 pub use crate::{
     footer::TgaFooter,
-    header::{ImageType, TgaHeader},
+    header::{ImageOrigin, ImageType, TgaHeader},
     pixel::Pixel,
 };
 
@@ -224,6 +225,12 @@ impl<'a> IntoIterator for &'a Tga<'a> {
 
         let current_packet_len = current_packet.len();
 
+        let y = if self.header.image_origin.is_bottom() {
+            u32::from(self.header.height).saturating_sub(1)
+        } else {
+            0
+        };
+
         TgaIterator {
             tga: self,
             bytes_to_consume,
@@ -232,7 +239,8 @@ impl<'a> IntoIterator for &'a Tga<'a> {
             current_packet_pixel_length: current_packet_len / stride,
             stride,
             x: 0,
-            y: 0,
+            y,
+            done: false,
         }
     }
 }
@@ -265,12 +273,19 @@ pub struct TgaIterator<'a> {
 
     /// Current Y coordinate from top-left of image
     y: u32,
+
+    /// Iteration is done
+    done: bool,
 }
 
 impl<'a> Iterator for TgaIterator<'a> {
     type Item = Pixel;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            return None;
+        }
+
         if self.current_packet_position >= self.current_packet_pixel_length {
             // Parse next packet from remaining bytes
             match self.tga.header.image_type {
@@ -371,7 +386,19 @@ impl<'a> Iterator for TgaIterator<'a> {
 
         if self.x >= u32::from(self.tga.width()) {
             self.x = 0;
-            self.y += 1;
+
+            if self.tga.header.image_origin.is_bottom() {
+                if self.y > 0 {
+                    self.y -= 1;
+                } else {
+                    self.done = true;
+                }
+            } else {
+                self.y += 1;
+                if self.y >= u32::from(self.tga.header.height) {
+                    self.done = true;
+                }
+            }
         }
 
         Some(Pixel {

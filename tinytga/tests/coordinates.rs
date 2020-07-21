@@ -1,4 +1,4 @@
-use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Tga, TgaFooter, TgaHeader};
 
 #[test]
 fn coordinates() {
@@ -25,7 +25,8 @@ fn coordinates() {
             width: 4,
             height: 4,
             pixel_depth: 24,
-            image_descriptor: 32
+            image_origin: ImageOrigin::TopLeft,
+            alpha_channel_bits: 0,
         }
     );
 
