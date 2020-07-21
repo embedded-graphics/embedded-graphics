@@ -44,6 +44,7 @@ this are adding support for different image formats or implementing custom fonts
 * [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
 * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
 * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
+* [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
