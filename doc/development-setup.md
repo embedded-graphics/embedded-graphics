@@ -12,6 +12,9 @@ rustup component add rustfmt
 # Install `cargo-readme`
 cargo install cargo-readme
 
+# Install `just`
+cargo install just
+
 # Install SDL2 for simulator and linkchecker for build script
 
 # Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
@@ -27,17 +30,17 @@ sudo pip3 install git+https://github.com/linkchecker/linkchecker.git
 ## Generating readmes
 
 The various `README.md` files in this project are generated from each crate's `lib.rs` comment. To
-regenerate a readme, ensure [`cargo-readme`](https://crates.io/crates/cargo-readme) is installed
-then run:
+regenerate a readme, ensure [`cargo-readme`](https://crates.io/crates/cargo-readme) and
+[`just`](https://github.com/casey/just) are installed then run:
 
 ```bash
-./readme.sh <crate>
+just generate-readme <crate>
 
 # e.g.
-./readme.sh simulator
+just generate-readme simulator
 ```
 
-All readmes can be generated at the same time by running the `./generate_readmes.sh` script in the project root.
+All readmes can be generated at the same time by running `just generate-readmes` in the project root.
 
-Running `./build.sh` will check if the readme was successfully updated. The updated `README.md`
+Running `just build` will check if the readme was successfully updated. The updated `README.md`
 should be committed into git.
