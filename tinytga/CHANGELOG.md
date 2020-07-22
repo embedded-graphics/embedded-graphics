@@ -6,11 +6,24 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `image_descriptor` in `TgaHeader` was replaced by `image_origin` and `alpha_channel_bits`.
+- **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `Pixel` type returned by `TgaIterator` now uses `u16` coordinates.
+
+### Added
+
+- [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) Added support for bottom-left origin images to `TgaIterator`.
+
+### Fixed
+
+- [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) Additional data in `pixel_data`, beyond `width * height` pixels, is now discarded by `TgaIterator`.
+
 ## [0.3.2] - 2020-03-20
 
 ## [0.3.1] - 2020-02-17
 
-- **(breaking)** #247 "reverse" integration of tinytga into [`embedded-graphics`](https://crates.io/crates/embedded-graphics). tinytga now has a `graphics` feature that must be turned on to enable embedded-graphics support. The `tga` feature from embedded-graphics is removed.
+- **(breaking)** [#247](https://github.com/jamwaffles/embedded-graphics/pull/247) "reverse" integration of tinytga into [`embedded-graphics`](https://crates.io/crates/embedded-graphics). tinytga now has a `graphics` feature that must be turned on to enable embedded-graphics support. The `tga` feature from embedded-graphics is removed.
 
   **Before**
 
@@ -56,13 +69,13 @@
 
 ### Added
 
-- #217 Added support for TGA files with color map.
+- [#217](https://github.com/jamwaffles/embedded-graphics/pull/217) Added support for TGA files with color map.
 
 ### Fixed
 
-- #217 Images without a TGA footer are now parsed correctly.
-- #216 Fixed integer overflow for some RLE compressed TGA files.
-- #218 Test README examples in CI and update them to work with latest crate versions.
+- [#217](https://github.com/jamwaffles/embedded-graphics/pull/217) Images without a TGA footer are now parsed correctly.
+- [#216](https://github.com/jamwaffles/embedded-graphics/pull/216) Fixed integer overflow for some RLE compressed TGA files.
+- [#218](https://github.com/jamwaffles/embedded-graphics/pull/218) Test README examples in CI and update them to work with latest crate versions.
 
 <!-- next-url -->
 [unreleased]: https://github.com/jamwaffles/tinytga/compare/tinytga-v0.3.2...HEAD

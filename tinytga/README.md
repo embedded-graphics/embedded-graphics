@@ -23,7 +23,7 @@ data will need to be interpreted according to the `image_type` specified in the 
 ### Load a Run Length Encoded (RLE) TGA image
 
 ```rust
-use tinytga::{ImageType, Pixel, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Pixel, Tga, TgaFooter, TgaHeader};
 
 // Include an image from a local path as bytes
 let data = include_bytes!("../tests/chessboard_4px_rle.tga");
@@ -46,7 +46,8 @@ assert_eq!(
         width: 4,
         height: 4,
         pixel_depth: 24,
-        image_descriptor: 32,
+        image_origin: ImageOrigin::TopLeft,
+        alpha_channel_depth: 0,
     }
 );
 

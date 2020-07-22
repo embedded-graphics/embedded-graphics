@@ -1,4 +1,4 @@
-use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Tga, TgaFooter, TgaHeader};
 
 #[test]
 fn chessboard_rle() {
@@ -25,7 +25,8 @@ fn chessboard_rle() {
             width: 8,
             height: 8,
             pixel_depth: 24,
-            image_descriptor: 32
+            image_origin: ImageOrigin::TopLeft,
+            alpha_channel_depth: 0,
         }
     );
 

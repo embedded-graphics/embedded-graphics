@@ -1,4 +1,4 @@
-use tinytga::{ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Tga, TgaFooter, TgaHeader};
 
 #[test]
 fn coordinates() {
@@ -25,7 +25,8 @@ fn coordinates() {
             width: 4,
             height: 4,
             pixel_depth: 24,
-            image_descriptor: 32
+            image_origin: ImageOrigin::TopLeft,
+            alpha_channel_depth: 0,
         }
     );
 
@@ -40,7 +41,7 @@ fn coordinates() {
     let coords = img
         .into_iter()
         .map(|p| (p.x, p.y))
-        .collect::<Vec<(u32, u32)>>();
+        .collect::<Vec<(u16, u16)>>();
 
     assert_eq!(coords.len(), 4 * 4);
     assert_eq!(

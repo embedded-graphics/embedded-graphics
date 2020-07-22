@@ -105,7 +105,6 @@ fn test_gray_tga(data: &[u8]) {
 
 /// Tests color mapped, uncompressed, bottom left origin TGA file.
 #[test]
-#[ignore]
 fn type1_bl() {
     test_color_tga(include_bytes!("./type1_bl.tga"));
 }
@@ -118,7 +117,6 @@ fn type1_tl() {
 
 /// Tests true color, uncompressed, bottom left origin TGA file.
 #[test]
-#[ignore]
 fn type2_bl() {
     test_color_tga(include_bytes!("./type2_bl.tga"));
 }
@@ -131,7 +129,6 @@ fn type2_tl() {
 
 /// Tests grayscale, uncompressed, bottom left origin TGA file.
 #[test]
-#[ignore]
 fn type3_bl() {
     test_gray_tga(include_bytes!("./type3_bl.tga"));
 }
@@ -144,7 +141,6 @@ fn type3_tl() {
 
 /// Tests color mapped, RLE compressed, bottom left origin TGA file.
 #[test]
-#[ignore]
 fn type9_bl() {
     test_color_tga(include_bytes!("./type9_bl.tga"));
 }
@@ -157,7 +153,6 @@ fn type9_tl() {
 
 /// Tests true color, RLE compressed, bottom left origin TGA file.
 #[test]
-#[ignore]
 fn type10_bl() {
     test_color_tga(include_bytes!("./type10_bl.tga"));
 }
@@ -170,7 +165,6 @@ fn type10_tl() {
 
 /// Tests grayscale, RLE compressed, bottom left origin TGA file.
 #[test]
-#[ignore]
 fn type11_bl() {
     test_gray_tga(include_bytes!("./type11_bl.tga"));
 }
