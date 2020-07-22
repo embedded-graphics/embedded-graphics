@@ -29,7 +29,7 @@ fn chequerboard_uncompressed_topleft() {
             height: 8,
             pixel_depth: 8,
             image_origin: ImageOrigin::TopLeft,
-            alpha_channel_bits: 0,
+            alpha_channel_depth: 0,
         }
     );
 

@@ -13,7 +13,7 @@ const HEADER_DEFAULT: TgaHeader = TgaHeader {
     height: 5,
     pixel_depth: 8,
     image_origin: ImageOrigin::BottomLeft,
-    alpha_channel_bits: 0,
+    alpha_channel_depth: 0,
 };
 
 #[test]

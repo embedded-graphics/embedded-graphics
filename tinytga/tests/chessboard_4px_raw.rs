@@ -26,7 +26,7 @@ fn chessboard_4px_raw() {
             height: 4,
             pixel_depth: 24,
             image_origin: ImageOrigin::TopLeft,
-            alpha_channel_bits: 0,
+            alpha_channel_depth: 0,
         }
     );
 

@@ -104,8 +104,8 @@ pub struct TgaHeader {
     /// Image origin
     pub image_origin: ImageOrigin,
 
-    /// Alpha channel bits
-    pub alpha_channel_bits: u8,
+    /// Alpha channel depth
+    pub alpha_channel_depth: u8,
 }
 
 fn has_color_map(input: &[u8]) -> IResult<&[u8], bool> {
@@ -144,7 +144,7 @@ pub fn header(input: &[u8]) -> IResult<&[u8], TgaHeader> {
 
     let (input, image_descriptor) = le_u8(input)?;
     let image_origin = ImageOrigin::from_image_descriptor(image_descriptor);
-    let alpha_channel_bits = image_descriptor & 0xF;
+    let alpha_channel_depth = image_descriptor & 0xF;
 
     let (input, _image_ident) = take(id_len)(input)?;
 
@@ -163,7 +163,7 @@ pub fn header(input: &[u8]) -> IResult<&[u8], TgaHeader> {
             height,
             pixel_depth,
             image_origin,
-            alpha_channel_bits,
+            alpha_channel_depth,
         },
     ))
 }
