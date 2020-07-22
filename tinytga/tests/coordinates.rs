@@ -41,7 +41,7 @@ fn coordinates() {
     let coords = img
         .into_iter()
         .map(|p| (p.x, p.y))
-        .collect::<Vec<(u32, u32)>>();
+        .collect::<Vec<(u16, u16)>>();
 
     assert_eq!(coords.len(), 4 * 4);
     assert_eq!(

@@ -9,6 +9,7 @@
 ### Changed
 
 - **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `image_descriptor` in `TgaHeader` was replaced by `image_origin` and `alpha_channel_bits`.
+- **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `Pixel` type returned by `TgaIterator` now uses `u16` coordinates.
 
 ### Added
 

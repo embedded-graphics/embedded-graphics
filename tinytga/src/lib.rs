@@ -226,7 +226,7 @@ impl<'a> IntoIterator for &'a Tga<'a> {
         let current_packet_len = current_packet.len();
 
         let y = if self.header.image_origin.is_bottom() {
-            u32::from(self.header.height).saturating_sub(1)
+            self.height().saturating_sub(1)
         } else {
             0
         };
@@ -269,10 +269,10 @@ pub struct TgaIterator<'a> {
     stride: usize,
 
     /// Current X coordinate from top-left of image
-    x: u32,
+    x: u16,
 
     /// Current Y coordinate from top-left of image
-    y: u32,
+    y: u16,
 
     /// Iteration is done
     done: bool,
@@ -384,7 +384,7 @@ impl<'a> Iterator for TgaIterator<'a> {
 
         self.x += 1;
 
-        if self.x >= u32::from(self.tga.width()) {
+        if self.x >= self.tga.width() {
             self.x = 0;
 
             if self.tga.header.image_origin.is_bottom() {
@@ -395,7 +395,7 @@ impl<'a> Iterator for TgaIterator<'a> {
                 }
             } else {
                 self.y += 1;
-                if self.y >= u32::from(self.tga.header.height) {
+                if self.y >= self.tga.height() {
                     self.done = true;
                 }
             }
@@ -439,7 +439,7 @@ mod e_g {
         fn next(&mut self) -> Option<Self::Item> {
             self.it.next().map(|p| {
                 let raw = C::Raw::from_u32(p.color);
-                EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
+                EgPixel(Point::new(i32::from(p.x), i32::from(p.y)), raw.into())
             })
         }
     }
