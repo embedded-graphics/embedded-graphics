@@ -41,8 +41,8 @@ fn draw(
     width: u32,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let fixed = Line::new(start, mid);
-    let l = Line::new(mid, end);
+    let first_line = Line::new(start, mid);
+    let second_line = Line::new(mid, end);
 
     // let tstyle = PrimitiveStyle::with_stroke(Rgb888::RED, 1);
     let tstyle = PrimitiveStyleBuilder::new()
@@ -57,9 +57,9 @@ fn draw(
     let miter_limit = (width * 2).pow(2);
 
     // Left and right edges of thick first segment
-    let (fixed_ext_l, fixed_ext_r) = fixed.extents(width as i32);
+    let (fixed_ext_l, fixed_ext_r) = first_line.extents(width as i32);
     // Left and right edges of thick second segment
-    let (ext_l, ext_r) = l.extents(width as i32);
+    let (ext_l, ext_r) = second_line.extents(width as i32);
 
     if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
         ext_l.intersection(&fixed_ext_l),
@@ -207,10 +207,10 @@ fn draw(
         // triangle for bevel cap.
         else {
             // Fixed (first) line
-            fixed.into_styled(linestyle).draw(display)?;
+            first_line.into_styled(linestyle).draw(display)?;
 
             // Moving (second) line
-            l.into_styled(linestyle).draw(display)?;
+            second_line.into_styled(linestyle).draw(display)?;
 
             // Bevel cap
             match outer_side {
@@ -245,11 +245,11 @@ fn draw(
     // Lines are colinear (probably). Draw a single thick line from start of first line to end of
     // second line.
     else {
-        Text::new("Colinear!", Point::zero())
-            .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
-            .draw(display)?;
+        // Text::new("Colinear!", Point::zero())
+        //     .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
+        //     .draw(display)?;
 
-        Line::new(fixed.start, l.end)
+        Line::new(first_line.start, second_line.end)
             .into_styled(linestyle)
             .draw(display)?;
     }
