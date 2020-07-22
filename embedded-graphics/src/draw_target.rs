@@ -2,8 +2,10 @@
 
 use crate::{
     geometry::{Point, Size},
+    pixel_iterator::PixelIteratorExt,
     pixelcolor::PixelColor,
     primitives::{rectangle::Rectangle, Primitive},
+    transform::Transform,
     Pixel,
 };
 
@@ -440,5 +442,72 @@ pub trait DrawTarget {
     /// [`fill_solid`]: #method.fill_solid
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
+    }
+}
+
+/// Extension trait for `DrawTarget`s.
+pub trait DrawTargetExt: DrawTarget + Sized {
+    /// Creates a new translated draw target.
+    ///
+    /// All drawing operations are translated by `offset` pixels, before being passed to the base
+    /// draw target.
+    fn translated(&mut self, offset: Point) -> TranslatedDrawTarget<'_, Self>;
+}
+
+impl<T> DrawTargetExt for T
+where
+    T: DrawTarget,
+{
+    fn translated(&mut self, offset: Point) -> TranslatedDrawTarget<'_, Self> {
+        TranslatedDrawTarget {
+            target: self,
+            offset,
+        }
+    }
+}
+/// Translated draw target.
+#[derive(Debug)]
+pub struct TranslatedDrawTarget<'a, T>
+where
+    T: DrawTarget,
+{
+    target: &'a mut T,
+    offset: Point,
+}
+
+impl<T> DrawTarget for TranslatedDrawTarget<'_, T>
+where
+    T: DrawTarget,
+{
+    type Color = T::Color;
+    type Error = T::Error;
+
+    fn size(&self) -> Size {
+        self.target.size()
+    }
+
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        self.target
+            .draw_iter(pixels.into_iter().translate(self.offset))
+    }
+
+    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Self::Color>,
+    {
+        let area = area.translate(self.offset);
+        self.target.fill_contiguous(&area, colors)
+    }
+
+    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+        let area = area.translate(self.offset);
+        self.target.fill_solid(&area, color)
+    }
+
+    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        self.target.clear(color)
     }
 }

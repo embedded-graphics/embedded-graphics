@@ -2,6 +2,7 @@
 
 #[doc(no_inline)]
 pub use crate::{
+    draw_target::DrawTargetExt,
     fonts::Font,
     geometry::{Angle, AngleUnit, Dimensions, Point, Size},
     image::{ImageDimensions, IntoPixelIter},
