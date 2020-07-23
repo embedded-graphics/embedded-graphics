@@ -9,6 +9,7 @@ precheck_steps: &precheck_steps
     - run: sudo apt update && sudo apt install -qq libsdl2-dev linkchecker
     - run: cargo install cargo-readme just
     - run: rustup default ${RUST_VERSION:-stable}
+    - run: rustup toolchain add nightly
     - run: rustup component add rustfmt
     - run: cargo update
     - run: just build
