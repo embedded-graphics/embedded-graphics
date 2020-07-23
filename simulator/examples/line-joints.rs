@@ -34,6 +34,140 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .unwrap();
 }
 
+enum Corner {
+    Miter {
+        left_intersection: Point,
+        right_intersection: Point,
+        outer_side: Side,
+    },
+    Bevel {
+        left_intersection: Point,
+        right_intersection: Point,
+        outer_side: Side,
+        filler_triangle: Triangle,
+    },
+    Degenerate,
+    Colinear,
+}
+
+fn corner(start: Point, mid: Point, end: Point, width: u32) -> Corner {
+    let first_line = Line::new(start, mid);
+    let second_line = Line::new(mid, end);
+
+    // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
+    let miter_limit = (width * 2).pow(2);
+
+    // Left and right edges of thick first segment
+    let (fixed_ext_l, fixed_ext_r) = first_line.extents(width as i32);
+    // Left and right edges of thick second segment
+    let (ext_l, ext_r) = second_line.extents(width as i32);
+
+    if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
+        ext_l.intersection(&fixed_ext_l),
+        ext_r.intersection(&fixed_ext_r),
+    ) {
+        let first_segment_start_edge = Line::new(fixed_ext_l.start, fixed_ext_r.start);
+        let second_segment_end_edge = Line::new(ext_l.end, ext_r.end);
+
+        let self_intersection_l = first_segment_start_edge
+            .intersection(&ext_l)
+            .filter(|(_, on_both)| *on_both)
+            .or_else(|| {
+                second_segment_end_edge
+                    .intersection(&fixed_ext_l)
+                    .filter(|(_, on_both)| *on_both)
+            });
+
+        let self_intersection_r = first_segment_start_edge
+            .intersection(&ext_r)
+            .filter(|(_, on_both)| *on_both)
+            .or_else(|| {
+                second_segment_end_edge
+                    .intersection(&fixed_ext_r)
+                    .filter(|(_, on_both)| *on_both)
+            });
+
+        let (self_intersection_l, self_intersection_r) =
+            (self_intersection_l.is_some(), self_intersection_r.is_some());
+
+        let is_self_intersecting = self_intersection_l || self_intersection_r;
+
+        // The side that will have the miter/bevel on it, relative to first line
+        let outer_side = if l_on_lines || self_intersection_l {
+            Side::Right
+        } else if r_on_lines || self_intersection_r {
+            Side::Left
+        } else {
+            // Default to some randomly chosen side when lines are colinear
+            Side::Right
+        };
+
+        let (
+            outside_intersection,
+            inside_intersection,
+            ext_outside,
+            ext_inside,
+            fixed_outside,
+            fixed_inside,
+        ) = match outer_side {
+            Side::Right => (
+                r_intersection,
+                l_intersection,
+                ext_r,
+                ext_l,
+                fixed_ext_r,
+                fixed_ext_l,
+            ),
+            Side::Left => (
+                l_intersection,
+                r_intersection,
+                ext_l,
+                ext_r,
+                fixed_ext_l,
+                fixed_ext_r,
+            ),
+        };
+
+        // Distance from midpoint to miter end point
+        let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
+
+        // Normal line: non-overlapping line end caps
+        if !is_self_intersecting {
+            // Intersection is within limit at which it will be chopped off into a bevel, so return
+            // a miter.
+            if miter_length_squared <= miter_limit {
+                Corner::Miter {
+                    left_intersection: l_intersection,
+                    right_intersection: r_intersection,
+                    outer_side,
+                }
+            }
+            // Miter is too long, chop it into bevel-style corner
+            else {
+                Corner::Bevel {
+                    left_intersection: l_intersection,
+                    right_intersection: r_intersection,
+                    outer_side,
+                    filler_triangle: Triangle::new(
+                        fixed_outside.end,
+                        ext_outside.start,
+                        inside_intersection,
+                    ),
+                }
+            }
+        }
+        // Line segments overlap (degenerate)
+        else {
+            Corner::Degenerate
+        }
+    }
+    // Lines are colinear (probably). Draw a single thick line from start of first line to end of
+    // second line.
+    else {
+        Corner::Colinear
+    }
+}
+
 fn draw(
     start: Point,
     mid: Point,
