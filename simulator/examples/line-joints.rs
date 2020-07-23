@@ -203,9 +203,52 @@ fn draw(
                     .draw(display)?;
             }
         }
-        // Line segments overlap (degenerate). Draw normal but overlapping thick lines with extra
-        // triangle for bevel cap.
+        // Line segments overlap (degenerate)
         else {
+            // // 1
+            // Triangle::new(fixed_outside.start, fixed_outside.end, inside_intersection)
+            //     .into_styled(
+            //         PrimitiveStyleBuilder::new()
+            //             .fill_color(Rgb888::BLUE)
+            //             .stroke_color(Rgb888::YELLOW)
+            //             .stroke_width(1)
+            //             .build(),
+            //     )
+            //     .draw(display)?;
+
+            // // 2
+            // Triangle::new(fixed_outside.end, ext_outside.start, inside_intersection)
+            //     .into_styled(
+            //         PrimitiveStyleBuilder::new()
+            //             .fill_color(Rgb888::BLUE)
+            //             .stroke_color(Rgb888::YELLOW)
+            //             .stroke_width(1)
+            //             .build(),
+            //     )
+            //     .draw(display)?;
+
+            // // 3
+            // Triangle::new(ext_outside.start, ext_outside.end, inside_intersection)
+            //     .into_styled(
+            //         PrimitiveStyleBuilder::new()
+            //             .fill_color(Rgb888::BLUE)
+            //             .stroke_color(Rgb888::YELLOW)
+            //             .stroke_width(1)
+            //             .build(),
+            //     )
+            //     .draw(display)?;
+
+            // // 4
+            // Triangle::new(inside_intersection, ext_outside.end, ext_inside.end)
+            //     .into_styled(
+            //         PrimitiveStyleBuilder::new()
+            //             .fill_color(Rgb888::BLUE)
+            //             .stroke_color(Rgb888::YELLOW)
+            //             .stroke_width(1)
+            //             .build(),
+            //     )
+            //     .draw(display)?;
+
             // Fixed (first) line
             first_line.into_styled(linestyle).draw(display)?;
 
@@ -225,20 +268,12 @@ fn draw(
 
         // Debugging points
         {
-            Circle::with_center(l_intersection, 5)
-                .into_styled(if l_on_lines {
-                    PrimitiveStyle::with_fill(Rgb888::YELLOW)
-                } else {
-                    PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1)
-                })
+            Circle::with_center(inside_intersection, 5)
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1))
                 .draw(display)?;
 
-            Circle::with_center(r_intersection, 5)
-                .into_styled(if r_on_lines {
-                    PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255))
-                } else {
-                    PrimitiveStyle::with_stroke(Rgb888::new(0, 127, 255), 1)
-                })
+            Circle::with_center(outside_intersection, 5)
+                .into_styled(PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255)))
                 .draw(display)?;
         }
     }
