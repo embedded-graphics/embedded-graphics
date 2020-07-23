@@ -44,13 +44,6 @@ fn draw(
     let first_line = Line::new(start, mid);
     let second_line = Line::new(mid, end);
 
-    // let tstyle = PrimitiveStyle::with_stroke(Rgb888::RED, 1);
-    let tstyle = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb888::RED)
-        .stroke_width(1)
-        .fill_color(Rgb888::GREEN)
-        .build();
-
     let linestyle = PrimitiveStyle::with_stroke(Rgb888::GREEN, width);
 
     // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
@@ -153,6 +146,12 @@ fn draw(
         // this case, draw the full miter as it won't stretch out really far.
         if !is_self_intersecting {
             if miter_length_squared <= miter_limit {
+                let tstyle = PrimitiveStyleBuilder::new()
+                    .stroke_color(Rgb888::RED)
+                    .stroke_width(1)
+                    .fill_color(Rgb888::GREEN)
+                    .build();
+
                 // Fixed (first) line triangles
                 {
                     Triangle::new(
@@ -177,6 +176,12 @@ fn draw(
                         .draw(display)?;
                 }
             } else {
+                let tstyle = PrimitiveStyleBuilder::new()
+                    .stroke_color(Rgb888::YELLOW)
+                    .stroke_width(1)
+                    .fill_color(Rgb888::CYAN)
+                    .build();
+
                 // 1 (fill in beginning of first line)
                 Triangle::new(fixed_outside.start, fixed_inside.start, inside_intersection)
                     .into_styled(tstyle)
