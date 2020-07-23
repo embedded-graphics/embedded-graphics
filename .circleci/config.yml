@@ -7,11 +7,11 @@ precheck_steps: &precheck_steps
     - restore_cache:
         key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: sudo apt update && sudo apt install -qq libsdl2-dev linkchecker
-    - run: cargo install cargo-readme
+    - run: cargo install cargo-readme just
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update
-    - run: ./build.sh
+    - run: just build
     - save_cache:
         key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
@@ -35,8 +35,9 @@ target_steps: &target_steps
         else
           echo "Target $TARGET is already installed"
         fi
+    - run: cargo install just
     - run: cargo update
-    - run: ./build_target.sh --release
+    - run: just build-target $TARGET --release
     - save_cache:
         key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
