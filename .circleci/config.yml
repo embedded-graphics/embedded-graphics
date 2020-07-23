@@ -50,47 +50,47 @@ jobs:
     <<: *precheck_steps
   precheck-beta:
     environment:
-      - RUST_VERSION: 'beta'
+      - RUST_VERSION: "beta"
     <<: *precheck_steps
 
   target-arm-unknown-linux-eabi:
     environment:
-      - TARGET: 'arm-unknown-linux-gnueabi'
+      - TARGET: "arm-unknown-linux-gnueabi"
     <<: *target_steps
 
   target-armv7-unknown-linux-gnueabihf:
     environment:
-      - TARGET: 'armv7-unknown-linux-gnueabihf'
+      - TARGET: "armv7-unknown-linux-gnueabihf"
     <<: *target_steps
 
   target-x86_64-unknown-linux-gnu:
     environment:
-      - TARGET: 'x86_64-unknown-linux-gnu'
+      - TARGET: "x86_64-unknown-linux-gnu"
     <<: *target_steps
 
   target-x86_64-unknown-linux-musl:
     environment:
-      - TARGET: 'x86_64-unknown-linux-musl'
+      - TARGET: "x86_64-unknown-linux-musl"
     <<: *target_steps
 
   target-thumbv6m-none-eabi:
     environment:
-      - TARGET: 'thumbv6m-none-eabi'
+      - TARGET: "thumbv6m-none-eabi"
     <<: *target_steps
 
   target-thumbv7em-none-eabi:
     environment:
-      - TARGET: 'thumbv7em-none-eabi'
+      - TARGET: "thumbv7em-none-eabi"
     <<: *target_steps
 
   target-thumbv7em-none-eabihf:
     environment:
-      - TARGET: 'thumbv7em-none-eabihf'
+      - TARGET: "thumbv7em-none-eabihf"
     <<: *target_steps
 
   target-thumbv7m-none-eabi:
     environment:
-      - TARGET: 'thumbv7m-none-eabi'
+      - TARGET: "thumbv7m-none-eabi"
     <<: *target_steps
 
 precheck_job: &precheck_job
@@ -137,7 +137,7 @@ workflows:
     <<: *build_jobs
     triggers:
       - schedule:
-          cron: '0 0 * * *'
+          cron: "0 0 * * *"
           filters:
             branches:
               only:
