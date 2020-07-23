@@ -99,7 +99,7 @@ _build-readme crate:
 # Generates the drawing examples screenshots and markdown file
 generate-drawing-examples:
     #!/usr/bin/env bash
-    set -e -o pipefail
+    set -ex -o pipefail
     mkdir -p {{doc_assets_dir}}
     cargo run --bin generate-drawing-examples | \
         rustfmt +nightly --config-path rustfmt.examples.toml | \
