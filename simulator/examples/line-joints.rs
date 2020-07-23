@@ -256,14 +256,9 @@ fn draw(
             second_line.into_styled(linestyle).draw(display)?;
 
             // Bevel cap
-            match outer_side {
-                Side::Left => Triangle::new(fixed_ext_l.end, mid, ext_l.start)
-                    .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                    .draw(display)?,
-                Side::Right => Triangle::new(fixed_ext_r.end, mid, ext_r.start)
-                    .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
-                    .draw(display)?,
-            }
+            Triangle::new(fixed_outside.end, mid, ext_outside.start)
+                .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
+                .draw(display)?;
         }
 
         // Debugging points
