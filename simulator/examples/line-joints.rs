@@ -34,23 +34,29 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .unwrap();
 }
 
-enum Corner {
-    Miter {
-        left_intersection: Point,
-        right_intersection: Point,
-        outer_side: Side,
-    },
-    Bevel {
-        left_intersection: Point,
-        right_intersection: Point,
-        outer_side: Side,
-        filler_triangle: Triangle,
-    },
-    Degenerate,
+#[derive(Copy, Clone, Debug)]
+enum JointKind {
+    Miter,
+    Bevel { filler_triangle: Triangle },
+    Degenerate { filler_triangle: Triangle },
     Colinear,
+    StartOrEnd,
 }
 
-fn corner(start: Point, mid: Point, end: Point, width: u32) -> Corner {
+#[derive(Copy, Clone, Debug)]
+struct EdgeCorners {
+    left: Point,
+    right: Point,
+}
+
+#[derive(Copy, Clone, Debug)]
+struct Joint {
+    kind: JointKind,
+    first_edge_end: EdgeCorners,
+    second_edge_start: EdgeCorners,
+}
+
+fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
     let first_line = Line::new(start, mid);
     let second_line = Line::new(mid, end);
 
@@ -58,32 +64,32 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Corner {
     let miter_limit = (width * 2).pow(2);
 
     // Left and right edges of thick first segment
-    let (fixed_ext_l, fixed_ext_r) = first_line.extents(width as i32);
+    let (first_edge_left, first_edge_right) = first_line.extents(width as i32);
     // Left and right edges of thick second segment
-    let (ext_l, ext_r) = second_line.extents(width as i32);
+    let (second_edge_left, second_edge_right) = second_line.extents(width as i32);
 
     if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
-        ext_l.intersection(&fixed_ext_l),
-        ext_r.intersection(&fixed_ext_r),
+        second_edge_left.intersection(&first_edge_left),
+        second_edge_right.intersection(&first_edge_right),
     ) {
-        let first_segment_start_edge = Line::new(fixed_ext_l.start, fixed_ext_r.start);
-        let second_segment_end_edge = Line::new(ext_l.end, ext_r.end);
+        let first_segment_start_edge = Line::new(first_edge_left.start, first_edge_right.start);
+        let second_segment_end_edge = Line::new(second_edge_left.end, second_edge_right.end);
 
         let self_intersection_l = first_segment_start_edge
-            .intersection(&ext_l)
+            .intersection(&second_edge_left)
             .filter(|(_, on_both)| *on_both)
             .or_else(|| {
                 second_segment_end_edge
-                    .intersection(&fixed_ext_l)
+                    .intersection(&first_edge_left)
                     .filter(|(_, on_both)| *on_both)
             });
 
         let self_intersection_r = first_segment_start_edge
-            .intersection(&ext_r)
+            .intersection(&second_edge_right)
             .filter(|(_, on_both)| *on_both)
             .or_else(|| {
                 second_segment_end_edge
-                    .intersection(&fixed_ext_r)
+                    .intersection(&first_edge_right)
                     .filter(|(_, on_both)| *on_both)
             });
 
@@ -102,31 +108,21 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Corner {
             Side::Right
         };
 
-        let (
-            outside_intersection,
-            inside_intersection,
-            ext_outside,
-            ext_inside,
-            fixed_outside,
-            fixed_inside,
-        ) = match outer_side {
-            Side::Right => (
-                r_intersection,
-                l_intersection,
-                ext_r,
-                ext_l,
-                fixed_ext_r,
-                fixed_ext_l,
-            ),
-            Side::Left => (
-                l_intersection,
-                r_intersection,
-                ext_l,
-                ext_r,
-                fixed_ext_l,
-                fixed_ext_r,
-            ),
-        };
+        let (outside_intersection, inside_intersection, ext_outside, fixed_outside) =
+            match outer_side {
+                Side::Right => (
+                    r_intersection,
+                    l_intersection,
+                    second_edge_right,
+                    first_edge_right,
+                ),
+                Side::Left => (
+                    l_intersection,
+                    r_intersection,
+                    second_edge_left,
+                    first_edge_left,
+                ),
+            };
 
         // Distance from midpoint to miter end point
         let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
@@ -136,297 +132,163 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Corner {
             // Intersection is within limit at which it will be chopped off into a bevel, so return
             // a miter.
             if miter_length_squared <= miter_limit {
-                Corner::Miter {
-                    left_intersection: l_intersection,
-                    right_intersection: r_intersection,
-                    outer_side,
+                let corners = EdgeCorners {
+                    left: l_intersection,
+                    right: r_intersection,
+                };
+
+                Joint {
+                    kind: JointKind::Miter,
+                    first_edge_end: corners,
+                    second_edge_start: corners,
                 }
             }
             // Miter is too long, chop it into bevel-style corner
             else {
-                Corner::Bevel {
-                    left_intersection: l_intersection,
-                    right_intersection: r_intersection,
-                    outer_side,
-                    filler_triangle: Triangle::new(
-                        fixed_outside.end,
-                        ext_outside.start,
-                        inside_intersection,
-                    ),
+                let filler_triangle =
+                    Triangle::new(fixed_outside.end, ext_outside.start, inside_intersection);
+
+                match outer_side {
+                    // Line turning right
+                    Side::Left => Joint {
+                        kind: JointKind::Bevel { filler_triangle },
+                        first_edge_end: EdgeCorners {
+                            left: first_edge_left.end,
+                            right: inside_intersection,
+                        },
+                        second_edge_start: EdgeCorners {
+                            left: second_edge_left.start,
+                            right: inside_intersection,
+                        },
+                    },
+                    // Line turning left
+                    Side::Right => Joint {
+                        kind: JointKind::Bevel { filler_triangle },
+                        first_edge_end: EdgeCorners {
+                            left: inside_intersection,
+                            right: first_edge_right.end,
+                        },
+                        second_edge_start: EdgeCorners {
+                            left: inside_intersection,
+                            right: second_edge_right.start,
+                        },
+                    },
                 }
             }
         }
         // Line segments overlap (degenerate)
         else {
-            Corner::Degenerate
+            Joint {
+                kind: JointKind::Degenerate {
+                    filler_triangle: Triangle::new(fixed_outside.end, ext_outside.start, mid),
+                },
+                first_edge_end: EdgeCorners {
+                    left: first_edge_left.end,
+                    right: first_edge_right.end,
+                },
+                second_edge_start: EdgeCorners {
+                    left: second_edge_left.start,
+                    right: second_edge_right.start,
+                },
+            }
         }
     }
     // Lines are colinear (probably). Draw a single thick line from start of first line to end of
     // second line.
     else {
-        Corner::Colinear
+        Joint {
+            kind: JointKind::Colinear,
+            first_edge_end: EdgeCorners {
+                left: first_edge_left.start,
+                right: first_edge_right.start,
+            },
+            second_edge_start: EdgeCorners {
+                left: second_edge_left.end,
+                right: second_edge_right.end,
+            },
+        }
+    }
+}
+
+fn render_line(
+    start_corner: Joint,
+    end_corner: Joint,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    let Joint {
+        second_edge_start:
+            EdgeCorners {
+                left: left_start,
+                right: right_start,
+            },
+        ..
+    } = start_corner;
+    let Joint {
+        first_edge_end:
+            EdgeCorners {
+                left: left_end,
+                right: right_end,
+            },
+        ..
+    } = end_corner;
+
+    let style = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb888::RED)
+        .stroke_width(1)
+        // .fill_color(Rgb888::GREEN)
+        .build();
+
+    Triangle::new(left_start, left_end, right_start)
+        .into_styled(style)
+        .draw(display)?;
+
+    Triangle::new(right_start, left_end, right_end)
+        .into_styled(style)
+        .draw(display)?;
+
+    Ok(())
+}
+
+fn draw_filler_triangle(
+    corner: Joint,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    let style = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb888::YELLOW)
+        .stroke_width(1)
+        // .fill_color(Rgb888::CYAN)
+        .build();
+
+    match corner.kind {
+        JointKind::Bevel {
+            filler_triangle, ..
+        }
+        | JointKind::Degenerate {
+            filler_triangle, ..
+        } => filler_triangle.into_styled(style).draw(display),
+        _ => Ok(()),
     }
 }
 
 fn draw(
-    start: Point,
-    mid: Point,
-    end: Point,
+    triangle: Triangle,
     width: u32,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let first_line = Line::new(start, mid);
-    let second_line = Line::new(mid, end);
+    let corner_1 = corner(triangle.p3, triangle.p1, triangle.p2, width);
+    let corner_2 = corner(triangle.p1, triangle.p2, triangle.p3, width);
+    let corner_3 = corner(triangle.p2, triangle.p3, triangle.p1, width);
 
-    let linestyle = PrimitiveStyle::with_stroke(Rgb888::GREEN, width);
+    // P1 -> P2
+    render_line(corner_1, corner_2, display).unwrap();
+    // P2 -> P3
+    render_line(corner_2, corner_3, display).unwrap();
+    // P3 -> P1
+    render_line(corner_3, corner_1, display).unwrap();
 
-    // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
-    let miter_limit = (width * 2).pow(2);
-
-    // Left and right edges of thick first segment
-    let (fixed_ext_l, fixed_ext_r) = first_line.extents(width as i32);
-    // Left and right edges of thick second segment
-    let (ext_l, ext_r) = second_line.extents(width as i32);
-
-    if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
-        ext_l.intersection(&fixed_ext_l),
-        ext_r.intersection(&fixed_ext_r),
-    ) {
-        let (outer_side, is_self_intersecting) = {
-            let first_segment_start_edge = Line::new(fixed_ext_l.start, fixed_ext_r.start);
-            let second_segment_end_edge = Line::new(ext_l.end, ext_r.end);
-
-            let self_intersection_l = first_segment_start_edge
-                .intersection(&ext_l)
-                .filter(|(_, on_both)| *on_both)
-                .or_else(|| {
-                    second_segment_end_edge
-                        .intersection(&fixed_ext_l)
-                        .filter(|(_, on_both)| *on_both)
-                });
-
-            let self_intersection_r = first_segment_start_edge
-                .intersection(&ext_r)
-                .filter(|(_, on_both)| *on_both)
-                .or_else(|| {
-                    second_segment_end_edge
-                        .intersection(&fixed_ext_r)
-                        .filter(|(_, on_both)| *on_both)
-                });
-
-            let (self_intersection_l, self_intersection_r) =
-                (self_intersection_l.is_some(), self_intersection_r.is_some());
-
-            // The side that will have the miter/bevel on it, relative to first line
-            let outer_side = if l_on_lines || self_intersection_l {
-                Side::Right
-            } else if r_on_lines || self_intersection_r {
-                Side::Left
-            } else {
-                // Default to some randomly chosen side when lines are colinear
-                Side::Right
-            };
-
-            (outer_side, self_intersection_l || self_intersection_r)
-        };
-
-        let (
-            outside_intersection,
-            inside_intersection,
-            ext_outside,
-            ext_inside,
-            fixed_outside,
-            fixed_inside,
-        ) = match outer_side {
-            Side::Right => (
-                r_intersection,
-                l_intersection,
-                ext_r,
-                ext_l,
-                fixed_ext_r,
-                fixed_ext_l,
-            ),
-            Side::Left => (
-                l_intersection,
-                r_intersection,
-                ext_l,
-                ext_r,
-                fixed_ext_l,
-                fixed_ext_r,
-            ),
-        };
-
-        // Distance from midpoint to miter end point
-        let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
-
-        // // Degenerate debugger
-        // Text::new(
-        //     &format!(
-        //         "L: {} R: {}: over m lim: {}",
-        //         if is_degenerate_l { "X" } else { "-" },
-        //         if is_degenerate_r { "X" } else { "-" },
-        //         if miter_length_squared <= miter_limit {
-        //             "N"
-        //         } else {
-        //             "Y"
-        //         },
-        //     ),
-        //     Point::zero(),
-        // )
-        // .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
-        // .draw(display)?;
-
-        // Normal line: not degenerate (overlapping) and miter length is less than thickness. In
-        // this case, draw the full miter as it won't stretch out really far.
-        if !is_self_intersecting {
-            if miter_length_squared <= miter_limit {
-                let tstyle = PrimitiveStyleBuilder::new()
-                    .stroke_color(Rgb888::RED)
-                    .stroke_width(1)
-                    .fill_color(Rgb888::GREEN)
-                    .build();
-
-                // Fixed (first) line triangles
-                {
-                    Triangle::new(
-                        fixed_outside.start,
-                        outside_intersection,
-                        inside_intersection,
-                    )
-                    .into_styled(tstyle)
-                    .draw(display)?;
-                    Triangle::new(fixed_outside.start, inside_intersection, fixed_inside.start)
-                        .into_styled(tstyle)
-                        .draw(display)?;
-                }
-
-                // Movable (second) line triangles
-                {
-                    Triangle::new(outside_intersection, ext_outside.end, inside_intersection)
-                        .into_styled(tstyle)
-                        .draw(display)?;
-                    Triangle::new(ext_outside.end, ext_inside.end, inside_intersection)
-                        .into_styled(tstyle)
-                        .draw(display)?;
-                }
-            } else {
-                let tstyle = PrimitiveStyleBuilder::new()
-                    .stroke_color(Rgb888::YELLOW)
-                    .stroke_width(1)
-                    .fill_color(Rgb888::CYAN)
-                    .build();
-
-                // 1 (fill in beginning of first line)
-                Triangle::new(fixed_outside.start, fixed_inside.start, inside_intersection)
-                    .into_styled(tstyle)
-                    .draw(display)?;
-
-                // 2 (adjacent to bevel)
-                Triangle::new(fixed_outside.start, fixed_outside.end, inside_intersection)
-                    .into_styled(tstyle)
-                    .draw(display)?;
-
-                // 3 (bevel)
-                Triangle::new(fixed_outside.end, ext_outside.start, inside_intersection)
-                    .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                    .draw(display)?;
-
-                // 4 (adjacent to bevel)
-                Triangle::new(ext_outside.start, inside_intersection, ext_outside.end)
-                    .into_styled(tstyle)
-                    .draw(display)?;
-
-                // 5 (fill in end of second line)
-                Triangle::new(inside_intersection, ext_outside.end, ext_inside.end)
-                    .into_styled(tstyle)
-                    .draw(display)?;
-            }
-        }
-        // Line segments overlap (degenerate)
-        else {
-            // // 1
-            // Triangle::new(fixed_outside.start, fixed_outside.end, inside_intersection)
-            //     .into_styled(
-            //         PrimitiveStyleBuilder::new()
-            //             .fill_color(Rgb888::BLUE)
-            //             .stroke_color(Rgb888::YELLOW)
-            //             .stroke_width(1)
-            //             .build(),
-            //     )
-            //     .draw(display)?;
-
-            // // 2
-            // Triangle::new(fixed_outside.end, ext_outside.start, inside_intersection)
-            //     .into_styled(
-            //         PrimitiveStyleBuilder::new()
-            //             .fill_color(Rgb888::BLUE)
-            //             .stroke_color(Rgb888::YELLOW)
-            //             .stroke_width(1)
-            //             .build(),
-            //     )
-            //     .draw(display)?;
-
-            // // 3
-            // Triangle::new(ext_outside.start, ext_outside.end, inside_intersection)
-            //     .into_styled(
-            //         PrimitiveStyleBuilder::new()
-            //             .fill_color(Rgb888::BLUE)
-            //             .stroke_color(Rgb888::YELLOW)
-            //             .stroke_width(1)
-            //             .build(),
-            //     )
-            //     .draw(display)?;
-
-            // // 4
-            // Triangle::new(inside_intersection, ext_outside.end, ext_inside.end)
-            //     .into_styled(
-            //         PrimitiveStyleBuilder::new()
-            //             .fill_color(Rgb888::BLUE)
-            //             .stroke_color(Rgb888::YELLOW)
-            //             .stroke_width(1)
-            //             .build(),
-            //     )
-            //     .draw(display)?;
-
-            // Fixed (first) line
-            first_line.into_styled(linestyle).draw(display)?;
-
-            // Moving (second) line
-            second_line.into_styled(linestyle).draw(display)?;
-
-            // Bevel cap
-            Triangle::new(fixed_outside.end, mid, ext_outside.start)
-                .into_styled(PrimitiveStyle::with_fill(Rgb888::RED))
-                .draw(display)?;
-        }
-
-        // Debugging points
-        {
-            Circle::with_center(inside_intersection, 5)
-                .into_styled(PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1))
-                .draw(display)?;
-
-            Circle::with_center(outside_intersection, 5)
-                .into_styled(PrimitiveStyle::with_fill(Rgb888::new(0, 127, 255)))
-                .draw(display)?;
-        }
-    }
-    // Lines are colinear (probably). Draw a single thick line from start of first line to end of
-    // second line.
-    else {
-        // Text::new("Colinear!", Point::zero())
-        //     .into_styled(TextStyle::new(Font6x8, Rgb888::RED))
-        //     .draw(display)?;
-
-        Line::new(first_line.start, second_line.end)
-            .into_styled(linestyle)
-            .draw(display)?;
-    }
-
-    // empty_crosshair(ext_l.start, Rgb888::RED, display);
-    // empty_crosshair(ext_l.end, Rgb888::RED, display);
-    // empty_crosshair(ext_r.start, Rgb888::new(255, 127, 0), display);
-    // empty_crosshair(ext_r.end, Rgb888::new(255, 127, 0), display);
+    draw_filler_triangle(corner_1, display)?;
+    draw_filler_triangle(corner_2, display)?;
+    draw_filler_triangle(corner_3, display)?;
 
     Ok(())
 }
@@ -444,17 +306,7 @@ fn trongle(
 
     let trongle = Triangle::new(p1, p2, p3);
 
-    let l1 = Line::new(trongle.p1, trongle.p2);
-    let l2 = Line::new(trongle.p1, trongle.p3);
-    let l3 = Line::new(trongle.p2, trongle.p3);
-
-    let l1_mid = l1.midpoint();
-    let l2_mid = l2.midpoint();
-    let l3_mid = l3.midpoint();
-
-    draw(l1_mid, p1, l2_mid, width, display)?;
-    draw(l1_mid, p2, l3_mid, width, display)?;
-    draw(l2_mid, p3, l3_mid, width, display)?;
+    draw(trongle, width, display)?;
 
     Ok(())
 }
@@ -472,10 +324,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut mouse_down = false;
 
-    let mid = Point::new(100, 100);
-    let start = Point::new(50, 130);
-
-    trongle(end_point, width, &mut display);
+    trongle(end_point, width, &mut display)?;
 
     'running: loop {
         window.update(&display);
@@ -502,7 +351,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            trongle(end_point, width, &mut display);
+            trongle(end_point, width, &mut display)?;
         }
     }
 
