@@ -5,15 +5,16 @@ precheck_steps: &precheck_steps
   steps:
     - checkout
     - restore_cache:
-        key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: sudo apt update && sudo apt install -qq libsdl2-dev linkchecker
-    - run: cargo install cargo-readme
+    - run: cargo install cargo-readme just
     - run: rustup default ${RUST_VERSION:-stable}
+    - run: rustup toolchain add nightly -c rustfmt
     - run: rustup component add rustfmt
     - run: cargo update
-    - run: ./build.sh
+    - run: just build
     - save_cache:
-        key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
           - ./target
           - /usr/local/cargo/registry
@@ -26,7 +27,7 @@ target_steps: &target_steps
     - checkout
     - restore_cache:
         keys:
-          - v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+          - v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: |
         SYSROOT=$(rustc --print sysroot)
 
@@ -35,10 +36,11 @@ target_steps: &target_steps
         else
           echo "Target $TARGET is already installed"
         fi
+    - run: cargo install just
     - run: cargo update
-    - run: ./build_target.sh --release
+    - run: just build-target $TARGET --release
     - save_cache:
-        key: v2-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
           - ./target
           - /usr/local/cargo/registry
@@ -49,47 +51,47 @@ jobs:
     <<: *precheck_steps
   precheck-beta:
     environment:
-      - RUST_VERSION: 'beta'
+      - RUST_VERSION: "beta"
     <<: *precheck_steps
 
   target-arm-unknown-linux-eabi:
     environment:
-      - TARGET: 'arm-unknown-linux-gnueabi'
+      - TARGET: "arm-unknown-linux-gnueabi"
     <<: *target_steps
 
   target-armv7-unknown-linux-gnueabihf:
     environment:
-      - TARGET: 'armv7-unknown-linux-gnueabihf'
+      - TARGET: "armv7-unknown-linux-gnueabihf"
     <<: *target_steps
 
   target-x86_64-unknown-linux-gnu:
     environment:
-      - TARGET: 'x86_64-unknown-linux-gnu'
+      - TARGET: "x86_64-unknown-linux-gnu"
     <<: *target_steps
 
   target-x86_64-unknown-linux-musl:
     environment:
-      - TARGET: 'x86_64-unknown-linux-musl'
+      - TARGET: "x86_64-unknown-linux-musl"
     <<: *target_steps
 
   target-thumbv6m-none-eabi:
     environment:
-      - TARGET: 'thumbv6m-none-eabi'
+      - TARGET: "thumbv6m-none-eabi"
     <<: *target_steps
 
   target-thumbv7em-none-eabi:
     environment:
-      - TARGET: 'thumbv7em-none-eabi'
+      - TARGET: "thumbv7em-none-eabi"
     <<: *target_steps
 
   target-thumbv7em-none-eabihf:
     environment:
-      - TARGET: 'thumbv7em-none-eabihf'
+      - TARGET: "thumbv7em-none-eabihf"
     <<: *target_steps
 
   target-thumbv7m-none-eabi:
     environment:
-      - TARGET: 'thumbv7m-none-eabi'
+      - TARGET: "thumbv7m-none-eabi"
     <<: *target_steps
 
 precheck_job: &precheck_job
@@ -136,7 +138,7 @@ workflows:
     <<: *build_jobs
     triggers:
       - schedule:
-          cron: '0 0 * * *'
+          cron: "0 0 * * *"
           filters:
             branches:
               only:
