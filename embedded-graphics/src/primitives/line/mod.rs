@@ -76,6 +76,38 @@ fn same_signs(a: i32, b: i32) -> bool {
     a ^ b >= 0
 }
 
+/// Intersection test result.
+#[derive(Copy, Clone, Debug)]
+pub enum Intersection {
+    /// Intersection at point
+    Point {
+        /// Intersection point.
+        point: Point,
+
+        /// The side to which the second line "leans" relative to the first, if stacked on top of
+        /// each other.
+        ///
+        /// For example:
+        ///
+        /// ```
+        /// # Right side:
+        ///
+        ///  _
+        /// /
+        ///
+        /// # Left side:
+        ///  |
+        /// /
+        /// ```
+        ///
+        /// This is used to find the outside edge of a corner.
+        side: Side,
+    },
+
+    /// No intersection: lines are colinear or parallel.
+    Parallel,
+}
+
 impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
@@ -105,13 +137,7 @@ impl Line {
         )
     }
 
-    /// Integer-only line segment intersection
-    ///
-    /// If the point lies on both line segments, the second tuple argument will return `true`.
-    ///
-    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
-    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
-    pub fn intersection(&self, other: &Self) -> Option<(Point, bool)> {
+    fn coefficients(&self, other: &Self) -> (i32, i32, i32, i32, i32, i32, i32) {
         let Point { x: x1, y: y1 } = self.start;
         let Point { x: x2, y: y2 } = self.end;
         let Point { x: x3, y: y3 } = other.start;
@@ -129,10 +155,22 @@ impl Line {
 
         let denom = a1 * b2 - a2 * b1;
 
-        // Lines are colinear
+        (a1, b1, c1, a2, b2, c2, denom)
+    }
+
+    /// Check if two line segments intersect.
+    pub fn segment_intersection(&self, other: &Self) -> bool {
+        let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
+
+        // Lines are colinear or parallel
         if denom == 0 {
-            return None;
+            return false;
         }
+
+        let Point { x: x1, y: y1 } = self.start;
+        let Point { x: x2, y: y2 } = self.end;
+        let Point { x: x3, y: y3 } = other.start;
+        let Point { x: x4, y: y4 } = other.end;
 
         // Compute sign values
         let r3 = a1 * x3 + b1 * y3 + c1;
@@ -150,8 +188,20 @@ impl Line {
         //
         // Check signs of r1 and r2.  If both point 1 and point 2 lie on same side of second line
         // segment, the line segments do not intersect.
-        let is_on_segments = (r3 == 0 || r4 == 0 || !same_signs(r3, r4))
-            && (r1 == 0 || r2 == 0 || !same_signs(r1, r2));
+        (r3 == 0 || r4 == 0 || !same_signs(r3, r4)) && (r1 == 0 || r2 == 0 || !same_signs(r1, r2))
+    }
+
+    /// Integer-only line intersection
+    ///
+    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
+    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
+    pub fn line_intersection(&self, other: &Self) -> Intersection {
+        let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
+
+        // Lines are colinear or parallel
+        if denom == 0 {
+            return Intersection::Parallel;
+        }
 
         // If we got here, line segments intersect. Compute intersection point using method similar
         // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
@@ -166,7 +216,10 @@ impl Line {
         let num = a2 * c1 - a1 * c2;
         let y = if num < 0 { num - offset } else { num + offset } / denom;
 
-        Some((Point::new(x, y), is_on_segments))
+        Intersection::Point {
+            point: Point::new(x, y),
+            side: if denom <= 0 { Side::Left } else { Side::Right },
+        }
     }
 
     /// Get two lines representing the left and right edges of the thick line.
