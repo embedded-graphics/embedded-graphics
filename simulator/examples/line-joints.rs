@@ -1,5 +1,10 @@
 use embedded_graphics::{
-    fonts::*, pixelcolor::Rgb888, prelude::*, primitives::line::Side, primitives::*, style::*,
+    fonts::*,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::line::{Intersection, Side},
+    primitives::*,
+    style::*,
 };
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
@@ -68,45 +73,28 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
     // Left and right edges of thick second segment
     let (second_edge_left, second_edge_right) = second_line.extents(width as i32);
 
-    if let (Some((l_intersection, l_on_lines)), Some((r_intersection, r_on_lines))) = (
-        second_edge_left.intersection(&first_edge_left),
-        second_edge_right.intersection(&first_edge_right),
+    if let (
+        Intersection::Point {
+            point: l_intersection,
+            side: outer_side,
+            ..
+        },
+        Intersection::Point {
+            point: r_intersection,
+            ..
+        },
+    ) = (
+        second_edge_left.line_intersection(&first_edge_left),
+        second_edge_right.line_intersection(&first_edge_right),
     ) {
         let first_segment_start_edge = Line::new(first_edge_left.start, first_edge_right.start);
         let second_segment_end_edge = Line::new(second_edge_left.end, second_edge_right.end);
 
-        let self_intersection_l = first_segment_start_edge
-            .intersection(&second_edge_left)
-            .filter(|(_, on_both)| *on_both)
-            .or_else(|| {
-                second_segment_end_edge
-                    .intersection(&first_edge_left)
-                    .filter(|(_, on_both)| *on_both)
-            });
+        let self_intersection_l = first_segment_start_edge.segment_intersection(&second_edge_left)
+            || second_segment_end_edge.segment_intersection(&first_edge_left);
 
-        let self_intersection_r = first_segment_start_edge
-            .intersection(&second_edge_right)
-            .filter(|(_, on_both)| *on_both)
-            .or_else(|| {
-                second_segment_end_edge
-                    .intersection(&first_edge_right)
-                    .filter(|(_, on_both)| *on_both)
-            });
-
-        let (self_intersection_l, self_intersection_r) =
-            (self_intersection_l.is_some(), self_intersection_r.is_some());
-
-        let is_self_intersecting = self_intersection_l || self_intersection_r;
-
-        // The side that will have the miter/bevel on it, relative to first line
-        let outer_side = if l_on_lines || self_intersection_l {
-            Side::Right
-        } else if r_on_lines || self_intersection_r {
-            Side::Left
-        } else {
-            // Default to some randomly chosen side when lines are colinear
-            Side::Right
-        };
+        let self_intersection_r = first_segment_start_edge.segment_intersection(&second_edge_right)
+            || second_segment_end_edge.segment_intersection(&first_edge_right);
 
         let (outside_intersection, inside_intersection, ext_outside, fixed_outside) =
             match outer_side {
@@ -128,7 +116,7 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
         let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
 
         // Normal line: non-overlapping line end caps
-        if !is_self_intersecting {
+        if !self_intersection_l && !self_intersection_r {
             // Intersection is within limit at which it will be chopped off into a bevel, so return
             // a miter.
             if miter_length_squared <= miter_limit {
@@ -145,13 +133,18 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
             }
             // Miter is too long, chop it into bevel-style corner
             else {
-                let filler_triangle =
-                    Triangle::new(fixed_outside.end, ext_outside.start, inside_intersection);
+                let kind = JointKind::Bevel {
+                    filler_triangle: Triangle::new(
+                        fixed_outside.end,
+                        ext_outside.start,
+                        inside_intersection,
+                    ),
+                };
 
                 match outer_side {
                     // Line turning right
                     Side::Left => Joint {
-                        kind: JointKind::Bevel { filler_triangle },
+                        kind,
                         first_edge_end: EdgeCorners {
                             left: first_edge_left.end,
                             right: inside_intersection,
@@ -163,7 +156,7 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
                     },
                     // Line turning left
                     Side::Right => Joint {
-                        kind: JointKind::Bevel { filler_triangle },
+                        kind,
                         first_edge_end: EdgeCorners {
                             left: inside_intersection,
                             right: first_edge_right.end,
@@ -193,8 +186,7 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
             }
         }
     }
-    // Lines are colinear (probably). Draw a single thick line from start of first line to end of
-    // second line.
+    // Lines are colinear
     else {
         Joint {
             kind: JointKind::Colinear,

@@ -9,7 +9,9 @@ fn draw(e2: Point, display: &mut SimulatorDisplay<Rgb888>) {
     let s1 = Point::new(10, 100);
     let e1 = Point::new(130, 40);
 
-    let s2 = Point::new(50, 10);
+    // let s2 = Point::new(50, 10);
+    // let s2 = Point::new(200, 200) - e2;
+    let s2 = e1;
 
     // First static line
     let l1 = Line::new(s1, e1);
@@ -25,7 +27,7 @@ fn draw(e2: Point, display: &mut SimulatorDisplay<Rgb888>) {
         .draw(display)
         .unwrap();
 
-    if let Some((point, is_on_lines)) = l1.intersection(&l2) {
+    if let Some((point, is_on_lines, _)) = l1.intersection(&l2) {
         // Draw intersection point
         Circle::with_center(point, 5)
             .into_styled(PrimitiveStyle::with_fill(if is_on_lines {
