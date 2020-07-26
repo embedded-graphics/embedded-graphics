@@ -15,6 +15,7 @@ use crate::{
         },
         Primitive, Rectangle,
     },
+    style::StrokeAlignment,
     transform::Transform,
 };
 pub use points::Points;
@@ -223,24 +224,36 @@ impl Line {
     }
 
     /// Get two lines representing the left and right edges of the thick line.
-    pub fn extents(&self, thickness: i32) -> (Line, Line) {
+    ///
+    /// Outside stroke alignment is always on the left side of the line. This is compatible with
+    /// clockwise-wound polygons and triangles.
+    pub fn extents(&self, thickness: i32, alignment: StrokeAlignment) -> (Line, Line) {
         let it = ParallelsIterator::new(self, thickness);
-        let mut start_l = self.start;
-        let mut start_r = self.start;
+
+        let mut l_delta = Point::zero();
+        let mut r_delta = Point::zero();
 
         for (bres, _, side) in it {
             match side {
                 Side::Left => {
-                    start_l = bres.point;
+                    l_delta = bres.point - self.start;
                 }
                 Side::Right => {
-                    start_r = bres.point;
+                    r_delta = bres.point - self.start;
                 }
             }
         }
 
-        let l_delta = start_l - self.start;
-        let r_delta = start_r - self.start;
+        let (l_delta, r_delta) = match alignment {
+            StrokeAlignment::Center => (l_delta, r_delta),
+            // Left
+            StrokeAlignment::Outside => (l_delta - r_delta, Point::zero()),
+            // Right
+            StrokeAlignment::Inside => (Point::zero(), r_delta - l_delta),
+        };
+
+        let start_l = self.start + l_delta;
+        let start_r = self.start + r_delta;
 
         let end_l = self.end + l_delta;
         let end_r = self.end + r_delta;
