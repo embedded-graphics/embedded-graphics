@@ -9,7 +9,7 @@ screenshots_dir := target_dir + "/screenshots"
 # Building
 #----------
 
-build: check-formatting test test-all build-benches build-simulator check-drawing-examples check-readmes generate-docs check-links
+build: check-formatting test test-all build-benches build-simulator check-drawing-examples check-readmes check-links
 
 # Build the benches
 build-benches:
@@ -53,7 +53,7 @@ generate-docs:
     cargo doc --all-features
 
 # Runs linkchecker on the docs
-check-links:
+check-links: generate-docs
     linkchecker --check-extern --ignore-url=^http \
         target/doc/embedded_graphics/index.html \
         target/doc/tinybmp/index.html \

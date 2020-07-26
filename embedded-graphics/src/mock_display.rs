@@ -163,7 +163,7 @@
 //! [`Gray8`]: ../pixelcolor/struct.Gray8.html
 //! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
-//! [`DrawTarget`]: ../trait.DrawTarget.html
+//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 //! [`MockDisplay`]: struct.MockDisplay.html
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
 //! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw

@@ -236,7 +236,7 @@
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/struct.Font6x8.html
-//! [`DrawTarget`]: ./draw_target/trait.DrawTarget.html
+//! [`DrawTarget`]: draw_target/trait.DrawTarget.html
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 
 #![doc(
