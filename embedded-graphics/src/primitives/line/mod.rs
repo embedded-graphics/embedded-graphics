@@ -15,6 +15,7 @@ use crate::{
         },
         Primitive, Rectangle,
     },
+    style::StrokeAlignment,
     transform::Transform,
     SaturatingCast,
 };
@@ -129,7 +130,9 @@ impl Line {
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
-    fn extents(&self, thickness: u32) -> (Line, Line) {
+    /// Outside stroke alignment is on the left side of the line, making this compatible with
+    /// clockwise triangles, polygons, etc.
+    fn extents(&self, thickness: u32, alignment: StrokeAlignment) -> (Line, Line) {
         let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
@@ -151,11 +154,21 @@ impl Line {
             }
         }
 
+        let side_delta = right.0 - left.0;
+
+        let (left_start, right_start) = match alignment {
+            StrokeAlignment::Center => (left.0, right.0),
+            // Left
+            StrokeAlignment::Outside => (left.0 - side_delta, right.0),
+            // Right
+            StrokeAlignment::Inside => (left.0, right.0 + side_delta),
+        };
+
         let delta = self.end - self.start;
 
         let left_line = Line::new(
-            left.0,
-            left.0 + delta
+            left_start,
+            left_start + delta
                 - match left.1 {
                     ParallelLineType::Normal => Point::zero(),
                     ParallelLineType::Extra => reduce,
@@ -163,8 +176,8 @@ impl Line {
         );
 
         let right_line = Line::new(
-            right.0,
-            right.0 + delta
+            right_start,
+            right_start + delta
                 - match right.1 {
                     ParallelLineType::Normal => Point::zero(),
                     ParallelLineType::Extra => reduce,
@@ -565,7 +578,7 @@ mod tests {
     fn extents_zero_thickness() {
         let line = Line::new(Point::new(10, 20), Point::new(20, 10));
 
-        let (l, r) = line.extents(0);
+        let (l, r) = line.extents(0, StrokeAlignment::Center);
 
         assert_eq!(l, line);
         assert_eq!(r, line);

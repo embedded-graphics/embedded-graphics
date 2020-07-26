@@ -61,7 +61,7 @@ struct Joint {
     second_edge_start: EdgeCorners,
 }
 
-fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
+fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Joint {
     let first_line = Line::new(start, mid);
     let second_line = Line::new(mid, end);
 
@@ -69,9 +69,9 @@ fn corner(start: Point, mid: Point, end: Point, width: u32) -> Joint {
     let miter_limit = (width * 2).pow(2);
 
     // Left and right edges of thick first segment
-    let (first_edge_left, first_edge_right) = first_line.extents(width as i32);
+    let (first_edge_left, first_edge_right) = first_line.extents(width as i32, alignment);
     // Left and right edges of thick second segment
-    let (second_edge_left, second_edge_right) = second_line.extents(width as i32);
+    let (second_edge_left, second_edge_right) = second_line.extents(width as i32, alignment);
 
     if let (
         Intersection::Point {
@@ -238,6 +238,11 @@ fn render_line(
         .into_styled(style)
         .draw(display)?;
 
+    // Highlight left (outside) edge
+    Line::new(left_start, left_end)
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
+        .draw(display)?;
+
     Ok(())
 }
 
@@ -248,7 +253,7 @@ fn draw_filler_triangle(
     let style = PrimitiveStyleBuilder::new()
         .stroke_color(Rgb888::YELLOW)
         .stroke_width(1)
-        // .fill_color(Rgb888::CYAN)
+        // .fill_color(Rgb888::GREEN)
         .build();
 
     match corner.kind {
@@ -265,11 +270,12 @@ fn draw_filler_triangle(
 fn draw(
     triangle: Triangle,
     width: u32,
+    alignment: StrokeAlignment,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let corner_1 = corner(triangle.p3, triangle.p1, triangle.p2, width);
-    let corner_2 = corner(triangle.p1, triangle.p2, triangle.p3, width);
-    let corner_3 = corner(triangle.p2, triangle.p3, triangle.p1, width);
+    let corner_1 = corner(triangle.p3, triangle.p1, triangle.p2, width, alignment);
+    let corner_2 = corner(triangle.p1, triangle.p2, triangle.p3, width, alignment);
+    let corner_3 = corner(triangle.p2, triangle.p3, triangle.p1, width, alignment);
 
     // P1 -> P2
     render_line(corner_1, corner_2, display).unwrap();
@@ -288,6 +294,7 @@ fn draw(
 fn trongle(
     moving_point: Point,
     width: u32,
+    alignment: StrokeAlignment,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
     display.clear(Rgb888::BLACK).unwrap();
@@ -295,28 +302,66 @@ fn trongle(
     let p1 = Point::new(100, 100);
     let p2 = Point::new(50, 130);
     let p3 = moving_point;
+    // let p3 = Point::new(92, 20);
 
-    let trongle = Triangle::new(p1, p2, p3);
+    let trongle = Triangle::new(p1, p2, p3).sorted_clockwise();
 
-    draw(trongle, width, display)?;
+    draw(trongle, width, alignment, display)?;
+
+    Text::new("P1", trongle.p1)
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .background_color(Rgb888::YELLOW)
+                .text_color(Rgb888::BLUE)
+                .build(),
+        )
+        .draw(display)?;
+
+    Text::new("P2", trongle.p2)
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .background_color(Rgb888::YELLOW)
+                .text_color(Rgb888::BLUE)
+                .build(),
+        )
+        .draw(display)?;
+
+    Text::new("P3", trongle.p3)
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .background_color(Rgb888::YELLOW)
+                .text_color(Rgb888::BLUE)
+                .build(),
+        )
+        .draw(display)?;
+
+    Text::new(&format!("{:?}", alignment), Point::zero())
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .background_color(Rgb888::YELLOW)
+                .text_color(Rgb888::BLUE)
+                .build(),
+        )
+        .draw(display)?;
 
     Ok(())
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(200, 200));
+    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(190, 190));
     let output_settings = OutputSettingsBuilder::new()
-        .scale(4)
-        .pixel_spacing(1)
+        .scale(2)
+        // .pixel_spacing(1)
         .build();
     let mut window = Window::new("Line joints debugger", &output_settings);
 
     let mut end_point = Point::new(20, 20);
     let mut width = 15u32;
+    let mut alignment = StrokeAlignment::Center;
 
     let mut mouse_down = false;
 
-    trongle(end_point, width, &mut display)?;
+    trongle(end_point, width, alignment, &mut display)?;
 
     'running: loop {
         window.update(&display);
@@ -332,6 +377,13 @@ fn main() -> Result<(), core::convert::Infallible> {
                 SimulatorEvent::KeyDown { keycode, .. } => match keycode {
                     Keycode::Up => width += 1,
                     Keycode::Down => width = width.saturating_sub(1),
+                    Keycode::Space => {
+                        alignment = match alignment {
+                            StrokeAlignment::Center => StrokeAlignment::Outside,
+                            StrokeAlignment::Outside => StrokeAlignment::Inside,
+                            StrokeAlignment::Inside => StrokeAlignment::Center,
+                        }
+                    }
                     _ => (),
                 },
                 SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
@@ -343,7 +395,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            trongle(end_point, width, &mut display)?;
+            trongle(end_point, width, alignment, &mut display)?;
         }
     }
 

@@ -8,7 +8,7 @@ use crate::{
         line::{thick_points::ThickPoints, Line},
         Rectangle,
     },
-    style::{PrimitiveStyle, Styled},
+    style::{PrimitiveStyle, StrokeAlignment, Styled},
     SaturatingCast,
 };
 
@@ -90,7 +90,9 @@ where
 {
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
-            let (l, r) = self.primitive.extents(self.style.stroke_width);
+            let (l, r) = self
+                .primitive
+                .extents(self.style.stroke_width, StrokeAlignment::Center);
 
             let min = l
                 .start
