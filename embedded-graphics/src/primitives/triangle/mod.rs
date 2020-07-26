@@ -9,6 +9,7 @@ use crate::{
     primitives::{ContainsPoint, Line, Primitive, Rectangle},
     transform::Transform,
 };
+use core::cmp::Ordering;
 use core::{
     borrow::Borrow,
     cmp::{max, min},
@@ -178,12 +179,66 @@ impl Triangle {
 
     /// Return the area of the triangle, doubled.
     ///
+    /// If the triangle's winding order is counter-clockwise, this method will return a negative
+    /// value.
+    ///
     /// This method can be used to determine if the triangle is colinear by checking if the returned
     /// value is equal to zero.
     fn area_doubled(&self) -> i32 {
         let Self { p1, p2, p3 } = self;
 
         -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y
+    }
+
+    /// Create a new triangle with points sorted in a clockwise direction
+    pub fn sorted_clockwise(&self) -> Self {
+        match self.area_doubled().cmp(&0) {
+            // Triangle is wound CCW. Swap two points to make it CW.
+            Ordering::Less => Self::new(self.p2, self.p1, self.p3),
+            // Triangle is already CW, do nothing.
+            Ordering::Greater => *self,
+            // Triangle is colinear. Sort points so they lie sequentially along the line.
+            Ordering::Equal => {
+                let (p1, p2, p3) = sort_yx(self.p1, self.p2, self.p3);
+
+                Self::new(p1, p2, p3)
+            }
+        }
+    }
+}
+
+// https://stackoverflow.com/a/6989383/383609
+// NOTE: This is unused, but kept around as it took a while to find, and may be useful for polygon
+// calculations.
+#[allow(unused)]
+fn sort_clockwise(a: Point, b: Point, center: Point) -> Ordering {
+    if a.x - center.x >= 0 && b.x - center.x < 0 {
+        return Ordering::Greater;
+    }
+    if a.x - center.x < 0 && b.x - center.x >= 0 {
+        return Ordering::Less;
+    }
+    if a.x - center.x == 0 && b.x - center.x == 0 {
+        if a.y - center.y >= 0 || b.y - center.y >= 0 {
+            return a.y.cmp(&b.y);
+        }
+        return b.y.cmp(&a.y);
+    }
+
+    // Compute the cross product of vectors (center -> a) x (center -> b)
+    let det = (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y);
+
+    match det.cmp(&0) {
+        Ordering::Less => Ordering::Greater,
+        Ordering::Greater => Ordering::Less,
+        Ordering::Equal => {
+            // Points a and b are on the same line from the center. Check which point is closer to
+            // the center.
+            let d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
+            let d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y);
+
+            d1.cmp(&d2)
+        }
     }
 }
 
