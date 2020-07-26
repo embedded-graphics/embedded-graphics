@@ -1,6 +1,6 @@
 //! Pixel iterator
 
-use crate::{drawable::Pixel, geometry::Point, pixelcolor::PixelColor, DrawTarget};
+use crate::{draw_target::DrawTarget, drawable::Pixel, geometry::Point, pixelcolor::PixelColor};
 
 /// Extension trait for pixel iterators.
 pub trait PixelIteratorExt<C>

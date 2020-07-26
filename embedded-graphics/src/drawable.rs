@@ -1,5 +1,5 @@
 //! `Drawable` trait and helpers
-use crate::{geometry::Point, pixelcolor::PixelColor, DrawTarget};
+use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 
 /// Marks an object as "drawable". Must be implemented for all graphics objects
 ///

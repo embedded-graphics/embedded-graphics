@@ -170,6 +170,7 @@
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
 
 use crate::{
+    draw_target::DrawTarget,
     drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::{
@@ -178,7 +179,6 @@ use crate::{
     },
     prelude::Primitive,
     primitives::{ContainsPoint, Rectangle},
-    DrawTarget,
 };
 use core::{
     cmp::PartialEq,

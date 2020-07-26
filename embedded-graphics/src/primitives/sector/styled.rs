@@ -1,4 +1,5 @@
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -6,7 +7,7 @@ use crate::{
         arc::PlaneSectorIterator, circle::DistanceIterator, line::ThickPoints, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
-    DrawTarget, SaturatingCast,
+    SaturatingCast,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

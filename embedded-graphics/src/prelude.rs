@@ -2,7 +2,7 @@
 
 #[doc(no_inline)]
 pub use crate::{
-    draw_target::DrawTargetExt,
+    draw_target::{DrawTarget, DrawTargetExt},
     fonts::Font,
     geometry::{Angle, AngleUnit, Dimensions, Point, Size},
     image::{ImageDimensions, IntoPixelIter},
@@ -11,5 +11,5 @@ pub use crate::{
     primitives::{ContainsPoint, Primitive},
     style::StyledPrimitiveAreas,
     transform::Transform,
-    DrawTarget, Drawable, Pixel,
+    Drawable, Pixel,
 };

@@ -256,7 +256,7 @@
 #[cfg(feature = "nalgebra_support")]
 extern crate nalgebra;
 
-mod draw_target;
+pub mod draw_target;
 mod drawable;
 pub mod fonts;
 pub mod geometry;
@@ -269,10 +269,7 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-pub use crate::{
-    draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
-};
+pub use crate::drawable::{Drawable, Pixel};
 
 /// Trait to convert unsigned into signed integer.
 pub(crate) trait SaturatingCast<T> {
