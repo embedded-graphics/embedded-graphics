@@ -48,6 +48,19 @@ enum JointKind {
     StartOrEnd,
 }
 
+use std::fmt;
+impl fmt::Display for JointKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Miter => f.write_str("Miter"),
+            Self::Bevel { .. } => f.write_str("Bevel"),
+            Self::Degenerate { .. } => f.write_str("Degenerate"),
+            Self::Colinear => f.write_str("Colinear"),
+            Self::StartOrEnd => f.write_str("StartOrEnd"),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 struct EdgeCorners {
     left: Point,
@@ -61,9 +74,28 @@ struct Joint {
     second_edge_start: EdgeCorners,
 }
 
+impl Joint {
+    fn is_degenerate(&self) -> bool {
+        match self.kind {
+            JointKind::Degenerate { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_colinear(&self) -> bool {
+        match self.kind {
+            JointKind::Colinear => true,
+            _ => false,
+        }
+    }
+}
+
 fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Joint {
     let first_line = Line::new(start, mid);
     let second_line = Line::new(mid, end);
+
+    // let first_line = Line::new(first_line.midpoint(), mid);
+    // let second_line = Line::new(mid, second_line.midpoint());
 
     // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
     let miter_limit = (width * 2).pow(2);
@@ -174,7 +206,7 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
     }
 }
 
-fn render_line(
+fn draw_thick_edge(
     start_corner: Joint,
     end_corner: Joint,
     display: &mut SimulatorDisplay<Rgb888>,
@@ -239,6 +271,85 @@ fn draw_filler_triangle(
     }
 }
 
+fn draw_degenerate_edge(
+    start_corner: Joint,
+    end_corner: Joint,
+    center: Point,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    let Joint {
+        second_edge_start:
+            EdgeCorners {
+                left: left_start,
+                right: right_start,
+            },
+        ..
+    } = start_corner;
+    let Joint {
+        first_edge_end:
+            EdgeCorners {
+                left: left_end,
+                right: right_end,
+            },
+        ..
+    } = end_corner;
+
+    let style = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb888::CYAN)
+        .stroke_width(1)
+        // .fill_color(Rgb888::GREEN)
+        .build();
+
+    let tri = Triangle::new(left_start, left_end, center);
+
+    if tri.area_doubled() > 0 {
+        Triangle::new(left_start, left_end, center)
+            .into_styled(style)
+            .draw(display)?;
+    }
+
+    // Highlight left (outside) edge
+    Line::new(left_start, left_end)
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
+        .draw(display)?;
+
+    Ok(())
+}
+
+fn draw_degenerate_bevel(
+    corner: Joint,
+    center: Point,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    let style = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb888::YELLOW)
+        .stroke_width(1)
+        // .fill_color(Rgb888::GREEN)
+        .build();
+
+    match corner.kind {
+        JointKind::Bevel {
+            filler_triangle, ..
+        }
+        | JointKind::Degenerate {
+            filler_triangle, ..
+        } => Triangle::new(filler_triangle.p1, filler_triangle.p2, center)
+            .into_styled(style)
+            .draw(display),
+        _ => Ok(()),
+    }
+}
+
+/// Calculate squared distance from midpoint of an edge to the center of the triangle
+fn calc_dist(center: Point, start: Joint, end: Joint) -> u32 {
+    let start = start.second_edge_start.left;
+    let end = end.first_edge_end.left;
+
+    let midpoint = Line::new(start, end).midpoint();
+
+    Line::new(center, midpoint).length_squared()
+}
+
 fn draw(
     triangle: Triangle,
     width: u32,
@@ -249,16 +360,54 @@ fn draw(
     let corner_2 = corner(triangle.p1, triangle.p2, triangle.p3, width, alignment);
     let corner_3 = corner(triangle.p2, triangle.p3, triangle.p1, width, alignment);
 
-    // P1 -> P2
-    render_line(corner_1, corner_2, display).unwrap();
-    // P2 -> P3
-    render_line(corner_2, corner_3, display).unwrap();
-    // P3 -> P1
-    render_line(corner_3, corner_1, display).unwrap();
+    Text::new(
+        &format!("{} {} {}", corner_1.kind, corner_2.kind, corner_3.kind),
+        Point::zero(),
+    )
+    .into_styled(
+        TextStyleBuilder::new(Font6x8)
+            .background_color(Rgb888::YELLOW)
+            .text_color(Rgb888::BLUE)
+            .build(),
+    )
+    .draw(display)?;
 
-    draw_filler_triangle(corner_1, display)?;
-    draw_filler_triangle(corner_2, display)?;
-    draw_filler_triangle(corner_3, display)?;
+    let centroid = triangle.centroid();
+
+    empty_crosshair(centroid, Rgb888::MAGENTA, display);
+
+    let dist1 = calc_dist(centroid, corner_1, corner_2);
+    let dist2 = calc_dist(centroid, corner_2, corner_3);
+    let dist3 = calc_dist(centroid, corner_3, corner_1);
+
+    let is_filled = dist1 < width.pow(2) || dist2 < width.pow(2) || dist3 < width.pow(2);
+
+    // Triangle is completely filled. Draw triangle fan around center
+    if is_filled {
+        // P1 -> P2
+        draw_degenerate_edge(corner_1, corner_2, centroid, display).unwrap();
+        // P2 -> P3
+        draw_degenerate_edge(corner_2, corner_3, centroid, display).unwrap();
+        // P3 -> P1
+        draw_degenerate_edge(corner_3, corner_1, centroid, display).unwrap();
+
+        draw_degenerate_bevel(corner_1, centroid, display)?;
+        draw_degenerate_bevel(corner_2, centroid, display)?;
+        draw_degenerate_bevel(corner_3, centroid, display)?;
+    }
+    // Triangle has a hole in the center. Draw borders and joints as normal.
+    else {
+        // P1 -> P2
+        draw_thick_edge(corner_1, corner_2, display)?;
+        // P2 -> P3
+        draw_thick_edge(corner_2, corner_3, display)?;
+        // P3 -> P1
+        draw_thick_edge(corner_3, corner_1, display)?;
+
+        draw_filler_triangle(corner_1, display)?;
+        draw_filler_triangle(corner_2, display)?;
+        draw_filler_triangle(corner_3, display)?;
+    }
 
     Ok(())
 }
@@ -307,7 +456,7 @@ fn trongle(
         )
         .draw(display)?;
 
-    Text::new(&format!("{:?}", alignment), Point::zero())
+    Text::new(&format!("{:?}", alignment), Point::new(0, 8))
         .into_styled(
             TextStyleBuilder::new(Font6x8)
                 .background_color(Rgb888::YELLOW)
@@ -322,12 +471,13 @@ fn trongle(
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(190, 190));
     let output_settings = OutputSettingsBuilder::new()
-        .scale(2)
+        .scale(4)
         // .pixel_spacing(1)
         .build();
     let mut window = Window::new("Line joints debugger", &output_settings);
 
-    let mut end_point = Point::new(20, 20);
+    // let mut end_point = Point::new(20, 20);
+    let mut end_point = Point::new(82, 110);
     let mut width = 15u32;
     let mut alignment = StrokeAlignment::Center;
 
