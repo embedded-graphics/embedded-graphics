@@ -1,13 +1,17 @@
 //! A target for embedded-graphics drawing operations.
 
+mod clipped_draw_target;
+mod cropped_draw_target;
+
 use crate::{
     geometry::{Point, Size},
-    pixel_iterator::PixelIteratorExt,
     pixelcolor::PixelColor,
     primitives::{rectangle::Rectangle, Primitive},
-    transform::Transform,
     Pixel,
 };
+
+pub use clipped_draw_target::ClippedDrawTarget;
+pub use cropped_draw_target::CroppedDrawTarget;
 
 /// A target for embedded-graphics drawing operations.
 ///
@@ -451,64 +455,30 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// All drawing operations are translated by `offset` pixels, before being passed to the base
     /// draw target.
-    fn translated(&mut self, offset: Point) -> TranslatedDrawTarget<'_, Self>;
+    fn translated(&mut self, offset: Point) -> CroppedDrawTarget<'_, Self>;
+
+    /// Creates a new cropped draw target.
+    fn cropped(&mut self, area: Rectangle) -> CroppedDrawTarget<'_, Self>;
+
+    /// Creates a new clipped draw target.
+    fn clipped(&mut self, area: Rectangle) -> ClippedDrawTarget<'_, Self>;
 }
 
 impl<T> DrawTargetExt for T
 where
     T: DrawTarget,
 {
-    fn translated(&mut self, offset: Point) -> TranslatedDrawTarget<'_, Self> {
-        TranslatedDrawTarget {
-            target: self,
-            offset,
-        }
-    }
-}
+    fn translated(&mut self, offset: Point) -> CroppedDrawTarget<'_, Self> {
+        let area = Rectangle::new(offset, self.size());
 
-/// Translated draw target.
-#[derive(Debug)]
-pub struct TranslatedDrawTarget<'a, T>
-where
-    T: DrawTarget,
-{
-    target: &'a mut T,
-    offset: Point,
-}
-
-impl<T> DrawTarget for TranslatedDrawTarget<'_, T>
-where
-    T: DrawTarget,
-{
-    type Color = T::Color;
-    type Error = T::Error;
-
-    fn size(&self) -> Size {
-        self.target.size()
+        CroppedDrawTarget::new(self, area)
     }
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
-    where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
-    {
-        self.target
-            .draw_iter(pixels.into_iter().translate(self.offset))
+    fn cropped(&mut self, area: Rectangle) -> CroppedDrawTarget<'_, Self> {
+        CroppedDrawTarget::new(self, area)
     }
 
-    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
-    where
-        I: IntoIterator<Item = Self::Color>,
-    {
-        let area = area.translate(self.offset);
-        self.target.fill_contiguous(&area, colors)
-    }
-
-    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-        let area = area.translate(self.offset);
-        self.target.fill_solid(&area, color)
-    }
-
-    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        self.target.clear(color)
+    fn clipped(&mut self, area: Rectangle) -> ClippedDrawTarget<'_, Self> {
+        ClippedDrawTarget::new(self, area)
     }
 }
