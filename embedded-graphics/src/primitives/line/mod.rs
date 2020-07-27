@@ -89,6 +89,8 @@ pub enum Intersection {
         /// The side to which the second line "leans" relative to the first, if stacked on top of
         /// each other.
         ///
+        /// TODO: This might be removable.
+        ///
         /// For example:
         ///
         /// ```
@@ -107,7 +109,7 @@ pub enum Intersection {
     },
 
     /// No intersection: lines are colinear or parallel.
-    Parallel,
+    Colinear,
 }
 
 impl Line {
@@ -249,7 +251,7 @@ impl Line {
 
         // Lines are colinear or parallel
         if denom == 0 {
-            return Intersection::Parallel;
+            return Intersection::Colinear;
         }
 
         // If we got here, line segments intersect. Compute intersection point using method similar
