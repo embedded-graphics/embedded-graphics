@@ -114,7 +114,12 @@ where
 
         Ok(())
     }
+}
 
+impl<C> OriginDimensions for SimulatorDisplay<C>
+where
+    C: PixelColor,
+{
     fn size(&self) -> Size {
         self.size
     }

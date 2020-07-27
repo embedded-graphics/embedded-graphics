@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::Size,
+    geometry::Dimensions,
     primitives::{ContainsPoint, Primitive, Rectangle},
     Pixel,
 };
@@ -20,6 +20,8 @@ where
     T: DrawTarget,
 {
     pub(super) fn new(target: &'a mut T, clip_area: Rectangle) -> Self {
+        let clip_area = clip_area.intersection(&target.bounding_box());
+
         Self { target, clip_area }
     }
 }
@@ -30,10 +32,6 @@ where
 {
     type Color = T::Color;
     type Error = T::Error;
-
-    fn size(&self) -> Size {
-        self.clip_area.size
-    }
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
@@ -65,7 +63,40 @@ where
         self.target.fill_solid(&area, color)
     }
 
-    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        self.target.fill_solid(&self.clip_area, color)
+    // TODO: should this use the default impl?
+    // fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+    //     self.target.fill_solid(&self.clip_area, color)
+    // }
+}
+
+impl<T> Dimensions for ClippedDrawTarget<'_, T>
+where
+    T: DrawTarget,
+{
+    fn bounding_box(&self) -> Rectangle {
+        self.clip_area
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        draw_target::DrawTargetExt,
+        geometry::{Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+    };
+
+    #[test]
+    fn clip_area_cant_be_larger_than_base_size() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let bounding_box = display.bounding_box();
+
+        let large_rect = Rectangle::new(Point::zero(), Size::new(1000, 1000));
+
+        let clipped = display.clipped(large_rect);
+
+        assert_eq!(clipped.bounding_box(), bounding_box);
     }
 }

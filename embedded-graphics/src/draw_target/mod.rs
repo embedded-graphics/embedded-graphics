@@ -4,7 +4,7 @@ mod clipped_draw_target;
 mod cropped_draw_target;
 
 use crate::{
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{rectangle::Rectangle, Primitive},
     Pixel,
@@ -90,10 +90,6 @@ pub use cropped_draw_target::CroppedDrawTarget;
 ///     // this the type `Infallible` was chosen as the `Error` type.
 ///     type Error = core::convert::Infallible;
 ///
-///     fn size(&self) -> Size {
-///         Size::new(64, 64)
-///     }
-///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
@@ -109,6 +105,12 @@ pub use cropped_draw_target::CroppedDrawTarget;
 ///         }
 ///
 ///         Ok(())
+///     }
+/// }
+///
+/// impl OriginDimensions for ExampleDisplay {
+///     fn size(&self) -> Size {
+///         Size::new(64, 64)
 ///     }
 /// }
 ///
@@ -188,10 +190,6 @@ pub use cropped_draw_target::CroppedDrawTarget;
 ///     type Color = Rgb565;
 ///     type Error = CommError;
 ///
-///     fn size(&self) -> Size {
-///         Size::new(64, 64)
-///     }
-///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
@@ -243,6 +241,12 @@ pub use cropped_draw_target::CroppedDrawTarget;
 ///     }
 /// }
 ///
+/// impl OriginDimensions for ExampleDisplay {
+///     fn size(&self) -> Size {
+///         Size::new(64, 64)
+///     }
+/// }
+///
 /// let mut display = ExampleDisplay {
 ///     iface: SPI1,
 /// };
@@ -281,7 +285,7 @@ pub use cropped_draw_target::CroppedDrawTarget;
 /// [`draw_iter`]: #tymethod.draw_iter
 /// [`size`]: #tymethod.size
 /// [`Error` type]: #associatedtype.Error
-pub trait DrawTarget {
+pub trait DrawTarget: Dimensions {
     /// The pixel color type the targetted display supports.
     type Color: PixelColor;
 
@@ -295,13 +299,6 @@ pub trait DrawTarget {
     ///
     /// [`core::convert::Infallible`]: https://doc.rust-lang.org/stable/core/convert/enum.Infallible.html
     type Error;
-
-    /// Returns the dimensions of the `DrawTarget` in pixels.
-    ///
-    /// This should return the size of the entire drawable area of the display. If a display
-    /// supports drawing to pixels outside the visible area, that area should also be reported in
-    /// the dimensions returned by `size`.
-    fn size(&self) -> Size;
 
     // TODO: Reenable this in a new PR with modified primitives iterators
     // // TODO: Mention performance
@@ -373,10 +370,6 @@ pub trait DrawTarget {
     ///     type Color = Gray8;
     ///     type Error = core::convert::Infallible;
     ///
-    ///     fn size(&self) -> Size {
-    ///         Size::new(64, 64)
-    ///     }
-    ///
     ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     ///     where
     ///         I: IntoIterator<Item = Pixel<Self::Color>>,
@@ -406,6 +399,13 @@ pub trait DrawTarget {
     ///         }
     ///     }
     /// }
+    ///
+    /// impl OriginDimensions for ExampleDisplay {
+    ///     fn size(&self) -> Size {
+    ///         Size::new(64, 64)
+    ///     }
+    /// }
+    ///
     /// ```
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
@@ -445,7 +445,7 @@ pub trait DrawTarget {
     /// [`size`]: #method.size
     /// [`fill_solid`]: #method.fill_solid
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
+        self.fill_solid(&self.bounding_box(), color)
     }
 }
 
@@ -461,6 +461,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     fn cropped(&mut self, area: Rectangle) -> CroppedDrawTarget<'_, Self>;
 
     /// Creates a new clipped draw target.
+    /// TODO: describe how `clip_area` larger than `target.bounding_box` are handled
     fn clipped(&mut self, area: Rectangle) -> ClippedDrawTarget<'_, Self>;
 }
 
@@ -469,7 +470,7 @@ where
     T: DrawTarget,
 {
     fn translated(&mut self, offset: Point) -> CroppedDrawTarget<'_, Self> {
-        let area = Rectangle::new(offset, self.size());
+        let area = Rectangle::new(offset, self.bounding_box().size);
 
         CroppedDrawTarget::new(self, area)
     }

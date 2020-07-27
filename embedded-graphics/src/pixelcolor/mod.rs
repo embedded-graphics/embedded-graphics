@@ -50,9 +50,11 @@
 //!
 //!         Ok(())
 //!     }
+//! }
 //!
+//! impl OriginDimensions for EpdDisplay {
 //!     fn size(&self) -> Size {
-//!         Size::zero()
+//!         Size::new(300, 300)
 //!     }
 //! }
 //!

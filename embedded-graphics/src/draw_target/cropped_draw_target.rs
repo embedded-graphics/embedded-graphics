@@ -1,5 +1,5 @@
 use crate::{
-    draw_target::DrawTarget, geometry::Size, pixel_iterator::PixelIteratorExt,
+    draw_target::DrawTarget, geometry::Dimensions, pixel_iterator::PixelIteratorExt,
     primitives::Rectangle, transform::Transform, Pixel,
 };
 
@@ -29,10 +29,6 @@ where
     type Color = T::Color;
     type Error = T::Error;
 
-    fn size(&self) -> Size {
-        self.area.size
-    }
-
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Pixel<Self::Color>>,
@@ -54,7 +50,17 @@ where
         self.target.fill_solid(&area, color)
     }
 
-    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        self.target.clear(color)
+    // TODO: how should clear be handled?
+    // fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+    //     self.target.clear(color)
+    // }
+}
+
+impl<T> Dimensions for CroppedDrawTarget<'_, T>
+where
+    T: DrawTarget,
+{
+    fn bounding_box(&self) -> Rectangle {
+        self.area
     }
 }

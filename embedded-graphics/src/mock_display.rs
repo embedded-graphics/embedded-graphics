@@ -172,7 +172,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::Pixel,
-    geometry::{Point, Size},
+    geometry::{OriginDimensions, Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
         Rgb565, Rgb888, RgbColor,
@@ -528,7 +528,12 @@ where
 
         Ok(())
     }
+}
 
+impl<C> OriginDimensions for MockDisplay<C>
+where
+    C: PixelColor,
+{
     fn size(&self) -> Size {
         DISPLAY_AREA.size
     }
