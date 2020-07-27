@@ -76,7 +76,6 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
     if let (
         Intersection::Point {
             point: l_intersection,
-            side: outer_side,
             ..
         },
         Intersection::Point {
@@ -96,27 +95,11 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
         let self_intersection_r = first_segment_start_edge.segment_intersection(&second_edge_right)
             || second_segment_end_edge.segment_intersection(&first_edge_right);
 
-        let (outside_intersection, inside_intersection, ext_outside, fixed_outside) =
-            match outer_side {
-                Side::Right => (
-                    r_intersection,
-                    l_intersection,
-                    second_edge_right,
-                    first_edge_right,
-                ),
-                Side::Left => (
-                    l_intersection,
-                    r_intersection,
-                    second_edge_left,
-                    first_edge_left,
-                ),
-            };
-
         // Distance from midpoint to miter end point
-        let miter_length_squared = Line::new(mid, outside_intersection).length_squared();
+        let miter_length_squared = Line::new(mid, l_intersection).length_squared();
 
         // Normal line: non-overlapping line end caps
-        if !self_intersection_l && !self_intersection_r {
+        if !self_intersection_r && !self_intersection_l {
             // Intersection is within limit at which it will be chopped off into a bevel, so return
             // a miter.
             if miter_length_squared <= miter_limit {
@@ -135,36 +118,21 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
             else {
                 let kind = JointKind::Bevel {
                     filler_triangle: Triangle::new(
-                        fixed_outside.end,
-                        ext_outside.start,
-                        inside_intersection,
+                        first_edge_left.end,
+                        second_edge_left.start,
+                        r_intersection,
                     ),
                 };
 
-                match outer_side {
-                    // Line turning right
-                    Side::Left => Joint {
-                        kind,
-                        first_edge_end: EdgeCorners {
-                            left: first_edge_left.end,
-                            right: inside_intersection,
-                        },
-                        second_edge_start: EdgeCorners {
-                            left: second_edge_left.start,
-                            right: inside_intersection,
-                        },
+                Joint {
+                    kind,
+                    first_edge_end: EdgeCorners {
+                        left: first_edge_left.end,
+                        right: r_intersection,
                     },
-                    // Line turning left
-                    Side::Right => Joint {
-                        kind,
-                        first_edge_end: EdgeCorners {
-                            left: inside_intersection,
-                            right: first_edge_right.end,
-                        },
-                        second_edge_start: EdgeCorners {
-                            left: inside_intersection,
-                            right: second_edge_right.start,
-                        },
+                    second_edge_start: EdgeCorners {
+                        left: second_edge_left.start,
+                        right: r_intersection,
                     },
                 }
             }
@@ -173,7 +141,11 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
         else {
             Joint {
                 kind: JointKind::Degenerate {
-                    filler_triangle: Triangle::new(fixed_outside.end, ext_outside.start, mid),
+                    filler_triangle: Triangle::new(
+                        first_edge_left.end,
+                        second_edge_left.start,
+                        mid,
+                    ),
                 },
                 first_edge_end: EdgeCorners {
                     left: first_edge_left.end,
@@ -191,12 +163,12 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
         Joint {
             kind: JointKind::Colinear,
             first_edge_end: EdgeCorners {
-                left: first_edge_left.start,
-                right: first_edge_right.start,
+                left: first_edge_left.end,
+                right: first_edge_right.end,
             },
             second_edge_start: EdgeCorners {
-                left: second_edge_left.end,
-                right: second_edge_right.end,
+                left: second_edge_left.start,
+                right: second_edge_right.start,
             },
         }
     }
