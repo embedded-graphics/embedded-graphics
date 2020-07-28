@@ -1,7 +1,8 @@
 //! A target for embedded-graphics drawing operations.
 
-mod clipped_draw_target;
-mod cropped_draw_target;
+mod clipped;
+mod cropped;
+mod translated;
 
 use crate::{
     geometry::{Dimensions, Point},
@@ -10,8 +11,9 @@ use crate::{
     Pixel,
 };
 
-pub use clipped_draw_target::ClippedDrawTarget;
-pub use cropped_draw_target::CroppedDrawTarget;
+pub use clipped::Clipped;
+pub use cropped::Cropped;
+pub use translated::Translated;
 
 /// A target for embedded-graphics drawing operations.
 ///
@@ -455,31 +457,30 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// All drawing operations are translated by `offset` pixels, before being passed to the base
     /// draw target.
-    fn translated(&mut self, offset: Point) -> CroppedDrawTarget<'_, Self>;
+    fn translated(&mut self, offset: Point) -> Translated<'_, Self>;
 
     /// Creates a new cropped draw target.
-    fn cropped(&mut self, area: Rectangle) -> CroppedDrawTarget<'_, Self>;
+    /// TODO: describe how `clip_area` larger than `target.bounding_box` are handled
+    fn cropped(&mut self, area: Rectangle) -> Cropped<'_, Self>;
 
     /// Creates a new clipped draw target.
     /// TODO: describe how `clip_area` larger than `target.bounding_box` are handled
-    fn clipped(&mut self, area: Rectangle) -> ClippedDrawTarget<'_, Self>;
+    fn clipped(&mut self, area: Rectangle) -> Clipped<'_, Self>;
 }
 
 impl<T> DrawTargetExt for T
 where
     T: DrawTarget,
 {
-    fn translated(&mut self, offset: Point) -> CroppedDrawTarget<'_, Self> {
-        let area = Rectangle::new(offset, self.bounding_box().size);
-
-        CroppedDrawTarget::new(self, area)
+    fn translated(&mut self, offset: Point) -> Translated<'_, Self> {
+        Translated::new(self, offset)
     }
 
-    fn cropped(&mut self, area: Rectangle) -> CroppedDrawTarget<'_, Self> {
-        CroppedDrawTarget::new(self, area)
+    fn cropped(&mut self, area: Rectangle) -> Cropped<'_, Self> {
+        Cropped::new(self, area)
     }
 
-    fn clipped(&mut self, area: Rectangle) -> ClippedDrawTarget<'_, Self> {
-        ClippedDrawTarget::new(self, area)
+    fn clipped(&mut self, area: Rectangle) -> Clipped<'_, Self> {
+        Clipped::new(self, area)
     }
 }
