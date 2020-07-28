@@ -8,6 +8,12 @@ use crate::{
 };
 
 /// Translated draw target.
+///
+/// Created by calling [`translated`] on any [`DrawTarget`].
+/// See the [`translated`] method documentation for more.
+///
+/// [`DrawTarget`]: trait.DrawTarget.html
+/// [`translated`]: trait.DrawTargetExt.html#tymethod.translated
 #[derive(Debug)]
 pub struct Translated<'a, T>
 where

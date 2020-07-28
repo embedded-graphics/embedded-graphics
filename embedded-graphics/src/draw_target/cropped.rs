@@ -6,6 +6,12 @@ use crate::{
 };
 
 /// Cropped draw target.
+///
+/// Created by calling [`cropped`] on any [`DrawTarget`].
+/// See the [`cropped`] method documentation for more.
+///
+/// [`DrawTarget`]: trait.DrawTarget.html
+/// [`cropped`]: trait.DrawTargetExt.html#tymethod.cropped
 #[derive(Debug)]
 pub struct Cropped<'a, T>
 where

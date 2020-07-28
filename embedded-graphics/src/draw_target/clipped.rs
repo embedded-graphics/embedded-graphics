@@ -6,6 +6,12 @@ use crate::{
 };
 
 /// Clipped draw target.
+///
+/// Created by calling [`clipped`] on any [`DrawTarget`].
+/// See the [`clipped`] method documentation for more.
+///
+/// [`DrawTarget`]: trait.DrawTarget.html
+/// [`clipped`]: trait.DrawTargetExt.html#tymethod.clipped
 #[derive(Debug)]
 pub struct Clipped<'a, T>
 where

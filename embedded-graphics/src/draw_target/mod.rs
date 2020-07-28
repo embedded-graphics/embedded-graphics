@@ -453,18 +453,139 @@ pub trait DrawTarget: Dimensions {
 
 /// Extension trait for `DrawTarget`s.
 pub trait DrawTargetExt: DrawTarget + Sized {
-    /// Creates a new translated draw target.
+    /// Creates a translated draw target based on this draw target.
     ///
     /// All drawing operations are translated by `offset` pixels, before being passed to the base
     /// draw target.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::BinaryColor,
+    ///     fonts::{Text, Font6x8},
+    ///     style::TextStyle,
+    /// };
+    ///
+    /// let mut display = MockDisplay::new();
+    /// let mut translated_display = display.translated(Point::new(10, 5));
+    ///
+    /// // Draws text at position (10, 5) in the display coordinate system
+    /// Text::new("Text", Point::zero())
+    ///     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+    ///     .draw(&mut translated_display)?;
+    /// #
+    /// # let mut expected = MockDisplay::new();
+    /// #
+    /// # Text::new("Text", Point::new(10, 5))
+    /// #     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+    /// #     .draw(&mut expected)?;
+    /// #
+    /// # assert_eq!(display, expected);
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
     fn translated(&mut self, offset: Point) -> Translated<'_, Self>;
 
-    /// Creates a new cropped draw target.
-    /// TODO: describe how `clip_area` larger than `target.bounding_box` are handled
+    /// Creates a cropped draw target based on this draw target.
+    ///
+    /// A cropped draw target is a draw target for a rectangular subregion of the base draw target.
+    /// Its coordinate system is shifted so that the origin coincides with `area.top_left` in the
+    /// base draw target's coordinate system.
+    ///
+    /// The bounding box of the returned target will always be contained inside the bounding box
+    /// of the base target. If the requested `area` is overlapping the base target's bounding box
+    /// the intersection of the base target's bounding box and `area` will be used.
+    ///
+    /// Drawing operations outside the bounding box will not be clipped.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::Rgb565,
+    ///     fonts::{Text, Font6x8},
+    ///     style::TextStyle,
+    ///     primitives::Rectangle,
+    /// };
+    ///
+    /// /// Fills a draw target with a blue background and prints centered yellow text.
+    /// fn draw_text<T>(target: &mut T, text: &str) -> Result<(), T::Error>
+    /// where
+    ///     T: DrawTarget<Color = Rgb565>,
+    /// {
+    ///     target.clear(Rgb565::BLUE)?;
+    ///
+    ///     let target_size = target.bounding_box().size;
+    ///     let text_size = Font6x8::CHARACTER_SIZE.component_mul(Size::new(text.len() as u32, 1));
+    ///
+    ///     let text_position = Point::zero() + (target_size - text_size) / 2;
+    ///
+    ///     Text::new(text, text_position)
+    ///         .into_styled(TextStyle::new(Font6x8, Rgb565::YELLOW))
+    ///         .draw(target)
+    /// }
+    ///
+    ///
+    /// let mut display = MockDisplay::new();
+    /// display.set_allow_overdraw(true);
+    ///
+    /// let area = Rectangle::new(Point::new(5, 10), Size::new(40, 15));
+    /// let mut cropped_display = display.cropped(area);
+    ///
+    /// draw_text(&mut cropped_display, "Text")?;
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
     fn cropped(&mut self, area: Rectangle) -> Cropped<'_, Self>;
 
-    /// Creates a new clipped draw target.
-    /// TODO: describe how `clip_area` larger than `target.bounding_box` are handled
+    /// Creates a clipped draw target based on this draw target.
+    ///
+    /// A clipped draw target is a draw target for a rectangular subregion of the base draw target.
+    /// The coordinate system of the created draw target is equal to the base target's coordinate
+    /// system. All drawing operations outside the bounding box will be clipped.
+    ///
+    /// The bounding box of the returned target will always be contained inside the bounding box
+    /// of the base target. If the requested `area` is overlapping the base target's bounding box
+    /// the intersection of the base target's bounding box and `area` will be used.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::BinaryColor,
+    ///     fonts::{Text, Font12x16},
+    ///     style::TextStyle,
+    ///     primitives::Rectangle,
+    /// };
+    ///
+    /// let mut display = MockDisplay::new();
+    ///
+    /// let area = Rectangle::new(Point::zero(), Size::new(4 * 12, 16));
+    /// let mut clipped_display = display.clipped(area);
+    ///
+    /// // Only the first 4 characters will be drawn, because the others are outside
+    /// // the clipping area
+    /// Text::new("Clipped", Point::zero())
+    ///     .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+    ///     .draw(&mut clipped_display)?;
+    /// #
+    /// # let mut expected = MockDisplay::new();
+    /// #
+    /// # Text::new("Clip", Point::zero())
+    /// #     .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+    /// #     .draw(&mut expected)?;
+    /// #
+    /// # assert_eq!(display, expected);
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
     fn clipped(&mut self, area: Rectangle) -> Clipped<'_, Self>;
 }
 
