@@ -25,7 +25,7 @@ impl<'a, T> Clipped<'a, T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(target: &'a mut T, clip_area: Rectangle) -> Self {
+    pub(super) fn new(target: &'a mut T, clip_area: &Rectangle) -> Self {
         let clip_area = clip_area.intersection(&target.bounding_box());
 
         Self { target, clip_area }
@@ -97,7 +97,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(2, 4));
-        let mut clipped = display.clipped(area);
+        let mut clipped = display.clipped(&area);
 
         let pixels = [
             Pixel(Point::new(0, 1), BinaryColor::On),
@@ -130,7 +130,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(2, 3));
-        let mut clipped = display.clipped(area);
+        let mut clipped = display.clipped(&area);
 
         let colors = [
             1, 1, 1, 1, 1, //
@@ -160,7 +160,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(4, 2));
-        let mut clipped = display.clipped(area);
+        let mut clipped = display.clipped(&area);
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(6, 4));
         clipped.fill_solid(&area, BinaryColor::On).unwrap();
@@ -181,7 +181,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
-        let mut clipped = display.clipped(area);
+        let mut clipped = display.clipped(&area);
         clipped.clear(BinaryColor::On).unwrap();
 
         let mut expected = MockDisplay::new();
@@ -197,7 +197,7 @@ mod tests {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(2, 4));
-        let clipped = display.clipped(area);
+        let clipped = display.clipped(&area);
 
         assert_eq!(clipped.bounding_box(), area);
     }
@@ -210,7 +210,7 @@ mod tests {
         let top_left = Point::new(10, 20);
         let size = Size::new(1000, 1000);
         let area = Rectangle::new(top_left, size);
-        let clipped = display.clipped(area);
+        let clipped = display.clipped(&area);
 
         let expected_size = display_bb.size - Size::new(top_left.x as u32, top_left.y as u32);
 

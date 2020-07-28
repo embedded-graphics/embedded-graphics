@@ -25,7 +25,7 @@ impl<'a, T> Cropped<'a, T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(target: &'a mut T, area: Rectangle) -> Self {
+    pub(super) fn new(target: &'a mut T, area: &Rectangle) -> Self {
         let area = area.intersection(&target.bounding_box());
 
         Self {
@@ -83,7 +83,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(2, 3), Size::new(10, 10));
-        let mut cropped = display.cropped(area);
+        let mut cropped = display.cropped(&area);
 
         let pixels = [
             Pixel(Point::new(0, 0), BinaryColor::On),
@@ -109,7 +109,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(10, 10));
-        let mut cropped = display.cropped(area);
+        let mut cropped = display.cropped(&area);
 
         let colors = [
             1, 1, 1, 1, 1, //
@@ -142,7 +142,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(10, 10));
-        let mut cropped = display.cropped(area);
+        let mut cropped = display.cropped(&area);
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(3, 4));
         cropped.fill_solid(&area, BinaryColor::On).unwrap();
@@ -167,7 +167,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
-        let mut cropped = display.cropped(area);
+        let mut cropped = display.cropped(&area);
         cropped.clear(BinaryColor::On).unwrap();
 
         let mut expected = MockDisplay::new();
@@ -184,7 +184,7 @@ mod tests {
 
         let size = Size::new(3, 4);
         let area = Rectangle::new(Point::new(1, 3), size);
-        let cropped = display.cropped(area);
+        let cropped = display.cropped(&area);
 
         assert_eq!(cropped.bounding_box(), Rectangle::new(Point::zero(), size));
     }
@@ -197,7 +197,7 @@ mod tests {
         let top_left = Point::new(10, 20);
         let size = Size::new(1000, 1000);
         let area = Rectangle::new(top_left, size);
-        let cropped = display.cropped(area);
+        let cropped = display.cropped(&area);
 
         let expected_size = display_bb.size - Size::new(top_left.x as u32, top_left.y as u32);
 

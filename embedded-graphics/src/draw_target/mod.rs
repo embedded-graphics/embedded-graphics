@@ -535,13 +535,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// display.set_allow_overdraw(true);
     ///
     /// let area = Rectangle::new(Point::new(5, 10), Size::new(40, 15));
-    /// let mut cropped_display = display.cropped(area);
+    /// let mut cropped_display = display.cropped(&area);
     ///
     /// draw_text(&mut cropped_display, "Text")?;
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn cropped(&mut self, area: Rectangle) -> Cropped<'_, Self>;
+    fn cropped(&mut self, area: &Rectangle) -> Cropped<'_, Self>;
 
     /// Creates a clipped draw target based on this draw target.
     ///
@@ -568,7 +568,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// let mut display = MockDisplay::new();
     ///
     /// let area = Rectangle::new(Point::zero(), Size::new(4 * 12, 16));
-    /// let mut clipped_display = display.clipped(area);
+    /// let mut clipped_display = display.clipped(&area);
     ///
     /// // Only the first 4 characters will be drawn, because the others are outside
     /// // the clipping area
@@ -586,7 +586,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn clipped(&mut self, area: Rectangle) -> Clipped<'_, Self>;
+    fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self>;
 }
 
 impl<T> DrawTargetExt for T
@@ -597,11 +597,11 @@ where
         Translated::new(self, offset)
     }
 
-    fn cropped(&mut self, area: Rectangle) -> Cropped<'_, Self> {
+    fn cropped(&mut self, area: &Rectangle) -> Cropped<'_, Self> {
         Cropped::new(self, area)
     }
 
-    fn clipped(&mut self, area: Rectangle) -> Clipped<'_, Self> {
+    fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self> {
         Clipped::new(self, area)
     }
 }
