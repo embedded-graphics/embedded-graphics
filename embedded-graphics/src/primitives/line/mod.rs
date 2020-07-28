@@ -238,32 +238,40 @@ impl Line {
         for (bres, _, side) in it {
             match side {
                 Side::Left => {
-                    l_delta = bres.point - self.start;
+                    l_delta = bres.point;
                 }
                 Side::Right => {
-                    r_delta = bres.point - self.start;
+                    r_delta = bres.point;
                 }
             }
         }
 
-        let (l_delta, r_delta) = match alignment {
-            StrokeAlignment::Center => (l_delta, r_delta),
+        let l_delta = l_delta - self.start;
+        let r_delta = r_delta - self.start;
+
+        match alignment {
+            StrokeAlignment::Center => {
+                let start_l = self.start + l_delta;
+                let start_r = self.start + r_delta;
+
+                let end_l = self.end + l_delta;
+                let end_r = self.end + r_delta;
+
+                (Line::new(start_l, end_l), Line::new(start_r, end_r))
+            }
             // Left
-            StrokeAlignment::Outside => (l_delta - r_delta, Point::zero()),
+            StrokeAlignment::Outside => {
+                let delta = l_delta - r_delta;
+
+                (Line::new(self.start + delta, self.end + delta), *self)
+            }
             // Right
-            StrokeAlignment::Inside => (Point::zero(), r_delta - l_delta),
-        };
+            StrokeAlignment::Inside => {
+                let delta = r_delta - l_delta;
 
-        let start_l = self.start + l_delta;
-        let start_r = self.start + r_delta;
-
-        let end_l = self.end + l_delta;
-        let end_r = self.end + r_delta;
-
-        let l = Line::new(start_l, end_l);
-        let r = Line::new(start_r, end_r);
-
-        (l, r)
+                (*self, Line::new(self.start + delta, self.end + delta))
+            }
+        }
     }
 
     /// Get the midpoint of this line
