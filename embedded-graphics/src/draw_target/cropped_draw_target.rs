@@ -1,6 +1,10 @@
 use crate::{
-    draw_target::DrawTarget, geometry::Dimensions, pixel_iterator::PixelIteratorExt,
-    primitives::Rectangle, transform::Transform, Pixel,
+    draw_target::DrawTarget,
+    geometry::{Dimensions, Point},
+    pixel_iterator::PixelIteratorExt,
+    primitives::Rectangle,
+    transform::Transform,
+    Pixel,
 };
 
 /// Cropped draw target.
@@ -61,6 +65,6 @@ where
     T: DrawTarget,
 {
     fn bounding_box(&self) -> Rectangle {
-        self.area
+        Rectangle::new(Point::zero(), self.area.size)
     }
 }
