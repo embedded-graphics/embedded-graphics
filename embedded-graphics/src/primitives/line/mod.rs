@@ -75,7 +75,7 @@ impl Dimensions for Line {
 ///
 /// Fastest ASM output compared to other methods. See: https://godbolt.org/z/zVx9cD
 fn same_signs(a: i32, b: i32) -> bool {
-    a ^ b >= 0
+    (a >= 0) == (b >= 0)
 }
 
 /// Intersection test result.
