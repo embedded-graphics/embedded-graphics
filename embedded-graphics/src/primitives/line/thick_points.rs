@@ -99,6 +99,7 @@ impl ParallelsIterator {
 
         // Thickness threshold, taking into account that fewer pixels are required to draw a
         // diagonal line of the same perceived width.
+        // TODO: Dedupe here and line/mod.rs into a method on Line
         let delta = (line.end - line.start).abs();
         let thickness_threshold = 4 * thickness.pow(2) * delta.length_squared();
         let thickness_accumulator =
@@ -162,7 +163,7 @@ impl ParallelsIterator {
 
 impl Iterator for ParallelsIterator {
     /// The bresenham state (`Bresenham`) and the reduction in line length (`u32`).
-    type Item = (Bresenham, u32, Side);
+    type Item = (Bresenham, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.thickness_accumulator.pow(2) > self.thickness_threshold {
@@ -176,21 +177,13 @@ impl Iterator for ParallelsIterator {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.minor;
 
                 // Normal lines are the same length as the original primitive line.
-                (
-                    Bresenham::with_initial_error(point, error),
-                    0,
-                    self.next_side,
-                )
+                (Bresenham::with_initial_error(point, error), 0)
             }
             BresenhamPoint::Extra(point) => {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.major;
 
                 // Extra lines are 1 pixel shorter than normal lines.
-                (
-                    Bresenham::with_initial_error(point, error),
-                    1,
-                    self.next_side,
-                )
+                (Bresenham::with_initial_error(point, error), 1)
             }
         };
 
@@ -232,7 +225,7 @@ impl Iterator for ThickPoints {
 
                 return Some(self.parallel.next(&self.iter.parallel_parameters));
             } else {
-                let (parallel, length_reduction, _) = self.iter.next()?;
+                let (parallel, length_reduction) = self.iter.next()?;
 
                 self.parallel = parallel;
                 self.parallel_points_remaining = self.parallel_length - length_reduction;
@@ -260,7 +253,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         for line_number in 0..count {
-            let (mut parallel, length_reduction, _) = parallels.next().unwrap();
+            let (mut parallel, length_reduction) = parallels.next().unwrap();
             let length = bresenham::major_length(&line) - length_reduction;
 
             for _ in 0..length {

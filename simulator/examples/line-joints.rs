@@ -94,9 +94,6 @@ fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAli
     let first_line = Line::new(start, mid);
     let second_line = Line::new(mid, end);
 
-    // let first_line = Line::new(first_line.midpoint(), mid);
-    // let second_line = Line::new(mid, second_line.midpoint());
-
     // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
     let miter_limit = (width * 2).pow(2);
 
@@ -340,7 +337,7 @@ fn draw_degenerate_bevel(
     }
 }
 
-/// Calculate squared distance from midpoint of an edge to the center of the triangle
+/// Calculate squared distance from midpoint of an outside (left) edge to the center of the triangle
 fn calc_dist(center: Point, start: Joint, end: Joint) -> u32 {
     let start = start.second_edge_start.left;
     let end = end.first_edge_end.left;
@@ -448,6 +445,15 @@ fn trongle(
         .draw(display)?;
 
     Text::new("P3", trongle.p3)
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .background_color(Rgb888::YELLOW)
+                .text_color(Rgb888::BLUE)
+                .build(),
+        )
+        .draw(display)?;
+
+    Text::new(&format!("W {}", width), Point::new(30, 8))
         .into_styled(
             TextStyleBuilder::new(Font6x8)
                 .background_color(Rgb888::YELLOW)
