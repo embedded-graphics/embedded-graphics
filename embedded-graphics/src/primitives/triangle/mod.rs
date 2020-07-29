@@ -1,5 +1,6 @@
 //! The triangle primitive.
 
+mod mathematical_points;
 mod points;
 mod scanline_iterator;
 mod styled;
@@ -14,6 +15,7 @@ use core::{
     borrow::Borrow,
     cmp::{max, min},
 };
+pub use mathematical_points::MathematicalPoints;
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -84,45 +86,12 @@ impl Primitive for Triangle {
 
 impl ContainsPoint for Triangle {
     fn contains(&self, point: Point) -> bool {
-        // Skip expensive calculations below if point is outside the bounding box
-        if !self.bounding_box().contains(point) {
-            return false;
-        }
-
-        let p = point;
-        let Self { p1, p2, p3 } = *self;
-
-        // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
-        // Works for any point ordering.
-        let is_inside = {
-            let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
-            let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
-
-            if (s < 0) != (t < 0) {
-                false
-            } else {
-                // Determinant
-                let a = self.area_doubled();
-
-                // If determinant is zero, triangle is colinear and can never contain a point.
-                if a == 0 {
-                    return false;
-                }
-
-                // This check allows this algorithm to work with clockwise or counterclockwise
-                // triangles.
-                if a < 0 {
-                    s <= 0 && s + t >= a
-                } else {
-                    s >= 0 && s + t <= a
-                }
-            }
-        };
-
         // Skip expensive point-on-line check below if point is definitely inside triangle
-        if is_inside {
+        if self.mathematical_contains(&point) {
             return true;
         }
+
+        let Self { p1, p2, p3 } = *self;
 
         // Sort points into same order as `ScanlineIterator` so this check produces the same results
         // as a rendered triangle would.
@@ -135,7 +104,7 @@ impl ContainsPoint for Triangle {
             .points()
             .chain(Line::new(p1, p3).points())
             .chain(Line::new(p2, p3).points())
-            .any(|line_point| line_point == p)
+            .any(|line_point| line_point == point)
     }
 }
 
@@ -209,6 +178,51 @@ impl Triangle {
     /// Find the center of gravity/centroid of the triangle
     pub fn centroid(&self) -> Point {
         (self.p1 + self.p2 + self.p3) / 3
+    }
+
+    /// Point inside triangle, ignoring pixels that partially lie outside triangle lines.
+    pub(self) fn mathematical_contains(&self, point: &Point) -> bool {
+        // Skip expensive calculations below if point is outside the bounding box
+        if !self.bounding_box().contains(*point) {
+            return false;
+        }
+
+        let p = point;
+        let Self { p1, p2, p3 } = *self;
+
+        // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
+        // Works for any point ordering.
+        let is_inside = {
+            let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
+            let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
+
+            if (s < 0) != (t < 0) {
+                false
+            } else {
+                // Determinant
+                let a = self.area_doubled();
+
+                // If determinant is zero, triangle is colinear and can never contain a point.
+                if a == 0 {
+                    return false;
+                }
+
+                // This check allows this algorithm to work with clockwise or counterclockwise
+                // triangles.
+                if a < 0 {
+                    s <= 0 && s + t >= a
+                } else {
+                    s >= 0 && s + t <= a
+                }
+            }
+        };
+
+        is_inside
+    }
+
+    /// Maths points yeahahhhhh
+    pub fn mathematical_points(&self) -> MathematicalPoints {
+        MathematicalPoints::new(self)
     }
 }
 
