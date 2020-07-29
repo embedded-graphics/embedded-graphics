@@ -19,7 +19,7 @@ pub struct Translated<'a, T>
 where
     T: DrawTarget,
 {
-    target: &'a mut T,
+    parent: &'a mut T,
     offset: Point,
 }
 
@@ -27,8 +27,8 @@ impl<'a, T> Translated<'a, T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(target: &'a mut T, offset: Point) -> Self {
-        Self { target, offset }
+    pub(super) fn new(parent: &'a mut T, offset: Point) -> Self {
+        Self { parent, offset }
     }
 }
 
@@ -43,7 +43,7 @@ where
     where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
-        self.target
+        self.parent
             .draw_iter(pixels.into_iter().translate(self.offset))
     }
 
@@ -52,16 +52,16 @@ where
         I: IntoIterator<Item = Self::Color>,
     {
         let area = area.translate(self.offset);
-        self.target.fill_contiguous(&area, colors)
+        self.parent.fill_contiguous(&area, colors)
     }
 
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
         let area = area.translate(self.offset);
-        self.target.fill_solid(&area, color)
+        self.parent.fill_solid(&area, color)
     }
 
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        self.target.clear(color)
+        self.parent.clear(color)
     }
 }
 
@@ -70,7 +70,7 @@ where
     T: DrawTarget,
 {
     fn bounding_box(&self) -> Rectangle {
-        self.target.bounding_box().translate(-self.offset)
+        self.parent.bounding_box().translate(-self.offset)
     }
 }
 

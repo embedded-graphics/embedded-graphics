@@ -17,7 +17,7 @@ pub struct Clipped<'a, T>
 where
     T: DrawTarget,
 {
-    target: &'a mut T,
+    parent: &'a mut T,
     clip_area: Rectangle,
 }
 
@@ -25,10 +25,10 @@ impl<'a, T> Clipped<'a, T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(target: &'a mut T, clip_area: &Rectangle) -> Self {
-        let clip_area = clip_area.intersection(&target.bounding_box());
+    pub(super) fn new(parent: &'a mut T, clip_area: &Rectangle) -> Self {
+        let clip_area = clip_area.intersection(&parent.bounding_box());
 
-        Self { target, clip_area }
+        Self { parent, clip_area }
     }
 }
 
@@ -49,14 +49,14 @@ where
             .into_iter()
             .filter(|Pixel(p, _)| clip_area.contains(*p));
 
-        self.target.draw_iter(pixels)
+        self.parent.draw_iter(pixels)
     }
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
     {
-        //TODO: this method should use `target.fill_contiguous` and not `target.draw_iter`
+        //TODO: this method should use `parent.fill_contiguous` and not `parent.draw_iter`
 
         let pixels = area.points().zip(colors).map(|(p, c)| Pixel(p, c));
 
@@ -66,7 +66,7 @@ where
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
         let area = area.intersection(&self.clip_area);
 
-        self.target.fill_solid(&area, color)
+        self.parent.fill_solid(&area, color)
     }
 }
 

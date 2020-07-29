@@ -455,7 +455,7 @@ pub trait DrawTarget: Dimensions {
 pub trait DrawTargetExt: DrawTarget + Sized {
     /// Creates a translated draw target based on this draw target.
     ///
-    /// All drawing operations are translated by `offset` pixels, before being passed to the base
+    /// All drawing operations are translated by `offset` pixels, before being passed to the parent
     /// draw target.
     ///
     /// # Examples
@@ -491,13 +491,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
 
     /// Creates a cropped draw target based on this draw target.
     ///
-    /// A cropped draw target is a draw target for a rectangular subregion of the base draw target.
+    /// A cropped draw target is a draw target for a rectangular subregion of the parent draw target.
     /// Its coordinate system is shifted so that the origin coincides with `area.top_left` in the
-    /// base draw target's coordinate system.
+    /// parent draw target's coordinate system.
     ///
     /// The bounding box of the returned target will always be contained inside the bounding box
-    /// of the base target. If any of the requested `area` lies outside the base target's bounding
-    /// box the intersection of the base target's bounding box and `area` will be used.
+    /// of the parent target. If any of the requested `area` lies outside the parent target's bounding
+    /// box the intersection of the parent target's bounding box and `area` will be used.
     ///
     /// Drawing operations outside the bounding box will not be clipped.
     ///
@@ -545,13 +545,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
 
     /// Creates a clipped draw target based on this draw target.
     ///
-    /// A clipped draw target is a draw target for a rectangular subregion of the base draw target.
-    /// The coordinate system of the created draw target is equal to the base target's coordinate
+    /// A clipped draw target is a draw target for a rectangular subregion of the parent draw target.
+    /// The coordinate system of the created draw target is equal to the parent target's coordinate
     /// system. All drawing operations outside the bounding box will be clipped.
     ///
     /// The bounding box of the returned target will always be contained inside the bounding box
-    /// of the base target. If any of the requested `area` lies outside the base target's bounding
-    /// box the intersection of the base target's bounding box and `area` will be used.
+    /// of the parent target. If any of the requested `area` lies outside the parent target's bounding
+    /// box the intersection of the parent target's bounding box and `area` will be used.
     ///
     /// # Examples
     ///

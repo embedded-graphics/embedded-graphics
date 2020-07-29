@@ -17,7 +17,7 @@ pub struct Cropped<'a, T>
 where
     T: DrawTarget,
 {
-    target: Translated<'a, T>,
+    parent: Translated<'a, T>,
     size: Size,
 }
 
@@ -25,11 +25,11 @@ impl<'a, T> Cropped<'a, T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(target: &'a mut T, area: &Rectangle) -> Self {
-        let area = area.intersection(&target.bounding_box());
+    pub(super) fn new(parent: &'a mut T, area: &Rectangle) -> Self {
+        let area = area.intersection(&parent.bounding_box());
 
         Self {
-            target: target.translated(area.top_left),
+            parent: parent.translated(area.top_left),
             size: area.size,
         }
     }
@@ -46,18 +46,18 @@ where
     where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
-        self.target.draw_iter(pixels)
+        self.parent.draw_iter(pixels)
     }
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
     {
-        self.target.fill_contiguous(area, colors)
+        self.parent.fill_contiguous(area, colors)
     }
 
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-        self.target.fill_solid(area, color)
+        self.parent.fill_solid(area, color)
     }
 }
 
