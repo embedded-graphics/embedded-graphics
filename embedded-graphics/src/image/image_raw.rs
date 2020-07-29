@@ -101,6 +101,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// ```
 ///
 /// [`raw` module documentation]: ../pixelcolor/raw/index.html
+/// [`Drawable`]: ../drawable/trait.Drawable.html
 /// [`ImageRawBE`]: type.ImageRawBE.html
 /// [`ImageRawLE`]: type.ImageRawLE.html
 /// [`Image`]: struct.Image.html

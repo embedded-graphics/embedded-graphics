@@ -233,6 +233,7 @@
 //! ```
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
+//! [`MockDisplay`]: ./mock_display/struct.MockDisplay.html
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/struct.Font6x8.html
