@@ -85,19 +85,17 @@ pub enum Intersection {
         /// The side to which the second line "leans" relative to the first, if stacked on top of
         /// each other.
         ///
-        /// TODO: This might be removable.
-        ///
         /// For example:
         ///
         /// ```
         /// # Right side:
         ///
-        ///  _
-        /// /
+        ///  ⎯
+        /// ╱
         ///
         /// # Left side:
-        ///  |
-        /// /
+        ///  │
+        /// ╱
         /// ```
         ///
         /// This is used to find the outside edge of a corner.
