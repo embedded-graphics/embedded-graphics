@@ -496,7 +496,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// base draw target's coordinate system.
     ///
     /// The bounding box of the returned target will always be contained inside the bounding box
-    /// of the base target. If any of the requested `area` lies outside the base target's bounding 
+    /// of the base target. If any of the requested `area` lies outside the base target's bounding
     /// box the intersection of the base target's bounding box and `area` will be used.
     ///
     /// Drawing operations outside the bounding box will not be clipped.
@@ -550,7 +550,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// system. All drawing operations outside the bounding box will be clipped.
     ///
     /// The bounding box of the returned target will always be contained inside the bounding box
-    /// of the base target. If any of the requested `area` lies outside the base target's bounding 
+    /// of the base target. If any of the requested `area` lies outside the base target's bounding
     /// box the intersection of the base target's bounding box and `area` will be used.
     ///
     /// # Examples
