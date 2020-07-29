@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point},
-    pixel_iterator::PixelIteratorExt,
+    iterator::PixelIteratorExt,
     primitives::Rectangle,
     transform::Transform,
     Pixel,

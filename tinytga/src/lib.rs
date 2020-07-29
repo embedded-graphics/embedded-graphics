@@ -412,59 +412,37 @@ impl<'a> Iterator for TgaIterator<'a> {
 #[cfg(feature = "graphics")]
 mod e_g {
     use super::*;
-    use core::marker::PhantomData;
-    use embedded_graphics::{
-        geometry::Point,
-        image::{ImageDimensions, IntoPixelIter},
-        pixelcolor::{raw::RawData, PixelColor},
-        Pixel as EgPixel,
-    };
+    use embedded_graphics::prelude::*;
 
-    /// A thin wrapper over [`TgaIterator`] to support [`embedded-graphics`] integration
-    ///
-    /// [`TgaIterator`]: ./struct.TgaIterator.html
-    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
-    #[derive(Debug)]
-    pub struct EgPixelIterator<'a, C> {
-        it: TgaIterator<'a>,
-        c: PhantomData<C>,
-    }
-
-    impl<'a, C> Iterator for EgPixelIterator<'a, C>
+    impl<C> ImageDrawable<C> for Tga<'_>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {
-        type Item = EgPixel<C>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            self.it.next().map(|p| {
-                let raw = C::Raw::from_u32(p.color);
-                EgPixel(Point::new(i32::from(p.x), i32::from(p.y)), raw.into())
-            })
-        }
-    }
-
-    impl ImageDimensions for Tga<'_> {
-        fn width(&self) -> u32 {
-            Tga::width(&self).into()
-        }
-
-        fn height(&self) -> u32 {
-            Tga::height(&self).into()
-        }
-    }
-
-    impl<'a, C> IntoPixelIter<C> for &'a Tga<'_>
-    where
-        C: PixelColor + From<<C as PixelColor>::Raw>,
-    {
-        type PixelIterator = EgPixelIterator<'a, C>;
-
-        fn pixel_iter(self) -> Self::PixelIterator {
-            EgPixelIterator {
-                it: self.into_iter(),
-                c: PhantomData,
+        fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+        where
+            D: DrawTarget<Color = C>,
+        {
+            // TGA files with the origin in the top left corner can be drawn using `fill_contiguous`.
+            // All other origins are drawn by falling back to `draw_iter`.
+            if self.header.image_origin == ImageOrigin::TopLeft {
+                target.fill_contiguous(
+                    &self.bounding_box(),
+                    self.into_iter().map(|p| C::Raw::from_u32(p.color).into()),
+                )
+            } else {
+                target.draw_iter(self.into_iter().map(|p| {
+                    Pixel(
+                        Point::new(i32::from(p.x), i32::from(p.y)),
+                        C::Raw::from_u32(p.color).into(),
+                    )
+                }))
             }
+        }
+    }
+
+    impl OriginDimensions for Tga<'_> {
+        fn size(&self) -> Size {
+            Size::new(self.width().into(), self.height().into())
         }
     }
 }

@@ -1,68 +1,38 @@
 use embedded_graphics::{
     image::Image,
     mock_display::MockDisplay,
-    pixelcolor::{Gray8, Rgb888, RgbColor},
+    pixelcolor::{Gray8, Rgb888},
     prelude::*,
 };
 use tinytga::Tga;
 
-const PIXEL_COLORS: [(i32, i32, Rgb888); 16] = [
-    (0, 0, Rgb888::WHITE),
-    (1, 0, Rgb888::BLACK),
-    (2, 0, Rgb888::WHITE),
-    (3, 0, Rgb888::BLACK),
-    (0, 1, Rgb888::BLACK),
-    (1, 1, Rgb888::RED),
-    (2, 1, Rgb888::BLACK),
-    (3, 1, Rgb888::GREEN),
-    (0, 2, Rgb888::WHITE),
-    (1, 2, Rgb888::BLACK),
-    (2, 2, Rgb888::BLUE),
-    (3, 2, Rgb888::BLACK),
-    (0, 3, Rgb888::BLACK),
-    (1, 3, Rgb888::WHITE),
-    (2, 3, Rgb888::BLACK),
-    (3, 3, Rgb888::WHITE),
+const CHESSBOARD_PATTERN: &[&str] = &[
+    "WKWK", //
+    "KRKG", //
+    "WKBK", //
+    "KWKW", //
 ];
 
 #[test]
 fn chessboard_compressed() {
-    let im = Tga::from_slice(include_bytes!("./chessboard_4px_rle.tga")).unwrap();
-    let im: Image<_, Rgb888> = Image::new(&im, Point::zero());
+    let tga = Tga::from_slice(include_bytes!("./chessboard_4px_rle.tga")).unwrap();
+    let image: Image<_, Rgb888> = Image::new(&tga, Point::zero());
 
-    let mut pixels = im.into_pixels();
+    let mut display = MockDisplay::new();
+    image.draw(&mut display).unwrap();
 
-    for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
-        assert_eq!(
-            pixels.next(),
-            Some(Pixel(Point::new(*x, *y), *color)),
-            "Pixel color at index {} does not match",
-            i
-        );
-    }
-
-    // 17th iteration should have no pixels from 4x4px image
-    assert_eq!(pixels.next(), None);
+    assert_eq!(display, MockDisplay::from_pattern(CHESSBOARD_PATTERN));
 }
 
 #[test]
 fn chessboard_uncompressed() {
-    let im = Tga::from_slice(include_bytes!("./chessboard_raw.tga")).unwrap();
-    let im: Image<_, Rgb888> = Image::new(&im, Point::zero());
+    let tga = Tga::from_slice(include_bytes!("./chessboard_raw.tga")).unwrap();
+    let image: Image<_, Rgb888> = Image::new(&tga, Point::zero());
 
-    let mut pixels = im.into_pixels();
+    let mut display = MockDisplay::new();
+    image.draw(&mut display).unwrap();
 
-    for (i, (x, y, color)) in PIXEL_COLORS.iter().enumerate() {
-        assert_eq!(
-            pixels.next(),
-            Some(Pixel(Point::new(*x, *y), *color)),
-            "Pixel color at index {} does not match",
-            i
-        );
-    }
-
-    // 17th iteration should have no pixels from 4x4px image
-    assert_eq!(pixels.next(), None);
+    assert_eq!(display, MockDisplay::from_pattern(CHESSBOARD_PATTERN));
 }
 
 fn test_color_tga(data: &[u8]) {

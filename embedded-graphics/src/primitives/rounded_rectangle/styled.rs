@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         rounded_rectangle::{Points, RoundedRectangle},
@@ -98,8 +98,8 @@ mod tests {
     use crate::{
         drawable::Drawable,
         geometry::{Point, Size},
+        iterator::IntoPixels,
         mock_display::MockDisplay,
-        pixel_iterator::IntoPixels,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{rectangle::Rectangle, CornerRadii, Primitive},
         style::PrimitiveStyleBuilder,

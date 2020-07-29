@@ -247,59 +247,29 @@ impl<'a> Iterator for BmpIterator<'a> {
 #[cfg(feature = "graphics")]
 mod e_g {
     use super::*;
-    use core::marker::PhantomData;
     use embedded_graphics::{
-        geometry::Point,
-        image::{ImageDimensions, IntoPixelIter},
         pixelcolor::{raw::RawData, PixelColor},
-        Pixel as EgPixel,
+        prelude::*,
     };
 
-    /// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration
-    ///
-    /// [`BmpIterator`]: ./struct.BmpIterator.html
-    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
-    #[derive(Debug)]
-    pub struct EgPixelIterator<'a, C> {
-        it: BmpIterator<'a>,
-        c: PhantomData<C>,
-    }
-
-    impl<'a, C> Iterator for EgPixelIterator<'a, C>
+    impl<C> ImageDrawable<C> for Bmp<'_>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {
-        type Item = EgPixel<C>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            self.it.next().map(|p| {
-                let raw = C::Raw::from_u32(p.color);
-                EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
-            })
+        fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+        where
+            D: DrawTarget<Color = C>,
+        {
+            target.fill_contiguous(
+                &self.bounding_box(),
+                self.into_iter().map(|p| C::Raw::from_u32(p.color).into()),
+            )
         }
     }
 
-    impl ImageDimensions for Bmp<'_> {
-        fn width(&self) -> u32 {
-            Bmp::width(&self)
-        }
-
-        fn height(&self) -> u32 {
-            Bmp::height(&self)
-        }
-    }
-
-    impl<'a, C> IntoPixelIter<C> for &'a Bmp<'_>
-    where
-        C: PixelColor + From<<C as PixelColor>::Raw>,
-    {
-        type PixelIterator = EgPixelIterator<'a, C>;
-
-        fn pixel_iter(self) -> Self::PixelIterator {
-            EgPixelIterator {
-                it: self.into_iter(),
-                c: PhantomData,
-            }
+    impl OriginDimensions for Bmp<'_> {
+        fn size(&self) -> Size {
+            Size::new(self.width(), self.height())
         }
     }
 }

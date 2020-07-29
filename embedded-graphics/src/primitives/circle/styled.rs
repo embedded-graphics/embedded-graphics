@@ -2,7 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::Dimensions,
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::circle::{distance_iterator::DistanceIterator, Circle},
     primitives::rectangle::{self, Rectangle},

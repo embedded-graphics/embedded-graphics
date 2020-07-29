@@ -1,12 +1,12 @@
 //! Image support for embedded-graphics
 //!
 //! Adding embedded-graphics support to an image format requires the implementation of the
-//! [`ImageDimensions`] and [`IntoPixelIter`] traits. These provide a common interface to image metadata
-//! and an iterator over individual pixel values respectively.
+//! [`ImageDrawable`] and [`OriginDimensions`] traits. These provide a common interface to image
+//! metadata and an iterator over individual pixel values respectively.
 //!
-//! The [`Image`] struct is a wrapper around items that implement both [`ImageDimensions`] and
-//! [`IntoPixelIter`] and allows them to be drawn to a [`DrawTarget`], reading pixel values from the
-//! implementation of [`IntoPixelIter`].
+//! The [`Image`] struct is a wrapper around items that implement both [`OriginDimensions`] and
+//! [`ImageDrawable`] and allows them to be drawn to a [`DrawTarget`], reading pixel values from the
+//! implementation of [`ImageDrawable`].
 //!
 //! # Examples
 //!
@@ -38,86 +38,58 @@
 //! ```
 //!
 //! [tinytga]: https://crates.io/crates/tinytga
-//! [`IntoPixelIter`]: ./trait.IntoPixelIter.html
-//! [`ImageDimensions`]: ./trait.ImageDimensions.html
+//! [`ImageDrawable`]: trait.ImageDrawable.html
+//! [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
 //! [`Image`]: ./struct.Image.html
 //! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 
+mod image_drawable;
 mod image_raw;
+mod sub_image;
 
-pub use self::image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
+pub use image_drawable::{ImageDrawable, ImageDrawableExt};
+pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
+pub use sub_image::SubImage;
 
 use crate::{
-    draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Point, Size},
-    pixel_iterator::IntoPixels,
+    draw_target::{DrawTarget, DrawTargetExt},
+    drawable::Drawable,
+    geometry::{Dimensions, OriginDimensions, Point},
     pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
 };
-use core::{fmt, fmt::Debug, marker::PhantomData};
+use core::{fmt::Debug, marker::PhantomData};
 
-/// Conversion into an iterator over the pixels of the image.
-pub trait IntoPixelIter<C>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    /// Iterator over pixels in the image
-    type PixelIterator: Iterator<Item = Pixel<C>>;
-
-    /// Get an iterator over the pixels of the image
-    fn pixel_iter(self) -> Self::PixelIterator;
-}
-
-/// A trait to get the dimensions of an image.
+/// Image object.
 ///
-/// This trait provides an interface to get the width and height of an image. It should be
-/// implemented along with [`IntoPixelIter`] for full embedded-graphics integration.
-pub trait ImageDimensions {
-    /// Get the width in pixels of an image
-    fn width(&self) -> u32;
-
-    /// Get the height in pixels of an image
-    fn height(&self) -> u32;
-}
-
-/// Image drawable.
-///
-/// The `Image` struct serves as a wrapper around other image types that provide pixel data decoded
-/// from a given format (raw bytes, BMP, TGA, etc). It allows an image to be repositioned using
-/// [`Transform::translate()`] or [`Transform::translate_mut()`] and drawn to a display that
+/// The `Image` struct serves as a wrapper around an [`ImageDrawable`] that provides support for
+/// an image format (raw bytes, BMP, TGA, etc). It allows an image to be repositioned using
+/// [`Transform::translate`] or [`Transform::translate_mut`] and drawn to a display that
 /// implements the [`DrawTarget`] trait.
-///
-/// `Image` accepts any item that implements `ImageDimensions` and `&'_ IntoPixelIter`.
 ///
 /// Refer to the [module documentation] for examples.
 ///
 /// [module documentation]: ./index.html
-/// [`Transform::translate()`]: ../transform/trait.Transform.html#tymethod.translate
-/// [`Transform::translate_mut()`]: ../transform/trait.Transform.html#tymethod.translate_mut
+/// [`Transform::translate`]: ../transform/trait.Transform.html#tymethod.translate
+/// [`Transform::translate_mut`]: ../transform/trait.Transform.html#tymethod.translate_mut
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, I, C> {
-    image_data: &'a I,
+    image_drawable: &'a I,
     offset: Point,
     c: PhantomData<C>,
 }
 
 impl<'a, I, C> Image<'a, I, C>
 where
-    &'a I: IntoPixelIter<C>,
-    I: ImageDimensions,
+    I: ImageDrawable<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// Create a new `Image` with the given image pixel data.
-    ///
-    /// The passed [`IntoPixelIter`] provides a source of pixel data from the original image.
-    ///
-    /// [`IntoPixelIter`]: ./trait.IntoPixelIter.html
-    pub fn new(image_data: &'a I, position: Point) -> Self {
+    /// Creates a new `Image`.
+    pub fn new(image_drawable: &'a I, position: Point) -> Self {
         Self {
-            image_data,
+            image_drawable,
             offset: position,
             c: PhantomData,
         }
@@ -153,7 +125,7 @@ impl<I, C> Transform for Image<'_, I, C> {
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
-            image_data: self.image_data,
+            image_drawable: self.image_drawable,
             offset: self.offset + by,
             c: PhantomData,
         }
@@ -193,8 +165,7 @@ impl<I, C> Transform for Image<'_, I, C> {
 
 impl<'a, I, C> Drawable for Image<'a, I, C>
 where
-    &'a I: IntoPixelIter<C>,
-    I: ImageDimensions,
+    I: ImageDrawable<C>,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     type Color = C;
@@ -203,110 +174,25 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        // FIXME: fill_contiguous should be used whenever possible,
-        //        but the current implementation assumes an top-left to bottom-right
-        //        iteration order that isn't guaranteed
-        //display.fill_contiguous(&self.bounding_box(), self.into_pixels().map(|p| p.1))
-
-        display.draw_iter(self.into_pixels())
+        self.image_drawable
+            .draw(&mut display.translated(self.offset))
     }
 }
 
 impl<'a, I, C> Dimensions for Image<'a, I, C>
 where
-    I: ImageDimensions,
+    I: OriginDimensions,
     C: PixelColor + From<<C as PixelColor>::Raw>,
 {
     fn bounding_box(&self) -> Rectangle {
-        let size = Size::new(self.image_data.width(), self.image_data.height());
-
-        Rectangle::new(self.offset, size)
-    }
-}
-
-impl<'a, 'b, I, C> IntoPixels for &'a Image<'b, I, C>
-where
-    &'b I: IntoPixelIter<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    type Color = C;
-
-    type Iter = ImageIterator<'a, 'b, I, C>;
-
-    fn into_pixels(self) -> Self::Iter {
-        ImageIterator {
-            it: self.image_data.pixel_iter(),
-            image: self,
-        }
-    }
-}
-
-/// Pixel iterator over `Image` objects
-pub struct ImageIterator<'a, 'b, I, C>
-where
-    &'b I: IntoPixelIter<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    image: &'a Image<'b, I, C>,
-    it: <&'b I as IntoPixelIter<C>>::PixelIterator,
-}
-
-impl<'a, 'b, I, C> Debug for ImageIterator<'a, 'b, I, C>
-where
-    &'b I: IntoPixelIter<C> + Debug,
-    <&'b I as IntoPixelIter<C>>::PixelIterator: Debug,
-    I: Debug,
-    C: PixelColor + From<<C as PixelColor>::Raw> + Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("ImageIterator")
-            .field("image", &self.image)
-            .field("it", &self.it)
-            .finish()
-    }
-}
-
-impl<'a, 'b, I, C> Iterator for ImageIterator<'a, 'b, I, C>
-where
-    &'b I: IntoPixelIter<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.it.next().map(|p| Pixel(p.0 + self.image.offset, p.1))
+        self.image_drawable.bounding_box().translate(self.offset)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{BinaryColor, Gray8, GrayColor};
-
-    #[test]
-    fn it_can_have_negative_offsets() {
-        let image_data: ImageRaw<Gray8> = ImageRaw::new(
-            &[0xff, 0x00, 0xbb, 0x00, 0xcc, 0x00, 0xee, 0x00, 0xaa],
-            3,
-            3,
-        );
-
-        let image = Image::new(&image_data, Point::zero()).translate(Point::new(-1, -1));
-
-        let expected = [
-            Pixel(Point::new(-1, -1), Gray8::WHITE),
-            Pixel(Point::new(0, -1), Gray8::BLACK),
-            Pixel(Point::new(1, -1), Gray8::new(0xbb)),
-            Pixel(Point::new(-1, 0), Gray8::BLACK),
-            Pixel(Point::new(0, 0), Gray8::new(0xcc)),
-            Pixel(Point::new(1, 0), Gray8::BLACK),
-            Pixel(Point::new(-1, 1), Gray8::new(0xee)),
-            Pixel(Point::new(0, 1), Gray8::BLACK),
-            Pixel(Point::new(1, 1), Gray8::new(0xaa)),
-        ];
-
-        assert!(image.into_pixels().eq(expected.iter().copied()));
-    }
+    use crate::{geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[test]
     fn negative_top_left() {
@@ -330,5 +216,27 @@ mod tests {
             image.bounding_box(),
             Rectangle::new(Point::new(100, 200), Size::new(4, 4))
         );
+    }
+
+    #[test]
+    fn position() {
+        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4, 4);
+
+        let mut display = MockDisplay::new();
+        Image::new(&image_raw, Point::new(1, 2))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     ", //
+                "     ", //
+                " #.#.", //
+                " .#.#", //
+                " #.#.", //
+                " .#.#", //
+            ])
+        )
     }
 }
