@@ -81,7 +81,7 @@ The `with-sdl` feature is enabled by default and can be disabled by adding `defa
 
 ```toml
 [dependencies.embedded-graphics-simulator]
-version = "0.2.0"
+version = "0.2.1"
 default-features = false
 ```
 
