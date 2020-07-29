@@ -206,21 +206,34 @@ impl Rectangle {
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
     pub fn intersection(&self, other: &Rectangle) -> Rectangle {
-        if let (Some(other_bottom_right), Some(self_bottom_right)) =
-            (other.bottom_right(), self.bottom_right())
-        {
-            // Check for overlap
-            if self.contains(other.top_left)
-                || self.contains(other_bottom_right)
-                || other.contains(self.top_left)
-                || other.contains(self_bottom_right)
-            {
-                return Rectangle::with_corners(
-                    self.top_left.component_max(other.top_left),
-                    self_bottom_right.component_min(other_bottom_right),
-                );
+        match (other.bottom_right(), self.bottom_right()) {
+            (Some(other_bottom_right), Some(self_bottom_right)) => {
+                // Check for overlap
+                if self.contains(other.top_left)
+                    || self.contains(other_bottom_right)
+                    || other.contains(self.top_left)
+                    || other.contains(self_bottom_right)
+                {
+                    return Rectangle::with_corners(
+                        self.top_left.component_max(other.top_left),
+                        self_bottom_right.component_min(other_bottom_right),
+                    );
+                }
             }
-        }
+            (Some(_other_bottom_right), None) => {
+                // Check if zero sized self is inside other
+                if other.contains(self.top_left) {
+                    return self.clone();
+                }
+            }
+            (None, Some(_self_bottom_right)) => {
+                // Check if zero sized other is inside self
+                if self.contains(other.top_left) {
+                    return other.clone();
+                }
+            }
+            (None, None) => (),
+        };
 
         // No overlap present
         Rectangle::zero()
@@ -394,10 +407,15 @@ mod tests {
 
     #[test]
     fn zero_sized_intersection() {
-        let rect1 = Rectangle::new(Point::new(0, 0), Size::new(0, 0));
+        let rect1 = Rectangle::new(Point::new(1, 2), Size::new(0, 0));
         let rect2 = Rectangle::new(Point::new(-10, -10), Size::new(20, 20));
 
-        assert_eq!(rect1.intersection(&rect2).size, Size::zero());
+        assert_eq!(rect1.intersection(&rect2), rect1);
+
+        let rect1 = Rectangle::new(Point::new(-10, -10), Size::new(20, 20));
+        let rect2 = Rectangle::new(Point::new(2, 3), Size::new(0, 0));
+
+        assert_eq!(rect1.intersection(&rect2), rect2);
     }
 
     #[test]

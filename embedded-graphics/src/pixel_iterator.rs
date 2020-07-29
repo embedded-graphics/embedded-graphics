@@ -1,17 +1,20 @@
 //! Pixel iterator
 
-use crate::drawable::Pixel;
-use crate::{pixelcolor::PixelColor, DrawTarget};
+use crate::{draw_target::DrawTarget, drawable::Pixel, geometry::Point, pixelcolor::PixelColor};
 
 /// Extension trait for pixel iterators.
 pub trait PixelIteratorExt<C>
 where
+    Self: Sized,
     C: PixelColor,
 {
     /// Draws the pixel iterator to a draw target.
     fn draw<D>(self, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>;
+
+    /// Translates a pixel iterator.
+    fn translate(self, offset: Point) -> TranslatedPixelIterator<Self>;
 }
 
 impl<I, C> PixelIteratorExt<C> for I
@@ -24,6 +27,10 @@ where
         D: DrawTarget<Color = C>,
     {
         target.draw_iter(self)
+    }
+
+    fn translate(self, offset: Point) -> TranslatedPixelIterator<Self> {
+        TranslatedPixelIterator::new(self, offset)
     }
 }
 
@@ -61,3 +68,34 @@ pub trait IntoPixels {
 //     ///  TODO: Doc
 //     fn into_sparse_pixels(self) -> Self::Iter;
 // }
+
+/// Translated pixel iterator.
+#[derive(Debug, PartialEq)]
+pub struct TranslatedPixelIterator<I> {
+    iter: I,
+    offset: Point,
+}
+
+impl<I, C> TranslatedPixelIterator<I>
+where
+    I: Iterator<Item = Pixel<C>>,
+    C: PixelColor,
+{
+    fn new(iter: I, offset: Point) -> Self {
+        Self { iter, offset }
+    }
+}
+
+impl<I, C> Iterator for TranslatedPixelIterator<I>
+where
+    I: Iterator<Item = Pixel<C>>,
+    C: PixelColor,
+{
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter
+            .next()
+            .map(|Pixel(p, c)| Pixel(p + self.offset, c))
+    }
+}

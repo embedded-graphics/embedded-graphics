@@ -31,6 +31,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#310](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Sector` primitive.
 - [#398](https://github.com/jamwaffles/embedded-graphics/pull/398) Added `Point::length_squared` and `component_min`, `component_max`, `component_mul` and `component_div` for `Point` and `Size`.
 - [#400](https://github.com/jamwaffles/embedded-graphics/pull/400) Added `OffsetOutline` and `StyledPrimitiveAreas` traits.
+- [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) Added `Clipped`, `Cropped` and `Translated` draw targets.
+- [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) Added `OriginDimensions` trait for dimensions with `top_left == Point::zero()`.
 
 ### Changed
 
@@ -46,11 +48,14 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#393](https://github.com/jamwaffles/embedded-graphics/pull/393) `DrawTarget::draw` now uses a reference to `self` instead of taking ownership of `self`. Because of this change `DrawTarget` can no longer be implemented for pixel iterators (`Iterator<Item = C>`), which can now be drawn using the `draw` method provided by the `PixelIteratorExt` extension trait.
 - **(breaking)** [#383](https://github.com/jamwaffles/embedded-graphics/pull/383) Replaced all `IntoIterator` impls with a custom `IntoPixels` trait. To get an iterator over pixels in an item, replace calls to `into_iter()` with `into_pixels()`.
 - **(breaking)** [#403](https://github.com/jamwaffles/embedded-graphics/pull/403) Use an associated type to define the color type for `Drawable`s.
+- **(breaking)** [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) `DrawTarget::size` was removed and `DrawTarget`s are now required also implement `Dimensions`.
+- **(breaking)** [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) The `DrawTarget` trait was moved from the root of the crate to a new `draw_target` module. Projects that use the `prelude` to import `DrawTarget` won't be affected by this change.
 
 ### Fixed
 
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) The bounding box size for `Circle`s was off by one.
 - [#401](https://github.com/jamwaffles/embedded-graphics/pull/401) Triangle pixel iterators no longer produce a pixel for each node twice.
+- [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) `Rectangle::intersect` will now preserve the `top_left` value of zero sized rectangles if `top_left` is contained in the other rectangle.
 
 ### Removed
 

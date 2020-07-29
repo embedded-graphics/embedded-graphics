@@ -104,7 +104,9 @@ impl DrawTarget for Framebuffer {
 
         Ok(())
     }
+}
 
+impl OriginDimensions for Framebuffer {
     fn size(&self) -> Size {
         self.size
     }

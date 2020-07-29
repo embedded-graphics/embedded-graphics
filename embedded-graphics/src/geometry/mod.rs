@@ -23,3 +23,20 @@ pub trait Dimensions {
     /// Returns the bounding box.
     fn bounding_box(&self) -> Rectangle;
 }
+
+/// Dimensions with `top_left` of the bounding box at `(0, 0)`.
+///
+/// A blanket implementation of `Dimensions` is provided for all types that implement this trait.
+pub trait OriginDimensions {
+    /// Returns the size of the bounding box.
+    fn size(&self) -> Size;
+}
+
+impl<T> Dimensions for T
+where
+    T: OriginDimensions,
+{
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), self.size())
+    }
+}

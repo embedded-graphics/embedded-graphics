@@ -31,7 +31,9 @@ impl DrawTarget for FakeDisplay {
     {
         Ok(())
     }
+}
 
+impl OriginDimensions for FakeDisplay {
     fn size(&self) -> Size {
         Size::zero()
     }

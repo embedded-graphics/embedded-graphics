@@ -1,4 +1,5 @@
 use crate::{
+    draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -8,7 +9,7 @@ use crate::{
         OffsetOutline, Styled,
     },
     style::PrimitiveStyle,
-    DrawTarget, SaturatingCast,
+    SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the arc border

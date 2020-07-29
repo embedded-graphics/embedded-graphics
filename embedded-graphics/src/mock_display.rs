@@ -163,22 +163,22 @@
 //! [`Gray8`]: ../pixelcolor/struct.Gray8.html
 //! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
-//! [`DrawTarget`]: ../trait.DrawTarget.html
+//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 //! [`MockDisplay`]: struct.MockDisplay.html
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
 //! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
 
 use crate::{
+    draw_target::DrawTarget,
     drawable::Pixel,
-    geometry::{Point, Size},
+    geometry::{OriginDimensions, Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
         Rgb565, Rgb888, RgbColor,
     },
     prelude::Primitive,
     primitives::{ContainsPoint, Rectangle},
-    DrawTarget,
 };
 use core::{
     cmp::PartialEq,
@@ -528,7 +528,12 @@ where
 
         Ok(())
     }
+}
 
+impl<C> OriginDimensions for MockDisplay<C>
+where
+    C: PixelColor,
+{
     fn size(&self) -> Size {
         DISPLAY_AREA.size
     }

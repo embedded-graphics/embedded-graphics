@@ -1,11 +1,19 @@
 //! A target for embedded-graphics drawing operations.
 
+mod clipped;
+mod cropped;
+mod translated;
+
 use crate::{
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{rectangle::Rectangle, Primitive},
     Pixel,
 };
+
+pub use clipped::Clipped;
+pub use cropped::Cropped;
+pub use translated::Translated;
 
 /// A target for embedded-graphics drawing operations.
 ///
@@ -84,10 +92,6 @@ use crate::{
 ///     // this the type `Infallible` was chosen as the `Error` type.
 ///     type Error = core::convert::Infallible;
 ///
-///     fn size(&self) -> Size {
-///         Size::new(64, 64)
-///     }
-///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
@@ -103,6 +107,12 @@ use crate::{
 ///         }
 ///
 ///         Ok(())
+///     }
+/// }
+///
+/// impl OriginDimensions for ExampleDisplay {
+///     fn size(&self) -> Size {
+///         Size::new(64, 64)
 ///     }
 /// }
 ///
@@ -182,10 +192,6 @@ use crate::{
 ///     type Color = Rgb565;
 ///     type Error = CommError;
 ///
-///     fn size(&self) -> Size {
-///         Size::new(64, 64)
-///     }
-///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
 ///         I: IntoIterator<Item = Pixel<Self::Color>> {
@@ -237,6 +243,12 @@ use crate::{
 ///     }
 /// }
 ///
+/// impl OriginDimensions for ExampleDisplay {
+///     fn size(&self) -> Size {
+///         Size::new(64, 64)
+///     }
+/// }
+///
 /// let mut display = ExampleDisplay {
 ///     iface: SPI1,
 /// };
@@ -275,7 +287,7 @@ use crate::{
 /// [`draw_iter`]: #tymethod.draw_iter
 /// [`size`]: #tymethod.size
 /// [`Error` type]: #associatedtype.Error
-pub trait DrawTarget {
+pub trait DrawTarget: Dimensions {
     /// The pixel color type the targetted display supports.
     type Color: PixelColor;
 
@@ -289,13 +301,6 @@ pub trait DrawTarget {
     ///
     /// [`core::convert::Infallible`]: https://doc.rust-lang.org/stable/core/convert/enum.Infallible.html
     type Error;
-
-    /// Returns the dimensions of the `DrawTarget` in pixels.
-    ///
-    /// This should return the size of the entire drawable area of the display. If a display
-    /// supports drawing to pixels outside the visible area, that area should also be reported in
-    /// the dimensions returned by `size`.
-    fn size(&self) -> Size;
 
     // TODO: Reenable this in a new PR with modified primitives iterators
     // // TODO: Mention performance
@@ -367,10 +372,6 @@ pub trait DrawTarget {
     ///     type Color = Gray8;
     ///     type Error = core::convert::Infallible;
     ///
-    ///     fn size(&self) -> Size {
-    ///         Size::new(64, 64)
-    ///     }
-    ///
     ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     ///     where
     ///         I: IntoIterator<Item = Pixel<Self::Color>>,
@@ -400,11 +401,18 @@ pub trait DrawTarget {
     ///         }
     ///     }
     /// }
+    ///
+    /// impl OriginDimensions for ExampleDisplay {
+    ///     fn size(&self) -> Size {
+    ///         Size::new(64, 64)
+    ///     }
+    /// }
+    ///
     /// ```
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
-    /// [`Rectangle::intersection`]: ./primitives/rectangle/struct.Rectangle.html#method.intersection
-    /// [`Points::points`]: ./primitives/trait.Primitive.html#tymethod.points
+    /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
+    /// [`Points::points`]: ../primitives/trait.Primitive.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
@@ -439,6 +447,161 @@ pub trait DrawTarget {
     /// [`size`]: #method.size
     /// [`fill_solid`]: #method.fill_solid
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
-        self.fill_solid(&Rectangle::new(Point::zero(), self.size()), color)
+        self.fill_solid(&self.bounding_box(), color)
+    }
+}
+
+/// Extension trait for `DrawTarget`s.
+pub trait DrawTargetExt: DrawTarget + Sized {
+    /// Creates a translated draw target based on this draw target.
+    ///
+    /// All drawing operations are translated by `offset` pixels, before being passed to the parent
+    /// draw target.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::BinaryColor,
+    ///     fonts::{Text, Font6x8},
+    ///     style::TextStyle,
+    /// };
+    ///
+    /// let mut display = MockDisplay::new();
+    /// let mut translated_display = display.translated(Point::new(10, 5));
+    ///
+    /// // Draws text at position (10, 5) in the display coordinate system
+    /// Text::new("Text", Point::zero())
+    ///     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+    ///     .draw(&mut translated_display)?;
+    /// #
+    /// # let mut expected = MockDisplay::new();
+    /// #
+    /// # Text::new("Text", Point::new(10, 5))
+    /// #     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+    /// #     .draw(&mut expected)?;
+    /// #
+    /// # assert_eq!(display, expected);
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    fn translated(&mut self, offset: Point) -> Translated<'_, Self>;
+
+    /// Creates a cropped draw target based on this draw target.
+    ///
+    /// A cropped draw target is a draw target for a rectangular subregion of the parent draw target.
+    /// Its coordinate system is shifted so that the origin coincides with `area.top_left` in the
+    /// parent draw target's coordinate system.
+    ///
+    /// The bounding box of the returned target will always be contained inside the bounding box
+    /// of the parent target. If any of the requested `area` lies outside the parent target's bounding
+    /// box the intersection of the parent target's bounding box and `area` will be used.
+    ///
+    /// Drawing operations outside the bounding box will not be clipped.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::Rgb565,
+    ///     fonts::{Text, Font6x8},
+    ///     style::TextStyle,
+    ///     primitives::Rectangle,
+    /// };
+    ///
+    /// /// Fills a draw target with a blue background and prints centered yellow text.
+    /// fn draw_text<T>(target: &mut T, text: &str) -> Result<(), T::Error>
+    /// where
+    ///     T: DrawTarget<Color = Rgb565>,
+    /// {
+    ///     target.clear(Rgb565::BLUE)?;
+    ///
+    ///     let target_size = target.bounding_box().size;
+    ///     let text_size = Font6x8::CHARACTER_SIZE.component_mul(Size::new(text.len() as u32, 1));
+    ///
+    ///     let text_position = Point::zero() + (target_size - text_size) / 2;
+    ///
+    ///     Text::new(text, text_position)
+    ///         .into_styled(TextStyle::new(Font6x8, Rgb565::YELLOW))
+    ///         .draw(target)
+    /// }
+    ///
+    ///
+    /// let mut display = MockDisplay::new();
+    /// display.set_allow_overdraw(true);
+    ///
+    /// let area = Rectangle::new(Point::new(5, 10), Size::new(40, 15));
+    /// let mut cropped_display = display.cropped(&area);
+    ///
+    /// draw_text(&mut cropped_display, "Text")?;
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    fn cropped(&mut self, area: &Rectangle) -> Cropped<'_, Self>;
+
+    /// Creates a clipped draw target based on this draw target.
+    ///
+    /// A clipped draw target is a draw target for a rectangular subregion of the parent draw target.
+    /// The coordinate system of the created draw target is equal to the parent target's coordinate
+    /// system. All drawing operations outside the bounding box will be clipped.
+    ///
+    /// The bounding box of the returned target will always be contained inside the bounding box
+    /// of the parent target. If any of the requested `area` lies outside the parent target's bounding
+    /// box the intersection of the parent target's bounding box and `area` will be used.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::BinaryColor,
+    ///     fonts::{Text, Font12x16},
+    ///     style::TextStyle,
+    ///     primitives::Rectangle,
+    /// };
+    ///
+    /// let mut display = MockDisplay::new();
+    ///
+    /// let area = Rectangle::new(Point::zero(), Size::new(4 * 12, 16));
+    /// let mut clipped_display = display.clipped(&area);
+    ///
+    /// // Only the first 4 characters will be drawn, because the others are outside
+    /// // the clipping area
+    /// Text::new("Clipped", Point::zero())
+    ///     .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+    ///     .draw(&mut clipped_display)?;
+    /// #
+    /// # let mut expected = MockDisplay::new();
+    /// #
+    /// # Text::new("Clip", Point::zero())
+    /// #     .into_styled(TextStyle::new(Font12x16, BinaryColor::On))
+    /// #     .draw(&mut expected)?;
+    /// #
+    /// # assert_eq!(display, expected);
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self>;
+}
+
+impl<T> DrawTargetExt for T
+where
+    T: DrawTarget,
+{
+    fn translated(&mut self, offset: Point) -> Translated<'_, Self> {
+        Translated::new(self, offset)
+    }
+
+    fn cropped(&mut self, area: &Rectangle) -> Cropped<'_, Self> {
+        Cropped::new(self, area)
+    }
+
+    fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self> {
+        Clipped::new(self, area)
     }
 }
