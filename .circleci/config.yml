@@ -6,8 +6,8 @@ precheck_steps: &precheck_steps
     - checkout
     - restore_cache:
         key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
-    - run: sudo apt update && sudo apt install -qq libsdl2-dev linkchecker
-    - run: cargo install cargo-readme just
+    - run: sudo apt update && sudo apt install -qq libsdl2-dev
+    - run: cargo install cargo-readme just cargo-deadlinks
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup toolchain add nightly -c rustfmt
     - run: rustup component add rustfmt
