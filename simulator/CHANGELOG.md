@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.1] - 2020-07-29
+
 ### Added
 
 - [#298](https://github.com/jamwaffles/embedded-graphics/pull/298) Added the `with-sdl` option (enabled by default) to allow optionally disabling SDL2 support.
@@ -50,7 +52,8 @@
 - The builtin simulator now supports colour pixel types, like `RGB565`.
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.1...HEAD
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0...HEAD
+[0.2.1]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0...embedded-graphics-simulator-v0.2.1
 [0.2.0]: https://github.com/jamwaffles/embedded-graphics-simulator/compare/embedded-graphics-simulator-v0.2.0-beta.2...embedded-graphics-simulator-v0.2.0
 [0.2.0-beta.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-simulator-v0.2.0-alpha.1...embedded-graphics-simulator-v0.2.0-beta.2
