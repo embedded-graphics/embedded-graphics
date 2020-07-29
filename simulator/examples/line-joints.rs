@@ -45,7 +45,6 @@ enum JointKind {
     Bevel { filler_triangle: Triangle },
     Degenerate { filler_triangle: Triangle },
     Colinear,
-    StartOrEnd,
 }
 
 use std::fmt;
@@ -56,7 +55,6 @@ impl fmt::Display for JointKind {
             Self::Bevel { .. } => f.write_str("Bevel"),
             Self::Degenerate { .. } => f.write_str("Degenerate"),
             Self::Colinear => f.write_str("Colinear"),
-            Self::StartOrEnd => f.write_str("StartOrEnd"),
         }
     }
 }
@@ -404,6 +402,15 @@ fn draw(
         draw_filler_triangle(corner_1, display)?;
         draw_filler_triangle(corner_2, display)?;
         draw_filler_triangle(corner_3, display)?;
+
+        // Fill inside
+        Triangle::new(
+            corner_1.first_edge_end.right,
+            corner_2.first_edge_end.right,
+            corner_3.first_edge_end.right,
+        )
+        .into_styled(PrimitiveStyle::with_fill(Rgb888::YELLOW))
+        .draw(display)?;
     }
 
     Ok(())
