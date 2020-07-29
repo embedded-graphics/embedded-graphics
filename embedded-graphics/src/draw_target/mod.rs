@@ -550,8 +550,8 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// system. All drawing operations outside the bounding box will be clipped.
     ///
     /// The bounding box of the returned target will always be contained inside the bounding box
-    /// of the base target. If the requested `area` is overlapping the base target's bounding box
-    /// the intersection of the base target's bounding box and `area` will be used.
+    /// of the base target. If any of the requested `area` lies outside the base target's bounding 
+    /// box the intersection of the base target's bounding box and `area` will be used.
     ///
     /// # Examples
     ///
