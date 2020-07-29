@@ -11,6 +11,10 @@ use embedded_graphics_simulator::{
 };
 use sdl2::keyboard::Keycode;
 
+fn filled_tri(triangle: Triangle, color: Rgb888) -> impl Iterator<Item = Pixel<Rgb888>> {
+    triangle.mathematical_points().map(move |p| Pixel(p, color))
+}
+
 fn crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
     let radius = Size::new(4, 4);
 
@@ -229,13 +233,19 @@ fn draw_thick_edge(
         // .fill_color(Rgb888::GREEN)
         .build();
 
-    Triangle::new(left_start, left_end, right_start)
-        .into_styled(style)
-        .draw(display)?;
+    let t1 = Triangle::new(left_start, left_end, right_start);
+    let t2 = Triangle::new(right_start, left_end, right_end);
 
-    Triangle::new(right_start, left_end, right_end)
-        .into_styled(style)
-        .draw(display)?;
+    filled_tri(t1, Rgb888::RED).draw(display)?;
+    filled_tri(t2, Rgb888::RED).draw(display)?;
+
+    // t1
+    //     .into_styled(style)
+    //     .draw(display)?;
+
+    // t2
+    //     .into_styled(style)
+    //     .draw(display)?;
 
     // Highlight left (outside) edge
     Line::new(left_start, left_end)
@@ -261,7 +271,11 @@ fn draw_filler_triangle(
         }
         | JointKind::Degenerate {
             filler_triangle, ..
-        } => filler_triangle.into_styled(style).draw(display),
+        } => {
+            filled_tri(filler_triangle, Rgb888::YELLOW).draw(display)
+
+            // filler_triangle.into_styled(style).draw(display)
+        }
         _ => Ok(()),
     }
 }
@@ -298,9 +312,11 @@ fn draw_degenerate_edge(
     let tri = Triangle::new(left_start, left_end, center);
 
     if tri.area_doubled() > 0 {
-        Triangle::new(left_start, left_end, center)
-            .into_styled(style)
-            .draw(display)?;
+        filled_tri(tri, Rgb888::CYAN).draw(display)?;
+
+        // tri
+        //     .into_styled(style)
+        //     .draw(display)?;
     }
 
     // Highlight left (outside) edge
@@ -328,9 +344,15 @@ fn draw_degenerate_bevel(
         }
         | JointKind::Degenerate {
             filler_triangle, ..
-        } => Triangle::new(filler_triangle.p1, filler_triangle.p2, center)
-            .into_styled(style)
-            .draw(display),
+        } => {
+            let t = Triangle::new(filler_triangle.p1, filler_triangle.p2, center);
+
+            filled_tri(t, Rgb888::YELLOW).draw(display)
+
+            // t
+            // .into_styled(style)
+            // .draw(display)
+        }
         _ => Ok(()),
     }
 }
