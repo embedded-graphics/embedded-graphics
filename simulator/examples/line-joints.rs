@@ -3,6 +3,7 @@ use embedded_graphics::{
     pixelcolor::Rgb888,
     prelude::*,
     primitives::line::{Intersection, Side},
+    primitives::line_joint::{EdgeCorners, JointKind, LineJoint},
     primitives::*,
     style::*,
 };
@@ -43,174 +44,12 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .unwrap();
 }
 
-#[derive(Copy, Clone, Debug)]
-enum JointKind {
-    Miter,
-    Bevel { filler_triangle: Triangle },
-    Degenerate { filler_triangle: Triangle },
-    Colinear,
-}
-
-use std::fmt;
-impl fmt::Display for JointKind {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Miter => f.write_str("Miter"),
-            Self::Bevel { .. } => f.write_str("Bevel"),
-            Self::Degenerate { .. } => f.write_str("Degenerate"),
-            Self::Colinear => f.write_str("Colinear"),
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-struct EdgeCorners {
-    left: Point,
-    right: Point,
-}
-
-#[derive(Copy, Clone, Debug)]
-struct Joint {
-    kind: JointKind,
-    first_edge_end: EdgeCorners,
-    second_edge_start: EdgeCorners,
-}
-
-impl Joint {
-    fn is_degenerate(&self) -> bool {
-        match self.kind {
-            JointKind::Degenerate { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_colinear(&self) -> bool {
-        match self.kind {
-            JointKind::Colinear => true,
-            _ => false,
-        }
-    }
-}
-
-fn corner(start: Point, mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Joint {
-    let first_line = Line::new(start, mid);
-    let second_line = Line::new(mid, end);
-
-    // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
-    let miter_limit = (width * 2).pow(2);
-
-    // Left and right edges of thick first segment
-    let (first_edge_left, first_edge_right) = first_line.extents(width as i32, alignment);
-    // Left and right edges of thick second segment
-    let (second_edge_left, second_edge_right) = second_line.extents(width as i32, alignment);
-
-    if let (
-        Intersection::Point {
-            point: l_intersection,
-            ..
-        },
-        Intersection::Point {
-            point: r_intersection,
-            ..
-        },
-    ) = (
-        second_edge_left.line_intersection(&first_edge_left),
-        second_edge_right.line_intersection(&first_edge_right),
-    ) {
-        let first_segment_start_edge = Line::new(first_edge_left.start, first_edge_right.start);
-        let second_segment_end_edge = Line::new(second_edge_left.end, second_edge_right.end);
-
-        let self_intersection_l = first_segment_start_edge.segment_intersection(&second_edge_left)
-            || second_segment_end_edge.segment_intersection(&first_edge_left);
-
-        let self_intersection_r = first_segment_start_edge.segment_intersection(&second_edge_right)
-            || second_segment_end_edge.segment_intersection(&first_edge_right);
-
-        // Distance from midpoint to miter end point
-        let miter_length_squared = Line::new(mid, l_intersection).length_squared();
-
-        // Normal line: non-overlapping line end caps
-        if !self_intersection_r && !self_intersection_l {
-            // Intersection is within limit at which it will be chopped off into a bevel, so return
-            // a miter.
-            if miter_length_squared <= miter_limit {
-                let corners = EdgeCorners {
-                    left: l_intersection,
-                    right: r_intersection,
-                };
-
-                Joint {
-                    kind: JointKind::Miter,
-                    first_edge_end: corners,
-                    second_edge_start: corners,
-                }
-            }
-            // Miter is too long, chop it into bevel-style corner
-            else {
-                let kind = JointKind::Bevel {
-                    filler_triangle: Triangle::new(
-                        first_edge_left.end,
-                        second_edge_left.start,
-                        r_intersection,
-                    ),
-                };
-
-                Joint {
-                    kind,
-                    first_edge_end: EdgeCorners {
-                        left: first_edge_left.end,
-                        right: r_intersection,
-                    },
-                    second_edge_start: EdgeCorners {
-                        left: second_edge_left.start,
-                        right: r_intersection,
-                    },
-                }
-            }
-        }
-        // Line segments overlap (degenerate)
-        else {
-            Joint {
-                kind: JointKind::Degenerate {
-                    filler_triangle: Triangle::new(
-                        first_edge_left.end,
-                        second_edge_left.start,
-                        mid,
-                    ),
-                },
-                first_edge_end: EdgeCorners {
-                    left: first_edge_left.end,
-                    right: first_edge_right.end,
-                },
-                second_edge_start: EdgeCorners {
-                    left: second_edge_left.start,
-                    right: second_edge_right.start,
-                },
-            }
-        }
-    }
-    // Lines are colinear
-    else {
-        Joint {
-            kind: JointKind::Colinear,
-            first_edge_end: EdgeCorners {
-                left: first_edge_left.end,
-                right: first_edge_right.end,
-            },
-            second_edge_start: EdgeCorners {
-                left: second_edge_left.start,
-                right: second_edge_right.start,
-            },
-        }
-    }
-}
-
 fn draw_thick_edge(
-    start_corner: Joint,
-    end_corner: Joint,
+    start_corner: LineJoint,
+    end_corner: LineJoint,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let Joint {
+    let LineJoint {
         second_edge_start:
             EdgeCorners {
                 left: left_start,
@@ -218,7 +57,7 @@ fn draw_thick_edge(
             },
         ..
     } = start_corner;
-    let Joint {
+    let LineJoint {
         first_edge_end:
             EdgeCorners {
                 left: left_end,
@@ -227,17 +66,17 @@ fn draw_thick_edge(
         ..
     } = end_corner;
 
-    let style = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb888::RED)
-        .stroke_width(1)
-        // .fill_color(Rgb888::GREEN)
-        .build();
-
     let t1 = Triangle::new(left_start, left_end, right_start);
     let t2 = Triangle::new(right_start, left_end, right_end);
 
     filled_tri(t1, Rgb888::RED).draw(display)?;
     filled_tri(t2, Rgb888::RED).draw(display)?;
+
+    // let style = PrimitiveStyleBuilder::new()
+    //    .stroke_color(Rgb888::RED)
+    //    .stroke_width(1)
+    //    // .fill_color(Rgb888::GREEN)
+    //    .build();
 
     // t1
     //     .into_styled(style)
@@ -256,14 +95,14 @@ fn draw_thick_edge(
 }
 
 fn draw_filler_triangle(
-    corner: Joint,
+    corner: LineJoint,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let style = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb888::YELLOW)
-        .stroke_width(1)
-        // .fill_color(Rgb888::GREEN)
-        .build();
+    // let style = PrimitiveStyleBuilder::new()
+    //     .stroke_color(Rgb888::YELLOW)
+    //     .stroke_width(1)
+    //     // .fill_color(Rgb888::GREEN)
+    //     .build();
 
     match corner.kind {
         JointKind::Bevel {
@@ -281,38 +120,40 @@ fn draw_filler_triangle(
 }
 
 fn draw_degenerate_edge(
-    start_corner: Joint,
-    end_corner: Joint,
+    start_corner: LineJoint,
+    end_corner: LineJoint,
     center: Point,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let Joint {
+    let LineJoint {
         second_edge_start:
             EdgeCorners {
                 left: left_start,
-                right: right_start,
+                // right: right_start,
+                ..
             },
         ..
     } = start_corner;
-    let Joint {
+    let LineJoint {
         first_edge_end:
             EdgeCorners {
                 left: left_end,
-                right: right_end,
+                // right: right_end,
+                ..
             },
         ..
     } = end_corner;
-
-    let style = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb888::CYAN)
-        .stroke_width(1)
-        // .fill_color(Rgb888::GREEN)
-        .build();
 
     let tri = Triangle::new(left_start, left_end, center);
 
     if tri.area_doubled() > 0 {
         filled_tri(tri, Rgb888::CYAN).draw(display)?;
+
+        // let style = PrimitiveStyleBuilder::new()
+        //     .stroke_color(Rgb888::CYAN)
+        //     .stroke_width(1)
+        //     // .fill_color(Rgb888::GREEN)
+        //     .build();
 
         // tri
         //     .into_styled(style)
@@ -328,16 +169,10 @@ fn draw_degenerate_edge(
 }
 
 fn draw_degenerate_bevel(
-    corner: Joint,
+    corner: LineJoint,
     center: Point,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let style = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb888::YELLOW)
-        .stroke_width(1)
-        // .fill_color(Rgb888::GREEN)
-        .build();
-
     match corner.kind {
         JointKind::Bevel {
             filler_triangle, ..
@@ -347,7 +182,13 @@ fn draw_degenerate_bevel(
         } => {
             let t = Triangle::new(filler_triangle.p1, filler_triangle.p2, center);
 
-            filled_tri(t, Rgb888::YELLOW).draw(display)
+            filled_tri(t, Rgb888::GREEN).draw(display)
+
+            //     let style = PrimitiveStyleBuilder::new()
+            // .stroke_color(Rgb888::YELLOW)
+            // .stroke_width(1)
+            // // .fill_color(Rgb888::GREEN)
+            // .build();
 
             // t
             // .into_styled(style)
@@ -358,7 +199,7 @@ fn draw_degenerate_bevel(
 }
 
 /// Calculate squared distance from midpoint of an outside (left) edge to the center of the triangle
-fn calc_dist(center: Point, start: Joint, end: Joint) -> u32 {
+fn calc_dist(center: Point, start: LineJoint, end: LineJoint) -> u32 {
     let start = start.second_edge_start.left;
     let end = end.first_edge_end.left;
 
@@ -373,9 +214,9 @@ fn draw(
     alignment: StrokeAlignment,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let corner_1 = corner(triangle.p3, triangle.p1, triangle.p2, width, alignment);
-    let corner_2 = corner(triangle.p1, triangle.p2, triangle.p3, width, alignment);
-    let corner_3 = corner(triangle.p2, triangle.p3, triangle.p1, width, alignment);
+    let corner_1 = LineJoint::from_points(triangle.p3, triangle.p1, triangle.p2, width, alignment);
+    let corner_2 = LineJoint::from_points(triangle.p1, triangle.p2, triangle.p3, width, alignment);
+    let corner_3 = LineJoint::from_points(triangle.p2, triangle.p3, triangle.p1, width, alignment);
 
     Text::new(
         &format!("{} {} {}", corner_1.kind, corner_2.kind, corner_3.kind),
@@ -390,8 +231,6 @@ fn draw(
     .draw(display)?;
 
     let centroid = triangle.centroid();
-
-    empty_crosshair(centroid, Rgb888::MAGENTA, display);
 
     let dist1 = calc_dist(centroid, corner_1, corner_2);
     let dist2 = calc_dist(centroid, corner_2, corner_3);
@@ -434,6 +273,8 @@ fn draw(
         .into_styled(PrimitiveStyle::with_fill(Rgb888::YELLOW))
         .draw(display)?;
     }
+
+    empty_crosshair(centroid, Rgb888::MAGENTA, display);
 
     Ok(())
 }
