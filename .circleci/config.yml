@@ -1,15 +1,12 @@
 # Check that everything (tests, benches, etc) builds in std environments
 precheck_steps: &precheck_steps
   docker:
-    - image: circleci/rust:1.40.0
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0
   steps:
     - checkout
     - restore_cache:
         key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
-    - run: sudo apt update && sudo apt install -qq libsdl2-dev
-    - run: cargo install cargo-readme just cargo-deadlinks
     - run: rustup default ${RUST_VERSION:-stable}
-    - run: rustup toolchain add nightly -c rustfmt
     - run: rustup component add rustfmt
     - run: cargo update
     - run: just build
@@ -22,7 +19,7 @@ precheck_steps: &precheck_steps
 # Build crates for embedded target
 target_steps: &target_steps
   docker:
-    - image: circleci/rust:1.40.0
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0
   steps:
     - checkout
     - restore_cache:
@@ -36,7 +33,6 @@ target_steps: &target_steps
         else
           echo "Target $TARGET is already installed"
         fi
-    - run: cargo install just
     - run: cargo update
     - run: just build-target $TARGET --release
     - save_cache:
