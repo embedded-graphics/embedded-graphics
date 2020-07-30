@@ -4,6 +4,7 @@ target_dir := "target"
 doc_dir := "doc"
 doc_assets_dir := doc_dir + "/assets"
 screenshots_dir := target_dir + "/screenshots"
+ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0"
 
 #----------
 # Building
@@ -132,3 +133,14 @@ generate-example-screenshot example:
         just generate-example-screenshot $(basename "$example" .rs); \
     done
 
+#--------
+# Docker
+#--------
+
+# Generate the Docker image used by the CI pipeline
+build-ci-image:
+    docker build -t "{{ci_build_image}}" -f ./.circleci/Dockerfile --compress .
+
+# Push the generated CI build environment image to Docker Hub
+push-ci-image:
+    docker push "{{ci_build_image}}"
