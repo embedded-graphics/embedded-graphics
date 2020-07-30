@@ -52,13 +52,9 @@ generate-docs:
     cargo clean --doc
     cargo doc --all-features
 
-# Runs linkchecker on the docs
+# Runs cargo-deadlinks on the docs
 check-links: generate-docs
-    linkchecker --check-extern --ignore-url=^http \
-        target/doc/embedded_graphics/index.html \
-        target/doc/tinybmp/index.html \
-        target/doc/tinytga/index.html \
-        target/doc/embedded_graphics_simulator/index.html
+    cargo deadlinks
 
 #----------------------
 # README.md generation

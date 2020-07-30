@@ -9,22 +9,15 @@ rustup update
 # Ensure rustfmt is installed
 rustup component add rustfmt
 
-# Install `cargo-readme`
-cargo install cargo-readme
+# Install `cargo-readme` and `cargo-deadlinks`
+cargo install cargo-readme cargo-deadlinks
 
 # Install `just`
 cargo install just
 
-# Install SDL2 for simulator and linkchecker for build script
+# Install SDL2 for simulator for build script
+sudo apt install libsdl2-dev
 
-# Python 2 systems (Ubuntu older than 20.04, Linux Mint 19, etc)
-sudo apt install libsdl2-dev linkchecker
-
-# OR
-
-# Python 3 systems (Ubuntu 20.04+, Linux Mint 20, etc)
-sudo apt install python3-pip
-sudo pip3 install git+https://github.com/linkchecker/linkchecker.git
 ```
 
 ## Generating readmes
