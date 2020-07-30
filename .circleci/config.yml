@@ -27,14 +27,17 @@ target_steps: &target_steps
           - v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: |
         SYSROOT=$(rustc --print sysroot)
+        TARGETS=("arm-unknown-linux-gnueabi" "armv7-unknown-linux-gnueabihf" "x86_64-unknown-linux-gnu" "x86_64-unknown-linux-musl" "thumbv6m-none-eabi" "thumbv7em-none-eabi" "thumbv7em-none-eabihf" "thumbv7m-none-eabi")
 
-        if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
-          rustup target add $TARGET
-        else
-          echo "Target $TARGET is already installed"
-        fi
+        for TARGET in "${TARGETS[@]}"; do
+          if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
+            rustup target add $TARGET
+          else
+            echo "Target $TARGET is already installed"
+          fi
+        done
     - run: cargo update
-    - run: just build-target $TARGET --release
+    - run: just build-targets --release
     - save_cache:
         key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
@@ -50,79 +53,14 @@ jobs:
       - RUST_VERSION: "beta"
     <<: *precheck_steps
 
-  target-arm-unknown-linux-eabi:
-    environment:
-      - TARGET: "arm-unknown-linux-gnueabi"
+  all-targets:
     <<: *target_steps
-
-  target-armv7-unknown-linux-gnueabihf:
-    environment:
-      - TARGET: "armv7-unknown-linux-gnueabihf"
-    <<: *target_steps
-
-  target-x86_64-unknown-linux-gnu:
-    environment:
-      - TARGET: "x86_64-unknown-linux-gnu"
-    <<: *target_steps
-
-  target-x86_64-unknown-linux-musl:
-    environment:
-      - TARGET: "x86_64-unknown-linux-musl"
-    <<: *target_steps
-
-  target-thumbv6m-none-eabi:
-    environment:
-      - TARGET: "thumbv6m-none-eabi"
-    <<: *target_steps
-
-  target-thumbv7em-none-eabi:
-    environment:
-      - TARGET: "thumbv7em-none-eabi"
-    <<: *target_steps
-
-  target-thumbv7em-none-eabihf:
-    environment:
-      - TARGET: "thumbv7em-none-eabihf"
-    <<: *target_steps
-
-  target-thumbv7m-none-eabi:
-    environment:
-      - TARGET: "thumbv7m-none-eabi"
-    <<: *target_steps
-
-precheck_job: &precheck_job
-  requires:
-    - precheck-stable
-    - precheck-beta
 
 build_jobs: &build_jobs
   jobs:
     - precheck-stable
     - precheck-beta
-
-    # Raspberry Pi 1
-    - target-arm-unknown-linux-eabi:
-        <<: *precheck_job
-
-    # Raspberry Pi 2, 3, etc
-    - target-armv7-unknown-linux-gnueabihf:
-        <<: *precheck_job
-
-    # Linux
-    - target-x86_64-unknown-linux-gnu:
-        <<: *precheck_job
-    - target-x86_64-unknown-linux-musl:
-        <<: *precheck_job
-
-    # Bare metal
-    - target-thumbv6m-none-eabi:
-        <<: *precheck_job
-    - target-thumbv7em-none-eabi:
-        <<: *precheck_job
-    - target-thumbv7em-none-eabihf:
-        <<: *precheck_job
-    - target-thumbv7m-none-eabi:
-        <<: *precheck_job
+    - all-targets
 
 workflows:
   version: 2

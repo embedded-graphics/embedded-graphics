@@ -1,4 +1,5 @@
 crates := "embedded-graphics simulator tinybmp tinytga"
+targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
 target_dir := "target"
 doc_dir := "doc"
@@ -43,6 +44,13 @@ build-target target *args:
 
     cargo build -p tinybmp --target {{target}} {{args}}
     cargo build -p tinybmp --target {{target}} --all-features {{args}}
+
+# Cross compiles embedded-graphics tinytga and tinybmp for all targets
+build-targets *args:
+    #!/usr/bin/env bash
+    set -e
+
+    for target in {{targets}}; do just build-target $target {{args}}; done
 
 #------
 # Docs
