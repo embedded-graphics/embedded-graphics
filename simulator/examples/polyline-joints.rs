@@ -140,14 +140,14 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let points = [
         Point::new(PADDING, h / 2),
-        Point::new(50, h / 2),
-        Point::new(60, h / 2 - 20),
-        Point::new(70, h / 2),
-        Point::new(80, h / 2),
-        Point::new(90, h / 2 + 10),
-        Point::new(100, PADDING),
-        Point::new(110, h / 2 + 20),
-        Point::new(120, h / 2),
+        Point::new(100, h / 2),
+        Point::new(120, h / 2 - 20),
+        Point::new(140, h / 2),
+        Point::new(160, h / 2),
+        Point::new(180, h / 2 + 10),
+        Point::new(200, PADDING),
+        Point::new(220, h / 2 + 20),
+        Point::new(240, h / 2),
         Point::new(w - PADDING, h / 2),
     ];
 
