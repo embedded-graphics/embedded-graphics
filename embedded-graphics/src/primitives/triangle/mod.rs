@@ -192,32 +192,29 @@ impl Triangle {
 
         // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
         // Works for any point ordering.
-        let is_inside = {
-            let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
-            let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
 
-            if (s < 0) != (t < 0) {
-                false
-            } else {
-                // Determinant
-                let a = self.area_doubled();
+        let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
+        let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
 
-                // If determinant is zero, triangle is colinear and can never contain a point.
-                if a == 0 {
-                    return false;
-                }
+        if (s < 0) != (t < 0) {
+            false
+        } else {
+            // Determinant
+            let a = self.area_doubled();
 
-                // This check allows this algorithm to work with clockwise or counterclockwise
-                // triangles.
-                if a < 0 {
-                    s <= 0 && s + t >= a
-                } else {
-                    s >= 0 && s + t <= a
-                }
+            // If determinant is zero, triangle is colinear and can never contain a point.
+            if a == 0 {
+                return false;
             }
-        };
 
-        is_inside
+            // This check allows this algorithm to work with clockwise or counterclockwise
+            // triangles.
+            if a < 0 {
+                s <= 0 && s + t >= a
+            } else {
+                s >= 0 && s + t <= a
+            }
+        }
     }
 
     /// Maths points yeahahhhhh
