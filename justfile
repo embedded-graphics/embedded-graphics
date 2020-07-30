@@ -1,9 +1,11 @@
 crates := "embedded-graphics simulator tinybmp tinytga"
+targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
 target_dir := "target"
 doc_dir := "doc"
 doc_assets_dir := doc_dir + "/assets"
 screenshots_dir := target_dir + "/screenshots"
+ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0"
 
 #----------
 # Building
@@ -42,6 +44,25 @@ build-target target *args:
 
     cargo build -p tinybmp --target {{target}} {{args}}
     cargo build -p tinybmp --target {{target}} --all-features {{args}}
+
+# Cross compiles embedded-graphics, tinytga and tinybmp for all targets
+build-targets *args:
+    for target in {{targets}}; do just build-target $target {{args}}; done
+
+# Install all targets used in the `build-targets` command
+install-targets:
+    #!/usr/bin/env bash
+    set -e
+
+    sysroot=$(rustc --print sysroot)
+
+    for target in {{targets}}; do
+      if [[ ! "$sysroot" =~ "$target" ]]; then
+        rustup target add $target
+      else
+        echo "Target $target is already installed"
+      fi
+    done
 
 #------
 # Docs
@@ -132,3 +153,14 @@ generate-example-screenshot example:
         just generate-example-screenshot $(basename "$example" .rs); \
     done
 
+#--------
+# Docker
+#--------
+
+# Generate the Docker image used by the CI pipeline
+build-ci-image:
+    docker build -t "{{ci_build_image}}" -f ./.circleci/Dockerfile --compress .
+
+# Push the generated CI build environment image to Docker Hub
+push-ci-image:
+    docker push "{{ci_build_image}}"

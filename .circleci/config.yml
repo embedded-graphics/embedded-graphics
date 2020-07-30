@@ -1,15 +1,12 @@
 # Check that everything (tests, benches, etc) builds in std environments
 precheck_steps: &precheck_steps
   docker:
-    - image: circleci/rust:1.40.0
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0
   steps:
     - checkout
     - restore_cache:
         key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
-    - run: sudo apt update && sudo apt install -qq libsdl2-dev
-    - run: cargo install cargo-readme just cargo-deadlinks
     - run: rustup default ${RUST_VERSION:-stable}
-    - run: rustup toolchain add nightly -c rustfmt
     - run: rustup component add rustfmt
     - run: cargo update
     - run: just build
@@ -22,23 +19,15 @@ precheck_steps: &precheck_steps
 # Build crates for embedded target
 target_steps: &target_steps
   docker:
-    - image: circleci/rust:1.40.0
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0
   steps:
     - checkout
     - restore_cache:
         keys:
           - v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
-    - run: |
-        SYSROOT=$(rustc --print sysroot)
-
-        if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
-          rustup target add $TARGET
-        else
-          echo "Target $TARGET is already installed"
-        fi
-    - run: cargo install just
+    - run: just install-targets
     - run: cargo update
-    - run: just build-target $TARGET --release
+    - run: just build-targets --release
     - save_cache:
         key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
@@ -54,79 +43,14 @@ jobs:
       - RUST_VERSION: "beta"
     <<: *precheck_steps
 
-  target-arm-unknown-linux-eabi:
-    environment:
-      - TARGET: "arm-unknown-linux-gnueabi"
+  all-targets:
     <<: *target_steps
-
-  target-armv7-unknown-linux-gnueabihf:
-    environment:
-      - TARGET: "armv7-unknown-linux-gnueabihf"
-    <<: *target_steps
-
-  target-x86_64-unknown-linux-gnu:
-    environment:
-      - TARGET: "x86_64-unknown-linux-gnu"
-    <<: *target_steps
-
-  target-x86_64-unknown-linux-musl:
-    environment:
-      - TARGET: "x86_64-unknown-linux-musl"
-    <<: *target_steps
-
-  target-thumbv6m-none-eabi:
-    environment:
-      - TARGET: "thumbv6m-none-eabi"
-    <<: *target_steps
-
-  target-thumbv7em-none-eabi:
-    environment:
-      - TARGET: "thumbv7em-none-eabi"
-    <<: *target_steps
-
-  target-thumbv7em-none-eabihf:
-    environment:
-      - TARGET: "thumbv7em-none-eabihf"
-    <<: *target_steps
-
-  target-thumbv7m-none-eabi:
-    environment:
-      - TARGET: "thumbv7m-none-eabi"
-    <<: *target_steps
-
-precheck_job: &precheck_job
-  requires:
-    - precheck-stable
-    - precheck-beta
 
 build_jobs: &build_jobs
   jobs:
     - precheck-stable
     - precheck-beta
-
-    # Raspberry Pi 1
-    - target-arm-unknown-linux-eabi:
-        <<: *precheck_job
-
-    # Raspberry Pi 2, 3, etc
-    - target-armv7-unknown-linux-gnueabihf:
-        <<: *precheck_job
-
-    # Linux
-    - target-x86_64-unknown-linux-gnu:
-        <<: *precheck_job
-    - target-x86_64-unknown-linux-musl:
-        <<: *precheck_job
-
-    # Bare metal
-    - target-thumbv6m-none-eabi:
-        <<: *precheck_job
-    - target-thumbv7em-none-eabi:
-        <<: *precheck_job
-    - target-thumbv7em-none-eabihf:
-        <<: *precheck_job
-    - target-thumbv7m-none-eabi:
-        <<: *precheck_job
+    - all-targets
 
 workflows:
   version: 2
