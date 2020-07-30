@@ -10,7 +10,7 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{
         line::bresenham::{Bresenham, BresenhamParameters, BresenhamPoint},
-        Primitive, Rectangle,
+        Primitive, Rectangle, Triangle,
     },
     style::StrokeAlignment,
     transform::Transform,
@@ -275,6 +275,19 @@ impl Line {
             // Right
             StrokeAlignment::Inside => (*self, Line::new(self.start - delta, self.end - delta)),
         }
+    }
+
+    /// Get the shortest distance between the line and a given point.
+    ///
+    /// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
+    pub fn distance_to_point_squared(&self, point: Point) -> u32 {
+        let numerator = Triangle::new(self.start, self.end, point)
+            .area_doubled()
+            .pow(2) as u32;
+
+        let denominator = self.length_squared();
+
+        numerator / denominator
     }
 
     /// Get the midpoint of this line
