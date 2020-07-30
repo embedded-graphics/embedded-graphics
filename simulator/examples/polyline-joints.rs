@@ -103,12 +103,26 @@ fn draw(
     });
 
     let mut prev_joint = LineJoint::start(points[0], points[1], width, alignment);
+    let mut curr_joint = interior_joints.next().unwrap();
 
-    while let Some(curr_joint) = interior_joints.next() {
+    loop {
         draw_thick_edge(prev_joint, curr_joint, display)?;
 
         prev_joint = curr_joint;
+
+        if let Some(curr) = interior_joints.next() {
+            curr_joint = curr;
+        } else {
+            break;
+        }
     }
+
+    let penultimate = points[points.len() - 2];
+    let last = points.last().unwrap();
+
+    let final_joint = LineJoint::end(penultimate, *last, width, alignment);
+
+    draw_thick_edge(curr_joint, final_joint, display)?;
 
     let skeleton_style = PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1);
 
