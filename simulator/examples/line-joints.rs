@@ -203,9 +203,7 @@ fn calc_dist(center: Point, start: LineJoint, end: LineJoint) -> u32 {
     let start = start.second_edge_start.left;
     let end = end.first_edge_end.left;
 
-    let midpoint = Line::new(start, end).midpoint();
-
-    Line::new(center, midpoint).length_squared()
+    Line::new(start, end).distance_to_point_squared(center)
 }
 
 fn draw(

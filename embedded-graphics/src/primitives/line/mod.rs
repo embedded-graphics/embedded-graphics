@@ -13,7 +13,7 @@ use crate::{
             bresenham::{Bresenham, BresenhamParameters},
             thick_points::{ParallelLineType, ParallelsIterator},
         },
-        Primitive, Rectangle,
+        Primitive, Rectangle, Triangle,
     },
     style::StrokeAlignment,
     transform::Transform,
@@ -269,6 +269,19 @@ impl Line {
             point: Point::new(x, y),
             side: if denom <= 0 { Side::Left } else { Side::Right },
         }
+    }
+
+    /// Get the shortest distance between the line and a given point.
+    ///
+    /// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
+    pub fn distance_to_point_squared(&self, point: Point) -> u32 {
+        let numerator = Triangle::new(self.start, self.end, point)
+            .area_doubled()
+            .pow(2) as u32;
+
+        let denominator = self.length_squared();
+
+        numerator / denominator
     }
 
     /// Get the squared length of the line
