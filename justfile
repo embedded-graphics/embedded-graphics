@@ -45,11 +45,8 @@ build-target target *args:
     cargo build -p tinybmp --target {{target}} {{args}}
     cargo build -p tinybmp --target {{target}} --all-features {{args}}
 
-# Cross compiles embedded-graphics tinytga and tinybmp for all targets
+# Cross compiles embedded-graphics, tinytga and tinybmp for all targets
 build-targets *args:
-    #!/usr/bin/env bash
-    set -e
-
     for target in {{targets}}; do just build-target $target {{args}}; done
 
 # Install all targets used in the `build-targets` command
