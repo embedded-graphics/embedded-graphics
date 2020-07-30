@@ -93,6 +93,24 @@ impl LineJoint {
         }
     }
 
+    /// Create an ending joint
+    pub fn end(mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Self {
+        let line = Line::new(mid, end);
+
+        let (l, r) = line.extents(width as i32, alignment);
+
+        let points = EdgeCorners {
+            left: l.end,
+            right: r.end,
+        };
+
+        Self {
+            kind: JointKind::End,
+            first_edge_end: points,
+            second_edge_start: points,
+        }
+    }
+
     /// Compute a joint.
     pub fn from_points(
         start: Point,
