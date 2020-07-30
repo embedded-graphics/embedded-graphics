@@ -44,13 +44,73 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .unwrap();
 }
 
+fn draw_thick_edge(
+    start_corner: LineJoint,
+    end_corner: LineJoint,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    let LineJoint {
+        second_edge_start:
+            EdgeCorners {
+                left: left_start,
+                right: right_start,
+            },
+        ..
+    } = start_corner;
+    let LineJoint {
+        first_edge_end:
+            EdgeCorners {
+                left: left_end,
+                right: right_end,
+            },
+        ..
+    } = end_corner;
+
+    let t1 = Triangle::new(left_start, left_end, right_start);
+    let t2 = Triangle::new(right_start, left_end, right_end);
+
+    filled_tri(t1, Rgb888::RED).draw(display)?;
+    filled_tri(t2, Rgb888::RED).draw(display)?;
+
+    // let style = PrimitiveStyleBuilder::new()
+    //    .stroke_color(Rgb888::RED)
+    //    .stroke_width(1)
+    //    // .fill_color(Rgb888::GREEN)
+    //    .build();
+
+    // t1
+    //     .into_styled(style)
+    //     .draw(display)?;
+
+    // t2
+    //     .into_styled(style)
+    //     .draw(display)?;
+
+    Ok(())
+}
+
 fn draw(
     points: &[Point],
     width: u32,
     alignment: StrokeAlignment,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    let skeleton_style = PrimitiveStyle::with_stroke(Rgb888::RED, 1);
+    display.clear(Rgb888::BLACK).unwrap();
+
+    let mut interior_joints = points.windows(3).map(|slice| match slice {
+        [start, mid, end] => LineJoint::from_points(*start, *mid, *end, width, alignment),
+        _ => todo!(),
+    });
+
+    let mut prev_joint = LineJoint::start(points[0], points[1], width, alignment);
+
+    while let Some(curr_joint) = interior_joints.next() {
+        draw_thick_edge(prev_joint, curr_joint, display)?;
+
+        prev_joint = curr_joint;
+    }
+
+    let skeleton_style = PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1);
 
     Polyline::new(points)
         .into_styled(skeleton_style)
