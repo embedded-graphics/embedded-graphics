@@ -28,6 +28,12 @@ pub enum JointKind {
 
     /// Essentially no joint (both lines are colinear)
     Colinear,
+
+    /// The starting "joint" of a line
+    Start,
+
+    /// The ending "joint" of a line
+    End,
 }
 
 // DELETEME: Remove when debugging in demo is no longer required.
@@ -39,6 +45,8 @@ impl fmt::Display for JointKind {
             Self::Bevel { .. } => f.write_str("Bevel"),
             Self::Degenerate { .. } => f.write_str("Degenerate"),
             Self::Colinear => f.write_str("Colinear"),
+            Self::Start => f.write_str("Start"),
+            Self::End => f.write_str("End"),
         }
     }
 }
@@ -67,6 +75,24 @@ pub struct LineJoint {
 }
 
 impl LineJoint {
+    /// Create a starting joint
+    pub fn start(start: Point, mid: Point, width: u32, alignment: StrokeAlignment) -> Self {
+        let line = Line::new(start, mid);
+
+        let (l, r) = line.extents(width as i32, alignment);
+
+        let points = EdgeCorners {
+            left: l.start,
+            right: r.start,
+        };
+
+        Self {
+            kind: JointKind::Start,
+            first_edge_end: points,
+            second_edge_start: points,
+        }
+    }
+
     /// Compute a joint.
     pub fn from_points(
         start: Point,
