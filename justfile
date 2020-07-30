@@ -52,6 +52,21 @@ build-targets *args:
 
     for target in {{targets}}; do just build-target $target {{args}}; done
 
+# Install all targets used in the `build-targets` command
+install-targets:
+    #!/usr/bin/env bash
+    set -e
+
+    sysroot=$(rustc --print sysroot)
+
+    for target in {{targets}}; do
+      if [[ ! "$sysroot" =~ "$target" ]]; then
+        rustup target add $target
+      else
+        echo "Target $target is already installed"
+      fi
+    done
+
 #------
 # Docs
 #------

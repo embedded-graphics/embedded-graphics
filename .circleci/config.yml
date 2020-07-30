@@ -25,17 +25,7 @@ target_steps: &target_steps
     - restore_cache:
         keys:
           - v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
-    - run: |
-        SYSROOT=$(rustc --print sysroot)
-        TARGETS=("arm-unknown-linux-gnueabi" "armv7-unknown-linux-gnueabihf" "x86_64-unknown-linux-gnu" "x86_64-unknown-linux-musl" "thumbv6m-none-eabi" "thumbv7em-none-eabi" "thumbv7em-none-eabihf" "thumbv7m-none-eabi")
-
-        for TARGET in "${TARGETS[@]}"; do
-          if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
-            rustup target add $TARGET
-          else
-            echo "Target $TARGET is already installed"
-          fi
-        done
+    - run: just install-targets
     - run: cargo update
     - run: just build-targets --release
     - save_cache:
