@@ -2,7 +2,6 @@ use embedded_graphics::{
     fonts::*,
     pixelcolor::Rgb888,
     prelude::*,
-    primitives::line::{Intersection, Side},
     primitives::line_joint::{EdgeCorners, JointKind, LineJoint},
     primitives::*,
     style::*,
@@ -72,20 +71,6 @@ fn draw_thick_edge(
     filled_tri(t1, Rgb888::RED).draw(display)?;
     filled_tri(t2, Rgb888::RED).draw(display)?;
 
-    // let style = PrimitiveStyleBuilder::new()
-    //    .stroke_color(Rgb888::RED)
-    //    .stroke_width(1)
-    //    // .fill_color(Rgb888::GREEN)
-    //    .build();
-
-    // t1
-    //     .into_styled(style)
-    //     .draw(display)?;
-
-    // t2
-    //     .into_styled(style)
-    //     .draw(display)?;
-
     // Highlight left (outside) edge
     Line::new(left_start, left_end)
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
@@ -98,23 +83,13 @@ fn draw_filler_triangle(
     corner: LineJoint,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
-    // let style = PrimitiveStyleBuilder::new()
-    //     .stroke_color(Rgb888::YELLOW)
-    //     .stroke_width(1)
-    //     // .fill_color(Rgb888::GREEN)
-    //     .build();
-
     match corner.kind {
         JointKind::Bevel {
             filler_triangle, ..
         }
         | JointKind::Degenerate {
             filler_triangle, ..
-        } => {
-            filled_tri(filler_triangle, Rgb888::YELLOW).draw(display)
-
-            // filler_triangle.into_styled(style).draw(display)
-        }
+        } => filled_tri(filler_triangle, Rgb888::YELLOW).draw(display),
         _ => Ok(()),
     }
 }
@@ -148,16 +123,6 @@ fn draw_degenerate_edge(
 
     if tri.area_doubled() > 0 {
         filled_tri(tri, Rgb888::CYAN).draw(display)?;
-
-        // let style = PrimitiveStyleBuilder::new()
-        //     .stroke_color(Rgb888::CYAN)
-        //     .stroke_width(1)
-        //     // .fill_color(Rgb888::GREEN)
-        //     .build();
-
-        // tri
-        //     .into_styled(style)
-        //     .draw(display)?;
     }
 
     // Highlight left (outside) edge
@@ -183,16 +148,6 @@ fn draw_degenerate_bevel(
             let t = Triangle::new(filler_triangle.p1, filler_triangle.p2, center);
 
             filled_tri(t, Rgb888::GREEN).draw(display)
-
-            //     let style = PrimitiveStyleBuilder::new()
-            // .stroke_color(Rgb888::YELLOW)
-            // .stroke_width(1)
-            // // .fill_color(Rgb888::GREEN)
-            // .build();
-
-            // t
-            // .into_styled(style)
-            // .draw(display)
         }
         _ => Ok(()),
     }
@@ -263,12 +218,14 @@ fn draw(
         draw_filler_triangle(corner_3, display)?;
 
         // Fill inside
-        Triangle::new(
-            corner_1.first_edge_end.right,
-            corner_2.first_edge_end.right,
-            corner_3.first_edge_end.right,
+        filled_tri(
+            Triangle::new(
+                corner_1.first_edge_end.right,
+                corner_2.first_edge_end.right,
+                corner_3.first_edge_end.right,
+            ),
+            Rgb888::YELLOW,
         )
-        .into_styled(PrimitiveStyle::with_fill(Rgb888::YELLOW))
         .draw(display)?;
     }
 
