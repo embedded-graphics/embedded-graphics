@@ -266,7 +266,7 @@ impl Line {
 
         Intersection::Point {
             point: Point::new(x, y),
-            outer_side: if denom <= 0 { Side::Right } else { Side::Left },
+            outer_side: if denom > 0 { Side::Right } else { Side::Left },
         }
     }
 

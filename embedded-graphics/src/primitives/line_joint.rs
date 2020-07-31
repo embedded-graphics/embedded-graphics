@@ -2,7 +2,10 @@
 
 use crate::{
     geometry::Point,
-    primitives::{line::Intersection, Line, Triangle},
+    primitives::{
+        line::{Intersection, Side},
+        Line, Triangle,
+    },
     style::StrokeAlignment,
 };
 
@@ -133,6 +136,7 @@ impl LineJoint {
         if let (
             Intersection::Point {
                 point: l_intersection,
+                outer_side,
                 ..
             },
             Intersection::Point {
@@ -154,7 +158,8 @@ impl LineJoint {
                 .segment_intersection(&second_edge_right)
                 || second_segment_end_edge.segment_intersection(&first_edge_right);
 
-            // Distance from midpoint to miter end point
+            // Distance from midpoint to miter end point. This arbitrarily picks the left-side
+            // intersection, but the left/right intersections are symmetrical around `mid` anyway.
             let miter_length_squared = Line::new(mid, l_intersection).length_squared();
 
             // Normal line: non-overlapping line end caps
@@ -175,23 +180,40 @@ impl LineJoint {
                 }
                 // Miter is too long, chop it into bevel-style corner
                 else {
-                    let kind = JointKind::Bevel {
-                        filler_triangle: Triangle::new(
-                            first_edge_left.end,
-                            second_edge_left.start,
-                            r_intersection,
-                        ),
-                    };
-
-                    Self {
-                        kind,
-                        first_edge_end: EdgeCorners {
-                            left: first_edge_left.end,
-                            right: r_intersection,
+                    match outer_side {
+                        Side::Right => Self {
+                            kind: JointKind::Bevel {
+                                filler_triangle: Triangle::new(
+                                    first_edge_right.end,
+                                    second_edge_right.start,
+                                    l_intersection,
+                                ),
+                            },
+                            first_edge_end: EdgeCorners {
+                                left: l_intersection,
+                                right: first_edge_right.end,
+                            },
+                            second_edge_start: EdgeCorners {
+                                left: l_intersection,
+                                right: second_edge_right.start,
+                            },
                         },
-                        second_edge_start: EdgeCorners {
-                            left: second_edge_left.start,
-                            right: r_intersection,
+                        Side::Left => Self {
+                            kind: JointKind::Bevel {
+                                filler_triangle: Triangle::new(
+                                    first_edge_left.end,
+                                    second_edge_left.start,
+                                    r_intersection,
+                                ),
+                            },
+                            first_edge_end: EdgeCorners {
+                                left: first_edge_left.end,
+                                right: r_intersection,
+                            },
+                            second_edge_start: EdgeCorners {
+                                left: second_edge_left.start,
+                                right: r_intersection,
+                            },
                         },
                     }
                 }

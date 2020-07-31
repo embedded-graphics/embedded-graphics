@@ -69,22 +69,18 @@ fn draw_thick_edge(
     let t1 = Triangle::new(left_start, left_end, right_start);
     let t2 = Triangle::new(right_start, left_end, right_end);
 
-    filled_tri(t1, Rgb888::RED).draw(display)?;
-    filled_tri(t2, Rgb888::RED).draw(display)?;
+    // filled_tri(t1, Rgb888::RED).draw(display)?;
+    // filled_tri(t2, Rgb888::RED).draw(display)?;
 
-    // let style = PrimitiveStyleBuilder::new()
-    //    .stroke_color(Rgb888::RED)
-    //    .stroke_width(1)
-    //    // .fill_color(Rgb888::GREEN)
-    //    .build();
+    let style = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb888::RED)
+        .stroke_width(1)
+        // .fill_color(Rgb888::GREEN)
+        .build();
 
-    // t1
-    //     .into_styled(style)
-    //     .draw(display)?;
+    t1.into_styled(style).draw(display)?;
 
-    // t2
-    //     .into_styled(style)
-    //     .draw(display)?;
+    t2.into_styled(style).draw(display)?;
 
     Ok(())
 }
