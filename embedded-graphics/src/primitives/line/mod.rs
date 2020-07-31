@@ -7,7 +7,7 @@ mod thick_points;
 
 pub use crate::primitives::line::thick_points::Side;
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     primitives::{
         line::bresenham::{Bresenham, BresenhamParameters, BresenhamPoint},
         Primitive, Rectangle, Triangle,
@@ -82,24 +82,23 @@ pub enum Intersection {
         /// Intersection point.
         point: Point,
 
-        /// The side to which the second line "leans" relative to the first, if stacked on top of
-        /// each other.
+        /// The "outer" side of the intersection, i.e. the side that has the joint's reflex angle.
         ///
         /// For example:
         ///
         /// ```
-        /// # Right side:
+        /// # Left outer side:
         ///
         ///  ⎯
         /// ╱
         ///
-        /// # Left side:
+        /// # Right outer side:
         ///  │
         /// ╱
         /// ```
         ///
         /// This is used to find the outside edge of a corner.
-        side: Side,
+        outer_side: Side,
     },
 
     /// No intersection: lines are colinear or parallel.
@@ -204,7 +203,7 @@ impl Line {
 
         Intersection::Point {
             point: Point::new(x, y),
-            side: if denom <= 0 { Side::Left } else { Side::Right },
+            outer_side: if denom <= 0 { Side::Right } else { Side::Left },
         }
     }
 

@@ -146,26 +146,29 @@ fn main() -> Result<(), core::convert::Infallible> {
         .build();
     let mut window = Window::new("Polyline joints debugger", &output_settings);
 
-    // let mut end_point = Point::new(82, 110);
+    let mut end_point = Point::new(82, 110);
     let mut width = 15u32;
     let mut alignment = StrokeAlignment::Center;
 
-    // let mut mouse_down = false;
+    let mut mouse_down = false;
 
-    let points = [
-        Point::new(PADDING, h / 2),
-        Point::new(100, h / 2),
-        Point::new(120, h / 2 - 20),
-        Point::new(140, h / 2),
-        Point::new(160, h / 2),
-        Point::new(180, h / 2 + 10),
-        Point::new(200, PADDING),
-        Point::new(220, h / 2 + 20),
-        Point::new(240, h / 2),
-        Point::new(w - PADDING, h / 2),
-    ];
+    // let points = [
+    //     Point::new(PADDING, h / 2),
+    //     Point::new(100, h / 2),
+    //     Point::new(120, h / 2 - 20),
+    //     Point::new(140, h / 2),
+    //     Point::new(160, h / 2),
+    //     Point::new(180, h / 2 + 10),
+    //     Point::new(200, PADDING),
+    //     Point::new(220, h / 2 + 20),
+    //     Point::new(240, h / 2),
+    //     Point::new(w - PADDING, h / 2),
+    // ];
 
-    draw(&points, width, alignment, &mut display)?;
+    let p1 = Point::new(20, h / 2);
+    let p2 = Point::new(w / 2, h / 3);
+
+    draw(&[p1, p2, end_point], width, alignment, &mut display)?;
 
     'running: loop {
         window.update(&display);
@@ -173,11 +176,11 @@ fn main() -> Result<(), core::convert::Infallible> {
         for event in window.events() {
             match event {
                 SimulatorEvent::Quit => break 'running,
-                // SimulatorEvent::MouseButtonDown { point, .. } => {
-                //     mouse_down = true;
+                SimulatorEvent::MouseButtonDown { point, .. } => {
+                    mouse_down = true;
 
-                //     end_point = point;
-                // }
+                    end_point = point;
+                }
                 SimulatorEvent::KeyDown { keycode, .. } => match keycode {
                     Keycode::Up => width += 1,
                     Keycode::Down => width = width.saturating_sub(1),
@@ -190,16 +193,16 @@ fn main() -> Result<(), core::convert::Infallible> {
                     }
                     _ => (),
                 },
-                // SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
-                // SimulatorEvent::MouseMove { point, .. } => {
-                //     if mouse_down {
-                //         end_point = point;
-                //     }
-                // }
+                SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
+                SimulatorEvent::MouseMove { point, .. } => {
+                    if mouse_down {
+                        end_point = point;
+                    }
+                }
                 _ => {}
             }
 
-            draw(&points, width, alignment, &mut display)?;
+            draw(&[p1, p2, end_point], width, alignment, &mut display)?;
         }
     }
 
