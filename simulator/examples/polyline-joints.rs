@@ -85,6 +85,31 @@ fn draw_thick_edge(
     Ok(())
 }
 
+fn draw_joint(
+    joint: LineJoint,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    match joint.kind {
+        JointKind::Bevel {
+            filler_triangle, ..
+        }
+        | JointKind::Degenerate {
+            filler_triangle, ..
+        } => {
+            // filled_tri(filler_triangle, Rgb888::YELLOW).draw(display)
+
+            let style = PrimitiveStyleBuilder::new()
+                .stroke_color(Rgb888::BLUE)
+                .stroke_width(1)
+                // .fill_color(Rgb888::YELLOW)
+                .build();
+
+            filler_triangle.into_styled(style).draw(display)
+        }
+        _ => Ok(()),
+    }
+}
+
 fn draw(
     points: &[Point],
     width: u32,
@@ -103,6 +128,8 @@ fn draw(
 
     loop {
         draw_thick_edge(prev_joint, curr_joint, display)?;
+
+        draw_joint(curr_joint, display)?;
 
         prev_joint = curr_joint;
 
@@ -132,7 +159,11 @@ fn draw(
 const PADDING: i32 = 16;
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let (w, h) = (320i32, 256i32);
+    // let (w, h) = (320i32, 256i32);
+
+    let w = 320i32;
+    // 16:9 aspect ratio for Twitter
+    let h = 180i32;
 
     let mut display: SimulatorDisplay<Rgb888> =
         SimulatorDisplay::new(Size::new(w as u32, h as u32));
@@ -148,23 +179,23 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut mouse_down = false;
 
-    // let points = [
-    //     Point::new(PADDING, h / 2),
-    //     Point::new(100, h / 2),
-    //     Point::new(120, h / 2 - 20),
-    //     Point::new(140, h / 2),
-    //     Point::new(160, h / 2),
-    //     Point::new(180, h / 2 + 10),
-    //     Point::new(200, PADDING),
-    //     Point::new(220, h / 2 + 20),
-    //     Point::new(240, h / 2),
-    //     Point::new(w - PADDING, h / 2),
-    // ];
+    let points = [
+        Point::new(PADDING, h / 2),
+        Point::new(100, h / 2),
+        Point::new(120, h / 2 - 20),
+        Point::new(140, h / 2),
+        Point::new(160, h / 2),
+        Point::new(180, h / 2 + 10),
+        Point::new(200, PADDING),
+        Point::new(220, h / 2 + 20),
+        Point::new(240, h / 2),
+        Point::new(w - PADDING, h / 2),
+    ];
 
     let p1 = Point::new(20, h / 2);
     let p2 = Point::new(w / 2, h / 3);
 
-    draw(&[p1, p2, end_point], width, alignment, &mut display)?;
+    draw(&points, width, alignment, &mut display)?;
 
     'running: loop {
         window.update(&display);
@@ -198,7 +229,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            draw(&[p1, p2, end_point], width, alignment, &mut display)?;
+            draw(&points, width, alignment, &mut display)?;
         }
     }
 
