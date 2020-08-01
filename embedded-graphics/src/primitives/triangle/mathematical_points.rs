@@ -1,10 +1,6 @@
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{
-        rectangle,
-        triangle::{scanline_iterator::ScanlineIterator, Triangle},
-        Primitive,
-    },
+    primitives::{rectangle, triangle::Triangle, Primitive},
 };
 
 /// Iterator over all points inside the triangle.
@@ -20,6 +16,14 @@ impl MathematicalPoints {
         Self {
             rect: triangle.bounding_box().points(),
             triangle: *triangle,
+        }
+    }
+
+    /// Empty variant
+    pub fn empty() -> Self {
+        Self {
+            rect: rectangle::Points::empty(),
+            triangle: Triangle::empty(),
         }
     }
 }
