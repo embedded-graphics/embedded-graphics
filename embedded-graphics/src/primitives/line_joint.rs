@@ -114,6 +114,21 @@ impl LineJoint {
         }
     }
 
+    /// Empty joint
+    pub fn empty() -> Self {
+        Self {
+            kind: JointKind::End,
+            first_edge_end: EdgeCorners {
+                left: Point::zero(),
+                right: Point::zero(),
+            },
+            second_edge_start: EdgeCorners {
+                left: Point::zero(),
+                right: Point::zero(),
+            },
+        }
+    }
+
     /// Compute a joint.
     pub fn from_points(
         start: Point,
@@ -272,6 +287,19 @@ impl LineJoint {
         match self.kind {
             JointKind::Colinear => true,
             _ => false,
+        }
+    }
+
+    /// Get the filler triangle (if any).
+    pub fn filler(&self) -> Option<Triangle> {
+        match self.kind {
+            JointKind::Bevel {
+                filler_triangle, ..
+            }
+            | JointKind::Degenerate {
+                filler_triangle, ..
+            } => Some(filler_triangle),
+            _ => None,
         }
     }
 }

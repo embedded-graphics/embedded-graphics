@@ -221,6 +221,11 @@ impl Triangle {
     pub fn mathematical_points(&self) -> MathematicalPoints {
         MathematicalPoints::new(self)
     }
+
+    /// Empty triangle
+    pub(in crate::primitives) const fn empty() -> Self {
+        Self::new(Point::zero(), Point::zero(), Point::zero())
+    }
 }
 
 // https://stackoverflow.com/a/6989383/383609
