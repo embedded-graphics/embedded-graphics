@@ -40,23 +40,18 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .unwrap();
 }
 
-struct ThickPoints<'a> {
+struct TriangleIterator<'a> {
     points: &'a [Point],
-    /// First triangle that forms edge rectangle
-    t1: MathematicalPoints,
-
-    /// Second triangle that forms edge rectangle
-    t2: MathematicalPoints,
-
-    /// Filler triangle (if the current joint style requires it)
-    filler: MathematicalPoints,
     start_idx: usize,
+    t1: Option<Triangle>,
+    t2: Option<Triangle>,
+    filler: Option<Triangle>,
     width: u32,
     alignment: StrokeAlignment,
     end_joint: LineJoint,
 }
 
-impl<'a> ThickPoints<'a> {
+impl<'a> TriangleIterator<'a> {
     pub fn new(points: &'a [Point], width: u32, alignment: StrokeAlignment) -> Self {
         if points.len() < 2 {
             Self::empty()
@@ -84,13 +79,10 @@ impl<'a> ThickPoints<'a> {
 
             Self {
                 points,
-                t1: t1.mathematical_points(),
-                t2: t2.mathematical_points(),
+                t1: Some(t1),
+                t2: Some(t2),
                 start_idx,
-                filler: end_joint
-                    .filler()
-                    .map(|t| t.mathematical_points())
-                    .unwrap_or_else(MathematicalPoints::empty),
+                filler: end_joint.filler(),
                 width,
                 alignment,
                 end_joint,
@@ -101,9 +93,9 @@ impl<'a> ThickPoints<'a> {
     pub fn empty() -> Self {
         Self {
             points: &[],
-            t1: MathematicalPoints::empty(),
-            t2: MathematicalPoints::empty(),
-            filler: MathematicalPoints::empty(),
+            t1: None,
+            t2: None,
+            filler: None,
             start_idx: 0,
             width: 0,
             alignment: StrokeAlignment::Center,
@@ -136,19 +128,19 @@ impl<'a> ThickPoints<'a> {
     }
 }
 
-impl<'a> Iterator for ThickPoints<'a> {
-    type Item = Point;
+impl<'a> Iterator for TriangleIterator<'a> {
+    type Item = Triangle;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(point) = self
+        if let Some(triangle) = self
             .t1
-            .next()
-            .or_else(|| self.t2.next())
-            .or_else(|| self.filler.next())
+            .take()
+            .or_else(|| self.t2.take())
+            .or_else(|| self.filler.take())
         {
-            Some(point)
+            Some(triangle)
         }
-        // Current line and optional joint filler have been rasterised. Reset state for next segment
+        // We've gone through the list of triangles in this edge/joint. Reset state for next edge
         // and joint.
         else {
             self.start_idx += 1;
@@ -172,16 +164,57 @@ impl<'a> Iterator for ThickPoints<'a> {
                 )
             };
 
-            // Initialise with line between p0 and p1
             let (t1, t2) = Self::edge_triangles(start_joint, self.end_joint);
 
-            self.t1 = t1.mathematical_points();
-            self.t2 = t2.mathematical_points();
-            self.filler = self
-                .end_joint
-                .filler()
+            self.t1 = Some(t1);
+            self.t2 = Some(t2);
+            self.filler = self.end_joint.filler();
+
+            self.next()
+        }
+    }
+}
+
+struct ThickPoints<'a> {
+    triangle_iter: TriangleIterator<'a>,
+    points_iter: MathematicalPoints,
+}
+
+impl<'a> ThickPoints<'a> {
+    pub fn new(points: &'a [Point], width: u32, alignment: StrokeAlignment) -> Self {
+        if points.len() < 2 {
+            Self::empty()
+        } else {
+            let mut triangle_iter = TriangleIterator::new(points, width, alignment);
+
+            let points_iter = triangle_iter
+                .next()
                 .map(|t| t.mathematical_points())
                 .unwrap_or_else(MathematicalPoints::empty);
+
+            Self {
+                triangle_iter,
+                points_iter,
+            }
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            triangle_iter: TriangleIterator::empty(),
+            points_iter: MathematicalPoints::empty(),
+        }
+    }
+}
+
+impl<'a> Iterator for ThickPoints<'a> {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(point) = self.points_iter.next() {
+            Some(point)
+        } else {
+            self.points_iter = self.triangle_iter.next().map(|t| t.mathematical_points())?;
 
             self.next()
         }
