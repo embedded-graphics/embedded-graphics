@@ -3,9 +3,19 @@ use crate::{
     drawable::{Drawable, Pixel},
     pixel_iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::{polyline, polyline::Polyline, Primitive},
+    primitives::{
+        polyline,
+        polyline::{thick_points::ThickPoints, Polyline},
+        Primitive,
+    },
     style::{PrimitiveStyle, Styled},
 };
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+enum StyledIter<'a> {
+    Thin(polyline::Points<'a>),
+    Thick(ThickPoints<'a>),
+}
 
 /// Pixel iterator for each pixel in the line
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -14,7 +24,7 @@ where
     C: PixelColor,
 {
     stroke_color: Option<C>,
-    line_iter: polyline::Points<'a>,
+    line_iter: StyledIter<'a>,
 }
 
 impl<'a, C> StyledPixels<'a, C>
@@ -22,9 +32,19 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
+        let line_iter = if styled.style.stroke_width <= 1 {
+            StyledIter::Thin(styled.primitive.points())
+        } else {
+            StyledIter::Thick(ThickPoints::new(
+                styled.primitive.vertices,
+                styled.style.stroke_width,
+                styled.style.stroke_alignment,
+            ))
+        };
+
         StyledPixels {
             stroke_color: styled.style.effective_stroke_color(),
-            line_iter: styled.primitive.points(),
+            line_iter,
         }
     }
 }
@@ -39,9 +59,11 @@ where
         // Return none if stroke color is none
         let stroke_color = self.stroke_color?;
 
-        self.line_iter
-            .next()
-            .map(|point| Pixel(point, stroke_color))
+        match self.line_iter {
+            StyledIter::Thin(ref mut it) => it.next(),
+            StyledIter::Thick(ref mut it) => it.next(),
+        }
+        .map(|point| Pixel(point, stroke_color))
     }
 }
 
@@ -75,7 +97,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitives::polyline::tests::HEARTBEAT;
     use crate::primitives::polyline::tests::SMALL;
     use crate::{
         drawable::Drawable,
@@ -85,18 +106,6 @@ mod tests {
         primitives::Primitive,
         style::{PrimitiveStyle, PrimitiveStyleBuilder},
     };
-
-    // Ensure that polylines only draw 1px wide due to lack of support for line joiners. This test
-    // should fail when joiners are supported and should be removed then.
-    #[test]
-    fn one_px_wide_only() {
-        let polyline = Polyline::new(&HEARTBEAT);
-
-        let thick = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 10));
-        let thin = polyline.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1));
-
-        assert!(thick.into_pixels().eq(thin.into_pixels()));
-    }
 
     #[test]
     fn mock_display() {

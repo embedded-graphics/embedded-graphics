@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// Joint kind
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum JointKind {
     /// Mitered (sharp point)
     Miter,
@@ -55,7 +55,7 @@ impl fmt::Display for JointKind {
 }
 
 /// The left/right corners that make up the start or end edge of a thick line.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct EdgeCorners {
     /// Left side point.
     pub left: Point,
@@ -65,7 +65,7 @@ pub struct EdgeCorners {
 }
 
 /// A joint between two lines.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct LineJoint {
     /// Joint kind.
     pub kind: JointKind,
