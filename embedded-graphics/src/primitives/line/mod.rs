@@ -90,7 +90,7 @@ pub enum Intersection {
         ///
         /// For example:
         ///
-        /// ```
+        /// ```text
         /// # Left outer side:
         ///
         ///  ⎯
