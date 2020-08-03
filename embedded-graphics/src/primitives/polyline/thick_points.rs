@@ -4,6 +4,7 @@ use crate::{
     style::StrokeAlignment,
 };
 
+// TODO: Generalise name, move into more common folder path
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct ThickPoints<'a> {
     triangle_iter: TriangleIterator<'a>,

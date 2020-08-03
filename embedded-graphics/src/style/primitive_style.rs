@@ -108,11 +108,12 @@ where
         (self.stroke_color.is_none() || self.stroke_width == 0) && self.fill_color.is_none()
     }
 
+    // TODO: Un-pub
     /// Returns the effective stroke color of the style.
     ///
     /// If the stroke width is 0, this method will return `None` regardless of the value in
     /// `stroke_color`.
-    pub(crate) fn effective_stroke_color(&self) -> Option<C> {
+    pub fn effective_stroke_color(&self) -> Option<C> {
         self.stroke_color.filter(|_| self.stroke_width > 0)
     }
 }
