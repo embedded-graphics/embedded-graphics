@@ -116,6 +116,8 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
             let start_joint = self.end_joint;
 
+            // Compute next end joint. The iterator will stop if the `points.get()` calls below
+            // return `None`, denoting that we've gone past the end of the points array.
             self.end_joint = if let Some(third_point) = self.points.get(self.start_idx + 2) {
                 LineJoint::from_points(
                     *self.points.get(self.start_idx)?,
