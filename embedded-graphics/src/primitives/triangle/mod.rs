@@ -4,6 +4,8 @@ mod mathematical_points;
 mod points;
 mod scanline_iterator;
 mod styled;
+mod thick_points;
+mod triangle_iterator;
 
 use crate::{
     geometry::{Dimensions, Point},
