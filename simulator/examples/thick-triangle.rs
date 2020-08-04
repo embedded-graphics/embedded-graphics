@@ -395,20 +395,31 @@ fn draw(
     )
     .draw(display)?;
 
-    TriangleIterator::new(triangle, width, alignment, true).try_for_each(|(t, ty)| {
-        let color = match ty {
-            TriangleType::Border => Rgb888::RED,
-            TriangleType::Fill => Rgb888::CYAN,
-        };
+    // TriangleIterator::new(triangle, width, alignment, true).try_for_each(|(t, ty)| {
+    //     let color = match ty {
+    //         TriangleType::Border => Rgb888::RED,
+    //         TriangleType::Fill => Rgb888::CYAN,
+    //     };
 
-        t.mathematical_points()
-            .map(move |p| Pixel(p, color))
-            // t.into_styled(PrimitiveStyle::with_stroke(
-            //     color,
-            //     1,
-            // ))
-            .draw(display)
-    })?;
+    //     t.mathematical_points()
+    //         .map(move |p| Pixel(p, color))
+    //         // t.into_styled(PrimitiveStyle::with_stroke(
+    //         //     color,
+    //         //     1,
+    //         // ))
+    //         .draw(display)
+    // })?;
+
+    triangle
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(width)
+                .stroke_alignment(alignment)
+                .stroke_color(Rgb888::RED)
+                .fill_color(Rgb888::CYAN)
+                .build(),
+        )
+        .draw(display)?;
 
     // let centroid = triangle.centroid();
 
