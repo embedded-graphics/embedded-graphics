@@ -5,7 +5,7 @@ pub use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
     fonts::Font,
     geometry::{Angle, AngleUnit, Dimensions, OriginDimensions, Point, Size},
-    image::{ImageDrawable, ImageDrawableExt},
+    image::{ImageData, ImageDrawable, ImageDrawableExt},
     iterator::{ContiguousIteratorExt, IntoPixels, PixelIteratorExt},
     pixelcolor::{raw::RawData, GrayColor, IntoStorage, PixelColor, RgbColor},
     primitives::{ContainsPoint, Primitive},

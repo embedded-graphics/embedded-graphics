@@ -44,10 +44,12 @@
 //! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 
 mod image_drawable;
+mod image_file;
 mod image_raw;
 mod sub_image;
 
 pub use image_drawable::{ImageDrawable, ImageDrawableExt};
+pub use image_file::{ImageData, ImageFile};
 pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
 pub use sub_image::SubImage;
 

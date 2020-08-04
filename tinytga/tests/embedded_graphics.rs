@@ -1,5 +1,5 @@
 use embedded_graphics::{
-    image::Image,
+    image::{Image, ImageFile},
     mock_display::MockDisplay,
     pixelcolor::{Gray8, Rgb888},
     prelude::*,
@@ -15,8 +15,9 @@ const CHESSBOARD_PATTERN: &[&str] = &[
 
 #[test]
 fn chessboard_compressed() {
-    let tga = Tga::from_slice(include_bytes!("./chessboard_4px_rle.tga")).unwrap();
-    let image: Image<_, Rgb888> = Image::new(&tga, Point::zero());
+    let tga: ImageFile<Tga, Rgb888> =
+        ImageFile::from_slice(include_bytes!("./chessboard_4px_rle.tga")).unwrap();
+    let image = Image::new(&tga, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -26,8 +27,9 @@ fn chessboard_compressed() {
 
 #[test]
 fn chessboard_uncompressed() {
-    let tga = Tga::from_slice(include_bytes!("./chessboard_raw.tga")).unwrap();
-    let image: Image<_, Rgb888> = Image::new(&tga, Point::zero());
+    let tga: ImageFile<Tga, Rgb888> =
+        ImageFile::from_slice(include_bytes!("./chessboard_raw.tga")).unwrap();
+    let image = Image::new(&tga, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -36,8 +38,8 @@ fn chessboard_uncompressed() {
 }
 
 fn test_color_tga(data: &[u8]) {
-    let im = Tga::from_slice(data).unwrap();
-    let image: Image<_, Rgb888> = Image::new(&im, Point::zero());
+    let im: ImageFile<Tga, Rgb888> = ImageFile::from_slice(data).unwrap();
+    let image = Image::new(&im, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -55,8 +57,8 @@ fn test_color_tga(data: &[u8]) {
 }
 
 fn test_gray_tga(data: &[u8]) {
-    let im = Tga::from_slice(data).unwrap();
-    let image: Image<_, Gray8> = Image::new(&im, Point::zero());
+    let im: ImageFile<Tga, Gray8> = ImageFile::from_slice(data).unwrap();
+    let image = Image::new(&im, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();

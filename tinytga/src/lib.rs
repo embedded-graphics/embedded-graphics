@@ -414,6 +414,14 @@ mod e_g {
     use super::*;
     use embedded_graphics::prelude::*;
 
+    impl<'a> ImageData<'a> for Tga<'a> {
+        type Error = ParseError;
+
+        fn from_slice(data: &'a [u8]) -> Result<Self, Self::Error> {
+            Tga::from_slice(data)
+        }
+    }
+
     impl<C> ImageDrawable<C> for Tga<'_>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,

@@ -252,6 +252,14 @@ mod e_g {
         prelude::*,
     };
 
+    impl<'a> ImageData<'a> for Bmp<'a> {
+        type Error = ();
+
+        fn from_slice(data: &'a [u8]) -> Result<Self, Self::Error> {
+            Bmp::from_slice(data)
+        }
+    }
+
     impl<C> ImageDrawable<C> for Bmp<'_>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,

@@ -1,5 +1,5 @@
 use embedded_graphics::{
-    image::Image,
+    image::{Image, ImageFile},
     pixelcolor::Rgb888,
     prelude::*,
     primitives::Rectangle,
@@ -143,13 +143,12 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(256, 256));
 
-    // Load the TGA image
-    let tga = Tga::from_slice(PIPES_IMAGE).unwrap();
+    let all_tiles: ImageFile<Tga, Rgb888> = ImageFile::from_slice(PIPES_IMAGE).unwrap();
 
     let pipe_tiles: Vec<_> = TILE_LAYOUT
         .iter()
         .map(|tile| {
-            tga.sub_image(&Rectangle::new(
+            all_tiles.sub_image(&Rectangle::new(
                 tile.component_mul(Point::new(32, 32)),
                 TILE_SIZE,
             ))

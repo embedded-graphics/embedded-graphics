@@ -1,5 +1,5 @@
 use embedded_graphics::{
-    image::Image,
+    image::{Image, ImageFile},
     mock_display::{ColorMapping, MockDisplay},
     pixelcolor::{Gray8, Rgb555, Rgb565, Rgb888},
     prelude::*,
@@ -9,8 +9,9 @@ use tinybmp::Bmp;
 
 #[test]
 fn negative_top_left() {
-    let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
+    let image: ImageFile<Bmp, Rgb565> =
+        ImageFile::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
+    let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
     assert_eq!(
         image.bounding_box(),
@@ -20,8 +21,9 @@ fn negative_top_left() {
 
 #[test]
 fn dimensions() {
-    let image = Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
+    let image: ImageFile<Bmp, Rgb565> =
+        ImageFile::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
+    let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
     assert_eq!(
         image.bounding_box(),
@@ -33,8 +35,8 @@ fn test_color_pattern<C>(data: &[u8])
 where
     C: PixelColor + From<<C as PixelColor>::Raw> + ColorMapping,
 {
-    let bmp = Bmp::from_slice(data).unwrap();
-    let image: Image<_, C> = Image::new(&bmp, Point::zero());
+    let bmp: ImageFile<Bmp, C> = ImageFile::from_slice(data).unwrap();
+    let image = Image::new(&bmp, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -70,8 +72,9 @@ fn colors_rgb888_32bit() {
 
 #[test]
 fn colors_grey8() {
-    let image = Bmp::from_slice(include_bytes!("./colors_grey8.bmp")).unwrap();
-    let image: Image<_, Gray8> = Image::new(&image, Point::zero());
+    let image: ImageFile<Bmp, Gray8> =
+        ImageFile::from_slice(include_bytes!("./colors_grey8.bmp")).unwrap();
+    let image = Image::new(&image, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
@@ -93,8 +96,9 @@ fn colors_grey8() {
 /// Test for issue #136
 #[test]
 fn issue_136_row_size_is_multiple_of_4_bytes() {
-    let image = Bmp::from_slice(include_bytes!("./issue_136.bmp")).unwrap();
-    let image: Image<_, Rgb565> = Image::new(&image, Point::zero());
+    let image: ImageFile<Bmp, Rgb565> =
+        ImageFile::from_slice(include_bytes!("./issue_136.bmp")).unwrap();
+    let image = Image::new(&image, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
