@@ -432,10 +432,12 @@ mod e_g {
         }
     }
 
-    impl<C> ImageDrawable<C> for EgTga<'_, C>
+    impl<C> ImageDrawable for EgTga<'_, C>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {
+        type Color = C;
+
         fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
         where
             D: DrawTarget<Color = C>,

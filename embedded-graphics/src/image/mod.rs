@@ -55,11 +55,10 @@ use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
     drawable::Drawable,
     geometry::{Dimensions, OriginDimensions, Point},
-    pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
 };
-use core::{fmt::Debug, marker::PhantomData};
+use core::fmt::Debug;
 
 /// Image object.
 ///
@@ -75,28 +74,25 @@ use core::{fmt::Debug, marker::PhantomData};
 /// [`Transform::translate_mut`]: ../transform/trait.Transform.html#tymethod.translate_mut
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 #[derive(Debug, Clone, Copy)]
-pub struct Image<'a, I, C> {
-    image_drawable: &'a I,
+pub struct Image<'a, T> {
+    image_drawable: &'a T,
     offset: Point,
-    c: PhantomData<C>,
 }
 
-impl<'a, I, C> Image<'a, I, C>
+impl<'a, T> Image<'a, T>
 where
-    I: ImageDrawable<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    T: ImageDrawable,
 {
     /// Creates a new `Image`.
-    pub fn new(image_drawable: &'a I, position: Point) -> Self {
+    pub fn new(image_drawable: &'a T, position: Point) -> Self {
         Self {
             image_drawable,
             offset: position,
-            c: PhantomData,
         }
     }
 }
 
-impl<I, C> Transform for Image<'_, I, C> {
+impl<T> Transform for Image<'_, T> {
     /// Translate the image by a given delta, returning a new image
     ///
     /// # Examples
@@ -116,7 +112,7 @@ impl<I, C> Transform for Image<'_, I, C> {
     ///
     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    /// let image: Image<_, BinaryColor> = Image::new(&image, Point::zero());
+    /// let image = Image::new(&image, Point::zero());
     ///
     /// let image_moved = image.translate(Point::new(10, 20));
     ///
@@ -127,7 +123,6 @@ impl<I, C> Transform for Image<'_, I, C> {
         Self {
             image_drawable: self.image_drawable,
             offset: self.offset + by,
-            c: PhantomData,
         }
     }
 
@@ -150,7 +145,7 @@ impl<I, C> Transform for Image<'_, I, C> {
     ///
     /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4, 4);
     ///
-    /// let mut image: Image<_, BinaryColor> = Image::new(&image, Point::zero());
+    /// let mut image = Image::new(&image, Point::zero());
     ///
     /// image.translate_mut(Point::new(10, 20));
     ///
@@ -163,26 +158,24 @@ impl<I, C> Transform for Image<'_, I, C> {
     }
 }
 
-impl<'a, I, C> Drawable for Image<'a, I, C>
+impl<'a, T> Drawable for Image<'a, T>
 where
-    I: ImageDrawable<C>,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    T: ImageDrawable,
 {
-    type Color = C;
+    type Color = T::Color;
 
     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
     where
-        D: DrawTarget<Color = C>,
+        D: DrawTarget<Color = Self::Color>,
     {
         self.image_drawable
             .draw(&mut display.translated(self.offset))
     }
 }
 
-impl<'a, I, C> Dimensions for Image<'a, I, C>
+impl<'a, T> Dimensions for Image<'a, T>
 where
-    I: OriginDimensions,
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    T: OriginDimensions,
 {
     fn bounding_box(&self) -> Rectangle {
         self.image_drawable.bounding_box().translate(self.offset)

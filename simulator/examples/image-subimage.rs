@@ -167,8 +167,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         for (tile, tile_index) in pipes.iter() {
             let tile_position = tile.component_mul(Point::new_equal(TILE_SIZE.width as i32));
 
-            let image: Image<_, Rgb888> = Image::new(&pipe_tiles[tile_index], tile_position);
-            image.draw(&mut display)?;
+            Image::new(&pipe_tiles[tile_index], tile_position).draw(&mut display)?;
         }
 
         let area = tile_to_rectangle(highlighted_tile);

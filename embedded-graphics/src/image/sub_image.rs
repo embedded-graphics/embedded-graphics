@@ -2,11 +2,9 @@ use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions},
     image::ImageDrawable,
-    pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
 };
-use core::marker::PhantomData;
 
 /// Sub image.
 ///
@@ -22,57 +20,44 @@ use core::marker::PhantomData;
 /// [`ImageDrawable`]: trait.ImageDrawable.html
 /// [`sub_image`]: trait.ImageDrawableExt.html#tymethod_sub_image
 #[derive(Debug)]
-pub struct SubImage<'a, C, D>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    D: ImageDrawable<C>,
-{
-    parent: &'a D,
+pub struct SubImage<'a, T> {
+    parent: &'a T,
     area: Rectangle,
-    color_type: PhantomData<C>,
 }
 
-impl<'a, C, D> SubImage<'a, C, D>
+impl<'a, T> SubImage<'a, T>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    D: ImageDrawable<C>,
+    T: ImageDrawable,
 {
-    pub(super) fn new(parent: &'a D, area: &Rectangle) -> Self {
+    pub(super) fn new(parent: &'a T, area: &Rectangle) -> Self {
         let area = parent.bounding_box().intersection(area);
 
-        Self {
-            parent,
-            area,
-            color_type: PhantomData,
-        }
+        Self { parent, area }
     }
 }
 
-impl<C, D> OriginDimensions for SubImage<'_, C, D>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    D: ImageDrawable<C>,
-{
+impl<T> OriginDimensions for SubImage<'_, T> {
     fn size(&self) -> crate::prelude::Size {
         self.area.size
     }
 }
 
-impl<'a, C, D> ImageDrawable<C> for SubImage<'a, C, D>
+impl<'a, T> ImageDrawable for SubImage<'a, T>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    D: ImageDrawable<C>,
+    T: ImageDrawable,
 {
+    type Color = T::Color;
+
     fn draw<DT>(&self, target: &mut DT) -> Result<(), DT::Error>
     where
-        DT: DrawTarget<Color = C>,
+        DT: DrawTarget<Color = Self::Color>,
     {
         self.parent.draw_sub_image(target, &self.area)
     }
 
     fn draw_sub_image<DT>(&self, target: &mut DT, area: &Rectangle) -> Result<(), DT::Error>
     where
-        DT: DrawTarget<Color = C>,
+        DT: DrawTarget<Color = Self::Color>,
     {
         let area = area.translate(self.area.top_left);
 
@@ -94,7 +79,9 @@ mod tests {
         expected_area: Rectangle,
     }
 
-    impl ImageDrawable<BinaryColor> for MockImageDrawable {
+    impl ImageDrawable for MockImageDrawable {
+        type Color = BinaryColor;
+
         fn draw<DT>(&self, _target: &mut DT) -> Result<(), DT::Error>
         where
             DT: DrawTarget<Color = BinaryColor>,

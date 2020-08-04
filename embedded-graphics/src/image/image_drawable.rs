@@ -16,10 +16,10 @@ use crate::{
 ///
 /// [`Image`]: struct.Image.html
 /// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
-pub trait ImageDrawable<C>: OriginDimensions
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-{
+pub trait ImageDrawable: OriginDimensions {
+    /// The color type.
+    type Color: PixelColor;
+
     /// Draws the entire image to the target.
     ///
     /// This method shouldn't be called directly by user code. Use an [`Image`] object instead.
@@ -34,7 +34,7 @@ where
     /// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
-        D: DrawTarget<Color = C>;
+        D: DrawTarget<Color = Self::Color>;
 
     /// Draws a part of the image to the target.
     ///
@@ -49,18 +49,14 @@ where
     /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
-        D: DrawTarget<Color = C>,
+        D: DrawTarget<Color = Self::Color>,
     {
         self.draw(&mut target.translated(-area.top_left).clipped(area))
     }
 }
 
 /// Extension trait for image drawables.
-pub trait ImageDrawableExt<C, D>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    D: ImageDrawable<C>,
-{
+pub trait ImageDrawableExt: Sized {
     /// Returns a sub image of this image drawable.
     ///
     /// If any of the given `area` lies outside the bounding box the intersection of `area` and the
@@ -69,15 +65,14 @@ where
     /// # Examples
     ///
     /// TODO: add example
-    fn sub_image(&self, area: &Rectangle) -> SubImage<C, D>;
+    fn sub_image(&self, area: &Rectangle) -> SubImage<Self>;
 }
 
-impl<C, D> ImageDrawableExt<C, D> for D
+impl<T> ImageDrawableExt for T
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    D: ImageDrawable<C>,
+    T: ImageDrawable,
 {
-    fn sub_image(&self, area: &Rectangle) -> SubImage<C, D> {
+    fn sub_image(&self, area: &Rectangle) -> SubImage<T> {
         SubImage::new(self, area)
     }
 }

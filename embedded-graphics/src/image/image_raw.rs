@@ -61,7 +61,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// // raw data gets converted into.
 /// let raw_image: ImageRaw<BinaryColor> = ImageRaw::new(DATA, 12, 5);
 ///
-/// let image: Image<_, BinaryColor> = Image::new(&raw_image, Point::zero());
+/// let image = Image::new(&raw_image, Point::zero());
 ///
 /// let mut display = Display::default();
 ///
@@ -151,12 +151,14 @@ where
     }
 }
 
-impl<'a, C, BO> ImageDrawable<C> for ImageRaw<'a, C, BO>
+impl<'a, C, BO> ImageDrawable for ImageRaw<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
     RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
+    type Color = C;
+
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
         D: crate::draw_target::DrawTarget<Color = C>,

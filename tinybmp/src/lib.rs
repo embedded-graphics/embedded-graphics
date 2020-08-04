@@ -262,7 +262,7 @@ mod e_g {
 
     impl<'a, C> EgBmp<'a, C>
     where
-        C: PixelColor,
+        C: PixelColor + From<<C as PixelColor>::Raw>,
     {
         /// TODO: docs
         pub fn from_slice(data: &'a [u8]) -> Result<Self, ()> {
@@ -273,10 +273,12 @@ mod e_g {
         }
     }
 
-    impl<C> ImageDrawable<C> for EgBmp<'_, C>
+    impl<C> ImageDrawable for EgBmp<'_, C>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {
+        type Color = C;
+
         fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
         where
             D: DrawTarget<Color = C>,
