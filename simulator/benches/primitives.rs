@@ -79,6 +79,21 @@ fn triangle(c: &mut Criterion) {
     });
 }
 
+fn thick_triangle(c: &mut Criterion) {
+    c.bench_function("thick triangle", |b| {
+        let object = &Triangle::new(Point::new(5, 10), Point::new(60, 80), Point::new(20, 80))
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .stroke_width(10)
+                    .stroke_color(Gray8::new(10))
+                    .fill_color(Gray8::new(5))
+                    .build(),
+            );
+
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 fn filled_triangle(c: &mut Criterion) {
     c.bench_function("filled_triangle", |b| {
         let object = &Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
@@ -150,6 +165,23 @@ fn polyline(c: &mut Criterion) {
     });
 }
 
+fn thick_polyline(c: &mut Criterion) {
+    c.bench_function("thick polyline", |b| {
+        let points = [
+            Point::new(5, 10),
+            Point::new(15, 20),
+            Point::new(5, 20),
+            Point::new(30, 50),
+            Point::new(100, 100),
+        ];
+
+        let object =
+            &Polyline::new(&points).into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 10));
+
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 fn rounded_rectangle(c: &mut Criterion) {
     c.bench_function("rounded_rectangle", |b| {
         let object = &RoundedRectangle::new(
@@ -200,10 +232,12 @@ criterion_group!(
     thick_line,
     thicker_line,
     triangle,
+    thick_triangle,
     filled_triangle,
     ellipse,
     filled_ellipse,
     polyline,
+    thick_polyline,
     rounded_rectangle,
     rounded_rectangle_corners,
     arc,
