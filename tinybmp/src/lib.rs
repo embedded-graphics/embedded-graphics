@@ -53,13 +53,13 @@
 //! ```rust
 //! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
 //! use embedded_graphics::{image::Image, prelude::*};
-//! use tinybmp::Bmp;
+//! use tinybmp::EgBmp;
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # use embedded_graphics::pixelcolor::Rgb565;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! // Load 16BPP 8x8px image
-//! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+//! let bmp: EgBmp<Rgb565> = EgBmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 //!
 //! let image = Image::new(&bmp, Point::zero());
 //!
@@ -247,20 +247,33 @@ impl<'a> Iterator for BmpIterator<'a> {
 #[cfg(feature = "graphics")]
 mod e_g {
     use super::*;
+    use core::marker::PhantomData;
     use embedded_graphics::{
         pixelcolor::{raw::RawData, PixelColor},
         prelude::*,
     };
 
-    impl<'a> ImageData<'a> for Bmp<'a> {
-        type Error = ();
+    /// TODO: docs
+    #[derive(Debug)]
+    pub struct EgBmp<'a, C> {
+        bmp: Bmp<'a>,
+        color_type: PhantomData<C>,
+    }
 
-        fn from_slice(data: &'a [u8]) -> Result<Self, Self::Error> {
-            Bmp::from_slice(data)
+    impl<'a, C> EgBmp<'a, C>
+    where
+        C: PixelColor,
+    {
+        /// TODO: docs
+        pub fn from_slice(data: &'a [u8]) -> Result<Self, ()> {
+            Ok(Self {
+                bmp: Bmp::from_slice(data)?,
+                color_type: PhantomData,
+            })
         }
     }
 
-    impl<C> ImageDrawable<C> for Bmp<'_>
+    impl<C> ImageDrawable<C> for EgBmp<'_, C>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {
@@ -270,14 +283,19 @@ mod e_g {
         {
             target.fill_contiguous(
                 &self.bounding_box(),
-                self.into_iter().map(|p| C::Raw::from_u32(p.color).into()),
+                self.bmp
+                    .into_iter()
+                    .map(|p| C::Raw::from_u32(p.color).into()),
             )
         }
     }
 
-    impl OriginDimensions for Bmp<'_> {
+    impl<C> OriginDimensions for EgBmp<'_, C>
+    where
+        C: PixelColor,
+    {
         fn size(&self) -> Size {
-            Size::new(self.width(), self.height())
+            Size::new(self.bmp.width(), self.bmp.height())
         }
     }
 }

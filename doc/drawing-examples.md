@@ -254,15 +254,15 @@ use embedded_graphics::{
     pixelcolor::Rgb888,
     prelude::*,
 };
-use tinytga::Tga;
+use tinytga::EgTga;
 
-let tga = Tga::from_slice(include_bytes!(concat!(
+let tga: EgTga<Rgb888> = EgTga::from_slice(include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../simulator/examples/assets/rust-pride.tga"
 )))
 .unwrap();
 
-let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+let image = Image::new(&tga, Point::zero());
 
 image.draw(&mut display)?;
 ```

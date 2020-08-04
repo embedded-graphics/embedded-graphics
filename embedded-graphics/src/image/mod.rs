@@ -21,16 +21,16 @@
 //! ```rust
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
-//! use tinytga::Tga;
+//! use tinytga::EgTga;
 //!
 //! let mut display: Display<Rgb565> = Display::default();
 //!
-//! let tga = Tga::from_slice(include_bytes!(
+//! let tga: EgTga<Rgb565> = EgTga::from_slice(include_bytes!(
 //!     "../../../simulator/examples/assets/rust-pride.tga"
 //! ))
 //! .unwrap();
 //!
-//! let image: Image<Tga, Rgb565> = Image::new(&tga, Point::zero());
+//! let image = Image::new(&tga, Point::zero());
 //!
 //! image.draw(&mut display);
 //!
@@ -44,12 +44,10 @@
 //! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 
 mod image_drawable;
-mod image_file;
 mod image_raw;
 mod sub_image;
 
 pub use image_drawable::{ImageDrawable, ImageDrawableExt};
-pub use image_file::{ImageData, ImageFile};
 pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
 pub use sub_image::SubImage;
 

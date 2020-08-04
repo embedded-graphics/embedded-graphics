@@ -1,5 +1,5 @@
 use embedded_graphics::{
-    image::{Image, ImageFile},
+    image::Image,
     pixelcolor::Rgb888,
     prelude::*,
     primitives::Rectangle,
@@ -10,7 +10,7 @@ use embedded_graphics_simulator::{
 };
 use sdl2::mouse::MouseButton;
 use std::{thread, time::Duration};
-use tinytga::Tga;
+use tinytga::EgTga;
 
 /// Pipes image based on [plums](https://opengameart.org/content/plums) by surt on OpenGameArt.org.
 const PIPES_IMAGE: &[u8] = include_bytes!("./assets/pipes.tga");
@@ -143,7 +143,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(256, 256));
 
-    let all_tiles: ImageFile<Tga, Rgb888> = ImageFile::from_slice(PIPES_IMAGE).unwrap();
+    let all_tiles: EgTga<Rgb888> = EgTga::from_slice(PIPES_IMAGE).unwrap();
 
     let pipe_tiles: Vec<_> = TILE_LAYOUT
         .iter()

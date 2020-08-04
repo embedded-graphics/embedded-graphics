@@ -134,13 +134,13 @@
 //!     pixelcolor::{Rgb888, RgbColor},
 //!     prelude::*,
 //! };
-//! use tinytga::Tga;
+//! use tinytga::EgTga;
 //!
 //! let data = include_bytes!("../../tinytga/tests/type1_tl.tga");
 //!
-//! let tga = Tga::from_slice(data).unwrap();
+//! let tga: EgTga<Rgb888> = EgTga::from_slice(data).unwrap();
 //!
-//! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+//! let image = Image::new(&tga, Point::zero());
 //!
 //! let mut display: MockDisplay<Rgb888> = MockDisplay::new();
 //!

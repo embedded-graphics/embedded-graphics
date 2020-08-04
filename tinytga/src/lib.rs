@@ -67,11 +67,11 @@
 //! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
 //! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
-//! use tinytga::Tga;
+//! use tinytga::EgTga;
 //!
-//! let tga = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
+//! let tga: EgTga<Rgb888> = EgTga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
 //!
-//! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+//! let image = Image::new(&tga, Point::zero());
 //!
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(()) } }
@@ -412,17 +412,27 @@ impl<'a> Iterator for TgaIterator<'a> {
 #[cfg(feature = "graphics")]
 mod e_g {
     use super::*;
+    use core::marker::PhantomData;
     use embedded_graphics::prelude::*;
 
-    impl<'a> ImageData<'a> for Tga<'a> {
-        type Error = ParseError;
+    ///TODO: docs
+    #[derive(Debug)]
+    pub struct EgTga<'a, C> {
+        tga: Tga<'a>,
+        color_type: PhantomData<C>,
+    }
 
-        fn from_slice(data: &'a [u8]) -> Result<Self, Self::Error> {
-            Tga::from_slice(data)
+    impl<'a, C> EgTga<'a, C> {
+        ///TODO: docs
+        pub fn from_slice(data: &'a [u8]) -> Result<Self, ParseError> {
+            Ok(Self {
+                tga: Tga::from_slice(data)?,
+                color_type: PhantomData,
+            })
         }
     }
 
-    impl<C> ImageDrawable<C> for Tga<'_>
+    impl<C> ImageDrawable<C> for EgTga<'_, C>
     where
         C: PixelColor + From<<C as PixelColor>::Raw>,
     {
@@ -432,13 +442,15 @@ mod e_g {
         {
             // TGA files with the origin in the top left corner can be drawn using `fill_contiguous`.
             // All other origins are drawn by falling back to `draw_iter`.
-            if self.header.image_origin == ImageOrigin::TopLeft {
+            if self.tga.header.image_origin == ImageOrigin::TopLeft {
                 target.fill_contiguous(
                     &self.bounding_box(),
-                    self.into_iter().map(|p| C::Raw::from_u32(p.color).into()),
+                    self.tga
+                        .into_iter()
+                        .map(|p| C::Raw::from_u32(p.color).into()),
                 )
             } else {
-                target.draw_iter(self.into_iter().map(|p| {
+                target.draw_iter(self.tga.into_iter().map(|p| {
                     Pixel(
                         Point::new(i32::from(p.x), i32::from(p.y)),
                         C::Raw::from_u32(p.color).into(),
@@ -448,9 +460,9 @@ mod e_g {
         }
     }
 
-    impl OriginDimensions for Tga<'_> {
+    impl<C> OriginDimensions for EgTga<'_, C> {
         fn size(&self) -> Size {
-            Size::new(self.width().into(), self.height().into())
+            Size::new(self.tga.width().into(), self.tga.height().into())
         }
     }
 }

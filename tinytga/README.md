@@ -74,11 +74,11 @@ with embedded-graphics.
 
 ```rust
 use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
-use tinytga::Tga;
+use tinytga::EgTga;
 
-let tga = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
+let tga: EgTga<Rgb888> = EgTga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
 
-let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+let image = Image::new(&tga, Point::zero());
 
 image.draw(&mut display)?;
 ```

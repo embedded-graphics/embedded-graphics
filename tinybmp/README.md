@@ -61,10 +61,10 @@ The `graphics` feature must be enabled for embedded-graphics support.
 
 ```rust
 use embedded_graphics::{image::Image, prelude::*};
-use tinybmp::Bmp;
+use tinybmp::EgBmp;
 
 // Load 16BPP 8x8px image
-let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+let bmp: EgBmp<Rgb565> = EgBmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 
 let image = Image::new(&bmp, Point::zero());
 
