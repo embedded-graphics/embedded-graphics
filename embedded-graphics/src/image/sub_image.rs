@@ -13,12 +13,8 @@ use crate::{
 ///
 /// To create a sub image call the [`sub_image`] method on the parent [`ImageDrawable`].
 ///
-/// # Examples
-///
-/// TODO: add example
-///
 /// [`ImageDrawable`]: trait.ImageDrawable.html
-/// [`sub_image`]: trait.ImageDrawableExt.html#tymethod_sub_image
+/// [`sub_image`]: trait.ImageDrawableExt.html#tymethod.sub_image
 #[derive(Debug)]
 pub struct SubImage<'a, T> {
     parent: &'a T,

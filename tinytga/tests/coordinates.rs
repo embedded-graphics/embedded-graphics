@@ -1,10 +1,10 @@
-use tinytga::{ImageOrigin, ImageType, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, TgaFooter, TgaHeader, TgaRaw};
 
 #[test]
 fn coordinates() {
     let data = include_bytes!("./chessboard_4px_raw.tga");
 
-    let img = Tga::from_slice(data).unwrap();
+    let img = TgaRaw::from_slice(data).unwrap();
 
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);

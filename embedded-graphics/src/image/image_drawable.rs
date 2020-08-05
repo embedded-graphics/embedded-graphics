@@ -9,7 +9,10 @@ use crate::{
 /// `ImageDrawable` is implemented for types that contains image information, which makes them
 /// usable with the [`Image`] object.
 ///
-/// # Implementation notes
+/// The methods in this trait shouldn't be called directly by user code. Instead the object
+/// that implements `ImageDrawable` should be wrapped in an [`Image`] object.
+///
+/// # Implementing `ImageDrawable`
 ///
 /// All image drawables are positioned at the origin and need to implement [`OriginDimensions`], in
 /// addition to this trait, to define their dimensions.
@@ -38,7 +41,7 @@ pub trait ImageDrawable: OriginDimensions {
 
     /// Draws a part of the image to the target.
     ///
-    /// This method shouldn't be called directly by user code. Use an [`SubImage`] object instead.
+    /// This method shouldn't be called directly by user code. Use a [`SubImage`] object instead.
     ///
     /// # Implementation notes
     ///
@@ -64,7 +67,26 @@ pub trait ImageDrawableExt: Sized {
     ///
     /// # Examples
     ///
-    /// TODO: add example
+    /// ```rust
+    /// use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
+    /// # use embedded_graphics::mock_display::MockDisplay as Display;
+    /// use tinytga::Tga;
+    ///
+    /// let mut display: Display<Rgb565> = Display::default();
+    ///
+    /// let sprite_atlas: Tga<Rgb565> = Tga::from_slice(include_bytes!(
+    ///     "../../../assets/tiles.tga"
+    /// ))
+    /// .unwrap();
+    ///
+    /// let sprite_1 = sprite_atlas.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(32, 32)));
+    /// let sprite_2 = sprite_atlas.sub_image(&Rectangle::new(Point::new(32, 0), Size::new(32, 32)));
+    ///
+    /// Image::new(&sprite_1, Point::new(100, 100)).draw(&mut display)?;
+    /// Image::new(&sprite_2, Point::new(100, 140)).draw(&mut display)?;
+    ///
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
     fn sub_image(&self, area: &Rectangle) -> SubImage<Self>;
 }
 

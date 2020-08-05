@@ -33,6 +33,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#400](https://github.com/jamwaffles/embedded-graphics/pull/400) Added `OffsetOutline` and `StyledPrimitiveAreas` traits.
 - [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) Added `Clipped`, `Cropped` and `Translated` draw targets.
 - [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) Added `OriginDimensions` trait for dimensions with `top_left == Point::zero()`.
+- [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) Added support for `SubImage`s.
 
 ### Changed
 
@@ -50,6 +51,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#403](https://github.com/jamwaffles/embedded-graphics/pull/403) Use an associated type to define the color type for `Drawable`s.
 - **(breaking)** [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) `DrawTarget::size` was removed and `DrawTarget`s are now required also implement `Dimensions`.
 - **(breaking)** [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) The `DrawTarget` trait was moved from the root of the crate to a new `draw_target` module. Projects that use the `prelude` to import `DrawTarget` won't be affected by this change.
+- **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) To add support for additional image formats now `ImageDrawable` and `OriginDimensions` needs to be implemented instead of `IntoPixelIterator` and `ImageDimensions`.
+- **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) The color type parameter was removed from the `Image` struct and is now defined by the associated `Color` type of an `ImageDrawable` implementation.
 
 ### Fixed
 

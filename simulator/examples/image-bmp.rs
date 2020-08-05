@@ -10,19 +10,18 @@
 
 use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay, Window};
-use tinybmp::EgBmp;
+use tinybmp::Bmp;
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(128, 128));
 
-    // Load the BMP image
-    let bmp: EgBmp<Rgb565> = EgBmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
+    // Load the BMP image.
+    // The color type must be specified explicitly to match the color format used by the image,
+    // otherwise the compiler may infer an incorrect type.
+    let bmp: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
 
-    // TODO: update comment
-    // Create a new embedded-graphics Image, wrapping the BMP which provides pixel data. The top
-    // left corner of the image is positioned at (32, 32). It is important to specify the color
-    // format used by the image, otherwise the compiler may infer an incorrect type. This image is
-    // in 16BPP RGB565 format, so the Rgb565 pixel color type is used.
+    // To draw the `bmp` object to the display it needs to be wrapped in an `Image` object to set
+    // the position at which it should drawn.
     let image = Image::new(&bmp, Point::new(32, 32));
 
     // Display the image

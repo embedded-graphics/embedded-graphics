@@ -290,10 +290,10 @@ object with embedded-graphics.",
                 pixelcolor::Rgb888,
                 prelude::*,
             };
-            use tinytga::EgTga;
+            use tinytga::Tga;
             {}
             // Load the TGA image
-            let tga: EgTga<Rgb888> = EgTga::from_slice(
+            let tga: Tga<Rgb888> = Tga::from_slice(
                 include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../simulator/examples/assets/rust-pride.tga"))
             ).unwrap();
             {}

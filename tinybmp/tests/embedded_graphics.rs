@@ -5,12 +5,12 @@ use embedded_graphics::{
     prelude::*,
     primitives::Rectangle,
 };
-use tinybmp::EgBmp;
+use tinybmp::Bmp;
 
 #[test]
 fn negative_top_left() {
-    let image: EgBmp<Rgb565> =
-        EgBmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
+    let image: Bmp<Rgb565> =
+        Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
     let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
     assert_eq!(
@@ -21,8 +21,8 @@ fn negative_top_left() {
 
 #[test]
 fn dimensions() {
-    let image: EgBmp<Rgb565> =
-        EgBmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
+    let image: Bmp<Rgb565> =
+        Bmp::from_slice(include_bytes!("./chessboard-4px-color-16bit.bmp")).unwrap();
     let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
     assert_eq!(
@@ -35,7 +35,7 @@ fn test_color_pattern<C>(data: &[u8])
 where
     C: PixelColor + From<<C as PixelColor>::Raw> + ColorMapping,
 {
-    let bmp: EgBmp<C> = EgBmp::from_slice(data).unwrap();
+    let bmp: Bmp<C> = Bmp::from_slice(data).unwrap();
     let image = Image::new(&bmp, Point::zero());
 
     let mut display = MockDisplay::new();
@@ -72,7 +72,7 @@ fn colors_rgb888_32bit() {
 
 #[test]
 fn colors_grey8() {
-    let image: EgBmp<Gray8> = EgBmp::from_slice(include_bytes!("./colors_grey8.bmp")).unwrap();
+    let image: Bmp<Gray8> = Bmp::from_slice(include_bytes!("./colors_grey8.bmp")).unwrap();
     let image = Image::new(&image, Point::zero());
 
     let mut display = MockDisplay::new();
@@ -95,7 +95,7 @@ fn colors_grey8() {
 /// Test for issue #136
 #[test]
 fn issue_136_row_size_is_multiple_of_4_bytes() {
-    let image: EgBmp<Rgb565> = EgBmp::from_slice(include_bytes!("./issue_136.bmp")).unwrap();
+    let image: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("./issue_136.bmp")).unwrap();
     let image = Image::new(&image, Point::zero());
 
     let mut display = MockDisplay::new();

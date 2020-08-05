@@ -1,19 +1,19 @@
 //! Image support for embedded-graphics
 //!
-//! Adding embedded-graphics support to an image format requires the implementation of the
-//! [`ImageDrawable`] and [`OriginDimensions`] traits. These provide a common interface to image
-//! metadata and an iterator over individual pixel values respectively.
+//! The two main types used to draw images are [`ImageDrawable`] and [`Image`].
 //!
-//! The [`Image`] struct is a wrapper around items that implement both [`OriginDimensions`] and
-//! [`ImageDrawable`] and allows them to be drawn to a [`DrawTarget`], reading pixel values from the
-//! implementation of [`ImageDrawable`].
+//! [`ImageDrawable`] is implemented to add support for different image formats. This crate includes
+//! an implementation for [raw pixel data]. Additional implementations for other image formats are
+//! provided by external crates like [tinybmp] and [tinytga].
+//!
+//! The [`Image`] object is used to specify the location at which an [`ImageDrawable`] is drawn.
 //!
 //! # Examples
 //!
 //! ## Load a TGA image and draw it to a display
 //!
 //! This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
-//! using the [`Image`] wrapper. The image is positioned at the top left corner of the display.
+//! using an [`Image`] object. The image is positioned at the top left corner of the display.
 //!
 //! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
 //! with embedded-graphics.
@@ -21,11 +21,11 @@
 //! ```rust
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
-//! use tinytga::EgTga;
+//! use tinytga::Tga;
 //!
 //! let mut display: Display<Rgb565> = Display::default();
 //!
-//! let tga: EgTga<Rgb565> = EgTga::from_slice(include_bytes!(
+//! let tga: Tga<Rgb565> = Tga::from_slice(include_bytes!(
 //!     "../../../simulator/examples/assets/rust-pride.tga"
 //! ))
 //! .unwrap();
@@ -37,11 +37,48 @@
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
+//! ## Sub images
+//!
+//! [`SubImage`]s are used to split a larger image drawables into multiple parts, e.g. to draw a
+//! single sprite from a sprite atlas. Use the [`sub_image`] method provided by [`ImageDrawableExt`]
+//! to get a sub image from an image drawable.
+//!
+//! ```rust
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
+//! # use embedded_graphics::mock_display::MockDisplay as Display;
+//! use tinytga::Tga;
+//!
+//! let mut display: Display<Rgb565> = Display::default();
+//!
+//! let sprite_atlas: Tga<Rgb565> = Tga::from_slice(include_bytes!(
+//!     "../../../assets/tiles.tga"
+//! ))
+//! .unwrap();
+//!
+//! let sprite_1 = sprite_atlas.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(32, 32)));
+//! let sprite_2 = sprite_atlas.sub_image(&Rectangle::new(Point::new(32, 0), Size::new(32, 32)));
+//!
+//! Image::new(&sprite_1, Point::new(100, 100)).draw(&mut display)?;
+//! Image::new(&sprite_2, Point::new(100, 140)).draw(&mut display)?;
+//!
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! # Implementing new image formats
+//!
+//! To add embedded-graphics support for an new image format the [`ImageDrawable`] and
+//! [`OriginDimensions`] traits must be implemented. See the [`ImageDrawable`] documentation
+//! for more information.
+//!
 //! [tinytga]: https://crates.io/crates/tinytga
+//! [tinybmp]: https://crates.io/crates/tinybmp
+//! [raw pixel data]: struct.ImageRaw.html
 //! [`ImageDrawable`]: trait.ImageDrawable.html
+//! [`ImageDrawableExt`]: trait.ImageDrawableExt.html
+//! [`sub_image`]: trait.ImageDrawableExt.html#tymethod.sub_image
 //! [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
 //! [`Image`]: ./struct.Image.html
-//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+//! [`SubImage`]: struct.SubImage.html
 
 mod image_drawable;
 mod image_raw;
@@ -73,6 +110,7 @@ use core::fmt::Debug;
 /// [`Transform::translate`]: ../transform/trait.Transform.html#tymethod.translate
 /// [`Transform::translate_mut`]: ../transform/trait.Transform.html#tymethod.translate_mut
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+/// [`ImageDrawable`]: trait.ImageDrawable.html
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, T> {
     image_drawable: &'a T,

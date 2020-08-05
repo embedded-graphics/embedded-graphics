@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) To support the new embedded-graphics 0.7 image API a color type parameter was added to `Bmp`. To use this crate without the `graphics` flag enabled replace `Bmp` by `BmpRaw`.
+
 ## [0.2.3] - 2020-05-26
 
 ### Added
@@ -16,11 +20,11 @@
 
 ## [0.2.1] - 2020-02-17
 
-- #244 Added `.into_iter()` support to the `Bmp` struct to get an iterator over every pixel in the image.
+- [#244](https://github.com/jamwaffles/embedded-graphics/pull/244) Added `.into_iter()` support to the `Bmp` struct to get an iterator over every pixel in the image.
 
 ### Changed
 
-- **(breaking)** #247 "reverse" integration of tinybmp into [`embedded-graphics`](https://crates.io/crates/embedded-graphics). tinybmp now has a `graphics` feature that must be turned on to enable embedded-graphics support. The `bmp` feature from embedded-graphics is removed.
+- **(breaking)** [#247](https://github.com/jamwaffles/embedded-graphics/pull/247) "reverse" integration of tinybmp into [`embedded-graphics`](https://crates.io/crates/embedded-graphics). tinybmp now has a `graphics` feature that must be turned on to enable embedded-graphics support. The `bmp` feature from embedded-graphics is removed.
 
   **Before**
 
