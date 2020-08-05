@@ -189,34 +189,25 @@ impl Triangle {
             return false;
         }
 
+        let Self { p1, p2, p3 } = self;
         let p = point;
-        let Self { p1, p2, p3 } = *self;
 
-        // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
-        // Works for any point ordering.
+        // Method as described in https://stackoverflow.com/a/9755252, but with `>` changed to `>=`
+        // to match points that lie _on_ the edge.
+        let as_x = p.x - p1.x;
+        let as_y = p.y - p1.y;
 
-        let s = p1.y * p3.x - p1.x * p3.y + (p3.y - p1.y) * p.x + (p1.x - p3.x) * p.y;
-        let t = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p.x + (p2.x - p1.x) * p.y;
+        let s_ab = (p2.x - p1.x) * as_y - (p2.y - p1.y) * as_x >= 0;
 
-        if (s < 0) != (t < 0) {
-            false
-        } else {
-            // Determinant
-            let a = self.area_doubled();
-
-            // If determinant is zero, triangle is colinear and can never contain a point.
-            if a == 0 {
-                return false;
-            }
-
-            // This check allows this algorithm to work with clockwise or counterclockwise
-            // triangles.
-            if a < 0 {
-                s <= 0 && s + t >= a
-            } else {
-                s >= 0 && s + t <= a
-            }
+        if ((p3.x - p1.x) * as_y - (p3.y - p1.y) * as_x >= 0) == s_ab {
+            return false;
         }
+
+        if ((p3.x - p2.x) * (p.y - p2.y) - (p3.y - p2.y) * (p.x - p2.x) >= 0) != s_ab {
+            return false;
+        }
+
+        true
     }
 
     /// Maths points yeahahhhhh
