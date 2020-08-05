@@ -1,6 +1,6 @@
 use embedded_graphics::{
     fonts::*,
-    pixelcolor::Rgb888,
+    pixelcolor::{Gray8, Rgb888},
     prelude::*,
     primitives::line_joint::{EdgeCorners, LineJoint},
     primitives::triangle::MathematicalPoints,
@@ -8,7 +8,7 @@ use embedded_graphics::{
     style::*,
 };
 use embedded_graphics_simulator::{
-    OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
+    OutputSettingsBuilder, OverdrawDisplay, SimulatorDisplay, SimulatorEvent, Window,
 };
 use sdl2::keyboard::Keycode;
 
@@ -44,15 +44,15 @@ fn draw(
     points: &[Point],
     width: u32,
     alignment: StrokeAlignment,
-    display: &mut SimulatorDisplay<Rgb888>,
+    display: &mut OverdrawDisplay,
 ) -> Result<(), core::convert::Infallible> {
-    display.clear(Rgb888::BLACK).unwrap();
+    display.clear(Gray8::BLACK)?;
 
     Text::new(&format!("Points {}", points.len()), Point::zero())
         .into_styled(
             TextStyleBuilder::new(Font6x8)
-                .background_color(Rgb888::YELLOW)
-                .text_color(Rgb888::BLUE)
+                .background_color(Gray8::WHITE)
+                .text_color(Gray8::WHITE)
                 .build(),
         )
         .draw(display)?;
@@ -62,7 +62,7 @@ fn draw(
             PrimitiveStyleBuilder::new()
                 .stroke_width(width)
                 .stroke_alignment(alignment)
-                .stroke_color(Rgb888::RED)
+                .stroke_color(Gray8::WHITE)
                 .build(),
         )
         .draw(display)?;
@@ -87,6 +87,8 @@ fn main() -> Result<(), core::convert::Infallible> {
         .build();
     let mut window = Window::new("Polyline joints debugger", &output_settings);
 
+    let mut overdraw_display = OverdrawDisplay::new(display.size());
+
     let mut end_point = Point::new(82, 110);
 
     let mut width = 15u32;
@@ -109,7 +111,14 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut num_points = points.len();
 
-    draw(&points[0..num_points], width, alignment, &mut display)?;
+    draw(
+        &points[0..num_points],
+        width,
+        alignment,
+        &mut overdraw_display,
+    )?;
+
+    overdraw_display.draw_to_display(&mut display)?;
 
     'running: loop {
         window.update(&display);
@@ -145,7 +154,14 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            draw(&points[0..num_points], width, alignment, &mut display)?;
+            draw(
+                &points[0..num_points],
+                width,
+                alignment,
+                &mut overdraw_display,
+            )?;
+
+            overdraw_display.draw_to_display(&mut display)?;
         }
     }
 
