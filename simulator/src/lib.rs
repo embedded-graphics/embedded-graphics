@@ -118,6 +118,7 @@
 mod display;
 mod framebuffer;
 mod output_settings;
+mod overdraw_display;
 mod theme;
 
 #[cfg(feature = "with-sdl")]
@@ -129,5 +130,6 @@ pub use window::{SimulatorEvent, Window};
 pub use crate::{
     display::SimulatorDisplay,
     output_settings::{OutputSettings, OutputSettingsBuilder},
+    overdraw_display::OverdrawDisplay,
     theme::BinaryColorTheme,
 };
