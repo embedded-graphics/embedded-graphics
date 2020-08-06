@@ -21,7 +21,8 @@ fn main() -> Result<(), core::convert::Infallible> {
     let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!("./assets/rust-pride.tga")).unwrap();
 
     // To draw the `tga` object to the display it needs to be wrapped in an `Image` object to set
-    // the position at which it should drawn.
+    // the position at which it should drawn. Here, the top left corner of the image is set to 
+    // `(32, 32)`.
     let image = Image::new(&tga, Point::new(32, 32));
 
     // Display the image
