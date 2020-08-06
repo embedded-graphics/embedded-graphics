@@ -1,10 +1,10 @@
-use tinytga::{ImageOrigin, ImageType, Pixel, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Pixel, TgaFooter, TgaHeader, TgaRaw};
 
 #[test]
 fn ubw8() {
     let data = include_bytes!("./ubw8.tga");
 
-    let img = Tga::from_slice(data).unwrap();
+    let img = TgaRaw::from_slice(data).unwrap();
 
     println!("{:#?}", img.header);
     println!("{:#?}", img.footer);

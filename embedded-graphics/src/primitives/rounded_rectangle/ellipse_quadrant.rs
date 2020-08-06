@@ -116,8 +116,8 @@ mod tests {
     use crate::{
         drawable::Pixel,
         geometry::{Point, Size},
+        iterator::PixelIteratorExt,
         mock_display::MockDisplay,
-        pixel_iterator::PixelIteratorExt,
         pixelcolor::BinaryColor,
         primitives::Primitive,
     };

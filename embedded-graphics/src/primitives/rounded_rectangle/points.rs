@@ -93,7 +93,7 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Size, pixel_iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle,
+        geometry::Size, iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle,
     };
 
     #[test]

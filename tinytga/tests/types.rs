@@ -1,4 +1,4 @@
-use tinytga::{ImageOrigin, ImageType, Tga, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, TgaHeader, TgaRaw};
 
 const HEADER_DEFAULT: TgaHeader = TgaHeader {
     id_len: 0,
@@ -18,7 +18,7 @@ const HEADER_DEFAULT: TgaHeader = TgaHeader {
 
 #[test]
 fn type1_bl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type1_bl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type1_bl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -36,7 +36,7 @@ fn type1_bl() {
 
 #[test]
 fn type1_tl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type1_tl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type1_tl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -55,7 +55,7 @@ fn type1_tl() {
 
 #[test]
 fn type2_bl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type2_bl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type2_bl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -70,7 +70,7 @@ fn type2_bl() {
 
 #[test]
 fn type2_tl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type2_tl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type2_tl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -86,7 +86,7 @@ fn type2_tl() {
 
 #[test]
 fn type3_bl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type3_bl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type3_bl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -100,7 +100,7 @@ fn type3_bl() {
 
 #[test]
 fn type3_tl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type3_tl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type3_tl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -115,7 +115,7 @@ fn type3_tl() {
 
 #[test]
 fn type9_bl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type9_bl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type9_bl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -133,7 +133,7 @@ fn type9_bl() {
 
 #[test]
 fn type9_tl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type9_tl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type9_tl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -152,7 +152,7 @@ fn type9_tl() {
 
 #[test]
 fn type10_bl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type10_bl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type10_bl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -167,7 +167,7 @@ fn type10_bl() {
 
 #[test]
 fn type10_tl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type10_tl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type10_tl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -183,7 +183,7 @@ fn type10_tl() {
 
 #[test]
 fn type11_bl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type11_bl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type11_bl.tga")).unwrap();
 
     assert_eq!(
         tga.header,
@@ -197,7 +197,7 @@ fn type11_bl() {
 
 #[test]
 fn type11_tl() {
-    let tga = Tga::from_slice(include_bytes!("../tests/type11_tl.tga")).unwrap();
+    let tga = TgaRaw::from_slice(include_bytes!("../tests/type11_tl.tga")).unwrap();
 
     assert_eq!(
         tga.header,

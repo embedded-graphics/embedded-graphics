@@ -1,7 +1,7 @@
 //! A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
 //! parsing the image header, no other allocations are made.
 //!
-//! To access the individual pixels in an image, the [`Bmp`] struct implements `IntoIterator`. It is
+//! To access the individual pixels in an image, the [`BmpRaw`] struct implements `IntoIterator`. It is
 //! also possible to access the raw image data by reading the [`pixel_data`] field.
 //!
 //! # Features
@@ -13,9 +13,9 @@
 //! ## Load a BMP image and check its [`Header`] and returned pixels.
 //!
 //! ```rust
-//! use tinybmp::{Bmp, FileType, Header, Pixel};
+//! use tinybmp::{BmpRaw, FileType, Header, Pixel};
 //!
-//! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+//! let bmp = BmpRaw::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
 //!     .expect("Failed to parse BMP image");
 //!
 //! // Read the BMP header
@@ -59,7 +59,7 @@
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //!
 //! // Load 16BPP 8x8px image
-//! let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+//! let bmp: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 //!
 //! let image = Image::new(&bmp, Point::zero());
 //!
@@ -69,8 +69,8 @@
 //!
 //! [embedded-graphics]: https://crates.io/crates/embedded-graphics
 //! [`Header`]: ./header/struct.Header.html
-//! [`Bmp`]: ./struct.Bmp.html
-//! [`pixel_data`]: ./struct.Bmp.html#structfield.pixel_data
+//! [`BmpRaw`]: ./struct.BmpRaw.html
+//! [`pixel_data`]: ./struct.BmpRaw.html#structfield.pixel_data
 
 #![no_std]
 #![deny(missing_docs)]
@@ -79,22 +79,28 @@
 mod header;
 mod pixel;
 
+#[cfg(feature = "graphics")]
+mod embedded_graphics;
+
 use crate::header::parse_header;
 pub use crate::{
     header::{FileType, Header},
     pixel::Pixel,
 };
 
+#[cfg(feature = "graphics")]
+pub use crate::embedded_graphics::*;
+
 /// A BMP-format bitmap
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Bmp<'a> {
+pub struct BmpRaw<'a> {
     /// Image header
     pub header: Header,
 
     image_data: &'a [u8],
 }
 
-impl<'a> Bmp<'a> {
+impl<'a> BmpRaw<'a> {
     /// Create a bitmap object from a byte array
     ///
     /// This method keeps a slice of the original input and does not dynamically allocate memory.
@@ -104,7 +110,7 @@ impl<'a> Bmp<'a> {
 
         let image_data = &bytes[header.image_data_start..];
 
-        Ok(Bmp { header, image_data })
+        Ok(BmpRaw { header, image_data })
     }
 
     /// Get a reference to the range of bytes that represents the pixel data in the image
@@ -142,7 +148,7 @@ impl<'a> Bmp<'a> {
     }
 }
 
-impl<'a> IntoIterator for &'a Bmp<'a> {
+impl<'a> IntoIterator for &'a BmpRaw<'a> {
     type Item = Pixel;
     type IntoIter = BmpIterator<'a>;
 
@@ -169,7 +175,7 @@ impl<'a> IntoIterator for &'a Bmp<'a> {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct BmpIterator<'a> {
     /// Reference to original BMP image
-    bmp: &'a Bmp<'a>,
+    bmp: &'a BmpRaw<'a>,
 
     /// Image pixel data as a byte slice, little endian ordering
     pixel_data: &'a [u8],
@@ -243,66 +249,3 @@ impl<'a> Iterator for BmpIterator<'a> {
         }
     }
 }
-
-#[cfg(feature = "graphics")]
-mod e_g {
-    use super::*;
-    use core::marker::PhantomData;
-    use embedded_graphics::{
-        geometry::Point,
-        image::{ImageDimensions, IntoPixelIter},
-        pixelcolor::{raw::RawData, PixelColor},
-        Pixel as EgPixel,
-    };
-
-    /// A thin wrapper over [`BmpIterator`] to support [`embedded-graphics`] integration
-    ///
-    /// [`BmpIterator`]: ./struct.BmpIterator.html
-    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
-    #[derive(Debug)]
-    pub struct EgPixelIterator<'a, C> {
-        it: BmpIterator<'a>,
-        c: PhantomData<C>,
-    }
-
-    impl<'a, C> Iterator for EgPixelIterator<'a, C>
-    where
-        C: PixelColor + From<<C as PixelColor>::Raw>,
-    {
-        type Item = EgPixel<C>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            self.it.next().map(|p| {
-                let raw = C::Raw::from_u32(p.color);
-                EgPixel(Point::new(p.x as i32, p.y as i32), raw.into())
-            })
-        }
-    }
-
-    impl ImageDimensions for Bmp<'_> {
-        fn width(&self) -> u32 {
-            Bmp::width(&self)
-        }
-
-        fn height(&self) -> u32 {
-            Bmp::height(&self)
-        }
-    }
-
-    impl<'a, C> IntoPixelIter<C> for &'a Bmp<'_>
-    where
-        C: PixelColor + From<<C as PixelColor>::Raw>,
-    {
-        type PixelIterator = EgPixelIterator<'a, C>;
-
-        fn pixel_iter(self) -> Self::PixelIterator {
-            EgPixelIterator {
-                it: self.into_iter(),
-                c: PhantomData,
-            }
-        }
-    }
-}
-
-#[cfg(feature = "graphics")]
-pub use e_g::*;

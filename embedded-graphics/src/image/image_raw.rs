@@ -1,11 +1,11 @@
 use crate::{
-    drawable::Pixel,
-    geometry::{Point, Size},
-    image::{ImageDimensions, IntoPixelIter},
+    geometry::{OriginDimensions, Size},
+    image::ImageDrawable,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
         PixelColor,
     },
+    prelude::Dimensions,
 };
 use core::marker::PhantomData;
 
@@ -28,8 +28,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// Details about the conversion of raw data to color types are explained in the
 /// [`raw` module documentation].
 ///
-/// As `ImageRaw` does not implement [`Drawable`], it cannot be directly drawn to a supported
-/// display. The [`Image`] struct should be used to wrap an `ImageRaw` to make it drawable.
+/// To draw an `ImageRaw` object it needs to be wrapped in an [`Image`] object.
 ///
 /// # Examples
 ///
@@ -62,7 +61,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// // raw data gets converted into.
 /// let raw_image: ImageRaw<BinaryColor> = ImageRaw::new(DATA, 12, 5);
 ///
-/// let image: Image<_, BinaryColor> = Image::new(&raw_image, Point::zero());
+/// let image = Image::new(&raw_image, Point::zero());
 ///
 /// let mut display = Display::default();
 ///
@@ -152,91 +151,86 @@ where
     }
 }
 
-impl<'a, 'b, C, BO> IntoPixelIter<C> for &'a ImageRaw<'b, C, BO>
+impl<'a, C, BO> ImageDrawable for ImageRaw<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
-    RawDataIter<'b, C::Raw, BO>: Iterator<Item = C::Raw>,
+    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
-    type PixelIterator = ImageRawIterator<'a, 'b, C, BO>;
+    type Color = C;
 
-    fn pixel_iter(self) -> Self::PixelIterator {
-        self.into_iter()
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: crate::draw_target::DrawTarget<Color = C>,
+    {
+        target.fill_contiguous(&self.bounding_box(), ContiguousPixels::new(self))
     }
 }
 
-impl<C, BO> ImageDimensions for ImageRaw<'_, C, BO>
+impl<C, BO> OriginDimensions for ImageRaw<'_, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
 {
-    fn width(&self) -> u32 {
-        self.size.width
-    }
-
-    fn height(&self) -> u32 {
-        self.size.height
+    fn size(&self) -> Size {
+        self.size
     }
 }
 
-impl<'a, 'b, C, BO> IntoIterator for &'a ImageRaw<'b, C, BO>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    BO: ByteOrder,
-    RawDataIter<'b, C::Raw, BO>: Iterator<Item = C::Raw>,
-{
-    type Item = Pixel<C>;
-    type IntoIter = ImageRawIterator<'a, 'b, C, BO>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        ImageRawIterator {
-            data: RawDataIter::new(self.data),
-            x: 0,
-            y: 0,
-            image: self,
-        }
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct ImageRawIterator<'a, 'b, C, BO>
+#[derive(Clone, Debug)]
+pub struct ContiguousPixels<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
 {
-    data: RawDataIter<'b, C::Raw, BO>,
+    iter: RawDataIter<'a, C::Raw, BO>,
 
     x: u32,
-    y: u32,
+    width: u32,
 
-    image: &'a ImageRaw<'b, C, BO>,
+    rows_remaining: u32,
 }
 
-impl<'a, 'b, C, BO> Iterator for ImageRawIterator<'a, 'b, C, BO>
+impl<'a, C, BO> ContiguousPixels<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
-    RawDataIter<'b, C::Raw, BO>: Iterator<Item = C::Raw>,
+    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
 {
-    type Item = Pixel<C>;
+    fn new(image: &ImageRaw<'a, C, BO>) -> Self {
+        Self {
+            iter: RawDataIter::new(image.data),
+            x: 0,
+            width: image.size.width,
+            rows_remaining: image.size.height,
+        }
+    }
+}
+
+impl<'a, C, BO> Iterator for ContiguousPixels<'a, C, BO>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    BO: ByteOrder,
+    RawDataIter<'a, C::Raw, BO>: Iterator<Item = C::Raw>,
+{
+    type Item = C;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y < self.image.size.height {
-            let data = self.data.next()?;
-            let point = Point::new(self.x as i32, self.y as i32);
-
-            self.x += 1;
-            if self.x >= self.image.size.width {
-                self.data.align();
-
-                self.y += 1;
-                self.x = 0;
-            }
-
-            Some(Pixel(point, data.into()))
-        } else {
-            None
+        if self.rows_remaining == 0 {
+            return None;
         }
+
+        let color = self.iter.next()?.into();
+
+        self.x += 1;
+        if self.x >= self.width {
+            self.x = 0;
+            self.rows_remaining -= 1;
+
+            self.iter.align();
+        }
+
+        Some(color)
     }
 }
 
@@ -244,8 +238,11 @@ where
 mod tests {
     use super::*;
     use crate::{
+        draw_target::DrawTarget,
         drawable::{Drawable, Pixel},
+        geometry::Point,
         image::Image,
+        iterator::PixelIteratorExt,
         mock_display::{ColorMapping, MockDisplay},
         pixelcolor::{raw::RawU32, *},
     };
@@ -280,16 +277,23 @@ mod tests {
 
     #[test]
     fn image_dimensions() {
-        let data = [0xAA, 0x00, 0x55, 0xFF, 0xAA, 0x80];
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
         let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9, 3);
 
-        assert_eq!(image_data.width(), 9);
-        assert_eq!(image_data.height(), 3);
+        assert_eq!(image_data.size(), Size::new(9, 3));
     }
 
     #[test]
     fn bpp1() {
-        let data = [0xAA, 0x00, 0x55, 0xFF, 0xAA, 0x80];
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
         let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9, 3);
 
         assert_pattern(
@@ -304,7 +308,12 @@ mod tests {
 
     #[test]
     fn bpp2() {
-        let data = [0b00011011, 0x0, 0b11100100, 0xFF];
+        let data = [
+            0b00_01_10_11, //
+            0b00_00_00_00, //
+            0b11_10_01_00, //
+            0b11_11_11_11, //
+        ];
         let image_data: ImageRaw<Gray2> = ImageRaw::new(&data, 5, 2);
 
         assert_pattern(
@@ -318,7 +327,12 @@ mod tests {
 
     #[test]
     fn bpp4() {
-        let data = [0b00011000, 0b11110000, 0b01011010, 0x0];
+        let data = [
+            0b0001_1000, //
+            0b1111_0000, //
+            0b0101_1010, //
+            0b0000_0000, //
+        ];
         let image_data: ImageRaw<Gray4> = ImageRaw::new(&data, 3, 2);
 
         assert_pattern(
@@ -332,7 +346,11 @@ mod tests {
 
     #[test]
     fn bpp8_1() {
-        let data = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
+        let data = [
+            0x11, 0x22, //
+            0x33, 0x44, //
+            0x55, 0x66, //
+        ];
         let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, 2, 3);
 
         assert_pattern(
@@ -352,17 +370,30 @@ mod tests {
         let data = [0x01, 0x08, 0x10, 0x80];
         let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, 4, 1);
 
-        let expected = data
-            .iter()
-            .enumerate()
-            .map(|(x, luma)| Pixel(Point::new(x as i32, 0), Gray8::new(*luma)));
+        let mut display = MockDisplay::new();
+        Image::new(&image_data, Point::zero())
+            .draw(&mut display)
+            .unwrap();
 
-        assert!(image_data.into_iter().eq(expected));
+        let mut expected = MockDisplay::new();
+        expected
+            .fill_contiguous(
+                &expected.bounding_box(),
+                data.iter().copied().map(Gray8::new),
+            )
+            .unwrap();
+
+        assert_eq!(display, expected);
     }
 
     #[test]
     fn bpp16_little_endian() {
-        let data = [0x00, 0xF8, 0xE0, 0x07, 0x1F, 0x00, 0x00, 0x00];
+        let data = [
+            0x00, 0xF8, //
+            0xE0, 0x07, //
+            0x1F, 0x00, //
+            0x00, 0x00, //
+        ];
         let image_data: ImageRawLE<Rgb565> = ImageRaw::new(&data, 1, 4);
 
         assert_pattern(
@@ -378,7 +409,12 @@ mod tests {
 
     #[test]
     fn bpp16_big_endian() {
-        let data = [0xF8, 0x00, 0x07, 0xE0, 0x00, 0x1F, 0x00, 0x00];
+        let data = [
+            0xF8, 0x00, //
+            0x07, 0xE0, //
+            0x00, 0x1F, //
+            0x00, 0x00, //
+        ];
         let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2, 2);
 
         assert_pattern(
@@ -393,7 +429,10 @@ mod tests {
     #[test]
     fn bpp24_little_endian() {
         let data = [
-            0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
+            0xFF, 0x00, 0x00, //
+            0x00, 0xFF, 0x00, //
+            0x00, 0x00, 0xFF, //
+            0x00, 0x00, 0x00, //
         ];
         let image_data: ImageRawLE<Bgr888> = ImageRaw::new(&data, 1, 4);
 
@@ -411,7 +450,10 @@ mod tests {
     #[test]
     fn bpp24_big_endian() {
         let data = [
-            0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
+            0xFF, 0x00, 0x00, //
+            0x00, 0xFF, 0x00, //
+            0x00, 0x00, 0xFF, //
+            0x00, 0x00, 0x00, //
         ];
         let image_data: ImageRawBE<Rgb888> = ImageRaw::new(&data, 4, 1);
 
@@ -420,14 +462,18 @@ mod tests {
 
     #[test]
     fn bpp32_little_endian() {
-        #[rustfmt::skip]
         let data = [
-            0x12, 0x34, 0x56, 0x78,
-            0x9A, 0xBC, 0xDE, 0xF0,
-            0x00, 0x00, 0x00, 0x00,
-            0xFF, 0xFF, 0xFF, 0xFF,
+            0x12, 0x34, 0x56, 0x78, //
+            0x9A, 0xBC, 0xDE, 0xF0, //
+            0x00, 0x00, 0x00, 0x00, //
+            0xFF, 0xFF, 0xFF, 0xFF, //
         ];
         let image_data: ImageRawLE<TestColorU32> = ImageRaw::new(&data, 2, 2);
+
+        let mut display = MockDisplay::new();
+        Image::new(&image_data, Point::zero())
+            .draw(&mut display)
+            .unwrap();
 
         let expected = [
             Pixel(Point::new(0, 0), TestColorU32(RawU32::new(0x78563412))),
@@ -436,19 +482,31 @@ mod tests {
             Pixel(Point::new(1, 1), TestColorU32(RawU32::new(0xFFFFFFFF))),
         ];
 
-        assert!(image_data.into_iter().eq(expected.iter().copied()));
+        let mut expected_display = MockDisplay::new();
+        expected
+            .iter()
+            .copied()
+            .draw(&mut expected_display)
+            .unwrap();
+
+        // assert_eq can't be used here because ColorMapping isn't implemented for TestColorU32
+        assert!(display == expected_display);
     }
 
     #[test]
     fn bpp32_big_endian() {
-        #[rustfmt::skip]
         let data = [
-            0x12, 0x34, 0x56, 0x78,
-            0x9A, 0xBC, 0xDE, 0xF0,
-            0x00, 0x00, 0x00, 0x00,
-            0xFF, 0xFF, 0xFF, 0xFF,
+            0x12, 0x34, 0x56, 0x78, //
+            0x9A, 0xBC, 0xDE, 0xF0, //
+            0x00, 0x00, 0x00, 0x00, //
+            0xFF, 0xFF, 0xFF, 0xFF, //
         ];
         let image_data: ImageRawBE<TestColorU32> = ImageRaw::new(&data, 4, 1);
+
+        let mut display = MockDisplay::new();
+        Image::new(&image_data, Point::zero())
+            .draw(&mut display)
+            .unwrap();
 
         let expected = [
             Pixel(Point::new(0, 0), TestColorU32(RawU32::new(0x12345678))),
@@ -457,7 +515,15 @@ mod tests {
             Pixel(Point::new(3, 0), TestColorU32(RawU32::new(0xFFFFFFFF))),
         ];
 
-        assert!(image_data.into_iter().eq(expected.iter().copied()));
+        let mut expected_display = MockDisplay::new();
+        expected
+            .iter()
+            .copied()
+            .draw(&mut expected_display)
+            .unwrap();
+
+        // assert_eq can't be used here because ColorMapping isn't implemented for TestColorU32
+        assert!(display == expected_display);
     }
 
     #[test]

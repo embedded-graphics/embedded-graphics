@@ -15,14 +15,15 @@ use tinybmp::Bmp;
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display: SimulatorDisplay<Rgb565> = SimulatorDisplay::new(Size::new(128, 128));
 
-    // Load the BMP image
-    let bmp = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
+    // Load the BMP image.
+    // The color type must be specified explicitly to match the color format used by the image,
+    // otherwise the compiler may infer an incorrect type.
+    let bmp: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
 
-    // Create a new embedded-graphics Image, wrapping the BMP which provides pixel data. The top
-    // left corner of the image is positioned at (32, 32). It is important to specify the color
-    // format used by the image, otherwise the compiler may infer an incorrect type. This image is
-    // in 16BPP RGB565 format, so the Rgb565 pixel color type is used.
-    let image: Image<Bmp, Rgb565> = Image::new(&bmp, Point::new(32, 32));
+    // To draw the `bmp` object to the display it needs to be wrapped in an `Image` object to set
+    // the position at which it should drawn. Here, the top left corner of the image is set to
+    // `(32, 32)`.
+    let image = Image::new(&bmp, Point::new(32, 32));
 
     // Display the image
     image.draw(&mut display)?;

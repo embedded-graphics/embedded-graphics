@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::line::{thick_points::ThickPoints, Line},
     style::{PrimitiveStyle, Styled},

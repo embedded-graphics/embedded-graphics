@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::triangle::{
         scanline_iterator::{PointType, ScanlineIterator},

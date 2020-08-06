@@ -1,9 +1,9 @@
-use tinytga::Tga;
+use tinytga::TgaRaw;
 
 #[test]
 fn issue_216() {
-    let uncompressed = Tga::from_slice(include_bytes!("issue_216_uncompressed.tga")).unwrap();
-    let compressed = Tga::from_slice(include_bytes!("issue_216_compressed.tga")).unwrap();
+    let uncompressed = TgaRaw::from_slice(include_bytes!("issue_216_uncompressed.tga")).unwrap();
+    let compressed = TgaRaw::from_slice(include_bytes!("issue_216_compressed.tga")).unwrap();
 
     assert_eq!(uncompressed.header.width, compressed.header.width);
     assert_eq!(uncompressed.header.height, compressed.header.height);

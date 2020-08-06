@@ -2,7 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         rectangle::{Points, Rectangle},
@@ -160,8 +160,8 @@ mod tests {
     use crate::{
         drawable::Drawable,
         geometry::{Point, Size},
+        iterator::{IntoPixels, PixelIteratorExt},
         mock_display::MockDisplay,
-        pixel_iterator::{IntoPixels, PixelIteratorExt},
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::Primitive,
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},

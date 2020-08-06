@@ -1,26 +1,26 @@
 //! A small TGA parser designed for embedded, no-std environments but usable anywhere. Beyond
 //! parsing the image header, no other allocations are made.
 //!
-//! To access the individual pixels in an image, the [`Tga`] struct implements `IntoIterator`. It is
+//! To access the individual pixels in an image, the [`TgaRaw`] struct implements `IntoIterator`. It is
 //! also possible to access the unaltered raw image data by reading the [`pixel_data`] field. This
 //! data will need to be interpreted according to the [`image_type`] specified in the header.
 //!
 //! # Features
 //!
-//! * `graphics` - enables [`embedded-graphics`] integration.
+//! * `graphics` - enables [embedded-graphics] integration.
 //!
 //! # Examples
 //!
 //! ## Load a Run Length Encoded (RLE) TGA image
 //!
 //! ```rust
-//! use tinytga::{ImageOrigin, ImageType, Pixel, Tga, TgaFooter, TgaHeader};
+//! use tinytga::{ImageOrigin, ImageType, Pixel, TgaRaw, TgaFooter, TgaHeader};
 //!
 //! // Include an image from a local path as bytes
 //! let data = include_bytes!("../tests/chessboard_4px_rle.tga");
 //!
 //! // Create a TGA instance from a byte slice
-//! let img = Tga::from_slice(data).unwrap();
+//! let img = TgaRaw::from_slice(data).unwrap();
 //!
 //! // Take a look at the header
 //! assert_eq!(
@@ -69,18 +69,18 @@
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 //! use tinytga::Tga;
 //!
-//! let tga = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
+//! let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
 //!
-//! let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+//! let image = Image::new(&tga, Point::zero());
 //!
 //! image.draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(()) } }
 //! ```
 //!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
-//! [`Tga`]: ./struct.Tga.html
+//! [`TgaRaw`]: ./struct.TgaRaw.html
 //! [`image_type`]: ./struct.TgaHeader.html#structfield.image_type
-//! [`pixel_data`]: ./struct.Tga.html#structfield.pixel_data
+//! [`pixel_data`]: ./struct.TgaRaw.html#structfield.pixel_data
 
 #![no_std]
 #![deny(missing_docs)]
@@ -99,6 +99,9 @@ mod packet;
 mod parse_error;
 mod pixel;
 
+#[cfg(feature = "graphics")]
+mod embedded_graphics;
+
 use crate::{
     footer::*,
     header::*,
@@ -112,9 +115,12 @@ pub use crate::{
     pixel::Pixel,
 };
 
+#[cfg(feature = "graphics")]
+pub use crate::embedded_graphics::*;
+
 /// TGA image
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Tga<'a> {
+pub struct TgaRaw<'a> {
     /// TGA header
     pub header: TgaHeader,
 
@@ -128,7 +134,7 @@ pub struct Tga<'a> {
     pub pixel_data: &'a [u8],
 }
 
-impl<'a> Tga<'a> {
+impl<'a> TgaRaw<'a> {
     /// Parse a TGA image from a byte slice
     pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ParseError> {
         let (_remaining, header) = header(bytes).map_err(|_| ParseError::Header)?;
@@ -195,7 +201,7 @@ impl<'a> Tga<'a> {
     }
 }
 
-impl<'a> IntoIterator for &'a Tga<'a> {
+impl<'a> IntoIterator for &'a TgaRaw<'a> {
     type Item = Pixel;
     type IntoIter = TgaIterator<'a>;
 
@@ -251,7 +257,7 @@ impl<'a> IntoIterator for &'a Tga<'a> {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct TgaIterator<'a> {
     /// Reference to original TGA image
-    tga: &'a Tga<'a>,
+    tga: &'a TgaRaw<'a>,
 
     /// Remaining bytes (after current packet) to consume
     bytes_to_consume: Option<&'a [u8]>,
@@ -408,66 +414,3 @@ impl<'a> Iterator for TgaIterator<'a> {
         })
     }
 }
-
-#[cfg(feature = "graphics")]
-mod e_g {
-    use super::*;
-    use core::marker::PhantomData;
-    use embedded_graphics::{
-        geometry::Point,
-        image::{ImageDimensions, IntoPixelIter},
-        pixelcolor::{raw::RawData, PixelColor},
-        Pixel as EgPixel,
-    };
-
-    /// A thin wrapper over [`TgaIterator`] to support [`embedded-graphics`] integration
-    ///
-    /// [`TgaIterator`]: ./struct.TgaIterator.html
-    /// [`embedded-graphics`]: https://docs.rs/embedded-graphics
-    #[derive(Debug)]
-    pub struct EgPixelIterator<'a, C> {
-        it: TgaIterator<'a>,
-        c: PhantomData<C>,
-    }
-
-    impl<'a, C> Iterator for EgPixelIterator<'a, C>
-    where
-        C: PixelColor + From<<C as PixelColor>::Raw>,
-    {
-        type Item = EgPixel<C>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            self.it.next().map(|p| {
-                let raw = C::Raw::from_u32(p.color);
-                EgPixel(Point::new(i32::from(p.x), i32::from(p.y)), raw.into())
-            })
-        }
-    }
-
-    impl ImageDimensions for Tga<'_> {
-        fn width(&self) -> u32 {
-            Tga::width(&self).into()
-        }
-
-        fn height(&self) -> u32 {
-            Tga::height(&self).into()
-        }
-    }
-
-    impl<'a, C> IntoPixelIter<C> for &'a Tga<'_>
-    where
-        C: PixelColor + From<<C as PixelColor>::Raw>,
-    {
-        type PixelIterator = EgPixelIterator<'a, C>;
-
-        fn pixel_iter(self) -> Self::PixelIterator {
-            EgPixelIterator {
-                it: self.into_iter(),
-                c: PhantomData,
-            }
-        }
-    }
-}
-
-#[cfg(feature = "graphics")]
-pub use e_g::*;

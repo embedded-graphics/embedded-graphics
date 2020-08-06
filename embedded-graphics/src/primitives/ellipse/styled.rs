@@ -2,7 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
     geometry::{Point, Size},
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},

@@ -64,19 +64,28 @@
 //! ];
 //!
 //! // Create new image with RGBI colors.
-//! let image: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
+//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
 //!
 //! // In a real application the image could now be drawn to a display:
 //! // display.draw(&image);
 //! #
-//! # // Convert image to iterator of colors to make testing easier.
-//! # let mut iter = image.into_iter().map(|Pixel(_, color)| color);
+//! # use embedded_graphics::{mock_display::MockDisplay, image::Image};
 //! #
-//! # assert_eq!(iter.next(), Some(RGBI::new(false, false, true, false)));
-//! # assert_eq!(iter.next(), Some(RGBI::new(false, true, false, false)));
-//! # assert_eq!(iter.next(), Some(RGBI::new(true, false, false, false)));
-//! # assert_eq!(iter.next(), Some(RGBI::new(true, true, true, true)));
-//! # assert_eq!(iter.next(), None);
+//! # let mut display = MockDisplay::new();
+//! # Image::new(&image_raw, Point::zero()).draw(&mut display).unwrap();
+//! #
+//! # let expected_pixels = [
+//! #     Pixel(Point::new(0, 0), RGBI::new(false, false, true, false)),
+//! #     Pixel(Point::new(1, 0), RGBI::new(false, true, false, false)),
+//! #     Pixel(Point::new(0, 1), RGBI::new(true, false, false, false)),
+//! #     Pixel(Point::new(1, 1), RGBI::new(true, true, true, true)),
+//! # ];
+//! #
+//! # let mut expected_display = MockDisplay::new();
+//! # expected_pixels.iter().copied().draw(&mut expected_display).unwrap();
+//! #
+//! # // assert_eq can't be used because ColorMapping isn't implemented for RGBI
+//! # assert!(display == expected_display);
 //! ```
 //!
 //! [`PixelColor`]: ../trait.PixelColor.html

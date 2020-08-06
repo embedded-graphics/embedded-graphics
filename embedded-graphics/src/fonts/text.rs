@@ -3,7 +3,7 @@ use crate::{
     drawable::{Drawable, Pixel},
     fonts::Font,
     geometry::{Dimensions, Point, Size},
-    pixel_iterator::IntoPixels,
+    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
     style::{Styled, TextStyle},

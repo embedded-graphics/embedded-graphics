@@ -10,7 +10,7 @@
 A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
 parsing the image header, no other allocations are made.
 
-To access the individual pixels in an image, the `Bmp` struct implements `IntoIterator`. It is
+To access the individual pixels in an image, the `BmpRaw` struct implements `IntoIterator`. It is
 also possible to access the raw image data by reading the `pixel_data` field.
 
 ## Features
@@ -22,9 +22,9 @@ also possible to access the raw image data by reading the `pixel_data` field.
 ### Load a BMP image and check its `Header` and returned pixels.
 
 ```rust
-use tinybmp::{Bmp, FileType, Header, Pixel};
+use tinybmp::{BmpRaw, FileType, Header, Pixel};
 
-let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+let bmp = BmpRaw::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
     .expect("Failed to parse BMP image");
 
 // Read the BMP header
@@ -64,7 +64,7 @@ use embedded_graphics::{image::Image, prelude::*};
 use tinybmp::Bmp;
 
 // Load 16BPP 8x8px image
-let bmp = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+let bmp: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
 
 let image = Image::new(&bmp, Point::zero());
 

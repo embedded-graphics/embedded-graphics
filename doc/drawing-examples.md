@@ -256,13 +256,13 @@ use embedded_graphics::{
 };
 use tinytga::Tga;
 
-let tga = Tga::from_slice(include_bytes!(concat!(
+let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../simulator/examples/assets/rust-pride.tga"
 )))
 .unwrap();
 
-let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+let image = Image::new(&tga, Point::zero());
 
 image.draw(&mut display)?;
 ```

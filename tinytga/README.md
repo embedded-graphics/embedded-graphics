@@ -10,26 +10,26 @@
 A small TGA parser designed for embedded, no-std environments but usable anywhere. Beyond
 parsing the image header, no other allocations are made.
 
-To access the individual pixels in an image, the `Tga` struct implements `IntoIterator`. It is
+To access the individual pixels in an image, the `TgaRaw` struct implements `IntoIterator`. It is
 also possible to access the unaltered raw image data by reading the `pixel_data` field. This
 data will need to be interpreted according to the `image_type` specified in the header.
 
 ## Features
 
-* `graphics` - enables `embedded-graphics` integration.
+* `graphics` - enables [embedded-graphics] integration.
 
 ## Examples
 
 ### Load a Run Length Encoded (RLE) TGA image
 
 ```rust
-use tinytga::{ImageOrigin, ImageType, Pixel, Tga, TgaFooter, TgaHeader};
+use tinytga::{ImageOrigin, ImageType, Pixel, TgaRaw, TgaFooter, TgaHeader};
 
 // Include an image from a local path as bytes
 let data = include_bytes!("../tests/chessboard_4px_rle.tga");
 
 // Create a TGA instance from a byte slice
-let img = Tga::from_slice(data).unwrap();
+let img = TgaRaw::from_slice(data).unwrap();
 
 // Take a look at the header
 assert_eq!(
@@ -76,9 +76,9 @@ with embedded-graphics.
 use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 use tinytga::Tga;
 
-let tga = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
+let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
 
-let image: Image<Tga, Rgb888> = Image::new(&tga, Point::zero());
+let image = Image::new(&tga, Point::zero());
 
 image.draw(&mut display)?;
 ```

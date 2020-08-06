@@ -1,8 +1,8 @@
-use tinybmp::{Bmp, Pixel};
+use tinybmp::{BmpRaw, Pixel};
 
 #[test]
 fn coordinates() {
-    let bmp = Bmp::from_slice(include_bytes!("./chessboard-8px-color-16bit.bmp"))
+    let bmp = BmpRaw::from_slice(include_bytes!("./chessboard-8px-color-16bit.bmp"))
         .expect("Failed to parse");
 
     let pixels: Vec<_> = bmp.into_iter().map(|Pixel { x, y, .. }| (x, y)).collect();

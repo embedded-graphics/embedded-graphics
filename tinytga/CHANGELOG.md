@@ -10,6 +10,7 @@
 
 - **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `image_descriptor` in `TgaHeader` was replaced by `image_origin` and `alpha_channel_bits`.
 - **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `Pixel` type returned by `TgaIterator` now uses `u16` coordinates.
+- **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) To support the new embedded-graphics 0.7 image API a color type parameter was added to `Tga`. To use this crate without the `graphics` flag enabled replace `Tga` by `TgaRaw`.
 
 ### Added
 

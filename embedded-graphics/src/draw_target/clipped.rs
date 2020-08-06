@@ -1,7 +1,9 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::Dimensions,
-    primitives::{ContainsPoint, Primitive, Rectangle},
+    iterator::contiguous::Crop,
+    prelude::Transform,
+    primitives::{ContainsPoint, Rectangle},
     Pixel,
 };
 
@@ -56,11 +58,15 @@ where
     where
         I: IntoIterator<Item = Self::Color>,
     {
-        //TODO: this method should use `parent.fill_contiguous` and not `parent.draw_iter`
+        let intersection = self.bounding_box().intersection(area);
 
-        let pixels = area.points().zip(colors).map(|(p, c)| Pixel(p, c));
-
-        self.draw_iter(pixels)
+        if &intersection == area {
+            self.parent.fill_contiguous(area, colors)
+        } else {
+            let crop_area = intersection.translate(-area.top_left);
+            let cropped = Crop::new(colors.into_iter(), area.size, &crop_area);
+            self.parent.fill_contiguous(&intersection, cropped)
+        }
     }
 
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {

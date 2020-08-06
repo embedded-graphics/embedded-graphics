@@ -163,8 +163,8 @@ impl Iterator for ScanlineIterator {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
-        style::PrimitiveStyle, transform::Transform,
+        drawable::Pixel, iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle,
+        transform::Transform,
     };
 
     #[test]
