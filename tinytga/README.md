@@ -16,7 +16,7 @@ data will need to be interpreted according to the `image_type` specified in the 
 
 ## Features
 
-* `graphics` - enables `embedded-graphics` integration.
+* `graphics` - enables [embedded-graphics] integration.
 
 ## Examples
 
