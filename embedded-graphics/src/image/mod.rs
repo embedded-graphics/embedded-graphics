@@ -14,7 +14,8 @@
 //! ## Load a TGA image and draw it to a display
 //!
 //! This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
-//! using an [`Image`] object. The image is positioned at the top left corner of the display.
+//! using an [`Image`] object. The image is positioned at the top left corner of the display by 
+//! passing `Point::zero()` as the second argument of `Image::new`.
 //!
 //! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
 //! with embedded-graphics.
