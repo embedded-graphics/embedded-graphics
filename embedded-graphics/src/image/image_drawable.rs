@@ -67,6 +67,9 @@ pub trait ImageDrawableExt: Sized {
     ///
     /// # Examples
     ///
+    /// This example loads an image containing multiple 32x32px sprites and draws two of them to a
+    /// display, with their top-left corners positioned at `(100, 100)` and `(100, 140)`.
+    ///
     /// ```rust
     /// use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
     /// # use embedded_graphics::mock_display::MockDisplay as Display;
