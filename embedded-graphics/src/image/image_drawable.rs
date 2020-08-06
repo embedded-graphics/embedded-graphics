@@ -62,8 +62,8 @@ pub trait ImageDrawable: OriginDimensions {
 pub trait ImageDrawableExt: Sized {
     /// Returns a sub image of this image drawable.
     ///
-    /// If any of the given `area` lies outside the bounding box the intersection of `area` and the
-    /// bounding box will be used.
+    /// If any of the given `area` lies outside the bounding box of the parent image, the 
+    /// intersection of `area` and the bounding box will be used.
     ///
     /// # Examples
     ///
