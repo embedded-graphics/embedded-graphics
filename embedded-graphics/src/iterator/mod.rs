@@ -1,7 +1,11 @@
 //! Iterators.
 
 use crate::{
-    draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
+    draw_target::DrawTarget,
+    geometry::{Dimensions, Point},
+    pixelcolor::PixelColor,
+    primitives::Rectangle,
+    Pixel,
 };
 
 pub mod contiguous;
@@ -29,18 +33,17 @@ pub trait IntoPixels {
     fn into_pixels(self) -> Self::Iter;
 }
 
-// TODO: Implement as part of a new PR for sparse pixel iterators
-// ///  TODO: Doc
-// pub trait IntoSparsePixels<C>
-// where
-//     C: PixelColor,
-// {
-//     ///  TODO: Doc
-//     type Iter: Iterator<Item = Option<C>> + Dimensions;
+///  TODO: Doc
+pub trait IntoSparsePixels {
+    /// TODO: Doc
+    type Color: PixelColor;
 
-//     ///  TODO: Doc
-//     fn into_sparse_pixels(self) -> Self::Iter;
-// }
+    ///  TODO: Doc
+    type Iter: Iterator<Item = Option<Self::Color>> + Dimensions;
+
+    ///  TODO: Doc
+    fn into_sparse_pixels(self) -> Self::Iter;
+}
 
 /// Extension trait for contiguous iterators.
 pub trait ContiguousIteratorExt

@@ -1,12 +1,15 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
+    drawable::Drawable,
     geometry::Dimensions,
-    iterator::IntoPixels,
+    iterator::{IntoPixels, IntoSparsePixels},
     pixelcolor::PixelColor,
-    primitives::circle::{distance_iterator::DistanceIterator, Circle},
     primitives::rectangle::{self, Rectangle},
     primitives::Primitive,
+    primitives::{
+        circle::{distance_iterator::DistanceIterator, Circle},
+        filtered_iterator::FilteredIterator,
+    },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
 };
 
@@ -23,6 +26,8 @@ where
 
     inner_threshold: u32,
     inner_color: Option<C>,
+
+    outer_bounding_box: Rectangle,
 }
 
 impl<C> StyledPixels<C>
@@ -33,13 +38,16 @@ where
         let stroke_area = styled.stroke_area();
         let fill_area = styled.fill_area();
 
-        let points = if !styled.style.is_transparent() {
-            stroke_area.bounding_box().points()
+        let bb = if !styled.style.is_transparent() {
+            stroke_area.bounding_box()
         } else {
-            Rectangle::zero().points()
+            Rectangle::zero()
         };
 
+        let points = bb.points();
+
         Self {
+            outer_bounding_box: bb,
             iter: stroke_area.distances(points),
             outer_threshold: stroke_area.threshold(),
             outer_color: styled.style.stroke_color,
@@ -49,28 +57,31 @@ where
     }
 }
 
+impl<C> Dimensions for StyledPixels<C>
+where
+    C: PixelColor,
+{
+    fn bounding_box(&self) -> Rectangle {
+        self.outer_bounding_box
+    }
+}
+
 impl<C> Iterator for StyledPixels<C>
 where
     C: PixelColor,
 {
-    type Item = Pixel<C>;
+    type Item = Option<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for (point, distance) in &mut self.iter {
-            let color = if distance < self.inner_threshold {
+        self.iter.next().map(|(_point, distance)| {
+            if distance < self.inner_threshold {
                 self.inner_color
             } else if distance < self.outer_threshold {
                 self.outer_color
             } else {
                 None
-            };
-
-            if let Some(color) = color {
-                return Some(Pixel(point, color));
             }
-        }
-
-        None
+        })
     }
 }
 
@@ -80,9 +91,24 @@ where
 {
     type Color = C;
 
-    type Iter = StyledPixels<Self::Color>;
+    type Iter = FilteredIterator<Self::Color, StyledPixels<Self::Color>>;
 
     fn into_pixels(self) -> Self::Iter {
+        let it = StyledPixels::new(self);
+
+        FilteredIterator::new(it, it.bounding_box())
+    }
+}
+
+impl<C> IntoSparsePixels for &Styled<Circle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    type Color = C;
+
+    type Iter = StyledPixels<Self::Color>;
+
+    fn into_sparse_pixels(self) -> Self::Iter {
         StyledPixels::new(self)
     }
 }
@@ -97,7 +123,9 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        let it = self.into_sparse_pixels();
+
+        display.fill_sparse(&it.bounding_box(), it)
     }
 }
 
@@ -111,6 +139,7 @@ mod tests {
         pixelcolor::BinaryColor,
         primitives::Primitive,
         style::{PrimitiveStyleBuilder, StrokeAlignment},
+        Pixel,
     };
 
     #[test]

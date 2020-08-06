@@ -302,23 +302,22 @@ pub trait DrawTarget: Dimensions {
     /// [`core::convert::Infallible`]: https://doc.rust-lang.org/stable/core/convert/enum.Infallible.html
     type Error;
 
-    // TODO: Reenable this in a new PR with modified primitives iterators
-    // // TODO: Mention performance
-    // // TODO: Mention default impl behaviour
-    // /// Fill a given area with a transparent pixel iterator.
-    // ///
-    // /// Iteration order is guaranteed from top left to bottom right, however some pixels may be
-    // /// transparent which are represented as `None`.
-    // fn fill_sparse<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
-    // where
-    //     I: IntoIterator<Item = Option<Self::Color>>,
-    // {
-    //     self.draw_iter(
-    //         area.points()
-    //             .zip(colors)
-    //             .filter_map(|(pos, color)| color.map(|c| Pixel(pos, c))),
-    //     )
-    // }
+    // TODO: Mention performance
+    // TODO: Mention default impl behaviour
+    /// Fill a given area with a transparent pixel iterator.
+    ///
+    /// Iteration order is guaranteed from top left to bottom right, however some pixels may be
+    /// transparent which are represented as `None`.
+    fn fill_sparse<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Option<Self::Color>>,
+    {
+        self.draw_iter(
+            area.points()
+                .zip(colors)
+                .filter_map(|(pos, color)| color.map(|c| Pixel(pos, c))),
+        )
+    }
 
     /// Draw individual pixels to the display without a defined order.
     ///

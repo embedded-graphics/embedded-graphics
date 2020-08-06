@@ -3,6 +3,7 @@
 pub mod arc;
 pub mod circle;
 pub mod ellipse;
+mod filtered_iterator;
 pub mod line;
 pub mod polyline;
 pub mod rectangle;
