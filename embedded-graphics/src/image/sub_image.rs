@@ -9,7 +9,7 @@ use crate::{
 /// Sub image.
 ///
 /// A sub image is rectangular subsection of an [`ImageDrawable`]. It can, for example, be used to
-/// draw individual sprites from a larger sprite sheet.
+/// draw individual sprites from a larger sprite atlas.
 ///
 /// To create a sub image call the [`sub_image`] method on the parent [`ImageDrawable`].
 ///
