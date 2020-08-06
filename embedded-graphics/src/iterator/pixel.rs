@@ -38,8 +38,6 @@ mod tests {
     use super::*;
     use crate::{iterator::PixelIteratorExt, pixelcolor::BinaryColor};
 
-    // TODO: Add draw test
-
     #[test]
     fn translate() {
         let pixels = [
