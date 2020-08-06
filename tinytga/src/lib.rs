@@ -7,7 +7,7 @@
 //!
 //! # Features
 //!
-//! * `graphics` - enables [`embedded-graphics`] integration.
+//! * `graphics` - enables [embedded-graphics] integration.
 //!
 //! # Examples
 //!

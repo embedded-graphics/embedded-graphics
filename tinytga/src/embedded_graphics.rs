@@ -2,7 +2,15 @@ use crate::{parse_error::ParseError, ImageOrigin, TgaRaw};
 use core::marker::PhantomData;
 use embedded_graphics::prelude::*;
 
-/// TGA image for use with embedded-graphics
+/// TGA image for use with embedded-graphics.
+///
+/// # Performance
+///
+/// `tinytga` uses different code paths to draw images with different [`ImageOrigin`]s.
+/// The performance difference between the origins will depend on the display driver, but using
+/// images with the origin at the top left corner will generally result in the best performance.
+///
+/// [`ImageOrigin`]: enum.ImageOrigin.html
 #[derive(Debug)]
 pub struct Tga<'a, C> {
     tga: TgaRaw<'a>,
