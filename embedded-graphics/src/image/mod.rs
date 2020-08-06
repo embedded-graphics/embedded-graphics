@@ -14,8 +14,7 @@
 //! ## Load a TGA image and draw it to a display
 //!
 //! This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
-//! using an [`Image`] object. The image is positioned at the top left corner of the display by 
-//! passing `Point::zero()` as the second argument of `Image::new`.
+//! using an [`Image`] object.
 //!
 //! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
 //! with embedded-graphics.
@@ -27,14 +26,19 @@
 //!
 //! let mut display: Display<Rgb565> = Display::default();
 //!
+//! // Load the TGA file.
+//! // Note that the color type is set explicitly to match the format used in the TGA file,
+//! // otherwise the compiler might infer an incorrect type.
 //! let tga: Tga<Rgb565> = Tga::from_slice(include_bytes!(
 //!     "../../../simulator/examples/assets/rust-pride.tga"
 //! ))
 //! .unwrap();
 //!
+//! // Create a `Image` object to position the image at `Point::zero()`.
 //! let image = Image::new(&tga, Point::zero());
 //!
-//! image.draw(&mut display);
+//! // Draw the image to the display.
+//! image.draw(&mut display)?;
 //!
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -43,8 +47,8 @@
 //!
 //! [`SubImage`]s are used to split a larger image drawables into multiple parts, e.g. to draw a
 //! single sprite from a sprite atlas. Use the [`sub_image`] method provided by [`ImageDrawableExt`]
-//! to get a sub image from an image drawable. `ImageDrawableExt` is available in the `prelude` which
-//! this example takes advantage of.
+//! to get a sub image from an image drawable. [`ImageDrawableExt`] is included in the [`prelude`]
+//! which this example takes advantage of.
 //!
 //! ```rust
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
@@ -53,14 +57,20 @@
 //!
 //! let mut display: Display<Rgb565> = Display::default();
 //!
+//! // Load the TGA file with the sprite atlas.
+//! // Note that the color type is set explicitly to match the format used in the TGA file,
+//! // otherwise the compiler might infer an incorrect type.
 //! let sprite_atlas: Tga<Rgb565> = Tga::from_slice(include_bytes!(
 //!     "../../../assets/tiles.tga"
 //! ))
 //! .unwrap();
 //!
+//! // Create individual sub images for each sprite in the sprite atlas.
+//! // The position and size of the sub images is defined by a `Rectangle`.
 //! let sprite_1 = sprite_atlas.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(32, 32)));
 //! let sprite_2 = sprite_atlas.sub_image(&Rectangle::new(Point::new(32, 0), Size::new(32, 32)));
 //!
+//! // Create `Image` objects to draw the sprites at different positions on the display.
 //! Image::new(&sprite_1, Point::new(100, 100)).draw(&mut display)?;
 //! Image::new(&sprite_2, Point::new(100, 140)).draw(&mut display)?;
 //!
@@ -82,6 +92,7 @@
 //! [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
 //! [`Image`]: ./struct.Image.html
 //! [`SubImage`]: struct.SubImage.html
+//! [`prelude`]: ../prelude/index.html
 
 mod image_drawable;
 mod image_raw;

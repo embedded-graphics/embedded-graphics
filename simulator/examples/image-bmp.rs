@@ -21,7 +21,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let bmp: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("./assets/rust-pride.bmp")).unwrap();
 
     // To draw the `bmp` object to the display it needs to be wrapped in an `Image` object to set
-    // the position at which it should drawn. Here, the top left corner of the image is set to 
+    // the position at which it should drawn. Here, the top left corner of the image is set to
     // `(32, 32)`.
     let image = Image::new(&bmp, Point::new(32, 32));
 
