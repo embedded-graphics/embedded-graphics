@@ -43,7 +43,8 @@
 //!
 //! [`SubImage`]s are used to split a larger image drawables into multiple parts, e.g. to draw a
 //! single sprite from a sprite atlas. Use the [`sub_image`] method provided by [`ImageDrawableExt`]
-//! to get a sub image from an image drawable.
+//! to get a sub image from an image drawable. `ImageDrawableExt` is available in the `prelude` which
+//! this example takes advantage of.
 //!
 //! ```rust
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
