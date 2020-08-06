@@ -90,8 +90,10 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        let t1 = Triangle::new(left_start, left_end, right_start);
-        let t2 = Triangle::new(right_start, left_end, right_end);
+        // NOTE: Winding order is important here to prevent overdraw of the shared edge from
+        // right_start to left_end.
+        let t1 = Triangle::new(left_start, left_end, right_start); // CW winding order
+        let t2 = Triangle::new(left_end, right_end, right_start); // CCW winding order
 
         (t1, t2)
     }
