@@ -7,6 +7,7 @@
 //! provided by external crates like [tinybmp] and [tinytga].
 //!
 //! The [`Image`] object is used to specify the location at which an [`ImageDrawable`] is drawn.
+//! Images are drawn relative to their top-left corner.
 //!
 //! # Examples
 //!
