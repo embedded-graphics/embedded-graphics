@@ -42,7 +42,6 @@ where
     }
 }
 
-// TODO: should this be made public and be added to ContiguousIteratorExt?
 /// Crops a part of the underlying iterator.
 #[derive(Debug)]
 pub(crate) struct Crop<I>
