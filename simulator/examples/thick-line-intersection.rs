@@ -1,14 +1,14 @@
 use core::slice::Windows;
 use embedded_graphics::{
     fonts::*,
-    pixelcolor::Rgb888,
+    pixelcolor::{Gray8, Rgb888},
     prelude::*,
     primitives::line_joint::{EdgeCorners, JointKind, LineJoint},
     primitives::*,
     style::*,
 };
 use embedded_graphics_simulator::{
-    OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
+    OutputSettingsBuilder, OverdrawDisplay, SimulatorDisplay, SimulatorEvent, Window,
 };
 use sdl2::keyboard::Keycode;
 
@@ -48,16 +48,17 @@ fn draw(
     moving_point: Point,
     width: u32,
     alignment: StrokeAlignment,
-    display: &mut SimulatorDisplay<Rgb888>,
+    // display: &mut SimulatorDisplay<Rgb888>,
+    display: &mut OverdrawDisplay,
 ) -> Result<(), core::convert::Infallible> {
-    display.clear(Rgb888::BLACK)?;
+    display.clear(Gray8::BLACK)?;
 
     Polyline::new(&[Point::new(50, 100), Point::new(120, 120), moving_point])
         .into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(width)
                 .stroke_alignment(alignment)
-                .stroke_color(Rgb888::RED)
+                .stroke_color(Gray8::WHITE)
                 .build(),
         )
         .draw(display)?;
@@ -73,6 +74,8 @@ fn main() -> Result<(), core::convert::Infallible> {
         .build();
     let mut window = Window::new("Line joints debugger", &output_settings);
 
+    let mut overdraw_display = OverdrawDisplay::new(display.size());
+
     // let mut end_point = Point::new(20, 20);
     let mut end_point = Point::new(82, 110);
     let mut width = 15u32;
@@ -80,7 +83,9 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut mouse_down = false;
 
-    draw(end_point, width, alignment, &mut display)?;
+    draw(end_point, width, alignment, &mut overdraw_display)?;
+
+    overdraw_display.draw_to_display(&mut display)?;
 
     'running: loop {
         window.update(&display);
@@ -114,7 +119,9 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            draw(end_point, width, alignment, &mut display)?;
+            draw(end_point, width, alignment, &mut overdraw_display)?;
+
+            overdraw_display.draw_to_display(&mut display)?;
         }
     }
 
