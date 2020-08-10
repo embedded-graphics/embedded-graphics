@@ -80,7 +80,7 @@ fn main() -> Result<(), core::convert::Infallible> {
     let h = 180i32;
 
     let mut display: SimulatorDisplay<Rgb888> =
-        SimulatorDisplay::new(Size::new(w as u32, h as u32));
+        SimulatorDisplay::new(Size::new(w as u32 + 100, h as u32));
     let output_settings = OutputSettingsBuilder::new()
         .scale(4)
         // .pixel_spacing(1)
@@ -96,7 +96,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut mouse_down = false;
 
-    let points = [
+    let mut points = [
         Point::new(PADDING, h / 2),
         Point::new(100, h / 2),
         Point::new(120, h / 2 - 20),
@@ -107,6 +107,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         Point::new(220, h / 2 + 20),
         Point::new(240, h / 2),
         Point::new(w - PADDING, h / 2),
+        end_point,
     ];
 
     let mut num_points = points.len();
@@ -153,6 +154,8 @@ fn main() -> Result<(), core::convert::Infallible> {
                 }
                 _ => {}
             }
+
+            *points.last_mut().unwrap() = end_point;
 
             draw(
                 &points[0..num_points],
