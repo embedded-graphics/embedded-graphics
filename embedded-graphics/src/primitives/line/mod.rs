@@ -247,11 +247,25 @@ impl Line {
                 }
             }
 
-            point
+            // Center point around origin
+            point - self.start
         };
 
-        // Center delta around zero
-        let delta = delta - self.start;
+        // Slow, float-based algorithm. Still causes issues with degenerate filler triangle.
+        // let delta = {
+        //     // Left-side perpendicular
+        //     let perp = self.perpendicular();
+
+        //     let thickness = thickness as f32;
+        //     let len = (perp.length_squared() as f32).sqrt();
+
+        //     let Point { x, y } = perp.end - perp.start;
+
+        //     let x = (x as f32 / len) * thickness;
+        //     let y = (y as f32 / len) * thickness;
+
+        //     Point::new(x as i32, y as i32)
+        // };
 
         match alignment {
             StrokeAlignment::Center => {
