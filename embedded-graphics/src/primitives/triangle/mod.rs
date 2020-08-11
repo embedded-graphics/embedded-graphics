@@ -224,8 +224,9 @@ impl Triangle {
 // https://stackoverflow.com/a/6989383/383609
 // NOTE: This is unused, but kept around as it took a while to find, and may be useful for polygon
 // calculations.
+/// Used by sorting functions to sort points in clockwise order.
 #[allow(unused)]
-fn sort_clockwise(a: Point, b: Point, center: Point) -> Ordering {
+pub fn sort_clockwise(a: &Point, b: &Point, center: Point) -> Ordering {
     if a.x - center.x >= 0 && b.x - center.x < 0 {
         return Ordering::Greater;
     }
