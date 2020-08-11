@@ -1,28 +1,27 @@
 /// Possible parse errors
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[non_exhaustive]
 pub enum ParseError {
-    /// An invalid color map value was encountered. Valid values are `0` (no color map) or `1`
-    /// (color map included)
-    InvalidColorMap(u8),
+    /// An error occurred when parsing the color map.
+    ColorMap,
 
-    /// An invalid image type was encountered. Valid values are presented in [`ImageType`]
-    InvalidImageType(u8),
-
-    /// Parse was incomplete. Holds the remaining number of bytes
-    Incomplete(usize),
-
-    /// An error occurred when parsing the TGA header
+    /// An error occurred when parsing the TGA header.
     Header,
 
-    /// An error occurred when parsing the TGA footer
+    /// An error occurred when parsing the TGA footer.
     Footer,
 
-    /// An unknown image type value was encountered
-    UnknownImageType(u8),
+    /// An unsupported image type value was encountered.
+    UnsupportedImageType(u8),
 
-    /// An unknown color map value was encountered
-    UnknownColorMap(u8),
+    /// An unsupported bits per pixel value was encountered.
+    UnsupportedBpp(u8),
 
-    /// Any other type of parse error
-    Other,
+    /// Mismatched bits per pixel.
+    ///
+    /// The bit depth of the image doesn't match the depth that was specified
+    /// when `Tga::from_slice` was called.
+    ///
+    /// [`Tga::from_slice`]: struct.Tga.html#method.from_slice
+    MismatchedBpp(u8),
 }

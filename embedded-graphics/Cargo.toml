@@ -37,4 +37,4 @@ fixed_point = [ "fixed" ]
 
 [dev-dependencies]
 arrayvec = { version = "0.5.1", default-features = false }
-tinytga = { version = "0.3.2", features = [ "graphics" ] }
+tinytga = { version = "0.3.2" }

@@ -20,16 +20,16 @@
 //! with embedded-graphics.
 //!
 //! ```rust
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
 //! use tinytga::Tga;
 //!
-//! let mut display: Display<Rgb565> = Display::default();
+//! let mut display: Display<Rgb888> = Display::default();
 //!
 //! // Load the TGA file.
 //! // Note that the color type is set explicitly to match the format used in the TGA file,
 //! // otherwise the compiler might infer an incorrect type.
-//! let tga: Tga<Rgb565> = Tga::from_slice(include_bytes!(
+//! let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!(
 //!     "../../../simulator/examples/assets/rust-pride.tga"
 //! ))
 //! .unwrap();
@@ -51,16 +51,16 @@
 //! which this example takes advantage of.
 //!
 //! ```rust
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
 //! use tinytga::Tga;
 //!
-//! let mut display: Display<Rgb565> = Display::default();
+//! let mut display: Display<Rgb888> = Display::default();
 //!
 //! // Load the TGA file with the sprite atlas.
 //! // Note that the color type is set explicitly to match the format used in the TGA file,
 //! // otherwise the compiler might infer an incorrect type.
-//! let sprite_atlas: Tga<Rgb565> = Tga::from_slice(include_bytes!(
+//! let sprite_atlas: Tga<Rgb888> = Tga::from_slice(include_bytes!(
 //!     "../../../assets/tiles.tga"
 //! ))
 //! .unwrap();
