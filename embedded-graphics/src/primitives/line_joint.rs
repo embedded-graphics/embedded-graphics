@@ -238,12 +238,16 @@ impl LineJoint {
                 Self {
                     kind: JointKind::Degenerate {
                         filler_triangle: match outer_side {
-                            Side::Left => {
-                                Triangle::new(first_edge_left.end, second_edge_left.start, mid)
-                            }
-                            Side::Right => {
-                                Triangle::new(first_edge_right.end, second_edge_right.start, mid)
-                            }
+                            Side::Left => Triangle::new(
+                                first_edge_left.end,
+                                first_edge_right.end,
+                                second_edge_left.start,
+                            ),
+                            Side::Right => Triangle::new(
+                                first_edge_left.end,
+                                first_edge_right.end,
+                                second_edge_right.start,
+                            ),
                         },
                     },
                     first_edge_end: EdgeCorners {
