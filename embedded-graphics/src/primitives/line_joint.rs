@@ -198,10 +198,11 @@ impl LineJoint {
                     match outer_side {
                         Side::Right => Self {
                             kind: JointKind::Bevel {
+                                /// Must be counter-clockwise
                                 filler_triangle: Triangle::new(
                                     first_edge_right.end,
-                                    second_edge_right.start,
                                     l_intersection,
+                                    second_edge_right.start,
                                 ),
                             },
                             first_edge_end: EdgeCorners {
@@ -215,6 +216,7 @@ impl LineJoint {
                         },
                         Side::Left => Self {
                             kind: JointKind::Bevel {
+                                /// Must be clockwise
                                 filler_triangle: Triangle::new(
                                     first_edge_left.end,
                                     second_edge_left.start,
