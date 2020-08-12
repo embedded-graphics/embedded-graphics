@@ -7,7 +7,10 @@ pub use crate::{
     geometry::{Angle, AngleUnit, Dimensions, OriginDimensions, Point, Size},
     image::{ImageDrawable, ImageDrawableExt},
     iterator::{ContiguousIteratorExt, IntoPixels, PixelIteratorExt},
-    pixelcolor::{raw::RawData, GrayColor, IntoStorage, PixelColor, RgbColor},
+    pixelcolor::{
+        raw::{RawData, ToBytes as _},
+        GrayColor, IntoStorage, PixelColor, RgbColor,
+    },
     primitives::{ContainsPoint, Primitive},
     style::StyledPrimitiveAreas,
     transform::Transform,

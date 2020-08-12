@@ -7,6 +7,20 @@
 //! Specifying a [`Raw`] type for a [`PixelColor`] is required to use that color
 //! with the [`Image`] struct.
 //!
+//! # Converting colors to raw data
+//!
+//! Colors can be converted into raw data by using two different methods. The [`into_storage`]
+//! method is used to convert a color into a single integer value and the [`to_bytes`] method
+//! is used to convert it into a byte array.
+//!
+//! ```
+//! use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+//!
+//! let color = Rgb888::new(0x11, 0x22, 0x33);
+//! assert_eq!(color.into_storage(), 0x00112233);
+//! assert_eq!(color.to_bytes(), [0x11, 0x22, 0x33]);
+//! ```
+//!
 //! # Implementing PixelColor with Raw support
 //!
 //! This example shows how to implement a new [`PixelColor`] that can be used
@@ -91,9 +105,14 @@
 //! [`PixelColor`]: ../trait.PixelColor.html
 //! [`Raw`]: ../trait.PixelColor.html#associatedtype.Raw
 //! [`Image`]: ../../image/struct.Image.html
+//! [`into_storage`]: ../trait.IntoStorage.html#tymethod.into_storage
+//! [`to_bytes`]: trait.ToBytes.html#tymethod.to_bytes
 
 mod iter;
+mod to_bytes;
+
 pub(crate) use iter::{RawDataIter, RawDataIterNext};
+pub use to_bytes::ToBytes;
 
 /// Trait implemented by all `RawUx` types.
 pub trait RawData:
@@ -102,6 +121,7 @@ pub trait RawData:
     + RawDataIterNext<LittleEndian>
     + RawDataIterNext<BigEndian>
     + From<<Self as RawData>::Storage>
+    + ToBytes
 {
     /// Storage type.
     ///
