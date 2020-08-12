@@ -60,7 +60,7 @@ fn point_label(
         .draw(display)
 }
 
-fn sort_two_yx(p1: &Point, p2: &Point) -> Ordering {
+fn sort_two_yx_cmp(p1: &Point, p2: &Point) -> Ordering {
     // If p1.y is less than p2.y, return it first. Otherwise, if they have the same Y coordinate,
     // the first point becomes the one with the lesser X coordinate.
     if p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x) {
@@ -70,11 +70,69 @@ fn sort_two_yx(p1: &Point, p2: &Point) -> Ordering {
     }
 }
 
+// Flag will be true if pair was swapped
+fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point, bool) {
+    // If p1.y is less than p2.y, return it first. Otherwise, if they have the same Y coordinate,
+    // the first point becomes the one with the lesser X coordinate.
+    if p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x) {
+        (p1, p2, false)
+    } else {
+        (p2, p1, true)
+    }
+}
+
+fn trapezium(
+    mouse_pos: Point,
+    points: [Point; 4],
+    scanline: Line,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
+    // let center = points
+    //     .iter()
+    //     .fold(Point::zero(), |accum, point| accum + *point)
+    //     / 4;
+
+    // empty_crosshair(center, Rgb888::CYAN, display)?;
+
+    // let mut points = points;
+    // points.sort_by(|a, b| sort_clockwise(a, b, center));
+
+    let [p0, p1, p2, p3] = points;
+
+    point_label(p0, 0 as u32, display)?;
+    point_label(p1, 1 as u32, display)?;
+    point_label(p2, 2 as u32, display)?;
+    point_label(p3, 3 as u32, display)?;
+
+    let lines = [
+        Line::new(p0, p1),
+        Line::new(p1, p2),
+        Line::new(p2, p3),
+        Line::new(p3, p0),
+    ];
+
+    let mut intersections = lines
+        .iter()
+        .filter_map(|l| l.segment_intersection_point(&scanline))
+        .take(2);
+
+    let style = PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1);
+
+    if let (Some(a), Some(b)) = (intersections.next(), intersections.next()) {
+        // Sort by increasing X order so fill line always travels left -> right
+        let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
+
+        let fill_line = Line::new(a, b);
+
+        fill_line.into_styled(style).draw(display)?;
+    }
+
+    Ok(())
+}
+
 fn draw(
     mouse_pos: Point,
     corner_pos: Point,
-    width: u32,
-    alignment: StrokeAlignment,
     // display: &mut OverdrawDisplay,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
@@ -85,7 +143,12 @@ fn draw(
         mouse_pos.y_axis() + display.size().x_axis(),
     );
 
-    let mut trapezium = [
+    // Scanline
+    scanline
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
+        .draw(display)?;
+
+    let points1 = [
         Point::new(40, 20),
         Point::new(80, 10),
         corner_pos,
@@ -93,46 +156,23 @@ fn draw(
         // Point::new(10, 40),
     ];
 
-    let center = trapezium
-        .iter()
-        .fold(Point::zero(), |accum, point| accum + *point)
-        / 4;
+    trapezium(mouse_pos, points1, scanline, display)?;
 
-    empty_crosshair(center, Rgb888::CYAN, display)?;
+    let points2 = [
+        Point::new(40, 5) + Point::new(100, 0),
+        Point::new(80, 10) + Point::new(100, 0),
+        corner_pos + Point::new(100, 0),
+        Point::new(30, 60) + Point::new(100, 0),
+        // Point::new(10, 40),
+    ];
 
-    // trapezium.sort_by(|a, b| sort_clockwise(a, b, center));
-    // trapezium.sort_by(sort_two_yx);
-
-    for (idx, point) in trapezium.iter().enumerate() {
-        point_label(*point, idx as u32, display)?;
-    }
-
-    // "inner" lines
-    Line::new(trapezium[0], trapezium[1])
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
-        .draw(display)?;
-    Line::new(trapezium[2], trapezium[3])
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
-        .draw(display)?;
-
-    // Edge Bresenham lines
-    Line::new(trapezium[1], trapezium[2])
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
-        .draw(display)?;
-    Line::new(trapezium[3], trapezium[0])
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
-        .draw(display)?;
-
-    // Scanline - last so it's on top
-    scanline
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
-        .draw(display)?;
+    trapezium(mouse_pos, points2, scanline, display)?;
 
     Ok(())
 }
 
 fn main() -> Result<(), core::convert::Infallible> {
-    let w = 100i32;
+    let w = 150i32;
     let h = 100i32;
 
     let mut display: SimulatorDisplay<Rgb888> =
@@ -153,7 +193,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut mouse_down = false;
 
-    draw(mouse_pos, corner_pos, width, alignment, &mut display)?;
+    draw(mouse_pos, corner_pos, &mut display)?;
 
     // overdraw_display.draw_to_display(&mut display)?;
 
@@ -190,7 +230,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                 _ => {}
             }
 
-            draw(mouse_pos, corner_pos, width, alignment, &mut display)?;
+            draw(mouse_pos, corner_pos, &mut display)?;
 
             // overdraw_display.draw_to_display(&mut display)?;
         }
