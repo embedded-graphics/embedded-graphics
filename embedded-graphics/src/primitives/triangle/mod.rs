@@ -312,7 +312,7 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
 
 /// Sort 3 points in order of increasing Y value. If two points have the same Y value, the one with
 /// the lesser X value is put before.
-fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
+pub(in crate::primitives) fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     let (y1, y2) = sort_two_yx(p1, p2);
     let (y1, y3) = sort_two_yx(p3, y1);
     let (y2, y3) = sort_two_yx(y3, y2);
