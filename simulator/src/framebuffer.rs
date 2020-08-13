@@ -96,7 +96,7 @@ impl DrawTarget for Framebuffer {
     {
         for Pixel(point, color) in pixels.into_iter() {
             if let Some(pixel) = self.get_pixel_mut(point) {
-                pixel.copy_from_slice(&color.to_bytes())
+                pixel.copy_from_slice(&color.to_be_bytes())
             }
         }
 

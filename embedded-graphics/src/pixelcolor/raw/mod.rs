@@ -10,15 +10,18 @@
 //! # Converting colors to raw data
 //!
 //! Colors can be converted into raw data by using two different methods. The [`into_storage`]
-//! method is used to convert a color into a single integer value and the [`to_bytes`] method
-//! is used to convert it into a byte array.
+//! method is used to convert a color into a single integer value. To convert a color into a byte
+//! array the methods provided by the [`ToBytes`] trait can be used. By using [`to_be_bytes`] the
+//! color components will have the same order in memory as in the name of the type.
 //!
 //! ```
 //! use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
 //!
 //! let color = Rgb888::new(0x11, 0x22, 0x33);
+//!
 //! assert_eq!(color.into_storage(), 0x00112233);
-//! assert_eq!(color.to_bytes(), [0x11, 0x22, 0x33]);
+//!
+//! assert_eq!(color.to_be_bytes(), [0x11, 0x22, 0x33]);
 //! ```
 //!
 //! # Implementing PixelColor with Raw support
@@ -106,7 +109,8 @@
 //! [`Raw`]: ../trait.PixelColor.html#associatedtype.Raw
 //! [`Image`]: ../../image/struct.Image.html
 //! [`into_storage`]: ../trait.IntoStorage.html#tymethod.into_storage
-//! [`to_bytes`]: trait.ToBytes.html#tymethod.to_bytes
+//! [`ToBytes`]: trait.ToBytes.html
+//! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_bytes
 
 mod iter;
 mod to_bytes;
