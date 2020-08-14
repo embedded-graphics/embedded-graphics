@@ -34,6 +34,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) Added `Clipped`, `Cropped` and `Translated` draw targets.
 - [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) Added `OriginDimensions` trait for dimensions with `top_left == Point::zero()`.
 - [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) Added support for `SubImage`s.
+- [#429](https://github.com/jamwaffles/embedded-graphics/pull/429) Added `ToBytes` trait to convert colors into byte arrays.
 
 ### Changed
 

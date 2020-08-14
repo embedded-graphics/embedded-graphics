@@ -121,7 +121,7 @@ pub trait PixelColor: Copy + PartialEq {
 ///
 /// ## Get the `u16` representing an `Rgb565` color
 ///
-/// This example converts an [`Rgb565`] color into its underlying `u16` represenation.
+/// This example converts an [`Rgb565`] color into its underlying `u16` representation.
 ///
 /// ```rust
 /// use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
