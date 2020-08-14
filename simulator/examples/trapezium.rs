@@ -97,6 +97,9 @@ fn trapezium(
     // let mut points = points;
     // points.sort_by(|a, b| sort_clockwise(a, b, center));
 
+    // let mut points = points;
+    // points.sort_by(|a, b| sort_two_yx_cmp(a, b));
+
     let [p0, p1, p2, p3] = points;
 
     point_label(p0, 0 as u32, display)?;
@@ -113,18 +116,35 @@ fn trapezium(
 
     let mut intersections = lines
         .iter()
-        .filter_map(|l| l.segment_intersection_point(&scanline))
-        .take(2);
+        .filter_map(|l| l.segment_intersection_point(&scanline));
+
+    // let a = lines[0]
+    //     .segment_intersection_point(&scanline)
+    //     .or_else(|| lines[1].segment_intersection_point(&scanline));
+    // let b = lines[2]
+    //     .segment_intersection_point(&scanline)
+    //     .or_else(|| lines[3].segment_intersection_point(&scanline));
 
     let style = PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1);
 
     if let (Some(a), Some(b)) = (intersections.next(), intersections.next()) {
-        // Sort by increasing X order so fill line always travels left -> right
-        let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
+        // If intersection points are equal, we might be at a line joint. See if there's another
+        // intersection we can use.
+        let b = if a == b {
+            intersections.next()
+        } else {
+            Some(b)
+        };
 
-        let fill_line = Line::new(a, b);
+        if let Some(b) = b {
+            // if let (Some(a), Some(b)) = (a, b) {
+            // Sort by increasing X order so fill line always travels left -> right
+            let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
 
-        fill_line.into_styled(style).draw(display)?;
+            let fill_line = Line::new(a, b);
+
+            fill_line.into_styled(style).draw(display)?;
+        }
     }
 
     Ok(())
