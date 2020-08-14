@@ -87,6 +87,9 @@ fn trapezium(
     scanline: Line,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
+    // let mut points = points;
+    // points.sort_by(|a, b| sort_two_yx_cmp(a, b));
+
     // let center = points
     //     .iter()
     //     .fold(Point::zero(), |accum, point| accum + *point)
@@ -96,9 +99,6 @@ fn trapezium(
 
     // let mut points = points;
     // points.sort_by(|a, b| sort_clockwise(a, b, center));
-
-    // let mut points = points;
-    // points.sort_by(|a, b| sort_two_yx_cmp(a, b));
 
     let [p0, p1, p2, p3] = points;
 
@@ -114,37 +114,28 @@ fn trapezium(
         Line::new(p3, p0),
     ];
 
-    let mut intersections = lines
+    let intersections = lines
         .iter()
         .filter_map(|l| l.segment_intersection_point(&scanline));
 
-    // let a = lines[0]
-    //     .segment_intersection_point(&scanline)
-    //     .or_else(|| lines[1].segment_intersection_point(&scanline));
-    // let b = lines[2]
-    //     .segment_intersection_point(&scanline)
-    //     .or_else(|| lines[3].segment_intersection_point(&scanline));
+    let (min, max): (Option<Point>, Option<Point>) =
+        intersections.fold((None, None), |acc, intersection_point| {
+            (
+                acc.0
+                    .map(|min| min.component_min(intersection_point))
+                    .or_else(|| Some(intersection_point)),
+                acc.1
+                    .map(|max| max.component_max(intersection_point))
+                    .or_else(|| Some(intersection_point)),
+            )
+        });
 
     let style = PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1);
 
-    if let (Some(a), Some(b)) = (intersections.next(), intersections.next()) {
-        // If intersection points are equal, we might be at a line joint. See if there's another
-        // intersection we can use.
-        let b = if a == b {
-            intersections.next()
-        } else {
-            Some(b)
-        };
+    if let (Some(min), Some(max)) = (min, max) {
+        let fill_line = Line::new(min, max);
 
-        if let Some(b) = b {
-            // if let (Some(a), Some(b)) = (a, b) {
-            // Sort by increasing X order so fill line always travels left -> right
-            let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
-
-            let fill_line = Line::new(a, b);
-
-            fill_line.into_styled(style).draw(display)?;
-        }
+        fill_line.into_styled(style).draw(display)?;
     }
 
     Ok(())
