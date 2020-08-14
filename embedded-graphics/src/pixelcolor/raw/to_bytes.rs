@@ -9,7 +9,7 @@ use crate::pixelcolor::{
 ///
 /// [module-level documentation]: index.html#converting-colors-to-raw-data
 pub trait ToBytes {
-    /// Return type of `to_bytes`.
+    /// Return type of methods in this trait.
     type Bytes;
 
     /// Converts a color into a byte array with big endian byte order.
