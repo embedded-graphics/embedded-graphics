@@ -32,17 +32,24 @@ fn draw(e2: Point, display: &mut SimulatorDisplay<Rgb888>) {
         .draw(display)
         .unwrap();
 
-    match l1.line_intersection(&l2) {
-        Intersection::Point { point, .. } => {
-            // Draw intersection point
-            Circle::with_center(point, 5)
-                .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
-                .draw(display)
-                .unwrap();
-        }
-        Intersection::Colinear => {
-            //
-        }
+    // match l1.line_intersection(&l2) {
+    //     Intersection::Point { point, .. } => {
+    //         // Draw intersection point
+    //         Circle::with_center(point, 5)
+    //             .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
+    //             .draw(display)
+    //             .unwrap();
+    //     }
+    //     Intersection::Colinear => {
+    //         //
+    //     }
+    // }
+
+    if let Some(point) = l1.segment_intersection_point(&l2) {
+        Circle::with_center(point, 5)
+            .into_styled(PrimitiveStyle::with_fill(Rgb888::MAGENTA))
+            .draw(display)
+            .unwrap();
     }
 }
 
