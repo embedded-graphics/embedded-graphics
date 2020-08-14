@@ -194,13 +194,21 @@ impl Line {
         let Point { x: x3, y: y3 } = other.start;
         let Point { x: x4, y: y4 } = other.end;
 
-        // Compute sign values
+        // Sign values for first line
+        let r1 = a2 * x1 + b2 * y1 + c2;
+        let r2 = a2 * x2 + b2 * y2 + c2;
+
+        // Sign values for second line
         let r3 = a1 * x3 + b1 * y3 + c1;
         let r4 = a1 * x4 + b1 * y4 + c1;
 
-        // Sign values for second line
-        let r1 = a2 * x1 + b2 * y1 + c2;
-        let r2 = a2 * x2 + b2 * y2 + c2;
+        // NOTE: (I think)
+        // Uncomment following line to check
+        // println!("{} {} {} {}", r1, r2, r3, r4);
+        // If r1 is 0, the intersection is at the beginning of the first line
+        // If r2 is 0, the intersection is at the end of the first line
+        // If r3 is 0, the intersection is at the beginning of the second line
+        // If r4 is 0, the intersection is at the end of the second line
 
         // Flag denoting whether intersection point is on given line segments. If this is false,
         // the intersection occurs somewhere along the two mathematical, infinite lines instead.
