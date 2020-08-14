@@ -178,15 +178,8 @@ impl Line {
         (r3 == 0 || r4 == 0 || !same_signs(r3, r4)) && (r1 == 0 || r2 == 0 || !same_signs(r1, r2))
     }
 
-    /// Segment intersection point.
-    ///
-    /// If `true` is passed to `ignore_first_end`, a point intersecting at the end of `self` will be
-    /// ignored. This is useful for checking lines that share a start/end point.
-    pub fn segment_intersection_point(
-        &self,
-        other: &Self,
-        ignore_first_end: bool,
-    ) -> Option<Point> {
+    /// Segment intersection point
+    pub fn segment_intersection_point(&self, other: &Self) -> Option<Point> {
         // TODO: Check bounding boxes first
 
         let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
@@ -204,11 +197,6 @@ impl Line {
         // Sign values for first line
         let r1 = a2 * x1 + b2 * y1 + c2;
         let r2 = a2 * x2 + b2 * y2 + c2;
-
-        // Optionally ignore intersection at end point of first line.
-        if ignore_first_end && r2 == 0 {
-            return None;
-        }
 
         // Sign values for second line
         let r3 = a1 * x3 + b1 * y3 + c1;
