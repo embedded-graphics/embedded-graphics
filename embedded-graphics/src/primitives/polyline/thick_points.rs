@@ -1,24 +1,14 @@
-use super::triangle_iterator::Item;
 use crate::{
     prelude::Point,
-    primitives::{
-        polyline::triangle_iterator::TriangleIterator, trapezium::TrapeziumIterator,
-        triangle::MathematicalPoints,
-    },
+    primitives::{polyline::triangle_iterator::TriangleIterator, triangle::MathematicalPoints},
     style::StrokeAlignment,
 };
-
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum PointsIter {
-    Trapezium(TrapeziumIterator),
-    Triangle(MathematicalPoints),
-}
 
 // TODO: Generalise name, move into more common folder path
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct ThickPoints<'a> {
     triangle_iter: TriangleIterator<'a>,
-    points_iter: PointsIter,
+    points_iter: MathematicalPoints,
 }
 
 impl<'a> ThickPoints<'a> {
@@ -30,11 +20,8 @@ impl<'a> ThickPoints<'a> {
 
             let points_iter = triangle_iter
                 .next()
-                .map(|t| match t {
-                    Item::Trapezium(t) => PointsIter::Trapezium(TrapeziumIterator::new(t)),
-                    Item::Triangle(t) => PointsIter::Triangle(t.mathematical_points()),
-                })
-                .unwrap_or_else(|| PointsIter::Triangle(MathematicalPoints::empty()));
+                .map(|t| t.mathematical_points())
+                .unwrap_or_else(MathematicalPoints::empty);
 
             Self {
                 triangle_iter,
@@ -46,7 +33,7 @@ impl<'a> ThickPoints<'a> {
     pub fn empty() -> Self {
         Self {
             triangle_iter: TriangleIterator::empty(),
-            points_iter: PointsIter::Triangle(MathematicalPoints::empty()),
+            points_iter: MathematicalPoints::empty(),
         }
     }
 }
@@ -55,16 +42,10 @@ impl<'a> Iterator for ThickPoints<'a> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(point) = match self.points_iter {
-            PointsIter::Trapezium(ref mut it) => it.next(),
-            PointsIter::Triangle(ref mut it) => it.next(),
-        } {
+        if let Some(point) = self.points_iter.next() {
             Some(point)
         } else {
-            self.points_iter = self.triangle_iter.next().map(|t| match t {
-                Item::Trapezium(t) => PointsIter::Trapezium(TrapeziumIterator::new(t)),
-                Item::Triangle(t) => PointsIter::Triangle(t.mathematical_points()),
-            })?;
+            self.points_iter = self.triangle_iter.next().map(|t| t.mathematical_points())?;
 
             self.next()
         }

@@ -11,9 +11,8 @@ use crate::{
 pub(in crate::primitives) struct TriangleIterator<'a> {
     points: &'a [Point],
     start_idx: usize,
-    // t1: Option<Triangle>,
-    // t2: Option<Triangle>,
-    trapezium: Option<[Point; 4]>,
+    t1: Option<Triangle>,
+    t2: Option<Triangle>,
     filler: Option<Triangle>,
     width: u32,
     alignment: StrokeAlignment,
@@ -44,16 +43,13 @@ impl<'a> TriangleIterator<'a> {
                 LineJoint::end(points[start_idx], points[start_idx + 1], width, alignment)
             };
 
-            // // Initialise with line between p0 and p1
-            // let (t1, t2) = Self::edge_triangles(start_joint, end_joint);
-
-            let trapezium = Self::trapezium(start_joint, end_joint);
+            // Initialise with line between p0 and p1
+            let (t1, t2) = Self::edge_triangles(start_joint, end_joint);
 
             Self {
                 points,
-                // t1: Some(t1),
-                // t2: Some(t2),
-                trapezium: Some(trapezium),
+                t1: Some(t1),
+                t2: Some(t2),
                 start_idx,
                 filler: end_joint.filler(),
                 width,
@@ -66,10 +62,8 @@ impl<'a> TriangleIterator<'a> {
     pub fn empty() -> Self {
         Self {
             points: &[],
-            // t1: None,
-            // t2: None,
-            // trapezium: TrapeziumIterator::empty(),
-            trapezium: None,
+            t1: None,
+            t2: None,
             filler: None,
             start_idx: 0,
             width: 0,
@@ -78,33 +72,7 @@ impl<'a> TriangleIterator<'a> {
         }
     }
 
-    // fn edge_triangles(start_joint: LineJoint, end_joint: LineJoint) -> (Triangle, Triangle) {
-    //     let LineJoint {
-    //         second_edge_start:
-    //             EdgeCorners {
-    //                 left: left_start,
-    //                 right: right_start,
-    //             },
-    //         ..
-    //     } = start_joint;
-    //     let LineJoint {
-    //         first_edge_end:
-    //             EdgeCorners {
-    //                 left: left_end,
-    //                 right: right_end,
-    //             },
-    //         ..
-    //     } = end_joint;
-
-    //     // NOTE: Winding order is important here to prevent overdraw of the shared edge from
-    //     // right_start to left_end.
-    //     let t1 = Triangle::new(left_start, left_end, right_start); // CW winding order
-    //     let t2 = Triangle::new(left_end, right_end, right_start); // CCW winding order
-
-    //     (t1, t2)
-    // }
-
-    fn trapezium(start_joint: LineJoint, end_joint: LineJoint) -> [Point; 4] {
+    fn edge_triangles(start_joint: LineJoint, end_joint: LineJoint) -> (Triangle, Triangle) {
         let LineJoint {
             second_edge_start:
                 EdgeCorners {
@@ -122,24 +90,24 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        [left_start, left_end, right_end, right_start]
+        // NOTE: Winding order is important here to prevent overdraw of the shared edge from
+        // right_start to left_end.
+        let t1 = Triangle::new(left_start, left_end, right_start); // CW winding order
+        let t2 = Triangle::new(left_end, right_end, right_start); // CCW winding order
+
+        (t1, t2)
     }
 }
 
-pub enum Item {
-    Trapezium([Point; 4]),
-    Triangle(Triangle),
-}
-
 impl<'a> Iterator for TriangleIterator<'a> {
-    type Item = Item;
+    type Item = Triangle;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(triangle) = self
-            .trapezium
+            .t1
             .take()
-            .map(|t| Item::Trapezium(t))
-            .or_else(|| self.filler.take().map(|t| Item::Triangle(t)))
+            .or_else(|| self.t2.take())
+            .or_else(|| self.filler.take())
         {
             Some(triangle)
         }
@@ -169,7 +137,10 @@ impl<'a> Iterator for TriangleIterator<'a> {
                 )
             };
 
-            self.trapezium = Some(Self::trapezium(start_joint, self.end_joint));
+            let (t1, t2) = Self::edge_triangles(start_joint, self.end_joint);
+
+            self.t1 = Some(t1);
+            self.t2 = Some(t2);
             self.filler = self.end_joint.filler();
 
             self.next()
