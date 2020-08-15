@@ -140,7 +140,7 @@ impl LineJoint {
         let first_line = Line::new(start, mid);
         let second_line = Line::new(mid, end);
 
-        // Miter length limit is dobule the line width (but squared to avoid sqrt() costs)
+        // Miter length limit is double the line width (but squared to avoid sqrt() costs)
         let miter_limit = (width * 2).pow(2);
 
         // Left and right edges of thick first segment
