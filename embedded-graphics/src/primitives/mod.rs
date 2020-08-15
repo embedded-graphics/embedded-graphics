@@ -9,7 +9,6 @@ pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
 pub mod sector;
-pub mod trapezium;
 pub mod triangle;
 
 pub use self::{
