@@ -1,12 +1,13 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         arc::{plane_sector::PlaneSectorIterator, Arc},
         circle::DistanceIterator,
-        OffsetOutline, Styled,
+        OffsetOutline, Rectangle, Styled,
     },
     style::PrimitiveStyle,
     SaturatingCast,
@@ -102,6 +103,18 @@ where
     }
 }
 
+impl<C> Dimensions for Styled<Arc, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
+    fn bounding_box(&self) -> Rectangle {
+        let offset = self.style.outside_stroke_width().saturating_cast();
+
+        self.primitive.bounding_box().offset(offset)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -169,5 +182,28 @@ mod tests {
 
         assert_eq!(display_center, display_inside);
         assert_eq!(display_center, display_outside);
+    }
+
+    #[test]
+    fn bounding_boxes() {
+        const CENTER: Point = Point::new(15, 15);
+        const SIZE: u32 = 10;
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let center = Arc::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg()).into_styled(style);
+        let inside = Arc::with_center(CENTER, SIZE + 2, 0.0.deg(), 90.0.deg()).into_styled(
+            PrimitiveStyleBuilder::from(&style)
+                .stroke_alignment(StrokeAlignment::Inside)
+                .build(),
+        );
+        let outside = Arc::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg()).into_styled(
+            PrimitiveStyleBuilder::from(&style)
+                .stroke_alignment(StrokeAlignment::Outside)
+                .build(),
+        );
+
+        assert_eq!(center.bounding_box(), inside.bounding_box());
+        assert_eq!(outside.bounding_box(), inside.bounding_box());
     }
 }
