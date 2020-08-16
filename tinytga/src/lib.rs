@@ -265,6 +265,13 @@ where
     C: PixelColor,
 {
     /// Parse a TGA image from a byte slice
+    ///
+    /// # Errors
+    /// 
+    /// If the bit depth of the source image does not match the bit depth of the output color type 
+    /// `C`, this method will return a [`ParseError::MismatchedBpp`] error.
+    ///
+    /// [`ParseError::MismatchedBpp`]: ../ass.html
     pub fn from_slice(data: &'a [u8]) -> Result<Self, ParseError> {
         let tga = Tga::from_slice_common(data)?;
 
