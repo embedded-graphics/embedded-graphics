@@ -7,81 +7,96 @@
 
 ## [Documentation](https://docs.rs/tinytga)
 
-A small TGA parser designed for embedded, no-std environments but usable anywhere. Beyond
-parsing the image header, no other allocations are made.
+A small TGA parser designed for use with [embedded-graphics] targetting no-std environments but
+usable anywhere. Beyond parsing the image header, no other allocations are made.
 
-To access the individual pixels in an image, the `TgaRaw` struct implements `IntoIterator`. It is
-also possible to access the unaltered raw image data by reading the `pixel_data` field. This
-data will need to be interpreted according to the `image_type` specified in the header.
-
-## Features
-
-* `graphics` - enables [embedded-graphics] integration.
+tinytga provides two methods of accessing the pixel data inside a TGA file. The most convenient
+way is to use a color type provided by [embedded-graphics] to define the format stored inside
+the TGA file. But it is also possible to directly access the raw pixel representation instead.
 
 ## Examples
 
 ### Load a Run Length Encoded (RLE) TGA image
 
 ```rust
-use tinytga::{ImageOrigin, ImageType, Pixel, TgaRaw, TgaFooter, TgaHeader};
+use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawPixel, Tga, TgaHeader};
 
 // Include an image from a local path as bytes
 let data = include_bytes!("../tests/chessboard_4px_rle.tga");
 
-// Create a TGA instance from a byte slice
-let img = TgaRaw::from_slice(data).unwrap();
+// Create a TGA instance from a byte slice.
+// The color type is set by defining the type of the `img` variable.
+let img: Tga<Rgb888> = Tga::from_slice(data).unwrap();
 
-// Take a look at the header
+// Check the size of the image.
+assert_eq!(img.size(), Size::new(4, 4));
+
+// Collect pixels into a vector.
+let pixels: Vec<_> = img.pixels().collect();
+```
+
+### Drawing an image using `embedded-graphics`
+
+This example demonstrates how a TGA image can be drawn to a [embedded-graphics] draw target.
+
+```rust
+use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+use tinytga::Tga;
+
+// Include an image from a local path as bytes
+let data = include_bytes!("../tests/chessboard_4px_rle.tga");
+let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
+
+let image = Image::new(&tga, Point::zero());
+
+image.draw(&mut display)?;
+```
+
+### Accessing raw pixel data
+
+If you do not want to use the color types provided by [embedded-graphics] you can also access
+the raw image data.
+
+```rust
+use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawPixel, Tga, TgaHeader};
+
+// Include an image from a local path as bytes.
+let data = include_bytes!("../tests/chessboard_4px_rle.tga");
+
+// Create a TGA instance from a byte slice.
+let img = Tga::from_slice_raw(data).unwrap();
+
+// Take a look at the raw image header.
 assert_eq!(
-    img.header,
+    img.raw_header(),
     TgaHeader {
         id_len: 0,
         has_color_map: false,
         image_type: ImageType::RleTruecolor,
         color_map_start: 0,
         color_map_len: 0,
-        color_map_depth: 0,
+        color_map_depth: None,
         x_origin: 0,
         y_origin: 4,
         width: 4,
         height: 4,
-        pixel_depth: 24,
+        pixel_depth: Bpp::Bits24,
         image_origin: ImageOrigin::TopLeft,
         alpha_channel_depth: 0,
     }
 );
 
-// Take a look at the footer
-assert_eq!(
-    img.footer,
-    Some(TgaFooter {
-        extension_area_offset: 0,
-        developer_directory_offset: 0
-    })
-);
-
-// Collect pixels into a `Vec<Pixel>`
-let pixels = img.into_iter().collect::<Vec<Pixel>>();
+// Collect raw pixels into a vector.
+let pixels: Vec<_> = img.raw_pixels().collect();
 ```
 
-### Use with `embedded-graphics`
+## Embedded-graphics drawing performance
 
-This example demonstrates [embedded-graphics] support by rendering a TGA image to a mock
-display.
-
-The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
-with embedded-graphics.
-
-```rust
-use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
-use tinytga::Tga;
-
-let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!("../tests/rust-rle-bw-topleft.tga")).unwrap();
-
-let image = Image::new(&tga, Point::zero());
-
-image.draw(&mut display)?;
-```
+`tinytga` uses different code paths to draw images with different `ImageOrigin` .
+The performance difference between the origins will depend on the display driver, but using
+images with the origin at the top left corner will generally result in the best performance.
 
 [embedded-graphics]: https://docs.rs/embedded-graphics
 

@@ -71,13 +71,13 @@ pub trait ImageDrawableExt: Sized {
     /// display, with their top-left corners positioned at `(100, 100)` and `(100, 140)`.
     ///
     /// ```rust
-    /// use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*, primitives::Rectangle};
+    /// use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
     /// # use embedded_graphics::mock_display::MockDisplay as Display;
     /// use tinytga::Tga;
     ///
-    /// let mut display: Display<Rgb565> = Display::default();
+    /// let mut display: Display<Rgb888> = Display::default();
     ///
-    /// let sprite_atlas: Tga<Rgb565> = Tga::from_slice(include_bytes!(
+    /// let sprite_atlas: Tga<Rgb888> = Tga::from_slice(include_bytes!(
     ///     "../../../assets/tiles.tga"
     /// ))
     /// .unwrap();
