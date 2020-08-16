@@ -4,10 +4,14 @@ use crate::{
     geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::circle::{distance_iterator::DistanceIterator, Circle},
     primitives::rectangle::{self, Rectangle},
     primitives::Primitive,
+    primitives::{
+        circle::{distance_iterator::DistanceIterator, Circle},
+        OffsetOutline,
+    },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
+    SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the circle border
@@ -98,6 +102,17 @@ where
         D: DrawTarget<Color = C>,
     {
         display.draw_iter(self.into_pixels())
+    }
+}
+
+impl<C> Dimensions for Styled<Circle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn bounding_box(&self) -> Rectangle {
+        let offset = self.style.outside_stroke_width().saturating_cast();
+
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
