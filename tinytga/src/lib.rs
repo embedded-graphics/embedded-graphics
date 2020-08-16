@@ -212,7 +212,7 @@ impl<'a, C> Tga<'a, C> {
 
     /// Returns the TGA header.
     ///
-    /// The returned object is a direct representation of the header in contained
+    /// The returned object is a direct representation of the header contained
     /// in the TGA file. Most of the information contained in the header is also
     /// available using other methods, which are the preferred way of accessing
     /// them.
