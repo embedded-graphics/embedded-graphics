@@ -1,8 +1,9 @@
+use super::TextStyle;
 use crate::{
+    fonts::Font,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    prelude::Primitive,
-    primitives::{OffsetOutline, Rectangle},
+    primitives::{OffsetOutline, Primitive, Rectangle},
     style::PrimitiveStyle,
     transform::Transform,
     SaturatingCast,
@@ -43,11 +44,24 @@ where
     }
 }
 
-impl<T, S> Dimensions for Styled<T, S>
+impl<T, C> Dimensions for Styled<T, PrimitiveStyle<C>>
 where
     T: Dimensions,
+    C: PixelColor,
 {
-    //FIXME: The bounding box for a styled primitive should use the stroke width and alignment.
+    fn bounding_box(&self) -> Rectangle {
+        let offset = self.style.outside_stroke_width().saturating_cast();
+
+        self.primitive.bounding_box().offset(offset)
+    }
+}
+
+impl<T, C, F> Dimensions for Styled<T, TextStyle<C, F>>
+where
+    T: Dimensions,
+    C: PixelColor,
+    F: Font,
+{
     fn bounding_box(&self) -> Rectangle {
         self.primitive.bounding_box()
     }
