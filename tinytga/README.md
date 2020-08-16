@@ -7,8 +7,8 @@
 
 ## [Documentation](https://docs.rs/tinytga)
 
-A small TGA parser designed for embedded, no-std environments but usable anywhere. Beyond
-parsing the image header, no other allocations are made.
+A small TGA parser designed for use with [embedded-graphics] targetting no-std environments but
+usable anywhere. Beyond parsing the image header, no other allocations are made.
 
 tinytga provides two methods of accessing the pixel data inside a TGA file. The most convenient
 way is to use a color type provided by [embedded-graphics] to define the format stored inside
