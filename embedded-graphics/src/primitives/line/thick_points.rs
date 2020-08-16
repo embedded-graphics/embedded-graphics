@@ -34,7 +34,7 @@ impl Side {
 /// between the left and right side of original line to keep the resulting thick
 /// line symmetric.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-struct ParallelsIterator {
+pub(in crate::primitives::line) struct ParallelsIterator {
     /// Parameters used for moves along the parallel lines.
     parallel_parameters: BresenhamParameters,
 
@@ -81,7 +81,8 @@ struct ParallelsIterator {
 }
 
 impl ParallelsIterator {
-    fn new(mut line: &Line, thickness: i32) -> Self {
+    /// Create a new parallels iterator.
+    pub fn new(mut line: &Line, thickness: i32) -> Self {
         let start_point = line.start;
 
         // The lines orientation is undefined if start and end point are equal.

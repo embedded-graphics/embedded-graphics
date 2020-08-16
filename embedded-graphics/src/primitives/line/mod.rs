@@ -7,7 +7,7 @@ mod thick_points;
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{Primitive, Rectangle},
+    primitives::{line::thick_points::ParallelsIterator, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -77,6 +77,35 @@ impl Line {
         let delta = Point::new(delta.y, -delta.x);
 
         Line::new(self.start, self.start + delta)
+    }
+
+    /// Get two lines representing the left and right edges of the thick line.
+    fn extents(&self, thickness: i32) -> (Line, Line) {
+        let mut it = ParallelsIterator::new(self, thickness);
+
+        let mut l_start = self.start;
+        let mut r_start = self.start;
+
+        loop {
+            if let Some((bresenham, _)) = it.next() {
+                r_start = bresenham.point;
+            } else {
+                break;
+            }
+
+            if let Some((bresenham, _)) = it.next() {
+                l_start = bresenham.point;
+            } else {
+                break;
+            }
+        }
+
+        let delta = self.end - self.start;
+
+        (
+            Line::new(l_start, l_start + delta),
+            Line::new(r_start, r_start + delta),
+        )
     }
 }
 
