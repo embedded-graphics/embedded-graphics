@@ -1,9 +1,13 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::{polyline, polyline::Polyline, Primitive},
+    primitives::{
+        polyline::{self, Polyline},
+        Primitive, Rectangle,
+    },
     style::{PrimitiveStyle, Styled},
 };
 
@@ -72,6 +76,17 @@ where
     }
 }
 
+impl<C> Dimensions for Styled<Polyline<'_>, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    // NOTE: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
+    // box impl.
+    fn bounding_box(&self) -> Rectangle {
+        self.primitive.bounding_box()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -135,5 +150,18 @@ mod tests {
             .into_styled::<Rgb565>(PrimitiveStyleBuilder::new().stroke_width(1).build())
             .into_pixels()
             .eq(core::iter::empty()));
+    }
+
+    #[test]
+    fn bounding_box() {
+        let points: [Point; 3] = [Point::new(2, 5), Point::new(3, 4), Point::new(4, 3)];
+
+        let pl = Polyline::new(&points);
+
+        assert_eq!(
+            pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 10))
+                .bounding_box(),
+            pl.bounding_box()
+        )
     }
 }
