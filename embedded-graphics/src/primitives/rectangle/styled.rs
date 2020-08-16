@@ -1,15 +1,16 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         rectangle::{Points, Rectangle},
-        ContainsPoint, Primitive,
+        ContainsPoint, OffsetOutline, Primitive,
     },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     transform::Transform,
+    SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the rect border
@@ -151,6 +152,17 @@ where
         }
 
         Ok(())
+    }
+}
+
+impl<C> Dimensions for Styled<Rectangle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn bounding_box(&self) -> Rectangle {
+        let offset = self.style.outside_stroke_width().saturating_cast();
+
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -377,5 +389,36 @@ mod tests {
         let moved = rectangle.translate(Point::new(1, 2));
 
         assert_eq!(moved, Rectangle::new(Point::new(1, 2), Size::new_equal(10)));
+    }
+
+    #[test]
+    fn bounding_box() {
+        let rectangle = Rectangle::new(Point::new(10, 10), Size::new(15, 20));
+
+        let base = PrimitiveStyleBuilder::new()
+            .stroke_color(BinaryColor::On)
+            .stroke_width(5);
+
+        assert_eq!(
+            rectangle
+                .into_styled(base.stroke_alignment(StrokeAlignment::Center).build())
+                .bounding_box(),
+            Rectangle::new(Point::new(8, 8), Size::new(19, 24)),
+            "center"
+        );
+        assert_eq!(
+            rectangle
+                .into_styled(base.stroke_alignment(StrokeAlignment::Inside).build())
+                .bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(15, 20)),
+            "inside"
+        );
+        assert_eq!(
+            rectangle
+                .into_styled(base.stroke_alignment(StrokeAlignment::Outside).build())
+                .bounding_box(),
+            Rectangle::new(Point::new(5, 5), Size::new(25, 30)),
+            "outside"
+        );
     }
 }
