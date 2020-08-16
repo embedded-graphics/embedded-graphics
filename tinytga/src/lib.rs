@@ -1,4 +1,4 @@
-//! A small TGA parser designed for use with [embedded-graphics] targetting no-std environments but 
+//! A small TGA parser designed for use with [embedded-graphics] targetting no-std environments but
 //! usable anywhere. Beyond parsing the image header, no other allocations are made.
 //!
 //! tinytga provides two methods of accessing the pixel data inside a TGA file. The most convenient
@@ -267,11 +267,11 @@ where
     /// Parse a TGA image from a byte slice
     ///
     /// # Errors
-    /// 
-    /// If the bit depth of the source image does not match the bit depth of the output color type 
+    ///
+    /// If the bit depth of the source image does not match the bit depth of the output color type
     /// `C`, this method will return a [`ParseError::MismatchedBpp`] error.
     ///
-    /// [`ParseError::MismatchedBpp`]: ../ass.html
+    /// [`ParseError::MismatchedBpp`]: enum.ParseError.html#variant.MismatchedBpp
     pub fn from_slice(data: &'a [u8]) -> Result<Self, ParseError> {
         let tga = Tga::from_slice_common(data)?;
 
