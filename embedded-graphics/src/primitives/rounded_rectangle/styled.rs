@@ -97,12 +97,12 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable,
-        geometry::{Point, Size},
+        geometry::{Dimensions, Point, Size},
         iterator::IntoPixels,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::{rectangle::Rectangle, CornerRadii, Primitive},
-        style::PrimitiveStyleBuilder,
+        primitives::{rectangle::Rectangle, CornerRadii, OffsetOutline, Primitive},
+        style::{PrimitiveStyleBuilder, StrokeAlignment},
     };
 
     #[test]
@@ -279,6 +279,37 @@ mod tests {
                 "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
                 "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
             ])
+        );
+    }
+
+    #[test]
+    fn styled_dimensions() {
+        let base = PrimitiveStyleBuilder::new()
+            .stroke_width(10)
+            .stroke_color(Rgb888::RED);
+
+        let inside = base.stroke_alignment(StrokeAlignment::Inside).build();
+        let outside = base.stroke_alignment(StrokeAlignment::Outside).build();
+        let center = base.stroke_alignment(StrokeAlignment::Center).build();
+
+        let item = RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(40, 20)),
+            CornerRadii {
+                top_left: Size::new(20, 20),
+                top_right: Size::new(20, 20),
+                bottom_right: Size::new(0, 0),
+                bottom_left: Size::new(0, 0),
+            },
+        );
+
+        assert_eq!(item.into_styled(inside).bounding_box(), item.bounding_box());
+        assert_eq!(
+            item.into_styled(outside).bounding_box(),
+            item.bounding_box().offset(10)
+        );
+        assert_eq!(
+            item.into_styled(center).bounding_box(),
+            item.bounding_box().offset(5)
         );
     }
 }
