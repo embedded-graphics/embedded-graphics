@@ -1,11 +1,15 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Point, Size},
+    geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
+    primitives::{
+        ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
+        OffsetOutline, Rectangle,
+    },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
+    SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the ellipse border
@@ -100,6 +104,17 @@ where
         D: DrawTarget<Color = C>,
     {
         display.draw_iter(self.into_pixels())
+    }
+}
+
+impl<C> Dimensions for Styled<Ellipse, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn bounding_box(&self) -> Rectangle {
+        let offset = self.style.outside_stroke_width().saturating_cast();
+
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -292,5 +307,28 @@ mod tests {
 
         assert_eq!(display_center, display_inside);
         assert_eq!(display_center, display_outside);
+    }
+
+    #[test]
+    fn bounding_boxes() {
+        const CENTER: Point = Point::new(15, 15);
+        const SIZE: Size = Size::new(15, 25);
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let center = Ellipse::with_center(CENTER, SIZE).into_styled(style);
+        let inside = Ellipse::with_center(CENTER, SIZE + Size::new_equal(2)).into_styled(
+            PrimitiveStyleBuilder::from(&style)
+                .stroke_alignment(StrokeAlignment::Inside)
+                .build(),
+        );
+        let outside = Ellipse::with_center(CENTER, SIZE - Size::new_equal(4)).into_styled(
+            PrimitiveStyleBuilder::from(&style)
+                .stroke_alignment(StrokeAlignment::Outside)
+                .build(),
+        );
+
+        assert_eq!(center.bounding_box(), inside.bounding_box());
+        assert_eq!(outside.bounding_box(), inside.bounding_box());
     }
 }
