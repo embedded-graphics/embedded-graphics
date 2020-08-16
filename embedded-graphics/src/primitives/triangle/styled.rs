@@ -1,11 +1,15 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::triangle::{
-        scanline_iterator::{PointType, ScanlineIterator},
-        Triangle,
+    primitives::{
+        triangle::{
+            scanline_iterator::{PointType, ScanlineIterator},
+            Triangle,
+        },
+        Rectangle,
     },
     style::{PrimitiveStyle, Styled},
 };
@@ -87,6 +91,17 @@ where
         D: DrawTarget<Color = C>,
     {
         display.draw_iter(self.into_pixels())
+    }
+}
+
+impl<C> Dimensions for Styled<Triangle, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    // FIXME: Triangles don't support stroke width or offset at the moment. This method should be
+    // fixed when support is implemented.
+    fn bounding_box(&self) -> Rectangle {
+        self.primitive.bounding_box()
     }
 }
 
@@ -261,5 +276,14 @@ mod tests {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
         styled.draw(&mut display).unwrap();
+    }
+
+    #[test]
+    fn bounding_box() {
+        let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
+
+        let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 30));
+
+        assert_eq!(triangle.bounding_box(), styled.bounding_box());
     }
 }
