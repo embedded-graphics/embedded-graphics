@@ -11,7 +11,7 @@
 - **(breaking)** [#407](https://github.com/jamwaffles/embedded-graphics/pull/407) The `image_descriptor` in `TgaHeader` was replaced by `image_origin` and `alpha_channel_bits`.
 - **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) To support the new embedded-graphics 0.7 image API a color type parameter was added to `Tga`.
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) The `graphics` feature was removed and the `embedded-graphics` dependency is now non optional.
-- **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) `Tga` does no longer implement `IntoIterator`. Pixel iterators can now be created using the `pixels` an `raw_pixels` methods.
+- **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) `Tga` no longer implements `IntoIterator`. Pixel iterators can now be created using the `pixels` and `raw_pixels` methods.
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) `Tga::from_slice` now checks that the specified color type matches the bit depth of the image.
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) The `TgaFooter` struct was replaced by the `raw_developer_dictionary` and `raw_extension_area` methods in `Tga`.
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) `Tga::width` and `Tga::height` were replaced by `Tga::size` which requires `embedded_graphics::geometry::OriginDimensions` to be in scope (also included in the embedded-graphics `prelude`).
