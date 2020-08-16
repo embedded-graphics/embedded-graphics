@@ -1,9 +1,13 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::line::{thick_points::ThickPoints, Line},
+    primitives::{
+        line::{thick_points::ThickPoints, Line},
+        Rectangle,
+    },
     style::{PrimitiveStyle, Styled},
     SaturatingCast,
 };
@@ -77,5 +81,74 @@ where
         D: DrawTarget<Color = C>,
     {
         display.draw_iter(self.into_pixels())
+    }
+}
+
+impl<C> Dimensions for Styled<Line, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    fn bounding_box(&self) -> Rectangle {
+        let (l, r) = self.primitive.extents(self.style.stroke_width as i32);
+
+        let min = l
+            .start
+            .component_min(l.end)
+            .component_min(r.start)
+            .component_min(r.end);
+        let max = l
+            .start
+            .component_max(l.end)
+            .component_max(r.start)
+            .component_max(r.end);
+
+        Rectangle::with_corners(min, max)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        geometry::{Point, Size},
+        pixelcolor::{Rgb888, RgbColor},
+        primitives::{Primitive, Rectangle},
+    };
+
+    #[test]
+    fn bounding_box() {
+        let style = PrimitiveStyle::with_stroke(Rgb888::RED, 10);
+
+        assert_eq!(
+            Line::new(Point::new(10, 20), Point::new(10, 50))
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::new(6, 20), Size::new(10, 31)),
+            "vertical line"
+        );
+
+        assert_eq!(
+            Line::new(Point::new(20, 20), Point::new(50, 20))
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::new(20, 15), Size::new(31, 10)),
+            "horizontal line"
+        );
+
+        assert_eq!(
+            Line::new(Point::new(50, 50), Point::new(70, 70))
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::new(47, 47), Size::new(28, 27)),
+            "45deg line"
+        );
+
+        assert_eq!(
+            Line::new(Point::new(50, 50), Point::new(70, 70))
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
+                .bounding_box(),
+            Line::new(Point::new(50, 50), Point::new(70, 70)).bounding_box(),
+            "1px line"
+        );
     }
 }

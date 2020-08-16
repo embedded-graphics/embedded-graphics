@@ -113,7 +113,7 @@ impl BresenhamParameters {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Bresenham {
     /// Current point.
-    point: Point,
+    pub point: Point,
 
     /// Error accumulator.
     error: i32,
