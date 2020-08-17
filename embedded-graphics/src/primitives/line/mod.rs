@@ -9,7 +9,10 @@ pub use crate::primitives::line::thick_points::Side;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        line::bresenham::{Bresenham, BresenhamParameters, BresenhamPoint},
+        line::{
+            bresenham::{Bresenham, BresenhamParameters, BresenhamPoint},
+            thick_points::ParallelsIterator,
+        },
         Primitive, Rectangle, Triangle,
     },
     style::StrokeAlignment,
@@ -276,81 +279,46 @@ impl Line {
     /// Outside stroke alignment is always on the left side of the line. This is compatible with
     /// clockwise-wound polygons and triangles.
     pub fn extents(&self, thickness: i32, alignment: StrokeAlignment) -> (Line, Line) {
-        // Total delta, perpendicular to the left of the line. This uses some Bresenham constructs
-        // to walk along the perpendicular line until the correct thickness is reached.
-        let delta = {
-            // Counterclockwise perpendicular to original line
-            let perp = self.perpendicular();
+        let mut it = ParallelsIterator::new(self, thickness);
 
-            let parameters = BresenhamParameters::new(&perp);
-            let mut bresenham = Bresenham::new(self.start);
+        let mut l_start = self.start;
+        let mut r_start = self.start;
 
-            // TODO: Dedupe here and line/mod.rs into a method on Line
-            let delta = (perp.end - perp.start).abs();
-            let thickness_threshold = 4 * thickness.pow(2) * delta.length_squared();
-
-            let mut thickness_accumulator =
-                (parameters.error_step.minor + parameters.error_step.major) / 2;
-
-            let mut point = Point::zero();
-
-            while thickness_accumulator.pow(2) < thickness_threshold {
-                let p = bresenham.next_all(&parameters);
-
-                point = match p {
-                    BresenhamPoint::Normal(p) => {
-                        thickness_accumulator += parameters.error_step.minor;
-
-                        p
-                    }
-                    BresenhamPoint::Extra(p) => {
-                        thickness_accumulator += parameters.error_step.major;
-
-                        p
-                    }
-                }
+        loop {
+            if let Some((bresenham, _)) = it.next() {
+                r_start = bresenham.point;
+            } else {
+                break;
             }
 
-            // Center point around origin
-            point - self.start
-        };
+            if let Some((bresenham, _)) = it.next() {
+                l_start = bresenham.point;
+            } else {
+                break;
+            }
+        }
 
-        // Slow, float-based algorithm. Still causes issues with degenerate filler triangle.
-        // let delta = {
-        //     // Left-side perpendicular
-        //     let perp = self.perpendicular();
-
-        //     let thickness = thickness as f32;
-        //     let len = (perp.length_squared() as f32).sqrt();
-
-        //     let Point { x, y } = perp.end - perp.start;
-
-        //     let x = (x as f32 / len) * thickness;
-        //     let y = (y as f32 / len) * thickness;
-
-        //     Point::new(x as i32, y as i32)
-        // };
+        let delta = self.end - self.start;
 
         match alignment {
-            StrokeAlignment::Center => {
-                let l_delta = delta / 2;
-
-                // Bias lines of even width to the right (inside). This mirrors the behaviour of the
-                // thick line primitive.
-                let r_delta = -(delta + Point::new_equal(1)) / 2;
-
-                let start_l = self.start + l_delta;
-                let start_r = self.start + r_delta;
-
-                let end_l = self.end + l_delta;
-                let end_r = self.end + r_delta;
-
-                (Line::new(start_l, end_l), Line::new(start_r, end_r))
-            }
+            StrokeAlignment::Center => (
+                Line::new(l_start, l_start + delta),
+                Line::new(r_start, r_start + delta),
+            ),
             // Left
-            StrokeAlignment::Outside => (Line::new(self.start + delta, self.end + delta), *self),
+            StrokeAlignment::Outside => {
+                let width_delta = r_start - l_start;
+                let start = self.start - width_delta;
+
+                (Line::new(start, start + delta), *self)
+            }
             // Right
-            StrokeAlignment::Inside => (*self, Line::new(self.start - delta, self.end - delta)),
+            StrokeAlignment::Inside => {
+                let width_delta = r_start - l_start;
+                let start = self.start + width_delta;
+
+                (*self, Line::new(start, start + delta))
+            }
         }
     }
 
