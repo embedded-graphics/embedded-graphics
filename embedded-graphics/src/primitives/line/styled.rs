@@ -115,6 +115,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
+        mock_display::MockDisplay,
         pixelcolor::{Rgb888, RgbColor},
         primitives::{Primitive, Rectangle},
     };
@@ -123,37 +124,54 @@ mod tests {
     fn bounding_box() {
         let style = PrimitiveStyle::with_stroke(Rgb888::RED, 10);
 
+        let vertical = Line::new(Point::new(10, 20), Point::new(10, 50)).into_styled(style);
+
+        let horizontal = Line::new(Point::new(20, 20), Point::new(50, 20)).into_styled(style);
+
+        let diagonal = Line::new(Point::new(20, 20), Point::new(60, 60)).into_styled(style);
+
+        let thin = Line::new(Point::new(50, 50), Point::new(60, 60))
+            .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1));
+
         assert_eq!(
-            Line::new(Point::new(10, 20), Point::new(10, 50))
-                .into_styled(style)
-                .bounding_box(),
+            vertical.bounding_box(),
             Rectangle::new(Point::new(6, 20), Size::new(10, 31)),
             "vertical line"
         );
 
         assert_eq!(
-            Line::new(Point::new(20, 20), Point::new(50, 20))
-                .into_styled(style)
-                .bounding_box(),
+            horizontal.bounding_box(),
             Rectangle::new(Point::new(20, 15), Size::new(31, 10)),
             "horizontal line"
         );
 
         assert_eq!(
-            Line::new(Point::new(50, 50), Point::new(70, 70))
-                .into_styled(style)
-                .bounding_box(),
-            Rectangle::new(Point::new(47, 47), Size::new(28, 27)),
+            diagonal.bounding_box(),
+            Rectangle::new(Point::new(17, 17), Size::new(48, 47)),
             "45deg line"
         );
 
         assert_eq!(
-            Line::new(Point::new(50, 50), Point::new(70, 70))
-                .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
-                .bounding_box(),
-            Line::new(Point::new(50, 50), Point::new(70, 70)).bounding_box(),
+            thin.bounding_box(),
+            Rectangle::with_corners(Point::new(50, 50), Point::new(60, 60)),
             "1px line"
         );
+
+        let mut display = MockDisplay::new();
+        vertical.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), vertical.bounding_box());
+
+        let mut display = MockDisplay::new();
+        horizontal.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), horizontal.bounding_box());
+
+        let mut display = MockDisplay::new();
+        diagonal.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), diagonal.bounding_box());
+
+        let mut display = MockDisplay::new();
+        thin.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), thin.bounding_box());
     }
 
     #[test]

@@ -291,6 +291,10 @@ mod tests {
         let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 30));
 
         assert_eq!(triangle.bounding_box(), styled.bounding_box());
+
+        let mut display = MockDisplay::new();
+        styled.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), styled.bounding_box());
     }
 
     #[test]
