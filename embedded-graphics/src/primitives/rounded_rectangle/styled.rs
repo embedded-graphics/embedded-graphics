@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::Dimensions,
+    geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -99,9 +99,13 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+        if self.style.is_transparent() {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        } else {
+            let offset = self.style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+            self.primitive.bounding_box().offset(offset)
+        }
     }
 }
 
@@ -323,6 +327,26 @@ mod tests {
         assert_eq!(
             item.into_styled(center).bounding_box(),
             item.bounding_box().offset(5)
+        );
+    }
+
+    #[test]
+    fn transparent_bounding_box() {
+        let rect = RoundedRectangle::new(
+            Rectangle::new(Point::new(5, 5), Size::new(11, 14)),
+            CornerRadii {
+                top_left: Size::new(20, 20),
+                top_right: Size::new(20, 20),
+                bottom_right: Size::new(0, 0),
+                bottom_left: Size::new(0, 0),
+            },
+        );
+
+        let styled = rect.into_styled::<Rgb888>(PrimitiveStyle::new());
+
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(rect.bounding_box().center(), Size::zero())
         );
     }
 }

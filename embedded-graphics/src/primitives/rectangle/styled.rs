@@ -160,9 +160,13 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+        if self.style.is_transparent() {
+            Rectangle::new(self.primitive.center(), Size::zero())
+        } else {
+            let offset = self.style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+            self.primitive.bounding_box().offset(offset)
+        }
     }
 }
 
@@ -419,6 +423,18 @@ mod tests {
                 .bounding_box(),
             Rectangle::new(Point::new(5, 5), Size::new(25, 30)),
             "outside"
+        );
+    }
+
+    #[test]
+    fn transparent_bounding_box() {
+        let rect = Rectangle::new(Point::new(5, 5), Size::new(11, 14));
+
+        let styled = rect.into_styled::<BinaryColor>(PrimitiveStyle::new());
+
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(rect.center(), Size::zero())
         );
     }
 }

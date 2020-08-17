@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::Dimensions,
+    geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -156,9 +156,13 @@ where
 {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+        if self.style.is_transparent() {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        } else {
+            let offset = self.style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+            self.primitive.bounding_box().offset(offset)
+        }
     }
 }
 
@@ -310,6 +314,10 @@ mod tests {
                 .stroke_alignment(StrokeAlignment::Outside)
                 .build(),
         );
+        let empty = Sector::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg())
+            .into_styled::<BinaryColor>(PrimitiveStyle::new());
+
+        assert_eq!(empty.bounding_box(), Rectangle::new(CENTER, Size::zero()));
 
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());

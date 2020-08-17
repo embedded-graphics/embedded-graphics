@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::Dimensions,
+    geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -83,7 +83,11 @@ where
     // NOTE: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
     // box impl.
     fn bounding_box(&self) -> Rectangle {
-        self.primitive.bounding_box()
+        if self.style.is_transparent() {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        } else {
+            self.primitive.bounding_box()
+        }
     }
 }
 
@@ -162,6 +166,12 @@ mod tests {
             pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 10))
                 .bounding_box(),
             pl.bounding_box()
-        )
+        );
+
+        assert_eq!(
+            pl.into_styled::<Rgb565>(PrimitiveStyle::new())
+                .bounding_box(),
+            Rectangle::new(pl.bounding_box().center(), Size::zero())
+        );
     }
 }

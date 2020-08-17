@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::Dimensions,
+    geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -101,7 +101,13 @@ where
     // FIXME: Triangles don't support stroke width or offset at the moment. This method should be
     // fixed when support is implemented.
     fn bounding_box(&self) -> Rectangle {
-        self.primitive.bounding_box()
+        let bb = self.primitive.bounding_box();
+
+        if self.style.is_transparent() {
+            Rectangle::new(bb.center(), Size::zero())
+        } else {
+            bb
+        }
     }
 }
 
@@ -285,5 +291,17 @@ mod tests {
         let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 30));
 
         assert_eq!(triangle.bounding_box(), styled.bounding_box());
+    }
+
+    #[test]
+    fn transparent_bounding_box() {
+        let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
+
+        let styled = triangle.into_styled::<BinaryColor>(PrimitiveStyle::new());
+
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(triangle.bounding_box().center(), Size::zero())
+        );
     }
 }
