@@ -88,8 +88,13 @@ impl Primitive for Triangle {
 
 impl ContainsPoint for Triangle {
     fn contains(&self, point: Point) -> bool {
+        // Skip expensive calculations below if point is outside the bounding box
+        if !self.bounding_box().contains(point) {
+            return false;
+        }
+
         // Skip expensive point-on-line check below if point is definitely inside triangle
-        if self.mathematical_contains(&point) {
+        if self.in_mathematical_triangle(&point) {
             return true;
         }
 
@@ -185,10 +190,14 @@ impl Triangle {
     /// Point inside triangle, ignoring pixels that partially lie outside triangle lines.
     pub(self) fn mathematical_contains(&self, point: &Point) -> bool {
         // Skip expensive calculations below if point is outside the bounding box
-        if !self.bounding_box().contains(*point) {
-            return false;
+        if self.bounding_box().contains(*point) {
+            self.in_mathematical_triangle(point)
+        } else {
+            false
         }
+    }
 
+    fn in_mathematical_triangle(&self, point: &Point) -> bool {
         let Self { p1, p2, p3 } = self;
         let p = point;
 
