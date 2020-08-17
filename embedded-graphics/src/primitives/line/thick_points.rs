@@ -81,7 +81,7 @@ pub(in crate::primitives::line) struct ParallelsIterator {
 }
 
 impl ParallelsIterator {
-    /// Create a new parallels iterator.
+    /// Creates a new parallels iterator.
     pub fn new(mut line: &Line, thickness: i32) -> Self {
         let start_point = line.start;
 
