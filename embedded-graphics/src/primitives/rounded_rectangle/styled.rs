@@ -310,7 +310,7 @@ mod tests {
         let center = base.stroke_alignment(StrokeAlignment::Center).build();
 
         let item = RoundedRectangle::new(
-            Rectangle::new(Point::zero(), Size::new(40, 20)),
+            Rectangle::new(Point::new(10, 10), Size::new(40, 20)),
             CornerRadii {
                 top_left: Size::new(20, 20),
                 top_right: Size::new(20, 20),
@@ -319,15 +319,23 @@ mod tests {
             },
         );
 
-        assert_eq!(item.into_styled(inside).bounding_box(), item.bounding_box());
-        assert_eq!(
-            item.into_styled(outside).bounding_box(),
-            item.bounding_box().offset(10)
-        );
-        assert_eq!(
-            item.into_styled(center).bounding_box(),
-            item.bounding_box().offset(5)
-        );
+        let center = item.into_styled(center);
+        let inside = item.into_styled(inside);
+        let outside = item.into_styled(outside);
+
+        assert_eq!(center.bounding_box(), item.bounding_box().offset(5));
+        assert_eq!(inside.bounding_box(), item.bounding_box());
+        assert_eq!(outside.bounding_box(), item.bounding_box().offset(10));
+
+        let mut display = MockDisplay::new();
+        center.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), center.bounding_box());
+        let mut display = MockDisplay::new();
+        inside.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), inside.bounding_box());
+        let mut display = MockDisplay::new();
+        outside.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), outside.bounding_box());
     }
 
     #[test]

@@ -300,6 +300,40 @@ mod tests {
     }
 
     #[test]
+    fn bounding_boxes() {
+        const CENTER: Point = Point::new(15, 15);
+        const SIZE: u32 = 10;
+
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+
+        let center = Circle::with_center(CENTER, SIZE).into_styled(style);
+
+        let inside = Circle::with_center(CENTER, SIZE + 2).into_styled(
+            PrimitiveStyleBuilder::from(&style)
+                .stroke_alignment(StrokeAlignment::Inside)
+                .build(),
+        );
+
+        let outside = Circle::with_center(CENTER, SIZE - 4).into_styled(
+            PrimitiveStyleBuilder::from(&style)
+                .stroke_alignment(StrokeAlignment::Outside)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+        center.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), center.bounding_box());
+
+        let mut display = MockDisplay::new();
+        outside.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), outside.bounding_box());
+
+        let mut display = MockDisplay::new();
+        inside.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), inside.bounding_box());
+    }
+
+    #[test]
     fn transparent_bounding_box() {
         let circle =
             Circle::new(Point::new(5, 5), 11).into_styled::<BinaryColor>(PrimitiveStyle::new());

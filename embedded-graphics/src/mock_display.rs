@@ -200,6 +200,7 @@ where
     pixels: [Option<C>; SIZE * SIZE],
     allow_overdraw: bool,
     allow_out_of_bounds_drawing: bool,
+    affected_area: Option<Rectangle>,
 }
 
 impl<C> MockDisplay<C>
@@ -234,8 +235,24 @@ where
 
     /// Changes the value of a pixel without bounds checking.
     pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+        if let Some(ref mut area) = self.affected_area {
+            *area = Rectangle::with_corners(
+                area.top_left.component_min(point),
+                area.bottom_right()
+                    .map(|bottom_right| bottom_right.component_max(point))
+                    .unwrap_or(point),
+            );
+        } else {
+            self.affected_area = Some(Rectangle::new(point, Size::new_equal(1)));
+        }
+
         let i = point.x + point.y * SIZE as i32;
         self.pixels[i as usize] = color;
+    }
+
+    /// Get the affected area of the display.
+    pub fn affected_area(&self) -> Option<Rectangle> {
+        self.affected_area
     }
 
     /// Changes the color of a pixel.
@@ -469,6 +486,7 @@ where
             pixels: [None; SIZE * SIZE],
             allow_overdraw: false,
             allow_out_of_bounds_drawing: false,
+            affected_area: None,
         }
     }
 }

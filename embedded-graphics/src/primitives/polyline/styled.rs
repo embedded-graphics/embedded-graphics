@@ -162,16 +162,19 @@ mod tests {
 
         let pl = Polyline::new(&points);
 
-        assert_eq!(
-            pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 10))
-                .bounding_box(),
-            pl.bounding_box()
-        );
+        let styled = pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 10));
+
+        assert_eq!(styled.bounding_box(), pl.bounding_box());
+
+        let mut display = MockDisplay::new();
+        styled.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), styled.bounding_box());
 
         assert_eq!(
             pl.into_styled::<Rgb565>(PrimitiveStyle::new())
                 .bounding_box(),
-            Rectangle::new(pl.bounding_box().center(), Size::zero())
+            Rectangle::new(pl.bounding_box().center(), Size::zero()),
+            "transparent"
         );
     }
 }

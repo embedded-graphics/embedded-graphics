@@ -403,27 +403,36 @@ mod tests {
             .stroke_color(BinaryColor::On)
             .stroke_width(5);
 
+        let center = rectangle.into_styled(base.stroke_alignment(StrokeAlignment::Center).build());
+        let inside = rectangle.into_styled(base.stroke_alignment(StrokeAlignment::Inside).build());
+        let outside =
+            rectangle.into_styled(base.stroke_alignment(StrokeAlignment::Outside).build());
+
         assert_eq!(
-            rectangle
-                .into_styled(base.stroke_alignment(StrokeAlignment::Center).build())
-                .bounding_box(),
+            center.bounding_box(),
             Rectangle::new(Point::new(8, 8), Size::new(19, 24)),
             "center"
         );
         assert_eq!(
-            rectangle
-                .into_styled(base.stroke_alignment(StrokeAlignment::Inside).build())
-                .bounding_box(),
+            inside.bounding_box(),
             Rectangle::new(Point::new(10, 10), Size::new(15, 20)),
             "inside"
         );
         assert_eq!(
-            rectangle
-                .into_styled(base.stroke_alignment(StrokeAlignment::Outside).build())
-                .bounding_box(),
+            outside.bounding_box(),
             Rectangle::new(Point::new(5, 5), Size::new(25, 30)),
             "outside"
         );
+
+        let mut display = MockDisplay::new();
+        center.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), center.bounding_box());
+        let mut display = MockDisplay::new();
+        inside.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), inside.bounding_box());
+        let mut display = MockDisplay::new();
+        outside.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area().unwrap(), outside.bounding_box());
     }
 
     #[test]

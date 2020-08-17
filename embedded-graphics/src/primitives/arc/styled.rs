@@ -209,6 +209,11 @@ mod tests {
 
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());
+
+        // TODO: Uncomment when arc bounding box is fixed in #405
+        // let mut display = MockDisplay::new();
+        // center.draw(&mut display).unwrap();
+        // assert_eq!(display.affected_area().unwrap(), center.bounding_box());
     }
 
     #[test]
