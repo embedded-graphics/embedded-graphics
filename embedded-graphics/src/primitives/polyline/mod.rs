@@ -122,13 +122,15 @@ impl<'a> Transform for Polyline<'a> {
     ///
     /// let polyline = Polyline::new(&points);
     /// let moved = polyline.translate(Point::new(10, 12));
+    /// let moved2 = moved.translate(Point::new(10, 12));
     ///
     /// assert_eq!(polyline.bounding_box().top_left, Point::new(5, 7));
     /// assert_eq!(moved.bounding_box().top_left, Point::new(15, 19));
+    /// assert_eq!(moved2.bounding_box().top_left, Point::new(25, 31));
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
-            translate: by,
+            translate: self.translate + by,
             ..*self
         }
     }
