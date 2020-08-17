@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::Dimensions,
+    geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -89,20 +89,24 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        let (l, r) = self.primitive.extents(self.style.stroke_width);
+        if self.style.is_transparent() {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        } else {
+            let (l, r) = self.primitive.extents(self.style.stroke_width);
 
-        let min = l
-            .start
-            .component_min(l.end)
-            .component_min(r.start)
-            .component_min(r.end);
-        let max = l
-            .start
-            .component_max(l.end)
-            .component_max(r.start)
-            .component_max(r.end);
+            let min = l
+                .start
+                .component_min(l.end)
+                .component_min(r.start)
+                .component_min(r.end);
+            let max = l
+                .start
+                .component_max(l.end)
+                .component_max(r.start)
+                .component_max(r.end);
 
-        Rectangle::with_corners(min, max)
+            Rectangle::with_corners(min, max)
+        }
     }
 }
 
@@ -149,6 +153,17 @@ mod tests {
                 .bounding_box(),
             Line::new(Point::new(50, 50), Point::new(70, 70)).bounding_box(),
             "1px line"
+        );
+    }
+
+    #[test]
+    fn transparent_bounding_box() {
+        let line = Line::new(Point::new(5, 5), Point::new(11, 14))
+            .into_styled::<Rgb888>(PrimitiveStyle::new());
+
+        assert_eq!(
+            line.bounding_box(),
+            Rectangle::new(line.primitive.bounding_box().center(), Size::zero())
         );
     }
 }
