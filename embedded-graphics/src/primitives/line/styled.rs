@@ -89,7 +89,7 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        let (l, r) = self.primitive.extents(self.style.stroke_width.saturating_cast());
+        let (l, r) = self.primitive.extents(self.style.stroke_width);
 
         let min = l
             .start

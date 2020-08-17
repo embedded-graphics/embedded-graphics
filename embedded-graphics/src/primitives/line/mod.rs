@@ -9,6 +9,7 @@ use crate::{
     geometry::{Dimensions, Point},
     primitives::{line::thick_points::ParallelsIterator, Primitive, Rectangle},
     transform::Transform,
+    SaturatingCast,
 };
 pub use points::Points;
 pub use styled::StyledPixels;
@@ -80,8 +81,10 @@ impl Line {
     }
 
     /// Get two lines representing the left and right edges of the thick line.
-    fn extents(&self, thickness: i32) -> (Line, Line) {
-        let mut it = ParallelsIterator::new(self, thickness);
+    ///
+    /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
+    fn extents(&self, thickness: u32) -> (Line, Line) {
+        let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
 
         let mut l_start = self.start;
         let mut r_start = self.start;
@@ -401,5 +404,15 @@ mod tests {
             Line::new(Point::zero(), Point::new(0, -10)).perpendicular(),
             Line::new(Point::zero(), Point::new(-10, 0))
         );
+    }
+
+    #[test]
+    fn extents_zero_thickness() {
+        let line = Line::new(Point::new(10, 20), Point::new(20, 10));
+
+        let (l, r) = line.extents(0);
+
+        assert_eq!(l, line);
+        assert_eq!(r, line);
     }
 }
