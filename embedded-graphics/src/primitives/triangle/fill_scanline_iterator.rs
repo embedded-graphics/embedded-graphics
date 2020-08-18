@@ -3,7 +3,7 @@ use crate::{
     geometry::Point,
     primitives::{
         line::{self, Line},
-        triangle::{sort_two_x, sort_yx, Triangle},
+        triangle::{sort_yx, Triangle},
         Primitive,
     },
 };
@@ -154,6 +154,20 @@ mod tests {
 
         check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
         check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
+
+        check(Triangle::new(Point::new(30, 0), Point::new(40, 10), Point::new(42, 10)));
+
+        /*
+        for x in 10..15 {
+            for y in 10..15 {
+                for z in 10..15 {
+                    for w in 10..15 {
+                        check(Triangle::new(Point::new(30, 30), Point::new(30, 30) + Point::new(x, y), Point::new(30, 30)+ Point::new(z, w)));
+                    }
+                }
+            }
+        }
+        */
     }
 
     #[test]
