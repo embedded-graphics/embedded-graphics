@@ -1,10 +1,9 @@
 use crate::{
     prelude::Point,
     primitives::{
-        Primitive,
         polyline::triangle_iterator::TriangleIterator,
-        triangle::{self, FillScanlineIterator, Triangle, Points},
-        ContainsPoint,
+        triangle::{self, FillScanlineIterator, Points, Triangle},
+        ContainsPoint, Primitive,
     },
     style::StrokeAlignment,
 };

@@ -163,9 +163,35 @@ impl Iterator for ScanlineIterator {
 mod tests {
     use super::*;
     use crate::{
+        geometry::Dimensions,
         drawable::Pixel, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
-        style::PrimitiveStyle, transform::Transform,
+        primitives::ContainsPoint, style::PrimitiveStyle, transform::Transform,
     };
+
+    #[test]
+    fn points_are_part_of_triangle() {
+        fn check(triangle: Triangle) {
+            assert!(triangle.points().all(|p| triangle.contains(p)));
+        }
+
+        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
+        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
+    }
+
+    #[test]
+    fn all_points_are_generated() {
+        fn check(triangle: Triangle) {
+            let iter_points = triangle.points().collect::<Vec<Point>>();
+            assert!(triangle
+                .bounding_box()
+                .points()
+                .filter(|&p| triangle.contains(p))
+                .all(|p| iter_points.contains(&p)));
+        }
+
+        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
+        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
+    }
 
     #[test]
     fn points_iter() {
