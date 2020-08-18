@@ -18,8 +18,8 @@ use core::{
     borrow::Borrow,
     cmp::{max, min},
 };
-pub use mathematical_points::MathematicalPoints;
 pub use fill_scanline_iterator::FillScanlineIterator;
+pub use mathematical_points::MathematicalPoints;
 pub use points::Points;
 pub use styled::StyledPixels;
 

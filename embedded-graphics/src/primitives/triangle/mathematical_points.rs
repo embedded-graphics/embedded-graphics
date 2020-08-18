@@ -36,7 +36,8 @@ impl Iterator for MathematicalPoints {
     fn next(&mut self) -> Option<Self::Item> {
         let Self { triangle, .. } = self;
 
-        self.rect.find(|point| triangle.mathematical_contains(point))
+        self.rect
+            .find(|point| triangle.mathematical_contains(point))
     }
 }
 

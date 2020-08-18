@@ -3,7 +3,7 @@ use crate::{
     geometry::Point,
     primitives::{
         line::{self, Line},
-        triangle::{sort_yx, sort_two_x, Triangle},
+        triangle::{sort_two_x, sort_yx, Triangle},
         Primitive,
     },
 };
@@ -29,11 +29,15 @@ pub struct FillScanlineIterator {
 
 impl FillScanlineIterator {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-        fn standing_triangle(v1: Point, v2: Point, v3: Point) -> (line::Points, line::Points, line::Points) {
+        fn standing_triangle(
+            v1: Point,
+            v2: Point,
+            v3: Point,
+        ) -> (line::Points, line::Points, line::Points) {
             (
                 line::Points::empty(),
                 Line::new(v1, v3).points(),
-                Line::new(v2, v3).points()
+                Line::new(v2, v3).points(),
             )
         }
 
@@ -44,7 +48,7 @@ impl FillScanlineIterator {
         } else if v2.y == v3.y {
             standing_triangle(v2, v3, v1)
         } else if v1.y == v3.y {
-            standing_triangle(v1, v3, v2)
+            standing_triangle(v3, v1, v2)
         } else {
             let line_a = Line::new(v1, v2).points();
             let line_b = Line::new(v2, v3).points();
@@ -53,14 +57,12 @@ impl FillScanlineIterator {
             (line_a, line_b, line_c)
         };
 
-        let scan_points = if let (Some(a), Some(b)) = (
-            line_a.next().or_else(|| line_b.next()),
-            line_c.next()
-        ) {
-            Line::new(a, b).points()
-        } else {
-            line::Points::empty()
-        };
+        let scan_points =
+            if let (Some(a), Some(b)) = (line_a.next().or_else(|| line_b.next()), line_c.next()) {
+                Line::new(a, b).points()
+            } else {
+                line::Points::empty()
+            };
 
         Self {
             line_a,
@@ -95,7 +97,6 @@ impl FillScanlineIterator {
         let b = self.update_c();
 
         if let (Some(a), Some(b)) = (a, b) {
-            let (a, b) = sort_two_x(a, b);
             self.scan_points = Line::new(a, b).points();
             true
         } else {
@@ -117,5 +118,55 @@ impl Iterator for FillScanlineIterator {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        drawable::Pixel, geometry::Dimensions, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
+        primitives::ContainsPoint, style::PrimitiveStyle, transform::Transform,
+    };
+
+    #[test]
+    fn points_are_part_of_triangle() {
+        fn check(triangle: Triangle) {
+            assert!(triangle.all_points().all(|p| triangle.contains(p)));
+        }
+
+        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
+        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
+
+        check(Triangle::new(Point::new(5, 10), Point::new(14, 10), Point::new(8, 15)));
+        check(Triangle::new(Point::new(5, 10), Point::new(8, 15), Point::new(14, 10)));
+    }
+
+    #[test]
+    fn all_points_are_generated() {
+        fn check(triangle: Triangle) {
+            let iter_points = triangle.all_points().collect::<Vec<Point>>();
+            assert!(triangle
+                .bounding_box()
+                .points()
+                .filter(|&p| triangle.contains(p))
+                .all(|p| iter_points.contains(&p)));
+        }
+
+        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
+        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
+
+        check(Triangle::new(Point::new(5, 10), Point::new(14, 10), Point::new(8, 15)));
+        check(Triangle::new(Point::new(5, 10), Point::new(8, 15), Point::new(14, 10)));
+    }
+
+    #[test]
+    fn off_screen_still_draws_points() {
+        let off_screen = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30));
+        let on_screen = off_screen.translate(Point::new(0, 35));
+
+        assert!(off_screen
+            .points()
+            .eq(on_screen.all_points().map(|p| p - Point::new(0, 35))));
     }
 }
