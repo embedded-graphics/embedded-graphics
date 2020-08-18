@@ -173,12 +173,12 @@ impl LineJoint {
                 .segment_intersection(&second_edge_right)
                 || second_segment_end_edge.segment_intersection(&first_edge_right);
 
-            // Distance from midpoint to miter end point. This arbitrarily picks the left-side
-            // intersection, but the left/right intersections are symmetrical around `mid` anyway.
-            let miter_length_squared = Line::new(mid, l_intersection).length_squared();
-
             // Normal line: non-overlapping line end caps
             if !self_intersection_r && !self_intersection_l {
+                // Distance from midpoint to miter end point. This arbitrarily picks the left-side
+                // intersection, but the left/right intersections are symmetrical around `mid` anyway.
+                let miter_length_squared = Line::new(mid, l_intersection).length_squared();
+
                 // Intersection is within limit at which it will be chopped off into a bevel, so return
                 // a miter.
                 if miter_length_squared <= miter_limit {
