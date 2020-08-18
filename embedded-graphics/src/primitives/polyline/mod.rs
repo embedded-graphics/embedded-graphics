@@ -238,7 +238,22 @@ mod tests {
     }
 
     #[test]
-    fn transform_transformed() {
+    fn translate_does_not_modify_size() {
+        let points = [
+            Point::new(5, 10),
+            Point::new(7, 7),
+            Point::new(5, 8),
+            Point::new(10, 10),
+        ];
+
+        let polyline = Polyline::new(&points);
+        let moved = polyline.translate(Point::new(10, 12));
+
+        assert_eq!(moved.bounding_box().size, polyline.bounding_box().size);
+    }
+
+    #[test]
+    fn translate_translated() {
         let points = [
             Point::new(5, 10),
             Point::new(7, 7),
@@ -250,8 +265,7 @@ mod tests {
         let moved = polyline.translate(Point::new(10, 12));
         let moved2 = moved.translate(Point::new(10, 12));
 
-        assert_eq!(polyline.bounding_box().top_left, Point::new(5, 7));
-        assert_eq!(moved.bounding_box().top_left, Point::new(15, 19));
-        assert_eq!(moved2.bounding_box().top_left, Point::new(25, 31));
+        assert_eq!(moved.bounding_box(), polyline.bounding_box().translate(Point::new(10, 12)));
+        assert_eq!(moved2.bounding_box(), polyline.bounding_box().translate(Point::new(20, 24)));
     }
 }
