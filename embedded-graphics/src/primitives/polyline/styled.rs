@@ -168,7 +168,7 @@ mod tests {
 
         let mut display = MockDisplay::new();
         styled.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), styled.bounding_box());
+        assert_eq!(display.affected_area(), styled.bounding_box());
 
         assert_eq!(
             pl.into_styled::<Rgb565>(PrimitiveStyle::new())
