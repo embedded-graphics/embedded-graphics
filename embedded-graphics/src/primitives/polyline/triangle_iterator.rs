@@ -120,18 +120,21 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
             // Compute next end joint. The iterator will stop if the `points.get()` calls below
             // return `None`, denoting that we've gone past the end of the points array.
+            let first_point = *self.points.get(self.start_idx)?;
+            let secound_point = *self.points.get(self.start_idx + 1)?;
+
             self.end_joint = if let Some(third_point) = self.points.get(self.start_idx + 2) {
                 LineJoint::from_points(
-                    *self.points.get(self.start_idx)?,
-                    *self.points.get(self.start_idx + 1)?,
+                first_point,
+                    secound_point,
                     *third_point,
                     self.width,
                     self.alignment,
                 )
             } else {
                 LineJoint::end(
-                    *self.points.get(self.start_idx)?,
-                    *self.points.get(self.start_idx + 1)?,
+                    first_point,
+                    secound_point,
                     self.width,
                     self.alignment,
                 )
