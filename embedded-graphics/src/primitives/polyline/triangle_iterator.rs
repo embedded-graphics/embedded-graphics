@@ -132,12 +132,7 @@ impl<'a> Iterator for TriangleIterator<'a> {
                     self.alignment,
                 )
             } else {
-                LineJoint::end(
-                    first_point,
-                    secound_point,
-                    self.width,
-                    self.alignment,
-                )
+                LineJoint::end(first_point, secound_point, self.width, self.alignment)
             };
 
             let (t1, t2) = Self::edge_triangles(start_joint, self.end_joint);
