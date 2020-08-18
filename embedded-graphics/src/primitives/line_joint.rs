@@ -200,9 +200,9 @@ impl LineJoint {
                             kind: JointKind::Bevel {
                                 /// Must be counter-clockwise
                                 filler_triangle: Triangle::new(
-                                    first_edge_right.end,
                                     l_intersection,
                                     second_edge_right.start,
+                                    first_edge_right.end,
                                 ),
                             },
                             first_edge_end: EdgeCorners {
