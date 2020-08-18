@@ -344,8 +344,8 @@ impl Line {
     pub fn length_squared(&self) -> u32 {
         let delta = self.end - self.start;
 
-        // Note: squaring result is always positive. `as u32` casts should be safe here.
-        delta.x.pow(2) as u32 + delta.y.pow(2) as u32
+        // Note: squaring result is always positive. `as u32` cast should be safe here.
+        delta.length_squared() as u32
     }
 }
 
