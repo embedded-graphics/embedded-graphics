@@ -122,62 +122,45 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let style = PrimitiveStyle::with_stroke(Rgb888::RED, 10);
-
-        let vertical = Line::new(Point::new(10, 20), Point::new(10, 50)).into_styled(style);
-
-        let horizontal = Line::new(Point::new(20, 20), Point::new(50, 20)).into_styled(style);
-
-        let diagonal = Line::new(Point::new(20, 20), Point::new(60, 60)).into_styled(style);
-
-        let thin = Line::new(Point::new(50, 50), Point::new(60, 60))
-            .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1));
-
-        assert_eq!(
-            vertical.bounding_box(),
-            Rectangle::new(Point::new(6, 20), Size::new(10, 31)),
-            "vertical line"
-        );
-
-        assert_eq!(
-            horizontal.bounding_box(),
-            Rectangle::new(Point::new(20, 15), Size::new(31, 10)),
-            "horizontal line"
-        );
-
-        assert_eq!(
-            diagonal.bounding_box(),
-            Rectangle::new(Point::new(17, 17), Size::new(47, 47)),
-            "45deg line"
-        );
-
-        assert_eq!(
-            thin.bounding_box(),
-            Rectangle::with_corners(Point::new(50, 50), Point::new(60, 60)),
-            "1px line"
-        );
-
         let lines = [
-            (vertical, "vertical"),
-            (horizontal, "horizontal"),
-            (diagonal, "diagonal"),
-            (thin, "thin"),
             (
-                Line::new(Point::new(40, 40), Point::new(13, 14))
-                    .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1)),
+                Line::new(Point::new(10, 20), Point::new(10, 50)),
+                "vertical",
+            ),
+            (
+                Line::new(Point::new(20, 20), Point::new(50, 20)),
+                "horizontal",
+            ),
+            (
+                Line::new(Point::new(20, 20), Point::new(55, 55)),
+                "diagonal",
+            ),
+            (Line::new(Point::new(20, 20), Point::new(55, 55)), "thin"),
+            (
+                Line::new(Point::new(40, 40), Point::new(13, 14)),
                 "random angle 1",
             ),
             (
-                Line::new(Point::new(30, 30), Point::new(12, 63))
-                    .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1)),
+                Line::new(Point::new(30, 30), Point::new(12, 53)),
                 "random angle 2",
             ),
         ];
 
         for (line, name) in lines.iter() {
-            let mut display = MockDisplay::new();
-            line.draw(&mut display).unwrap();
-            assert_eq!(display.affected_area(), line.bounding_box(), "{}", name);
+            for thickness in 1..15 {
+                let style = PrimitiveStyle::with_stroke(Rgb888::RED, thickness);
+                let styled = line.into_styled(style);
+
+                let mut display = MockDisplay::new();
+                styled.draw(&mut display).unwrap();
+                assert_eq!(
+                    display.affected_area(),
+                    styled.bounding_box(),
+                    "{}, {} px",
+                    name,
+                    thickness
+                );
+            }
         }
     }
 
