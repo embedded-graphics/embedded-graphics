@@ -83,7 +83,7 @@ where
     // NOTE: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
     // box impl.
     fn bounding_box(&self) -> Rectangle {
-        if self.style.is_transparent() {
+        if self.style.effective_stroke_color().is_none() {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         } else {
             self.primitive.bounding_box()
@@ -175,6 +175,13 @@ mod tests {
                 .bounding_box(),
             Rectangle::new(pl.bounding_box().center(), Size::zero()),
             "transparent"
+        );
+
+        assert_eq!(
+            pl.into_styled::<Rgb565>(PrimitiveStyle::with_fill(Rgb565::RED))
+                .bounding_box(),
+            Rectangle::new(pl.bounding_box().center(), Size::zero()),
+            "filled"
         );
     }
 }

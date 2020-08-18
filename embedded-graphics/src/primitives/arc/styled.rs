@@ -109,7 +109,7 @@ where
 {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
-        if self.style.is_transparent() {
+        if self.style.effective_stroke_color().is_none() {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         } else {
             let offset = self.style.outside_stroke_width().saturating_cast();
@@ -221,9 +221,21 @@ mod tests {
         const CENTER: Point = Point::new(15, 15);
         const SIZE: u32 = 10;
 
-        let empty = Arc::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg())
-            .into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let empty = Arc::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg());
 
-        assert_eq!(empty.bounding_box(), Rectangle::new(CENTER, Size::zero()));
+        assert_eq!(
+            empty
+                .into_styled::<BinaryColor>(PrimitiveStyle::new())
+                .bounding_box(),
+            Rectangle::new(CENTER, Size::zero())
+        );
+
+        assert_eq!(
+            empty
+                .into_styled::<BinaryColor>(PrimitiveStyle::with_fill(BinaryColor::On))
+                .bounding_box(),
+            Rectangle::new(empty.bounding_box().center(), Size::zero()),
+            "filled"
+        );
     }
 }
