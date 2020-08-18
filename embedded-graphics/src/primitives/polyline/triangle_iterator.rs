@@ -13,7 +13,6 @@ pub(in crate::primitives) struct TriangleIterator<'a> {
     start_idx: usize,
     t1: Option<Triangle>,
     t2: Option<Triangle>,
-    filler: Option<Triangle>,
     width: u32,
     alignment: StrokeAlignment,
     end_joint: LineJoint,
@@ -51,7 +50,6 @@ impl<'a> TriangleIterator<'a> {
                 t1: Some(t1),
                 t2: Some(t2),
                 start_idx,
-                filler: end_joint.filler(),
                 width,
                 alignment,
                 end_joint,
@@ -64,7 +62,6 @@ impl<'a> TriangleIterator<'a> {
             points: &[],
             t1: None,
             t2: None,
-            filler: None,
             start_idx: 0,
             width: 0,
             alignment: StrokeAlignment::Center,
@@ -107,13 +104,14 @@ impl<'a> Iterator for TriangleIterator<'a> {
             .t1
             .take()
             .or_else(|| self.t2.take())
-            .or_else(|| self.filler.take())
         {
             Some(triangle)
         }
         // We've gone through the list of triangles in this edge/joint. Reset state for next edge
         // and joint.
         else {
+            let t = self.end_joint.filler();
+
             self.start_idx += 1;
 
             let start_joint = self.end_joint;
@@ -144,9 +142,8 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
             self.t1 = Some(t1);
             self.t2 = Some(t2);
-            self.filler = self.end_joint.filler();
 
-            self.next()
+            t.or_else(|| self.next())
         }
     }
 }
