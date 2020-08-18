@@ -1,8 +1,9 @@
 use crate::{
     prelude::Point,
     primitives::{
+        Primitive,
         polyline::triangle_iterator::TriangleIterator,
-        triangle::{MathematicalPoints, Triangle},
+        triangle::{self, FillScanlineIterator, Triangle, Points},
         ContainsPoint,
     },
     style::StrokeAlignment,
@@ -14,7 +15,7 @@ pub(in crate::primitives) struct ThickPoints<'a> {
     triangle_iter: TriangleIterator<'a>,
     prev_triangle: Option<Triangle>,
     triangle: Triangle,
-    points_iter: MathematicalPoints,
+    points_iter: Points,
 }
 
 impl<'a> ThickPoints<'a> {
@@ -25,7 +26,7 @@ impl<'a> ThickPoints<'a> {
             let mut triangle_iter = TriangleIterator::new(points, width, alignment);
 
             let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
-            let points_iter = triangle.mathematical_points();
+            let points_iter = triangle.points();
 
             Self {
                 prev_triangle: None,
@@ -41,7 +42,7 @@ impl<'a> ThickPoints<'a> {
             prev_triangle: None,
             triangle: Triangle::empty(),
             triangle_iter: TriangleIterator::empty(),
-            points_iter: MathematicalPoints::empty(),
+            points_iter: Triangle::empty().points(),
         }
     }
 }
@@ -58,7 +59,7 @@ impl<'a> Iterator for ThickPoints<'a> {
             } else {
                 self.prev_triangle = Some(self.triangle);
                 self.triangle = self.triangle_iter.next()?;
-                self.points_iter = self.triangle.mathematical_points();
+                self.points_iter = self.triangle.points();
             }
         }
     }

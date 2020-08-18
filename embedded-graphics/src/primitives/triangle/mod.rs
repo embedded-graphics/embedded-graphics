@@ -1,5 +1,6 @@
 //! The triangle primitive.
 
+mod fill_scanline_iterator;
 mod mathematical_points;
 mod points;
 mod scanline_iterator;
@@ -18,6 +19,7 @@ use core::{
     cmp::{max, min},
 };
 pub use mathematical_points::MathematicalPoints;
+pub use fill_scanline_iterator::FillScanlineIterator;
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -249,6 +251,11 @@ impl Triangle {
         MathematicalPoints::new(self)
     }
 
+    /// Iterate ALL the points
+    pub fn all_points(&self) -> FillScanlineIterator {
+        FillScanlineIterator::new(self)
+    }
+
     /// Empty triangle
     pub(in crate::primitives) const fn empty() -> Self {
         Self::new(Point::zero(), Point::zero(), Point::zero())
@@ -331,6 +338,14 @@ impl Transform for Triangle {
         self.p3 += by;
 
         self
+    }
+}
+
+fn sort_two_x(p1: Point, p2: Point) -> (Point, Point) {
+    if p1.x < p2.x {
+        (p1, p2)
+    } else {
+        (p2, p1)
     }
 }
 
