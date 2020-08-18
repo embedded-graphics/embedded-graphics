@@ -29,48 +29,22 @@ pub struct FillScanlineIterator {
 
 impl FillScanlineIterator {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-        fn standing_triangle(
-            v1: Point,
-            v2: Point,
-            v3: Point,
-        ) -> (line::Points, line::Points, line::Points) {
-            (
-                line::Points::empty(),
-                Line::new(v1, v3).points(),
-                Line::new(v2, v3).points(),
-            )
-        }
 
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
-        let (mut line_a, mut line_b, mut line_c) = if v1.y == v2.y {
-            standing_triangle(v1, v2, v3)
-        } else if v2.y == v3.y {
-            standing_triangle(v2, v3, v1)
-        } else if v1.y == v3.y {
-            standing_triangle(v3, v1, v2)
-        } else {
-            let line_a = Line::new(v1, v2).points();
-            let line_b = Line::new(v2, v3).points();
-            let line_c = Line::new(v1, v3).points();
+        let mut line_a = if v1.y == v2.y { line::Points::empty() } else { Line::new(v1, v2).points() };
+        let mut line_b = if v2.y == v3.y { line::Points::empty() } else { Line::new(v2, v3).points() };
+        let mut line_c = Line::new(v1, v3).points();
 
-            (line_a, line_b, line_c)
-        };
-
-        let scan_points =
-            if let (Some(a), Some(b)) = (line_a.next().or_else(|| line_b.next()), line_c.next()) {
-                Line::new(a, b).points()
-            } else {
-                line::Points::empty()
-            };
-
-        Self {
+        let self_ = Self {
             line_a,
             line_b,
             line_c,
-            scan_points,
-            current_y: v1.y,
-        }
+            scan_points: line::Points::empty(),
+            current_y: v1.y-1,
+        };
+
+        self_
     }
 
     fn update_ab(&mut self) -> Option<Point> {
@@ -136,9 +110,6 @@ mod tests {
             let mut mock_display1 = MockDisplay::new();
             let mut mock_display2 = MockDisplay::new();
 
-            mock_display1.set_allow_overdraw(true);
-            mock_display2.set_allow_overdraw(true);
-
             triangle
                 .bounding_box()
                 .points()
@@ -153,8 +124,7 @@ mod tests {
         }
 
         check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
-        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
-
+        check(Triangle::new(Point::new(5, 5), Point::new(15, 0), Point::new(10, 10)));
         check(Triangle::new(Point::new(30, 0), Point::new(40, 10), Point::new(42, 10)));
 
         /*
