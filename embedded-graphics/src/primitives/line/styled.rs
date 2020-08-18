@@ -89,7 +89,7 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.is_transparent() {
+        if self.style.effective_stroke_color().is_none() {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         } else {
             let (l, r) = self.primitive.extents(self.style.stroke_width);
@@ -183,12 +183,19 @@ mod tests {
 
     #[test]
     fn transparent_bounding_box() {
-        let line = Line::new(Point::new(5, 5), Point::new(11, 14))
-            .into_styled::<Rgb888>(PrimitiveStyle::new());
+        let line = Line::new(Point::new(5, 5), Point::new(11, 14));
 
         assert_eq!(
-            line.bounding_box(),
-            Rectangle::new(line.primitive.bounding_box().center(), Size::zero())
+            line.into_styled::<Rgb888>(PrimitiveStyle::new())
+                .bounding_box(),
+            Rectangle::new(line.bounding_box().center(), Size::zero())
+        );
+
+        assert_eq!(
+            line.into_styled::<Rgb888>(PrimitiveStyle::with_fill(Rgb888::RED))
+                .bounding_box(),
+            Rectangle::new(line.bounding_box().center(), Size::zero()),
+            "filled"
         );
     }
 }
