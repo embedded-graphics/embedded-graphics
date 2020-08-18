@@ -103,10 +103,10 @@ where
     fn bounding_box(&self) -> Rectangle {
         let bb = self.primitive.bounding_box();
 
-        if self.style.is_transparent() {
-            Rectangle::new(bb.center(), Size::zero())
-        } else {
+        if !self.style.is_transparent() {
             bb
+        } else {
+            Rectangle::new(bb.center(), Size::zero())
         }
     }
 }
