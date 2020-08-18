@@ -29,11 +29,18 @@ pub struct FillScanlineIterator {
 
 impl FillScanlineIterator {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
-        let mut line_a = if v1.y == v2.y { line::Points::empty() } else { Line::new(v1, v2).points() };
-        let mut line_b = if v2.y == v3.y { line::Points::empty() } else { Line::new(v2, v3).points() };
+        let mut line_a = if v1.y == v2.y {
+            line::Points::empty()
+        } else {
+            Line::new(v1, v2).points()
+        };
+        let mut line_b = if v2.y == v3.y {
+            line::Points::empty()
+        } else {
+            Line::new(v2, v3).points()
+        };
         let mut line_c = Line::new(v1, v3).points();
 
         let self_ = Self {
@@ -41,7 +48,7 @@ impl FillScanlineIterator {
             line_b,
             line_c,
             scan_points: line::Points::empty(),
-            current_y: v1.y-1,
+            current_y: v1.y - 1,
         };
 
         self_
@@ -99,9 +106,14 @@ impl Iterator for FillScanlineIterator {
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel}, geometry::Dimensions, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
-        primitives::ContainsPoint, style::PrimitiveStyle, transform::Transform,
-        mock_display::MockDisplay
+        drawable::{Drawable, Pixel},
+        geometry::Dimensions,
+        mock_display::MockDisplay,
+        pixel_iterator::IntoPixels,
+        pixelcolor::BinaryColor,
+        primitives::ContainsPoint,
+        style::PrimitiveStyle,
+        transform::Transform,
     };
 
     #[test]
@@ -123,9 +135,21 @@ mod tests {
             assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
         }
 
-        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
-        check(Triangle::new(Point::new(5, 5), Point::new(15, 0), Point::new(10, 10)));
-        check(Triangle::new(Point::new(30, 0), Point::new(40, 10), Point::new(42, 10)));
+        check(Triangle::new(
+            Point::new(5, 10),
+            Point::new(10, 15),
+            Point::new(15, 10),
+        ));
+        check(Triangle::new(
+            Point::new(5, 5),
+            Point::new(15, 0),
+            Point::new(10, 10),
+        ));
+        check(Triangle::new(
+            Point::new(30, 0),
+            Point::new(40, 10),
+            Point::new(42, 10),
+        ));
 
         /*
         for x in 10..15 {
