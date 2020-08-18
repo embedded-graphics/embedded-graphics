@@ -19,10 +19,7 @@ pub(in crate::primitives) struct ThickPoints<'a> {
 
 impl<'a> ThickPoints<'a> {
     pub fn new(points: &'a [Point], width: u32, alignment: StrokeAlignment) -> Self {
-        if points.len() < 2 {
-            Self::empty()
-        } else {
-            let mut triangle_iter = TriangleIterator::new(points, width, alignment);
+        let mut triangle_iter = TriangleIterator::new(points, width, alignment);
 
             let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
             let points_iter = triangle.mathematical_points();
