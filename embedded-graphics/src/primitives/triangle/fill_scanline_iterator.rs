@@ -7,6 +7,7 @@ use crate::{
         Primitive,
     },
 };
+use crate::primitives::triangle::sort_two_x;
 
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -28,12 +29,6 @@ pub struct FillScanlineIterator {
 
     ///
     next_c: Option<Point>,
-
-    ///
-    current_point: Option<Point>,
-
-    /// y
-    current_y: i32,
 }
 
 impl FillScanlineIterator {
@@ -58,59 +53,61 @@ impl FillScanlineIterator {
             line_c,
             next_a: None,
             next_c: None,
-            current_point: None,
             scan_points: line::Points::empty(),
-            current_y: v1.y - 1,
         };
 
         self_
     }
 
-    fn update_ab(&mut self) -> Option<Point> {
-        if self.next_a.is_none() {
-            self.next_a = self.line_a.next().or_else(|| self.line_b.next());
+    fn update_ab(&mut self) -> Option<(Point, Point)> {
+        let mut next_a = self
+            .next_a
+            .take()
+            .or_else(|| self.line_a.next().or_else(|| self.line_b.next()))?;
+        let first = next_a;
+        while let Some(a) = self.line_a.next().or_else(|| self.line_b.next()) {
+            if a.y == next_a.y {
+                next_a = a;
+            } else {
+                self.next_a = Some(a);
+                return Some((first, next_a));
+            }
         }
-
-        self.next_a
+        Some((first, next_a))
     }
 
-    fn update_c(&mut self) -> Option<Point> {
-        if self.next_c.is_none() {
-            self.next_c = self.line_c.next();
+    fn update_c(&mut self) -> Option<(Point, Point)> {
+        let mut next_c = self.next_c.take().or_else(|| self.line_c.next())?;
+        let first = next_c;
+        while let Some(c) = self.line_c.next() {
+            if c.y == next_c.y {
+                next_c = c;
+            } else {
+                self.next_c = Some(c);
+                return Some((first, next_c));
+            }
         }
-
-        self.next_c
+        Some((first, next_c))
     }
 
     fn next_scanline(&mut self) -> bool {
         let a = self.update_ab();
         let c = self.update_c();
 
-        match (a, c) {
-            (Some(a), Some(c)) => {
-                if a.y == c.y && a.y != self.current_y {
-                    self.current_y = a.y;
-                    self.scan_points = Line::new(a, c).points();
-                    self.next_a.take();
-                    self.next_c.take();
-                } else if a.y < c.y {
-                    self.current_point = self.next_a.take();
-                } else {
-                    self.current_point = self.next_c.take();
-                }
+        if let (Some((fa, la)), Some((fc, lc))) = (a, c) {
+            let (left, l2) = sort_two_x(fa, la);
+            let (r2, right) = sort_two_x(fc, lc);
+
+            if left.x < right.x {
+                self.scan_points = Line::new(left, right).points();
+            } else {
+                self.scan_points = Line::new(r2, l2).points();
             }
 
-            (Some(a), None) => {
-                self.current_point = self.next_a.take();
-            }
-            (None, Some(c)) => {
-                self.current_point = self.next_c.take();
-            }
-
-            (None, None) => return false,
+            true
+        } else {
+            false
         }
-
-        true
     }
 }
 
@@ -121,8 +118,6 @@ impl Iterator for FillScanlineIterator {
         loop {
             if let Some(point) = self.scan_points.next() {
                 return Some(point);
-            } else if let Some(p) = self.current_point.take() {
-                return Some(p);
             } else if !self.next_scanline() {
                 return None;
             }
@@ -164,27 +159,30 @@ mod tests {
         }
 
         check(Triangle::new(
+            Point::new(30, 0),
+            Point::new(40, 10),
+            Point::new(42, 10),
+        ));
+        check(Triangle::new(
             Point::new(5, 5),
             Point::new(15, 0),
             Point::new(10, 10),
         ));
         check(Triangle::new(
-            Point::new(30, 0),
+            Point::new(0, 0),
+            Point::new(0, 10),
             Point::new(40, 10),
-            Point::new(42, 10),
         ));
-
-        /*
-        for x in 10..15 {
-            for y in 10..15 {
-                for z in 10..15 {
-                    for w in 10..15 {
-                        check(Triangle::new(Point::new(30, 30), Point::new(30, 30) + Point::new(x, y), Point::new(30, 30)+ Point::new(z, w)));
-                    }
-                }
-            }
-        }
-        */
+        check(Triangle::new(
+            Point::new(0, 0),
+            Point::new(0, 10),
+            Point::new(40, 0),
+        ));
+        check(Triangle::new(
+            Point::new(0, 0),
+            Point::new(40, 10),
+            Point::new(40, 0),
+        ));
     }
 
     #[test]
