@@ -59,8 +59,6 @@ impl<'a> Iterator for ThickPoints<'a> {
                 self.prev_triangle = Some(self.triangle);
                 self.triangle = self.triangle_iter.next()?;
                 self.points_iter = self.triangle.mathematical_points();
-
-                return self.next();
             }
         }
     }
