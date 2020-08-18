@@ -115,6 +115,15 @@ impl ContainsPoint for Triangle {
     }
 }
 
+impl ContainsPoint for Option<Triangle> {
+    fn contains(&self, point: Point) -> bool {
+        match self {
+            None => false,
+            Some(ref triangle) => triangle.contains(point),
+        }
+    }
+}
+
 impl Dimensions for Triangle {
     fn bounding_box(&self) -> Rectangle {
         let x_min = min(min(self.p1.x, self.p2.x), self.p3.x);
