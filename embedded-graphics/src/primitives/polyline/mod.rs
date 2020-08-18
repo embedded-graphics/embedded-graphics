@@ -265,7 +265,13 @@ mod tests {
         let moved = polyline.translate(Point::new(10, 12));
         let moved2 = moved.translate(Point::new(10, 12));
 
-        assert_eq!(moved.bounding_box(), polyline.bounding_box().translate(Point::new(10, 12)));
-        assert_eq!(moved2.bounding_box(), polyline.bounding_box().translate(Point::new(20, 24)));
+        assert_eq!(
+            moved.bounding_box(),
+            polyline.bounding_box().translate(Point::new(10, 12))
+        );
+        assert_eq!(
+            moved2.bounding_box(),
+            polyline.bounding_box().translate(Point::new(20, 24))
+        );
     }
 }
