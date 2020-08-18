@@ -7,7 +7,7 @@ use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,
     primitives::Arc,
-    style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, TextStyle},
+    style::{PrimitiveStyleBuilder, StrokeAlignment, TextStyle},
 };
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
@@ -22,7 +22,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     let arc_stroke = PrimitiveStyleBuilder::new()
         .stroke_color(BinaryColor::On)
         .stroke_width(5)
-        .stroke_alignment(StrokeAlignment::Center)
+        .stroke_alignment(StrokeAlignment::Inside)
         .build();
     let text_style = TextStyle::new(Font12x16, BinaryColor::On);
 
@@ -40,13 +40,9 @@ fn main() -> Result<(), std::convert::Infallible> {
         let sweep = progress as f32 * 360.0 / 100.0;
 
         // Draw an arc with a 5px wide stroke.
-        let a = Arc::new(Point::new(10, 10), 40, 90.0.deg(), sweep.deg()).into_styled(arc_stroke);
-
-        a.bounding_box()
-            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+        Arc::new(Point::new(2, 2), 64 - 4, 90.0.deg(), sweep.deg())
+            .into_styled(arc_stroke)
             .draw(&mut display)?;
-
-        a.draw(&mut display)?;
 
         // Draw centered text.
         let text = format!("{}%", progress);

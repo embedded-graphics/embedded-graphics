@@ -47,16 +47,12 @@ fn draw(
     .into_styled(TextStyle::new(Font6x8, Rgb888::MAGENTA))
     .draw(display)?;
 
-    let l = Line::new(start, position).into_styled(PrimitiveStyle::with_stroke(
-        Rgb888::new(0x80, 0xf2, 0x91),
-        stroke_width,
-    ));
-
-    l.bounding_box()
-        .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
+    Line::new(start, position)
+        .into_styled(PrimitiveStyle::with_stroke(
+            Rgb888::new(0x80, 0xf2, 0x91),
+            stroke_width,
+        ))
         .draw(display)?;
-
-    l.draw(display)?;
 
     Ok(())
 }
