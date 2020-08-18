@@ -107,11 +107,16 @@ impl ContainsPoint for Triangle {
         // Special case: due to the Bresenham algorithm being used to render triangles, some pixel
         // centers on a Styled<Triangle> lie outside the mathematical triangle. This check
         // inefficiently checks to see if the point lies on any of the border edges.
-        Line::new(p1, p2)
-            .points()
-            .chain(Line::new(p1, p3).points())
-            .chain(Line::new(p2, p3).points())
-            .any(|line_point| line_point == point)
+        let mut l1 = Line::new(p1, p2).points();
+        let mut l2 = Line::new(p2, p3).points();
+        let mut l3 = Line::new(p3, p1).points();
+
+        // Skip first points so that they are not checked twice
+        l1.next();
+        l2.next();
+        l3.next();
+
+        l1.chain(l2).chain(l3).any(|line_point| line_point == point)
     }
 }
 

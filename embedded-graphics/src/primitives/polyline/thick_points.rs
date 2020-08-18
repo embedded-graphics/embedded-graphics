@@ -21,15 +21,14 @@ impl<'a> ThickPoints<'a> {
     pub fn new(points: &'a [Point], width: u32, alignment: StrokeAlignment) -> Self {
         let mut triangle_iter = TriangleIterator::new(points, width, alignment);
 
-            let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
-            let points_iter = triangle.mathematical_points();
+        let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
+        let points_iter = triangle.mathematical_points();
 
-            Self {
-                prev_triangle: None,
-                triangle,
-                triangle_iter,
-                points_iter,
-            }
+        Self {
+            prev_triangle: None,
+            triangle,
+            triangle_iter,
+            points_iter,
         }
     }
 
