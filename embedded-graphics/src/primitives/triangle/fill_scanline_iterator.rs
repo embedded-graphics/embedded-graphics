@@ -23,6 +23,15 @@ pub struct FillScanlineIterator {
     /// Horizontal line
     scan_points: line::Points,
 
+    ///
+    next_a: Option<Point>,
+
+    ///
+    next_c: Option<Point>,
+
+    ///
+    current_point: Option<Point>,
+
     /// y
     current_y: i32,
 }
@@ -47,6 +56,9 @@ impl FillScanlineIterator {
             line_a,
             line_b,
             line_c,
+            next_a: None,
+            next_c: None,
+            current_point: None,
             scan_points: line::Points::empty(),
             current_y: v1.y - 1,
         };
@@ -55,34 +67,50 @@ impl FillScanlineIterator {
     }
 
     fn update_ab(&mut self) -> Option<Point> {
-        while let Some(point) = self.line_a.next().or_else(|| self.line_b.next()) {
-            if point.y != self.current_y {
-                self.current_y = point.y;
-                return Some(point);
-            }
+        if self.next_a.is_none() {
+            self.next_a = self.line_a.next().or_else(|| self.line_b.next());
         }
-        None
+
+        self.next_a
     }
 
     fn update_c(&mut self) -> Option<Point> {
-        while let Some(point) = self.line_c.next() {
-            if point.y == self.current_y {
-                return Some(point);
-            }
+        if self.next_c.is_none() {
+            self.next_c = self.line_c.next();
         }
-        None
+
+        self.next_c
     }
 
     fn next_scanline(&mut self) -> bool {
         let a = self.update_ab();
-        let b = self.update_c();
+        let c = self.update_c();
 
-        if let (Some(a), Some(b)) = (a, b) {
-            self.scan_points = Line::new(a, b).points();
-            true
-        } else {
-            false
+        match (a, c) {
+            (Some(a), Some(c)) => {
+                if a.y == c.y && a.y != self.current_y {
+                    self.current_y = a.y;
+                    self.scan_points = Line::new(a, c).points();
+                    self.next_a.take();
+                    self.next_c.take();
+                } else if a.y < c.y {
+                    self.current_point = self.next_a.take();
+                } else {
+                    self.current_point = self.next_c.take();
+                }
+            }
+
+            (Some(a), None) => {
+                self.current_point = self.next_a.take();
+            }
+            (None, Some(c)) => {
+                self.current_point = self.next_c.take();
+            }
+
+            (None, None) => return false,
         }
+
+        true
     }
 }
 
@@ -93,10 +121,10 @@ impl Iterator for FillScanlineIterator {
         loop {
             if let Some(point) = self.scan_points.next() {
                 return Some(point);
-            } else {
-                if !self.next_scanline() {
-                    return None;
-                }
+            } else if let Some(p) = self.current_point.take() {
+                return Some(p);
+            } else if !self.next_scanline() {
+                return None;
             }
         }
     }
@@ -135,11 +163,6 @@ mod tests {
             assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
         }
 
-        check(Triangle::new(
-            Point::new(5, 10),
-            Point::new(10, 15),
-            Point::new(15, 10),
-        ));
         check(Triangle::new(
             Point::new(5, 5),
             Point::new(15, 0),
