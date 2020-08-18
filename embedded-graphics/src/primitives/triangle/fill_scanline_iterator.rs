@@ -129,7 +129,7 @@ mod tests {
                 .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display1).unwrap());
 
             triangle
-                .all_points()
+                .points()
                 .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display2).unwrap());
 
             assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
@@ -171,6 +171,6 @@ mod tests {
 
         assert!(off_screen
             .points()
-            .eq(on_screen.all_points().map(|p| p - Point::new(0, 35))));
+            .eq(on_screen.points().map(|p| p - Point::new(0, 35))));
     }
 }

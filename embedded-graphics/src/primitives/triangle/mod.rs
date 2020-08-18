@@ -251,11 +251,6 @@ impl Triangle {
         MathematicalPoints::new(self)
     }
 
-    /// Iterate ALL the points
-    pub fn all_points(&self) -> FillScanlineIterator {
-        FillScanlineIterator::new(self)
-    }
-
     /// Empty triangle
     pub(in crate::primitives) const fn empty() -> Self {
         Self::new(Point::zero(), Point::zero(), Point::zero())

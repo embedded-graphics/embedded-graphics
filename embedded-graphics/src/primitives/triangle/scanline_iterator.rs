@@ -228,8 +228,8 @@ mod tests {
         let off_screen = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30));
         let on_screen = off_screen.translate(Point::new(0, 35));
 
-        assert!(off_screen
-            .points()
-            .eq(on_screen.points().map(|p| p - Point::new(0, 35))));
+        ScanlineIterator::new(&off_screen)
+            .map(|(_, p)| p)
+            .eq(on_screen.points().map(|p| p - Point::new(0, 35)));
     }
 }
