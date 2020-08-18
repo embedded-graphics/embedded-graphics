@@ -125,7 +125,7 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
             self.end_joint = if let Some(third_point) = self.points.get(self.start_idx + 2) {
                 LineJoint::from_points(
-                first_point,
+                    first_point,
                     secound_point,
                     *third_point,
                     self.width,
