@@ -182,6 +182,22 @@ impl Triangle {
         }
     }
 
+    /// Create a new triangle with points sorted in a counterclockwise direction
+    pub fn sorted_counterclockwise(&self) -> Self {
+        match self.area_doubled().cmp(&0) {
+            // Triangle is already CCW, do nothing.
+            Ordering::Less => *self,
+            // Triangle is wound CW. Swap two points to make it CCW.
+            Ordering::Greater => Self::new(self.p2, self.p1, self.p3),
+            // Triangle is colinear. Sort points so they lie sequentially along the line.
+            Ordering::Equal => {
+                let (p1, p2, p3) = sort_yx(self.p1, self.p2, self.p3);
+
+                Self::new(p1, p2, p3)
+            }
+        }
+    }
+
     /// Find the center of gravity/centroid of the triangle
     pub fn centroid(&self) -> Point {
         (self.p1 + self.p2 + self.p3) / 3
