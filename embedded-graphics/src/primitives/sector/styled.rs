@@ -320,7 +320,7 @@ mod tests {
         // TODO: Uncomment when arc bounding box is fixed in #405
         // let mut display = MockDisplay::new();
         // center.draw(&mut display).unwrap();
-        // assert_eq!(display.affected_area().unwrap(), center.bounding_box());
+        // assert_eq!(display.affected_area(), center.bounding_box());
 
         assert_eq!(empty.bounding_box(), Rectangle::new(CENTER, Size::zero()));
 

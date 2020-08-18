@@ -177,12 +177,7 @@ mod tests {
         for (line, name) in lines.iter() {
             let mut display = MockDisplay::new();
             line.draw(&mut display).unwrap();
-            assert_eq!(
-                display.affected_area().unwrap(),
-                line.bounding_box(),
-                "{}",
-                name
-            );
+            assert_eq!(display.affected_area(), line.bounding_box(), "{}", name);
         }
     }
 

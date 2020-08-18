@@ -322,15 +322,15 @@ mod tests {
 
         let mut display = MockDisplay::new();
         center.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), center.bounding_box());
+        assert_eq!(display.affected_area(), center.bounding_box());
 
         let mut display = MockDisplay::new();
         outside.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), outside.bounding_box());
+        assert_eq!(display.affected_area(), outside.bounding_box());
 
         let mut display = MockDisplay::new();
         inside.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), inside.bounding_box());
+        assert_eq!(display.affected_area(), inside.bounding_box());
     }
 
     #[test]
