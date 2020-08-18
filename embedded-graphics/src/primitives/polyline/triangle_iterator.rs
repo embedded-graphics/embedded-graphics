@@ -100,11 +100,7 @@ impl<'a> Iterator for TriangleIterator<'a> {
     type Item = Triangle;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(triangle) = self
-            .t1
-            .take()
-            .or_else(|| self.t2.take())
-        {
+        if let Some(triangle) = self.t1.take().or_else(|| self.t2.take()) {
             Some(triangle)
         }
         // We've gone through the list of triangles in this edge/joint. Reset state for next edge
