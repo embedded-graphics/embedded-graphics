@@ -128,7 +128,7 @@ impl<'a> Transform for Polyline<'a> {
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
-            translate: by,
+            translate: self.translate + by,
             ..*self
         }
     }
@@ -234,6 +234,44 @@ mod tests {
         assert_eq!(
             bb,
             Rectangle::with_corners(Point::new(-90, -90), Point::new(200, -16))
+        );
+    }
+
+    #[test]
+    fn translate_does_not_modify_size() {
+        let points = [
+            Point::new(5, 10),
+            Point::new(7, 7),
+            Point::new(5, 8),
+            Point::new(10, 10),
+        ];
+
+        let polyline = Polyline::new(&points);
+        let moved = polyline.translate(Point::new(10, 12));
+
+        assert_eq!(moved.bounding_box().size, polyline.bounding_box().size);
+    }
+
+    #[test]
+    fn translate_translated() {
+        let points = [
+            Point::new(5, 10),
+            Point::new(7, 7),
+            Point::new(5, 8),
+            Point::new(10, 10),
+        ];
+
+        let polyline = Polyline::new(&points);
+        let moved = polyline.translate(Point::new(10, 12));
+        let moved2 = moved.translate(Point::new(10, 12));
+
+        assert_eq!(
+            moved.bounding_box(),
+            polyline.bounding_box().translate(Point::new(10, 12))
+        );
+        assert_eq!(
+            moved2.bounding_box(),
+            polyline.bounding_box().translate(Point::new(20, 24))
         );
     }
 }
