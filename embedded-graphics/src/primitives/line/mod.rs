@@ -85,19 +85,21 @@ impl Line {
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
     fn extents(&self, thickness: u32) -> (Line, Line) {
         let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
+        let reduce =
+            it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
 
-        let mut l_start = self.start;
-        let mut r_start = self.start;
+        let mut left = (self.start, 0);
+        let mut right = (self.start, 0);
 
         loop {
-            if let Some((bresenham, _)) = it.next() {
-                r_start = bresenham.point;
+            if let Some((bresenham, reduce)) = it.next() {
+                right = (bresenham.point, reduce);
             } else {
                 break;
             }
 
-            if let Some((bresenham, _)) = it.next() {
-                l_start = bresenham.point;
+            if let Some((bresenham, reduce)) = it.next() {
+                left = (bresenham.point, reduce);
             } else {
                 break;
             }
@@ -105,10 +107,19 @@ impl Line {
 
         let delta = self.end - self.start;
 
-        (
-            Line::new(l_start, l_start + delta),
-            Line::new(r_start, r_start + delta),
-        )
+        let left_line = if left.1 == 0 {
+            Line::new(left.0, left.0 + delta)
+        } else {
+            Line::new(left.0, left.0 + delta - reduce)
+        };
+
+        let right_line = if right.1 == 0 {
+            Line::new(right.0, right.0 + delta)
+        } else {
+            Line::new(right.0, right.0 + delta - reduce)
+        };
+
+        (left_line, right_line)
     }
 }
 

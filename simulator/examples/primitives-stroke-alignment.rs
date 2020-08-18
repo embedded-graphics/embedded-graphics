@@ -28,17 +28,31 @@ fn draw_primitives(
 ) -> Result<(), Infallible> {
     let row_offset = Size::new(0, SIZE + PADDING);
 
-    Rectangle::new(position, Size::new(SIZE, SIZE))
-        .into_styled(style.clone())
+    let r = Rectangle::new(position, Size::new(SIZE, SIZE)).into_styled(style.clone());
+
+    r.draw(display)?;
+
+    r.bounding_box()
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
         .draw(display)?;
 
-    Circle::new(position + row_offset, SIZE)
-        .into_styled(style.clone())
+    let c = Circle::new(position + row_offset, SIZE).into_styled(style.clone());
+
+    c.draw(display)?;
+
+    c.bounding_box()
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
         .draw(display)?;
 
-    Ellipse::new(position + row_offset * 2, Size::new(SIZE, SIZE + 16))
-        .into_styled(style)
-        .draw(display)
+    let e = Ellipse::new(position + row_offset * 2, Size::new(SIZE, SIZE + 16)).into_styled(style);
+
+    e.draw(display)?;
+
+    e.bounding_box()
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
+        .draw(display)?;
+
+    Ok(())
 }
 
 fn update(

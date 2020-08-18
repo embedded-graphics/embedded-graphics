@@ -147,7 +147,7 @@ mod tests {
 
         assert_eq!(
             diagonal.bounding_box(),
-            Rectangle::new(Point::new(17, 17), Size::new(48, 47)),
+            Rectangle::new(Point::new(17, 17), Size::new(47, 47)),
             "45deg line"
         );
 
@@ -157,21 +157,33 @@ mod tests {
             "1px line"
         );
 
-        let mut display = MockDisplay::new();
-        vertical.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), vertical.bounding_box());
+        let lines = [
+            (vertical, "vertical"),
+            (horizontal, "horizontal"),
+            (diagonal, "diagonal"),
+            (thin, "thin"),
+            (
+                Line::new(Point::new(40, 40), Point::new(13, 14))
+                    .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1)),
+                "random angle 1",
+            ),
+            (
+                Line::new(Point::new(30, 30), Point::new(12, 63))
+                    .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1)),
+                "random angle 2",
+            ),
+        ];
 
-        let mut display = MockDisplay::new();
-        horizontal.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), horizontal.bounding_box());
-
-        let mut display = MockDisplay::new();
-        diagonal.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), diagonal.bounding_box());
-
-        let mut display = MockDisplay::new();
-        thin.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area().unwrap(), thin.bounding_box());
+        for (line, name) in lines.iter() {
+            let mut display = MockDisplay::new();
+            line.draw(&mut display).unwrap();
+            assert_eq!(
+                display.affected_area().unwrap(),
+                line.bounding_box(),
+                "{}",
+                name
+            );
+        }
     }
 
     #[test]

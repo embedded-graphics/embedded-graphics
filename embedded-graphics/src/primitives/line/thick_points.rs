@@ -36,7 +36,7 @@ impl Side {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives::line) struct ParallelsIterator {
     /// Parameters used for moves along the parallel lines.
-    parallel_parameters: BresenhamParameters,
+    pub parallel_parameters: BresenhamParameters,
 
     /// Parameters used for moves perpendicular to the parallel lines.
     perpendicular_parameters: BresenhamParameters,
