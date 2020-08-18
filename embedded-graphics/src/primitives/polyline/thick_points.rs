@@ -1,6 +1,10 @@
 use crate::{
     prelude::Point,
-    primitives::{polyline::triangle_iterator::TriangleIterator, triangle::MathematicalPoints},
+    primitives::{
+        polyline::triangle_iterator::TriangleIterator,
+        triangle::{MathematicalPoints, Triangle},
+        ContainsPoint,
+    },
     style::StrokeAlignment,
 };
 
@@ -8,6 +12,8 @@ use crate::{
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct ThickPoints<'a> {
     triangle_iter: TriangleIterator<'a>,
+    prev_triangle: Option<Triangle>,
+    triangle: Triangle,
     points_iter: MathematicalPoints,
 }
 
@@ -18,12 +24,12 @@ impl<'a> ThickPoints<'a> {
         } else {
             let mut triangle_iter = TriangleIterator::new(points, width, alignment);
 
-            let points_iter = triangle_iter
-                .next()
-                .map(|t| t.mathematical_points())
-                .unwrap_or_else(MathematicalPoints::empty);
+            let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
+            let points_iter = triangle.mathematical_points();
 
             Self {
+                prev_triangle: None,
+                triangle,
                 triangle_iter,
                 points_iter,
             }
@@ -32,6 +38,8 @@ impl<'a> ThickPoints<'a> {
 
     pub fn empty() -> Self {
         Self {
+            prev_triangle: None,
+            triangle: Triangle::empty(),
             triangle_iter: TriangleIterator::empty(),
             points_iter: MathematicalPoints::empty(),
         }
@@ -42,12 +50,18 @@ impl<'a> Iterator for ThickPoints<'a> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(point) = self.points_iter.next() {
-            Some(point)
-        } else {
-            self.points_iter = self.triangle_iter.next().map(|t| t.mathematical_points())?;
+        loop {
+            if let Some(point) = self.points_iter.next() {
+                if !ContainsPoint::contains(&self.prev_triangle, point) {
+                    return Some(point);
+                }
+            } else {
+                self.prev_triangle = Some(self.triangle);
+                self.triangle = self.triangle_iter.next()?;
+                self.points_iter = self.triangle.mathematical_points();
 
-            self.next()
+                return self.next();
+            }
         }
     }
 }

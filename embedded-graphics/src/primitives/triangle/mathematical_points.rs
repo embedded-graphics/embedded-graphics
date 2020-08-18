@@ -1,6 +1,6 @@
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{line, rectangle, triangle::Triangle, Primitive},
+    primitives::{line, rectangle, triangle::Triangle, ContainsPoint, Primitive},
 };
 use line::Line;
 
@@ -36,8 +36,7 @@ impl Iterator for MathematicalPoints {
     fn next(&mut self) -> Option<Self::Item> {
         let Self { triangle, .. } = self;
 
-        self.rect
-            .find(|point| triangle.mathematical_contains(point))
+        self.rect.find(|&point| triangle.contains(point))
     }
 }
 
