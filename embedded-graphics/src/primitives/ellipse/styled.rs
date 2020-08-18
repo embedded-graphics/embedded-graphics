@@ -112,12 +112,12 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.is_transparent() {
-            Rectangle::new(self.primitive.center(), Size::zero())
-        } else {
+        if !self.style.is_transparent() {
             let offset = self.style.outside_stroke_width().saturating_cast();
 
             self.primitive.bounding_box().offset(offset)
+        } else {
+            Rectangle::new(self.primitive.center(), Size::zero())
         }
     }
 }

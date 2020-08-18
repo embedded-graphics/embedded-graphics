@@ -89,9 +89,7 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_none() {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        } else {
+        if self.style.effective_stroke_color().is_some() {
             let (l, r) = self.primitive.extents(self.style.stroke_width);
 
             let min = l
@@ -106,6 +104,8 @@ where
                 .component_max(r.end);
 
             Rectangle::with_corners(min, max)
+        } else {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
     }
 }

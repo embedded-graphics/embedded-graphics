@@ -83,10 +83,10 @@ where
     // NOTE: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
     // box impl.
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_none() {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        } else {
+        if self.style.effective_stroke_color().is_some() {
             self.primitive.bounding_box()
+        } else {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
     }
 }
