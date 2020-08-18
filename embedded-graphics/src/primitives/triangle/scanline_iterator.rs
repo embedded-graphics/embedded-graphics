@@ -163,34 +163,51 @@ impl Iterator for ScanlineIterator {
 mod tests {
     use super::*;
     use crate::{
+        drawable::{Drawable, Pixel},
         geometry::Dimensions,
-        drawable::Pixel, pixel_iterator::IntoPixels, pixelcolor::BinaryColor,
-        primitives::ContainsPoint, style::PrimitiveStyle, transform::Transform,
+        mock_display::MockDisplay,
+        pixel_iterator::IntoPixels,
+        pixelcolor::BinaryColor,
+        primitives::ContainsPoint,
+        style::PrimitiveStyle,
+        transform::Transform,
     };
 
     #[test]
     fn points_are_part_of_triangle() {
         fn check(triangle: Triangle) {
-            assert!(triangle.points().all(|p| triangle.contains(p)));
-        }
+            let mut mock_display1 = MockDisplay::new();
+            let mut mock_display2 = MockDisplay::new();
 
-        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
-        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
-    }
+            mock_display2.set_allow_overdraw(true);
 
-    #[test]
-    fn all_points_are_generated() {
-        fn check(triangle: Triangle) {
-            let iter_points = triangle.points().collect::<Vec<Point>>();
-            assert!(triangle
+            triangle
                 .bounding_box()
                 .points()
                 .filter(|&p| triangle.contains(p))
-                .all(|p| iter_points.contains(&p)));
+                .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display1).unwrap());
+
+            ScanlineIterator::new(&triangle)
+                .for_each(|(_, p)| Pixel(p, BinaryColor::On).draw(&mut mock_display2).unwrap());
+
+            assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
         }
 
-        check(Triangle::new(Point::new(5, 10), Point::new(15, 10), Point::new(10, 15)));
-        check(Triangle::new(Point::new(5, 10), Point::new(10, 15), Point::new(15, 10)));
+        check(Triangle::new(
+            Point::new(5, 10),
+            Point::new(10, 15),
+            Point::new(15, 10),
+        ));
+        check(Triangle::new(
+            Point::new(5, 5),
+            Point::new(15, 0),
+            Point::new(10, 10),
+        ));
+        check(Triangle::new(
+            Point::new(30, 0),
+            Point::new(40, 10),
+            Point::new(42, 10),
+        ));
     }
 
     #[test]
