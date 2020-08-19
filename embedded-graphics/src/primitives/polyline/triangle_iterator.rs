@@ -19,7 +19,6 @@ pub(in crate::primitives) enum TriangleIteratorState {
 pub(in crate::primitives) struct TriangleIterator<'a> {
     points: &'a [Point],
     state: TriangleIteratorState,
-    start_idx: usize,
     width: u32,
     alignment: StrokeAlignment,
     start_joint: EdgeCorners, // it's not necessary to store the whole joint so save some memory
@@ -31,29 +30,19 @@ impl<'a> TriangleIterator<'a> {
         if points.len() < 2 {
             Self::empty()
         } else {
-            let start_idx = 0;
-
-            let start_joint =
-                LineJoint::start(points[start_idx], points[start_idx + 1], width, alignment);
+            let start_joint = LineJoint::start(points[0], points[1], width, alignment);
 
             // If there are enough points to compute first joint, do so. Otherwise the line is two
             // points long and should just be a straight segment.
             let end_joint = if points.len() >= 3 {
-                LineJoint::from_points(
-                    points[start_idx],
-                    points[start_idx + 1],
-                    points[start_idx + 2],
-                    width,
-                    alignment,
-                )
+                LineJoint::from_points(points[0], points[1], points[2], width, alignment)
             } else {
-                LineJoint::end(points[start_idx], points[start_idx + 1], width, alignment)
+                LineJoint::end(points[0], points[1], width, alignment)
             };
 
             Self {
                 state: TriangleIteratorState::First,
                 points,
-                start_idx,
                 width,
                 alignment,
                 start_joint: start_joint.second_edge_start,
@@ -66,7 +55,6 @@ impl<'a> TriangleIterator<'a> {
         Self {
             state: TriangleIteratorState::NextJoint,
             points: &[],
-            start_idx: 0,
             width: 0,
             alignment: StrokeAlignment::Center,
             start_joint: EdgeCorners {
@@ -121,28 +109,31 @@ impl<'a> Iterator for TriangleIterator<'a> {
                     if self.end_joint.is_end_joint() {
                         return None;
                     }
-                    self.state = TriangleIteratorState::First;
 
-                    self.start_idx += 1;
+                    self.state = TriangleIteratorState::First;
                     self.start_joint = self.end_joint.second_edge_start;
 
                     // Compute next end joint. The iterator will stop if the `points.get()` calls below
                     // return `None`, denoting that we've gone past the end of the points array.
-                    let first_point = *self.points.get(self.start_idx)?;
-                    let secound_point = *self.points.get(self.start_idx + 1)?;
-
-                    self.end_joint = if let Some(third_point) = self.points.get(self.start_idx + 2)
-                    {
+                    self.end_joint = if self.points.len() >= 3 {
                         LineJoint::from_points(
-                            first_point,
-                            secound_point,
-                            *third_point,
+                            self.points[0],
+                            self.points[1],
+                            self.points[2],
                             self.width,
                             self.alignment,
                         )
                     } else {
-                        LineJoint::end(first_point, secound_point, self.width, self.alignment)
+                        LineJoint::end(
+                            *self.points.get(0)?,
+                            *self.points.get(1)?,
+                            self.width,
+                            self.alignment,
+                        )
                     };
+
+                    // Shift the points.
+                    self.points = &self.points[1..];
                 }
 
                 TriangleIteratorState::First => {
