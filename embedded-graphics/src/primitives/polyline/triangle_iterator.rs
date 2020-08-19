@@ -65,25 +65,16 @@ impl<'a> TriangleIterator<'a> {
         }
     }
 
-    fn edge_triangle1(start_joint: EdgeCorners, end_joint: LineJoint) -> Triangle {
-        let EdgeCorners {
-            left: left_start,
-            right: right_start,
-        } = start_joint;
+    fn edge_triangle1(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Triangle {
         let LineJoint {
             first_edge_end: EdgeCorners { left: left_end, .. },
             ..
         } = end_joint;
 
-        // NOTE: Winding order is important here to prevent overdraw of the shared edge from
-        // right_start to left_end.
-        Triangle::new(left_start, left_end, right_start) // CW winding order
+        Triangle::new(start_joint_corners.left, left_end, start_joint_corners.right)
     }
 
-    fn edge_triangle2(start_joint: EdgeCorners, end_joint: LineJoint) -> Triangle {
-        let EdgeCorners {
-            right: right_start, ..
-        } = start_joint;
+    fn edge_triangle2(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Triangle {
         let LineJoint {
             first_edge_end:
                 EdgeCorners {
@@ -93,9 +84,7 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        // NOTE: Winding order is important here to prevent overdraw of the shared edge from
-        // right_start to left_end.
-        Triangle::new(left_end, right_end, right_start) // CCW winding order
+        Triangle::new(left_end, right_end, start_joint_corners.right)
     }
 }
 
