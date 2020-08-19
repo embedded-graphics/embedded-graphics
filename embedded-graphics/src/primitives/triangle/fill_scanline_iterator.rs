@@ -24,18 +24,18 @@ impl ChainedLines {
             // A -> B walk is unnecessary, the horizontal iterator will return those points
             Self {
                 line: Line::new(b, c).points(),
-                next_point: None
+                next_point: None,
             }
         } else if b.y == c.y {
             // B -> C walk is unnecessary, the horizontal iterator will return those points
             Self {
                 line: Line::new(a, b).points(),
-                next_point: None
+                next_point: None,
             }
         } else {
             Self {
                 line: Line::new(a, b).points(),
-                next_point: Some(c)
+                next_point: Some(c),
             }
         }
     }
@@ -92,10 +92,7 @@ impl FillScanlineIterator {
     }
 
     fn update_ab(&mut self) -> Option<(Point, Point)> {
-        let mut next_a = self
-            .next_a
-            .take()
-            .or_else(|| self.line_ab.next())?;
+        let mut next_a = self.next_a.take().or_else(|| self.line_ab.next())?;
         let first = next_a;
         while let Some(a) = self.line_ab.next() {
             if a.y == next_a.y {

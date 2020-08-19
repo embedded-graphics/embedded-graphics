@@ -71,7 +71,11 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        Triangle::new(start_joint_corners.left, left_end, start_joint_corners.right)
+        Triangle::new(
+            start_joint_corners.left,
+            left_end,
+            start_joint_corners.right,
+        )
     }
 
     fn edge_triangle2(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Triangle {
