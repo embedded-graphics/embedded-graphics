@@ -1,4 +1,4 @@
-//!
+//! A scanline iterator that returns every point in a triangle once.
 use crate::{
     geometry::Point,
     primitives::{
@@ -23,10 +23,10 @@ pub struct FillScanlineIterator {
     /// Horizontal line
     scan_points: line::Points,
 
-    ///
+    /// The first point of the ab edge in the next line
     next_a: Option<Point>,
 
-    ///
+    /// The first point of the c edge in the next line
     next_c: Option<Point>,
 }
 
