@@ -321,19 +321,16 @@ mod tests {
         let style = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
 
         let center = Ellipse::with_center(CENTER, SIZE).into_styled(style);
-        let inside = Ellipse::with_center(CENTER, SIZE + Size::new_equal(2)).into_styled(
+        let inside = Ellipse::with_center(CENTER, SIZE).into_styled(
             PrimitiveStyleBuilder::from(&style)
                 .stroke_alignment(StrokeAlignment::Inside)
                 .build(),
         );
-        let outside = Ellipse::with_center(CENTER, SIZE - Size::new_equal(4)).into_styled(
+        let outside = Ellipse::with_center(CENTER, SIZE).into_styled(
             PrimitiveStyleBuilder::from(&style)
                 .stroke_alignment(StrokeAlignment::Outside)
                 .build(),
         );
-
-        assert_eq!(center.bounding_box(), inside.bounding_box());
-        assert_eq!(outside.bounding_box(), inside.bounding_box());
 
         let mut display = MockDisplay::new();
         center.draw(&mut display).unwrap();
