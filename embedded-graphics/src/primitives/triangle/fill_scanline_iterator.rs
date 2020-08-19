@@ -93,16 +93,23 @@ impl FillScanlineIterator {
         let a = self.update_ab();
         let c = self.update_c();
 
-        if let (Some((fa, la)), Some((fc, lc))) = (a, c) {
-            let mut arr = [fa, la, fc, lc];
-            arr.sort_by(|&a, &b| a.x.cmp(&b.x));
-            let [left, _, _, right] = arr;
+        match (a, c) {
+            (Some((fa, la)), Some((fc, lc))) => {
+                let mut arr = [fa, la, fc, lc];
+                arr.sort_by(|&a, &b| a.x.cmp(&b.x));
+                let [left, _, _, right] = arr;
 
-            self.scan_points = Line::new(left, right).points();
+                self.scan_points = Line::new(left, right).points();
 
-            true
-        } else {
-            false
+                true
+            }
+            (Some((l, r)), None) | (None, Some((l, r))) => {
+                let (l, r) = sort_two_x(l, r);
+                self.scan_points = Line::new(l, r).points();
+
+                true
+            }
+            (None, None) => false,
         }
     }
 }
