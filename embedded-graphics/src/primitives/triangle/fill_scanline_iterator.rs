@@ -102,7 +102,7 @@ impl FillScanlineIterator {
                 break;
             }
         }
-        Some((first, next_a))
+        Some(sort_two_x(first, next_a))
     }
 
     fn update_c(&mut self) -> Option<(Point, Point)> {
@@ -116,31 +116,34 @@ impl FillScanlineIterator {
                 break;
             }
         }
-        Some((first, next_c))
+        Some(sort_two_x(first, next_c))
     }
 
+    /// Steps to the new scan line. Returns false if there are no points left to generate.
     fn next_scanline(&mut self) -> bool {
         let a = self.update_ab();
         let c = self.update_c();
 
-        match (a, c) {
-            (Some((fa, la)), Some((fc, lc))) => {
-                let mut arr = [fa, la, fc, lc];
-                arr.sort_by(|&a, &b| a.x.cmp(&b.x));
-                let [left, _, _, right] = arr;
+        // We are walking on the two sides of the triangle. a and c contain the possible edge
+        // points that we want to use for the scan line.
+        let (left, right) = match (a, c) {
+            (Some((left_a, right_a)), Some((left_c, right_c))) => {
+                // It's possible that the two sections that the update functions return, overlap.
+                let (left, _) = sort_two_x(left_a, left_c);
+                let (_, right) = sort_two_x(right_a, right_c);
 
-                self.scan_points = Line::new(left, right).points();
-
-                true
+                (left, right)
             }
-            (Some((l, r)), None) | (None, Some((l, r))) => {
-                let (l, r) = sort_two_x(l, r);
-                self.scan_points = Line::new(l, r).points();
 
-                true
-            }
-            (None, None) => false,
-        }
+            // We only have points on one side, so let's use those for the scan line
+            (Some((left, right)), None) | (None, Some((left, right))) => (left, right),
+
+            // No points, no point in continuing
+            (None, None) => return false,
+        };
+
+        self.scan_points = Line::new(left, right).points();
+        true
     }
 }
 
