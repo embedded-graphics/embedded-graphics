@@ -88,8 +88,12 @@ impl Primitive for Triangle {
     }
 }
 
-fn same_signs(a: i32, b: i32) -> bool {
+fn is_inside(a: i32, b: i32) -> bool {
     (a > 0) == (b > 0)
+}
+
+fn point_on_line(point: Point, p1: Point, p2: Point) -> i32 {
+    (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x)
 }
 
 impl ContainsPoint for Triangle {
@@ -106,23 +110,22 @@ impl ContainsPoint for Triangle {
         let (p1, p2, p3) = sort_yx(p1, p2, p3);
         let cw = Triangle::new(p1, p2, p3).area_doubled();
 
-        let edge1 = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
-        if !same_signs(edge1, cw) {
+        let edge1 = point_on_line(point, p1, p2);
+        if !is_inside(edge1, cw) {
             return Line::new(p1, p2)
                 .points()
                 .any(|line_point| line_point == point);
         }
 
-        let edge2 = (p3.x - p2.x) * (point.y - p2.y) - (p3.y - p2.y) * (point.x - p2.x);
-        if !same_signs(edge2, cw) {
+        let edge2 = point_on_line(point, p2, p3);
+        if !is_inside(edge2, cw) {
             return Line::new(p2, p3)
                 .points()
                 .any(|line_point| line_point == point);
         }
 
-        let edge3 = (p3.x - p1.x) * (point.y - p1.y) - (p3.y - p1.y) * (point.x - p1.x);
-        if same_signs(edge3, cw) {
-            // ^ missing negation is not a bug, third edge runs "backwards"
+        let edge3 = point_on_line(point, p3, p1);
+        if !is_inside(edge3, cw) {
             return Line::new(p1, p3)
                 .points()
                 .any(|line_point| line_point == point);
