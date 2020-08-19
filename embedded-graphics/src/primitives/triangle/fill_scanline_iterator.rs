@@ -102,7 +102,7 @@ impl FillScanlineIterator {
                 next_a = a;
             } else {
                 self.next_a = Some(a);
-                return Some((first, next_a));
+                break;
             }
         }
         Some((first, next_a))
@@ -116,7 +116,7 @@ impl FillScanlineIterator {
                 next_c = c;
             } else {
                 self.next_c = Some(c);
-                return Some((first, next_c));
+                break;
             }
         }
         Some((first, next_c))
