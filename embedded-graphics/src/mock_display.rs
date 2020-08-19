@@ -186,7 +186,8 @@ use core::{
     iter,
 };
 
-const SIZE: usize = 64;
+// TODO FIXME restore this to 64
+const SIZE: usize = 128;
 const DISPLAY_AREA: Rectangle = Rectangle::new(Point::zero(), Size::new_equal(SIZE as u32));
 
 /// Mock display struct
