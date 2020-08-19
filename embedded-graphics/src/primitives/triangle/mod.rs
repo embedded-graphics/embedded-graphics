@@ -416,6 +416,16 @@ mod tests {
         }
     }
 
+    #[test]
+    fn contains_edge_point() {
+        assert!(Triangle::new(
+            Point::new(193, 14),
+            Point::new(192, 79),
+            Point::new(185, 111)
+        )
+        .contains(Point::new(192, 81)));
+    }
+
     // FIXME: Colinear triangles are rendered as a line, so this should also return true. Why not?
     // #[test]
     // fn colinear_never_contains() {
