@@ -1,8 +1,7 @@
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{line, rectangle, triangle::Triangle, Primitive},
+    primitives::{rectangle, triangle::Triangle, Primitive},
 };
-use line::Line;
 
 // // TODO: Pub in crate primitives
 /// Iterator over all points inside the triangle.
