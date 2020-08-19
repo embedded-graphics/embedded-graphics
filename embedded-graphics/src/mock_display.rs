@@ -172,7 +172,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::Pixel,
-    geometry::{OriginDimensions, Point, Size},
+    geometry::{Dimensions, OriginDimensions, Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
         Rgb565, Rgb888, RgbColor,
@@ -238,21 +238,16 @@ where
         self.pixels[i as usize] = color;
     }
 
-    /// Get the affected area of the display.
+    /// Returns the area that was affected by drawing operations.
     pub fn affected_area(&self) -> Rectangle {
         let (tl, br) = self
-            .pixels
-            .iter()
-            .enumerate()
-            .filter_map(|(idx, p)| p.map(|_| idx))
+            .bounding_box()
+            .points()
+            .zip(self.pixels.iter())
+            .filter_map(|(point, color)| color.map(|_| point))
             .fold(
                 (None, None),
-                |(tl, br): (Option<Point>, Option<Point>), idx| {
-                    let x = idx % SIZE;
-                    let y = idx / SIZE;
-
-                    let point = Point::new(x as i32, y as i32);
-
+                |(tl, br): (Option<Point>, Option<Point>), point| {
                     (
                         tl.map(|tl| tl.component_min(point)).or(Some(point)),
                         br.map(|br| br.component_max(point)).or(Some(point)),
@@ -260,10 +255,11 @@ where
                 },
             );
 
-        Rectangle::with_corners(
-            tl.unwrap_or_else(Point::zero),
-            br.unwrap_or_else(Point::zero),
-        )
+        if let (Some(tl), Some(br)) = (tl, br) {
+            Rectangle::with_corners(tl, br)
+        } else {
+            Rectangle::new(Point::zero(), Size::zero())
+        }
     }
 
     /// Changes the color of a pixel.
@@ -779,5 +775,15 @@ mod tests {
     #[should_panic(expected = "invalid char in pattern: 'G'")]
     fn invalid_gray8_char_g() {
         Gray8::char_to_color('G');
+    }
+
+    #[test]
+    fn zero_sized_affected_area() {
+        let disp: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        assert_eq!(
+            disp.affected_area(),
+            Rectangle::new(Point::zero(), Size::zero())
+        );
     }
 }
