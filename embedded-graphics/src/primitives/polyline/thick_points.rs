@@ -54,16 +54,11 @@ impl<'a> Iterator for ThickPoints<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(point) = self.points_iter.next() {
-                if !ContainsPoint::contains(&self.prev_triangle, point) {
-                    if self.triangle_iter.is_current_beveled() {
-                        if !ContainsPoint::contains(&self.prev_triangle2, point)
-                            && !ContainsPoint::contains(&self.prev_triangle3, point)
-                        {
-                            return Some(point);
-                        }
-                    } else {
-                        return Some(point);
-                    }
+                if !ContainsPoint::contains(&self.prev_triangle, point)
+                    && !ContainsPoint::contains(&self.prev_triangle2, point)
+                    && !ContainsPoint::contains(&self.prev_triangle3, point)
+                {
+                    return Some(point);
                 }
             } else {
                 self.prev_triangle3 = self.prev_triangle2;
