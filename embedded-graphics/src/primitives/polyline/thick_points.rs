@@ -75,3 +75,35 @@ impl<'a> Iterator for ThickPoints<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        drawable::{Drawable, Pixel},
+        geometry::Dimensions,
+        mock_display::MockDisplay,
+        pixel_iterator::IntoPixels,
+        pixelcolor::BinaryColor,
+        primitives::{ContainsPoint, Polyline},
+        style::PrimitiveStyle,
+        transform::Transform,
+    };
+
+    #[test]
+    fn test_no_overwrite_on_sharp_corner() {
+        let mut mock_display = MockDisplay::new();
+
+        Polyline::new(&[Point::new(35, 5), Point::new(25, 35), Point::new(15, 5)])
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 10))
+            .draw(&mut mock_display)
+            .unwrap();
+
+        let mut mock_display = MockDisplay::new();
+
+        Polyline::new(&[Point::new(15, 5), Point::new(25, 35), Point::new(35, 5)])
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 10))
+            .draw(&mut mock_display)
+            .unwrap();
+    }
+}
