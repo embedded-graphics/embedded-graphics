@@ -12,9 +12,9 @@ use crate::{
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct ThickPoints<'a> {
     triangle_iter: TriangleIterator<'a>,
-    prev_triangle: Option<Triangle>,
-    prev_triangle2: Option<Triangle>,
-    prev_triangle3: Option<Triangle>,
+    prev_triangle: Triangle,
+    prev_triangle2: Triangle,
+    prev_triangle3: Triangle,
     triangle: Triangle,
     points_iter: Points,
 }
@@ -27,9 +27,9 @@ impl<'a> ThickPoints<'a> {
         let points_iter = triangle.points();
 
         Self {
-            prev_triangle: None,
-            prev_triangle2: None,
-            prev_triangle3: None,
+            prev_triangle: Triangle::empty(),
+            prev_triangle2: Triangle::empty(),
+            prev_triangle3: Triangle::empty(),
             triangle,
             triangle_iter,
             points_iter,
@@ -38,9 +38,9 @@ impl<'a> ThickPoints<'a> {
 
     pub fn empty() -> Self {
         Self {
-            prev_triangle: None,
-            prev_triangle2: None,
-            prev_triangle3: None,
+            prev_triangle: Triangle::empty(),
+            prev_triangle2: Triangle::empty(),
+            prev_triangle3: Triangle::empty(),
             triangle: Triangle::empty(),
             triangle_iter: TriangleIterator::empty(),
             points_iter: Triangle::empty().points(),
@@ -63,7 +63,7 @@ impl<'a> Iterator for ThickPoints<'a> {
             } else {
                 self.prev_triangle3 = self.prev_triangle2;
                 self.prev_triangle2 = self.prev_triangle;
-                self.prev_triangle = Some(self.triangle);
+                self.prev_triangle = self.triangle;
                 self.triangle = self.triangle_iter.next()?;
                 self.points_iter = self.triangle.points();
             }
