@@ -34,28 +34,26 @@ impl FillScanlineIterator {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
-        let mut line_a = if v1.y == v2.y {
+        let line_a = if v1.y == v2.y {
             line::Points::empty()
         } else {
             Line::new(v1, v2).points()
         };
-        let mut line_b = if v2.y == v3.y {
+        let line_b = if v2.y == v3.y {
             line::Points::empty()
         } else {
             Line::new(v2, v3).points()
         };
-        let mut line_c = Line::new(v1, v3).points();
+        let line_c = Line::new(v1, v3).points();
 
-        let self_ = Self {
+        Self {
             line_a,
             line_b,
             line_c,
             next_a: None,
             next_c: None,
             scan_points: line::Points::empty(),
-        };
-
-        self_
+        }
     }
 
     fn update_ab(&mut self) -> Option<(Point, Point)> {

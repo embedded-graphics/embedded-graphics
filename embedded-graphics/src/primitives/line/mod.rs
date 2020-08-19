@@ -9,10 +9,7 @@ pub use crate::primitives::line::thick_points::Side;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        line::{
-            bresenham::{Bresenham, BresenhamParameters},
-            thick_points::{ParallelLineType, ParallelsIterator},
-        },
+        line::thick_points::{ParallelLineType, ParallelsIterator},
         Primitive, Rectangle, Triangle,
     },
     style::StrokeAlignment,

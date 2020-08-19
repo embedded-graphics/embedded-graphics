@@ -2,7 +2,7 @@ use crate::{
     prelude::Point,
     primitives::{
         polyline::triangle_iterator::TriangleIterator,
-        triangle::{self, FillScanlineIterator, Points, Triangle},
+        triangle::{Points, Triangle},
         ContainsPoint, Primitive,
     },
     style::StrokeAlignment,
