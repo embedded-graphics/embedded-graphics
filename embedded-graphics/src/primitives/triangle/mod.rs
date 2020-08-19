@@ -88,6 +88,10 @@ impl Primitive for Triangle {
     }
 }
 
+fn same_signs(a: i32, b: i32) -> bool {
+    (a >= 0) == (b >= 0)
+}
+
 impl ContainsPoint for Triangle {
     fn contains(&self, point: Point) -> bool {
         // Skip expensive calculations below if point is outside the bounding box
@@ -95,29 +99,36 @@ impl ContainsPoint for Triangle {
             return false;
         }
 
-        // Skip expensive point-on-line check below if point is definitely inside triangle
-        if self.in_mathematical_triangle(&point) {
-            return true;
-        }
-
         let Self { p1, p2, p3 } = *self;
 
         // Sort points into same order as `ScanlineIterator` so this check produces the same results
         // as a rendered triangle would.
         let (p1, p2, p3) = sort_yx(p1, p2, p3);
+        let cw = Triangle::new(p1, p2, p3).area_doubled();
 
-        // Special case: due to the Bresenham algorithm being used to render triangles, some pixel
-        // centers on a Styled<Triangle> lie outside the mathematical triangle. This check
-        // inefficiently checks to see if the point lies on any of the border edges.
-        let mut l1 = Line::new(p1, p2).points();
-        let mut l2 = Line::new(p2, p3).points();
-        let l3 = Line::new(p1, p3).points();
+        let edge1 = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
+        if !same_signs(edge1, cw) {
+            return Line::new(p1, p2)
+                .points()
+                .any(|line_point| line_point == point);
+        }
 
-        // Skip first points so that they are not checked twice
-        l1.next();
-        l2.next();
+        let edge2 = (p3.x - p2.x) * (point.y - p2.y) - (p3.y - p2.y) * (point.x - p2.x);
+        if !same_signs(edge2, cw) {
+            return Line::new(p2, p3)
+                .points()
+                .any(|line_point| line_point == point);
+        }
 
-        l1.chain(l2).chain(l3).any(|line_point| line_point == point)
+        let edge3 = (p3.x - p1.x) * (point.y - p1.y) - (p3.y - p1.y) * (point.x - p1.x);
+        if same_signs(edge3, cw) {
+            // ^ missing negation is not a bug, third edge runs "backwards"
+            return Line::new(p1, p3)
+                .points()
+                .any(|line_point| line_point == point);
+        }
+
+        true
     }
 }
 
