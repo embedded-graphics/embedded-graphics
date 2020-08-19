@@ -89,7 +89,7 @@ impl Primitive for Triangle {
 }
 
 fn same_signs(a: i32, b: i32) -> bool {
-    (a >= 0) == (b >= 0)
+    (a > 0) == (b > 0)
 }
 
 impl ContainsPoint for Triangle {
