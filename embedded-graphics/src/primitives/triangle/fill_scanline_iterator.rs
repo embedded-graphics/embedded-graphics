@@ -3,11 +3,10 @@ use crate::{
     geometry::Point,
     primitives::{
         line::{self, Line},
-        triangle::{sort_yx, Triangle},
+        triangle::{sort_two_x, sort_yx, Triangle},
         Primitive,
     },
 };
-use crate::primitives::triangle::sort_two_x;
 
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
