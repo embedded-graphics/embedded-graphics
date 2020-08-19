@@ -8,13 +8,7 @@ mod thick_points;
 pub use crate::primitives::line::thick_points::Side;
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{
-        line::{
-            bresenham::{Bresenham, BresenhamParameters, BresenhamPoint},
-            thick_points::ParallelsIterator,
-        },
-        Primitive, Rectangle, Triangle,
-    },
+    primitives::{line::thick_points::ParallelsIterator, Primitive, Rectangle, Triangle},
     style::StrokeAlignment,
     transform::Transform,
 };
