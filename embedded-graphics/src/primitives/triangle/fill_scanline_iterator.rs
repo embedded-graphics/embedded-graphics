@@ -59,6 +59,46 @@ impl Iterator for ChainedLines {
     }
 }
 
+/// Iterator that returns points on a horizontal line.
+///
+/// Bresenham's algo is good, but not this good.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct HorizontalLine {
+    p: Point,
+    x_max: i32,
+}
+
+impl HorizontalLine {
+    pub fn new(start: Point, end: Point) -> Self {
+        Self {
+            p: start,
+            x_max: end.x,
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            p: Point::zero(),
+            x_max: -1,
+        }
+    }
+}
+
+impl Iterator for HorizontalLine {
+    type Item = Point;
+
+    #[inline(always)]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.p.x <= self.x_max {
+            let p = Some(self.p);
+            self.p.x += 1;
+            p
+        } else {
+            None
+        }
+    }
+}
+
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct FillScanlineIterator {
@@ -68,8 +108,8 @@ pub struct FillScanlineIterator {
     /// Edges on the other side of the triangle
     line_c: line::Points,
 
-    /// Horizontal line
-    scan_points: line::Points,
+    /// Points in the current horizontal line
+    scan_points: HorizontalLine,
 
     /// The first point of the ab edge in the next line
     next_a: Option<Point>,
@@ -87,7 +127,7 @@ impl FillScanlineIterator {
             line_c: Line::new(v1, v3).points(),
             next_a: None,
             next_c: None,
-            scan_points: line::Points::empty(),
+            scan_points: HorizontalLine::empty(),
         }
     }
 
@@ -142,7 +182,7 @@ impl FillScanlineIterator {
             (None, None) => return false,
         };
 
-        self.scan_points = Line::new(left, right).points();
+        self.scan_points = HorizontalLine::new(left, right);
         true
     }
 }
