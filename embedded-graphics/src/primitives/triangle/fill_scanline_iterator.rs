@@ -264,6 +264,29 @@ mod tests {
             Point::new(60, 10),
             Point::new(60, 15),
         ));
+
+        // these triangles were found manually, they are cases where Triangle::contains() did not
+        // match the scanline iterator.
+        let triangles = [
+
+            // this triangle passes with the original contains(), but not with the optimized one
+            Triangle::new(
+                Point::new(37, 0),
+                Point::new(36, 68),
+                Point::new(29, 97),
+            ),
+
+            // this triangle fails even with the original contains()
+            Triangle::new(
+                Point::new(19, 0),
+                Point::new(29, 22),
+                Point::new(0, 8),
+            ),
+        ];
+
+        for triangle in triangles.iter() {
+            check(*triangle);
+        }
     }
 
     #[test]
