@@ -22,6 +22,7 @@ pub(in crate::primitives) struct TriangleIterator<'a> {
     width: u32,
     alignment: StrokeAlignment,
     start_joint: EdgeCorners, // it's not necessary to store the whole joint so save some memory
+    start_beveled: bool,
     end_joint: LineJoint,
 }
 
@@ -46,6 +47,7 @@ impl<'a> TriangleIterator<'a> {
                 width,
                 alignment,
                 start_joint: start_joint.second_edge_start,
+                start_beveled: false,
                 end_joint,
             }
         }
@@ -61,6 +63,7 @@ impl<'a> TriangleIterator<'a> {
                 left: Point::zero(),
                 right: Point::zero(),
             },
+            start_beveled: false,
             end_joint: LineJoint::empty(),
         }
     }
@@ -90,6 +93,11 @@ impl<'a> TriangleIterator<'a> {
 
         Triangle::new(left_end, right_end, start_joint_corners.right)
     }
+
+    /// Returns true if current joint is beveled
+    pub fn is_current_beveled(&self) -> bool {
+        self.start_beveled
+    }
 }
 
 impl<'a> Iterator for TriangleIterator<'a> {
@@ -105,6 +113,7 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
                     self.state = TriangleIteratorState::First;
                     self.start_joint = self.end_joint.second_edge_start;
+                    self.start_beveled = self.end_joint.filler().is_some();
 
                     // Compute next end joint. The iterator will stop if the `points.get()` calls below
                     // return `None`, denoting that we've gone past the end of the points array.
