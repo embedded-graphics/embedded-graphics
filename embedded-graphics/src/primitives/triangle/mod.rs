@@ -111,12 +111,11 @@ impl ContainsPoint for Triangle {
         // inefficiently checks to see if the point lies on any of the border edges.
         let mut l1 = Line::new(p1, p2).points();
         let mut l2 = Line::new(p2, p3).points();
-        let mut l3 = Line::new(p1, p3).points();
+        let l3 = Line::new(p1, p3).points();
 
         // Skip first points so that they are not checked twice
         l1.next();
         l2.next();
-        l3.next();
 
         l1.chain(l2).chain(l3).any(|line_point| line_point == point)
     }
