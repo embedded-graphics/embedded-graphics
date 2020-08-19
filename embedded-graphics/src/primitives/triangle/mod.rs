@@ -196,11 +196,7 @@ impl Triangle {
     /// Point inside triangle, ignoring pixels that partially lie outside triangle lines.
     pub(self) fn mathematical_contains(&self, point: &Point) -> bool {
         // Skip expensive calculations below if point is outside the bounding box
-        if self.bounding_box().contains(*point) {
-            self.in_mathematical_triangle(point)
-        } else {
-            false
-        }
+        self.bounding_box().contains(*point) && in_mathematical_triangle(point)
     }
 
     fn in_mathematical_triangle(&self, point: &Point) -> bool {
