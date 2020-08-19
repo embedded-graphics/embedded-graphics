@@ -308,13 +308,13 @@ mod tests {
 
         let center = Circle::with_center(CENTER, SIZE).into_styled(style);
 
-        let inside = Circle::with_center(CENTER, SIZE + 2).into_styled(
+        let inside = Circle::with_center(CENTER, SIZE).into_styled(
             PrimitiveStyleBuilder::from(&style)
                 .stroke_alignment(StrokeAlignment::Inside)
                 .build(),
         );
 
-        let outside = Circle::with_center(CENTER, SIZE - 4).into_styled(
+        let outside = Circle::with_center(CENTER, SIZE).into_styled(
             PrimitiveStyleBuilder::from(&style)
                 .stroke_alignment(StrokeAlignment::Outside)
                 .build(),

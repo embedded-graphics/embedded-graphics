@@ -284,6 +284,8 @@ mod tests {
         styled.draw(&mut display).unwrap();
     }
 
+    // FIXME: Triangles don't support stroke width or offset at the moment. This test should be
+    // ammended to test stroke offsets when support is implemented.
     #[test]
     fn bounding_box() {
         let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));

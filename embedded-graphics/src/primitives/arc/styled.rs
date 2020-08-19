@@ -227,7 +227,8 @@ mod tests {
             empty
                 .into_styled::<BinaryColor>(PrimitiveStyle::new())
                 .bounding_box(),
-            Rectangle::new(CENTER, Size::zero())
+            Rectangle::new(CENTER, Size::zero()),
+            "empty"
         );
 
         assert_eq!(
