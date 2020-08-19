@@ -8,13 +8,21 @@ use crate::{
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(in crate::primitives) enum TriangleIteratorState {
+    NextJoint,
+    First,
+    Secound,
+    Filler,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct TriangleIterator<'a> {
     points: &'a [Point],
+    state: TriangleIteratorState,
     start_idx: usize,
-    t1: Option<Triangle>,
-    t2: Option<Triangle>,
     width: u32,
     alignment: StrokeAlignment,
+    start_joint: EdgeCorners, // it's not necessary to store the whole joint so save some memory
     end_joint: LineJoint,
 }
 
@@ -42,16 +50,13 @@ impl<'a> TriangleIterator<'a> {
                 LineJoint::end(points[start_idx], points[start_idx + 1], width, alignment)
             };
 
-            // Initialise with line between p0 and p1
-            let (t1, t2) = Self::edge_triangles(start_joint, end_joint);
-
             Self {
+                state: TriangleIteratorState::First,
                 points,
-                t1: Some(t1),
-                t2: Some(t2),
                 start_idx,
                 width,
                 alignment,
+                start_joint: start_joint.second_edge_start,
                 end_joint,
             }
         }
@@ -59,24 +64,37 @@ impl<'a> TriangleIterator<'a> {
 
     pub fn empty() -> Self {
         Self {
+            state: TriangleIteratorState::NextJoint,
             points: &[],
-            t1: None,
-            t2: None,
             start_idx: 0,
             width: 0,
             alignment: StrokeAlignment::Center,
+            start_joint: EdgeCorners {
+                left: Point::zero(),
+                right: Point::zero(),
+            },
             end_joint: LineJoint::empty(),
         }
     }
 
-    fn edge_triangles(start_joint: LineJoint, end_joint: LineJoint) -> (Triangle, Triangle) {
+    fn edge_triangle1(start_joint: EdgeCorners, end_joint: LineJoint) -> Triangle {
+        let EdgeCorners {
+            left: left_start,
+            right: right_start,
+        } = start_joint;
         let LineJoint {
-            second_edge_start:
-                EdgeCorners {
-                    left: left_start,
-                    right: right_start,
-                },
+            first_edge_end: EdgeCorners { left: left_end, .. },
             ..
+        } = end_joint;
+
+        // NOTE: Winding order is important here to prevent overdraw of the shared edge from
+        // right_start to left_end.
+        Triangle::new(left_start, left_end, right_start) // CW winding order
+    }
+
+    fn edge_triangle2(start_joint: EdgeCorners, end_joint: LineJoint) -> Triangle {
+        let EdgeCorners {
+            right: right_start, ..
         } = start_joint;
         let LineJoint {
             first_edge_end:
@@ -89,10 +107,7 @@ impl<'a> TriangleIterator<'a> {
 
         // NOTE: Winding order is important here to prevent overdraw of the shared edge from
         // right_start to left_end.
-        let t1 = Triangle::new(left_start, left_end, right_start); // CW winding order
-        let t2 = Triangle::new(left_end, right_end, right_start); // CCW winding order
-
-        (t1, t2)
+        Triangle::new(left_end, right_end, right_start) // CCW winding order
     }
 }
 
@@ -100,41 +115,55 @@ impl<'a> Iterator for TriangleIterator<'a> {
     type Item = Triangle;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(triangle) = self.t1.take().or_else(|| self.t2.take()) {
-            Some(triangle)
-        }
-        // We've gone through the list of triangles in this edge/joint. Reset state for next edge
-        // and joint.
-        else {
-            let t = self.end_joint.filler();
+        loop {
+            match self.state {
+                TriangleIteratorState::NextJoint => {
+                    if self.end_joint.is_end_joint() {
+                        return None;
+                    }
+                    self.state = TriangleIteratorState::First;
 
-            self.start_idx += 1;
+                    self.start_idx += 1;
+                    self.start_joint = self.end_joint.second_edge_start;
 
-            let start_joint = self.end_joint;
+                    // Compute next end joint. The iterator will stop if the `points.get()` calls below
+                    // return `None`, denoting that we've gone past the end of the points array.
+                    let first_point = *self.points.get(self.start_idx)?;
+                    let secound_point = *self.points.get(self.start_idx + 1)?;
 
-            // Compute next end joint. The iterator will stop if the `points.get()` calls below
-            // return `None`, denoting that we've gone past the end of the points array.
-            let first_point = *self.points.get(self.start_idx)?;
-            let secound_point = *self.points.get(self.start_idx + 1)?;
+                    self.end_joint = if let Some(third_point) = self.points.get(self.start_idx + 2)
+                    {
+                        LineJoint::from_points(
+                            first_point,
+                            secound_point,
+                            *third_point,
+                            self.width,
+                            self.alignment,
+                        )
+                    } else {
+                        LineJoint::end(first_point, secound_point, self.width, self.alignment)
+                    };
+                }
 
-            self.end_joint = if let Some(third_point) = self.points.get(self.start_idx + 2) {
-                LineJoint::from_points(
-                    first_point,
-                    secound_point,
-                    *third_point,
-                    self.width,
-                    self.alignment,
-                )
-            } else {
-                LineJoint::end(first_point, secound_point, self.width, self.alignment)
-            };
+                TriangleIteratorState::First => {
+                    self.state = TriangleIteratorState::Secound;
+                    return Some(Self::edge_triangle1(self.start_joint, self.end_joint));
+                }
 
-            let (t1, t2) = Self::edge_triangles(start_joint, self.end_joint);
+                TriangleIteratorState::Secound => {
+                    self.state = TriangleIteratorState::Filler;
+                    return Some(Self::edge_triangle2(self.start_joint, self.end_joint));
+                }
 
-            self.t1 = Some(t1);
-            self.t2 = Some(t2);
+                TriangleIteratorState::Filler => {
+                    let t = self.end_joint.filler();
+                    self.state = TriangleIteratorState::NextJoint;
 
-            t.or_else(|| self.next())
+                    if t.is_some() {
+                        return t;
+                    }
+                }
+            }
         }
     }
 }
