@@ -312,7 +312,7 @@ impl LineJoint {
         }
     }
 
-    /// Returns whether the joint is the end.
+    /// Returns whether the joint is the last one.
     pub fn is_end_joint(&self) -> bool {
         match self.kind {
             JointKind::End => true,

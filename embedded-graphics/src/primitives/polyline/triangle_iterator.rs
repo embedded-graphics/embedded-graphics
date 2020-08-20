@@ -7,11 +7,19 @@ use crate::{
     style::StrokeAlignment,
 };
 
+/// The internal state of `TriangleIterator`
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) enum TriangleIteratorState {
+    /// Calculate the next joint
     NextJoint,
+
+    /// Return the first triangle of a joint
     First,
+
+    /// Return the second triangle of a joint
     Second,
+
+    /// Return the filler triangle for bevelled / degenerate joints
     Filler,
 }
 
@@ -71,6 +79,7 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
+        // Don't return colinear triangles
         if start_joint_corners != end_joint.first_edge_end {
             Some(Triangle::new(
                 start_joint_corners.left,
@@ -92,6 +101,7 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
+        // Don't return colinear triangles
         if start_joint_corners != end_joint.first_edge_end {
             Some(Triangle::new(
                 left_end,
