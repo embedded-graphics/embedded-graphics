@@ -88,12 +88,25 @@ impl Primitive for Triangle {
     }
 }
 
-fn is_inside(a: i32, b: i32) -> bool {
-    (a > 0) == (b > 0)
+/// A point is inside the triangle if it's on the right side of all 3 edges of a clockwise triangle,
+/// or on the left side of a counterclockwise triangle.
+///
+/// When this function returns true for all 3 edges, the point is inside the triangle.
+/// When this function returns false, the point is outside of the mathematical triangle.
+const fn is_inside(point_on_line: i32, clockwise: bool) -> bool {
+    (point_on_line > 0) == clockwise
 }
 
-fn point_on_line(point: Point, p1: Point, p2: Point) -> i32 {
-    (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x)
+/// Evaluate the line equation for point.
+///
+/// This function returns:
+///  - 0 if the point is on the line,
+///  - < 0 if point is on the left half-plane
+///  - > 0 if point is on the right half-plane
+///
+/// The directions are defined as if standing on p1 and looking towards p2.
+const fn point_on_line(point: Point, p1: Point, p2: Point) -> i32 {
+    (p1.x - p2.x) * (point.y - p2.y) - (p1.y - p2.y) * (point.x - p2.x)
 }
 
 impl ContainsPoint for Triangle {
@@ -108,8 +121,9 @@ impl ContainsPoint for Triangle {
         // Sort points into same order as `ScanlineIterator` so this check produces the same results
         // as a rendered triangle would.
         let (p1, p2, p3) = sort_yx(p1, p2, p3);
-        let cw = Triangle::new(p1, p2, p3).area_doubled();
+        let cw = Triangle::new(p1, p2, p3).is_clockwise();
 
+        // Checking for each edge separately allows exiting early.
         let edge1 = point_on_line(point, p1, p2);
         if !is_inside(edge1, cw) {
             if Line::new(p1, p2)
@@ -132,6 +146,8 @@ impl ContainsPoint for Triangle {
 
         let edge3 = point_on_line(point, p3, p1);
         if !is_inside(edge3, cw) {
+            // we are walking on the line against the triangle's winding order to check the same
+            // points as the scanline iterators would return.
             if Line::new(p1, p3)
                 .points()
                 .any(|line_point| line_point == point)
@@ -140,6 +156,8 @@ impl ContainsPoint for Triangle {
             }
         }
 
+        // At this point we only know that the point is not on the edges defined by Bresenham's
+        // algorithm.
         is_inside(edge1, cw) && is_inside(edge2, cw) && is_inside(edge3, cw)
     }
 }
@@ -160,6 +178,20 @@ impl Triangle {
     /// Create a new triangle with a given style
     pub const fn new(p1: Point, p2: Point, p3: Point) -> Self {
         Triangle { p1, p2, p3 }
+    }
+
+    /// Returns whether the triangle is wound clockwise.
+    pub const fn is_clockwise(self) -> bool {
+        let Self { p1, p2, p3 } = self;
+
+        point_on_line(p3, p1, p2) > 0
+    }
+
+    /// Returns whether the triangle is wound counter-clockwise.
+    pub const fn is_counter_clockwise(self) -> bool {
+        let Self { p1, p2, p3 } = self;
+
+        point_on_line(p3, p1, p2) < 0
     }
 
     /// Creates a new triangle from an array of points.
@@ -219,10 +251,10 @@ impl Triangle {
     /// Point inside triangle, ignoring pixels that partially lie outside triangle lines.
     pub(self) fn mathematical_contains(&self, point: &Point) -> bool {
         // Skip expensive calculations if point is outside the bounding box
-        self.bounding_box().contains(*point) && self.in_mathematical_triangle(point)
-    }
+        if !self.bounding_box().contains(*point) {
+            return false;
+        }
 
-    fn in_mathematical_triangle(&self, point: &Point) -> bool {
         let Self { p1, p2, p3 } = self;
         let p = point;
 
@@ -334,6 +366,7 @@ impl Transform for Triangle {
     }
 }
 
+/// Sort the two points in increasing X value.
 fn sort_two_x(p1: Point, p2: Point) -> (Point, Point) {
     if p1.x < p2.x {
         (p1, p2)
@@ -432,6 +465,22 @@ mod tests {
             Triangle::new(Point::new(30, 30), Point::new(0, 0), Point::new(32, 33))
                 .contains(Point::new(31, 31))
         );
+    }
+
+    #[test]
+    fn test_winding() {
+        let t1 = Triangle::empty();
+        let t2 = Triangle::new(Point::zero(), Point::new(1, 1), Point::new(1, 0));
+        let t3 = Triangle::new(Point::zero(), Point::new(1, 0), Point::new(1, 1));
+
+        assert!(!t1.is_clockwise());
+        assert!(!t1.is_counter_clockwise());
+
+        assert!(t2.is_clockwise());
+        assert!(!t2.is_counter_clockwise());
+
+        assert!(!t3.is_clockwise());
+        assert!(t3.is_counter_clockwise());
     }
 
     // FIXME: Colinear triangles are rendered as a line, so this should also return true. Why not?
