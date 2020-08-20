@@ -93,7 +93,11 @@ impl<'a> TriangleIterator<'a> {
         } = end_joint;
 
         if start_joint_corners != end_joint.first_edge_end {
-            Some(Triangle::new(left_end, right_end, start_joint_corners.right))
+            Some(Triangle::new(
+                left_end,
+                right_end,
+                start_joint_corners.right,
+            ))
         } else {
             None
         }

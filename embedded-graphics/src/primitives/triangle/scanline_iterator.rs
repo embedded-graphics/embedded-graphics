@@ -174,11 +174,12 @@ mod tests {
     };
 
     #[test]
-    fn points_are_part_of_triangle() {
+    fn points_by_scanline_match_triangle_contains() {
         fn check(triangle: Triangle) {
             let mut mock_display1 = MockDisplay::new();
             let mut mock_display2 = MockDisplay::new();
 
+            // FIXME: right now, ScanlineIterator does not guarantee unique points
             mock_display2.set_allow_overdraw(true);
 
             triangle
