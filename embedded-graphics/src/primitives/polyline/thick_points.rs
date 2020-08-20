@@ -8,14 +8,50 @@ use crate::{
     style::StrokeAlignment,
 };
 
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+struct PointBuffer {
+    points: [Point; 5],
+    count: u8,
+}
+
+impl PointBuffer {
+    pub const fn new() -> Self {
+        Self {
+            points: [Point::zero(); 5],
+            count: 0,
+        }
+    }
+
+    pub fn add(&mut self, p: Point) {
+        self.points[4] = self.points[3];
+        self.points[3] = self.points[2];
+        self.points[2] = self.points[1];
+        self.points[1] = self.points[0];
+        self.points[0] = p;
+        if self.count < 5 {
+            self.count += 1;
+        }
+    }
+
+    pub fn prev1_contains(&self, p: Point) -> bool {
+        self.count >= 3 && Triangle::new(self.points[0], self.points[1], self.points[2]).contains(p)
+    }
+
+    pub fn prev2_contains(&self, p: Point) -> bool {
+        self.count >= 4 && Triangle::new(self.points[1], self.points[2], self.points[3]).contains(p)
+    }
+
+    pub fn prev3_contains(&self, p: Point) -> bool {
+        self.count == 5 && Triangle::new(self.points[2], self.points[3], self.points[4]).contains(p)
+    }
+}
+
 // TODO: Generalise name, move into more common folder path
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct ThickPoints<'a> {
+    prev_points: PointBuffer,
     triangle_iter: TriangleIterator<'a>,
-    prev_triangle: Triangle,
-    prev_triangle2: Triangle,
-    prev_triangle3: Triangle,
-    triangle: Triangle,
+    new_point: Point,
     points_iter: Points,
 }
 
@@ -26,11 +62,13 @@ impl<'a> ThickPoints<'a> {
         let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
         let points_iter = triangle.points();
 
+        let mut prev_points = PointBuffer::new();
+        prev_points.add(triangle.p1);
+        prev_points.add(triangle.p2);
+
         Self {
-            prev_triangle: Triangle::empty(),
-            prev_triangle2: Triangle::empty(),
-            prev_triangle3: Triangle::empty(),
-            triangle,
+            prev_points,
+            new_point: triangle.p3,
             triangle_iter,
             points_iter,
         }
@@ -38,10 +76,8 @@ impl<'a> ThickPoints<'a> {
 
     pub fn empty() -> Self {
         Self {
-            prev_triangle: Triangle::empty(),
-            prev_triangle2: Triangle::empty(),
-            prev_triangle3: Triangle::empty(),
-            triangle: Triangle::empty(),
+            prev_points: PointBuffer::new(),
+            new_point: Point::zero(),
             triangle_iter: TriangleIterator::empty(),
             points_iter: Triangle::empty().points(),
         }
@@ -56,18 +92,17 @@ impl<'a> Iterator for ThickPoints<'a> {
             if let Some(point) = self.points_iter.next() {
                 // We need to check previous triangles so we don't overdraw them
                 // TODO: depending on the joint, not all 3 checks are necessary - optimize this
-                if !ContainsPoint::contains(&self.prev_triangle, point)
-                    && !ContainsPoint::contains(&self.prev_triangle2, point)
-                    && !ContainsPoint::contains(&self.prev_triangle3, point)
+                if !self.prev_points.prev1_contains(point)
+                    && !self.prev_points.prev2_contains(point)
+                    && !self.prev_points.prev3_contains(point)
                 {
                     return Some(point);
                 }
             } else {
-                self.prev_triangle3 = self.prev_triangle2;
-                self.prev_triangle2 = self.prev_triangle;
-                self.prev_triangle = self.triangle;
-                self.triangle = self.triangle_iter.next()?;
-                self.points_iter = self.triangle.points();
+                self.prev_points.add(self.new_point);
+                let triangle = self.triangle_iter.next()?;
+                self.points_iter = triangle.points();
+                self.new_point = triangle.p3;
             }
         }
     }
