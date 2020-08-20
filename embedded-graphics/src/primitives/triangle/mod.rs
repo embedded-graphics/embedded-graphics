@@ -112,26 +112,35 @@ impl ContainsPoint for Triangle {
 
         let edge1 = point_on_line(point, p1, p2);
         if !is_inside(edge1, cw) {
-            return Line::new(p1, p2)
+            if Line::new(p1, p2)
                 .points()
-                .any(|line_point| line_point == point);
+                .any(|line_point| line_point == point)
+            {
+                return true;
+            }
         }
 
         let edge2 = point_on_line(point, p2, p3);
         if !is_inside(edge2, cw) {
-            return Line::new(p2, p3)
+            if Line::new(p2, p3)
                 .points()
-                .any(|line_point| line_point == point);
+                .any(|line_point| line_point == point)
+            {
+                return true;
+            }
         }
 
         let edge3 = point_on_line(point, p3, p1);
         if !is_inside(edge3, cw) {
-            return Line::new(p1, p3)
+            if Line::new(p1, p3)
                 .points()
-                .any(|line_point| line_point == point);
+                .any(|line_point| line_point == point)
+            {
+                return true;
+            }
         }
 
-        true
+        is_inside(edge1, cw) && is_inside(edge2, cw) && is_inside(edge3, cw)
     }
 }
 
@@ -417,7 +426,8 @@ mod tests {
     }
 
     #[test]
-    fn contains_edge_point() {
+    fn bug_triangle_contains_edge_point() {
+        // This test is a regression test case found while optimizing Triangle::contains()
         assert!(Triangle::new(
             Point::new(193, 14),
             Point::new(192, 79),
