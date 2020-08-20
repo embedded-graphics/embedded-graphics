@@ -8,16 +8,64 @@ use crate::{
     },
 };
 
+/// A bit more memory-friendly way to chain two lines together.
+/// Horizontal lines are optimized for the scanline iterator.
+///
+/// TODO: maybe generalize this?
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct ChainedLines {
+    line: line::Points,
+    next_point: Option<Point>,
+}
+
+impl ChainedLines {
+    pub fn new(a: Point, b: Point, c: Point) -> Self {
+        if a.y == b.y {
+            // A -> B walk is unnecessary, the horizontal iterator will return those points
+            Self {
+                line: Line::new(b, c).points(),
+                next_point: None
+            }
+        } else if b.y == c.y {
+            // B -> C walk is unnecessary, the horizontal iterator will return those points
+            Self {
+                line: Line::new(a, b).points(),
+                next_point: None
+            }
+        } else {
+            Self {
+                line: Line::new(a, b).points(),
+                next_point: Some(c)
+            }
+        }
+    }
+}
+
+impl Iterator for ChainedLines {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(p) = self.line.next() {
+            if self.line.is_empty() {
+                if let Some(p2) = self.next_point.take() {
+                    self.line = Line::new(p, p2).points();
+                    self.line.next();
+                }
+            }
+            Some(p)
+        } else {
+            None
+        }
+    }
+}
+
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct FillScanlineIterator {
-    /// Left-most edge of the triangle
-    line_a: line::Points,
+    /// Edges on the one side of the triangle
+    line_ab: ChainedLines,
 
-    /// Right-most edge of the triangle
-    line_b: line::Points,
-
-    /// Bottom edge of the triangle
+    /// Edges on the other side of the triangle
     line_c: line::Points,
 
     /// Horizontal line
@@ -34,22 +82,9 @@ impl FillScanlineIterator {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
-        let line_a = if v1.y == v2.y {
-            line::Points::empty()
-        } else {
-            Line::new(v1, v2).points()
-        };
-        let line_b = if v2.y == v3.y {
-            line::Points::empty()
-        } else {
-            Line::new(v2, v3).points()
-        };
-        let line_c = Line::new(v1, v3).points();
-
         Self {
-            line_a,
-            line_b,
-            line_c,
+            line_ab: ChainedLines::new(v1, v2, v3),
+            line_c: Line::new(v1, v3).points(),
             next_a: None,
             next_c: None,
             scan_points: line::Points::empty(),
@@ -60,9 +95,9 @@ impl FillScanlineIterator {
         let mut next_a = self
             .next_a
             .take()
-            .or_else(|| self.line_a.next().or_else(|| self.line_b.next()))?;
+            .or_else(|| self.line_ab.next())?;
         let first = next_a;
-        while let Some(a) = self.line_a.next().or_else(|| self.line_b.next()) {
+        while let Some(a) = self.line_ab.next() {
             if a.y == next_a.y {
                 next_a = a;
             } else {
