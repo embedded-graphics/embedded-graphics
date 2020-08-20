@@ -7,7 +7,10 @@ mod thick_points;
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{line::thick_points::ParallelsIterator, Primitive, Rectangle},
+    primitives::{
+        line::thick_points::{ParallelLineType, ParallelsIterator},
+        Primitive, Rectangle,
+    },
     transform::Transform,
     SaturatingCast,
 };
@@ -88,8 +91,8 @@ impl Line {
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
 
-        let mut left = (self.start, 0);
-        let mut right = (self.start, 0);
+        let mut left = (self.start, ParallelLineType::Normal);
+        let mut right = (self.start, ParallelLineType::Normal);
 
         loop {
             if let Some((bresenham, reduce)) = it.next() {
@@ -107,18 +110,23 @@ impl Line {
 
         let delta = self.end - self.start;
 
-        let left_line = if left.1 == 0 {
-            Line::new(left.0, left.0 + delta)
-        } else {
-            Line::new(left.0, left.0 + delta - reduce)
-        };
+        let left_line = Line::new(
+            left.0,
+            left.0 + delta
+                - match left.1 {
+                    ParallelLineType::Normal => Point::zero(),
+                    ParallelLineType::Extra => reduce,
+                },
+        );
 
-        let right_line = if right.1 == 0 {
-            Line::new(right.0, right.0 + delta)
-        } else {
-            Line::new(right.0, right.0 + delta - reduce)
-        };
-
+        let right_line = Line::new(
+            right.0,
+            right.0 + delta
+                - match right.1 {
+                    ParallelLineType::Normal => Point::zero(),
+                    ParallelLineType::Extra => reduce,
+                },
+        );
         (left_line, right_line)
     }
 }

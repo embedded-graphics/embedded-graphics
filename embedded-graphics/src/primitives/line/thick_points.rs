@@ -27,6 +27,12 @@ impl Side {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(in crate::primitives::line) enum ParallelLineType {
+    Normal,
+    Extra,
+}
+
 /// Iterator over the parallel lines used to draw a thick line.
 ///
 /// Thick lines are drawn using multiple 1px wide lines, which are parallel to
@@ -159,8 +165,8 @@ impl ParallelsIterator {
 }
 
 impl Iterator for ParallelsIterator {
-    /// The bresenham state (`Bresenham`) and the reduction in line length (`u32`).
-    type Item = (Bresenham, u32);
+    /// The bresenham state (`Bresenham`) and the line type.
+    type Item = (Bresenham, ParallelLineType);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.thickness_accumulator.pow(2) > self.thickness_threshold {
@@ -174,13 +180,19 @@ impl Iterator for ParallelsIterator {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.minor;
 
                 // Normal lines are the same length as the original primitive line.
-                (Bresenham::with_initial_error(point, error), 0)
+                (
+                    Bresenham::with_initial_error(point, error),
+                    ParallelLineType::Normal,
+                )
             }
             BresenhamPoint::Extra(point) => {
                 self.thickness_accumulator += self.perpendicular_parameters.error_step.major;
 
                 // Extra lines are 1 pixel shorter than normal lines.
-                (Bresenham::with_initial_error(point, error), 1)
+                (
+                    Bresenham::with_initial_error(point, error),
+                    ParallelLineType::Extra,
+                )
             }
         };
 
@@ -222,10 +234,15 @@ impl Iterator for ThickPoints {
 
                 return Some(self.parallel.next(&self.iter.parallel_parameters));
             } else {
-                let (parallel, length_reduction) = self.iter.next()?;
+                let (parallel, line_type) = self.iter.next()?;
 
                 self.parallel = parallel;
-                self.parallel_points_remaining = self.parallel_length - length_reduction;
+                self.parallel_points_remaining = self.parallel_length;
+
+                // Reduce the length of extra lines by one pixel
+                if line_type == ParallelLineType::Extra {
+                    self.parallel_points_remaining -= 1;
+                }
             }
         }
     }
@@ -250,8 +267,13 @@ mod tests {
         let mut display = MockDisplay::new();
 
         for line_number in 0..count {
-            let (mut parallel, length_reduction) = parallels.next().unwrap();
-            let length = bresenham::major_length(&line) - length_reduction;
+            let (mut parallel, line_type) = parallels.next().unwrap();
+            let mut length = bresenham::major_length(&line);
+
+            // Reduce the length of extra lines by one pixel
+            if line_type == ParallelLineType::Extra {
+                length -= 1;
+            }
 
             for _ in 0..length {
                 let point = parallel.next(&parallels.parallel_parameters);
