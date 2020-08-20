@@ -65,20 +65,24 @@ impl<'a> TriangleIterator<'a> {
         }
     }
 
-    fn edge_triangle1(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Triangle {
+    fn edge_triangle1(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Option<Triangle> {
         let LineJoint {
             first_edge_end: EdgeCorners { left: left_end, .. },
             ..
         } = end_joint;
 
-        Triangle::new(
-            start_joint_corners.left,
-            left_end,
-            start_joint_corners.right,
-        )
+        if start_joint_corners != end_joint.first_edge_end {
+            Some(Triangle::new(
+                start_joint_corners.left,
+                left_end,
+                start_joint_corners.right,
+            ))
+        } else {
+            None
+        }
     }
 
-    fn edge_triangle2(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Triangle {
+    fn edge_triangle2(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Option<Triangle> {
         let LineJoint {
             first_edge_end:
                 EdgeCorners {
@@ -88,7 +92,11 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        Triangle::new(left_end, right_end, start_joint_corners.right)
+        if start_joint_corners != end_joint.first_edge_end {
+            Some(Triangle::new(left_end, right_end, start_joint_corners.right))
+        } else {
+            None
+        }
     }
 }
 
@@ -131,12 +139,16 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
                 TriangleIteratorState::First => {
                     self.state = TriangleIteratorState::Secound;
-                    return Some(Self::edge_triangle1(self.start_joint, self.end_joint));
+                    if let Some(t) = Self::edge_triangle1(self.start_joint, self.end_joint) {
+                        return Some(t);
+                    }
                 }
 
                 TriangleIteratorState::Secound => {
                     self.state = TriangleIteratorState::Filler;
-                    return Some(Self::edge_triangle2(self.start_joint, self.end_joint));
+                    if let Some(t) = Self::edge_triangle2(self.start_joint, self.end_joint) {
+                        return Some(t);
+                    }
                 }
 
                 TriangleIteratorState::Filler => {
