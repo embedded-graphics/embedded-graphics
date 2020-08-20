@@ -219,7 +219,7 @@ mod tests {
     };
 
     #[test]
-    fn points_are_part_of_triangle() {
+    fn points_by_scanline_match_triangle_contains() {
         fn check(triangle: Triangle) {
             let mut mock_display1 = MockDisplay::new();
             let mut mock_display2 = MockDisplay::new();
@@ -283,7 +283,7 @@ mod tests {
     }
 
     #[test]
-    fn bug_corner_points_are_generated() {
+    fn bug_corner_points_must_be_generated() {
         assert!(
             Triangle::new(Point::new(19, 0), Point::new(29, 22), Point::new(0, 8))
                 .points()
