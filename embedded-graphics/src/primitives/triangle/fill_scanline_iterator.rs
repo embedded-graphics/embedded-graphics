@@ -218,68 +218,78 @@ mod tests {
         transform::Transform,
     };
 
+    fn check_iterator_and_contains(triangle: Triangle) {
+        let mut mock_display1 = MockDisplay::new();
+        let mut mock_display2 = MockDisplay::new();
+
+        triangle
+            .bounding_box()
+            .points()
+            .filter(|&p| triangle.contains(p))
+            .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display1).unwrap());
+
+        triangle
+            .points()
+            .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display2).unwrap());
+
+        assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
+    }
+
     #[test]
     fn points_by_scanline_match_triangle_contains() {
-        fn check(triangle: Triangle) {
-            let mut mock_display1 = MockDisplay::new();
-            let mut mock_display2 = MockDisplay::new();
-
-            triangle
-                .bounding_box()
-                .points()
-                .filter(|&p| triangle.contains(p))
-                .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display1).unwrap());
-
-            triangle
-                .points()
-                .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display2).unwrap());
-
-            assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
-        }
-
-        check(Triangle::new(
+        check_iterator_and_contains(Triangle::new(
             Point::new(30, 0),
             Point::new(40, 10),
             Point::new(42, 10),
         ));
-        check(Triangle::new(
+        check_iterator_and_contains(Triangle::new(
             Point::new(5, 5),
             Point::new(15, 0),
             Point::new(10, 10),
         ));
-        check(Triangle::new(
+        check_iterator_and_contains(Triangle::new(
             Point::new(0, 0),
             Point::new(0, 10),
             Point::new(40, 10),
         ));
-        check(Triangle::new(
+        check_iterator_and_contains(Triangle::new(
             Point::new(0, 0),
             Point::new(0, 10),
             Point::new(40, 0),
         ));
-        check(Triangle::new(
+        check_iterator_and_contains(Triangle::new(
             Point::new(0, 0),
             Point::new(40, 10),
             Point::new(40, 0),
         ));
-        check(Triangle::new(
+        check_iterator_and_contains(Triangle::new(
             Point::new(0, 0),
             Point::new(60, 10),
             Point::new(60, 15),
         ));
 
-        // these triangles were found manually, they are cases where Triangle::contains() did not
+        // this triangle was found manually, it's a case where Triangle::contains() did not
         // match the scanline iterator.
-        let triangles = [
-            // this triangle passes with the original contains(), but not with the optimized one
-            Triangle::new(Point::new(37, 0), Point::new(36, 68), Point::new(29, 97)),
-            // this triangle fails even with the original contains()
-            Triangle::new(Point::new(19, 0), Point::new(29, 22), Point::new(0, 8)),
-        ];
+        // this triangle fails even with the original contains() implementation
+        check_iterator_and_contains(Triangle::new(
+            Point::new(19, 0),
+            Point::new(29, 22),
+            Point::new(0, 8),
+        ));
+    }
 
-        for triangle in triangles.iter() {
-            check(*triangle);
-        }
+    #[test]
+    #[ignore = "right now this requires a modified mock display with bigger display area"]
+    fn points_by_scanline_match_triangle_contains_regression() {
+        // this triangle was found manually, it's a case where Triangle::contains() did not
+        // match the scanline iterator.
+
+        // this triangle passes with the original contains() implementation
+        check_iterator_and_contains(Triangle::new(
+            Point::new(37, 0),
+            Point::new(36, 68),
+            Point::new(29, 97),
+        ));
     }
 
     #[test]
