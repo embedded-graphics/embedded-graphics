@@ -16,18 +16,12 @@ pub enum JointKind {
     Miter,
 
     /// Bevelled (flattened point)
-    Bevel {
-        /// The triangle used to draw the bevel itself.
-        filler_triangle: Triangle,
-    },
+    Bevel(Side),
 
     /// Degenerate (angle between lines is too small to properly render stroke).
     ///
     /// Degenerate corners are rendered with a bevel.
-    Degenerate {
-        /// The triangle used to fill in the corner.
-        filler_triangle: Triangle,
-    },
+    Degenerate,
 
     /// Essentially no joint (both lines are colinear)
     Colinear,
@@ -45,8 +39,8 @@ impl fmt::Display for JointKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Miter => f.write_str("Miter"),
-            Self::Bevel { .. } => f.write_str("Bevel"),
-            Self::Degenerate { .. } => f.write_str("Degenerate"),
+            Self::Bevel(_) => f.write_str("Bevel"),
+            Self::Degenerate => f.write_str("Degenerate"),
             Self::Colinear => f.write_str("Colinear"),
             Self::Start => f.write_str("Start"),
             Self::End => f.write_str("End"),
@@ -197,14 +191,7 @@ impl LineJoint {
                 else {
                     match outer_side {
                         Side::Right => Self {
-                            kind: JointKind::Bevel {
-                                // Point order matters so that the next triangle's new point is p3
-                                filler_triangle: Triangle::new(
-                                    l_intersection,
-                                    first_edge_right.end,
-                                    second_edge_right.start,
-                                ),
-                            },
+                            kind: JointKind::Bevel(Side::Right),
                             first_edge_end: EdgeCorners {
                                 left: l_intersection,
                                 right: first_edge_right.end,
@@ -215,14 +202,7 @@ impl LineJoint {
                             },
                         },
                         Side::Left => Self {
-                            kind: JointKind::Bevel {
-                                // Point order matters so that the next triangle's new point is p3
-                                filler_triangle: Triangle::new(
-                                    first_edge_left.end,
-                                    r_intersection,
-                                    second_edge_left.start,
-                                ),
-                            },
+                            kind: JointKind::Bevel(Side::Left),
                             first_edge_end: EdgeCorners {
                                 left: first_edge_left.end,
                                 right: r_intersection,
@@ -238,13 +218,7 @@ impl LineJoint {
             // Line segments overlap (degenerate)
             else {
                 Self {
-                    kind: JointKind::Degenerate {
-                        filler_triangle: Triangle::new(
-                            first_edge_left.end,
-                            first_edge_right.end,
-                            second_edge_right.start,
-                        ),
-                    },
+                    kind: JointKind::Degenerate,
                     first_edge_end: EdgeCorners {
                         left: first_edge_left.end,
                         right: first_edge_right.end,
@@ -276,7 +250,7 @@ impl LineJoint {
     /// of the other).
     pub fn is_degenerate(&self) -> bool {
         match self.kind {
-            JointKind::Degenerate { .. } => true,
+            JointKind::Degenerate => true,
             _ => false,
         }
     }
@@ -295,12 +269,16 @@ impl LineJoint {
     /// Get the filler triangle (if any).
     pub fn filler(&self) -> Option<Triangle> {
         match self.kind {
-            JointKind::Bevel {
-                filler_triangle, ..
-            }
-            | JointKind::Degenerate {
-                filler_triangle, ..
-            } => Some(filler_triangle),
+            JointKind::Bevel(Side::Left) => Some(Triangle::new(
+                self.first_edge_end.left,
+                self.first_edge_end.right,
+                self.second_edge_start.left,
+            )),
+            JointKind::Bevel(Side::Right) | JointKind::Degenerate  => Some(Triangle::new(
+                self.first_edge_end.left,
+                self.first_edge_end.right,
+                self.second_edge_start.right,
+            )),
             _ => None,
         }
     }
