@@ -426,12 +426,11 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "right now this requires a modified mock display with bigger display area"]
     fn triangle_contains_edge_point_regression() {
         // This test is a regression test case found while optimizing Triangle::contains()
         assert!(
-            Triangle::new(Point::new(8, 0), Point::new(7, 65), Point::new(0, 97))
-                .contains(Point::new(7, 67))
+            Triangle::new(Point::new(30, 30), Point::new(0, 0), Point::new(32, 33))
+                .contains(Point::new(31, 31))
         );
     }
 

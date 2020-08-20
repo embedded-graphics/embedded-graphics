@@ -268,27 +268,18 @@ mod tests {
             Point::new(60, 15),
         ));
 
-        // this triangle was found manually, it's a case where Triangle::contains() did not
-        // match the scanline iterator.
         // this triangle fails even with the original contains() implementation
         check_iterator_and_contains(Triangle::new(
             Point::new(19, 0),
             Point::new(29, 22),
             Point::new(0, 8),
         ));
-    }
-
-    #[test]
-    #[ignore = "right now this requires a modified mock display with bigger display area"]
-    fn points_by_scanline_match_triangle_contains_regression() {
-        // this triangle was found manually, it's a case where Triangle::contains() did not
-        // match the scanline iterator.
 
         // this triangle passes with the original contains() implementation
         check_iterator_and_contains(Triangle::new(
             Point::new(37, 0),
-            Point::new(36, 68),
-            Point::new(29, 97),
+            Point::new(36, 38),
+            Point::new(29, 52),
         ));
     }
 
