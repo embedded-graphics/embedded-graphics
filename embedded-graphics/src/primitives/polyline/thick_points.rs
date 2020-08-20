@@ -54,6 +54,8 @@ impl<'a> Iterator for ThickPoints<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(point) = self.points_iter.next() {
+                // We need to check previous triangles so we don't overdraw them
+                // TODO: depending on the joint, not all 3 checks are necessary - optimize this
                 if !ContainsPoint::contains(&self.prev_triangle, point)
                     && !ContainsPoint::contains(&self.prev_triangle2, point)
                     && !ContainsPoint::contains(&self.prev_triangle3, point)
@@ -75,14 +77,8 @@ impl<'a> Iterator for ThickPoints<'a> {
 mod test {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
-        geometry::Dimensions,
-        mock_display::MockDisplay,
-        pixel_iterator::IntoPixels,
-        pixelcolor::BinaryColor,
-        primitives::{ContainsPoint, Polyline},
-        style::PrimitiveStyle,
-        transform::Transform,
+        drawable::Drawable, mock_display::MockDisplay, pixelcolor::BinaryColor,
+        primitives::Polyline, style::PrimitiveStyle,
     };
 
     #[test]
