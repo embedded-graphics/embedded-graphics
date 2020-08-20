@@ -133,16 +133,19 @@ impl FillScanlineIterator {
 
     fn update_ab(&mut self) -> Option<(Point, Point)> {
         let mut next_a = self.next_a.take().or_else(|| self.line_ab.next())?;
-        let first = next_a;
+        // track limits to handle cases when line direction changes
+        let (mut min_x, mut max_x) = (next_a.x, next_a.x);
         while let Some(a) = self.line_ab.next() {
             if a.y == next_a.y {
+                min_x = min_x.min(a.x);
+                max_x = max_x.max(a.x);
                 next_a = a;
             } else {
                 self.next_a = Some(a);
                 break;
             }
         }
-        Some(sort_two_x(first, next_a))
+        Some((Point::new(min_x, next_a.y), Point::new(max_x, next_a.y)))
     }
 
     fn update_c(&mut self) -> Option<(Point, Point)> {
