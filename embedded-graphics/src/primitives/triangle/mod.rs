@@ -425,18 +425,15 @@ mod tests {
         }
     }
 
-    /* // This test requires a bigger mock display. TODO: figure out what to do
     #[test]
-    fn bug_triangle_contains_edge_point() {
+    #[ignore = "right now this requires a modified mock display with bigger display area"]
+    fn triangle_contains_edge_point_regression() {
         // This test is a regression test case found while optimizing Triangle::contains()
-        assert!(Triangle::new(
-            Point::new(8, 0),
-            Point::new(7, 65),
-            Point::new(0, 97)
-        )
-        .contains(Point::new(7, 67)));
+        assert!(
+            Triangle::new(Point::new(8, 0), Point::new(7, 65), Point::new(0, 97))
+                .contains(Point::new(7, 67))
+        );
     }
-    */
 
     // FIXME: Colinear triangles are rendered as a line, so this should also return true. Why not?
     // #[test]
