@@ -280,6 +280,25 @@ mod tests {
     }
 
     #[test]
+    fn bug_corner_points_are_generated() {
+        assert!(
+            Triangle::new(Point::new(19, 0), Point::new(29, 22), Point::new(0, 8))
+                .points()
+                .any(|p| p == Point::new(0, 8))
+        );
+        assert!(
+            Triangle::new(Point::new(19, 0), Point::new(29, 22), Point::new(0, 8))
+                .points()
+                .any(|p| p == Point::new(19, 0))
+        );
+        assert!(
+            Triangle::new(Point::new(19, 0), Point::new(29, 22), Point::new(0, 8))
+                .points()
+                .any(|p| p == Point::new(29, 22))
+        );
+    }
+
+    #[test]
     fn off_screen_still_draws_points() {
         let off_screen = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30));
         let on_screen = off_screen.translate(Point::new(0, 35));
