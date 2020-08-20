@@ -41,6 +41,11 @@ impl Points {
 
         self_
     }
+
+    /// Returns true if the iterator contains no points.
+    pub(in crate::primitives) fn is_empty(&self) -> bool {
+        self.points_remaining == 0
+    }
 }
 
 impl Iterator for Points {
