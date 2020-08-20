@@ -11,7 +11,7 @@ use crate::{
 pub(in crate::primitives) enum TriangleIteratorState {
     NextJoint,
     First,
-    Secound,
+    Second,
     Filler,
 }
 
@@ -142,13 +142,13 @@ impl<'a> Iterator for TriangleIterator<'a> {
                 }
 
                 TriangleIteratorState::First => {
-                    self.state = TriangleIteratorState::Secound;
+                    self.state = TriangleIteratorState::Second;
                     if let Some(t) = Self::edge_triangle1(self.start_joint, self.end_joint) {
                         return Some(t);
                     }
                 }
 
-                TriangleIteratorState::Secound => {
+                TriangleIteratorState::Second => {
                     self.state = TriangleIteratorState::Filler;
                     if let Some(t) = Self::edge_triangle2(self.start_joint, self.end_joint) {
                         return Some(t);
