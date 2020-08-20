@@ -47,7 +47,11 @@ impl Iterator for ChainedLines {
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(p) = self.line.next() {
             if self.line.is_empty() {
+                // We just got the last point of the line.
+                // Check if we have a point to continue with.
                 if let Some(p2) = self.next_point.take() {
+                    // Build the next line and skip it's first point - which is the point we
+                    // return now.
                     self.line = Line::new(p, p2).points();
                     self.line.next();
                 }
@@ -131,10 +135,15 @@ impl FillScanlineIterator {
         }
     }
 
+    /// Step on the AB side of the triangle.
+    ///
+    /// This function returns two possible starting points of the current scanline.
     fn update_ab(&mut self) -> Option<(Point, Point)> {
         let mut next_a = self.next_a.take().or_else(|| self.line_ab.next())?;
         // track limits to handle cases when line direction changes
         let (mut min_x, mut max_x) = (next_a.x, next_a.x);
+
+        // look for the first point that will be in the next scan line
         while let Some(a) = self.line_ab.next() {
             if a.y == next_a.y {
                 min_x = min_x.min(a.x);
@@ -148,6 +157,9 @@ impl FillScanlineIterator {
         Some((Point::new(min_x, next_a.y), Point::new(max_x, next_a.y)))
     }
 
+    /// Step on the C edge of the triangle.
+    ///
+    /// This function returns two possible ending points of the current scanline.
     fn update_c(&mut self) -> Option<(Point, Point)> {
         let mut next_c = self.next_c.take().or_else(|| self.line_c.next())?;
         let first = next_c;
@@ -211,10 +223,8 @@ mod tests {
         drawable::{Drawable, Pixel},
         geometry::Dimensions,
         mock_display::MockDisplay,
-        pixel_iterator::IntoPixels,
         pixelcolor::BinaryColor,
         primitives::ContainsPoint,
-        style::PrimitiveStyle,
         transform::Transform,
     };
 
