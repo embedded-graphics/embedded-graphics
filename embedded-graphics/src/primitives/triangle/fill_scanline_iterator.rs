@@ -190,11 +190,9 @@ impl FillScanlineIterator {
                 (left, right)
             }
 
-            // We only have points on one side, so let's use those for the scan line
-            (Some((left, right)), None) | (None, Some((left, right))) => (left, right),
-
+            // We can't only have points on one side, otherwise the triangle would be open
             // No points, no point in continuing
-            (None, None) => return false,
+            _ => return false,
         };
 
         self.scan_points = HorizontalLine::new(left, right);
