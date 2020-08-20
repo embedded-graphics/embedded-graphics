@@ -1,7 +1,8 @@
 use crate::{
     prelude::Point,
     primitives::{
-        line_joint::{EdgeCorners, LineJoint},
+        line::Side,
+        line_joint::{EdgeCorners, JointKind, LineJoint},
         Triangle,
     },
     style::StrokeAlignment,
@@ -30,6 +31,7 @@ pub(in crate::primitives) struct TriangleIterator<'a> {
     width: u32,
     alignment: StrokeAlignment,
     start_joint: EdgeCorners, // it's not necessary to store the whole joint so save some memory
+    start_joint_kind: JointKind,
     end_joint: LineJoint,
 }
 
@@ -54,6 +56,7 @@ impl<'a> TriangleIterator<'a> {
                 width,
                 alignment,
                 start_joint: start_joint.second_edge_start,
+                start_joint_kind: start_joint.kind,
                 end_joint,
             }
         }
@@ -69,6 +72,7 @@ impl<'a> TriangleIterator<'a> {
                 left: Point::zero(),
                 right: Point::zero(),
             },
+            start_joint_kind: JointKind::Start,
             end_joint: LineJoint::empty(),
         }
     }
@@ -114,6 +118,10 @@ impl<'a> TriangleIterator<'a> {
             None
         }
     }
+
+    pub const fn joint_kind(&self) -> JointKind {
+        self.start_joint_kind
+    }
 }
 
 impl<'a> Iterator for TriangleIterator<'a> {
@@ -129,6 +137,7 @@ impl<'a> Iterator for TriangleIterator<'a> {
 
                     self.state = TriangleIteratorState::First;
                     self.start_joint = self.end_joint.second_edge_start;
+                    self.start_joint_kind = self.end_joint.kind;
 
                     // Compute next end joint. The iterator will stop if the `points.get()` calls below
                     // return `None`, denoting that we've gone past the end of the points array.

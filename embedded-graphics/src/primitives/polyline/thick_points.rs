@@ -1,6 +1,8 @@
 use crate::{
     prelude::Point,
     primitives::{
+        line::Side,
+        line_joint::JointKind,
         polyline::triangle_iterator::TriangleIterator,
         triangle::{Points, Triangle},
         ContainsPoint, Primitive,
@@ -91,12 +93,21 @@ impl<'a> Iterator for ThickPoints<'a> {
         loop {
             if let Some(point) = self.points_iter.next() {
                 // We need to check previous triangles so we don't overdraw them
-                // TODO: depending on the joint, not all 3 checks are necessary - optimize this
-                if !self.prev_points.prev1_contains(point)
-                    && !self.prev_points.prev2_contains(point)
-                    && !self.prev_points.prev3_contains(point)
-                {
-                    return Some(point);
+                if !self.prev_points.prev1_contains(point) {
+                    // Not every previous triangle must be checked
+                    let return_point = match self.triangle_iter.joint_kind() {
+                        JointKind::Bevel(Side::Left) => {
+                            !self.prev_points.prev2_contains(point)
+                                && !self.prev_points.prev3_contains(point)
+                        }
+                        JointKind::Bevel(Side::Right) => !self.prev_points.prev3_contains(point),
+                        JointKind::Miter(true) => !self.prev_points.prev2_contains(point),
+                        _ => true,
+                    };
+
+                    if return_point {
+                        return Some(point);
+                    }
                 }
             } else {
                 self.prev_points.add(self.new_point);
