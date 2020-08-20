@@ -81,10 +81,11 @@ impl<'a> TriangleIterator<'a> {
 
         // Don't return colinear triangles
         if start_joint_corners != end_joint.first_edge_end {
+            // Point order matters so that the next triangle's new point is p3
             Some(Triangle::new(
                 start_joint_corners.left,
-                left_end,
                 start_joint_corners.right,
+                left_end,
             ))
         } else {
             None
@@ -103,10 +104,11 @@ impl<'a> TriangleIterator<'a> {
 
         // Don't return colinear triangles
         if start_joint_corners != end_joint.first_edge_end {
+            // Point order matters so that the next triangle's new point is p3
             Some(Triangle::new(
+                start_joint_corners.right,
                 left_end,
                 right_end,
-                start_joint_corners.right,
             ))
         } else {
             None

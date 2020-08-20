@@ -198,10 +198,10 @@ impl LineJoint {
                     match outer_side {
                         Side::Right => Self {
                             kind: JointKind::Bevel {
-                                /// Must be counter-clockwise
+                                // Point order matters so that the next triangle's new point is p3
                                 filler_triangle: Triangle::new(
-                                    first_edge_right.end,
                                     l_intersection,
+                                    first_edge_right.end,
                                     second_edge_right.start,
                                 ),
                             },
@@ -216,11 +216,11 @@ impl LineJoint {
                         },
                         Side::Left => Self {
                             kind: JointKind::Bevel {
-                                /// Must be clockwise
+                                // Point order matters so that the next triangle's new point is p3
                                 filler_triangle: Triangle::new(
                                     first_edge_left.end,
-                                    second_edge_left.start,
                                     r_intersection,
+                                    second_edge_left.start,
                                 ),
                             },
                             first_edge_end: EdgeCorners {
@@ -239,18 +239,11 @@ impl LineJoint {
             else {
                 Self {
                     kind: JointKind::Degenerate {
-                        filler_triangle: match outer_side {
-                            Side::Left => Triangle::new(
-                                first_edge_left.end,
-                                first_edge_right.end,
-                                second_edge_left.start,
-                            ),
-                            Side::Right => Triangle::new(
-                                first_edge_left.end,
-                                first_edge_right.end,
-                                second_edge_right.start,
-                            ),
-                        },
+                        filler_triangle: Triangle::new(
+                            first_edge_left.end,
+                            first_edge_right.end,
+                            second_edge_right.start,
+                        ),
                     },
                     first_edge_end: EdgeCorners {
                         left: first_edge_left.end,
