@@ -183,9 +183,7 @@ impl LineJoint {
                     };
 
                     Self {
-                        kind: JointKind::Miter(
-                            miter_length_squared > miter_limit_sharp && outer_side == Side::Left,
-                        ),
+                        kind: JointKind::Miter(miter_length_squared > miter_limit_sharp),
                         first_edge_end: corners,
                         second_edge_start: corners,
                     }
