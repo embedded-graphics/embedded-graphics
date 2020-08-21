@@ -1,3 +1,4 @@
+use crate::primitives::polyline::triangle_iterator::TriangleIteratorState;
 use crate::{
     prelude::Point,
     primitives::{
@@ -102,11 +103,21 @@ impl<'a> Iterator for ThickPoints<'a> {
                 if !self.prev_points.prev1_contains(point) {
                     // Not every previous triangle must be checked
                     let return_point = match self.triangle_iter.joint_kind() {
-                        JointKind::Bevel(Side::Left) => {
-                            !self.prev_points.prev2_contains(point)
-                                && !self.prev_points.prev3_contains(point)
-                        }
-                        JointKind::Bevel(Side::Right) => !self.prev_points.prev3_contains(point),
+                        JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
+                            TriangleIteratorState::Second => {
+                                !self.prev_points.prev2_contains(point)
+                            }
+                            TriangleIteratorState::Filler => {
+                                !self.prev_points.prev3_contains(point)
+                            }
+                            _ => true,
+                        },
+                        JointKind::Bevel(Side::Right) => match self.triangle_iter.state {
+                            TriangleIteratorState::Second => {
+                                !self.prev_points.prev3_contains(point)
+                            }
+                            _ => true,
+                        },
                         JointKind::Miter(true) => !self.prev_points.prev2_contains(point),
                         _ => true,
                     };

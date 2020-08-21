@@ -26,8 +26,10 @@ pub(in crate::primitives) enum TriangleIteratorState {
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct TriangleIterator<'a> {
+    /// Contains which iterator state will run next.
+    pub state: TriangleIteratorState,
+
     points: &'a [Point],
-    state: TriangleIteratorState,
     width: u32,
     alignment: StrokeAlignment,
     start_joint: EdgeCorners, // it's not necessary to store the whole joint so save some memory
