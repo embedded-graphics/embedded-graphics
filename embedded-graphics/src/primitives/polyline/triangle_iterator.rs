@@ -178,11 +178,9 @@ impl<'a> Iterator for TriangleIterator<'a> {
                 }
 
                 TriangleIteratorState::Filler => {
-                    let t = self.end_joint.filler();
                     self.state = TriangleIteratorState::NextJoint;
-
-                    if t.is_some() {
-                        return t;
+                    if let Some(t) = self.end_joint.filler() {
+                        return Some(t);
                     }
                 }
             }
