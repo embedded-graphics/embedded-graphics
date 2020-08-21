@@ -1,5 +1,8 @@
 use crate::primitives::polyline::triangle_iterator::TriangleIteratorState;
+use crate::primitives::triangle::{sort_two_yx, sort_yx};
+use crate::primitives::Line;
 use crate::{
+    geometry::Dimensions,
     prelude::Point,
     primitives::{
         line::Side,
@@ -10,6 +13,7 @@ use crate::{
     },
     style::StrokeAlignment,
 };
+use core::cmp::{max, min};
 
 /// Remembers the previous 5 points to avoid overdraw.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -41,7 +45,39 @@ impl LookbackBuffer {
 
     /// Returns whether the given point is inside the newest tracked triangle.
     pub fn prev1_contains(&self, p: Point) -> bool {
-        self.count >= 3 && Triangle::new(self.points[0], self.points[1], self.points[2]).contains(p)
+        let (p1, p2) = sort_two_yx(self.points[0], self.points[1]);
+
+        if p.y < p1.y || p.y > p2.y {
+            return false;
+        }
+
+        let min_x = min(p1.x, p2.x);
+        let max_x = max(p1.x, p2.x);
+
+        if p.x < min_x || p.x > max_x {
+            return false;
+        }
+
+        let line = Line::new(p1, p2);
+        line.points().any(|pp| pp == p)
+    }
+
+    pub fn prev1_contains_2(&self, p: Point) -> bool {
+        let (p1, p2) = sort_two_yx(self.points[0], self.points[2]);
+
+        if p.y < p1.y || p.y > p2.y {
+            return false;
+        }
+
+        let min_x = min(p1.x, p2.x);
+        let max_x = max(p1.x, p2.x);
+
+        if p.x < min_x || p.x > max_x {
+            return false;
+        }
+
+        let line = Line::new(p1, p2);
+        line.points().any(|pp| pp == p)
     }
 
     /// Returns whether the given point is inside the second tracked triangle.
@@ -100,31 +136,40 @@ impl<'a> Iterator for ThickPoints<'a> {
         loop {
             if let Some(point) = self.points_iter.next() {
                 // We need to check previous triangles so we don't overdraw them
-                if !self.prev_points.prev1_contains(point) {
-                    // Not every previous triangle must be checked
-                    let return_point = match self.triangle_iter.joint_kind() {
-                        JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
-                            TriangleIteratorState::Second => {
-                                !self.prev_points.prev2_contains(point)
-                            }
-                            TriangleIteratorState::Filler => {
-                                !self.prev_points.prev3_contains(point)
-                            }
-                            _ => true,
-                        },
-                        JointKind::Bevel(Side::Right) => match self.triangle_iter.state {
-                            TriangleIteratorState::Second => {
-                                !self.prev_points.prev3_contains(point)
-                            }
-                            _ => true,
-                        },
-                        JointKind::Miter(true) => !self.prev_points.prev2_contains(point),
+                // Not every previous triangle must be checked
+                let return_point = match self.triangle_iter.joint_kind() {
+                    JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
+                        TriangleIteratorState::Second => {
+                            !self.prev_points.prev1_contains(point)
+                                && !self.prev_points.prev2_contains(point)
+                        }
+                        TriangleIteratorState::Filler => {
+                            !self.prev_points.prev1_contains_2(point)
+                                && !self.prev_points.prev3_contains(point)
+                        }
                         _ => true,
-                    };
-
-                    if return_point {
-                        return Some(point);
+                    },
+                    JointKind::Bevel(Side::Right) => match self.triangle_iter.state {
+                        TriangleIteratorState::Second => {
+                            !self.prev_points.prev1_contains_2(point)
+                                && !self.prev_points.prev3_contains(point)
+                        }
+                        TriangleIteratorState::Filler => !self.prev_points.prev1_contains(point),
+                        _ => true,
+                    },
+                    JointKind::Miter(true) => {
+                        !self.prev_points.prev1_contains(point)
+                            && !self.prev_points.prev2_contains(point)
                     }
+                    JointKind::Start => match self.triangle_iter.state {
+                        TriangleIteratorState::Second => true,
+                        _ => !self.prev_points.prev1_contains(point),
+                    },
+                    _ => !self.prev_points.prev1_contains(point),
+                };
+
+                if return_point {
+                    return Some(point);
                 }
             } else {
                 self.prev_points.add(self.new_point);

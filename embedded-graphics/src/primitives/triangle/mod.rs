@@ -375,7 +375,9 @@ fn sort_two_x(p1: Point, p2: Point) -> (Point, Point) {
     }
 }
 
-fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
+/// Sort 2 points in order of increasing Y value. If the points have the same Y value, the one with
+/// the lesser X value is put before.
+pub fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
     // If p1.y is less than p2.y, return it first. Otherwise, if they have the same Y coordinate,
     // the first point becomes the one with the lesser X coordinate.
     if p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x) {
@@ -387,7 +389,7 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
 
 /// Sort 3 points in order of increasing Y value. If two points have the same Y value, the one with
 /// the lesser X value is put before.
-fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
+pub fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     let (y1, y2) = sort_two_yx(p1, p2);
     let (y1, y3) = sort_two_yx(p3, y1);
     let (y2, y3) = sort_two_yx(y3, y2);
