@@ -85,17 +85,12 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        // Don't return colinear triangles
-        if start_joint_corners != end_joint.first_edge_end {
-            // Point order matters so that the next triangle's new point is p3
-            Some(Triangle::new(
-                start_joint_corners.left,
-                start_joint_corners.right,
-                left_end,
-            ))
-        } else {
-            None
-        }
+        // Point order matters so that the next triangle's new point is p3
+        Some(Triangle::new(
+            start_joint_corners.left,
+            start_joint_corners.right,
+            left_end,
+        ))
     }
 
     fn edge_triangle2(start_joint_corners: EdgeCorners, end_joint: LineJoint) -> Option<Triangle> {
@@ -108,17 +103,12 @@ impl<'a> TriangleIterator<'a> {
             ..
         } = end_joint;
 
-        // Don't return colinear triangles
-        if start_joint_corners != end_joint.first_edge_end {
-            // Point order matters so that the next triangle's new point is p3
-            Some(Triangle::new(
-                start_joint_corners.right,
-                left_end,
-                right_end,
-            ))
-        } else {
-            None
-        }
+        // Point order matters so that the next triangle's new point is p3
+        Some(Triangle::new(
+            start_joint_corners.right,
+            left_end,
+            right_end,
+        ))
     }
 
     /// Returns the type (`JointKind`) of the starting joint.
@@ -138,7 +128,6 @@ impl<'a> Iterator for TriangleIterator<'a> {
                         return None;
                     }
 
-                    self.state = TriangleIteratorState::First;
                     self.start_joint = self.end_joint.second_edge_start;
                     self.start_joint_kind = self.end_joint.kind;
 
@@ -161,22 +150,25 @@ impl<'a> Iterator for TriangleIterator<'a> {
                         )
                     };
 
+                    // Skip redundant data
+                    if self.start_joint != self.end_joint.first_edge_end {
+                        self.state = TriangleIteratorState::First;
+                    } else {
+                        self.state = TriangleIteratorState::NextJoint;
+                    }
+
                     // Shift the points.
                     self.points = &self.points[1..];
                 }
 
                 TriangleIteratorState::First => {
                     self.state = TriangleIteratorState::Second;
-                    if let Some(t) = Self::edge_triangle1(self.start_joint, self.end_joint) {
-                        return Some(t);
-                    }
+                    return Self::edge_triangle1(self.start_joint, self.end_joint);
                 }
 
                 TriangleIteratorState::Second => {
                     self.state = TriangleIteratorState::Filler;
-                    if let Some(t) = Self::edge_triangle2(self.start_joint, self.end_joint) {
-                        return Some(t);
-                    }
+                    return Self::edge_triangle2(self.start_joint, self.end_joint);
                 }
 
                 TriangleIteratorState::Filler => {
