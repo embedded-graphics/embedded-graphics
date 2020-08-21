@@ -119,6 +119,7 @@ impl<'a> TriangleIterator<'a> {
         }
     }
 
+    /// Returns the type (`JointKind`) of the starting joint.
     pub const fn joint_kind(&self) -> JointKind {
         self.start_joint_kind
     }
