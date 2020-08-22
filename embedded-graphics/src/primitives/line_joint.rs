@@ -58,6 +58,15 @@ pub struct EdgeCorners {
     pub right: Point,
 }
 
+impl Default for EdgeCorners {
+    fn default() -> Self {
+        Self {
+            left: Point::zero(),
+            right: Point::zero(),
+        }
+    }
+}
+
 /// A joint between two lines.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct LineJoint {

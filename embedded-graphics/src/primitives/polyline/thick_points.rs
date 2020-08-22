@@ -1,10 +1,9 @@
-use crate::primitives::polyline::triangle_iterator::TriangleIteratorState;
 use crate::{
     prelude::Point,
     primitives::{
         line::Side,
         line_joint::JointKind,
-        polyline::triangle_iterator::TriangleIterator,
+        polyline::joint_iterator::{JointTriangleIterator, State},
         triangle::{Points, Triangle},
         ContainsPoint, Primitive,
     },
@@ -59,14 +58,14 @@ impl LookbackBuffer {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct ThickPoints<'a> {
     prev_points: LookbackBuffer,
-    triangle_iter: TriangleIterator<'a>,
+    triangle_iter: JointTriangleIterator<'a>,
     new_point: Point,
     points_iter: Points,
 }
 
 impl<'a> ThickPoints<'a> {
     pub fn new(points: &'a [Point], width: u32, alignment: StrokeAlignment) -> Self {
-        let mut triangle_iter = TriangleIterator::new(points, width, alignment);
+        let mut triangle_iter = JointTriangleIterator::new(points, width, alignment);
 
         let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
         let points_iter = triangle.points();
@@ -87,7 +86,7 @@ impl<'a> ThickPoints<'a> {
         Self {
             prev_points: LookbackBuffer::new(),
             new_point: Point::zero(),
-            triangle_iter: TriangleIterator::empty(),
+            triangle_iter: JointTriangleIterator::empty(),
             points_iter: Triangle::empty().points(),
         }
     }
@@ -102,20 +101,14 @@ impl<'a> Iterator for ThickPoints<'a> {
                 // We need to check previous triangles so we don't overdraw them
                 if !self.prev_points.prev1_contains(point) {
                     // Not every previous triangle must be checked
-                    let return_point = match self.triangle_iter.joint_kind() {
+                    let return_point = match self.triangle_iter.prev_joint_kind {
                         JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
-                            TriangleIteratorState::Second => {
-                                !self.prev_points.prev2_contains(point)
-                            }
-                            TriangleIteratorState::Filler => {
-                                !self.prev_points.prev3_contains(point)
-                            }
+                            State::SecondTriangle => !self.prev_points.prev2_contains(point),
+                            State::ExtraTriangle => !self.prev_points.prev3_contains(point),
                             _ => true,
                         },
                         JointKind::Bevel(Side::Right) => match self.triangle_iter.state {
-                            TriangleIteratorState::Second => {
-                                !self.prev_points.prev3_contains(point)
-                            }
+                            State::SecondTriangle => !self.prev_points.prev3_contains(point),
                             _ => true,
                         },
                         JointKind::Miter(true) => !self.prev_points.prev2_contains(point),

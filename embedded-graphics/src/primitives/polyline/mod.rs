@@ -1,5 +1,6 @@
 //! The polyline primitive
 
+mod joint_iterator;
 mod points;
 mod styled;
 mod thick_points;
