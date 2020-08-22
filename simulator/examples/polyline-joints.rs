@@ -89,7 +89,7 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut overdraw_display = OverdrawDisplay::new(display.size());
 
-    let mut end_point = Point::new(82, 110);
+    let mut end_point = Point::new(202, 113);
 
     let mut width = 15u32;
     let mut alignment = StrokeAlignment::Center;
