@@ -3,6 +3,9 @@
 //! This list includes the [basic color keywords] as well as all colors in the
 //! [extended color keywords] list.
 //!
+//! Note that the `grEy` variants of some colors as defined in the spec are absent from this list.
+//! The `grAy` variants of these colors should be used instead.
+//!
 //! [basic color keywords]: https://drafts.csswg.org/css-color-3/#html4
 //! [extended color keywords]: https://drafts.csswg.org/css-color-3/#svg-color
 
@@ -49,7 +52,6 @@ macro_rules! impl_web_colors {
             color!(DARK_GOLDENROD, 184, 134, 11, $container, "Dark Goldenrod", "184, 134, 11");
             color!(DARK_GRAY, 169, 169, 169, $container, "Dark Gray", "169, 169, 169");
             color!(DARK_GREEN, 0, 100, 0, $container, "Dark Green", "0, 100, 0");
-            color!(DARK_GREY, 169, 169, 169, $container, "Dark Grey", "169, 169, 169");
             color!(DARK_KHAKI, 189, 183, 107, $container, "Dark Khaki", "189, 183, 107");
             color!(DARK_MAGENTA, 139, 0, 139, $container, "Dark Magenta", "139, 0, 139");
             color!(DARK_OLIVE_GREEN, 85, 107, 47, $container, "Dark Olive Green", "85, 107, 47");
@@ -60,7 +62,6 @@ macro_rules! impl_web_colors {
             color!(DARK_SEA_GREEN, 143, 188, 143, $container, "Dark Sea Green", "143, 188, 143");
             color!(DARK_SLATE_BLUE, 72, 61, 139, $container, "Dark Slate Blue", "72, 61, 139");
             color!(DARK_SLATE_GRAY, 47, 79, 79, $container, "Dark Slate Gray", "47, 79, 79");
-            color!(DARK_SLATE_GREY, 47, 79, 79, $container, "Dark Slate Grey", "47, 79, 79");
             color!(DARK_TURQUOISE, 0, 206, 209, $container, "Dark Turquoise", "0, 206, 209");
             color!(DARK_VIOLET, 148, 0, 211, $container, "Dark Violet", "148, 0, 211");
             color!(DEEP_PINK, 255, 20, 147, $container, "Deep Pink", "255, 20, 147");
@@ -78,7 +79,6 @@ macro_rules! impl_web_colors {
             color!(GRAY, 128, 128, 128, $container, "Gray", "128, 128, 128");
             color!(GREEN, 0, 128, 0, $container, "Green", "0, 128, 0");
             color!(GREEN_YELLOW, 173, 255, 47, $container, "Green Yellow", "173, 255, 47");
-            color!(GREY, 128, 128, 128, $container, "Grey", "128, 128, 128");
             color!(HONEYDEW, 240, 255, 240, $container, "Honeydew", "240, 255, 240");
             color!(HOT_PINK, 255, 105, 180, $container, "Hot Pink", "255, 105, 180");
             color!(INDIAN_RED, 205, 92, 92, $container, "Indian Red", "205, 92, 92");
@@ -95,13 +95,11 @@ macro_rules! impl_web_colors {
             color!(LIGHT_GOLDENROD_YELLOW, 250, 250, 210, $container, "Light Goldenrod Yellow", "250, 250, 210");
             color!(LIGHT_GRAY, 211, 211, 211, $container, "Light Gray", "211, 211, 211");
             color!(LIGHT_GREEN, 144, 238, 144, $container, "Light Green", "144, 238, 144");
-            color!(LIGHT_GREY, 211, 211, 211, $container, "Light Grey", "211, 211, 211");
             color!(LIGHT_PINK, 255, 182, 193, $container, "Light Pink", "255, 182, 193");
             color!(LIGHT_SALMON, 255, 160, 122, $container, "Light Salmon", "255, 160, 122");
             color!(LIGHT_SEA_GREEN, 32, 178, 170, $container, "Light Sea Green", "32, 178, 170");
             color!(LIGHT_SKY_BLUE, 135, 206, 250, $container, "Light Sky Blue", "135, 206, 250");
             color!(LIGHT_SLATE_GRAY, 119, 136, 153, $container, "Light Slate Gray", "119, 136, 153");
-            color!(LIGHT_SLATE_GREY, 119, 136, 153, $container, "Light Slate Grey", "119, 136, 153");
             color!(LIGHT_STEEL_BLUE, 176, 196, 222, $container, "Light Steel Blue", "176, 196, 222");
             color!(LIGHT_YELLOW, 255, 255, 224, $container, "Light Yellow", "255, 255, 224");
             color!(LIME, 0, 255, 0, $container, "Lime", "0, 255, 0");
@@ -155,7 +153,6 @@ macro_rules! impl_web_colors {
             color!(SKY_BLUE, 135, 206, 235, $container, "Sky Blue", "135, 206, 235");
             color!(SLATE_BLUE, 106, 90, 205, $container, "Slate Blue", "106, 90, 205");
             color!(SLATE_GRAY, 112, 128, 144, $container, "Slate Gray", "112, 128, 144");
-            color!(SLATE_GREY, 112, 128, 144, $container, "Slate Grey", "112, 128, 144");
             color!(SNOW, 255, 250, 250, $container, "Snow", "255, 250, 250");
             color!(SPRING_GREEN, 0, 255, 127, $container, "Spring Green", "0, 255, 127");
             color!(STEEL_BLUE, 70, 130, 180, $container, "Steel Blue", "70, 130, 180");
