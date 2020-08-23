@@ -9,7 +9,7 @@ pub struct Points(FillScanlineIterator);
 
 impl Points {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-        Self(FillScanlineIterator::new(triangle))
+        Self(FillScanlineIterator::new(triangle, None))
     }
 }
 

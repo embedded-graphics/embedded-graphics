@@ -1,4 +1,5 @@
 //! A scanline iterator that returns every point in a triangle once.
+use crate::primitives::triangle::sort_two_yx;
 use crate::{
     geometry::Point,
     primitives::{
@@ -7,61 +8,6 @@ use crate::{
         Primitive,
     },
 };
-
-/// A bit more memory-friendly way to chain two lines together.
-/// Horizontal lines are optimized for the scanline iterator.
-///
-/// TODO: maybe generalize this?
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct ChainedLines {
-    line: line::Points,
-    next_point: Option<Point>,
-}
-
-impl ChainedLines {
-    pub fn new(a: Point, b: Point, c: Point) -> Self {
-        if a.y == b.y {
-            // A -> B walk is unnecessary, the horizontal iterator will return those points
-            Self {
-                line: Line::new(b, c).points(),
-                next_point: None,
-            }
-        } else if b.y == c.y {
-            // B -> C walk is unnecessary, the horizontal iterator will return those points
-            Self {
-                line: Line::new(a, b).points(),
-                next_point: None,
-            }
-        } else {
-            Self {
-                line: Line::new(a, b).points(),
-                next_point: Some(c),
-            }
-        }
-    }
-}
-
-impl Iterator for ChainedLines {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(p) = self.line.next() {
-            if self.line.is_empty() {
-                // We just got the last point of the line.
-                // Check if we have a point to continue with.
-                if let Some(p2) = self.next_point.take() {
-                    // Build the next line and skip it's first point - which is the point we
-                    // return now.
-                    self.line = Line::new(p, p2).points();
-                    self.line.next();
-                }
-            }
-            Some(p)
-        } else {
-            None
-        }
-    }
-}
 
 /// Iterator that returns points on a horizontal line.
 ///
@@ -103,11 +49,25 @@ impl Iterator for HorizontalLine {
     }
 }
 
+/// Which edge should not be drawn.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum Edge {
+    // "a" edge
+    AB,
+
+    // "b" edge
+    AC,
+
+    // "c" edge
+    BC,
+}
+
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct FillScanlineIterator {
     /// Edges on the one side of the triangle
-    line_ab: ChainedLines,
+    line_a: line::Points,
+    line_b: line::Points,
 
     /// Edges on the other side of the triangle
     line_c: line::Points,
@@ -117,86 +77,127 @@ pub struct FillScanlineIterator {
 
     /// The first point of the ab edge in the next line
     next_a: Option<Point>,
+    next_b: Option<Point>,
 
     /// The first point of the c edge in the next line
     next_c: Option<Point>,
+
+    /// The ignored edge, or None if everything should be drawn
+    ignore: Option<Edge>,
 }
 
 impl FillScanlineIterator {
-    pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
+    pub(in crate::primitives) fn new(triangle: &Triangle, ignore: Option<(Point, Point)>) -> Self {
         let (v1, v2, v3) = sort_yx(triangle.p1, triangle.p2, triangle.p3);
 
+        let ignore = ignore.map(|(p1, p2)| {
+            let (p1, p2) = sort_two_yx(p1, p2);
+
+            if p1 == v1 {
+                if p2 == v2 {
+                    Edge::AB
+                } else {
+                    Edge::AC
+                }
+            } else {
+                Edge::BC
+            }
+        });
+
+        let mut line_a = Line::new(v1, v2).points();
+        let mut line_b = Line::new(v2, v3).points();
+        let mut line_c = Line::new(v1, v3).points();
+
         Self {
-            line_ab: ChainedLines::new(v1, v2, v3),
-            line_c: Line::new(v1, v3).points(),
-            next_a: None,
-            next_c: None,
+            line_a,
+            line_b,
+            line_c,
+            next_a: line_a.next(),
+            next_b: line_b.next(),
+            next_c: line_c.next(),
             scan_points: HorizontalLine::empty(),
+
+            ignore,
         }
     }
 
-    /// Step on the AB side of the triangle.
-    ///
-    /// This function returns two possible starting points of the current scanline.
-    fn update_ab(&mut self) -> Option<(Point, Point)> {
-        let mut next_a = self.next_a.take().or_else(|| self.line_ab.next())?;
-        // track limits to handle cases when line direction changes
-        let (mut min_x, mut max_x) = (next_a.x, next_a.x);
-
-        // look for the first point that will be in the next scan line
-        while let Some(a) = self.line_ab.next() {
-            if a.y == next_a.y {
-                min_x = min_x.min(a.x);
-                max_x = max_x.max(a.x);
-                next_a = a;
+    /// Walk along the given line and return the left and right point of the current horizontal
+    /// segment.
+    fn next_edge_segment(
+        line: &mut line::Points,
+        last_point: &mut Option<Point>,
+    ) -> Option<(Point, Point)> {
+        let first = last_point.take()?;
+        let mut next = first;
+        while let Some(a) = line.next() {
+            if a.y == first.y {
+                next = a;
             } else {
-                self.next_a = Some(a);
+                last_point.replace(a);
                 break;
             }
         }
-        Some((Point::new(min_x, next_a.y), Point::new(max_x, next_a.y)))
+        Some(sort_two_x(first, next))
     }
 
-    /// Step on the C edge of the triangle.
-    ///
-    /// This function returns two possible ending points of the current scanline.
-    fn update_c(&mut self) -> Option<(Point, Point)> {
-        let mut next_c = self.next_c.take().or_else(|| self.line_c.next())?;
-        let first = next_c;
-        while let Some(c) = self.line_c.next() {
-            if c.y == next_c.y {
-                next_c = c;
-            } else {
-                self.next_c = Some(c);
-                break;
-            }
+    /// If the `cond` condition is true, modify the edge segment so that it will be skipped.
+    fn skip_edge_if(edge: (Point, Point), cond: bool) -> (Point, Point) {
+        if cond {
+            (edge.1 + Point::new(1, 0), edge.0 - Point::new(1, 0))
+        } else {
+            edge
         }
-        Some(sort_two_x(first, next_c))
     }
 
-    /// Steps to the new scan line. Returns false if there are no points left to generate.
-    fn next_scanline(&mut self) -> bool {
-        let a = self.update_ab();
-        let c = self.update_c();
+    /// Steps to the new scan line. Returns None if there are no points left to generate.
+    fn next_scanline(&mut self) -> Option<()> {
+        // Walk the edges, get the next horizontal segments.
+        // These segments are used to figure out where the scanline has to start and end.
+        // Each segment contains a left and right point, which are points drawn as a single
+        // horizontal line on the edge of the triangle.
+        let a = Self::next_edge_segment(&mut self.line_a, &mut self.next_a);
+        let b = self.next_a.map_or_else(
+            // only walk BC edge if AB has finished (even if AB just returned it's last segment)
+            || Self::next_edge_segment(&mut self.line_b, &mut self.next_b),
+            |_| None,
+        );
+        let c = Self::next_edge_segment(&mut self.line_c, &mut self.next_c)?;
 
-        // We are walking on the two sides of the triangle. a and c contain the possible edge
-        // points that we want to use for the scan line.
-        let (left, right) = match (a, c) {
-            (Some((left_a, right_a)), Some((left_c, right_c))) => {
-                // It's possible that the two sections that the update functions return, overlap.
-                let (left, _) = sort_two_x(left_a, left_c);
-                let (_, right) = sort_two_x(right_a, right_c);
+        // Figure out which segment we need if we are at the point where AB and BC overlap.
+        let ab = match (a, b) {
+            // It's possible that the two sections that the update functions return, overlap.
+            // In this case, use the ignore parameter to decide, since it's not possible to
+            // ignore both AB and BC edges at the same time.
+            (Some(_), Some(b)) if self.ignore == Some(Edge::BC) => b,
 
-                (left, right)
-            }
+            // Prefer "a" edge, but use whichever is available or return if both are None
+            _ => a.or(b)?,
+        };
 
-            // We can't only have points on one side, otherwise the triangle would be open
-            // No points, no point in continuing
-            _ => return false,
+        // Decide what to draw and what to ignore
+        let ignore_ab = match self.ignore {
+            Some(Edge::AB) => Some(ab) == a,
+            Some(Edge::BC) => Some(ab) == b,
+            _ => false,
+        };
+
+        let (left_a, right_a) = Self::skip_edge_if(ab, ignore_ab);
+        let (left_c, right_c) = Self::skip_edge_if(c, self.ignore == Some(Edge::AC));
+
+        // In general, we want the scan line between the outermost points.
+        // This check sorts the points to (outer, outer) and (inner, inner) pairs by checking the
+        // signed lengths of the segments. This works even if the segments overlap.
+        let length_1 = right_a.x - left_c.x;
+        let length_2 = right_c.x - left_a.x;
+
+        let (left, right) = if length_1 > length_2 {
+            (left_c, right_a)
+        } else {
+            (left_a, right_c)
         };
 
         self.scan_points = HorizontalLine::new(left, right);
-        true
+        Some(())
     }
 }
 
@@ -207,7 +208,7 @@ impl Iterator for FillScanlineIterator {
         loop {
             if let Some(point) = self.scan_points.next() {
                 return Some(point);
-            } else if !self.next_scanline() {
+            } else if self.next_scanline().is_none() {
                 return None;
             }
         }
@@ -217,6 +218,7 @@ impl Iterator for FillScanlineIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::style::PrimitiveStyle;
     use crate::{
         drawable::{Drawable, Pixel},
         geometry::Dimensions,
@@ -285,6 +287,44 @@ mod tests {
 
         // this triangle passes with the original contains() implementation
         check_iterator_and_contains(Triangle::new(
+            Point::new(37, 0),
+            Point::new(36, 38),
+            Point::new(29, 52),
+        ));
+    }
+
+    #[test]
+    fn ignore_side() {
+        fn check_ignored_edge(triangle: Triangle) {
+            let Triangle { p1, p2, p3 } = triangle;
+
+            for &(a, b) in [(p1, p2), (p2, p1), (p1, p3), (p3, p1), (p2, p3), (p3, p2)].iter() {
+                let mut mock_display = MockDisplay::new();
+                let mut expectation = MockDisplay::new();
+
+                triangle
+                    .points()
+                    .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut expectation).unwrap());
+
+                let (start, end) = sort_two_yx(a, b);
+                Line::new(start, end)
+                    .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .draw(&mut mock_display)
+                    .unwrap();
+
+                FillScanlineIterator::new(&triangle, Some((start, end)))
+                    .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display).unwrap());
+
+                assert_eq!(mock_display, expectation, "{:?}", triangle);
+            }
+        }
+
+        check_ignored_edge(Triangle::new(
+            Point::new(0, 0),
+            Point::new(0, 10),
+            Point::new(40, 0),
+        ));
+        check_ignored_edge(Triangle::new(
             Point::new(37, 0),
             Point::new(36, 38),
             Point::new(29, 52),

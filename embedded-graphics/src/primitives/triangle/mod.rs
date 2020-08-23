@@ -285,6 +285,19 @@ impl Triangle {
     pub(in crate::primitives) const fn empty() -> Self {
         Self::new(Point::zero(), Point::zero(), Point::zero())
     }
+
+    /// If the two triangles have overlapping edges, return the first one.
+    pub fn shared_edge(&self, other: Triangle) -> Option<(Point, Point)> {
+        let (p1, p2, p3) = sort_yx(other.p1, other.p2, other.p3);
+        let (b1, b2, b3) = sort_yx(self.p1, self.p2, self.p3);
+
+        let edges = [(p1, p2), (p1, p3), (p2, p3)];
+        let prev_edges = [(b1, b2), (b1, b3), (b2, b3)];
+
+        prev_edges
+            .iter()
+            .find_map(|e| if edges.contains(e) { Some(*e) } else { None })
+    }
 }
 
 // https://stackoverflow.com/a/6989383/383609
@@ -387,7 +400,7 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
 
 /// Sort 3 points in order of increasing Y value. If two points have the same Y value, the one with
 /// the lesser X value is put before.
-fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
+pub fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     let (y1, y2) = sort_two_yx(p1, p2);
     let (y1, y3) = sort_two_yx(p3, y1);
     let (y2, y3) = sort_two_yx(y3, y2);

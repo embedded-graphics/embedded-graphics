@@ -4,53 +4,49 @@ use crate::{
         line::Side,
         line_joint::JointKind,
         polyline::joint_iterator::{JointTriangleIterator, State},
-        triangle::{Points, Triangle},
-        ContainsPoint, Primitive,
+        triangle::{FillScanlineIterator, Triangle},
+        ContainsPoint,
     },
     style::StrokeAlignment,
 };
 
-/// Remembers the previous 5 points to avoid overdraw.
+/// Remembers the previous 6 points to avoid overdraw.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 struct LookbackBuffer {
-    points: [Point; 5],
-    count: u8,
+    points: [Point; 6],
 }
 
 impl LookbackBuffer {
     /// Creates a new buffer.
     pub const fn new() -> Self {
         Self {
-            points: [Point::zero(); 5],
-            count: 0,
+            points: [Point::zero(); 6],
         }
     }
 
     /// Shifts a point to the front of the buffer.
     pub fn add(&mut self, p: Point) {
+        self.points[5] = self.points[4];
         self.points[4] = self.points[3];
         self.points[3] = self.points[2];
         self.points[2] = self.points[1];
         self.points[1] = self.points[0];
         self.points[0] = p;
-        if self.count < 5 {
-            self.count += 1;
-        }
     }
 
-    /// Returns whether the given point is inside the newest tracked triangle.
-    pub fn prev1_contains(&self, p: Point) -> bool {
-        self.count >= 3 && Triangle::new(self.points[0], self.points[1], self.points[2]).contains(p)
+    /// Returns the most recent triangle.
+    pub const fn prev1(&self) -> Triangle {
+        Triangle::new(self.points[1], self.points[2], self.points[3])
     }
 
-    /// Returns whether the given point is inside the second tracked triangle.
-    pub fn prev2_contains(&self, p: Point) -> bool {
-        self.count >= 4 && Triangle::new(self.points[1], self.points[2], self.points[3]).contains(p)
+    /// Returns the second tracked triangle.
+    pub const fn prev2(&self) -> Triangle {
+        Triangle::new(self.points[2], self.points[3], self.points[4])
     }
 
-    /// Returns whether the given point is inside the oldest tracked.
-    pub fn prev3_contains(&self, p: Point) -> bool {
-        self.count == 5 && Triangle::new(self.points[2], self.points[3], self.points[4]).contains(p)
+    /// Returns the oldest tracked triangle.
+    pub const fn prev3(&self) -> Triangle {
+        Triangle::new(self.points[3], self.points[4], self.points[5])
     }
 }
 
@@ -59,8 +55,7 @@ impl LookbackBuffer {
 pub(in crate::primitives) struct ThickPoints<'a> {
     prev_points: LookbackBuffer,
     triangle_iter: JointTriangleIterator<'a>,
-    new_point: Point,
-    points_iter: Points,
+    points_iter: FillScanlineIterator,
 }
 
 impl<'a> ThickPoints<'a> {
@@ -68,26 +63,17 @@ impl<'a> ThickPoints<'a> {
         let mut triangle_iter = JointTriangleIterator::new(points, width, alignment);
 
         let triangle = triangle_iter.next().unwrap_or_else(Triangle::empty);
-        let points_iter = triangle.points();
+        let points_iter = FillScanlineIterator::new(&triangle, None);
 
         let mut prev_points = LookbackBuffer::new();
         prev_points.add(triangle.p1);
         prev_points.add(triangle.p2);
+        prev_points.add(triangle.p3);
 
         Self {
             prev_points,
-            new_point: triangle.p3,
             triangle_iter,
             points_iter,
-        }
-    }
-
-    pub fn empty() -> Self {
-        Self {
-            prev_points: LookbackBuffer::new(),
-            new_point: Point::zero(),
-            triangle_iter: JointTriangleIterator::empty(),
-            points_iter: Triangle::empty().points(),
         }
     }
 }
@@ -98,32 +84,58 @@ impl<'a> Iterator for ThickPoints<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(point) = self.points_iter.next() {
-                // We need to check previous triangles so we don't overdraw them
-                if !self.prev_points.prev1_contains(point) {
-                    // Not every previous triangle must be checked
-                    let return_point = match self.triangle_iter.prev_joint_kind {
-                        JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
-                            State::SecondTriangle => !self.prev_points.prev2_contains(point),
-                            State::ExtraTriangle => !self.prev_points.prev3_contains(point),
-                            _ => true,
-                        },
-                        JointKind::Bevel(Side::Right) => match self.triangle_iter.state {
-                            State::SecondTriangle => !self.prev_points.prev3_contains(point),
-                            _ => true,
-                        },
-                        JointKind::Miter(true) => !self.prev_points.prev2_contains(point),
-                        _ => true,
-                    };
+                let return_point = match self.triangle_iter.prev_joint_kind {
+                    // List here the possible overdraw cases
+                    // Triangle iterator states are the states after the current triangle, e.g.:
+                    // - State::SecondTriangle: first triangle of a joint
+                    // - State::ExtraTriangle: second triangle of a joint
+                    // - State::NextJoint: extra triangle of a joint
 
-                    if return_point {
-                        return Some(point);
+                    // Bevelled(left) joints generate 4 triangles that share a single point:
+                    //  - The second and filler joint triangle
+                    //  - The "normal" triangles of the next joint
+                    JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
+                        State::SecondTriangle => !self.prev_points.prev2().contains(point),
+                        State::ExtraTriangle => !self.prev_points.prev3().contains(point),
+                        _ => true,
+                    },
+
+                    // Bevelled(right) joints are a bit nicer
+                    JointKind::Bevel(Side::Right) => {
+                        if self.triangle_iter.state == State::SecondTriangle {
+                            !self.prev_points.prev3().contains(point)
+                        } else {
+                            true
+                        }
                     }
+
+                    JointKind::Colinear => {
+                        if self.triangle_iter.state == State::ExtraTriangle {
+                            !self.prev_points.prev3().contains(point)
+                        } else {
+                            !self.prev_points.prev2().contains(point)
+                                && !self.prev_points.prev3().contains(point)
+                        }
+                    }
+
+                    // For anything else, don't check
+                    _ => true,
+                };
+                if return_point {
+                    return Some(point);
                 }
             } else {
-                self.prev_points.add(self.new_point);
+                // Calculate the next triangle
                 let triangle = self.triangle_iter.next()?;
-                self.points_iter = triangle.points();
-                self.new_point = triangle.p3;
+
+                // Remember the new point - iterator ensures it's always p3
+                self.prev_points.add(triangle.p3);
+
+                // Calculate the shared edge so that it can be ignored while drawing
+                let edge = self.prev_points.prev1().shared_edge(triangle);
+
+                // Create the pixel iterator for the current triangle
+                self.points_iter = FillScanlineIterator::new(&triangle, edge);
             }
         }
     }
@@ -133,8 +145,11 @@ impl<'a> Iterator for ThickPoints<'a> {
 mod test {
     use super::*;
     use crate::{
-        drawable::Drawable, mock_display::MockDisplay, pixelcolor::BinaryColor,
-        primitives::Polyline, style::PrimitiveStyle,
+        drawable::Drawable,
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::{Polyline, Primitive},
+        style::PrimitiveStyle,
     };
 
     #[test]
