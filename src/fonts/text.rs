@@ -110,6 +110,11 @@ where
     F: Font,
 {
     fn bounding_box(&self) -> Rectangle {
+        // If a piece of text is completely transparent, return an empty bounding box
+        if self.style.text_color.is_none() && self.style.background_color.is_none() {
+            return Rectangle::new(self.primitive.position, Size::new(0, 0));
+        }
+
         let width = if !self.primitive.text.is_empty() {
             self.primitive
                 .text
@@ -194,7 +199,7 @@ where
                     self.char_walk_x as u32,
                     self.char_walk_y as u32,
                 ) {
-                    self.style.text_color.or(self.style.background_color)
+                    self.style.text_color
                 } else {
                     self.style.background_color
                 };
@@ -236,6 +241,8 @@ mod tests {
         fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
+        prelude::*,
+        style::PrimitiveStyle,
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -430,5 +437,59 @@ mod tests {
         text.translate_mut(Point::new(-6, 0));
 
         assert_eq!(text.into_pixels().count(), 6 * 12);
+    }
+
+    #[test]
+    fn transparent_text_color_does_not_overwrite_background() {
+        let style = TextStyle {
+            font: Font6x8,
+            text_color: None,
+            background_color: Some(BinaryColor::On),
+        };
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        // Draw a background for the first character
+        Rectangle::new(Point::zero(), Size::new(6, 8))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::Off))
+            .draw(&mut display)
+            .unwrap();
+
+        Text::new("AA", Point::zero())
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "#...###   ##",
+                ".###.# ### #",
+                ".###.# ### #",
+                ".....#     #",
+                ".###.# ### #",
+                ".###.# ### #",
+                ".###.# ### #",
+                "############",
+            ])
+        );
+    }
+
+    #[test]
+    fn transparent_text_has_zero_size_but_retains_position() {
+        let style: TextStyle<BinaryColor, _> = TextStyle {
+            font: Font6x8,
+            text_color: None,
+            background_color: None,
+        };
+
+        let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
+
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(Point::new(7, 11), Size::zero()),
+            "Transparent text is expected to have a zero sized bounding box with the top left corner at the text position",
+        );
     }
 }
