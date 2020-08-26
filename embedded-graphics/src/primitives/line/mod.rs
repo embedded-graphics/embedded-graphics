@@ -585,4 +585,13 @@ mod tests {
             Line::new(Point::zero(), Point::new(-10, 0))
         );
     }
+
+    #[test]
+    fn intersect_shared_point() {
+        let line1 = Line::new(Point::new(173, 98), Point::new(187, 102));
+        let line2 = Line::new(Point::new(173, 98), Point::new(193, 14));
+
+        assert!(line1.segment_intersection(&line2));
+        assert!(line2.segment_intersection(&line1));
+    }
 }

@@ -175,24 +175,14 @@ impl<'a> JointTriangleIterator<'a> {
                 second_edge_right.line_intersection(&first_edge_right),
             ) {
                 let first_segment_start_edge =
-                    Line::new(first_edge_left.start, first_edge_right.start);
-                let second_segment_end_edge =
-                    Line::new(second_edge_left.end, second_edge_right.end);
+                    Line::new(self.next_points.left, self.next_points.right);
                 let intersection_line = Line::new(l_intersection, r_intersection);
 
                 let is_degenerate =
                     first_segment_start_edge.segment_intersection(&intersection_line);
 
-                let self_intersection_l = first_segment_start_edge
-                    .segment_intersection(&second_edge_left)
-                    || second_segment_end_edge.segment_intersection(&first_edge_left);
-
-                let self_intersection_r = first_segment_start_edge
-                    .segment_intersection(&second_edge_right)
-                    || second_segment_end_edge.segment_intersection(&first_edge_right);
-
                 // Normal line: non-overlapping line end caps
-                if !(is_degenerate || self_intersection_l || self_intersection_r) {
+                if !is_degenerate {
                     // Length of the intersection segment.
                     let miter_length_squared =
                         Line::new(l_intersection, r_intersection).length_squared();
