@@ -4,7 +4,6 @@ mod joint_iterator;
 mod points;
 mod styled;
 mod thick_points;
-mod triangle_iterator;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
