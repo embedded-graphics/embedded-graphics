@@ -221,7 +221,7 @@ impl Triangle {
     ///
     /// This method can be used to determine if the triangle is colinear by checking if the returned
     /// value is equal to zero.
-    pub fn area_doubled(&self) -> i32 {
+    pub const fn area_doubled(&self) -> i32 {
         let Self { p1, p2, p3 } = self;
 
         -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y

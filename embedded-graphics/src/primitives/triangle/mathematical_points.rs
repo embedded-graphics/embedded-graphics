@@ -21,7 +21,7 @@ impl MathematicalPoints {
     }
 
     /// Empty variant
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             rect: rectangle::Points::empty(),
             triangle: Triangle::empty(),

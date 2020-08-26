@@ -79,17 +79,17 @@ impl<'a> JointTriangleIterator<'a> {
     }
 
     /// Returns the current internal state.
-    pub fn state(&self) -> State {
+    pub const fn state(&self) -> State {
         self.state
     }
 
     /// Returns the most recently processed joint kind.
-    pub fn current_joint_kind(&self) -> JointKind {
+    pub const fn current_joint_kind(&self) -> JointKind {
         self.joint_kind
     }
 
     /// Returns a new iterator that yields no triangles.
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             points: &[],
             state: State::End,
