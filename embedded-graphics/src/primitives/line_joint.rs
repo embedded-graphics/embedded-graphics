@@ -12,8 +12,8 @@ use crate::{
 /// Joint kind
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum JointKind {
-    /// Mitered (sharp point) and whether lookback is necessary
-    Miter(bool),
+    /// Mitered (sharp point)
+    Miter,
 
     /// Bevelled (flattened point)
     Bevel(Side),
@@ -38,7 +38,7 @@ use std::fmt;
 impl fmt::Display for JointKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Miter(_) => f.write_str("Miter"),
+            Self::Miter => f.write_str("Miter"),
             Self::Bevel(_) => f.write_str("Bevel"),
             Self::Degenerate => f.write_str("Degenerate"),
             Self::Colinear => f.write_str("Colinear"),
@@ -145,7 +145,6 @@ impl LineJoint {
 
         // Miter length limit is double the line width (but squared to avoid sqrt() costs)
         let miter_limit = (width * 2).pow(2);
-        let miter_limit_sharp = width.pow(2);
 
         // Left and right edges of thick first segment
         let (first_edge_left, first_edge_right) = first_line.extents(width as i32, alignment);
@@ -192,7 +191,7 @@ impl LineJoint {
                     };
 
                     Self {
-                        kind: JointKind::Miter(miter_length_squared > miter_limit_sharp),
+                        kind: JointKind::Miter,
                         first_edge_end: corners,
                         second_edge_start: corners,
                     }

@@ -192,14 +192,13 @@ impl<'a> JointTriangleIterator<'a> {
                     // Miter length limit is double the line width (squared to avoid sqrt() costs)
                     // We consider a miter sharp if the angle between the lines is >90°, which is
                     // checked by the length of the intersection segment.
-                    let miter_limit_sharp = self.width.pow(2) as u32;
-                    let miter_limit = 8 * miter_limit_sharp;
+                    let miter_limit = 8 * self.width.pow(2) as u32;
 
                     if miter_length_squared <= miter_limit {
                         // Intersection is within limit at which it will be chopped off into a
                         // bevel, so return a miter.
                         self.new_joint(
-                            JointKind::Miter(miter_length_squared > miter_limit_sharp),
+                            JointKind::Miter,
                             l_intersection,
                             r_intersection,
                         );
