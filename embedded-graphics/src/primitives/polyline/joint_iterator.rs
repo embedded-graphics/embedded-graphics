@@ -26,12 +26,7 @@ pub enum State {
 /// Generate triangles of a polyline
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct JointTriangleIterator<'a> {
-    /// Current state.
-    pub state: State,
-
-    /// The previous joint kind.
-    pub prev_joint_kind: JointKind,
-
+    state: State,
     points: &'a [Point],
     width: i32,
     alignment: StrokeAlignment,
@@ -76,12 +71,21 @@ impl<'a> JointTriangleIterator<'a> {
             next_points: EdgeCorners::default(),
             extra_point: Point::zero(),
             joint_kind: JointKind::Start,
-            prev_joint_kind: JointKind::Start,
         };
 
         self_.start();
 
         self_
+    }
+
+    /// Returns the current internal state.
+    pub fn state(&self) -> State {
+        self.state
+    }
+
+    /// Returns the most recently processed joint kind.
+    pub fn current_joint_kind(&self) -> JointKind {
+        self.joint_kind
     }
 
     /// Returns a new iterator that yields no triangles.
@@ -97,7 +101,6 @@ impl<'a> JointTriangleIterator<'a> {
             next_points: EdgeCorners::default(),
             extra_point: Point::zero(),
             joint_kind: JointKind::End,
-            prev_joint_kind: JointKind::End,
         }
     }
 
@@ -127,7 +130,6 @@ impl<'a> JointTriangleIterator<'a> {
 
     /// Updates the state of the current joint.
     fn new_joint(&mut self, kind: JointKind, left: Point, right: Point) {
-        self.prev_joint_kind = self.joint_kind;
         self.joint_kind = kind;
         self.previous_points = self.next_points;
         self.next_points = EdgeCorners { left, right };

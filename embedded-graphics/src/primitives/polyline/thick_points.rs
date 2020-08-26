@@ -56,6 +56,7 @@ pub(in crate::primitives) struct ThickPoints<'a> {
     prev_points: LookbackBuffer,
     triangle_iter: JointTriangleIterator<'a>,
     points_iter: FillScanlineIterator,
+    prev_joint_kind: JointKind,
 }
 
 impl<'a> ThickPoints<'a> {
@@ -74,6 +75,7 @@ impl<'a> ThickPoints<'a> {
             prev_points,
             triangle_iter,
             points_iter,
+            prev_joint_kind: JointKind::Start,
         }
     }
 }
@@ -84,7 +86,7 @@ impl<'a> Iterator for ThickPoints<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(point) = self.points_iter.next() {
-                let return_point = match self.triangle_iter.prev_joint_kind {
+                let return_point = match self.prev_joint_kind {
                     // List here the possible overdraw cases
                     // Triangle iterator states are the states after the current triangle, e.g.:
                     // - State::SecondTriangle: first triangle of a joint
@@ -94,7 +96,7 @@ impl<'a> Iterator for ThickPoints<'a> {
                     // Bevelled(left) joints generate 4 triangles that share a single point:
                     //  - The second and filler joint triangle
                     //  - The "normal" triangles of the next joint
-                    JointKind::Bevel(Side::Left) => match self.triangle_iter.state {
+                    JointKind::Bevel(Side::Left) => match self.triangle_iter.state() {
                         State::SecondTriangle => !self.prev_points.prev2().contains(point),
                         State::ExtraTriangle => !self.prev_points.prev3().contains(point),
                         _ => true,
@@ -102,7 +104,7 @@ impl<'a> Iterator for ThickPoints<'a> {
 
                     // Bevelled(right) joints are a bit nicer
                     JointKind::Bevel(Side::Right) => {
-                        if self.triangle_iter.state == State::SecondTriangle {
+                        if self.triangle_iter.state() == State::SecondTriangle {
                             !self.prev_points.prev3().contains(point)
                         } else {
                             true
@@ -110,7 +112,7 @@ impl<'a> Iterator for ThickPoints<'a> {
                     }
 
                     JointKind::Colinear => {
-                        if self.triangle_iter.state == State::ExtraTriangle {
+                        if self.triangle_iter.state() == State::ExtraTriangle {
                             !self.prev_points.prev3().contains(point)
                         } else {
                             !self.prev_points.prev2().contains(point)
@@ -125,6 +127,10 @@ impl<'a> Iterator for ThickPoints<'a> {
                     return Some(point);
                 }
             } else {
+                if self.triangle_iter.state() == State::NextJoint {
+                    self.prev_joint_kind = self.triangle_iter.current_joint_kind();
+                }
+
                 // Calculate the next triangle
                 let triangle = self.triangle_iter.next()?;
 
