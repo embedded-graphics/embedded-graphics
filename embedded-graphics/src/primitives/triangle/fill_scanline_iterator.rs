@@ -298,6 +298,9 @@ mod tests {
         fn check_ignored_edge(triangle: Triangle) {
             let Triangle { p1, p2, p3 } = triangle;
 
+            // For all edges, verify that a fully drawn triangle is equal to a triangle with
+            // the given edge ignored + the edge drawn as a line in the proper direction.
+            // This test checks both the lack of overwrites and that all expected pixels are drawn.
             for &(a, b) in [(p1, p2), (p2, p1), (p1, p3), (p3, p1), (p2, p3), (p3, p2)].iter() {
                 let mut mock_display = MockDisplay::new();
                 let mut expectation = MockDisplay::new();
