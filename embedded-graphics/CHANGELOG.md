@@ -19,7 +19,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#292](https://github.com/jamwaffles/embedded-graphics/pull/292) Added the `Polyline` primitive.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::x_axis`, `Point::y_axis`, `Size::x_axis` and `Size::y_axis`.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::new_equal` and `Size::new_equal`.
-- [#336](https://github.com/jamwaffles/embedded-graphics/pull/336) Add `RoundedRectangle` primitive and `egroundedrectangle!` macro.
+- [#336](https://github.com/jamwaffles/embedded-graphics/pull/336) Add `RoundedRectangle` primitive.
 - [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) Add `MockDisplay::swap_xy` method.
 - [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Add `MockDisplay::map` method.
 - [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Allow usage of all RGB color types in `MockDisplay` patterns.
