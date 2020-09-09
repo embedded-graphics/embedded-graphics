@@ -314,12 +314,12 @@ where
         // TGA files with the origin in the top left corner can be drawn using `fill_contiguous`.
         // All other origins are drawn by falling back to `draw_iter`.
         if self.image_origin == ImageOrigin::TopLeft {
-            target.fill_contiguous(
+            target.fill_contiguous::<_, C>(
                 &self.bounding_box(),
                 self.raw_pixels().map(|p| C::Raw::from_u32(p.color).into()),
             )
         } else {
-            target.draw_iter(
+            target.draw_iter::<_, C>(
                 self.raw_pixels()
                     .map(|p| Pixel(p.position, C::Raw::from_u32(p.color).into())),
             )

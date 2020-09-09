@@ -1,6 +1,7 @@
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt, Translated},
     geometry::{Dimensions, Point, Size},
+    pixelcolor::PixelColor,
     primitives::Rectangle,
     Pixel,
 };
@@ -42,21 +43,26 @@ where
     type Color = T::Color;
     type Error = T::Error;
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item = Pixel<C>>,
+        C: Into<Self::Color> + PixelColor,
     {
         self.parent.draw_iter(pixels)
     }
 
-    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    fn fill_contiguous<I, C>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Self::Color>,
+        I: IntoIterator<Item = C>,
+        C: Into<Self::Color> + PixelColor,
     {
         self.parent.fill_contiguous(area, colors)
     }
 
-    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+    fn fill_solid<C>(&mut self, area: &Rectangle, color: C) -> Result<(), Self::Error>
+    where
+        C: Into<Self::Color> + PixelColor,
+    {
         self.parent.fill_solid(area, color)
     }
 }
@@ -80,7 +86,7 @@ mod tests {
 
     #[test]
     fn draw_iter() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(2, 3), Size::new(10, 10));
         let mut cropped = display.cropped(&area);
@@ -106,7 +112,7 @@ mod tests {
 
     #[test]
     fn fill_contiguous() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(10, 10));
         let mut cropped = display.cropped(&area);
@@ -139,7 +145,7 @@ mod tests {
 
     #[test]
     fn fill_solid() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(10, 10));
         let mut cropped = display.cropped(&area);

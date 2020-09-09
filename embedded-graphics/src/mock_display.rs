@@ -540,14 +540,15 @@ where
     type Color = C;
     type Error = core::convert::Infallible;
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, P>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item = Pixel<P>>,
+        P: Into<Self::Color> + PixelColor,
     {
         for pixel in pixels.into_iter() {
             let Pixel(point, color) = pixel;
 
-            self.draw_pixel(point, color);
+            self.draw_pixel(point, color.into());
         }
 
         Ok(())

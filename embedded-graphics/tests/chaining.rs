@@ -1,6 +1,7 @@
 extern crate embedded_graphics;
 
 use embedded_graphics::{
+    pixelcolor::PixelColor,
     prelude::*,
     primitives::{Circle, Line, Primitive, Rectangle},
     style::PrimitiveStyle,
@@ -25,9 +26,10 @@ impl DrawTarget for FakeDisplay {
     type Color = TestPixelColor;
     type Error = core::convert::Infallible;
 
-    fn draw_iter<I>(&mut self, _pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, C>(&mut self, _pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item = Pixel<C>>,
+        C: Into<Self::Color> + PixelColor,
     {
         Ok(())
     }

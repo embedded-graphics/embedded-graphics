@@ -13,6 +13,7 @@
 //! ```
 //! use embedded_graphics::{
 //!     geometry::Size, prelude::*, primitives::Rectangle, style::PrimitiveStyle,
+//!     pixelcolor::PixelColor,
 //! };
 //!
 //! /// Color with 3 states.
@@ -36,12 +37,13 @@
 //!     type Color = EpdColor;
 //!     type Error = core::convert::Infallible;
 //!
-//!     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+//!     fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
 //!     where
-//!         I: IntoIterator<Item = Pixel<Self::Color>>,
+//!         I: IntoIterator<Item = Pixel<C>>,
+//!         C: Into<Self::Color> + PixelColor,
 //!     {
 //!         for Pixel(point, color) in pixels.into_iter() {
-//!             match color {
+//!             match color.into() {
 //!                 EpdColor::White => {} // draw white pixel at `point`
 //!                 EpdColor::Black => {} // draw black pixel at `point`
 //!                 EpdColor::Red => {}   // draw red pixel at `point`

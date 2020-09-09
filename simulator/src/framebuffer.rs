@@ -90,13 +90,14 @@ impl DrawTarget for Framebuffer {
     type Color = Rgb888;
     type Error = core::convert::Infallible;
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item = Pixel<C>>,
+        C: Into<Self::Color> + PixelColor,
     {
         for Pixel(point, color) in pixels.into_iter() {
             if let Some(pixel) = self.get_pixel_mut(point) {
-                pixel.copy_from_slice(&color.to_be_bytes())
+                pixel.copy_from_slice(&color.into().to_be_bytes())
             }
         }
 

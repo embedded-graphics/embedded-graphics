@@ -92,9 +92,11 @@ pub use translated::Translated;
 ///     // this the type `Infallible` was chosen as the `Error` type.
 ///     type Error = core::convert::Infallible;
 ///
-///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+///     fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
-///         I: IntoIterator<Item = Pixel<Self::Color>> {
+///         I: IntoIterator<Item = Pixel<C>>,
+///         C: Into<Self::Color> + PixelColor
+///     {
 ///         for Pixel(coord, color) in pixels.into_iter() {
 ///             // Check if the pixel coordinates are out of bounds (negative or greater than
 ///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
@@ -102,7 +104,7 @@ pub use translated::Translated;
 ///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
 ///                 // Calculate the index in the framebuffer.
 ///                 let index: u32 = x + y * 64;
-///                 self.framebuffer[index as usize] = color.luma();
+///                 self.framebuffer[index as usize] = color.into().luma();
 ///             }
 ///         }
 ///
@@ -192,22 +194,27 @@ pub use translated::Translated;
 ///     type Color = Rgb565;
 ///     type Error = CommError;
 ///
-///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+///     fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
-///         I: IntoIterator<Item = Pixel<Self::Color>> {
+///         I: IntoIterator<Item = Pixel<C>>,
+///         C: Into<Self::Color> + PixelColor,
+///     {
 ///         for Pixel(coord, color) in pixels.into_iter() {
 ///             // Check if the pixel coordinates are out of bounds (negative or greater than
 ///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
 ///             // pixels without returning an error or causing a panic.
 ///             if let Ok((x @ 0..=63, y @ 0..=63)) = coord.try_into() {
-///                 self.set_pixel(x, y, RawU16::from(color).into_inner())?;
+///                 self.set_pixel(x, y, RawU16::from(color.into()).into_inner())?;
 ///             }
 ///         }
 ///
 ///         Ok(())
 ///     }
 ///
-///     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+///     fn fill_solid<C>(&mut self, area: &Rectangle, color: C) -> Result<(), Self::Error>
+///     where
+///         C: Into<Self::Color>
+///     {
 ///         // Clamp the rectangle coordinates to the valid range by determining
 ///         // the intersection of the fill area and the visible display area
 ///         // by using Rectangle::intersection.
@@ -221,6 +228,8 @@ pub use translated::Translated;
 ///         } else {
 ///             return Ok(())
 ///         };
+///
+///         let color = color.into();
 ///
 ///         self.send_commands(&[
 ///             // Draw rectangle command
@@ -308,9 +317,10 @@ pub trait DrawTarget: Dimensions {
     /// drawing method for a display that writes data to the hardware immediately. If possible, the
     /// other methods in this trait should be implemented to improve performance when rendering
     /// more contiguous pixel patterns.
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>;
+        I: IntoIterator<Item = Pixel<C>>,
+        C: Into<Self::Color> + PixelColor;
 
     /// Fill a given area with an iterator providing a contiguous stream of pixel colors.
     ///
@@ -354,18 +364,20 @@ pub trait DrawTarget: Dimensions {
     ///     type Color = Gray8;
     ///     type Error = core::convert::Infallible;
     ///
-    ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    ///     fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     ///     where
-    ///         I: IntoIterator<Item = Pixel<Self::Color>>,
+    ///         I: IntoIterator<Item = Pixel<C>>,
+    ///         C: Into<Self::Color> + PixelColor,
     ///     {
     ///         // Draw pixels to the display
     ///
     ///         Ok(())
     ///     }
     ///
-    ///     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    ///     fn fill_contiguous<I, C>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     ///     where
-    ///         I: IntoIterator<Item = Self::Color>,
+    ///         I: IntoIterator<Item = C>,
+    ///         C: Into<Self::Color> + PixelColor,
     ///     {
     ///         // Clamp area to drawable part of the display target
     ///         let drawable_area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
@@ -395,9 +407,10 @@ pub trait DrawTarget: Dimensions {
     /// [`draw_iter`]: #tymethod.draw_iter
     /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
     /// [`Points::points`]: ../primitives/trait.Primitive.html#tymethod.points
-    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    fn fill_contiguous<I, C>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Self::Color>,
+        I: IntoIterator<Item = C>,
+        C: Into<Self::Color> + PixelColor,
     {
         self.draw_iter(
             area.points()
@@ -414,7 +427,10 @@ pub trait DrawTarget: Dimensions {
     ///
     /// The default implementation of this method calls [`fill_contiguous`](#method.fill_contiguous)
     /// with an iterator that repeats the given `color` for every point in `area`.
-    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+    fn fill_solid<C>(&mut self, area: &Rectangle, color: C) -> Result<(), Self::Error>
+    where
+        C: Into<Self::Color> + PixelColor,
+    {
         self.fill_contiguous(area, core::iter::repeat(color))
     }
 
@@ -428,7 +444,10 @@ pub trait DrawTarget: Dimensions {
     ///
     /// [`size`]: #method.size
     /// [`fill_solid`]: #method.fill_solid
-    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+    fn clear<C>(&mut self, color: C) -> Result<(), Self::Error>
+    where
+        C: Into<Self::Color> + PixelColor,
+    {
         self.fill_solid(&self.bounding_box(), color)
     }
 }

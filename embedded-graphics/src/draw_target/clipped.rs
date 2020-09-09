@@ -2,6 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     geometry::Dimensions,
     iterator::contiguous::Crop,
+    pixelcolor::PixelColor,
     prelude::Transform,
     primitives::{ContainsPoint, Rectangle},
     Pixel,
@@ -41,9 +42,10 @@ where
     type Color = T::Color;
     type Error = T::Error;
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item = Pixel<C>>,
+        C: Into<Self::Color> + PixelColor,
     {
         let clip_area = self.clip_area;
 
@@ -54,9 +56,10 @@ where
         self.parent.draw_iter(pixels)
     }
 
-    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    fn fill_contiguous<I, C>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Self::Color>,
+        I: IntoIterator<Item = C>,
+        C: Into<Self::Color> + PixelColor,
     {
         let intersection = self.bounding_box().intersection(area);
 
@@ -69,7 +72,10 @@ where
         }
     }
 
-    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+    fn fill_solid<C>(&mut self, area: &Rectangle, color: C) -> Result<(), Self::Error>
+    where
+        C: Into<Self::Color> + PixelColor,
+    {
         let area = area.intersection(&self.clip_area);
 
         self.parent.fill_solid(&area, color)
@@ -100,7 +106,7 @@ mod tests {
 
     #[test]
     fn draw_iter() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(2, 4));
         let mut clipped = display.clipped(&area);
@@ -133,7 +139,7 @@ mod tests {
 
     #[test]
     fn fill_contiguous() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(2, 3));
         let mut clipped = display.clipped(&area);
@@ -163,7 +169,7 @@ mod tests {
 
     #[test]
     fn fill_solid() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(4, 2));
         let mut clipped = display.clipped(&area);
@@ -184,13 +190,13 @@ mod tests {
 
     #[test]
     fn clear() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
         let mut clipped = display.clipped(&area);
         clipped.clear(BinaryColor::On).unwrap();
 
-        let mut expected = MockDisplay::new();
+        let mut expected = MockDisplay::<BinaryColor>::new();
         area.into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .draw(&mut expected)
             .unwrap();
@@ -200,7 +206,7 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::<BinaryColor>::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(2, 4));
         let clipped = display.clipped(&area);
@@ -210,7 +216,7 @@ mod tests {
 
     #[test]
     fn bounding_box_is_clipped() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::<BinaryColor>::new();
         let display_bb = display.bounding_box();
 
         let top_left = Point::new(10, 20);

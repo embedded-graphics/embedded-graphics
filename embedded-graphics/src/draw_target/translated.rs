@@ -2,6 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point},
     iterator::PixelIteratorExt,
+    pixelcolor::PixelColor,
     primitives::Rectangle,
     transform::Transform,
     Pixel,
@@ -39,28 +40,36 @@ where
     type Color = T::Color;
     type Error = T::Error;
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn draw_iter<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item = Pixel<C>>,
+        C: Into<Self::Color> + PixelColor,
     {
         self.parent
             .draw_iter(pixels.into_iter().translate(self.offset))
     }
 
-    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    fn fill_contiguous<I, C>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Self::Color>,
+        I: IntoIterator<Item = C>,
+        C: Into<Self::Color> + PixelColor,
     {
         let area = area.translate(self.offset);
         self.parent.fill_contiguous(&area, colors)
     }
 
-    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+    fn fill_solid<C>(&mut self, area: &Rectangle, color: C) -> Result<(), Self::Error>
+    where
+        C: Into<Self::Color> + PixelColor,
+    {
         let area = area.translate(self.offset);
         self.parent.fill_solid(&area, color)
     }
 
-    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+    fn clear<C>(&mut self, color: C) -> Result<(), Self::Error>
+    where
+        C: Into<Self::Color> + PixelColor,
+    {
         self.parent.clear(color)
     }
 }
@@ -84,7 +93,7 @@ mod tests {
 
     #[test]
     fn draw_iter() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let mut translated = display.translated(Point::new(2, 3));
 
@@ -109,7 +118,7 @@ mod tests {
 
     #[test]
     fn fill_contiguous() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let mut translated = display.translated(Point::new(3, 2));
 
@@ -141,7 +150,7 @@ mod tests {
 
     #[test]
     fn fill_solid() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
 
         let mut translated = display.translated(Point::new(1, 3));
 
@@ -165,7 +174,7 @@ mod tests {
 
     #[test]
     fn clear() {
-        let mut display = MockDisplay::new();
+        let mut display = MockDisplay::<BinaryColor>::new();
         let mut translated = display.translated(Point::new(1, 3));
         translated.clear(BinaryColor::On).unwrap();
 
@@ -177,7 +186,7 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::<BinaryColor>::new();
         let display_bb = display.bounding_box();
 
         let translated = display.translated(Point::new(1, 3));

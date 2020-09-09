@@ -38,7 +38,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        target.fill_contiguous(
+        target.fill_contiguous::<_, C>(
             &self.bounding_box(),
             self.bmp
                 .into_iter()
