@@ -107,12 +107,11 @@ impl<C> Dimensions for Styled<Arc, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
             let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
+            self.primitive.offset(offset).bounding_box()
         } else {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
