@@ -72,9 +72,39 @@ The `ToBytes` trait has been added to support conversion of colors into byte arr
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
 
-// TODO: All the new methods and how they related to the old ones.
+`DrawTarget`s must also implement the `Dimensions` trait.
 
-// TODO: Talk about `Clipped`, `Cropped` and `Translated` draw targets.
+### Method changes
+
+All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. The new methods provided by `DrawTarget` are as follows:
+
+- `draw_iter`
+
+  Draw individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
+
+- `fill_contiguous`
+
+  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
+
+- `fill_solid`
+
+  Fills a given area with a solid color.
+
+- `clear`
+
+  Fill the entire display with a solid color.
+
+These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics primitives will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
+
+To reduce duplication, please search the `DrawTarget` documentation on <docs.rs/embedded-graphics> for more details on the usage and arguments of the above methods.
+
+### Sub draw targets
+
+The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of the display to be drawn to.
+
+`DrawTargetExt` is implemented for `DrawTarget`.
+
+Please search for `DrawTargetExt` on <docs.rs/embedded-graphics> for usage examples.
 
 ## General
 
