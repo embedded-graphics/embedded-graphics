@@ -47,7 +47,7 @@ version = "0.32.2"
 optional = true
 
 [dependencies.embedded-graphics]
-version = "0.6.0"
+version = "=0.7.0-alpha.1"
 
 [dev-dependencies]
 chrono = "0.4.10"

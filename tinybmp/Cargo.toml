@@ -27,7 +27,7 @@ version = "5.1.0"
 default-features = false
 
 [dependencies.embedded-graphics]
-version = "0.6.0"
+version = "=0.7.0-alpha.1"
 optional = true
 
 [features]
