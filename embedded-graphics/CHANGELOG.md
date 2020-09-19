@@ -12,7 +12,6 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `Rectangle::center` to get the center point of a rectangle.
 - [#318](https://github.com/jamwaffles/embedded-graphics/pull/317) Added `ContainsPoint` trait to check if a point is inside a closed shape.
 - [#320](https://github.com/jamwaffles/embedded-graphics/pull/320) Added the `Ellipse` primitive.
-- [#320](https://github.com/jamwaffles/embedded-graphics/pull/320) Added `DrawTarget::draw_ellipse`
 - [#333](https://github.com/jamwaffles/embedded-graphics/pull/333) Added `Rectangle::bottom_right` to get the bottom right corner of a rectangle.
 - [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added stroke alignment to `PrimitiveStyle`.
 - [#331](https://github.com/jamwaffles/embedded-graphics/pull/331) Added `Rectangle::with_center`.
@@ -20,7 +19,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#292](https://github.com/jamwaffles/embedded-graphics/pull/292) Added the `Polyline` primitive.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::x_axis`, `Point::y_axis`, `Size::x_axis` and `Size::y_axis`.
 - [#337](https://github.com/jamwaffles/embedded-graphics/pull/337) Add `Point::new_equal` and `Size::new_equal`.
-- [#336](https://github.com/jamwaffles/embedded-graphics/pull/336) Add `RoundedRectangle` primitive and `egroundedrectangle!` macro.
+- [#336](https://github.com/jamwaffles/embedded-graphics/pull/336) Add `RoundedRectangle` primitive.
 - [#353](https://github.com/jamwaffles/embedded-graphics/pull/353) Add `MockDisplay::swap_xy` method.
 - [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Add `MockDisplay::map` method.
 - [#357](https://github.com/jamwaffles/embedded-graphics/pull/357) Allow usage of all RGB color types in `MockDisplay` patterns.
