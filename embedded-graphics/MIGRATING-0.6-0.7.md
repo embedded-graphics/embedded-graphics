@@ -2,11 +2,29 @@
 
 ## Table of contents
 
-// TODO
+- [Migrating from embedded-graphics 0.6.x to 0.7.0](#migrating-from-embedded-graphics-06x-to-070)
+  - [Table of contents](#table-of-contents)
+  - [New features](#new-features)
+    - [Primitives](#primitives)
+    - [Mock display](#mock-display)
+    - [Geometry](#geometry)
+    - [Color](#color)
+  - [For display driver authors](#for-display-driver-authors)
+    - [Method changes](#method-changes)
+    - [Sub draw targets](#sub-draw-targets)
+  - [General](#general)
+    - [`Drawable`](#drawable)
+    - [`IntoIterator` changes](#intoiterator-changes)
+  - [Macros are removed](#macros-are-removed)
+  - [Primitives](#primitives-1)
+    - [Circle](#circle)
+    - [Rectangle](#rectangle)
+  - [Geometry](#geometry-1)
+  - [Mock display](#mock-display-1)
 
 ## New features
 
-// TODO: This entire section should probably be moved into a GH release or blog post. Leaving here for now.
+// TODO: This entire section will be moved into a GH release text body and/or blog post. Leaving here until that release is published.
 
 ### Primitives
 
