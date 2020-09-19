@@ -56,5 +56,4 @@ tinybmp = { version = "0.2.2", features = [ "graphics" ] }
 
 [features]
 default = [ "with-sdl" ]
-fixed_point = [ "embedded-graphics/fixed_point" ]
 with-sdl = [ "sdl2" ]
