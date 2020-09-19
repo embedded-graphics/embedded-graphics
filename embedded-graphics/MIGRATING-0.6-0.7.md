@@ -86,6 +86,14 @@ The `Rectangle::intersection` method was added to get the intersecting `Rectangl
 
 The `ToBytes` trait has been added to support conversion of colors into byte arrays.
 
+### Sub draw targets
+
+The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of a `DrawTarget` to be drawn to.
+
+`DrawTargetExt` is implemented for `DrawTarget`.
+
+Please search for `DrawTargetExt` on <https://docs.rs/embedded-graphics> for usage examples.
+
 ## For display driver authors
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
@@ -98,7 +106,7 @@ All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`
 
 - `draw_iter`
 
-  Draw individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
+  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
 
 - `fill_contiguous`
 
@@ -114,15 +122,7 @@ All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`
 
 These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics primitives will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
 
-To reduce duplication, please search the `DrawTarget` documentation on <docs.rs/embedded-graphics> for more details on the usage and arguments of the above methods.
-
-### Sub draw targets
-
-The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of the display to be drawn to.
-
-`DrawTargetExt` is implemented for `DrawTarget`.
-
-Please search for `DrawTargetExt` on <docs.rs/embedded-graphics> for usage examples.
+To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics> for more details on the usage and arguments of the above methods.
 
 ## General
 
@@ -131,37 +131,37 @@ Please search for `DrawTargetExt` on <docs.rs/embedded-graphics> for usage examp
 The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
 
 ```diff
-impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
-where
-    C: PixelColor + From<BinaryColor>,
-{
-    fn draw<D>(self, display: &mut D) -> Result<(), D::Error> where D: DrawTarget<C> {
-        // ...
-    }
-}
-impl<C> Drawable for Button<'_, C>
-where
-    C: PixelColor + From<BinaryColor>,
-{
-    type Color = C;
-
-    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
-    where
-        D: DrawTarget<Color = C>,
-    {
-        Rectangle::new(self.top_left, self.size)
-            .into_styled(PrimitiveStyle::with_fill(self.bg_color))
-            .draw(display)?;
-        Text::new(self.text, Point::new(6, 6))
-            .into_styled(TextStyle::new(Font6x8, self.fg_color))
-            .draw(display)
-    }
-}
+- impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
+- where
+-     C: PixelColor + From<BinaryColor>,
+- {
+-     fn draw<D>(self, display: &mut D) -> Result<(), D::Error> where D: DrawTarget<C> {
+-         // ...
+-     }
+- }
++ impl<C> Drawable for Button<'_, C>
++ where
++     C: PixelColor + From<BinaryColor>,
++ {
++     type Color = C;
++
++     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
++     where
++         D: DrawTarget<Color = C>,
++     {
++         Rectangle::new(self.top_left, self.size)
++             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
++             .draw(display)?;
++         Text::new(self.text, Point::new(6, 6))
++             .into_styled(TextStyle::new(Font6x8, self.fg_color))
++             .draw(display)
++     }
++ }
 ```
 
 ### `IntoIterator` changes
 
-All `IntoIterator` impls are now replaced with the `IntoPixels` trait which exposes the `into_pixels()` method. This trait is included in the prelude, or can be included by adding `embedded_graphics::iterator::IntoPixels` to the imports list. Using the prelude is recommended.
+All `IntoIterator` impls are now replaced with the custom `IntoPixels` trait which exposes the `into_pixels()` method. This trait is included in the prelude, or can be included by adding `embedded_graphics::iterator::IntoPixels` to the imports list. Using the prelude is recommended.
 
 For example, chaining two items together now requires explicit calls to `into_pixels()`:
 
@@ -179,8 +179,21 @@ let text = Text::new(...);
 
 All text, primitive and style macros have been removed. To create text, primitives and styles, use the appropriate struct methods instead.
 
+For example, a styled rectangle is now built like this:
+
 ```diff
-+ TODO: Example
+- let filled_rect: Styled<Rectangle, PrimitiveStyle<Rgb565>> = egrectangle!(
+-     top_left = (10, 20),
+-     bottom_right = (30, 40),
+-     style = primitive_style!(stroke_color = Rgb565::RED, fill_color = Rgb565::GREEN)
+- );
++ let filled_rect = Rectangle::with_corners(Point::new(10, 20), Point::new(30, 40))
++     .into_styled(
++         PrimitiveStyleBuilder::new()
++            .stroke_color(Rgb565::RED)
++            .fill_color(Rgb565::GREEN)
++            .build()
++     );
 ```
 
 ## Primitives
@@ -235,4 +248,6 @@ Implementations of the `Dimensions` trait now only require the `bounding_box` me
 
 ## Mock display
 
-The `MockDisplay`, used often for unit testing, now checks for pixel overdraw by default. To disable this behaviour, call `set_allow_overdraw(false)` on the `MockDisplay` instance. It now also disallows out of bounds drawing by default. This behaviour can be changed by calling `display.set_allow_out_of_bounds_drawing(true)`.
+The `MockDisplay`, used often for unit testing, now checks for pixel overdraw by default. To disable this behaviour, call `set_allow_overdraw(false)` on the `MockDisplay` instance.
+
+It now also disallows out of bounds drawing by default. This behaviour can be changed by calling `display.set_allow_out_of_bounds_drawing(true)`.
