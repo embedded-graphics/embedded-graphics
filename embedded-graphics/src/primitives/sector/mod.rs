@@ -120,7 +120,7 @@ impl Sector {
 
     /// Return the center point of the sector
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
     }
 
     /// Return the end angle of the sector
@@ -170,7 +170,26 @@ impl ContainsPoint for Sector {
 
 impl Dimensions for Sector {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new_equal(self.diameter))
+        let center = self.center();
+
+        let quadrants = [
+            Angle::from_degrees(90.0),
+            Angle::from_degrees(180.0),
+            Angle::from_degrees(270.0),
+            Angle::from_degrees(360.0),
+        ];
+
+        let (min, max) = quadrants
+            .iter()
+            .filter(|quadrant| **quadrant > self.angle_start && **quadrant <= self.angle_end())
+            .chain([self.angle_start, self.angle_end()].iter())
+            .fold((center, center), |acc, angle| {
+                let point = self.line_from_angle(*angle).end;
+
+                (acc.0.component_min(point), acc.1.component_max(point))
+            });
+
+        Rectangle::with_corners(min, max)
     }
 }
 

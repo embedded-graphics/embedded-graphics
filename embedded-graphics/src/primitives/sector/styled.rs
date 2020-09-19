@@ -154,12 +154,11 @@ impl<C> Dimensions for Styled<Sector, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
         if !self.style.is_transparent() {
             let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
+            self.primitive.offset(offset).bounding_box()
         } else {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
@@ -317,10 +316,9 @@ mod tests {
         let empty = Sector::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg())
             .into_styled::<BinaryColor>(PrimitiveStyle::new());
 
-        // TODO: Uncomment when arc bounding box is fixed in #405
-        // let mut display = MockDisplay::new();
-        // center.draw(&mut display).unwrap();
-        // assert_eq!(display.affected_area(), center.bounding_box());
+        let mut display = MockDisplay::new();
+        center.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area(), center.bounding_box());
 
         assert_eq!(empty.bounding_box(), Rectangle::new(CENTER, Size::zero()));
 
