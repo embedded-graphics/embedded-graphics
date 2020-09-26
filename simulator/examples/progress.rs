@@ -40,8 +40,8 @@ fn main() -> Result<(), std::convert::Infallible> {
         let sweep = progress as f32 * 360.0 / 100.0;
 
         // Draw an arc with a 5px wide stroke.
-        // let thing = Arc::new(Point::new(2, 2), 64 - 4, 90.0.deg(), sweep.deg());
-        let thing = Arc::new(Point::new(2, 2), 64 - 4, 0.0.deg(), 90.0.deg());
+        let thing = Arc::new(Point::new(2, 2), 64 - 4, (sweep / 2.0).deg(), sweep.deg());
+        // let thing = Arc::new(Point::new(2, 2), 64 - 4, 0.0.deg(), 90.0.deg());
 
         println!(
             "Circle {:?}",

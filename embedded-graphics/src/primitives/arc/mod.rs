@@ -151,34 +151,41 @@ impl Dimensions for Arc {
     // https://stackoverflow.com/questions/1336663/2d-bounding-box-of-a-sector
     fn bounding_box(&self) -> Rectangle {
         let quadrants = [
-            Angle::from_degrees(0.0),
-            Angle::from_degrees(90.0),
-            Angle::from_degrees(180.0),
-            Angle::from_degrees(270.0),
+            self.point_from_angle(Angle::from_degrees(0.0)),
+            self.point_from_angle(Angle::from_degrees(90.0)),
+            self.point_from_angle(Angle::from_degrees(180.0)),
+            self.point_from_angle(Angle::from_degrees(270.0)),
+            self.point_from_angle(Angle::from_degrees(360.0)),
         ];
 
-        println!("Quadrants {:?}", quadrants);
+        println!("Quadrants");
+
+        for q in &quadrants {
+            println!("    {:?}", q);
+        }
 
         let start = self.point_from_angle(self.angle_start);
         let end = self.point_from_angle(self.angle_end());
         let center = self.center();
 
+        let plane_sector = PlaneSector::new(center, self.angle_start, self.angle_sweep);
+
         let (min, mut max) = quadrants
             .iter()
-            .filter(|quadrant| **quadrant > self.angle_start && **quadrant < self.angle_end())
-            .chain([self.angle_start, self.angle_end()].iter())
+            .filter(|quadrant| plane_sector.contains(**quadrant))
+            .chain([&start, &end].iter().cloned())
             .fold(
                 (start.component_min(end), start.component_max(end)),
-                |acc, angle| {
-                    let point = self.point_from_angle(*angle);
-
-                    println!("P {:?}", point);
-
-                    (acc.0.component_min(point), acc.1.component_max(point))
-                },
+                |acc, point| (acc.0.component_min(*point), acc.1.component_max(*point)),
             );
 
-        println!("Min/max {:?} {:?}", min, max);
+        println!(
+            "Min/max {:?} {:?} start/end {:?} {:?}",
+            min,
+            max,
+            self.angle_start,
+            self.angle_end()
+        );
 
         if max.x > center.x {
             max.x += 1;
