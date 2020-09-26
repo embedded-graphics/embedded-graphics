@@ -6,7 +6,7 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Real, Trigonometry},
+    geometry::{Angle, AngleUnit, Dimensions, Point, Real, Size, Trigonometry},
     primitives::{Circle, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
@@ -148,29 +148,45 @@ impl Primitive for Arc {
 }
 
 impl Dimensions for Arc {
+    // https://stackoverflow.com/questions/1336663/2d-bounding-box-of-a-sector
     fn bounding_box(&self) -> Rectangle {
         let quadrants = [
+            Angle::from_degrees(0.0),
             Angle::from_degrees(90.0),
             Angle::from_degrees(180.0),
             Angle::from_degrees(270.0),
-            Angle::from_degrees(360.0),
         ];
+
+        println!("Quadrants {:?}", quadrants);
 
         let start = self.point_from_angle(self.angle_start);
         let end = self.point_from_angle(self.angle_end());
+        let center = self.center();
 
-        let (min, max) = quadrants
+        let (min, mut max) = quadrants
             .iter()
-            .filter(|quadrant| **quadrant > self.angle_start && **quadrant <= self.angle_end())
+            .filter(|quadrant| **quadrant > self.angle_start && **quadrant < self.angle_end())
             .chain([self.angle_start, self.angle_end()].iter())
             .fold(
                 (start.component_min(end), start.component_max(end)),
                 |acc, angle| {
                     let point = self.point_from_angle(*angle);
 
+                    println!("P {:?}", point);
+
                     (acc.0.component_min(point), acc.1.component_max(point))
                 },
             );
+
+        println!("Min/max {:?} {:?}", min, max);
+
+        if max.x > center.x {
+            max.x += 1;
+        }
+
+        if max.y > center.y {
+            max.y += 1;
+        }
 
         Rectangle::with_corners(min, max)
     }
