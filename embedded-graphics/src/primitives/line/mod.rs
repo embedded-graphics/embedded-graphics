@@ -10,7 +10,7 @@ use crate::{
     geometry::{Dimensions, Point},
     primitives::{
         line::thick_points::{ParallelLineType, ParallelsIterator},
-        Primitive, Rectangle, Triangle,
+        ContainsPoint, Primitive, Rectangle, Triangle,
     },
     style::StrokeAlignment,
     transform::Transform,
@@ -123,12 +123,17 @@ impl Line {
         Line::new(self.start, self.start + delta)
     }
 
+    // TODO: Un-pub
+    // TODO: Convert thickness back to u32
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
     /// Outside stroke alignment is on the left side of the line, making this compatible with
     /// clockwise triangles, polygons, etc.
-    fn extents(&self, thickness: u32, alignment: StrokeAlignment) -> (Line, Line) {
+    pub fn extents(&self, thickness: i32, alignment: StrokeAlignment) -> (Line, Line) {
+        // FIXME: Delete
+        let thickness: u32 = thickness as u32;
+
         let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
@@ -284,6 +289,18 @@ impl Line {
             point: Point::new(x, y),
             outer_side: if denom > 0 { Side::Right } else { Side::Left },
         }
+    }
+
+    /// Intersect a horizontal scan line with the Bresenham representation of this line segment.
+    pub fn bresenham_scanline_intersection(&self, scan_y: i32) -> Option<Point> {
+        if !self
+            .bounding_box()
+            .contains(Point::new(self.start.x, scan_y))
+        {
+            return None;
+        }
+
+        self.points().find(|p| p.y == scan_y)
     }
 
     /// Get the shortest distance between the line and a given point.
