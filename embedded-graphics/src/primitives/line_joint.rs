@@ -19,6 +19,9 @@ pub enum JointKind {
     Bevel {
         /// The triangle used to draw the bevel itself.
         filler_triangle: Triangle,
+
+        /// Line filling the outside of the bevel.
+        filler_line: Line,
     },
 
     /// Degenerate (angle between lines is too small to properly render stroke).
@@ -27,6 +30,9 @@ pub enum JointKind {
     Degenerate {
         /// The triangle used to fill in the corner.
         filler_triangle: Triangle,
+
+        /// Line filling the outside of the bevel.
+        filler_line: Line,
     },
 
     /// Essentially no joint (both lines are colinear)
@@ -204,6 +210,10 @@ impl LineJoint {
                                     l_intersection,
                                     second_edge_right.start,
                                 ),
+                                filler_line: Line::new(
+                                    first_edge_right.end,
+                                    second_edge_right.start,
+                                ),
                             },
                             first_edge_end: EdgeCorners {
                                 left: l_intersection,
@@ -222,6 +232,7 @@ impl LineJoint {
                                     second_edge_left.start,
                                     r_intersection,
                                 ),
+                                filler_line: Line::new(first_edge_left.end, second_edge_left.start),
                             },
                             first_edge_end: EdgeCorners {
                                 left: first_edge_left.end,
@@ -238,18 +249,22 @@ impl LineJoint {
             // Line segments overlap (degenerate)
             else {
                 Self {
-                    kind: JointKind::Degenerate {
-                        filler_triangle: match outer_side {
-                            Side::Left => Triangle::new(
+                    kind: match outer_side {
+                        Side::Left => JointKind::Degenerate {
+                            filler_triangle: Triangle::new(
                                 first_edge_left.end,
                                 first_edge_right.end,
                                 second_edge_left.start,
                             ),
-                            Side::Right => Triangle::new(
+                            filler_line: Line::new(first_edge_left.end, second_edge_left.start),
+                        },
+                        Side::Right => JointKind::Degenerate {
+                            filler_triangle: Triangle::new(
                                 first_edge_left.end,
                                 first_edge_right.end,
                                 second_edge_right.start,
                             ),
+                            filler_line: Line::new(first_edge_right.end, second_edge_right.start),
                         },
                     },
                     first_edge_end: EdgeCorners {

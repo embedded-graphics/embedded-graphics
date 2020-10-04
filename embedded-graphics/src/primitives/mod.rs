@@ -5,6 +5,7 @@ pub mod circle;
 pub mod ellipse;
 pub mod line;
 pub mod line_joint;
+pub mod line_joints_iter;
 pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
