@@ -69,6 +69,11 @@ impl<'a> LineJointsIter<'a> {
         }
     }
 
+    /// Reset
+    pub fn reset(&mut self) {
+        *self = Self::new(self.points, self.width, self.alignment);
+    }
+
     /// Empty
     fn empty() -> Self {
         Self {

@@ -303,6 +303,15 @@ impl Line {
         self.points().find(|p| p.y == scan_y)
     }
 
+    /// Does a given point lie on the Bresenham rendering of this line?
+    pub fn bresenham_contains_point(&self, point: Point) -> bool {
+        if !self.bounding_box().contains(point) {
+            return false;
+        }
+
+        self.points().any(|p| p == point)
+    }
+
     /// Get the shortest distance between the line and a given point.
     ///
     /// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points

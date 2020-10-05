@@ -11,6 +11,7 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
+use scanline_intersections::ScanlineIntersections;
 use sdl2::keyboard::Keycode;
 
 fn crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
@@ -45,29 +46,15 @@ fn draw(
     points: &[Point],
     width: u32,
     alignment: StrokeAlignment,
+    mouse_pos: Point,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
     display.clear(Rgb888::BLACK)?;
 
-    // Text::new(&format!("Points {}", points.len()), Point::zero())
-    //     .into_styled(
-    //         TextStyleBuilder::new(Font6x8)
-    //             .background_color(Rgb888::WHITE)
-    //             .text_color(Rgb888::WHITE)
-    //             .build(),
-    //     )
-    //     .draw(display)?;
-
-    LineJointsIter::new(points, width, alignment).try_for_each(|line| {
-        line.into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(1)
-                .stroke_alignment(alignment)
-                .stroke_color(Rgb888::YELLOW)
-                .build(),
-        )
-        .draw(display)
-    })?;
+    let scanline = Line::new(
+        mouse_pos.y_axis(),
+        mouse_pos.y_axis() + display.size().x_axis(),
+    );
 
     Polyline::new(points)
         .into_styled(
@@ -78,6 +65,28 @@ fn draw(
                 .build(),
         )
         .draw(display)?;
+
+    // Scanline
+    scanline
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
+        .draw(display)?;
+
+    // let lines = LineJointsIter::new(points, width, alignment);
+
+    // lines.try_for_each(|line| {
+    //     line.into_styled(
+    //         PrimitiveStyleBuilder::new()
+    //             .stroke_width(1)
+    //             .stroke_alignment(alignment)
+    //             .stroke_color(Rgb888::YELLOW)
+    //             .build(),
+    //     )
+    //     .draw(display)
+    // })?;
+
+    let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline);
+
+    intersections.try_for_each(|point| Pixel(point, Rgb888::YELLOW).draw(display))?;
 
     Ok(())
 }
@@ -122,7 +131,13 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let mut num_points = points.len();
 
-    draw(&points[0..num_points], width, alignment, &mut display)?;
+    draw(
+        &points[0..num_points],
+        width,
+        alignment,
+        end_point,
+        &mut display,
+    )?;
 
     'running: loop {
         window.update(&display);
@@ -160,7 +175,13 @@ fn main() -> Result<(), core::convert::Infallible> {
 
             *points.last_mut().unwrap() = end_point;
 
-            draw(&points[0..num_points], width, alignment, &mut display)?;
+            draw(
+                &points[0..num_points],
+                width,
+                alignment,
+                end_point,
+                &mut display,
+            )?;
         }
     }
 

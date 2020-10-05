@@ -9,6 +9,7 @@ pub mod line_joints_iter;
 pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
+pub mod scanline_intersections;
 pub mod sector;
 pub mod triangle;
 
