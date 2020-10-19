@@ -34,7 +34,7 @@
 //! `tinybmp` without [`embedded-graphics`].
 //!
 //! ```rust
-//! use tinybmp::{Bmp, FileType, Header, RawPixel};
+//! use tinybmp::{Bmp, Bpp, Header, RawPixel};
 //!
 //! let bmp = Bmp::from_slice_raw(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
 //!     .expect("Failed to parse BMP image");
@@ -43,12 +43,9 @@
 //! assert_eq!(
 //!     bmp.header,
 //!     Header {
-//!         file_type: FileType::BM,
 //!         file_size: 314,
-//!         reserved_1: 0,
-//!         reserved_2: 0,
 //!         image_data_start: 122,
-//!         bpp: 24,
+//!         bpp: Bpp::Bits24,
 //!         image_width: 8,
 //!         image_height: 8,
 //!         image_data_len: 192
@@ -84,7 +81,7 @@ use embedded_graphics::prelude::*;
 
 use crate::header::parse_header;
 pub use crate::{
-    header::{FileType, Header},
+    header::{Bpp, Header},
     pixels::Pixels,
     raw_pixels::{RawPixel, RawPixels},
 };
@@ -103,8 +100,8 @@ pub struct Bmp<'a, C> {
 }
 
 impl<'a, C> Bmp<'a, C> {
-    fn from_slice_common(bytes: &'a [u8]) -> Result<Self, ()> {
-        let (_remaining, header) = parse_header(bytes).map_err(|_| ())?;
+    fn from_slice_common(bytes: &'a [u8]) -> Result<Self, ParseError> {
+        let (_remaining, header) = parse_header(bytes).map_err(|_| ParseError::Header)?;
 
         let image_data = &bytes[header.image_data_start..];
 
@@ -116,8 +113,8 @@ impl<'a, C> Bmp<'a, C> {
     }
 
     /// Returns the BPP (bits per pixel) for this image.
-    pub fn color_bpp(&self) -> u32 {
-        u32::from(self.header.bpp)
+    pub fn color_bpp(&self) -> Bpp {
+        self.header.bpp
     }
 
     /// Returns a slice containing the raw image data.
@@ -139,7 +136,7 @@ impl<'a, C> Bmp<'a, C> {
     ///
     /// Each row in a BMP file is a multiple of 4 bytes long.
     fn bytes_per_row(&self) -> usize {
-        let bits_per_row = self.header.image_width as usize * usize::from(self.header.bpp);
+        let bits_per_row = self.header.image_width as usize * usize::from(self.header.bpp.bits());
 
         (bits_per_row + 31) / 32 * (32 / 8)
     }
@@ -157,7 +154,7 @@ impl<'a> Bmp<'a, ()> {
     ///
     /// [`from_slice`]: #method.from_slice
     /// [`pixels`]: #method.pixels
-    pub fn from_slice_raw(bytes: &'a [u8]) -> Result<Self, ()> {
+    pub fn from_slice_raw(bytes: &'a [u8]) -> Result<Self, ParseError> {
         Self::from_slice_common(bytes)
     }
 }
@@ -174,17 +171,17 @@ where
     /// The color type needs to be specified explicitly when this method is called, for example by
     /// using the turbofish syntax. An error is returned if the bit depth of the specified color
     /// type doesn't match the bit depth of the BMP file.
-    pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ()> {
+    pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ParseError> {
         let bmp = Self::from_slice_common(bytes)?;
 
-        if C::Raw::BITS_PER_PIXEL != bmp.color_bpp() as usize {
-            if bmp.color_bpp() == 32 && C::Raw::BITS_PER_PIXEL == 24 {
+        if C::Raw::BITS_PER_PIXEL != usize::from(bmp.color_bpp().bits()) {
+            if bmp.color_bpp() == Bpp::Bits32 && C::Raw::BITS_PER_PIXEL == 24 {
                 // Allow 24BPP color types for 32BPP images to support RGB888 BMP files with
                 // 4 bytes per pixel.
                 // This check could be improved by using the bit masks available in BMP headers
                 // with version >= 4, but we don't currently parse this information.
             } else {
-                return Err(());
+                return Err(ParseError::MismatchedBpp(bmp.color_bpp().bits()));
             }
         }
 
@@ -230,4 +227,17 @@ where
     fn size(&self) -> Size {
         Size::new(self.header.image_width, self.header.image_height)
     }
+}
+
+/// Parse error.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum ParseError {
+    /// An error occurred while parsing the header.
+    Header,
+
+    /// The image uses a bit depth that isn't supported by tinybmp.
+    UnsupportedBpp(u16),
+
+    /// The image bit depth doesn't match the specified color type.
+    MismatchedBpp(u16),
 }

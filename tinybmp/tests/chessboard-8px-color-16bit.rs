@@ -1,4 +1,4 @@
-use tinybmp::{Bmp, FileType, Header};
+use tinybmp::{Bmp, Bpp, Header};
 
 #[test]
 fn chessboard_8px_color_16bit() {
@@ -8,12 +8,9 @@ fn chessboard_8px_color_16bit() {
     assert_eq!(
         bmp.header,
         Header {
-            file_type: FileType::BM,
             file_size: 266,
-            reserved_1: 0,
-            reserved_2: 0,
             image_data_start: 138,
-            bpp: 16,
+            bpp: Bpp::Bits16,
             image_width: 8,
             image_height: 8,
             image_data_len: 128

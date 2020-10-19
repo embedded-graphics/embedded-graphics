@@ -1,4 +1,4 @@
-use crate::Bmp;
+use crate::{Bmp, Bpp};
 use embedded_graphics::prelude::*;
 
 /// Iterator over individual BMP pixels
@@ -12,9 +12,6 @@ pub struct RawPixels<'a, 'b, C> {
     /// Image pixel data as a byte slice, little endian ordering
     pixel_data: &'b [u8],
 
-    /// Number of bits per pixel
-    pixel_stride: usize,
-
     /// Current position
     position: Point,
 
@@ -26,15 +23,9 @@ pub struct RawPixels<'a, 'b, C> {
 
 impl<'a, 'b, C> RawPixels<'a, 'b, C> {
     pub(crate) fn new(bmp: &'a Bmp<'b, C>) -> Self {
-        let pixel_stride = match bmp.color_bpp() {
-            1 | 8 | 16 | 24 | 32 => bmp.color_bpp() as usize,
-            depth => panic!("Bit depth {} not supported", depth),
-        };
-
         Self {
             bmp,
             pixel_data: bmp.image_data,
-            pixel_stride,
             position: Point::zero(),
             bit_idx: 0,
         }
@@ -67,24 +58,25 @@ impl<C> Iterator for RawPixels<'_, '_, C> {
         let byte_idx = self.bit_idx / 8;
 
         let px = self.pixel_data;
-        let pixel_value = match self.pixel_stride {
-            1 => {
+        let pixel_value = match self.bmp.color_bpp() {
+            Bpp::Bits1 => {
                 let mask = 0b_1000_0000 >> self.bit_idx % 8;
                 (px[byte_idx] & mask != 0) as u32
             }
-            8 => u32::from(px[byte_idx]),
-            16 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], 0, 0]),
-            24 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], px[byte_idx + 2], 0]),
-            32 => u32::from_le_bytes([
+            Bpp::Bits8 => u32::from(px[byte_idx]),
+            Bpp::Bits16 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], 0, 0]),
+            Bpp::Bits24 => {
+                u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], px[byte_idx + 2], 0])
+            }
+            Bpp::Bits32 => u32::from_le_bytes([
                 px[byte_idx],
                 px[byte_idx + 1],
                 px[byte_idx + 2],
                 px[byte_idx + 3],
             ]),
-            _ => unreachable!(),
         };
 
-        self.bit_idx += self.pixel_stride;
+        self.bit_idx += usize::from(self.bmp.color_bpp().bits());
 
         Some(RawPixel::new(p, pixel_value))
     }
