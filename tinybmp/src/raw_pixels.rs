@@ -57,33 +57,31 @@ impl<C> Iterator for RawPixels<'_, '_, C> {
 
         let byte_idx = self.bit_idx / 8;
 
-        let pixel_value = match self.bmp.color_bpp() {
+        let mut pixel_value = [0u8; 4];
+
+        match self.bmp.color_bpp() {
             Bpp::Bits1 => self.pixel_data.get(byte_idx).map(|byte| {
                 let mask = 0b_1000_0000 >> self.bit_idx % 8;
-                (byte & mask != 0) as u32
+                pixel_value[0] = (byte & mask != 0) as u8;
             }),
-            Bpp::Bits8 => self.pixel_data.get(byte_idx).map(|byte| u32::from(*byte)),
+            Bpp::Bits8 => self
+                .pixel_data
+                .get(byte_idx)
+                .map(|byte| pixel_value[0] = *byte),
             Bpp::Bits16 => self.pixel_data.get(byte_idx..byte_idx + 2).map(|data| {
-                let mut bytes = [0u8; 2];
-                bytes.copy_from_slice(data);
-                u32::from(u16::from_le_bytes(bytes))
+                pixel_value[0..2].copy_from_slice(data);
             }),
             Bpp::Bits24 => self.pixel_data.get(byte_idx..byte_idx + 3).map(|data| {
-                let mut bytes = [0u8; 4];
-                bytes[0..3].copy_from_slice(data);
-                u32::from_le_bytes(bytes)
+                pixel_value[0..3].copy_from_slice(data);
             }),
             Bpp::Bits32 => self.pixel_data.get(byte_idx..byte_idx + 4).map(|data| {
-                let mut bytes = [0u8; 4];
-                bytes.copy_from_slice(data);
-                u32::from_le_bytes(bytes)
+                pixel_value[0..4].copy_from_slice(data);
             }),
-        }
-        .unwrap_or_default();
+        };
 
         self.bit_idx += usize::from(self.bmp.color_bpp().bits());
 
-        Some(RawPixel::new(p, pixel_value))
+        Some(RawPixel::new(p, u32::from_le_bytes(pixel_value)))
     }
 }
 
