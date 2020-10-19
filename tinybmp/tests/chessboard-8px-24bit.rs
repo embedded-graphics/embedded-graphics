@@ -1,9 +1,9 @@
-use tinybmp::{BmpRaw, FileType, Header, Pixel};
+use tinybmp::{Bmp, FileType, Header};
 
 #[test]
 fn chessboard_8px_24bit() {
     let bmp =
-        BmpRaw::from_slice(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
+        Bmp::from_slice_raw(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
 
     assert_eq!(
         bmp.header,
@@ -20,15 +20,15 @@ fn chessboard_8px_24bit() {
         }
     );
 
-    assert_eq!(bmp.image_data().len(), 314 - 122);
+    assert_eq!(bmp.raw_image_data().len(), 314 - 122);
 }
 
 #[test]
 fn chessboard_8px_24bit_iter() {
     let bmp =
-        BmpRaw::from_slice(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
+        Bmp::from_slice_raw(include_bytes!("./chessboard-8px-24bit.bmp")).expect("Failed to parse");
 
-    let pixels: Vec<u32> = bmp.into_iter().map(|Pixel { color, .. }| color).collect();
+    let pixels: Vec<u32> = bmp.raw_pixels().map(|pixel| pixel.color).collect();
 
     assert_eq!(pixels.len(), 8 * 8);
 
