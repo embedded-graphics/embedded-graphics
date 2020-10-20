@@ -30,7 +30,7 @@
 //!
 //! ## Accessing the raw image data
 //!
-//! This example demonstrates how the mage header and raw image data can be accessed to use
+//! This example demonstrates how the image header and raw image data can be accessed to use
 //! `tinybmp` without [`embedded-graphics`].
 //!
 //! ```rust
@@ -168,7 +168,7 @@ where
     /// The created object keeps a shared reference to the input and does not dynamically allocate
     /// memory.
     ///
-    /// The color type needs to be specified explicitly when this method is called, for example by
+    /// The color type must be explicitly specified when this method is called, for example by
     /// using the turbofish syntax. An error is returned if the bit depth of the specified color
     /// type doesn't match the bit depth of the BMP file.
     pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ParseError> {
@@ -190,7 +190,7 @@ where
 
     /// Returns an iterator over the pixels in this image.
     ///
-    /// The iterator automatically converts the pixel colors into a `embedded-graphics` color type,
+    /// The iterator automatically converts the pixel colors into an `embedded-graphics` color type,
     /// that is when the [`from_slice`] constructor was called. This method isn't available when
     /// the [`from_slice_raw`] constructor was used and the pixel can only be accessed by using the
     /// [`raw_pixels`] method.

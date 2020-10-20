@@ -1,18 +1,18 @@
 use crate::{Bmp, Bpp};
 use embedded_graphics::prelude::*;
 
-/// Iterator over individual BMP pixels
+/// Iterator over individual BMP pixels.
 ///
 /// Each pixel is returned as a `u32` regardless of the bit depth of the source image.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct RawPixels<'a, 'b, C> {
-    /// Reference to original BMP image
+    /// Reference to original BMP image.
     bmp: &'a Bmp<'b, C>,
 
-    /// Image pixel data as a byte slice, little endian ordering
+    /// Image pixel data as a byte slice, little endian ordering.
     pixel_data: &'b [u8],
 
-    /// Current position
+    /// Current position.
     position: Point,
 
     /// Start bit index for the current pixel.
@@ -85,7 +85,7 @@ impl<C> Iterator for RawPixels<'_, '_, C> {
     }
 }
 
-/// Pixel with raw pixel color.
+/// Pixel with raw pixel color stored as a `u32`.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Default)]
 pub struct RawPixel {
     /// The position relative to the top left corner of the image.
