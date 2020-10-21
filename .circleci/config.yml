@@ -2,6 +2,9 @@
 precheck_steps: &precheck_steps
   docker:
     - image: jamwaffles/circleci-embedded-graphics:1.40.0
+      auth:
+        username: jamwaffles
+        password: $DOCKERHUB_PASSWORD
   steps:
     - checkout
     - restore_cache:
@@ -20,6 +23,9 @@ precheck_steps: &precheck_steps
 target_steps: &target_steps
   docker:
     - image: jamwaffles/circleci-embedded-graphics:1.40.0
+      auth:
+        username: jamwaffles
+        password: $DOCKERHUB_PASSWORD
   steps:
     - checkout
     - restore_cache:
