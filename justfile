@@ -5,7 +5,9 @@ target_dir := "target"
 doc_dir := "doc"
 doc_assets_dir := doc_dir + "/assets"
 screenshots_dir := target_dir + "/screenshots"
-ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0"
+# FIXME: `-cimg` suffix is temporary while moving to new CircleCI base images. Remove this suffix
+# when upgrading the tag next time.
+ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-cimg"
 
 #----------
 # Building
