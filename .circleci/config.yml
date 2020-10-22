@@ -1,38 +1,44 @@
 # Check that everything (tests, benches, etc) builds in std environments
 precheck_steps: &precheck_steps
   docker:
-    - image: jamwaffles/circleci-embedded-graphics:1.40.0
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0-cimg
+      auth:
+        username: jamwaffles
+        password: $DOCKERHUB_PASSWORD
   steps:
     - checkout
     - restore_cache:
-        key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update
     - run: just build
     - save_cache:
-        key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
           - ./target
-          - /usr/local/cargo/registry
+          - /home/circleci/.cargo/registry
 
 # Build crates for embedded target
 target_steps: &target_steps
   docker:
-    - image: jamwaffles/circleci-embedded-graphics:1.40.0
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0-cimg
+      auth:
+        username: jamwaffles
+        password: $DOCKERHUB_PASSWORD
   steps:
     - checkout
     - restore_cache:
         keys:
-          - v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+          - v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
     - run: just install-targets
     - run: cargo update
     - run: just build-targets --release
     - save_cache:
-        key: v5-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
         paths:
           - ./target
-          - /usr/local/cargo/registry
+          - /home/circleci/.cargo/registry
 
 version: 2
 jobs:
