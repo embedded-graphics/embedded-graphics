@@ -52,7 +52,7 @@ version = "=0.7.0-alpha.1"
 [dev-dependencies]
 chrono = "0.4.10"
 criterion = { version = "0.3.0", default-features = false }
-tinybmp = { version = "0.2.2", features = [ "graphics" ] }
+tinybmp = { version = "0.2.2" }
 
 [features]
 default = [ "with-sdl" ]

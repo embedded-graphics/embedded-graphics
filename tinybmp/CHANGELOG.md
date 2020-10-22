@@ -8,7 +8,13 @@
 
 ### Changed
 
-- **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) To support the new embedded-graphics 0.7 image API a color type parameter was added to `Bmp`. To use this crate without the `graphics` flag enabled replace `Bmp` by `BmpRaw`.
+- **(breaking)** [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) To support the new embedded-graphics 0.7 image API a color type parameter was added to `Bmp`.
+- **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) The `graphics` feature was removed and the `embedded-graphics` dependency is now non optional.
+- **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp` no longer implements `IntoIterator`. Pixel iterators can now be created using the `pixels` and `raw_pixels` methods.
+- **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::from_slice` now checks that the specified color type matches the bit depth of the image.
+- **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::width` and `Bmp::height` were replaced by `Bmp::size` which requires `embedded_graphics::geometry::OriginDimensions` to be in scope (also included in the embedded-graphics `prelude`).
+- **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::from_slice` now checks if the image BPP matches the specified color type. To report possible errors it now returns the dedicated error type `ParseError` instead of `()`.
+- **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::bpp` was renamed to `Bmp::color_bpp` to be consistent with `tinytga` and the return type was changed to an enum.
 
 ## [0.2.3] - 2020-05-26
 

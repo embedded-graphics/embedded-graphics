@@ -1,57 +1,18 @@
 //! A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
 //! parsing the image header, no other allocations are made.
 //!
-//! To access the individual pixels in an image, the [`BmpRaw`] struct implements `IntoIterator`. It is
-//! also possible to access the raw image data by reading the [`pixel_data`] field.
-//!
-//! # Features
-//!
-//! * `graphics` - enables [embedded-graphics] integration.
+//! To use `tinybmp` without [`embedded-graphics`] the raw data for individual pixels in an image
+//! can be accessed using the [`raw_pixels`] and [`raw_image_data`] methods provided by the [`Bmp`]
+//! struct.
 //!
 //! # Examples
 //!
-//! ## Load a BMP image and check its [`Header`] and returned pixels.
+//! ## Draw a BMP image to an `embedded-graphics` draw target
+//!
+//! This example loads a 16BPP image and draws it to an [`embedded-graphics`] compatible display.
 //!
 //! ```rust
-//! use tinybmp::{BmpRaw, FileType, Header, Pixel};
-//!
-//! let bmp = BmpRaw::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
-//!     .expect("Failed to parse BMP image");
-//!
-//! // Read the BMP header
-//! assert_eq!(
-//!     bmp.header,
-//!     Header {
-//!         file_type: FileType::BM,
-//!         file_size: 314,
-//!         reserved_1: 0,
-//!         reserved_2: 0,
-//!         image_data_start: 122,
-//!         bpp: 24,
-//!         image_width: 8,
-//!         image_height: 8,
-//!         image_data_len: 192
-//!     }
-//! );
-//!
-//! // Check that raw image data slice is the correct length (according to parsed header)
-//! assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
-//!
-//! // Get an iterator over the pixel coordinates and values in this image and load into a vec
-//! let pixels: Vec<Pixel> = bmp.into_iter().collect();
-//!
-//! // Loaded example image is 8x8px
-//! assert_eq!(pixels.len(), 8 * 8);
-//! ```
-//!
-//! ## Integrate with `embedded-graphics`
-//!
-//! This example loads a 16BPP image and draws it to an [embedded-graphics] compatible display.
-//!
-//! The `graphics` feature must be enabled for embedded-graphics support.
-//!
-//! ```rust
-//! # #[cfg(feature = "graphics")] { fn main() -> Result<(), core::convert::Infallible> {
+//! # fn main() -> Result<(), core::convert::Infallible> {
 //! use embedded_graphics::{image::Image, prelude::*};
 //! use tinybmp::Bmp;
 //! # use embedded_graphics::mock_display::MockDisplay;
@@ -64,188 +25,219 @@
 //! let image = Image::new(&bmp, Point::zero());
 //!
 //! image.draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(()) } }
+//! # Ok::<(), core::convert::Infallible>(()) }
 //! ```
 //!
-//! [embedded-graphics]: https://crates.io/crates/embedded-graphics
+//! ## Accessing the raw image data
+//!
+//! This example demonstrates how the image header and raw image data can be accessed to use
+//! `tinybmp` without [`embedded-graphics`].
+//!
+//! ```rust
+//! use tinybmp::{Bmp, Bpp, Header, RawPixel};
+//!
+//! let bmp = Bmp::from_slice_raw(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+//!     .expect("Failed to parse BMP image");
+//!
+//! // Read the BMP header
+//! assert_eq!(
+//!     bmp.header,
+//!     Header {
+//!         file_size: 314,
+//!         image_data_start: 122,
+//!         bpp: Bpp::Bits24,
+//!         image_width: 8,
+//!         image_height: 8,
+//!         image_data_len: 192
+//!     }
+//! );
+//!
+//! // Check that raw image data slice is the correct length (according to parsed header)
+//! assert_eq!(bmp.raw_image_data().len(), bmp.header.image_data_len as usize);
+//!
+//! // Get an iterator over the pixel coordinates and values in this image and load into a vec
+//! let pixels: Vec<RawPixel> = bmp.raw_pixels().collect();
+//!
+//! // Loaded example image is 8x8px
+//! assert_eq!(pixels.len(), 8 * 8);
+//! ```
+//!
+//! [`embedded-graphics`]: https://crates.io/crates/embedded-graphics
 //! [`Header`]: ./header/struct.Header.html
-//! [`BmpRaw`]: ./struct.BmpRaw.html
-//! [`pixel_data`]: ./struct.BmpRaw.html#structfield.pixel_data
+//! [`Bmp`]: ./struct.Bmp.html
+//! [`raw_pixels`]: ./struct.Bmp.html#method.raw_pixels
+//! [`raw_image_data`]: ./struct.Bmp.html#method.raw_image_data
 
 #![no_std]
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 
 mod header;
-mod pixel;
+mod pixels;
+mod raw_pixels;
 
-#[cfg(feature = "graphics")]
-mod embedded_graphics;
+use core::marker::PhantomData;
+use embedded_graphics::prelude::*;
 
 use crate::header::parse_header;
 pub use crate::{
-    header::{FileType, Header},
-    pixel::Pixel,
+    header::{Bpp, Header},
+    pixels::Pixels,
+    raw_pixels::{RawPixel, RawPixels},
 };
-
-#[cfg(feature = "graphics")]
-pub use crate::embedded_graphics::*;
 
 /// A BMP-format bitmap
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct BmpRaw<'a> {
+pub struct Bmp<'a, C> {
     /// Image header
     pub header: Header,
 
+    /// Image data
     image_data: &'a [u8],
+
+    /// Color type
+    color_type: PhantomData<C>,
 }
 
-impl<'a> BmpRaw<'a> {
-    /// Create a bitmap object from a byte array
-    ///
-    /// This method keeps a slice of the original input and does not dynamically allocate memory.
-    /// The input data must live for as long as this BMP instance does.
-    pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ()> {
-        let (_remaining, header) = parse_header(bytes).map_err(|_| ())?;
+impl<'a, C> Bmp<'a, C> {
+    fn from_slice_common(bytes: &'a [u8]) -> Result<Self, ParseError> {
+        let (_remaining, header) = parse_header(bytes).map_err(|_| ParseError::Header)?;
 
         let image_data = &bytes[header.image_data_start..];
 
-        Ok(BmpRaw { header, image_data })
+        Ok(Self {
+            header,
+            image_data,
+            color_type: PhantomData,
+        })
     }
 
-    /// Get a reference to the range of bytes that represents the pixel data in the image
-    pub fn image_data(&'a self) -> &'a [u8] {
+    /// Returns the BPP (bits per pixel) for this image.
+    pub fn color_bpp(&self) -> Bpp {
+        self.header.bpp
+    }
+
+    /// Returns a slice containing the raw image data.
+    pub fn raw_image_data(&self) -> &[u8] {
         self.image_data
     }
 
-    /// Get the image width in pixels
-    pub fn width(&self) -> u32 {
-        self.header.image_width
-    }
-
-    /// Get the image height in pixels
-    pub fn height(&self) -> u32 {
-        self.header.image_height
-    }
-
-    /// Get image dimensions as `(width, height)` in pixels
-    pub fn dimensions(&self) -> (u32, u32) {
-        (self.header.image_width, self.header.image_height)
-    }
-
-    /// Get the BPP (bits per pixel) for this image
-    pub fn bpp(&self) -> u32 {
-        u32::from(self.header.bpp)
+    /// Returns an iterator over the raw pixels in the image.
+    ///
+    /// The iterator returns the raw pixel colors as `u32` values. To automatically convert the raw
+    /// values into the color specified by `C` use [`pixels`] instead.
+    ///
+    /// [`pixels`]: #method.pixels
+    pub fn raw_pixels<'b>(&'b self) -> RawPixels<'b, 'a, C> {
+        RawPixels::new(self)
     }
 
     /// Returns the row length in bytes.
     ///
     /// Each row in a BMP file is a multiple of 4 bytes long.
     fn bytes_per_row(&self) -> usize {
-        let bits_per_row = self.width() as usize * self.bpp() as usize;
+        let bits_per_row = self.header.image_width as usize * usize::from(self.header.bpp.bits());
 
         (bits_per_row + 31) / 32 * (32 / 8)
     }
 }
 
-impl<'a> IntoIterator for &'a BmpRaw<'a> {
-    type Item = Pixel;
-    type IntoIter = BmpIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        let pixel_stride = match self.bpp() {
-            1 | 8 | 16 | 24 | 32 => self.bpp() as usize,
-            depth => panic!("Bit depth {} not supported", depth),
-        };
-
-        BmpIterator {
-            bmp: self,
-            pixel_data: self.image_data(),
-            pixel_stride,
-            x: 0,
-            y: 0,
-            bit_idx: 0,
-        }
-    }
-}
-
-/// Iterator over individual BMP pixels
-///
-/// Each pixel is returned as a `u32` regardless of the bit depth of the source image.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct BmpIterator<'a> {
-    /// Reference to original BMP image
-    bmp: &'a BmpRaw<'a>,
-
-    /// Image pixel data as a byte slice, little endian ordering
-    pixel_data: &'a [u8],
-
-    /// Number of bits per pixel
-    pixel_stride: usize,
-
-    /// Current X position
-    x: u32,
-
-    /// Current Y position
-    y: u32,
-
-    /// Start bit index for the current pixel.
+impl<'a> Bmp<'a, ()> {
+    /// Create a bitmap object from a byte slice.
     ///
-    /// This is incremented by `pixel_stride` bits every iteration.
-    bit_idx: usize,
+    /// The created object keeps a shared reference to the input and does not dynamically allocate
+    /// memory.
+    ///
+    /// In contrast to the [`from_slice`] constructor no color type needs to be specified when
+    /// calling this method. This will disable all functions that requires a specified color type,
+    /// like the [`pixels`] method.
+    ///
+    /// [`from_slice`]: #method.from_slice
+    /// [`pixels`]: #method.pixels
+    pub fn from_slice_raw(bytes: &'a [u8]) -> Result<Self, ParseError> {
+        Self::from_slice_common(bytes)
+    }
 }
 
-impl<'a> Iterator for BmpIterator<'a> {
-    type Item = Pixel;
+impl<'a, C> Bmp<'a, C>
+where
+    C: PixelColor,
+{
+    /// Create a bitmap object from a byte slice.
+    ///
+    /// The created object keeps a shared reference to the input and does not dynamically allocate
+    /// memory.
+    ///
+    /// The color type must be explicitly specified when this method is called, for example by
+    /// using the turbofish syntax. An error is returned if the bit depth of the specified color
+    /// type doesn't match the bit depth of the BMP file.
+    pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ParseError> {
+        let bmp = Self::from_slice_common(bytes)?;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let px = self.pixel_data;
-
-        if self.y < self.bmp.height() {
-            let x = self.x;
-            let y = self.y;
-
-            if self.x == 0 {
-                let row_index = (self.bmp.height() - 1) - self.y;
-                let row_start = self.bmp.bytes_per_row() * row_index as usize;
-
-                self.bit_idx = row_start * 8;
+        if C::Raw::BITS_PER_PIXEL != usize::from(bmp.color_bpp().bits()) {
+            if bmp.color_bpp() == Bpp::Bits32 && C::Raw::BITS_PER_PIXEL == 24 {
+                // Allow 24BPP color types for 32BPP images to support RGB888 BMP files with
+                // 4 bytes per pixel.
+                // This check could be improved by using the bit masks available in BMP headers
+                // with version >= 4, but we don't currently parse this information.
+            } else {
+                return Err(ParseError::MismatchedBpp(bmp.color_bpp().bits()));
             }
-
-            self.x += 1;
-            if self.x >= self.bmp.width() {
-                self.y += 1;
-                self.x = 0;
-            }
-
-            let byte_idx = self.bit_idx / 8;
-
-            let pixel_value = match self.pixel_stride {
-                1 => {
-                    let mask = 0b_1000_0000 >> self.bit_idx % 8;
-                    (px[byte_idx] & mask != 0) as u32
-                }
-                8 => u32::from(px[byte_idx]),
-                16 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], 0, 0]),
-                24 => u32::from_le_bytes([px[byte_idx], px[byte_idx + 1], px[byte_idx + 2], 0]),
-                32 => u32::from_le_bytes([
-                    px[byte_idx],
-                    px[byte_idx + 1],
-                    px[byte_idx + 2],
-                    px[byte_idx + 3],
-                ]),
-                _ => unreachable!(),
-            };
-
-            self.bit_idx += self.pixel_stride;
-
-            Some(Pixel {
-                x,
-                y,
-                color: pixel_value,
-            })
-        } else {
-            None
         }
+
+        Ok(bmp)
     }
+
+    /// Returns an iterator over the pixels in this image.
+    ///
+    /// The iterator automatically converts the pixel colors into an `embedded-graphics` color type,
+    /// that is when the [`from_slice`] constructor was called. This method isn't available when
+    /// the [`from_slice_raw`] constructor was used and the pixel can only be accessed by using the
+    /// [`raw_pixels`] method.
+    ///
+    /// [`from_slice`]: #method.from_slice
+    /// [`from_slice_raw`]: #method.from_slice_raw
+    /// [`raw_pixels`]: #method.raw_pixels
+    pub fn pixels<'b>(&'b self) -> Pixels<'b, 'a, C> {
+        Pixels::new(self.raw_pixels())
+    }
+}
+
+impl<C> ImageDrawable for Bmp<'_, C>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+{
+    type Color = C;
+
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        target.fill_contiguous(
+            &self.bounding_box(),
+            self.raw_pixels().map(|p| C::Raw::from_u32(p.color).into()),
+        )
+    }
+}
+
+impl<C> OriginDimensions for Bmp<'_, C>
+where
+    C: PixelColor,
+{
+    fn size(&self) -> Size {
+        Size::new(self.header.image_width, self.header.image_height)
+    }
+}
+
+/// Parse error.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum ParseError {
+    /// An error occurred while parsing the header.
+    Header,
+
+    /// The image uses a bit depth that isn't supported by tinybmp.
+    UnsupportedBpp(u16),
+
+    /// The image bit depth doesn't match the specified color type.
+    MismatchedBpp(u16),
 }
