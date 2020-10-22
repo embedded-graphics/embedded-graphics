@@ -1,18 +1,18 @@
 use embedded_graphics::prelude::*;
-use tinytga::{Bpp, ImageOrigin, ImageType, Tga, TgaHeader};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawTga, TgaHeader};
 
 #[test]
 fn coordinates() {
     let data = include_bytes!("./chessboard_4px_raw.tga");
 
-    let img = Tga::from_slice_raw(data).unwrap();
+    let img = RawTga::from_slice(data).unwrap();
 
-    println!("{:#?}", img.raw_header());
-    println!("Raw image data len {:#?}", img.raw_image_data().len());
-    println!("Raw image data {:#?}", img.raw_image_data());
+    println!("{:#?}", img.header());
+    println!("Raw image data len {:#?}", img.image_data().len());
+    println!("Raw image data {:#?}", img.image_data());
 
     assert_eq!(
-        img.raw_header(),
+        img.header(),
         TgaHeader {
             id_len: 0,
             has_color_map: false,
@@ -30,10 +30,10 @@ fn coordinates() {
         }
     );
 
-    assert_eq!(img.raw_extension_area(), None);
-    assert_eq!(img.raw_developer_directory(), None);
+    assert_eq!(img.extension_area(), None);
+    assert_eq!(img.developer_directory(), None);
 
-    let coords: Vec<_> = img.raw_pixels().map(|p| p.position).collect();
+    let coords: Vec<_> = img.pixels().map(|p| p.position).collect();
 
     assert_eq!(coords.len(), 4 * 4);
     assert_eq!(

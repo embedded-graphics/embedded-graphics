@@ -1,4 +1,4 @@
-//! A small TGA parser designed for use with [embedded-graphics] targetting no-std environments but
+//! A small TGA parser designed for use with [embedded-graphics] targeting no-std environments but
 //! usable anywhere. Beyond parsing the image header, no other allocations are made.
 //!
 //! tinytga provides two methods of accessing the pixel data inside a TGA file. The most convenient
@@ -7,7 +7,59 @@
 //!
 //! # Examples
 //!
-//! ## Load a Run Length Encoded (RLE) TGA image
+//! ## Using `Tga` to draw an image
+//!
+//! This example demonstrates how a TGA image can be drawn to a [embedded-graphics] draw target.
+//!
+//! The code uses the [`Tga`] struct and only works if the color format inside the TGA file is known
+//! at compile time. While this makes the code less flexible it offers the best performance by
+//! making sure that no unnecessary color conversions are used.
+//!
+//! ```rust
+//! # fn main() -> Result<(), core::convert::Infallible> {
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+//! use tinytga::Tga;
+//!
+//! // Include an image from a local path as bytes
+//! let data = include_bytes!("../tests/chessboard_4px_rle.tga");
+//!
+//! let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
+//!
+//! let image = Image::new(&tga, Point::zero());
+//!
+//! image.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(()) }
+//! ```
+//!
+//! ## Using `DynamicTga` to draw an image
+//!
+//! The previous example had the limitation that the color format needed to be known at compile
+//! time. In some use cases this can be a problem, for example if user supplied images should
+//! be displayed. To handle these cases [`DynamicTga`] can be used, which performs color conversion
+//! if necessary.
+//!
+//! ```rust
+//! # fn main() -> Result<(), core::convert::Infallible> {
+//! # let mut display = embedded_graphics::mock_display::MockDisplay::<Rgb888>::default();
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+//! use tinytga::DynamicTga;
+//!
+//! // Include an image from a local path as bytes
+//! let data = include_bytes!("../tests/chessboard_4px_rle.tga");
+//!
+//! let tga = DynamicTga::from_slice(data).unwrap();
+//!
+//! let image = Image::new(&tga, Point::zero());
+//!
+//! image.draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(()) }
+//! ```
+//! ## Accessing pixels using an embedded-graphics color type
+//!
+//! Even if tinytga is used without using [embedded-graphics] to draw the image the color types
+//! provided by [embedded-graphics] can still be used to access the pixel data using the
+//! [`pixels`](struct.Tga.html#method.pixels) method.
 //!
 //! ```rust
 //! use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
@@ -27,45 +79,25 @@
 //! let pixels: Vec<_> = img.pixels().collect();
 //! ```
 //!
-//! ## Drawing an image using `embedded-graphics`
-//!
-//! This example demonstrates how a TGA image can be drawn to a [embedded-graphics] draw target.
-//!
-//! ```rust
-//! # fn main() -> Result<(), core::convert::Infallible> {
-//! # let mut display = embedded_graphics::mock_display::MockDisplay::default();
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
-//! use tinytga::Tga;
-//!
-//! // Include an image from a local path as bytes
-//! let data = include_bytes!("../tests/chessboard_4px_rle.tga");
-
-//! let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
-//!
-//! let image = Image::new(&tga, Point::zero());
-//!
-//! image.draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(()) }
-//! ```
-//!
 //! ## Accessing raw pixel data
 //!
 //! If you do not want to use the color types provided by [embedded-graphics] you can also access
-//! the raw image data.
+//! the raw image data. The iterator returned by the [`pixels`](struct.RawTga.html#method.pixels)
+//! method uses `u32` values to return the raw color value of each pixel.
 //!
 //! ```rust
 //! use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
-//! use tinytga::{Bpp, ImageOrigin, ImageType, RawPixel, Tga, TgaHeader};
+//! use tinytga::{Bpp, ImageOrigin, ImageType, RawPixel, RawTga, TgaHeader};
 //!
 //! // Include an image from a local path as bytes.
 //! let data = include_bytes!("../tests/chessboard_4px_rle.tga");
 //!
 //! // Create a TGA instance from a byte slice.
-//! let img = Tga::from_slice_raw(data).unwrap();
+//! let img = RawTga::from_slice(data).unwrap();
 //!
 //! // Take a look at the raw image header.
 //! assert_eq!(
-//!     img.raw_header(),
+//!     img.header(),
 //!     TgaHeader {
 //!         id_len: 0,
 //!         has_color_map: false,
@@ -84,10 +116,13 @@
 //! );
 //!
 //! // Collect raw pixels into a vector.
-//! let pixels: Vec<_> = img.raw_pixels().collect();
+//! let pixels: Vec<_> = img.pixels().collect();
 //! ```
 //!
 //! # Embedded-graphics drawing performance
+//!
+//! [`Tga`] should by used instead of [`DynamicTga`] when possible to reduce the risk of
+//! accidentally adding unnecessary color conversions.
 //!
 //! `tinytga` uses different code paths to draw images with different [`ImageOrigin`]s.
 //! The performance difference between the origins will depend on the display driver, but using
@@ -96,6 +131,7 @@
 //! [`ImageOrigin`]: enum.ImageOrigin.html
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Tga`]: ./struct.Tga.html
+//! [`DynamicTga`]: ./struct.DynamicTga.html
 //! [`image_type`]: ./struct.TgaHeader.html#structfield.image_type
 //! [`pixel_data`]: ./struct.Tga.html#structfield.pixel_data
 
@@ -111,160 +147,43 @@
 #![deny(unused_qualifications)]
 
 mod color_map;
+mod dynamic_tga;
 mod footer;
 mod header;
 mod packet;
 mod parse_error;
 mod pixels;
 mod raw_pixels;
+mod raw_tga;
 
-use ::embedded_graphics::prelude::*;
 use core::marker::PhantomData;
-use nom::{bytes::complete::take, IResult};
+use embedded_graphics::prelude::*;
 
-use crate::footer::TgaFooter;
 pub use crate::{
     color_map::ColorMap,
+    dynamic_tga::DynamicTga,
     header::{Bpp, ImageOrigin, ImageType, TgaHeader},
     parse_error::ParseError,
     pixels::Pixels,
     raw_pixels::{RawPixel, RawPixels},
+    raw_tga::RawTga,
 };
 
-/// TGA image
+/// TGA image.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Tga<'a, C> {
-    /// Image data
-    data: &'a [u8],
+    /// Raw TGA file.
+    raw: RawTga<'a>,
 
-    /// Color map
-    pub color_map: Option<ColorMap<'a>>,
-
-    /// Image pixel data
-    pixel_data: &'a [u8],
-
-    /// Image size
-    size: Size,
-
-    /// Image type
-    image_type: ImageType,
-
-    /// Bits per pixel
-    bpp: Bpp,
-
-    /// Image origin
-    image_origin: ImageOrigin,
-
-    /// Color type
+    /// Color type.
     color_type: PhantomData<C>,
-}
-
-impl<'a, C> Tga<'a, C> {
-    /// Common part of `from_slice` and `from_slice_raw`.
-    fn from_slice_common(data: &'a [u8]) -> Result<Self, ParseError> {
-        let input = data;
-        let (input, header) = TgaHeader::parse(input).map_err(|_| ParseError::Header)?;
-        let (input, _image_id) = image_id(input, &header).map_err(|_| ParseError::Header)?;
-        let (input, color_map) = ColorMap::parse(input, &header)?;
-
-        let footer_length = TgaFooter::parse(data).map_or(0, |footer| footer.length(data));
-
-        // Use saturating_sub to make sure this can't panic
-        let pixel_data = &input[0..input.len().saturating_sub(footer_length)];
-
-        let size = Size::new(u32::from(header.width), u32::from(header.height));
-
-        Ok(Self {
-            data,
-            color_map,
-            pixel_data,
-            size,
-            bpp: header.pixel_depth,
-            image_origin: header.image_origin,
-            image_type: header.image_type,
-            color_type: PhantomData,
-        })
-    }
-
-    /// Returns the color bit depth (BPP) of this image.
-    pub fn color_bpp(&self) -> Bpp {
-        if let Some(color_map) = &self.color_map {
-            color_map.entry_bpp()
-        } else {
-            self.bpp
-        }
-    }
-
-    /// Returns the image origin.
-    pub fn image_origin(&self) -> ImageOrigin {
-        self.image_origin
-    }
-
-    /// Returns the raw image data contained in this image.
-    pub fn raw_image_data(&self) -> &'a [u8] {
-        self.pixel_data
-    }
-
-    /// Returns an iterator over the raw pixels in this image.
-    pub fn raw_pixels<'b>(&'b self) -> RawPixels<'b, 'a, C> {
-        RawPixels::new(self)
-    }
-
-    /// Returns the TGA header.
-    ///
-    /// The returned object is a direct representation of the header contained
-    /// in the TGA file. Most of the information contained in the header is also
-    /// available using other methods, which are the preferred way of accessing
-    /// them.
-    ///
-    /// # Performance
-    ///
-    /// To save memory the header is parsed every time this method is called.
-    pub fn raw_header(&self) -> TgaHeader {
-        // unwrap can't fail because the header was checked when self was created
-        TgaHeader::parse(self.data).unwrap().1
-    }
-
-    /// Returns the developer directory.
-    ///
-    /// # Performance
-    ///
-    /// To save memory the footer is parsed every time this method is called.
-    pub fn raw_developer_directory(&self) -> Option<&[u8]> {
-        TgaFooter::parse(self.data).and_then(|footer| footer.developer_directory(self.data))
-    }
-
-    /// Returns the extension area.
-    ///
-    /// # Performance
-    ///
-    /// To save memory the footer is parsed every time this method is called.
-    pub fn raw_extension_area(&self) -> Option<&[u8]> {
-        TgaFooter::parse(self.data).and_then(|footer| footer.extension_area(self.data))
-    }
-
-    /// Returns the content of the image ID.
-    ///
-    /// If the TGA file doesn't contain an image ID `None` is returned.
-    ///
-    /// # Performance
-    ///
-    /// To save memory the header is parsed every time this method is called.
-    pub fn image_id(&self) -> Option<&[u8]> {
-        let (input, header) = TgaHeader::parse(self.data).ok()?;
-
-        image_id(input, &header)
-            .ok()
-            .map(|(_input, id)| id)
-            .filter(|id| !id.is_empty())
-    }
 }
 
 impl<'a, C> Tga<'a, C>
 where
-    C: PixelColor,
+    C: PixelColor + From<<C as PixelColor>::Raw>,
 {
-    /// Parse a TGA image from a byte slice
+    /// Parses a TGA image from a byte slice.
     ///
     /// # Errors
     ///
@@ -273,31 +192,48 @@ where
     ///
     /// [`ParseError::MismatchedBpp`]: enum.ParseError.html#variant.MismatchedBpp
     pub fn from_slice(data: &'a [u8]) -> Result<Self, ParseError> {
-        let tga = Tga::from_slice_common(data)?;
+        let raw = RawTga::from_slice(data)?;
 
-        if C::Raw::BITS_PER_PIXEL != usize::from(tga.color_bpp().bits()) {
-            return Err(ParseError::MismatchedBpp(tga.color_bpp().bits()));
+        Self::from_raw(raw)
+    }
+
+    /// Converts a raw TGA object into a embedded-graphics TGA object.
+    ///
+    /// # Errors
+    ///
+    /// If the bit depth of the source image does not match the bit depth of the output color type
+    /// `C`, this method will return a [`ParseError::MismatchedBpp`] error.
+    ///
+    /// [`ParseError::MismatchedBpp`]: enum.ParseError.html#variant.MismatchedBpp
+    pub fn from_raw(raw: RawTga<'a>) -> Result<Self, ParseError> {
+        if C::Raw::BITS_PER_PIXEL != usize::from(raw.color_bpp().bits()) {
+            return Err(ParseError::MismatchedBpp(raw.color_bpp().bits()));
         }
 
-        Ok(tga)
+        Ok(Tga {
+            raw,
+            color_type: PhantomData,
+        })
     }
 
-    /// Returns an iterator over the raw pixels in this image.
+    /// Returns a reference to the raw TGA image.
+    ///
+    /// The [`RawTga`] object can be used to access lower level details about the TGA file.
+    ///
+    /// [`RawTga`]: struct.RawTga.html
+    pub fn raw(&self) -> &RawTga<'a> {
+        &self.raw
+    }
+
+    /// Returns an iterator over the pixels in this image.
     pub fn pixels<'b>(&'b self) -> Pixels<'b, 'a, C> {
-        Pixels::new(self.raw_pixels())
-    }
-}
-
-impl<'a> Tga<'a, ()> {
-    /// Parse a TGA image from a byte slice
-    pub fn from_slice_raw(bytes: &'a [u8]) -> Result<Self, ParseError> {
-        Tga::from_slice_common(bytes)
+        Pixels::new(self.raw.pixels())
     }
 }
 
 impl<C> OriginDimensions for Tga<'_, C> {
     fn size(&self) -> Size {
-        self.size
+        self.raw.size()
     }
 }
 
@@ -311,22 +247,6 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        // TGA files with the origin in the top left corner can be drawn using `fill_contiguous`.
-        // All other origins are drawn by falling back to `draw_iter`.
-        if self.image_origin == ImageOrigin::TopLeft {
-            target.fill_contiguous(
-                &self.bounding_box(),
-                self.raw_pixels().map(|p| C::Raw::from_u32(p.color).into()),
-            )
-        } else {
-            target.draw_iter(
-                self.raw_pixels()
-                    .map(|p| Pixel(p.position, C::Raw::from_u32(p.color).into())),
-            )
-        }
+        self.raw.draw(target)
     }
-}
-
-fn image_id<'a>(input: &'a [u8], header: &TgaHeader) -> IResult<&'a [u8], &'a [u8]> {
-    take(header.id_len)(input)
 }

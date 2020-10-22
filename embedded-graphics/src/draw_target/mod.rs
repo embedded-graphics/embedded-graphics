@@ -1,6 +1,7 @@
 //! A target for embedded-graphics drawing operations.
 
 mod clipped;
+mod convert_color;
 mod cropped;
 mod translated;
 
@@ -12,6 +13,7 @@ use crate::{
 };
 
 pub use clipped::Clipped;
+pub use convert_color::ConvertColor;
 pub use cropped::Cropped;
 pub use translated::Translated;
 
@@ -569,6 +571,69 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
     fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self>;
+
+    /// Creates a color conversion draw target.
+    ///
+    /// A color conversion draw target is used to draw drawables with a different color type to a
+    /// draw target. The drawable color type needs to implement `Into<C>`, where `C` is the draw
+    /// target color type.
+    ///
+    /// # Performance
+    ///
+    /// Color conversion can be expensive on embedded hardware and should be avoided if possible.
+    /// Using the same color type for drawables and the draw target makes sure that no unnecessary
+    /// color conversion is used. But in some cases color conversion will be required, for example,
+    /// to draw images.
+    ///
+    /// # Examples
+    ///
+    /// This example draws a `BinaryColor` image to a `Rgb888` display.
+    ///
+    /// ```
+    /// use embedded_graphics::{
+    ///     prelude::*,
+    ///     mock_display::MockDisplay,
+    ///     pixelcolor::{BinaryColor, Rgb888},
+    ///     image::{Image, ImageRaw},
+    /// };
+    ///
+    /// /// The image data.
+    /// const DATA: &[u8] = &[
+    ///     0b11110000, //
+    ///     0b10010000, //
+    ///     0b10010000, //
+    ///     0b11110000, //
+    /// ];
+    ///
+    /// // Create a `BinaryColor` image from the image data.
+    /// let raw_image = ImageRaw::<BinaryColor>::new(DATA, 4, 4);
+    /// let image = Image::new(&raw_image, Point::zero());
+    ///
+    /// // Create a `Rgb888` display.
+    /// let mut display = MockDisplay::<Rgb888>::new();
+    ///
+    /// // The image can't directly be drawn to the draw target because they use different
+    /// // color type. This will fail to compile:
+    /// // image.draw(&mut display)?;
+    ///
+    /// // To fix this `convert_color` is added to enable color conversion.
+    /// image.draw(&mut display.convert_color())?;
+    /// #
+    /// # let mut expected = MockDisplay::from_pattern(&[
+    /// #     "WWWW", //
+    /// #     "WKKW", //
+    /// #     "WKKW", //
+    /// #     "WWWW", //
+    /// # ]);
+    /// #
+    /// # assert_eq!(display, expected);
+    /// #
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+
+    fn convert_color<C>(&mut self) -> ConvertColor<'_, Self, C>
+    where
+        C: PixelColor + Into<Self::Color>;
 }
 
 impl<T> DrawTargetExt for T
@@ -585,5 +650,12 @@ where
 
     fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self> {
         Clipped::new(self, area)
+    }
+
+    fn convert_color<C>(&mut self) -> ConvertColor<'_, Self, C>
+    where
+        C: PixelColor + Into<Self::Color>,
+    {
+        ConvertColor::new(self)
     }
 }

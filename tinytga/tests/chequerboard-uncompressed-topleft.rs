@@ -1,20 +1,20 @@
-use tinytga::{Bpp, ImageOrigin, ImageType, Tga, TgaHeader};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawTga, TgaHeader};
 
 #[test]
 fn chequerboard_uncompressed_topleft() {
     let data = include_bytes!("./chequerboard-uncompressed-topleft.tga");
 
-    let img = Tga::from_slice_raw(data).unwrap();
+    let img = RawTga::from_slice(data).unwrap();
 
-    println!("{:#?}", img.raw_header());
-    println!("Raw image data len {:#?}", img.raw_image_data().len());
+    println!("{:#?}", img.header());
+    println!("Raw image data len {:#?}", img.image_data().len());
 
-    let header = img.raw_header();
+    let header = img.header();
     let image_data_len = header.width * header.height * header.pixel_depth.bytes() as u16;
 
     // Source image is 8x8px, uncompressed, 8BPP color
     assert_eq!(
-        img.raw_header(),
+        img.header(),
         TgaHeader {
             id_len: 0,
             has_color_map: false,
@@ -33,8 +33,8 @@ fn chequerboard_uncompressed_topleft() {
     );
 
     // Footer is empty for this image
-    assert_eq!(img.raw_extension_area(), None);
-    assert_eq!(img.raw_developer_directory(), None);
+    assert_eq!(img.extension_area(), None);
+    assert_eq!(img.developer_directory(), None);
 
-    assert_eq!(img.raw_image_data().len(), image_data_len as usize);
+    assert_eq!(img.image_data().len(), image_data_len as usize);
 }

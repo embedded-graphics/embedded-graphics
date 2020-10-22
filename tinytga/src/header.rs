@@ -105,6 +105,14 @@ impl ImageType {
             _ => false,
         }
     }
+
+    /// Returns `true` when the image is monochrome.
+    pub fn is_monochrome(self) -> bool {
+        match self {
+            ImageType::Monochrome | ImageType::RleMonochrome => true,
+            _ => false,
+        }
+    }
 }
 
 /// Image origin
@@ -138,7 +146,9 @@ impl ImageOrigin {
     }
 }
 
-/// TGA header structure, referenced from <https://www.fileformat.info/format/tga/egff.htm>
+/// TGA header.
+///
+/// See <https://www.fileformat.info/format/tga/egff.htm> for a detailed description of the fields.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct TgaHeader {
     /// Image ID field length
