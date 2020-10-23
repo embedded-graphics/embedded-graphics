@@ -54,9 +54,9 @@ fn image_data_truncated() {
 
 #[test]
 fn mismatched_bpp() {
-    // type2_tl.tga is a 24 BPP image
+    // type2_tl_24bpp.tga is a 24 BPP image
     assert_eq!(
-        Tga::<Gray8>::from_slice(include_bytes!("../tests/type2_tl.tga")),
+        Tga::<Gray8>::from_slice(include_bytes!("../tests/type2_24bpp_tl.tga")),
         Err(ParseError::MismatchedBpp(24))
     );
 

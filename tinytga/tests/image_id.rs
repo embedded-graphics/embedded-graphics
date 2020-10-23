@@ -12,8 +12,8 @@ fn has_image_id() {
 
 #[test]
 fn no_image_id() {
-    // type1_bl.tga does not contain an image ID
-    let data = include_bytes!("./type1_bl.tga");
+    // type1_24bpp_bl.tga does not contain an image ID
+    let data = include_bytes!("./type1_24bpp_bl.tga");
 
     let img = Tga::from_slice_raw(data).unwrap();
 

@@ -136,7 +136,7 @@
 //! };
 //! use tinytga::Tga;
 //!
-//! let data = include_bytes!("../../tinytga/tests/type1_tl.tga");
+//! let data = include_bytes!("../../tinytga/tests/type1_24bpp_tl.tga");
 //!
 //! let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
 //!
