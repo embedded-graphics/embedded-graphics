@@ -11,7 +11,6 @@ use embedded_graphics::{
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
-use scanline_intersections::ScanlineIntersections;
 use sdl2::keyboard::Keycode;
 
 fn crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
@@ -59,7 +58,7 @@ fn draw(
     Polyline::new(points)
         .into_styled(
             PrimitiveStyleBuilder::new()
-                .stroke_width(1)
+                .stroke_width(width)
                 .stroke_alignment(alignment)
                 .stroke_color(Rgb888::RED)
                 .build(),
@@ -71,22 +70,45 @@ fn draw(
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(display)?;
 
-    // let lines = LineJointsIter::new(points, width, alignment);
+    let mut lines = LineJointsIter::new(points, width, alignment);
 
-    // lines.try_for_each(|line| {
+    // Draw polyline skeleton
+    lines.try_for_each(|line| {
+        line.into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(1)
+                .stroke_alignment(alignment)
+                .stroke_color(Rgb888::CYAN)
+                .build(),
+        )
+        .draw(display)
+    })?;
+
+    // let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline);
+
+    // intersections.try_for_each(|(line, state)| {
+    //     // Pixel(
+    //     //     point,
+    //     //     match state {
+    //     //         State::Outside => Rgb888::YELLOW,
+    //     //         State::Inside => Rgb888::BLACK,
+    //     //     },
+    //     // )
+    //     // .draw(display)
+
     //     line.into_styled(
     //         PrimitiveStyleBuilder::new()
     //             .stroke_width(1)
     //             .stroke_alignment(alignment)
+    //             // .stroke_color(match state {
+    //             //     State::Outside => Rgb888::YELLOW,
+    //             //     State::Inside => Rgb888::RED,
+    //             // })
     //             .stroke_color(Rgb888::YELLOW)
     //             .build(),
     //     )
     //     .draw(display)
     // })?;
-
-    let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline);
-
-    intersections.try_for_each(|point| Pixel(point, Rgb888::YELLOW).draw(display))?;
 
     Ok(())
 }

@@ -106,6 +106,19 @@ pub enum Intersection {
     Colinear,
 }
 
+/// BLAH
+#[derive(Debug, Copy, Clone)]
+pub enum BresenhamIntersection {
+    /// Point
+    Point(Point),
+
+    /// Colinear line
+    Colinear(Line),
+
+    /// Multiple intersection points
+    Line(Line),
+}
+
 impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
@@ -185,6 +198,17 @@ impl Line {
                 },
         );
         (left_line, right_line)
+    }
+
+    /// Sort line so point with smallest X coordinate is to the left.
+    pub fn sorted_x(&self) -> Self {
+        let (start, end) = if self.start.x > self.end.x {
+            (self.end, self.start)
+        } else {
+            (self.start, self.end)
+        };
+
+        Self::new(start, end)
     }
 
     const fn coefficients(&self, other: &Self) -> (i32, i32, i32, i32, i32, i32, i32) {
@@ -292,7 +316,7 @@ impl Line {
     }
 
     /// Intersect a horizontal scan line with the Bresenham representation of this line segment.
-    pub fn bresenham_scanline_intersection(&self, scan_y: i32) -> Option<Point> {
+    pub fn bresenham_scanline_intersection(&self, scan_y: i32) -> Option<BresenhamIntersection> {
         if !self
             .bounding_box()
             .contains(Point::new(self.start.x, scan_y))
@@ -300,7 +324,26 @@ impl Line {
             return None;
         }
 
-        self.points().find(|p| p.y == scan_y)
+        // Colinear
+        if self.start.y == self.end.y {
+            return Some(BresenhamIntersection::Colinear(*self));
+        }
+
+        let mut points = self.points().filter(|p| p.y == scan_y);
+
+        let first = points.next()?;
+
+        let intersection = if let Some(last) = points.last() {
+            if last != first {
+                BresenhamIntersection::Line(Line::new(first, last))
+            } else {
+                BresenhamIntersection::Point(first)
+            }
+        } else {
+            BresenhamIntersection::Point(first)
+        };
+
+        Some(intersection)
     }
 
     /// Does a given point lie on the Bresenham rendering of this line?

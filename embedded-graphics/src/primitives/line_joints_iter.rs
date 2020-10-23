@@ -18,7 +18,7 @@ enum State {
 }
 
 /// Line joints iter
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct LineJointsIter<'a> {
     windows: core::slice::Windows<'a, Point>,
     state: State,
@@ -158,5 +158,6 @@ impl<'a> Iterator for LineJointsIter<'a> {
             }
             State::Done => None,
         }
+        .map(|l| l.sorted_x())
     }
 }

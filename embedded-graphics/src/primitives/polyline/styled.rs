@@ -1,25 +1,25 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Size},
+    geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         polyline,
-        polyline::{thick_points::ThickPoints, Polyline},
+        polyline::{scanline_iterator::ScanlineIterator, Polyline},
         Primitive, Rectangle,
     },
     style::{PrimitiveStyle, Styled},
 };
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Debug)]
 enum StyledIter<'a> {
     Thin(polyline::Points<'a>),
-    Thick(ThickPoints<'a>),
+    Thick(ScanlineIterator<'a>),
 }
 
 /// Pixel iterator for each pixel in the line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Debug)]
 pub struct StyledPixels<'a, C>
 where
     C: PixelColor,
@@ -36,11 +36,7 @@ where
         let line_iter = if styled.style.stroke_width <= 1 {
             StyledIter::Thin(styled.primitive.points())
         } else {
-            StyledIter::Thick(ThickPoints::new(
-                styled.primitive.vertices,
-                styled.style.stroke_width,
-                styled.style.stroke_alignment,
-            ))
+            StyledIter::Thick(ScanlineIterator::new(styled))
         };
 
         StyledPixels {
@@ -62,7 +58,7 @@ where
 
         match self.line_iter {
             StyledIter::Thin(ref mut it) => it.next(),
-            StyledIter::Thick(ref mut it) => it.next(),
+            StyledIter::Thick(ref mut _it) => todo!(),
         }
         .map(|point| Pixel(point, stroke_color))
     }
@@ -91,7 +87,32 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        if let Some(stroke_color) = self.style.stroke_color {
+            if self.style.is_transparent() {
+                return Ok(());
+            }
+
+            match self.style.stroke_width {
+                0 => Ok(()),
+                1 => display.draw_iter(
+                    self.primitive
+                        .points()
+                        .map(|point| Pixel(point, stroke_color)),
+                ),
+                _ => {
+                    for line in ScanlineIterator::new(self) {
+                        display.fill_solid(
+                            &Rectangle::with_corners(line.start, line.end),
+                            stroke_color,
+                        )?;
+                    }
+
+                    Ok(())
+                }
+            }
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -99,7 +120,7 @@ impl<C> Dimensions for Styled<Polyline<'_>, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // NOTE: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
+    // FIXME: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
     // box impl.
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
