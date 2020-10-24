@@ -119,6 +119,34 @@ pub enum BresenhamIntersection {
     Line(Line),
 }
 
+impl BresenhamIntersection {
+    /// Get the left-most point of the intersection.
+    pub fn start_point(&self) -> Point {
+        match self {
+            Self::Point(p) => *p,
+            Self::Colinear(l) | Self::Line(l) => l.start,
+        }
+    }
+
+    /// Get the right-most point of the intersection.
+    pub fn end_point(&self) -> Point {
+        match self {
+            Self::Point(p) => *p,
+            Self::Colinear(l) | Self::Line(l) => l.end,
+        }
+    }
+
+    /// As a line
+    pub fn as_line(&self) -> Line {
+        match self {
+            Self::Colinear(l) => *l,
+            Self::Line(l) => *l,
+            Self::Point(p) => Line::new(*p, *p),
+        }
+        .sorted_x()
+    }
+}
+
 impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
@@ -374,6 +402,15 @@ impl Line {
 
         // Note: squaring result is always positive. `as u32` cast should be safe here.
         delta.length_squared() as u32
+    }
+
+    /// Get the approximate slope of the line.
+    ///
+    /// This uses integer division, so should not be relied on for mathematically accurate slopes.
+    pub fn slope(&self) -> i32 {
+        (self.end.y - self.start.y)
+            .checked_div(self.end.x - self.start.x)
+            .unwrap_or(0)
     }
 }
 

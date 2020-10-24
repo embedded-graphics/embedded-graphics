@@ -11,7 +11,10 @@ use crate::{
     transform::Transform,
 };
 pub use points::Points;
+// TODO: Un-pub
 pub use scanline_iterator::ScanlineIterator;
+// TODO: Un-pub
+pub use scanline_intersections::ScanlineIntersections;
 pub use styled::StyledPixels;
 
 /// Polyline primitive

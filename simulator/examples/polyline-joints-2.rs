@@ -4,7 +4,9 @@ use embedded_graphics::{
     prelude::*,
     primitives::line_joint::{EdgeCorners, LineJoint},
     primitives::line_joints_iter::LineJointsIter,
+    primitives::polyline::ScanlineIntersections,
     primitives::triangle::MathematicalPoints,
+    primitives::Line,
     primitives::*,
     style::*,
 };
@@ -13,21 +15,27 @@ use embedded_graphics_simulator::{
 };
 use sdl2::keyboard::Keycode;
 
-fn crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
+fn crosshair(
+    point: Point,
+    color: Rgb888,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
     let radius = Size::new(4, 4);
 
     Line::new(point - radius.x_axis(), point + radius.x_axis())
         .into_styled(PrimitiveStyle::with_stroke(color, 1))
-        .draw(display)
-        .unwrap();
+        .draw(display)?;
 
     Line::new(point - radius.y_axis(), point + radius.y_axis())
         .into_styled(PrimitiveStyle::with_stroke(color, 1))
         .draw(display)
-        .unwrap();
 }
 
-fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
+fn empty_crosshair(
+    point: Point,
+    color: Rgb888,
+    display: &mut SimulatorDisplay<Rgb888>,
+) -> Result<(), core::convert::Infallible> {
     let radius = Size::new_equal(4);
     let inner_radius = Size::new_equal(2);
 
@@ -38,7 +46,6 @@ fn empty_crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<R
         .chain(Line::new(point + radius.y_axis(), point + inner_radius.y_axis()).points())
         .map(|p| Pixel(p, color))
         .draw(display)
-        .unwrap();
 }
 
 fn draw(
@@ -55,15 +62,15 @@ fn draw(
         mouse_pos.y_axis() + display.size().x_axis(),
     );
 
-    Polyline::new(points)
-        .into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(width)
-                .stroke_alignment(alignment)
-                .stroke_color(Rgb888::RED)
-                .build(),
-        )
-        .draw(display)?;
+    // Polyline::new(points)
+    //     .into_styled(
+    //         PrimitiveStyleBuilder::new()
+    //             .stroke_width(width)
+    //             .stroke_alignment(alignment)
+    //             .stroke_color(Rgb888::RED)
+    //             .build(),
+    //     )
+    //     .draw(display)?;
 
     // Scanline
     scanline
@@ -73,7 +80,15 @@ fn draw(
     let mut lines = LineJointsIter::new(points, width, alignment);
 
     // Draw polyline skeleton
-    lines.try_for_each(|line| {
+    lines.enumerate().try_for_each(|(idx, (line, _))| {
+        Text::new(&format!("{}", idx), line.start)
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(Rgb888::WHITE)
+                    .build(),
+            )
+            .draw(display)?;
+
         line.into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(1)
@@ -84,31 +99,56 @@ fn draw(
         .draw(display)
     })?;
 
-    // let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline);
+    let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline.start.y);
 
-    // intersections.try_for_each(|(line, state)| {
-    //     // Pixel(
-    //     //     point,
-    //     //     match state {
-    //     //         State::Outside => Rgb888::YELLOW,
-    //     //         State::Inside => Rgb888::BLACK,
-    //     //     },
-    //     // )
-    //     // .draw(display)
+    intersections.try_for_each(|line| {
+        // Pixel(
+        //     point,
+        //     match state {
+        //         State::Outside => Rgb888::YELLOW,
+        //         State::Inside => Rgb888::BLACK,
+        //     },
+        // )
+        // .draw(display)
 
-    //     line.into_styled(
-    //         PrimitiveStyleBuilder::new()
-    //             .stroke_width(1)
-    //             .stroke_alignment(alignment)
-    //             // .stroke_color(match state {
-    //             //     State::Outside => Rgb888::YELLOW,
-    //             //     State::Inside => Rgb888::RED,
-    //             // })
-    //             .stroke_color(Rgb888::YELLOW)
-    //             .build(),
-    //     )
-    //     .draw(display)
-    // })?;
+        empty_crosshair(line.start, Rgb888::GREEN, display)?;
+        empty_crosshair(line.end - Point::new(0, 10), Rgb888::RED, display)?;
+
+        Line::new(line.start, line.end - Point::new(0, 10))
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .stroke_width(1)
+                    .stroke_color(Rgb888::MAGENTA)
+                    .build(),
+            )
+            .draw(display)?;
+
+        line.into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(1)
+                .stroke_alignment(alignment)
+                // .stroke_color(match state {
+                //     State::Outside => Rgb888::YELLOW,
+                //     State::Inside => Rgb888::RED,
+                // })
+                .stroke_color(Rgb888::YELLOW)
+                .build(),
+        )
+        .draw(display)
+    })?;
+
+    Text::new(
+        &format!("M {}, {}", mouse_pos.x, mouse_pos.y),
+        Point::zero(),
+    )
+    .into_styled(
+        TextStyleBuilder::new(Font6x8)
+            .text_color(Rgb888::WHITE)
+            .build(),
+    )
+    .draw(display)?;
+
+    crosshair(mouse_pos, Rgb888::WHITE, display)?;
 
     Ok(())
 }

@@ -17,6 +17,21 @@ enum State {
     Done,
 }
 
+/// Line type.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum LineType {
+    /// Start Cap
+    StartCap,
+    /// Left Side
+    LeftSide,
+    /// Right Side
+    RightSide,
+    /// Bevel
+    Bevel,
+    /// End Cap
+    EndCap,
+}
+
 /// Line joints iter
 #[derive(Clone, Debug)]
 pub struct LineJointsIter<'a> {
@@ -27,6 +42,7 @@ pub struct LineJointsIter<'a> {
     width: u32,
     alignment: StrokeAlignment,
     points: &'a [Point],
+    swap_sides: bool,
 }
 
 static EMPTY: &[Point; 0] = &[];
@@ -48,6 +64,7 @@ impl<'a> LineJointsIter<'a> {
                 width,
                 alignment,
                 points,
+                swap_sides: Line::new(*start, *mid).slope() < 0,
             }
         } else if let [start, end] = points {
             // Single line segment.
@@ -62,6 +79,7 @@ impl<'a> LineJointsIter<'a> {
                 width,
                 alignment,
                 points,
+                swap_sides: Line::new(*start, *end).slope() < 0,
             }
         } else {
             // Points must be at least 2 in length to make a polyline iterator out of.
@@ -84,41 +102,67 @@ impl<'a> LineJointsIter<'a> {
             width: 0,
             alignment: StrokeAlignment::Center,
             points: EMPTY,
+            swap_sides: false,
         }
     }
 }
 
 impl<'a> Iterator for LineJointsIter<'a> {
-    type Item = Line;
+    type Item = (Line, LineType);
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.state {
             State::StartEdge => {
-                self.state = State::FirstEdgeL;
+                if !self.swap_sides {
+                    self.state = State::FirstEdgeL;
+                } else {
+                    self.state = State::FirstEdgeR;
+                }
 
-                Some(Line::new(
-                    self.start_joint.first_edge_end.left,
-                    self.start_joint.first_edge_end.right,
+                Some((
+                    Line::new(
+                        self.start_joint.first_edge_end.left,
+                        self.start_joint.first_edge_end.right,
+                    ),
+                    LineType::StartCap,
                 ))
             }
             State::FirstEdgeL => {
-                self.state = State::FirstEdgeR;
+                if !self.swap_sides {
+                    self.state = State::FirstEdgeR;
+                } else {
+                    self.state = match self.end_joint.kind {
+                        JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
+                        JointKind::End => State::EndEdge,
+                        _ => State::NextSegment,
+                    };
+                }
 
-                Some(Line::new(
-                    self.start_joint.second_edge_start.left,
-                    self.end_joint.first_edge_end.left,
+                Some((
+                    Line::new(
+                        self.start_joint.second_edge_start.left,
+                        self.end_joint.first_edge_end.left,
+                    ),
+                    LineType::LeftSide,
                 ))
             }
             State::FirstEdgeR => {
-                self.state = match self.end_joint.kind {
-                    JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
-                    JointKind::End => State::EndEdge,
-                    _ => State::NextSegment,
-                };
+                if !self.swap_sides {
+                    self.state = match self.end_joint.kind {
+                        JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
+                        JointKind::End => State::EndEdge,
+                        _ => State::NextSegment,
+                    };
+                } else {
+                    self.state = State::FirstEdgeL;
+                }
 
-                Some(Line::new(
-                    self.start_joint.second_edge_start.right,
-                    self.end_joint.first_edge_end.right,
+                Some((
+                    Line::new(
+                        self.start_joint.second_edge_start.right,
+                        self.end_joint.first_edge_end.right,
+                    ),
+                    LineType::RightSide,
                 ))
             }
             State::Bevel => {
@@ -126,38 +170,54 @@ impl<'a> Iterator for LineJointsIter<'a> {
 
                 match self.end_joint.kind {
                     JointKind::Bevel { filler_line, .. }
-                    | JointKind::Degenerate { filler_line, .. } => Some(filler_line),
+                    | JointKind::Degenerate { filler_line, .. } => {
+                        Some((filler_line, LineType::Bevel))
+                    }
                     _ => None,
                 }
             }
             State::NextSegment => {
                 self.start_joint = self.end_joint;
-                self.state = State::FirstEdgeL;
 
                 if let Some([start, mid, end]) = self.windows.next() {
                     self.end_joint =
                         LineJoint::from_points(*start, *mid, *end, self.width, self.alignment);
+
+                    self.swap_sides = Line::new(
+                        self.start_joint.second_edge_start.left,
+                        self.end_joint.first_edge_end.left,
+                    )
+                    .slope()
+                        > 0;
                 } else {
-                    self.end_joint = LineJoint::end(
-                        *self.points.get(self.points.len() - 2)?,
-                        *self.points.last()?,
-                        self.width,
-                        self.alignment,
-                    );
+                    let start = *self.points.get(self.points.len() - 2)?;
+                    let end = *self.points.last()?;
+
+                    self.swap_sides = Line::new(start, end).slope() > 0;
+                    self.end_joint = LineJoint::end(start, end, self.width, self.alignment);
                 }
+
+                self.state = if !self.swap_sides {
+                    State::FirstEdgeL
+                } else {
+                    State::FirstEdgeR
+                };
 
                 self.next()
             }
             State::EndEdge => {
                 self.state = State::Done;
 
-                Some(Line::new(
-                    self.end_joint.second_edge_start.left,
-                    self.end_joint.second_edge_start.right,
+                Some((
+                    Line::new(
+                        self.end_joint.second_edge_start.left,
+                        self.end_joint.second_edge_start.right,
+                    ),
+                    LineType::EndCap,
                 ))
             }
             State::Done => None,
         }
-        .map(|l| l.sorted_x())
+        .map(|(l, s)| (l.sorted_x(), s))
     }
 }
