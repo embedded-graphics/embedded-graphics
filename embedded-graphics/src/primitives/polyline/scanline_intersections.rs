@@ -160,6 +160,39 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
         self.prev_intersection = Some(second);
 
+        // dbg!(first, second);
+
+        match (first.2, second.2, first.0, first.0, first.1, second.1) {
+            // Colinear lines are always inside
+            (_, _, BresenhamIntersection::Colinear(_), _) => {
+                dbg!("Colinear first inside");
+            }
+            // Colinear lines are always inside
+            (_, _, _, BresenhamIntersection::Colinear(_)) => {
+                dbg!("Colinear second inside");
+            }
+            // Start cap to any intersection is always inside
+            (LineType::StartCap, _, _, _) => {
+                dbg!("Inside start cap -> any");
+            }
+            // Left side -> right side line always results in intersection
+            (LineType::LeftSide, LineType::RightSide, _, _) => {
+                dbg!("Inside L -> R");
+            }
+            // Likewise with the opposite right -> left
+            (LineType::RightSide, LineType::LeftSide, _, _) => {
+                dbg!("Inside R -> L");
+            }
+            // Final line is always inside shape if it hits end cap
+            (_, LineType::EndCap, _, _) => {
+                dbg!("Inside any -> end cap");
+            }
+            _ => {
+                // dbg!("Not  dere");
+                return self.next();
+            }
+        }
+
         Some(Line::new(l1.start, l2.end))
 
         // dbg!(l1, l2);
