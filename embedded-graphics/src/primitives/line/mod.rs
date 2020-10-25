@@ -344,7 +344,10 @@ impl Line {
     }
 
     /// Intersect a horizontal scan line with the Bresenham representation of this line segment.
-    pub fn bresenham_scanline_intersection(&self, scan_y: i32) -> Option<BresenhamIntersection> {
+    pub fn bresenham_scanline_intersection(
+        &self,
+        scan_y: i32,
+    ) -> Option<(BresenhamIntersection, Self)> {
         if !self
             .bounding_box()
             .contains(Point::new(self.start.x, scan_y))
@@ -354,7 +357,8 @@ impl Line {
 
         // Colinear
         if self.start.y == self.end.y {
-            return Some(BresenhamIntersection::Colinear(*self));
+            return Some((BresenhamIntersection::Colinear(*self), *self));
+            // return None;
         }
 
         let mut points = self.points().filter(|p| p.y == scan_y);
@@ -371,7 +375,7 @@ impl Line {
             BresenhamIntersection::Point(first)
         };
 
-        Some(intersection)
+        Some((intersection, *self))
     }
 
     /// Does a given point lie on the Bresenham rendering of this line?

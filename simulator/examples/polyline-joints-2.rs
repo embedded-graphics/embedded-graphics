@@ -81,13 +81,13 @@ fn draw(
 
     // Draw polyline skeleton
     lines.enumerate().try_for_each(|(idx, (line, _))| {
-        Text::new(&format!("{}", idx), line.start)
-            .into_styled(
-                TextStyleBuilder::new(Font6x8)
-                    .text_color(Rgb888::WHITE)
-                    .build(),
-            )
-            .draw(display)?;
+        // Text::new(&format!("{}", idx), line.start)
+        //     .into_styled(
+        //         TextStyleBuilder::new(Font6x8)
+        //             .text_color(Rgb888::WHITE)
+        //             .build(),
+        //     )
+        //     .draw(display)?;
 
         line.into_styled(
             PrimitiveStyleBuilder::new()
@@ -101,7 +101,7 @@ fn draw(
 
     let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline.start.y);
 
-    intersections.try_for_each(|line| {
+    intersections.enumerate().try_for_each(|(idx, line)| {
         // Pixel(
         //     point,
         //     match state {
@@ -111,14 +111,29 @@ fn draw(
         // )
         // .draw(display)
 
-        empty_crosshair(line.start, Rgb888::GREEN, display)?;
-        empty_crosshair(line.end - Point::new(0, 10), Rgb888::RED, display)?;
+        let marker =
+            Line::new(line.start, line.end - Point::new(0, 10)).translate(if idx % 2 == 0 {
+                Point::new(0, -15)
+            } else {
+                Point::zero()
+            });
 
-        Line::new(line.start, line.end - Point::new(0, 10))
+        empty_crosshair(marker.start, Rgb888::GREEN, display)?;
+        empty_crosshair(marker.end, Rgb888::RED, display)?;
+
+        marker
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .stroke_width(1)
                     .stroke_color(Rgb888::MAGENTA)
+                    .build(),
+            )
+            .draw(display)?;
+
+        Text::new(&format!("{}", idx), marker.start)
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(Rgb888::WHITE)
                     .build(),
             )
             .draw(display)?;

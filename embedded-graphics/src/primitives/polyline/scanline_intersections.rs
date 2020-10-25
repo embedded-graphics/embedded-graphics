@@ -26,10 +26,15 @@ pub struct ScanlineIntersections<'a> {
     cache: Option<Line>,
     prev_was_colinear: bool,
     start: Option<Point>,
+    winding_number: i32,
+    prev_intersection: Option<InternalItem>,
+    prev_line: Option<Line>,
+    prev_line_type: LineType,
+    prev_is_colinear: bool,
 }
 
 // type InternalItem = (Option<BresenhamIntersection>, LineType, Line);
-type InternalItem = (BresenhamIntersection, LineType, Line);
+type InternalItem = (BresenhamIntersection, Line, LineType);
 
 impl<'a> ScanlineIntersections<'a> {
     /// New
@@ -51,6 +56,11 @@ impl<'a> ScanlineIntersections<'a> {
             cache: None,
             prev_was_colinear: false,
             start: None,
+            winding_number: 0,
+            prev_intersection: None,
+            prev_line: None,
+            prev_line_type: LineType::StartCap,
+            prev_is_colinear: false,
         }
     }
 
@@ -61,82 +71,73 @@ impl<'a> ScanlineIntersections<'a> {
         self.prev_end = Point::zero();
     }
 
-    fn next_intersection(&mut self) -> Option<Line> {
+    fn next_intersection(&mut self) -> Option<InternalItem> {
         let scanline_y = self.scanline_y;
 
-        let mut line = self.cache.take().or_else(|| {
-            self.lines
-                .find_map(|(l, _line_type)| l.bresenham_scanline_intersection(scanline_y))
-                .map(|intersection| intersection.as_line())
-        })?;
+        // let (mut initial_intersection, initial_line, initial_type) =
+        //     self.cache.take().or_else(|| {
+        //         self.lines.find_map(|(l, line_type)| {
+        //             l.bresenham_scanline_intersection(scanline_y)
+        //                 .map(|(intersection, line)| (intersection, line, line_type))
+        //         })
+        //     })?;
 
-        while let Some(next) = self
-            .lines
-            .find_map(|(l, _line_type)| l.bresenham_scanline_intersection(scanline_y))
-            .map(|l| l.as_line())
-        {
-            // Extend line if they touch each other
-            if line.end == next.start {
-                line.end = next.end
-            } else {
-                // We've already read `next` out of the iterator, but we want to reuse it so store
-                // it somewhere.
-                self.cache = Some(next);
+        // while let Some((next_intersection, next_line, next_type)) =
+        //     self.lines.find_map(|(l, line_type)| {
+        //         l.bresenham_scanline_intersection(scanline_y)
+        //             .map(|(intersection, line)| (intersection, line, line_type))
+        //     })
+        // {
+        //     // let l1 = initial_intersection.as_line();
+        //     // let l2 = next_intersection.as_line();
 
-                break;
-            }
-        }
+        //     // dbg!(initial_intersection, next_intersection);
 
-        // loop {
-        //     let next = self
-        //         .lines
-        //         .find_map(|(l, _line_type)| l.bresenham_scanline_intersection(scanline_y))?
-        //         .as_line();
+        //     match next_intersection {
+        //         BresenhamIntersection::Colinear(l2) | BresenhamIntersection::Line(l2)
+        //             if l2.start == initial_intersection.as_line().end =>
+        //         {
+        //             match initial_intersection {
+        //                 BresenhamIntersection::Colinear(mut l1)
+        //                 | BresenhamIntersection::Line(mut l1) => {
+        //                     l1.end = l2.end;
+        //                 }
+        //                 BresenhamIntersection::Point(p1) => {
+        //                     initial_intersection =
+        //                         BresenhamIntersection::Colinear(Line::new(p1, l2.end));
+        //                 }
+        //             }
+        //         }
+        //         _ => {
+        //             self.cache = Some((next_intersection, next_line, next_type));
 
-        //     // Extend line if they touch each other
-        //     if line.end == next.start {
-        //         line.end = next.end
-        //     } else {
-        //         // We've already read `next` out of the iterator, but we want to reuse it so store
-        //         // it somewhere.
-        //         self.cache = Some(next);
-
-        //         break;
+        //             break;
+        //         }
         //     }
         // }
 
-        Some(line)
+        // Some((initial_intersection, initial_line, initial_type))
 
-        // self.lines.find_map(|(l, s)| {
-        //     l.bresenham_scanline_intersection(scanline_y)
-        //         .map(|intersection| (intersection, s, l))
-        // })
+        self.lines.find_map(|(l, line_type)| {
+            l.bresenham_scanline_intersection(scanline_y)
+                .map(|(intersection, line)| (intersection, line, line_type))
+        })
     }
 
-    // /// Join two colinear intersections into one longer line, if they both touch.
-    // fn join_intersections(
-    //     first: &BresenhamIntersection,
-    //     second: &BresenhamIntersection,
-    // ) -> Option<Line> {
-    //     let first_line = match first {
-    //         BresenhamIntersection::Colinear(l) | BresenhamIntersection::Line(l) => *l,
-    //         BresenhamIntersection::Point(p) => Line::new(*p, *p),
-    //     };
+    // fn next_line(&mut self) -> Option<Line> {
+    //     let (start_intersection, start_line, start_type) = self
+    //         .prev_intersection
+    //         .take()
+    //         .or_else(|| self.next_intersection())?;
 
-    //     let second_line = match second {
-    //         BresenhamIntersection::Colinear(l) | BresenhamIntersection::Line(l) => *l,
-    //         BresenhamIntersection::Point(p) => Line::new(*p, *p),
-    //     };
+    //     let (end_intersection, end_line, end_type) = self.next_intersection()?;
 
-    //     if second_line.start != first_line.end {
-    //         return None;
-    //     }
+    //     self.prev_intersection = Some((end_intersection, end_line, end_type));
 
-    //     // Some(BresenhamIntersection::Colinear(Line::new(
-    //     //     first_line.start,
-    //     //     second_line.end,
-    //     // )))
-    //     Some(Line::new(first_line.start, second_line.end))
+    //     Some(Line::new(
+    //         start_intersection.as_line().start,
+    //         end_intersection.as_line().end,
+    //     ))
     // }
 }
 
@@ -147,38 +148,34 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         println!("xxx");
 
-        // dbg!(self.i, self.i % 2);
-        let prev_end = self.start;
+        let first = self
+            .prev_intersection
+            .take()
+            .or_else(|| self.next_intersection())?;
 
-        let start = self
-            .start
-            .or_else(|| self.next_intersection().map(|l| l.start))?;
+        let second = self.next_intersection()?;
 
-        let curr = self.next_intersection()?;
+        let l1 = first.0.as_line();
+        let l2 = second.0.as_line();
 
-        let end = curr.end;
+        self.prev_intersection = Some(second);
 
-        let line = Line::new(start, end);
+        Some(Line::new(l1.start, l2.end))
 
-        self.start = Some(end);
+        // dbg!(l1, l2);
 
-        dbg!(line, prev_end, self.start);
+        // if l1 != l2 {
+        //     self.prev_line = Some(l1);
 
-        // match prev_end {
-        //     Some(prev_end) if prev_end == line.start => {
-        //         // self.i += 1;
-        //     }
-        //     _ => self.i += 1,
+        //     Some(l1)
         // }
-
-        self.i += 1;
-
-        // Skip outside iteration
-        if self.i % 2 == 0 {
-            // dbg!("skipping");
-            return self.next();
-        }
-
-        Some(line)
+        // // Ignores first line - the next one is longer and better
+        // else if l1.start == l2.start && l2.end > l1.end {
+        //     Some(l2)
+        // }
+        // // Also ignore first line? idk why
+        // else {
+        //     Some(l2)
+        // }
     }
 }
