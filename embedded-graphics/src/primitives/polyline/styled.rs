@@ -5,6 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
+        line_joints_iter::LineJointsIter,
         polyline,
         polyline::{scanline_iterator::ScanlineIterator, Polyline},
         Primitive, Rectangle,
@@ -120,11 +121,29 @@ impl<C> Dimensions for Styled<Polyline<'_>, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // FIXME: Polyline currently ignores stroke width, so this delegates to the un-styled bounding
-    // box impl.
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
-            self.primitive.bounding_box()
+            let (min, max) = LineJointsIter::new(
+                self.primitive.vertices,
+                self.style.stroke_width,
+                self.style.stroke_alignment,
+            )
+            .fold(
+                (
+                    Point::new_equal(core::i32::MAX),
+                    Point::new_equal(core::i32::MIN),
+                ),
+                |(min, max), (line, _)| {
+                    let bb = line.bounding_box();
+
+                    (
+                        min.component_min(bb.top_left),
+                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
+                    )
+                },
+            );
+
+            Rectangle::with_corners(min, max)
         } else {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }

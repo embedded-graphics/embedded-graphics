@@ -228,6 +228,7 @@ impl<'a> Iterator for LineJointsIter<'a> {
             }
             State::Done => None,
         }
-        .map(|(l, s)| (l.sorted_x(), s))
+        // TODO: Check if I can delete this forever
+        // .map(|(l, s)| (l.sorted_x(), s))
     }
 }
