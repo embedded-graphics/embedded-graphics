@@ -9,7 +9,6 @@ use crate::{
     },
     style::StrokeAlignment,
 };
-use core::iter::Peekable;
 
 /// Scanline intersections iterator.
 ///
@@ -21,16 +20,7 @@ use core::iter::Peekable;
 pub struct ScanlineIntersections<'a> {
     lines: LineJointsIter<'a>,
     scanline_y: i32,
-    prev_end: Point,
-    i: u32,
-    cache: Option<Line>,
-    prev_was_colinear: bool,
-    start: Option<Point>,
-    winding_number: i32,
     prev_intersection: Option<InternalItem>,
-    prev_line: Option<Line>,
-    prev_line_type: LineType,
-    prev_is_colinear: bool,
 }
 
 // type InternalItem = (Option<BresenhamIntersection>, LineType, Line);
@@ -51,16 +41,7 @@ impl<'a> ScanlineIntersections<'a> {
         Self {
             lines,
             scanline_y,
-            prev_end: Point::zero(),
-            i: 0,
-            cache: None,
-            prev_was_colinear: false,
-            start: None,
-            winding_number: 0,
             prev_intersection: None,
-            prev_line: None,
-            prev_line_type: LineType::StartCap,
-            prev_is_colinear: false,
         }
     }
 
@@ -68,77 +49,16 @@ impl<'a> ScanlineIntersections<'a> {
     pub fn reset_with_new_scanline(&mut self, scanline_y: i32) {
         self.lines.reset();
         self.scanline_y = scanline_y;
-        self.prev_end = Point::zero();
     }
 
     fn next_intersection(&mut self) -> Option<InternalItem> {
         let scanline_y = self.scanline_y;
 
-        // let (mut initial_intersection, initial_line, initial_type) =
-        //     self.cache.take().or_else(|| {
-        //         self.lines.find_map(|(l, line_type)| {
-        //             l.bresenham_scanline_intersection(scanline_y)
-        //                 .map(|(intersection, line)| (intersection, line, line_type))
-        //         })
-        //     })?;
-
-        // while let Some((next_intersection, next_line, next_type)) =
-        //     self.lines.find_map(|(l, line_type)| {
-        //         l.bresenham_scanline_intersection(scanline_y)
-        //             .map(|(intersection, line)| (intersection, line, line_type))
-        //     })
-        // {
-        //     // let l1 = initial_intersection.as_line();
-        //     // let l2 = next_intersection.as_line();
-
-        //     // dbg!(initial_intersection, next_intersection);
-
-        //     match next_intersection {
-        //         BresenhamIntersection::Colinear(l2) | BresenhamIntersection::Line(l2)
-        //             if l2.start == initial_intersection.as_line().end =>
-        //         {
-        //             match initial_intersection {
-        //                 BresenhamIntersection::Colinear(mut l1)
-        //                 | BresenhamIntersection::Line(mut l1) => {
-        //                     l1.end = l2.end;
-        //                 }
-        //                 BresenhamIntersection::Point(p1) => {
-        //                     initial_intersection =
-        //                         BresenhamIntersection::Colinear(Line::new(p1, l2.end));
-        //                 }
-        //             }
-        //         }
-        //         _ => {
-        //             self.cache = Some((next_intersection, next_line, next_type));
-
-        //             break;
-        //         }
-        //     }
-        // }
-
-        // Some((initial_intersection, initial_line, initial_type))
-
         self.lines.find_map(|(l, line_type)| {
             l.bresenham_scanline_intersection(scanline_y)
-                .map(|(intersection, line)| (intersection, line, line_type))
+                .map(|(intersection, _line)| (intersection, l, line_type))
         })
     }
-
-    // fn next_line(&mut self) -> Option<Line> {
-    //     let (start_intersection, start_line, start_type) = self
-    //         .prev_intersection
-    //         .take()
-    //         .or_else(|| self.next_intersection())?;
-
-    //     let (end_intersection, end_line, end_type) = self.next_intersection()?;
-
-    //     self.prev_intersection = Some((end_intersection, end_line, end_type));
-
-    //     Some(Line::new(
-    //         start_intersection.as_line().start,
-    //         end_intersection.as_line().end,
-    //     ))
-    // }
 }
 
 impl<'a> Iterator for ScanlineIntersections<'a> {
@@ -146,8 +66,6 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
     #[allow(unused)]
     fn next(&mut self) -> Option<Self::Item> {
-        println!("xxx");
-
         let first = self
             .prev_intersection
             .take()
@@ -160,55 +78,38 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
         self.prev_intersection = Some(second);
 
-        // dbg!(first, second);
-
-        match (first.2, second.2, first.0, first.0, first.1, second.1) {
+        // Various reasons to _not_ skip the currently computed line, i.e. these pick any line
+        // that's inside the shape. Lines outside the shape are skipped with the fallthrough
+        // branch.
+        match (
+            first.0,
+            first.0,
+            first.1.sign_y(),
+            second.1.sign_y(),
+            first.2,
+            second.2,
+        ) {
             // Colinear lines are always inside
-            (_, _, BresenhamIntersection::Colinear(_), _) => {
-                dbg!("Colinear first inside");
-            }
+            (BresenhamIntersection::Colinear(_), _, _, _, _, _) => {}
             // Colinear lines are always inside
-            (_, _, _, BresenhamIntersection::Colinear(_)) => {
-                dbg!("Colinear second inside");
-            }
+            (_, BresenhamIntersection::Colinear(_), _, _, _, _) => {}
             // Start cap to any intersection is always inside
-            (LineType::StartCap, _, _, _) => {
-                dbg!("Inside start cap -> any");
-            }
-            // Left side -> right side line always results in intersection
-            (LineType::LeftSide, LineType::RightSide, _, _) => {
-                dbg!("Inside L -> R");
-            }
-            // Likewise with the opposite right -> left
-            (LineType::RightSide, LineType::LeftSide, _, _) => {
-                dbg!("Inside R -> L");
-            }
+            (_, _, _, _, LineType::StartCap, _) => {}
             // Final line is always inside shape if it hits end cap
-            (_, LineType::EndCap, _, _) => {
-                dbg!("Inside any -> end cap");
-            }
+            (_, _, _, _, _, LineType::EndCap) => {}
+            // Left side -> right side line always results in intersection
+            (_, _, _, _, LineType::LeftSide, LineType::RightSide) => {}
+            // Likewise with the opposite right -> left
+            (_, _, _, _, LineType::RightSide, LineType::LeftSide) => {}
+            // Left side but pyramid shape is inside
+            (_, _, l1, l2, LineType::LeftSide, LineType::LeftSide) if l1 == -1 && l2 == 1 => {}
+            // Right side but pyramid shape is inside
+            (_, _, l1, l2, LineType::RightSide, LineType::RightSide) if l1 == 1 && l2 == -1 => {}
             _ => {
-                // dbg!("Not  dere");
                 return self.next();
             }
         }
 
         Some(Line::new(l1.start, l2.end))
-
-        // dbg!(l1, l2);
-
-        // if l1 != l2 {
-        //     self.prev_line = Some(l1);
-
-        //     Some(l1)
-        // }
-        // // Ignores first line - the next one is longer and better
-        // else if l1.start == l2.start && l2.end > l1.end {
-        //     Some(l2)
-        // }
-        // // Also ignore first line? idk why
-        // else {
-        //     Some(l2)
-        // }
     }
 }

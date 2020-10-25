@@ -408,13 +408,9 @@ impl Line {
         delta.length_squared() as u32
     }
 
-    /// Get the approximate slope of the line.
-    ///
-    /// This uses integer division, so should not be relied on for mathematically accurate slopes.
-    pub fn slope(&self) -> i32 {
-        (self.end.y - self.start.y)
-            .checked_div(self.end.x - self.start.x)
-            .unwrap_or(0)
+    /// Y-direction of line, -1, 0 or 1
+    pub fn sign_y(&self) -> i32 {
+        (self.end.y - self.start.y).signum()
     }
 }
 

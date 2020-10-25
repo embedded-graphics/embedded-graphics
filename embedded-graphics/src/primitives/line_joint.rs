@@ -22,6 +22,9 @@ pub enum JointKind {
 
         /// Line filling the outside of the bevel.
         filler_line: Line,
+
+        /// Left side or right side?
+        side: Side,
     },
 
     /// Degenerate (angle between lines is too small to properly render stroke).
@@ -33,6 +36,9 @@ pub enum JointKind {
 
         /// Line filling the outside of the bevel.
         filler_line: Line,
+
+        /// Left side or right side?
+        side: Side,
     },
 
     /// Essentially no joint (both lines are colinear)
@@ -214,6 +220,7 @@ impl LineJoint {
                                     first_edge_right.end,
                                     second_edge_right.start,
                                 ),
+                                side: outer_side,
                             },
                             first_edge_end: EdgeCorners {
                                 left: l_intersection,
@@ -233,6 +240,7 @@ impl LineJoint {
                                     r_intersection,
                                 ),
                                 filler_line: Line::new(first_edge_left.end, second_edge_left.start),
+                                side: outer_side,
                             },
                             first_edge_end: EdgeCorners {
                                 left: first_edge_left.end,
@@ -257,6 +265,7 @@ impl LineJoint {
                                 second_edge_left.start,
                             ),
                             filler_line: Line::new(first_edge_left.end, second_edge_left.start),
+                            side: outer_side,
                         },
                         Side::Right => JointKind::Degenerate {
                             filler_triangle: Triangle::new(
@@ -265,6 +274,7 @@ impl LineJoint {
                                 second_edge_right.start,
                             ),
                             filler_line: Line::new(first_edge_right.end, second_edge_right.start),
+                            side: outer_side,
                         },
                     },
                     first_edge_end: EdgeCorners {

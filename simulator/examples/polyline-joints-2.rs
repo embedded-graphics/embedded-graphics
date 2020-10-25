@@ -62,26 +62,27 @@ fn draw(
         mouse_pos.y_axis() + display.size().x_axis(),
     );
 
-    // Polyline::new(points)
-    //     .into_styled(
-    //         PrimitiveStyleBuilder::new()
-    //             .stroke_width(width)
-    //             .stroke_alignment(alignment)
-    //             .stroke_color(Rgb888::RED)
-    //             .build(),
-    //     )
-    //     .draw(display)?;
+    Polyline::new(points)
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(width)
+                .stroke_alignment(alignment)
+                .stroke_color(Rgb888::RED)
+                .build(),
+        )
+        .draw(display)?;
 
     // Scanline
     scanline
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(display)?;
 
-    let mut lines = LineJointsIter::new(points, width, alignment);
+    let lines = LineJointsIter::new(points, width, alignment);
 
     // Draw polyline skeleton
-    lines.enumerate().try_for_each(|(idx, (line, _))| {
+    lines.enumerate().try_for_each(|(_idx, (line, _))| {
         // Text::new(&format!("{}", idx), line.start)
+        // Text::new(&format!("{}", line.sign_y()), line.start)
         //     .into_styled(
         //         TextStyleBuilder::new(Font6x8)
         //             .text_color(Rgb888::WHITE)
@@ -99,7 +100,7 @@ fn draw(
         .draw(display)
     })?;
 
-    let mut intersections = ScanlineIntersections::new(points, width, alignment, scanline.start.y);
+    let intersections = ScanlineIntersections::new(points, width, alignment, scanline.start.y);
 
     intersections.enumerate().try_for_each(|(idx, line)| {
         // Pixel(
@@ -130,13 +131,13 @@ fn draw(
             )
             .draw(display)?;
 
-        Text::new(&format!("{}", idx), marker.start)
-            .into_styled(
-                TextStyleBuilder::new(Font6x8)
-                    .text_color(Rgb888::WHITE)
-                    .build(),
-            )
-            .draw(display)?;
+        // Text::new(&format!("{}", idx), marker.start)
+        //     .into_styled(
+        //         TextStyleBuilder::new(Font6x8)
+        //             .text_color(Rgb888::WHITE)
+        //             .build(),
+        //     )
+        //     .draw(display)?;
 
         line.into_styled(
             PrimitiveStyleBuilder::new()
@@ -185,7 +186,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         .build();
     let mut window = Window::new("Polyline joints debugger", &output_settings);
 
-    let mut end_point = Point::new(82, 110);
+    let mut end_point = Point::new(363, 39);
 
     let mut width = 15u32;
     let mut alignment = StrokeAlignment::Center;

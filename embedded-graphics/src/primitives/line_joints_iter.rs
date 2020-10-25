@@ -6,6 +6,8 @@ use crate::{
     style::StrokeAlignment,
 };
 
+use super::line::Side;
+
 #[derive(Debug, Copy, Clone)]
 enum State {
     StartEdge,
@@ -64,7 +66,7 @@ impl<'a> LineJointsIter<'a> {
                 width,
                 alignment,
                 points,
-                swap_sides: Line::new(*start, *mid).slope() < 0,
+                swap_sides: Line::new(*start, *mid).sign_y() < 0,
             }
         } else if let [start, end] = points {
             // Single line segment.
@@ -79,7 +81,7 @@ impl<'a> LineJointsIter<'a> {
                 width,
                 alignment,
                 points,
-                swap_sides: Line::new(*start, *end).slope() < 0,
+                swap_sides: Line::new(*start, *end).sign_y() < 0,
             }
         } else {
             // Points must be at least 2 in length to make a polyline iterator out of.
@@ -169,10 +171,18 @@ impl<'a> Iterator for LineJointsIter<'a> {
                 self.state = State::NextSegment;
 
                 match self.end_joint.kind {
-                    JointKind::Bevel { filler_line, .. }
-                    | JointKind::Degenerate { filler_line, .. } => {
-                        Some((filler_line, LineType::Bevel))
+                    JointKind::Bevel {
+                        filler_line, side, ..
                     }
+                    | JointKind::Degenerate {
+                        filler_line, side, ..
+                    } => Some((
+                        filler_line,
+                        match side {
+                            Side::Left => LineType::LeftSide,
+                            Side::Right => LineType::RightSide,
+                        },
+                    )),
                     _ => None,
                 }
             }
@@ -187,13 +197,13 @@ impl<'a> Iterator for LineJointsIter<'a> {
                         self.start_joint.second_edge_start.left,
                         self.end_joint.first_edge_end.left,
                     )
-                    .slope()
+                    .sign_y()
                         > 0;
                 } else {
                     let start = *self.points.get(self.points.len() - 2)?;
                     let end = *self.points.last()?;
 
-                    self.swap_sides = Line::new(start, end).slope() > 0;
+                    self.swap_sides = Line::new(start, end).sign_y() > 0;
                     self.end_joint = LineJoint::end(start, end, self.width, self.alignment);
                 }
 
