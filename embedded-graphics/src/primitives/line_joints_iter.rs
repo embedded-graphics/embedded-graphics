@@ -47,7 +47,7 @@ pub struct LineJointsIter<'a> {
     width: u32,
     alignment: StrokeAlignment,
     points: &'a [Point],
-    swap_sides: bool,
+    right_side_first: bool,
 }
 
 static EMPTY: &[Point; 0] = &[];
@@ -61,6 +61,14 @@ impl<'a> LineJointsIter<'a> {
             let start_joint = LineJoint::start(*start, *mid, width, alignment);
             let end_joint = LineJoint::from_points(*start, *mid, *end, width, alignment);
 
+            let joiner = Line::new(
+                start_joint.second_edge_start.left,
+                end_joint.first_edge_end.left,
+            );
+
+            // dbg!(joiner, joiner.sign_y());
+            let dir = joiner.direction();
+
             Self {
                 state: State::StartEdge,
                 windows,
@@ -69,7 +77,11 @@ impl<'a> LineJointsIter<'a> {
                 width,
                 alignment,
                 points,
-                swap_sides: Line::new(*start, *mid).sign_y() < 0,
+                // TODO: Can I simplify this by sorting points and checking for a certain Y slope?
+                // right_side_first: dir == Point::new(1, -1) || dir == Point::new(-1, 1),
+                // right_side_first: joiner.sign_y() == 1,
+                // right_side_first: dir == Point::new(-1, -1) || dir == Point::new(1, 1),
+                right_side_first: false,
             }
         } else if let [start, end] = points {
             // Single line segment.
@@ -84,7 +96,7 @@ impl<'a> LineJointsIter<'a> {
                 width,
                 alignment,
                 points,
-                swap_sides: Line::new(*start, *end).sign_y() < 0,
+                right_side_first: Line::new(*start, *end).sign_y() < 0,
             }
         } else {
             // Points must be at least 2 in length to make a polyline iterator out of.
@@ -107,7 +119,7 @@ impl<'a> LineJointsIter<'a> {
             width: 0,
             alignment: StrokeAlignment::Center,
             points: EMPTY,
-            swap_sides: false,
+            right_side_first: false,
         }
     }
 }
@@ -118,7 +130,7 @@ impl<'a> Iterator for LineJointsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         match self.state {
             State::StartEdge => {
-                if !self.swap_sides {
+                if !self.right_side_first {
                     self.state = State::FirstEdgeL;
                 } else {
                     self.state = State::FirstEdgeR;
@@ -133,7 +145,7 @@ impl<'a> Iterator for LineJointsIter<'a> {
                 ))
             }
             State::FirstEdgeL => {
-                if !self.swap_sides {
+                if !self.right_side_first {
                     self.state = match self.end_joint.kind {
                         JointKind::End => State::EndEdge,
                         _ => State::FirstEdgeR,
@@ -155,7 +167,7 @@ impl<'a> Iterator for LineJointsIter<'a> {
                 ))
             }
             State::FirstEdgeR => {
-                if !self.swap_sides {
+                if !self.right_side_first {
                     self.state = match self.end_joint.kind {
                         JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
                         JointKind::End => State::Done,
@@ -202,7 +214,7 @@ impl<'a> Iterator for LineJointsIter<'a> {
                     self.end_joint =
                         LineJoint::from_points(*start, *mid, *end, self.width, self.alignment);
 
-                    self.swap_sides = Line::new(
+                    self.right_side_first = Line::new(
                         self.start_joint.second_edge_start.left,
                         self.end_joint.first_edge_end.left,
                     )
@@ -212,11 +224,11 @@ impl<'a> Iterator for LineJointsIter<'a> {
                     let start = *self.points.get(self.points.len() - 2)?;
                     let end = *self.points.last()?;
 
-                    self.swap_sides = Line::new(start, end).sign_y() > 0;
+                    self.right_side_first = Line::new(start, end).sign_y() > 0;
                     self.end_joint = LineJoint::end(start, end, self.width, self.alignment);
                 }
 
-                self.state = if !self.swap_sides {
+                self.state = if !self.right_side_first {
                     State::FirstEdgeL
                 } else {
                     State::FirstEdgeR
@@ -225,7 +237,7 @@ impl<'a> Iterator for LineJointsIter<'a> {
                 self.next()
             }
             State::EndEdge => {
-                if !self.swap_sides {
+                if !self.right_side_first {
                     self.state = State::FirstEdgeR;
                 } else {
                     self.state = State::FirstEdgeL;
@@ -241,7 +253,6 @@ impl<'a> Iterator for LineJointsIter<'a> {
             }
             State::Done => None,
         }
-        // TODO: Check if I can delete this forever
         // .map(|(l, s)| (l.sorted_x(), s))
     }
 }

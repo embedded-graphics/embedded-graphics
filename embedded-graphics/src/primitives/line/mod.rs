@@ -117,13 +117,16 @@ pub enum BresenhamIntersection {
 
     /// Multiple intersection points
     Line(Line),
+
+    /// Intersection lies on the start or end of the line
+    Vertex(Point),
 }
 
 impl BresenhamIntersection {
     /// Get the left-most point of the intersection.
     pub fn start_point(&self) -> Point {
         match self {
-            Self::Point(p) => *p,
+            Self::Point(p) | Self::Vertex(p) => *p,
             Self::Colinear(l) | Self::Line(l) => l.start,
         }
     }
@@ -131,7 +134,7 @@ impl BresenhamIntersection {
     /// Get the right-most point of the intersection.
     pub fn end_point(&self) -> Point {
         match self {
-            Self::Point(p) => *p,
+            Self::Point(p) | Self::Vertex(p) => *p,
             Self::Colinear(l) | Self::Line(l) => l.end,
         }
     }
@@ -139,9 +142,8 @@ impl BresenhamIntersection {
     /// As a line
     pub fn as_line(&self) -> Line {
         match self {
-            Self::Colinear(l) => *l,
-            Self::Line(l) => *l,
-            Self::Point(p) => Line::new(*p, *p),
+            Self::Colinear(l) | Self::Line(l) => *l,
+            Self::Point(p) | Self::Vertex(p) => Line::new(*p, *p),
         }
         .sorted_x()
     }
@@ -408,9 +410,19 @@ impl Line {
         delta.length_squared() as u32
     }
 
+    /// Slope (but not really)
+    pub fn direction(&self) -> Point {
+        Point::new(self.sign_x(), self.sign_y())
+    }
+
     /// Y-direction of line, -1, 0 or 1
     pub fn sign_y(&self) -> i32 {
-        (self.end.y - self.start.y).signum()
+        (self.start.y - self.end.y).signum()
+    }
+
+    /// X-direction of line, -1, 0 or 1
+    pub fn sign_x(&self) -> i32 {
+        (self.start.x - self.end.x).signum()
     }
 }
 

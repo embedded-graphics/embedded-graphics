@@ -57,50 +57,58 @@ fn draw(
 ) -> Result<(), core::convert::Infallible> {
     display.clear(Rgb888::BLACK)?;
 
+    let mut points = points.to_vec();
+    if let StrokeAlignment::Outside = alignment {
+        points.reverse();
+    }
+    let points = &points;
+
     let scanline = Line::new(
         mouse_pos.y_axis(),
         mouse_pos.y_axis() + display.size().x_axis(),
     );
 
-    Polyline::new(points)
-        .into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(width)
-                .stroke_alignment(alignment)
-                .stroke_color(Rgb888::RED)
-                .build(),
-        )
-        .draw(display)?;
+    let pl = Polyline::new(points).into_styled(
+        PrimitiveStyleBuilder::new()
+            .stroke_width(width)
+            // .stroke_alignment(alignment)
+            .stroke_color(Rgb888::RED)
+            .build(),
+    );
+
+    // pl.draw(display)?;
 
     // Scanline
     scanline
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(display)?;
 
-    let lines = LineJointsIter::new(points, width, alignment);
+    // let lines = LineJointsIter::new(points, width, alignment);
+    let lines = LineJointsIter::new(points, width, StrokeAlignment::Center);
 
     // Draw polyline skeleton
-    lines.enumerate().try_for_each(|(_idx, (line, _))| {
-        // Text::new(&format!("{}", idx), line.start)
-        // Text::new(&format!("{}", line.sign_y()), line.start)
-        //     .into_styled(
-        //         TextStyleBuilder::new(Font6x8)
-        //             .text_color(Rgb888::WHITE)
-        //             .build(),
-        //     )
-        //     .draw(display)?;
+    lines.enumerate().try_for_each(|(idx, (line, _))| {
+        Text::new(&format!("{}", idx), line.start)
+            // Text::new(&format!("{}", line.sign_y()), line.start)
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(Rgb888::WHITE)
+                    .build(),
+            )
+            .draw(display)?;
 
         line.into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(1)
-                .stroke_alignment(alignment)
+                // .stroke_alignment(alignment)
                 .stroke_color(Rgb888::CYAN)
                 .build(),
         )
         .draw(display)
     })?;
 
-    let intersections = ScanlineIntersections::new(points, width, alignment, scanline.start.y);
+    let intersections =
+        ScanlineIntersections::new(points, width, StrokeAlignment::Center, scanline.start.y);
 
     intersections.enumerate().try_for_each(|(idx, line)| {
         // Pixel(
@@ -131,18 +139,18 @@ fn draw(
             )
             .draw(display)?;
 
-        // Text::new(&format!("{}", idx), marker.start)
-        //     .into_styled(
-        //         TextStyleBuilder::new(Font6x8)
-        //             .text_color(Rgb888::WHITE)
-        //             .build(),
-        //     )
-        //     .draw(display)?;
+        Text::new(&format!("{}", idx), marker.start - Point::new(0, 8))
+            .into_styled(
+                TextStyleBuilder::new(Font6x8)
+                    .text_color(Rgb888::MAGENTA)
+                    .build(),
+            )
+            .draw(display)?;
 
         line.into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(1)
-                .stroke_alignment(alignment)
+                // .stroke_alignment(alignment)
                 // .stroke_color(match state {
                 //     State::Outside => Rgb888::YELLOW,
                 //     State::Inside => Rgb888::RED,
@@ -165,6 +173,10 @@ fn draw(
     .draw(display)?;
 
     crosshair(mouse_pos, Rgb888::WHITE, display)?;
+
+    // pl.bounding_box()
+    //     .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
+    //     .draw(display)?;
 
     Ok(())
 }
@@ -236,7 +248,8 @@ fn main() -> Result<(), core::convert::Infallible> {
                     Keycode::Space => {
                         alignment = match alignment {
                             StrokeAlignment::Center => StrokeAlignment::Outside,
-                            StrokeAlignment::Outside => StrokeAlignment::Inside,
+                            StrokeAlignment::Outside => StrokeAlignment::Center,
+                            // StrokeAlignment::Outside => StrokeAlignment::Inside,
                             StrokeAlignment::Inside => StrokeAlignment::Center,
                         }
                     }
