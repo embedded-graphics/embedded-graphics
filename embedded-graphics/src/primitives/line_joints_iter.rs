@@ -34,7 +34,10 @@ pub enum LineType {
     EndCap,
 }
 
-/// Line joints iter
+/// Line joints iter.
+///
+/// Iterates over all line segments that make up the closed boundary polygon of a thick polyline.
+/// Lines must be returned in increasing X order so that scanline intersections work correctly.
 #[derive(Clone, Debug)]
 pub struct LineJointsIter<'a> {
     windows: core::slice::Windows<'a, Point>,
@@ -131,11 +134,14 @@ impl<'a> Iterator for LineJointsIter<'a> {
             }
             State::FirstEdgeL => {
                 if !self.swap_sides {
-                    self.state = State::FirstEdgeR;
+                    self.state = match self.end_joint.kind {
+                        JointKind::End => State::EndEdge,
+                        _ => State::FirstEdgeR,
+                    };
                 } else {
                     self.state = match self.end_joint.kind {
                         JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
-                        JointKind::End => State::EndEdge,
+                        JointKind::End => State::Done,
                         _ => State::NextSegment,
                     };
                 }
@@ -152,11 +158,14 @@ impl<'a> Iterator for LineJointsIter<'a> {
                 if !self.swap_sides {
                     self.state = match self.end_joint.kind {
                         JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
-                        JointKind::End => State::EndEdge,
+                        JointKind::End => State::Done,
                         _ => State::NextSegment,
                     };
                 } else {
-                    self.state = State::FirstEdgeL;
+                    self.state = match self.end_joint.kind {
+                        JointKind::End => State::EndEdge,
+                        _ => State::FirstEdgeL,
+                    };
                 }
 
                 Some((
@@ -216,7 +225,11 @@ impl<'a> Iterator for LineJointsIter<'a> {
                 self.next()
             }
             State::EndEdge => {
-                self.state = State::Done;
+                if !self.swap_sides {
+                    self.state = State::FirstEdgeR;
+                } else {
+                    self.state = State::FirstEdgeL;
+                }
 
                 Some((
                     Line::new(
