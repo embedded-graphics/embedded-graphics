@@ -97,10 +97,14 @@ generate-readme crate: (_build-readme crate)
 
 # Generate README.md for all crates
 generate-readmes:
+    #!/usr/bin/env bash
+    set -e
     for crate in {{crates}}; do just generate-readme $crate; done
 
 # Checks README.md for all crates
 check-readmes:
+    #!/usr/bin/env bash
+    set -e
     for crate in {{crates}}; do just check-readme $crate; done
 
 # Builds README.md for a single crate
@@ -151,6 +155,8 @@ generate-example-screenshot example:
 
 # Generates screenshots of all examples
 @generate-example-screenshots:
+    #!/usr/bin/env bash
+    set -e
     for example in simulator/examples/*.rs; do \
         just generate-example-screenshot $(basename "$example" .rs); \
     done
