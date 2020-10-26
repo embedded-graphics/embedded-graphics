@@ -41,45 +41,23 @@ impl ThickSegment {
     pub fn intersection(&self, scanline_y: i32) -> Option<Line> {
         // TODO: Broad phase bounding box collision detection
 
-        let mut it = Segments::new(self.start_joint, self.end_joint).filter_map(|l| {
+        let it = Segments::new(self.start_joint, self.end_joint).filter_map(|l| {
             l.bresenham_scanline_intersection(scanline_y)
-                .map(|(intersection, base_line)| intersection.as_line().sorted_x())
+                .map(|(intersection, _)| intersection.as_line().sorted_x())
         });
 
-        let start = it.next()?;
-        let end = it.next()?;
+        let line = it.fold(None, |acc: Option<Line>, line| {
+            if let Some(acc) = acc {
+                Some(Line::new(
+                    acc.start.component_min(line.start),
+                    acc.end.component_max(line.end),
+                ))
+            } else {
+                Some(line)
+            }
+        })?;
 
-        Some(Line::new(start.start, end.end).sorted_x())
-
-        // let (first, base) = it.next()?;
-
-        // // Colinear
-        // if first == base {
-        //     return Some(SegmentIntersection::Closed(first));
-        // }
-
-        // // // On vertex
-        // // if first.start == base.start
-        // //     || first.start == base.end
-        // //     || first.end == base.start
-        // //     || first.end == base.end
-        // // {
-        // //     return Some(SegmentIntersection::Closed(first));
-        // // }
-
-        // // Second intersection as long as it doesn't lie on the same point (e.g. at nodes).
-        // let second = it.next()/*.filter(|second| *second != first)*/;
-
-        // let res = if let Some((second, _)) = second {
-        //     let line = Line::new(first.start, second.end).sorted_x();
-
-        //     SegmentIntersection::Closed(line)
-        // } else {
-        //     // FIXME: What about when this is a line?
-        //     SegmentIntersection::Open(first)
-        // };
-
-        // Some(res)
+        Some(line)
     }
 }
 

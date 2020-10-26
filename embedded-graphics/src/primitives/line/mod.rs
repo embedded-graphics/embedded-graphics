@@ -241,6 +241,11 @@ impl Line {
         Self::new(start, end)
     }
 
+    /// Get the midpoint of the line.
+    pub fn midpoint(&self) -> Point {
+        self.start + (self.end - self.start) / 2
+    }
+
     const fn coefficients(&self, other: &Self) -> (i32, i32, i32, i32, i32, i32, i32) {
         let Point { x: x1, y: y1 } = self.start;
         let Point { x: x2, y: y2 } = self.end;
