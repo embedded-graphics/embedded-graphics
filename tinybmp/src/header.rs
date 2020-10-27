@@ -3,6 +3,7 @@
 //! Information gleaned from [wikipedia](https://en.wikipedia.org/wiki/BMP_file_format) and
 //! [this website](http://paulbourke.net/dataformats/bmp/)
 
+use embedded_graphics::prelude::*;
 use nom::{
     bytes::complete::tag,
     combinator::map_opt,
@@ -63,11 +64,8 @@ pub struct Header {
     /// Byte offset from beginning of file at which pixel data begins
     pub image_data_start: usize,
 
-    /// Image width in pixels
-    pub image_width: u32,
-
-    /// Image height in pixels
-    pub image_height: u32,
+    /// Image size in pixels
+    pub image_size: Size,
 
     /// Number of bits per pixel
     pub bpp: Bpp,
@@ -76,29 +74,30 @@ pub struct Header {
     pub image_data_len: u32,
 }
 
-pub fn parse_header(input: &[u8]) -> IResult<&[u8], Header> {
-    let (input, _) = tag("BM")(input)?;
-    let (input, file_size) = le_u32(input)?;
-    let (input, _reserved_1) = le_u16(input)?;
-    let (input, _reserved_2) = le_u16(input)?;
-    let (input, image_data_start) = le_u32(input)?;
-    let (input, _header_size) = le_u32(input)?;
-    let (input, image_width) = le_u32(input)?;
-    let (input, image_height) = le_u32(input)?;
-    let (input, _color_planes) = le_u16(input)?;
-    let (input, bpp) = Bpp::parse(input)?;
-    let (input, _compression_method) = le_u32(input)?;
-    let (input, image_data_len) = le_u32(input)?;
+impl Header {
+    pub(crate) fn parse(input: &[u8]) -> IResult<&[u8], Header> {
+        let (input, _) = tag("BM")(input)?;
+        let (input, file_size) = le_u32(input)?;
+        let (input, _reserved_1) = le_u16(input)?;
+        let (input, _reserved_2) = le_u16(input)?;
+        let (input, image_data_start) = le_u32(input)?;
+        let (input, _header_size) = le_u32(input)?;
+        let (input, image_width) = le_u32(input)?;
+        let (input, image_height) = le_u32(input)?;
+        let (input, _color_planes) = le_u16(input)?;
+        let (input, bpp) = Bpp::parse(input)?;
+        let (input, _compression_method) = le_u32(input)?;
+        let (input, image_data_len) = le_u32(input)?;
 
-    Ok((
-        input,
-        Header {
-            file_size,
-            image_data_start: image_data_start as usize,
-            image_width,
-            image_height,
-            image_data_len,
-            bpp,
-        },
-    ))
+        Ok((
+            input,
+            Header {
+                file_size,
+                image_data_start: image_data_start as usize,
+                image_size: Size::new(image_width, image_height),
+                image_data_len,
+                bpp,
+            },
+        ))
+    }
 }

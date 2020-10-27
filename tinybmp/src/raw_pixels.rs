@@ -1,13 +1,14 @@
-use crate::{Bmp, Bpp};
 use embedded_graphics::prelude::*;
+
+use crate::{header::Bpp, raw_bmp::RawBmp};
 
 /// Iterator over individual BMP pixels.
 ///
 /// Each pixel is returned as a `u32` regardless of the bit depth of the source image.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct RawPixels<'a, 'b, C> {
+pub struct RawPixels<'a, 'b> {
     /// Reference to original BMP image.
-    bmp: &'a Bmp<'b, C>,
+    raw_bmp: &'a RawBmp<'b>,
 
     /// Image pixel data as a byte slice, little endian ordering.
     pixel_data: &'b [u8],
@@ -21,36 +22,36 @@ pub struct RawPixels<'a, 'b, C> {
     bit_idx: usize,
 }
 
-impl<'a, 'b, C> RawPixels<'a, 'b, C> {
-    pub(crate) fn new(bmp: &'a Bmp<'b, C>) -> Self {
+impl<'a, 'b> RawPixels<'a, 'b> {
+    pub(crate) fn new(raw_bmp: &'a RawBmp<'b>) -> Self {
         Self {
-            bmp,
-            pixel_data: bmp.image_data,
+            raw_bmp,
+            pixel_data: raw_bmp.image_data(),
             position: Point::zero(),
             bit_idx: 0,
         }
     }
 }
 
-impl<C> Iterator for RawPixels<'_, '_, C> {
+impl Iterator for RawPixels<'_, '_> {
     type Item = RawPixel;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.position.y >= self.bmp.header.image_height as i32 {
+        if self.position.y >= self.raw_bmp.size().height as i32 {
             return None;
         }
 
         let p = self.position;
 
         if self.position.x == 0 {
-            let row_index = (self.bmp.header.image_height as i32 - 1) - self.position.y;
-            let row_start = self.bmp.bytes_per_row() * row_index as usize;
+            let row_index = (self.raw_bmp.size().height as i32 - 1) - self.position.y;
+            let row_start = self.raw_bmp.bytes_per_row() * row_index as usize;
 
             self.bit_idx = row_start * 8;
         }
 
         self.position.x += 1;
-        if self.position.x >= self.bmp.header.image_width as i32 {
+        if self.position.x >= self.raw_bmp.size().width as i32 {
             self.position.y += 1;
             self.position.x = 0;
         }
@@ -59,7 +60,7 @@ impl<C> Iterator for RawPixels<'_, '_, C> {
 
         let mut pixel_value = [0u8; 4];
 
-        match self.bmp.color_bpp() {
+        match self.raw_bmp.color_bpp() {
             Bpp::Bits1 => self.pixel_data.get(byte_idx).map(|byte| {
                 let mask = 0b_1000_0000 >> self.bit_idx % 8;
                 pixel_value[0] = (byte & mask != 0) as u8;
@@ -79,7 +80,7 @@ impl<C> Iterator for RawPixels<'_, '_, C> {
             }),
         };
 
-        self.bit_idx += usize::from(self.bmp.color_bpp().bits());
+        self.bit_idx += usize::from(self.raw_bmp.color_bpp().bits());
 
         Some(RawPixel::new(p, u32::from_le_bytes(pixel_value)))
     }
