@@ -90,7 +90,9 @@ pub struct LineJoint {
 }
 
 impl LineJoint {
-    /// Create a starting joint
+    /// Create a starting joint.
+    ///
+    /// `first_edge_end` and `second_edge_start` are set to the same points.
     pub fn start(start: Point, mid: Point, width: u32, alignment: StrokeAlignment) -> Self {
         let line = Line::new(start, mid);
 
@@ -108,7 +110,9 @@ impl LineJoint {
         }
     }
 
-    /// Create an ending joint
+    /// Create an ending joint.
+    ///
+    /// `first_edge_end` and `second_edge_start` are set to the same points.
     pub fn end(mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Self {
         let line = Line::new(mid, end);
 
@@ -302,6 +306,34 @@ impl LineJoint {
                 },
             }
         }
+    }
+
+    fn cap(&self, cap: &EdgeCorners) -> [Option<Line>; 2] {
+        let midpoint = match self.kind {
+            JointKind::Bevel { filler_line, .. } | JointKind::Degenerate { filler_line, .. } => {
+                filler_line.midpoint()
+            }
+            _ => return [Line::new(cap.left, cap.right).into(), None],
+        };
+
+        let l1 = Line::new(cap.left, midpoint);
+        let l2 = Line::new(midpoint, cap.right);
+
+        [l1.into(), l2.into()]
+    }
+
+    /// Start node bevel line(s).
+    ///
+    /// If the joint is a bevel joint, this will return two lines, otherwise one.
+    pub fn start_cap_lines(&self) -> [Option<Line>; 2] {
+        self.cap(&self.second_edge_start)
+    }
+
+    /// End node bevel line(s).
+    ///
+    /// If the joint is a bevel joint, this will return two lines, otherwise one.
+    pub fn end_cap_lines(&self) -> [Option<Line>; 2] {
+        self.cap(&self.first_edge_end)
     }
 
     /// Check whether the joint is degenerate (where the end edge of one line intersects the edge

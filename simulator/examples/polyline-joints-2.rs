@@ -5,6 +5,8 @@ use embedded_graphics::{
     primitives::line_joint::{EdgeCorners, LineJoint},
     primitives::line_joints_iter::LineJointsIter,
     primitives::polyline::ScanlineIntersections,
+    // primitives::thick_segment::Segments,
+    primitives::thick_segment::ThickSegment,
     primitives::triangle::MathematicalPoints,
     primitives::Line,
     primitives::*,
@@ -67,6 +69,7 @@ fn draw(
         mouse_pos.y_axis(),
         mouse_pos.y_axis() + display.size().x_axis(),
     );
+    let scanline_y = scanline.start.y;
 
     let pl = Polyline::new(points).into_styled(
         PrimitiveStyleBuilder::new()
@@ -76,18 +79,62 @@ fn draw(
             .build(),
     );
 
-    // pl.draw(display)?;
+    pl.draw(display)?;
+
+    // let joints = tmp
+    //     .windows(3)
+    //     .enumerate()
+    //     .map(|(idx, items)| {
+    //         if let [start, mid, end] = items {
+    //             if idx == 0 {
+    //                 LineJoint::start(*start, *mid, width, StrokeAlignment::Center)
+    //             } else {
+    //                 LineJoint::from_points(*start, *mid, *end, width, StrokeAlignment::Center)
+    //             }
+    //         } else {
+    //             unreachable!()
+    //         }
+    //     })
+    //     .collect::<Vec<LineJoint>>();
+
+    // let mut joints = joints.windows(2).skip(1).take(1);
+
+    // while let Some([start_joint, end_joint]) = joints.next() {
+    //     // let start_joint = LineJoint::start(*start, *mid, width, StrokeAlignment::Center);
+    //     // let end_joint = LineJoint::from_points(*start, *mid, *end, width, StrokeAlignment::Center);
+    //     dbg!(start_joint, end_joint);
+    //     Segments::new(*start_joint, *end_joint)
+    //         .enumerate()
+    //         .try_for_each(|(idx, segment)| {
+    //             Text::new(&format!("{}", idx), segment.start - Point::new(0, 8))
+    //                 .into_styled(
+    //                     TextStyleBuilder::new(Font6x8)
+    //                         .text_color(Rgb888::MAGENTA)
+    //                         .build(),
+    //                 )
+    //                 .draw(display)?;
+
+    //             segment
+    //                 .into_styled(
+    //                     PrimitiveStyleBuilder::new()
+    //                         .stroke_width(1)
+    //                         // .stroke_alignment(alignment)
+    //                         .stroke_color(Rgb888::RED)
+    //                         .build(),
+    //                 )
+    //                 .draw(display)
+    //         })?;
+    // }
 
     // Scanline
     scanline
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(display)?;
 
-    // let lines = LineJointsIter::new(points, width, alignment);
     let lines = LineJointsIter::new(points, width, StrokeAlignment::Center);
 
     // Draw polyline skeleton
-    lines.enumerate().try_for_each(|(idx, (line, _))| {
+    lines.enumerate().try_for_each(|(idx, line)| {
         Text::new(&format!("{}", idx), line.start)
             // Text::new(&format!("{}", line.sign_y()), line.start)
             .into_styled(
@@ -101,7 +148,7 @@ fn draw(
             PrimitiveStyleBuilder::new()
                 .stroke_width(1)
                 // .stroke_alignment(alignment)
-                .stroke_color(Rgb888::CYAN)
+                .stroke_color(Rgb888::MAGENTA)
                 .build(),
         )
         .draw(display)
@@ -139,13 +186,13 @@ fn draw(
             )
             .draw(display)?;
 
-        Text::new(&format!("{}", idx), marker.start - Point::new(0, 8))
-            .into_styled(
-                TextStyleBuilder::new(Font6x8)
-                    .text_color(Rgb888::MAGENTA)
-                    .build(),
-            )
-            .draw(display)?;
+        // Text::new(&format!("{}", idx), marker.start - Point::new(0, 8))
+        //     .into_styled(
+        //         TextStyleBuilder::new(Font6x8)
+        //             .text_color(Rgb888::MAGENTA)
+        //             .build(),
+        //     )
+        //     .draw(display)?;
 
         line.into_styled(
             PrimitiveStyleBuilder::new()
@@ -217,6 +264,7 @@ fn main() -> Result<(), core::convert::Infallible> {
         Point::new(240, h / 2),
         Point::new(w - PADDING, h / 2),
         end_point,
+        // Point::new(w + 100, h / 2),
     ];
 
     let mut num_points = points.len();
@@ -258,13 +306,14 @@ fn main() -> Result<(), core::convert::Infallible> {
                 SimulatorEvent::MouseButtonUp { .. } => mouse_down = false,
                 SimulatorEvent::MouseMove { point, .. } => {
                     if mouse_down {
-                        end_point = point;
+                        *points.get_mut(10).unwrap() = end_point;
                     }
+                    end_point = point;
                 }
                 _ => {}
             }
 
-            *points.last_mut().unwrap() = end_point;
+            // *points.get_mut(10).unwrap() = end_point;
 
             draw(
                 &points[0..num_points],

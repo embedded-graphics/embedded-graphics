@@ -10,12 +10,13 @@ use super::line::Side;
 
 #[derive(Debug, Copy, Clone)]
 enum State {
-    StartEdge,
-    FirstEdgeL,
-    FirstEdgeR,
-    Bevel,
+    StartEdge1,
+    StartEdge2,
+    RightEdge,
+    EndEdge1,
+    EndEdge2,
+    LeftEdge,
     NextSegment,
-    EndEdge,
     Done,
 }
 
@@ -70,7 +71,7 @@ impl<'a> LineJointsIter<'a> {
             let dir = joiner.direction();
 
             Self {
-                state: State::StartEdge,
+                state: State::StartEdge1,
                 windows,
                 start_joint,
                 end_joint,
@@ -89,7 +90,7 @@ impl<'a> LineJointsIter<'a> {
             let end_joint = LineJoint::end(*start, *end, width, alignment);
 
             Self {
-                state: State::StartEdge,
+                state: State::StartEdge1,
                 windows: EMPTY.windows(3),
                 start_joint,
                 end_joint,
@@ -125,134 +126,123 @@ impl<'a> LineJointsIter<'a> {
 }
 
 impl<'a> Iterator for LineJointsIter<'a> {
-    type Item = (Line, LineType);
+    type Item = Line;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.state {
-            State::StartEdge => {
-                if !self.right_side_first {
-                    self.state = State::FirstEdgeL;
-                } else {
-                    self.state = State::FirstEdgeR;
-                }
+            State::StartEdge1 => {
+                let start = self.start_joint.second_edge_start.left;
 
-                Some((
-                    Line::new(
-                        self.start_joint.first_edge_end.left,
-                        self.start_joint.first_edge_end.right,
-                    ),
-                    LineType::StartCap,
-                ))
-            }
-            State::FirstEdgeL => {
-                if !self.right_side_first {
-                    self.state = match self.end_joint.kind {
-                        JointKind::End => State::EndEdge,
-                        _ => State::FirstEdgeR,
-                    };
-                } else {
-                    self.state = match self.end_joint.kind {
-                        JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
-                        JointKind::End => State::Done,
-                        _ => State::NextSegment,
-                    };
-                }
+                let end = match self.start_joint.kind {
+                    JointKind::Bevel { filler_line, .. }
+                    | JointKind::Degenerate { filler_line, .. } => {
+                        self.state = State::StartEdge2;
 
-                Some((
-                    Line::new(
-                        self.start_joint.second_edge_start.left,
-                        self.end_joint.first_edge_end.left,
-                    ),
-                    LineType::LeftSide,
-                ))
-            }
-            State::FirstEdgeR => {
-                if !self.right_side_first {
-                    self.state = match self.end_joint.kind {
-                        JointKind::Bevel { .. } | JointKind::Degenerate { .. } => State::Bevel,
-                        JointKind::End => State::Done,
-                        _ => State::NextSegment,
-                    };
-                } else {
-                    self.state = match self.end_joint.kind {
-                        JointKind::End => State::EndEdge,
-                        _ => State::FirstEdgeL,
-                    };
-                }
-
-                Some((
-                    Line::new(
-                        self.start_joint.second_edge_start.right,
-                        self.end_joint.first_edge_end.right,
-                    ),
-                    LineType::RightSide,
-                ))
-            }
-            State::Bevel => {
-                self.state = State::NextSegment;
-
-                match self.end_joint.kind {
-                    JointKind::Bevel {
-                        filler_line, side, ..
+                        filler_line.midpoint()
                     }
-                    | JointKind::Degenerate {
-                        filler_line, side, ..
-                    } => Some((
-                        filler_line,
-                        match side {
-                            Side::Left => LineType::LeftSide,
-                            Side::Right => LineType::RightSide,
-                        },
-                    )),
-                    _ => None,
-                }
+                    _ => {
+                        self.state = State::RightEdge;
+
+                        self.start_joint.second_edge_start.right
+                    }
+                };
+
+                Some(Line::new(start, end))
+            }
+            State::StartEdge2 => {
+                let start = match self.start_joint.kind {
+                    JointKind::Bevel { filler_line, .. }
+                    | JointKind::Degenerate { filler_line, .. } => {
+                        self.state = State::RightEdge;
+
+                        filler_line.midpoint()
+                    }
+                    _ => unreachable!(
+                        "StartEdge2: Bevelled end caps always comprise two line segments."
+                    ),
+                };
+
+                let end = self.start_joint.second_edge_start.right;
+
+                Some(Line::new(start, end))
+            }
+            State::RightEdge => {
+                self.state = State::EndEdge1;
+
+                let start = self.start_joint.second_edge_start.right;
+                let end = self.end_joint.first_edge_end.right;
+
+                Some(Line::new(start, end))
+            }
+            State::EndEdge1 => {
+                let start = self.end_joint.first_edge_end.right;
+
+                let end = match self.end_joint.kind {
+                    JointKind::Bevel { filler_line, .. }
+                    | JointKind::Degenerate { filler_line, .. } => {
+                        self.state = State::EndEdge2;
+
+                        filler_line.midpoint()
+                    }
+                    _ => {
+                        self.state = State::LeftEdge;
+
+                        self.end_joint.first_edge_end.left
+                    }
+                };
+
+                Some(Line::new(start, end))
+            }
+            State::EndEdge2 => {
+                let start = match self.end_joint.kind {
+                    JointKind::Bevel { filler_line, .. }
+                    | JointKind::Degenerate { filler_line, .. } => {
+                        self.state = State::LeftEdge;
+
+                        filler_line.midpoint()
+                    }
+                    _ => unreachable!(
+                        "EndEdge2: Bevelled end caps always comprise two line segments."
+                    ),
+                };
+
+                let end = self.end_joint.first_edge_end.left;
+
+                Some(Line::new(start, end))
+            }
+            State::LeftEdge => {
+                self.state = match self.end_joint.kind {
+                    JointKind::End => State::Done,
+                    _ => State::NextSegment,
+                };
+
+                let start = self.end_joint.first_edge_end.left;
+                let end = self.start_joint.second_edge_start.left;
+
+                Some(Line::new(start, end))
             }
             State::NextSegment => {
                 self.start_joint = self.end_joint;
 
                 if let Some([start, mid, end]) = self.windows.next() {
+                    self.state = State::StartEdge1;
+
                     self.end_joint =
                         LineJoint::from_points(*start, *mid, *end, self.width, self.alignment);
+                } else if self.end_joint.kind != JointKind::End {
+                    self.state = State::StartEdge1;
 
-                    self.right_side_first = Line::new(
-                        self.start_joint.second_edge_start.left,
-                        self.end_joint.first_edge_end.left,
-                    )
-                    .sign_y()
-                        > 0;
-                } else {
                     let start = *self.points.get(self.points.len() - 2)?;
                     let end = *self.points.last()?;
 
-                    self.right_side_first = Line::new(start, end).sign_y() > 0;
                     self.end_joint = LineJoint::end(start, end, self.width, self.alignment);
-                }
-
-                self.state = if !self.right_side_first {
-                    State::FirstEdgeL
                 } else {
-                    State::FirstEdgeR
-                };
+                    self.state = State::Done;
+                }
 
                 self.next()
             }
-            State::EndEdge => {
-                if !self.right_side_first {
-                    self.state = State::FirstEdgeR;
-                } else {
-                    self.state = State::FirstEdgeL;
-                }
-
-                Some((
-                    Line::new(
-                        self.end_joint.second_edge_start.left,
-                        self.end_joint.second_edge_start.right,
-                    ),
-                    LineType::EndCap,
-                ))
-            }
             State::Done => None,
         }
-        // .map(|(l, s)| (l.sorted_x(), s))
     }
 }

@@ -133,7 +133,7 @@ where
                     Point::new_equal(core::i32::MAX),
                     Point::new_equal(core::i32::MIN),
                 ),
-                |(min, max), (line, _)| {
+                |(min, max), line| {
                     let bb = line.bounding_box();
 
                     (

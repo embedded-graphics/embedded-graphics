@@ -4,7 +4,7 @@ use crate::{
     geometry::Point,
     primitives::{
         line::BresenhamIntersection, line_joint::JointKind, line_joint::LineJoint,
-        thick_segment::SegmentIntersection, thick_segment::ThickSegment, Line,
+        thick_segment::ThickSegment, Line,
     },
     style::StrokeAlignment,
 };
