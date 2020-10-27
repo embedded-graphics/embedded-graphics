@@ -79,7 +79,7 @@ fn draw(
             .build(),
     );
 
-    pl.draw(display)?;
+    // pl.draw(display)?;
 
     // let joints = tmp
     //     .windows(3)
@@ -135,14 +135,14 @@ fn draw(
 
     // Draw polyline skeleton
     lines.enumerate().try_for_each(|(idx, line)| {
-        Text::new(&format!("{}", idx), line.start)
-            // Text::new(&format!("{}", line.sign_y()), line.start)
-            .into_styled(
-                TextStyleBuilder::new(Font6x8)
-                    .text_color(Rgb888::WHITE)
-                    .build(),
-            )
-            .draw(display)?;
+        // Text::new(&format!("{}", idx), line.start)
+        //     // Text::new(&format!("{}", line.sign_y()), line.start)
+        //     .into_styled(
+        //         TextStyleBuilder::new(Font6x8)
+        //             .text_color(Rgb888::WHITE)
+        //             .build(),
+        //     )
+        //     .draw(display)?;
 
         line.into_styled(
             PrimitiveStyleBuilder::new()

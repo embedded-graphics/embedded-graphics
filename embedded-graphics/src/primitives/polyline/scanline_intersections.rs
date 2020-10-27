@@ -25,6 +25,7 @@ pub struct ScanlineIntersections<'a> {
     width: u32,
     alignment: StrokeAlignment,
     stop: bool,
+    prev_line: Option<Line>,
 }
 
 // type InternalItem = (Option<BresenhamIntersection>, LineType, Line);
@@ -66,6 +67,7 @@ impl<'a> ScanlineIntersections<'a> {
                 points,
                 scanline_y,
                 stop: false,
+                prev_line: None,
             }
         } else if let [start, end] = points {
             // Single line segment.
@@ -81,6 +83,7 @@ impl<'a> ScanlineIntersections<'a> {
                 points,
                 scanline_y,
                 stop: false,
+                prev_line: None,
             }
         } else {
             // Points must be at least 2 in length to make a polyline iterator out of.
@@ -99,6 +102,7 @@ impl<'a> ScanlineIntersections<'a> {
             points: EMPTY,
             scanline_y: 0,
             stop: true,
+            prev_line: None,
         }
     }
 
@@ -199,7 +203,21 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
         self.update()?;
 
-        if let Some(line) = line {
+        if let Some(mut line) = line {
+            // Do some checks to prevent adjacent line overdraw at end/start points.
+            if let Some(prev_line) = self.prev_line {
+                // Skip this line if it doesn't have a length.
+                if line.start.x == line.end.x {
+                    return self.next();
+                }
+                // If previous end/current start points overlap, un-overlap them
+                else if line.start == prev_line.end {
+                    line.start.x += 1;
+                }
+            }
+
+            self.prev_line = Some(line);
+
             Some(line)
         } else {
             self.next()
