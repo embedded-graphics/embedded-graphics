@@ -13,7 +13,8 @@ fn chessboard_8px_1bit() {
             image_data_start: 62,
             bpp: Bpp::Bits1,
             image_size: Size::new(8, 8),
-            image_data_len: 32
+            image_data_len: 32,
+            channel_masks: None,
         }
     );
 

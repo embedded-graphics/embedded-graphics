@@ -14,7 +14,8 @@ fn chessboard_8px_24bit() {
             image_data_start: 122,
             bpp: Bpp::Bits24,
             image_size: Size::new(8, 8),
-            image_data_len: 192
+            image_data_len: 192,
+            channel_masks: None,
         }
     );
 
@@ -35,7 +36,8 @@ fn chessboard_8px_24bit_truncated_iter() {
             image_data_start: 122,
             bpp: Bpp::Bits24,
             image_size: Size::new(8, 8),
-            image_data_len: 192
+            image_data_len: 192,
+            channel_masks: None,
         }
     );
 

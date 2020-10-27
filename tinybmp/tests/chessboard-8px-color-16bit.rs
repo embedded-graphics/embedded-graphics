@@ -1,5 +1,5 @@
 use embedded_graphics::prelude::*;
-use tinybmp::{Bpp, Header, RawBmp};
+use tinybmp::{Bpp, ChannelMasks, Header, RawBmp};
 
 #[test]
 fn chessboard_8px_color_16bit() {
@@ -13,7 +13,8 @@ fn chessboard_8px_color_16bit() {
             image_data_start: 138,
             bpp: Bpp::Bits16,
             image_size: Size::new(8, 8),
-            image_data_len: 128
+            image_data_len: 128,
+            channel_masks: Some(ChannelMasks::RGB565)
         }
     );
 

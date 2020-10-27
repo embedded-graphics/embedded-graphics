@@ -1,7 +1,8 @@
-use embedded_graphics::prelude::*;
+use embedded_graphics::{prelude::*, primitives::Rectangle};
 
 use crate::{
     header::{Bpp, Header},
+    pixels::Pixels,
     raw_pixels::RawPixels,
     ParseError,
 };
@@ -51,14 +52,13 @@ impl<'a> RawBmp<'a> {
         self.image_data
     }
 
-    ///TODO: docs
+    /// Returns a reference to the BMP header.
     pub fn header(&self) -> &Header {
         &self.header
     }
 
     /// Returns an iterator over the raw pixels in the image.
     ///
-    /// TODO: update comment
     /// The iterator returns the raw pixel colors as `u32` values. To automatically convert the raw
     /// values into the color specified by `C` use [`pixels`] instead.
     ///
@@ -75,5 +75,16 @@ impl<'a> RawBmp<'a> {
             self.header.image_size.width as usize * usize::from(self.header.bpp.bits());
 
         (bits_per_row + 31) / 32 * (32 / 8)
+    }
+
+    pub(crate) fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget,
+        D::Color: From<<D::Color as PixelColor>::Raw>,
+    {
+        target.fill_contiguous(
+            &Rectangle::new(Point::zero(), self.size()),
+            Pixels::new(self.pixels()).map(|Pixel(_, color)| color),
+        )
     }
 }

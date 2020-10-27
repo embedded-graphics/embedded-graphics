@@ -48,7 +48,8 @@
 //!         image_data_start: 122,
 //!         bpp: Bpp::Bits24,
 //!         image_size: Size::new(8, 8),
-//!         image_data_len: 192
+//!         image_data_len: 192,
+//!         channel_masks: None,
 //!     }
 //! );
 //!
@@ -72,6 +73,7 @@
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 
+mod dynamic_bmp;
 mod header;
 mod pixels;
 mod raw_bmp;
@@ -81,7 +83,8 @@ use core::marker::PhantomData;
 use embedded_graphics::prelude::*;
 
 pub use crate::{
-    header::{Bpp, Header},
+    dynamic_bmp::DynamicBmp,
+    header::{Bpp, ChannelMasks, Header},
     pixels::Pixels,
     raw_bmp::RawBmp,
     raw_pixels::{RawPixel, RawPixels},
@@ -156,12 +159,7 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        target.fill_contiguous(
-            &self.bounding_box(),
-            self.raw_bmp
-                .pixels()
-                .map(|p| C::Raw::from_u32(p.color).into()),
-        )
+        self.raw().draw(target)
     }
 }
 
@@ -185,4 +183,7 @@ pub enum ParseError {
 
     /// The image bit depth doesn't match the specified color type.
     MismatchedBpp(u16),
+
+    /// The image format isn't supported by `DynamicBmp`.
+    UnsupportedDynamicBmpFormat,
 }
