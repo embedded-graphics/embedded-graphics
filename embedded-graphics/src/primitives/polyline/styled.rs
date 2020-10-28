@@ -153,21 +153,29 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitives::polyline::tests::SMALL;
     use crate::{
         drawable::Drawable,
         geometry::Point,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
+        primitives::polyline::tests::SMALL,
         primitives::Primitive,
-        style::{PrimitiveStyle, PrimitiveStyleBuilder},
+        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
+
+    // Smaller test pattern for mock display
+    pub(in crate::primitives::polyline) const PATTERN: [Point; 4] = [
+        Point::new(5, 10),
+        Point::new(13, 5),
+        Point::new(20, 10),
+        Point::new(30, 5),
+    ];
 
     #[test]
     fn mock_display() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
-        Polyline::new(&SMALL)
+        Polyline::new(&PATTERN)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut display)
             .unwrap();
@@ -175,14 +183,138 @@ mod tests {
         assert_eq!(
             display,
             MockDisplay::from_pattern(&[
-                "                ",
-                "                ",
-                "     #         #",
-                "    # ##     ## ",
-                "   #    ## ##   ",
-                "  #       #     ",
+                "                               ",
+                "                               ",
+                "                               ",
+                "                               ",
+                "                               ",
+                "             #                #",
+                "           ## ##            ## ",
+                "          #     #         ##   ",
+                "        ##       #      ##     ",
+                "      ##          ##  ##       ",
+                "     #              ##         ",
             ])
         );
+    }
+
+    #[test]
+    fn thick_stroke() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Polyline::new(&PATTERN)
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "                                ",
+                "                                ",
+                "                                ",
+                "             #                  ",
+                "           #####            ##  ",
+                "          #######         ##### ",
+                "        ##########      ####### ",
+                "       #############  ##########",
+                "     ######## ################# ",
+                "    #######     #############   ",
+                "     ####         #########     ",
+                "      #            ######       ",
+                "                     #          ",
+            ])
+        );
+    }
+
+    #[test]
+    fn alignment() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        let cases = [
+            (
+                StrokeAlignment::Inside,
+                [
+                    "                                 ",
+                    "                                 ",
+                    "                                 ",
+                    "             #                   ",
+                    "           ####               #  ",
+                    "          #######           ###  ",
+                    "        ##########        ###### ",
+                    "       ############     ######## ",
+                    "     ################ ###########",
+                    "    ######### ################## ",
+                    "      #####     ##############   ",
+                    "        #        ###########     ",
+                    "                  ########       ",
+                    "                    ####         ",
+                    "                     #           ",
+                ],
+            ),
+            (
+                StrokeAlignment::Center,
+                [
+                    "                                 ",
+                    "                                 ",
+                    "                                 ",
+                    "             #                   ",
+                    "           ####               #  ",
+                    "          #######           ###  ",
+                    "        ##########        ###### ",
+                    "       ############     ######## ",
+                    "     ################ ###########",
+                    "    ######### ################## ",
+                    "      #####     ##############   ",
+                    "        #        ###########     ",
+                    "                  ########       ",
+                    "                    ####         ",
+                    "                     #           ",
+                ],
+            ),
+            (
+                StrokeAlignment::Outside,
+                [
+                    "                                 ",
+                    "                                 ",
+                    "                                 ",
+                    "             #                   ",
+                    "           ####               #  ",
+                    "          #######           ###  ",
+                    "        ##########        ###### ",
+                    "       ############     ######## ",
+                    "     ################ ###########",
+                    "    ######### ################## ",
+                    "      #####     ##############   ",
+                    "        #        ###########     ",
+                    "                  ########       ",
+                    "                    ####         ",
+                    "                     #           ",
+                ],
+            ),
+        ];
+
+        for (alignment, expected) in cases.iter() {
+            println!("Testing alignment {:?}...", alignment);
+
+            Polyline::new(&PATTERN)
+                .into_styled(
+                    PrimitiveStyleBuilder::new()
+                        .stroke_color(BinaryColor::On)
+                        .stroke_width(3)
+                        .stroke_alignment(*alignment)
+                        .build(),
+                )
+                .draw(&mut display)
+                .unwrap();
+
+            assert_eq!(
+                display,
+                MockDisplay::from_pattern(expected),
+                "{:?}",
+                alignment
+            );
+        }
     }
 
     #[test]
@@ -204,13 +336,9 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let points: [Point; 3] = [Point::new(2, 5), Point::new(3, 4), Point::new(4, 3)];
+        let pl = Polyline::new(&PATTERN);
 
-        let pl = Polyline::new(&points);
-
-        let styled = pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 10));
-
-        assert_eq!(styled.bounding_box(), pl.bounding_box());
+        let styled = pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 5));
 
         let mut display = MockDisplay::new();
         styled.draw(&mut display).unwrap();
