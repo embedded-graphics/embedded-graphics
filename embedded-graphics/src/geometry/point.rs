@@ -232,6 +232,11 @@ impl Point {
     pub fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
     }
+
+    // /// Point's direction
+    // pub(crate) fn direction(self) -> Self {
+    //     Self::new(self.x.signum(), self.y.signum())
+    // }
 }
 
 impl Add for Point {

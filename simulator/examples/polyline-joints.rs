@@ -78,6 +78,33 @@ fn draw(
             .build(),
     );
 
+    Text::new(&format!("{:?} {}", alignment, width), Point::new(0, 8))
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .text_color(Rgb888::WHITE)
+                .build(),
+        )
+        .draw(display)?;
+
+    // Draw line extents
+    // points
+    //     .windows(2)
+    //     .map(|tmp| {
+    //         if let [start, end] = tmp {
+    //             Line::new(*start, *end)
+    //         } else {
+    //             unreachable!()
+    //         }
+    //     })
+    //     .try_for_each(|line| {
+    //         let (l, r) = line.extents(width, alignment);
+
+    //         l.into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
+    //             .draw(display)?;
+    //         r.into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
+    //             .draw(display)
+    //     })?;
+
     // pl.bounding_box()
     //     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
     //     .draw(display)?;
@@ -132,84 +159,75 @@ fn draw(
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(display)?;
 
-    let lines = PolylineOutlineIterator::new(points, width, StrokeAlignment::Center);
+    // let lines = PolylineOutlineIterator::new(points, width, alignment);
 
-    // Draw polyline skeleton
-    lines.enumerate().try_for_each(|(idx, line)| {
-        // Text::new(&format!("{}", idx), line.start)
-        //     // Text::new(&format!("{}", line.sign_y()), line.start)
-        //     .into_styled(
-        //         TextStyleBuilder::new(Font6x8)
-        //             .text_color(Rgb888::WHITE)
-        //             .build(),
-        //     )
-        //     .draw(display)?;
-
-        line.into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(1)
-                // .stroke_alignment(alignment)
-                .stroke_color(Rgb888::GREEN)
-                .build(),
-        )
-        .draw(display)
-    })?;
+    // // Draw polyline skeleton
+    // lines.enumerate().try_for_each(|(idx, line)| {
+    //     Text::new(&format!("{}", idx), line.start)
+    //         // Text::new(&format!("{}", line.sign_y()), line.start)
+    //         .into_styled(
+    //             TextStyleBuilder::new(Font6x8)
+    //                 .text_color(Rgb888::WHITE)
+    //                 .build(),
+    //         )
+    //         .draw(display)?;
+    // })?;
 
     pl.draw(display)?;
 
-    let intersections =
-        ScanlineIntersections::new(points, width, StrokeAlignment::Center, scanline.start.y);
+    // let intersections =
+    //     ScanlineIntersections::new(points, width, StrokeAlignment::Center, scanline.start.y);
 
-    intersections.enumerate().try_for_each(|(idx, line)| {
-        // Pixel(
-        //     point,
-        //     match state {
-        //         State::Outside => Rgb888::YELLOW,
-        //         State::Inside => Rgb888::BLACK,
-        //     },
-        // )
-        // .draw(display)
+    // intersections.enumerate().try_for_each(|(idx, line)| {
+    //     // Pixel(
+    //     //     point,
+    //     //     match state {
+    //     //         State::Outside => Rgb888::YELLOW,
+    //     //         State::Inside => Rgb888::BLACK,
+    //     //     },
+    //     // )
+    //     // .draw(display)
 
-        let marker =
-            Line::new(line.start, line.end - Point::new(0, 10)).translate(if idx % 2 == 0 {
-                Point::new(0, -15)
-            } else {
-                Point::zero()
-            });
+    //     let marker =
+    //         Line::new(line.start, line.end - Point::new(0, 10)).translate(if idx % 2 == 0 {
+    //             Point::new(0, -15)
+    //         } else {
+    //             Point::zero()
+    //         });
 
-        empty_crosshair(marker.start, Rgb888::GREEN, display)?;
-        empty_crosshair(marker.end, Rgb888::RED, display)?;
+    //     empty_crosshair(marker.start, Rgb888::GREEN, display)?;
+    //     empty_crosshair(marker.end, Rgb888::RED, display)?;
 
-        marker
-            .into_styled(
-                PrimitiveStyleBuilder::new()
-                    .stroke_width(1)
-                    .stroke_color(Rgb888::MAGENTA)
-                    .build(),
-            )
-            .draw(display)?;
+    //     marker
+    //         .into_styled(
+    //             PrimitiveStyleBuilder::new()
+    //                 .stroke_width(1)
+    //                 .stroke_color(Rgb888::MAGENTA)
+    //                 .build(),
+    //         )
+    //         .draw(display)?;
 
-        // Text::new(&format!("{}", idx), marker.start - Point::new(0, 8))
-        //     .into_styled(
-        //         TextStyleBuilder::new(Font6x8)
-        //             .text_color(Rgb888::MAGENTA)
-        //             .build(),
-        //     )
-        //     .draw(display)?;
+    //     // Text::new(&format!("{}", idx), marker.start - Point::new(0, 8))
+    //     //     .into_styled(
+    //     //         TextStyleBuilder::new(Font6x8)
+    //     //             .text_color(Rgb888::MAGENTA)
+    //     //             .build(),
+    //     //     )
+    //     //     .draw(display)?;
 
-        line.into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(1)
-                .stroke_alignment(alignment)
-                // .stroke_color(match state {
-                //     State::Outside => Rgb888::YELLOW,
-                //     State::Inside => Rgb888::RED,
-                // })
-                .stroke_color(Rgb888::YELLOW)
-                .build(),
-        )
-        .draw(display)
-    })?;
+    //     line.into_styled(
+    //         PrimitiveStyleBuilder::new()
+    //             .stroke_width(1)
+    //             .stroke_alignment(alignment)
+    //             // .stroke_color(match state {
+    //             //     State::Outside => Rgb888::YELLOW,
+    //             //     State::Inside => Rgb888::RED,
+    //             // })
+    //             .stroke_color(Rgb888::YELLOW)
+    //             .build(),
+    //     )
+    //     .draw(display)
+    // })?;
 
     Text::new(
         &format!("M {}, {}", mouse_pos.x, mouse_pos.y),

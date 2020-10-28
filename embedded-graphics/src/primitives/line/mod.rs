@@ -173,36 +173,44 @@ impl Line {
     /// Outside stroke alignment is on the left side of the line, making this compatible with
     /// clockwise triangles, polygons, etc.
     pub fn extents(&self, thickness: u32, alignment: StrokeAlignment) -> (Line, Line) {
-        let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
+        let mut it = ParallelsIterator::new(self, thickness.saturating_cast(), alignment);
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
 
         let mut left = (self.start, ParallelLineType::Normal);
         let mut right = (self.start, ParallelLineType::Normal);
 
-        loop {
-            if let Some((bresenham, reduce)) = it.next() {
-                right = (bresenham.point, reduce);
-            } else {
-                break;
+        // PERF: Benchmark using some sort of `fold()` with an odd/even tracking variable.
+        match alignment {
+            StrokeAlignment::Center => loop {
+                if let Some((bresenham, reduce)) = it.next() {
+                    right = (bresenham.point, reduce);
+                } else {
+                    break;
+                }
+
+                if let Some((bresenham, reduce)) = it.next() {
+                    left = (bresenham.point, reduce);
+                } else {
+                    break;
+                }
+            },
+            // Left side
+            StrokeAlignment::Outside => {
+                if let Some((bresenham, reduce)) = it.last() {
+                    left = (bresenham.point, reduce);
+                }
             }
-
-            if let Some((bresenham, reduce)) = it.next() {
-                left = (bresenham.point, reduce);
-            } else {
-                break;
+            // Right side
+            StrokeAlignment::Inside => {
+                if let Some((bresenham, reduce)) = it.last() {
+                    right = (bresenham.point, reduce);
+                }
             }
-        }
-
-        let side_delta = right.0 - left.0;
-
-        let (left_start, right_start) = match alignment {
-            StrokeAlignment::Center => (left.0, right.0),
-            // Left
-            StrokeAlignment::Outside => (left.0 - side_delta, right.0),
-            // Right
-            StrokeAlignment::Inside => (left.0, right.0 + side_delta),
         };
+
+        let left_start = left.0;
+        let right_start = right.0;
 
         let delta = self.end - self.start;
 
