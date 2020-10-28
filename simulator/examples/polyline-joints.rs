@@ -59,9 +59,9 @@ fn draw(
     display.clear(Rgb888::BLACK)?;
 
     let mut points = points.to_vec();
-    if let StrokeAlignment::Outside = alignment {
-        points.reverse();
-    }
+    // if let StrokeAlignment::Outside = alignment {
+    //     points.reverse();
+    // }
     let points = &points;
 
     let scanline = Line::new(
@@ -73,7 +73,7 @@ fn draw(
     let pl = Polyline::new(points).into_styled(
         PrimitiveStyleBuilder::new()
             .stroke_width(width)
-            // .stroke_alignment(alignment)
+            .stroke_alignment(alignment)
             .stroke_color(Rgb888::RED)
             .build(),
     );
@@ -119,7 +119,7 @@ fn draw(
     //                 .into_styled(
     //                     PrimitiveStyleBuilder::new()
     //                         .stroke_width(1)
-    //                         // .stroke_alignment(alignment)
+    //                         .stroke_alignment(alignment)
     //                         .stroke_color(Rgb888::RED)
     //                         .build(),
     //                 )
@@ -200,7 +200,7 @@ fn draw(
         line.into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_width(1)
-                // .stroke_alignment(alignment)
+                .stroke_alignment(alignment)
                 // .stroke_color(match state {
                 //     State::Outside => Rgb888::YELLOW,
                 //     State::Inside => Rgb888::RED,
@@ -295,8 +295,7 @@ fn main() -> Result<(), core::convert::Infallible> {
                     Keycode::Space => {
                         alignment = match alignment {
                             StrokeAlignment::Center => StrokeAlignment::Outside,
-                            StrokeAlignment::Outside => StrokeAlignment::Center,
-                            // StrokeAlignment::Outside => StrokeAlignment::Inside,
+                            StrokeAlignment::Outside => StrokeAlignment::Inside,
                             StrokeAlignment::Inside => StrokeAlignment::Center,
                         }
                     }
