@@ -99,7 +99,7 @@ impl ThickSegment {
         let it = perimiter.iter().filter_map(|l| {
             l.and_then(|l| {
                 l.bresenham_scanline_intersection(scanline_y)
-                    .map(|(intersection, _)| intersection.as_line().sorted_x())
+                    .map(|intersection| intersection.as_line())
             })
         });
 

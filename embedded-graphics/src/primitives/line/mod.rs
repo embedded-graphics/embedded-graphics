@@ -351,10 +351,7 @@ impl Line {
     }
 
     /// Intersect a horizontal scan line with the Bresenham representation of this line segment.
-    pub fn bresenham_scanline_intersection(
-        &self,
-        scan_y: i32,
-    ) -> Option<(BresenhamIntersection, Self)> {
+    pub fn bresenham_scanline_intersection(&self, scan_y: i32) -> Option<BresenhamIntersection> {
         if !self
             .bounding_box()
             .contains(Point::new(self.start.x, scan_y))
@@ -364,7 +361,7 @@ impl Line {
 
         // Colinear
         if self.start.y == self.end.y {
-            return Some((BresenhamIntersection::Colinear(*self), *self));
+            return Some(BresenhamIntersection::Colinear(*self));
             // return None;
         }
 
@@ -382,7 +379,7 @@ impl Line {
             BresenhamIntersection::Point(first)
         };
 
-        Some((intersection, *self))
+        Some(intersection)
     }
 
     /// Does a given point lie on the Bresenham rendering of this line?
@@ -394,18 +391,18 @@ impl Line {
         self.points().any(|p| p == point)
     }
 
-    /// Get the shortest distance between the line and a given point.
-    ///
-    /// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
-    pub fn distance_to_point_squared(&self, point: Point) -> u32 {
-        let numerator = Triangle::new(self.start, self.end, point)
-            .area_doubled()
-            .pow(2) as u32;
+    // /// Get the shortest distance between the line and a given point.
+    // ///
+    // /// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
+    // pub fn distance_to_point_squared(&self, point: Point) -> u32 {
+    //     let numerator = Triangle::new(self.start, self.end, point)
+    //         .area_doubled()
+    //         .pow(2) as u32;
 
-        let denominator = self.length_squared();
+    //     let denominator = self.length_squared();
 
-        numerator / denominator
-    }
+    //     numerator / denominator
+    // }
 
     /// Get the squared length of the line
     pub fn length_squared(&self) -> u32 {

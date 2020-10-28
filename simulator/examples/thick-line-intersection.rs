@@ -12,9 +12,9 @@ use embedded_graphics_simulator::{
 };
 use sdl2::keyboard::Keycode;
 
-fn filled_tri(triangle: Triangle, color: Rgb888) -> impl Iterator<Item = Pixel<Rgb888>> {
-    triangle.mathematical_points().map(move |p| Pixel(p, color))
-}
+// fn filled_tri(triangle: Triangle, color: Rgb888) -> impl Iterator<Item = Pixel<Rgb888>> {
+//     triangle.mathematical_points().map(move |p| Pixel(p, color))
+// }
 
 fn crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
     let radius = Size::new(4, 4);

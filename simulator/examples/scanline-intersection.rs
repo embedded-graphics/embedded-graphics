@@ -5,7 +5,6 @@ use embedded_graphics::{
     pixelcolor::{Gray8, Rgb888},
     prelude::*,
     primitives::line_joint::{EdgeCorners, LineJoint},
-    primitives::triangle::MathematicalPoints,
     primitives::*,
     style::*,
 };
@@ -14,7 +13,6 @@ use embedded_graphics_simulator::{
 };
 use sdl2::keyboard::Keycode;
 use std::cmp::Ordering;
-use triangle::sort_clockwise;
 
 fn crosshair(point: Point, color: Rgb888, display: &mut SimulatorDisplay<Rgb888>) {
     let radius = Size::new(4, 4);
@@ -104,7 +102,7 @@ fn draw(
     let line = Line::new(Point::new(10, 10), Point::new(20, 30));
 
     if let Some(intersection_point) = line.bresenham_scanline_intersection(mouse_pos.y) {
-        empty_crosshair(intersection_point, Rgb888::CYAN, display)?;
+        empty_crosshair(intersection_point.as_line().start, Rgb888::CYAN, display)?;
     }
 
     line.into_styled(PrimitiveStyle::with_stroke(Rgb888::YELLOW, 1))
