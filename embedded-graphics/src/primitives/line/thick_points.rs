@@ -4,6 +4,7 @@ use crate::{
         bresenham::{self, Bresenham, BresenhamParameters, BresenhamPoint},
         Line,
     },
+    style::StrokeAlignment,
 };
 
 const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
@@ -84,11 +85,14 @@ pub(in crate::primitives::line) struct ParallelsIterator {
 
     /// The next side which will be drawn.
     next_side: Side,
+
+    /// Stroke alignment.
+    alignment: StrokeAlignment,
 }
 
 impl ParallelsIterator {
     /// Creates a new parallels iterator.
-    pub fn new(mut line: &Line, thickness: i32) -> Self {
+    pub fn new(mut line: &Line, thickness: i32, alignment: StrokeAlignment) -> Self {
         let start_point = line.start;
 
         // The lines orientation is undefined if start and end point are equal.
@@ -112,6 +116,14 @@ impl ParallelsIterator {
         let flip = perpendicular_parameters.position_step.minor
             == -parallel_parameters.position_step.major;
 
+        let (next_side, skip_side) = match alignment {
+            StrokeAlignment::Center => (Side::Right, Side::Left),
+            // Left side
+            StrokeAlignment::Outside => (Side::Left, Side::Right),
+            // Right side
+            StrokeAlignment::Inside => (Side::Right, Side::Left),
+        };
+
         let mut self_ = Self {
             parallel_parameters,
             perpendicular_parameters,
@@ -122,11 +134,12 @@ impl ParallelsIterator {
             left_error: 0,
             right: Bresenham::new(start_point),
             right_error: 0,
-            next_side: Side::Right,
+            next_side,
+            alignment,
         };
 
         // Skip center line on left side iterator
-        self_.next_parallel(Side::Left);
+        self_.next_parallel(skip_side);
 
         self_
     }
@@ -174,6 +187,7 @@ impl Iterator for ParallelsIterator {
         }
 
         let (point, error) = self.next_parallel(self.next_side);
+        // let (point, error) = self.next_parallel(Side::Left);
 
         let ret = match point {
             BresenhamPoint::Normal(point) => {
@@ -196,7 +210,9 @@ impl Iterator for ParallelsIterator {
             }
         };
 
-        self.next_side = self.next_side.swap();
+        if self.alignment == StrokeAlignment::Center {
+            self.next_side = self.next_side.swap();
+        }
 
         Some(ret)
     }
@@ -219,7 +235,7 @@ impl ThickPoints {
             parallel: Bresenham::new(line.start),
             parallel_length: bresenham::major_length(line),
             parallel_points_remaining: 0,
-            iter: ParallelsIterator::new(line, thickness),
+            iter: ParallelsIterator::new(line, thickness, StrokeAlignment::Center),
         }
     }
 }
@@ -262,7 +278,7 @@ mod tests {
         // The maximum number of lines is 0xE, because 0xF is used to mark overdraw
         assert!(count < 0xF);
 
-        let mut parallels = ParallelsIterator::new(&line, 100);
+        let mut parallels = ParallelsIterator::new(&line, 100, StrokeAlignment::Center);
 
         let mut display = MockDisplay::new();
 
