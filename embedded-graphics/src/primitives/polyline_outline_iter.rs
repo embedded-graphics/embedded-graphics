@@ -40,7 +40,7 @@ pub enum LineType {
 /// Iterates over all line segments that make up the closed boundary polygon of a thick polyline.
 /// Lines must be returned in increasing X order so that scanline intersections work correctly.
 #[derive(Clone, Debug)]
-pub struct LineJointsIter<'a> {
+pub struct PolylineOutlineIterator<'a> {
     windows: core::slice::Windows<'a, Point>,
     state: State,
     start_joint: LineJoint,
@@ -53,7 +53,7 @@ pub struct LineJointsIter<'a> {
 
 static EMPTY: &[Point; 0] = &[];
 
-impl<'a> LineJointsIter<'a> {
+impl<'a> PolylineOutlineIterator<'a> {
     /// New
     pub fn new(points: &'a [Point], width: u32, alignment: StrokeAlignment) -> Self {
         let mut windows = points.windows(3);
@@ -125,7 +125,7 @@ impl<'a> LineJointsIter<'a> {
     }
 }
 
-impl<'a> Iterator for LineJointsIter<'a> {
+impl<'a> Iterator for PolylineOutlineIterator<'a> {
     type Item = Line;
 
     fn next(&mut self) -> Option<Self::Item> {

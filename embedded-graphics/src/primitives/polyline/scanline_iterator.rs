@@ -13,6 +13,7 @@ pub struct ScanlineIterator<'a> {
     scanline_y: i32,
     scanline_limit: i32,
     intersections: ScanlineIntersections<'a>,
+    stop: bool,
 }
 
 impl<'a> ScanlineIterator<'a> {
@@ -24,8 +25,7 @@ impl<'a> ScanlineIterator<'a> {
         let bb = styled.bounding_box();
 
         let scanline_y = bb.top_left.y;
-        // FIXME: Return empty version of this iterator if this is `None`.
-        let scanline_limit = bb.bottom_right().unwrap().y;
+        let scanline_limit = bb.bottom_right().map(|br| br.y).unwrap_or(scanline_y);
 
         let intersections = ScanlineIntersections::new(
             styled.primitive.vertices,
@@ -38,6 +38,7 @@ impl<'a> ScanlineIterator<'a> {
             scanline_y,
             scanline_limit,
             intersections,
+            stop: scanline_y == scanline_limit,
         }
     }
 }
@@ -46,8 +47,12 @@ impl<'a> Iterator for ScanlineIterator<'a> {
     type Item = Line;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.scanline_y == self.scanline_limit {
+        if self.stop {
             return None;
+        }
+
+        if self.scanline_y == self.scanline_limit {
+            self.stop = true;
         }
 
         if let Some(next) = self.intersections.next() {

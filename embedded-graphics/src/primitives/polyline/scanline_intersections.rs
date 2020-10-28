@@ -43,7 +43,7 @@ impl<'a> ScanlineIntersections<'a> {
     ) -> Self {
         // let lines = LineJointsIter::new(points, width, alignment);
 
-        println!("\n\n\n---\n\n\n");
+        // println!("\n\n\n---\n\n\n");
 
         // Self {
         //     lines,
@@ -188,7 +188,7 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
     #[allow(unused)]
     fn next(&mut self) -> Option<Self::Item> {
-        println!("xxxx");
+        // println!("xxxx");
 
         if self.stop {
             return None;

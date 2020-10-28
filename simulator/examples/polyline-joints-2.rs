@@ -3,8 +3,8 @@ use embedded_graphics::{
     pixelcolor::Rgb888,
     prelude::*,
     primitives::line_joint::{EdgeCorners, LineJoint},
-    primitives::line_joints_iter::LineJointsIter,
     primitives::polyline::ScanlineIntersections,
+    primitives::polyline_outline_iter::PolylineOutlineIterator,
     // primitives::thick_segment::Segments,
     primitives::thick_segment::ThickSegment,
     primitives::triangle::MathematicalPoints,
@@ -79,7 +79,11 @@ fn draw(
             .build(),
     );
 
-    // pl.draw(display)?;
+    pl.bounding_box()
+        .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
+        .draw(display)?;
+
+    pl.draw(display)?;
 
     // let joints = tmp
     //     .windows(3)
@@ -131,28 +135,28 @@ fn draw(
         .into_styled(PrimitiveStyle::with_stroke(Rgb888::BLUE, 1))
         .draw(display)?;
 
-    let lines = LineJointsIter::new(points, width, StrokeAlignment::Center);
+    let lines = PolylineOutlineIterator::new(points, width, StrokeAlignment::Center);
 
-    // Draw polyline skeleton
-    lines.enumerate().try_for_each(|(idx, line)| {
-        // Text::new(&format!("{}", idx), line.start)
-        //     // Text::new(&format!("{}", line.sign_y()), line.start)
-        //     .into_styled(
-        //         TextStyleBuilder::new(Font6x8)
-        //             .text_color(Rgb888::WHITE)
-        //             .build(),
-        //     )
-        //     .draw(display)?;
+    // // Draw polyline skeleton
+    // lines.enumerate().try_for_each(|(idx, line)| {
+    //     // Text::new(&format!("{}", idx), line.start)
+    //     //     // Text::new(&format!("{}", line.sign_y()), line.start)
+    //     //     .into_styled(
+    //     //         TextStyleBuilder::new(Font6x8)
+    //     //             .text_color(Rgb888::WHITE)
+    //     //             .build(),
+    //     //     )
+    //     //     .draw(display)?;
 
-        line.into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(1)
-                // .stroke_alignment(alignment)
-                .stroke_color(Rgb888::MAGENTA)
-                .build(),
-        )
-        .draw(display)
-    })?;
+    //     line.into_styled(
+    //         PrimitiveStyleBuilder::new()
+    //             .stroke_width(1)
+    //             // .stroke_alignment(alignment)
+    //             .stroke_color(Rgb888::MAGENTA)
+    //             .build(),
+    //     )
+    //     .draw(display)
+    // })?;
 
     let intersections =
         ScanlineIntersections::new(points, width, StrokeAlignment::Center, scanline.start.y);
@@ -220,10 +224,6 @@ fn draw(
     .draw(display)?;
 
     crosshair(mouse_pos, Rgb888::WHITE, display)?;
-
-    // pl.bounding_box()
-    //     .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
-    //     .draw(display)?;
 
     Ok(())
 }

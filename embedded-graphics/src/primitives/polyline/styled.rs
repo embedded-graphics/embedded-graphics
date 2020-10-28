@@ -5,9 +5,9 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        line_joints_iter::LineJointsIter,
         polyline,
         polyline::{scanline_iterator::ScanlineIterator, Polyline},
+        thick_segment_iter::ThickSegmentIter,
         Primitive, Rectangle,
     },
     style::{PrimitiveStyle, Styled},
@@ -123,7 +123,7 @@ where
 {
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
-            let (min, max) = LineJointsIter::new(
+            let (min, max) = ThickSegmentIter::new(
                 self.primitive.vertices,
                 self.style.stroke_width,
                 self.style.stroke_alignment,
@@ -133,8 +133,8 @@ where
                     Point::new_equal(core::i32::MAX),
                     Point::new_equal(core::i32::MIN),
                 ),
-                |(min, max), line| {
-                    let bb = line.bounding_box();
+                |(min, max), segment| {
+                    let bb = segment.edges_bounding_box();
 
                     (
                         min.component_min(bb.top_left),

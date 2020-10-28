@@ -89,6 +89,8 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
+        // FIXME: Change to use custom left/right outside line iterator - there's an edge case where
+        // the tails of long miter joints could land outside the bounding box.
         if self.style.effective_stroke_color().is_some() {
             let (l, r) = self
                 .primitive
