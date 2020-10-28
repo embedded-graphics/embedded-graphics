@@ -86,24 +86,26 @@ fn draw(
         )
         .draw(display)?;
 
-    // Draw line extents
-    // points
-    //     .windows(2)
-    //     .map(|tmp| {
-    //         if let [start, end] = tmp {
-    //             Line::new(*start, *end)
-    //         } else {
-    //             unreachable!()
-    //         }
-    //     })
-    //     .try_for_each(|line| {
-    //         let (l, r) = line.extents(width, alignment);
+    pl.draw(display)?;
 
-    //         l.into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
-    //             .draw(display)?;
-    //         r.into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
-    //             .draw(display)
-    //     })?;
+    // Draw line extents
+    points
+        .windows(2)
+        .map(|tmp| {
+            if let [start, end] = tmp {
+                Line::new(*start, *end)
+            } else {
+                unreachable!()
+            }
+        })
+        .try_for_each(|line| {
+            let (l, r) = line.extents(width, alignment);
+
+            l.into_styled(PrimitiveStyle::with_stroke(Rgb888::CYAN, 1))
+                .draw(display)?;
+            r.into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
+                .draw(display)
+        })?;
 
     // pl.bounding_box()
     //     .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
@@ -172,8 +174,6 @@ fn draw(
     //         )
     //         .draw(display)?;
     // })?;
-
-    pl.draw(display)?;
 
     // let intersections =
     //     ScanlineIntersections::new(points, width, StrokeAlignment::Center, scanline.start.y);
