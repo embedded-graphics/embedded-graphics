@@ -1,15 +1,15 @@
 use crate::{
     geometry::Point,
-    primitives::triangle::{fill_scanline_iterator::FillScanlineIterator, Triangle},
+    primitives::triangle::{scanline_iterator::ScanlineIterator, Triangle},
 };
 
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points(FillScanlineIterator);
+pub struct Points(ScanlineIterator);
 
 impl Points {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-        Self(FillScanlineIterator::new(triangle))
+        Self(ScanlineIterator::new(triangle))
     }
 }
 
@@ -17,7 +17,7 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next()
+        self.0.next().map(|(_, p)| p)
     }
 }
 

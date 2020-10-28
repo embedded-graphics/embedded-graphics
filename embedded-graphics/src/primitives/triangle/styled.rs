@@ -1,4 +1,3 @@
-use super::thick_points::ThickPoints;
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
@@ -15,19 +14,13 @@ use crate::{
     style::{PrimitiveStyle, Styled},
 };
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum InnerIter<C> {
-    Scanline(ScanlineIterator),
-    Thick(ThickPoints<C>),
-}
-
 /// Pixel iterator for each pixel in the triangle border
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: InnerIter<C>,
+    iter: ScanlineIterator,
     fill_color: Option<C>,
     stroke_color: Option<C>,
 }
@@ -38,13 +31,9 @@ where
 {
     pub(in crate::primitives) fn new(styled: &Styled<Triangle, PrimitiveStyle<C>>) -> Self {
         let iter = if !styled.style.is_transparent() {
-            if styled.style.stroke_width <= 1 {
-                InnerIter::Scanline(ScanlineIterator::new(&styled.primitive))
-            } else {
-                InnerIter::Thick(ThickPoints::new(&styled.primitive, styled.style))
-            }
+            ScanlineIterator::new(&styled.primitive)
         } else {
-            InnerIter::Scanline(ScanlineIterator::empty())
+            ScanlineIterator::empty()
         };
 
         Self {
@@ -68,16 +57,13 @@ where
             ..
         } = self;
 
-        match self.iter {
-            InnerIter::Scanline(ref mut it) => it.find_map(|(point_type, point)| {
-                match point_type {
-                    PointType::Border => stroke_color.or(*fill_color),
-                    PointType::Inside => *fill_color,
-                }
-                .map(|c| Pixel(point, c))
-            }),
-            InnerIter::Thick(ref mut it) => it.next(),
-        }
+        self.iter.find_map(|(point_type, point)| {
+            match point_type {
+                PointType::Border => stroke_color.or(*fill_color),
+                PointType::Inside => *fill_color,
+            }
+            .map(|c| Pixel(point, c))
+        })
     }
 }
 

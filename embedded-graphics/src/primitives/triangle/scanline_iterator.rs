@@ -163,53 +163,9 @@ impl Iterator for ScanlineIterator {
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
-        geometry::Dimensions,
-        mock_display::MockDisplay,
-        pixel_iterator::IntoPixels,
-        pixelcolor::BinaryColor,
-        primitives::ContainsPoint,
-        style::PrimitiveStyle,
+        drawable::Pixel, iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle,
         transform::Transform,
     };
-
-    #[test]
-    fn points_by_scanline_match_triangle_contains() {
-        fn check(triangle: Triangle) {
-            let mut mock_display1 = MockDisplay::new();
-            let mut mock_display2 = MockDisplay::new();
-
-            // FIXME: right now, ScanlineIterator does not guarantee unique points
-            mock_display2.set_allow_overdraw(true);
-
-            triangle
-                .bounding_box()
-                .points()
-                .filter(|&p| triangle.contains(p))
-                .for_each(|p| Pixel(p, BinaryColor::On).draw(&mut mock_display1).unwrap());
-
-            ScanlineIterator::new(&triangle)
-                .for_each(|(_, p)| Pixel(p, BinaryColor::On).draw(&mut mock_display2).unwrap());
-
-            assert_eq!(mock_display1, mock_display2, "{:?}", triangle);
-        }
-
-        check(Triangle::new(
-            Point::new(5, 10),
-            Point::new(10, 15),
-            Point::new(15, 10),
-        ));
-        check(Triangle::new(
-            Point::new(5, 5),
-            Point::new(15, 0),
-            Point::new(10, 10),
-        ));
-        check(Triangle::new(
-            Point::new(30, 0),
-            Point::new(40, 10),
-            Point::new(42, 10),
-        ));
-    }
 
     #[test]
     fn points_iter() {
@@ -229,8 +185,8 @@ mod tests {
         let off_screen = Triangle::new(Point::new(10, 10), Point::new(20, 20), Point::new(30, -30));
         let on_screen = off_screen.translate(Point::new(0, 35));
 
-        ScanlineIterator::new(&off_screen)
-            .map(|(_, p)| p)
-            .eq(on_screen.points().map(|p| p - Point::new(0, 35)));
+        assert!(off_screen
+            .points()
+            .eq(on_screen.points().map(|p| p - Point::new(0, 35))));
     }
 }
