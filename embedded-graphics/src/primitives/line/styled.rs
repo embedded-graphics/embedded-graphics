@@ -94,7 +94,7 @@ where
         if self.style.effective_stroke_color().is_some() {
             let (l, r) = self
                 .primitive
-                .extents(self.style.stroke_width as i32, StrokeAlignment::Center);
+                .extents(self.style.stroke_width, StrokeAlignment::Center);
 
             let min = l
                 .start

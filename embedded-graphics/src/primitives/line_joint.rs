@@ -96,7 +96,7 @@ impl LineJoint {
     pub fn start(start: Point, mid: Point, width: u32, alignment: StrokeAlignment) -> Self {
         let line = Line::new(start, mid);
 
-        let (l, r) = line.extents(width as i32, alignment);
+        let (l, r) = line.extents(width, alignment);
 
         let points = EdgeCorners {
             left: l.start,
@@ -116,7 +116,7 @@ impl LineJoint {
     pub fn end(mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Self {
         let line = Line::new(mid, end);
 
-        let (l, r) = line.extents(width as i32, alignment);
+        let (l, r) = line.extents(width, alignment);
 
         let points = EdgeCorners {
             left: l.end,
@@ -160,9 +160,9 @@ impl LineJoint {
         let miter_limit = (width * 2).pow(2);
 
         // Left and right edges of thick first segment
-        let (first_edge_left, first_edge_right) = first_line.extents(width as i32, alignment);
+        let (first_edge_left, first_edge_right) = first_line.extents(width, alignment);
         // Left and right edges of thick second segment
-        let (second_edge_left, second_edge_right) = second_line.extents(width as i32, alignment);
+        let (second_edge_left, second_edge_right) = second_line.extents(width, alignment);
 
         if let (
             Intersection::Point {

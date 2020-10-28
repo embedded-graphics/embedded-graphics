@@ -167,16 +167,12 @@ impl Line {
     }
 
     // TODO: Un-pub
-    // TODO: Convert thickness back to u32
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
     /// Outside stroke alignment is on the left side of the line, making this compatible with
     /// clockwise triangles, polygons, etc.
-    pub fn extents(&self, thickness: i32, alignment: StrokeAlignment) -> (Line, Line) {
-        // FIXME: Delete
-        let thickness: u32 = thickness as u32;
-
+    pub fn extents(&self, thickness: u32, alignment: StrokeAlignment) -> (Line, Line) {
         let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
