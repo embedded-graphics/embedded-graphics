@@ -59,15 +59,6 @@ impl ThickSegment {
     pub fn edges_bounding_box(&self) -> Rectangle {
         let (right, left) = self.edges();
 
-        // let line = [right, left].iter().fold(left, |acc, line| {
-        //     Line::new(
-        //         acc.start.component_min(line.start),
-        //         acc.end.component_max(line.end),
-        //     )
-        // });
-
-        // let extents = right.
-
         let left = left.bounding_box();
         let right = right.bounding_box();
 

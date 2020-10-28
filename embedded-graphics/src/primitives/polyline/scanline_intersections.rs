@@ -206,13 +206,19 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
         if let Some(mut line) = line {
             // Do some checks to prevent adjacent line overdraw at end/start points.
             if let Some(prev_line) = self.prev_line {
-                // Skip this line if it doesn't have a length.
-                if line.start.x == line.end.x {
-                    return self.next();
-                }
+                // // Skip this line if it doesn't have a length.
+                // if line.start.x == line.end.x {
+                //     return self.next();
+                // }
                 // If previous end/current start points overlap, un-overlap them
-                else if line.start == prev_line.end {
+                if line.start == prev_line.end && line.start.x != line.end.x {
                     line.start.x += 1;
+                }
+
+                if line == prev_line
+                    || line.start.x == line.end.x && line.start.x == prev_line.end.x
+                {
+                    return self.next();
                 }
             }
 
