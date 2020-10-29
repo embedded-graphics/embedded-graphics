@@ -59,7 +59,6 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#317](https://github.com/jamwaffles/embedded-graphics/pull/317) The bounding box size for `Circle`s was off by one.
 - [#401](https://github.com/jamwaffles/embedded-graphics/pull/401) Triangle pixel iterators no longer produce a pixel for each node twice.
-- [#409](https://github.com/jamwaffles/embedded-graphics/pull/409) `Rectangle::intersect` will now preserve the `top_left` value of zero sized rectangles if `top_left` is contained in the other rectangle.
 - [#431](https://github.com/jamwaffles/embedded-graphics/pull/431) Styled primitive bounding boxes now take the stroke width and alignment into account.
 
 ### Removed
