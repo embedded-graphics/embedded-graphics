@@ -17,9 +17,6 @@ pub enum JointKind {
 
     /// Bevelled (flattened point)
     Bevel {
-        /// The triangle used to draw the bevel itself.
-        filler_triangle: Triangle,
-
         /// Line filling the outside of the bevel.
         filler_line: Line,
 
@@ -31,9 +28,6 @@ pub enum JointKind {
     ///
     /// Degenerate corners are rendered with a bevel.
     Degenerate {
-        /// The triangle used to fill in the corner.
-        filler_triangle: Triangle,
-
         /// Line filling the outside of the bevel.
         filler_line: Line,
 
@@ -201,8 +195,8 @@ impl LineJoint {
                 )
                 .length_squared();
 
-                // Intersection is within limit at which it will be chopped off into a bevel, so return
-                // a miter.
+                // Intersection is within limit at which it will be chopped off into a bevel, so
+                // return a miter.
                 if miter_length_squared <= miter_limit {
                     let corners = EdgeCorners {
                         left: l_intersection,
@@ -217,15 +211,11 @@ impl LineJoint {
                 }
                 // Miter is too long, chop it into bevel-style corner
                 else {
+                    // PERF: By removing the now-unused `filler_triangle`, I can probably get rid of
+                    // this match with some more concise if()s.
                     match outer_side {
                         Side::Right => Self {
                             kind: JointKind::Bevel {
-                                /// Must be counter-clockwise
-                                filler_triangle: Triangle::new(
-                                    first_edge_right.end,
-                                    l_intersection,
-                                    second_edge_right.start,
-                                ),
                                 filler_line: Line::new(
                                     first_edge_right.end,
                                     second_edge_right.start,
@@ -243,12 +233,6 @@ impl LineJoint {
                         },
                         Side::Left => Self {
                             kind: JointKind::Bevel {
-                                /// Must be clockwise
-                                filler_triangle: Triangle::new(
-                                    first_edge_left.end,
-                                    second_edge_left.start,
-                                    r_intersection,
-                                ),
                                 filler_line: Line::new(first_edge_left.end, second_edge_left.start),
                                 side: outer_side,
                             },
@@ -269,20 +253,10 @@ impl LineJoint {
                 Self {
                     kind: match outer_side {
                         Side::Left => JointKind::Degenerate {
-                            filler_triangle: Triangle::new(
-                                first_edge_left.end,
-                                first_edge_right.end,
-                                second_edge_left.start,
-                            ),
                             filler_line: Line::new(first_edge_left.end, second_edge_left.start),
                             side: outer_side,
                         },
                         Side::Right => JointKind::Degenerate {
-                            filler_triangle: Triangle::new(
-                                first_edge_left.end,
-                                first_edge_right.end,
-                                second_edge_right.start,
-                            ),
                             filler_line: Line::new(first_edge_right.end, second_edge_right.start),
                             side: outer_side,
                         },
@@ -340,46 +314,5 @@ impl LineJoint {
     /// If the joint is a bevel joint, this will return two lines, otherwise one.
     pub fn end_cap_lines(&self) -> [Option<Line>; 2] {
         self.cap(&self.first_edge_end)
-    }
-
-    /// Check whether the joint is degenerate (where the end edge of one line intersects the edge
-    /// of the other).
-    pub fn is_degenerate(&self) -> bool {
-        match self.kind {
-            JointKind::Degenerate { .. } => true,
-            _ => false,
-        }
-    }
-
-    /// Check whether the two base lines are colinear.
-    ///
-    /// This also checks for parallelism, but since both lines share a vertex, they can only ever
-    /// be colinear.
-    pub fn is_colinear(&self) -> bool {
-        match self.kind {
-            JointKind::Colinear => true,
-            _ => false,
-        }
-    }
-
-    /// Get the filler triangle (if any).
-    pub fn filler(&self) -> Option<Triangle> {
-        match self.kind {
-            JointKind::Bevel {
-                filler_triangle, ..
-            }
-            | JointKind::Degenerate {
-                filler_triangle, ..
-            } => Some(filler_triangle),
-            _ => None,
-        }
-    }
-
-    /// Returns whether the joint is the last one.
-    pub fn is_end_joint(&self) -> bool {
-        match self.kind {
-            JointKind::End => true,
-            _ => false,
-        }
     }
 }
