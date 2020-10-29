@@ -8,7 +8,7 @@ use crate::{
     primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
-use core::cmp::min;
+use core::{cmp::min, ops::RangeInclusive};
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -208,12 +208,13 @@ impl Rectangle {
     pub fn intersection(&self, other: &Rectangle) -> Rectangle {
         match (other.bottom_right(), self.bottom_right()) {
             (Some(other_bottom_right), Some(self_bottom_right)) => {
-                // Check for overlap
-                if self.contains(other.top_left)
-                    || self.contains(other_bottom_right)
-                    || other.contains(self.top_left)
-                    || other.contains(self_bottom_right)
-                {
+                if overlaps(
+                    self.top_left.x..=self_bottom_right.x,
+                    other.top_left.x..=other_bottom_right.x,
+                ) && overlaps(
+                    self.top_left.y..=self_bottom_right.y,
+                    other.top_left.y..=other_bottom_right.y,
+                ) {
                     return Rectangle::with_corners(
                         self.top_left.component_max(other.top_left),
                         self_bottom_right.component_min(other_bottom_right),
@@ -238,6 +239,13 @@ impl Rectangle {
         // No overlap present
         Rectangle::zero()
     }
+}
+
+/// Checks if the two ranges overlap.
+fn overlaps(first: RangeInclusive<i32>, second: RangeInclusive<i32>) -> bool {
+    second.contains(first.start())
+        || second.contains(first.end())
+        || first.start() < second.start() && first.end() > second.end()
 }
 
 impl OffsetOutline for Rectangle {
@@ -416,6 +424,32 @@ mod tests {
         let rect2 = Rectangle::new(Point::new(2, 3), Size::new(0, 0));
 
         assert_eq!(rect1.intersection(&rect2), rect2);
+    }
+
+    /// Test for issue #452
+    ///
+    /// Rectangles can intersect even if no corner of any rectangle is contained inside the other
+    /// rectangle.
+    ///
+    /// Example:
+    ///
+    ///     ****
+    ///     *  *
+    /// ############
+    /// #   *  *   #
+    /// #   *  *   #
+    /// ############
+    ///     *  *
+    ///     ****
+    #[test]
+    fn issue_452_broken_intersection_check() {
+        let rect1 = Rectangle::new(Point::new(50, 0), Size::new(75, 200));
+        let rect2 = Rectangle::new(Point::new(0, 75), Size::new(200, 50));
+
+        let expected = Rectangle::new(Point::new(50, 75), Size::new(75, 50));
+
+        assert_eq!(rect1.intersection(&rect2), expected);
+        assert_eq!(rect2.intersection(&rect1), expected);
     }
 
     #[test]
