@@ -6,6 +6,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+## [0.7.0-alpha.1] - 2020-09-19
+
 ### Added
 
 - [#307](https://github.com/jamwaffles/embedded-graphics/pull/307) Added `Primitive::points` to get an iterator over all points inside a primitive.
@@ -525,7 +527,8 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
 
 <!-- next-url -->
 
-[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.2...HEAD
+[unreleased]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.1...HEAD
+[0.7.0-alpha.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.2...embedded-graphics-v0.7.0-alpha.1
 [0.6.2]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.1...embedded-graphics-v0.6.2
 [0.6.1]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0...embedded-graphics-v0.6.1
 [0.6.0]: https://github.com/jamwaffles/embedded-graphics/compare/embedded-graphics-v0.6.0-beta.2...embedded-graphics-v0.6.0
