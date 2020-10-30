@@ -1,4 +1,4 @@
-//! Thick line joint.
+//! Thick line join.
 
 use crate::{
     geometry::Point,
@@ -9,9 +9,9 @@ use crate::{
     style::StrokeAlignment,
 };
 
-/// Joint kind
+/// Join kind
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum JointKind {
+pub enum JoinKind {
     /// Mitered (sharp point)
     Miter,
 
@@ -37,7 +37,7 @@ pub enum JointKind {
 
     /// Lines are colinear.
     ///
-    /// Start and end points for this joint will be equal.
+    /// Start and end points for this join will be equal.
     Colinear,
 
     /// The starting cap of a line.
@@ -57,21 +57,21 @@ pub struct EdgeCorners {
     pub right: Point,
 }
 
-/// A joint between two lines.
+/// A join between two lines.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct LineJoint {
-    /// Joint kind.
-    pub kind: JointKind,
+pub struct LineJoin {
+    /// Join kind.
+    pub kind: JoinKind,
 
-    /// Corners comprising the ending edge of the line that ends at this joint.
+    /// Corners comprising the ending edge of the line that ends at this join.
     pub first_edge_end: EdgeCorners,
 
-    /// Corners comprising the start edge of the line that begins at this joint.
+    /// Corners comprising the start edge of the line that begins at this join.
     pub second_edge_start: EdgeCorners,
 }
 
-impl LineJoint {
-    /// Create a starting joint.
+impl LineJoin {
+    /// Create a starting join.
     ///
     /// `first_edge_end` and `second_edge_start` are set to the same points.
     pub fn start(start: Point, mid: Point, width: u32, alignment: StrokeAlignment) -> Self {
@@ -85,13 +85,13 @@ impl LineJoint {
         };
 
         Self {
-            kind: JointKind::Start,
+            kind: JoinKind::Start,
             first_edge_end: points,
             second_edge_start: points,
         }
     }
 
-    /// Create an ending joint.
+    /// Create an ending join.
     ///
     /// `first_edge_end` and `second_edge_start` are set to the same points.
     pub fn end(mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Self {
@@ -105,16 +105,16 @@ impl LineJoint {
         };
 
         Self {
-            kind: JointKind::End,
+            kind: JoinKind::End,
             first_edge_end: points,
             second_edge_start: points,
         }
     }
 
-    /// Empty joint
+    /// Empty join
     pub fn empty() -> Self {
         Self {
-            kind: JointKind::End,
+            kind: JoinKind::End,
             first_edge_end: EdgeCorners {
                 left: Point::zero(),
                 right: Point::zero(),
@@ -126,7 +126,7 @@ impl LineJoint {
         }
     }
 
-    /// Compute a joint.
+    /// Compute a join.
     pub fn from_points(
         start: Point,
         mid: Point,
@@ -192,7 +192,7 @@ impl LineJoint {
                     };
 
                     Self {
-                        kind: JointKind::Miter,
+                        kind: JoinKind::Miter,
                         first_edge_end: corners,
                         second_edge_start: corners,
                     }
@@ -203,7 +203,7 @@ impl LineJoint {
                     // this match with some more concise if()s.
                     match outer_side {
                         Side::Right => Self {
-                            kind: JointKind::Bevel {
+                            kind: JoinKind::Bevel {
                                 filler_line: Line::new(
                                     first_edge_right.end,
                                     second_edge_right.start,
@@ -220,7 +220,7 @@ impl LineJoint {
                             },
                         },
                         Side::Left => Self {
-                            kind: JointKind::Bevel {
+                            kind: JoinKind::Bevel {
                                 filler_line: Line::new(first_edge_left.end, second_edge_left.start),
                                 outer_side,
                             },
@@ -240,11 +240,11 @@ impl LineJoint {
             else {
                 Self {
                     kind: match outer_side {
-                        Side::Left => JointKind::Degenerate {
+                        Side::Left => JoinKind::Degenerate {
                             filler_line: Line::new(first_edge_left.end, second_edge_left.start),
                             outer_side,
                         },
-                        Side::Right => JointKind::Degenerate {
+                        Side::Right => JoinKind::Degenerate {
                             filler_line: Line::new(first_edge_right.end, second_edge_right.start),
                             outer_side,
                         },
@@ -263,7 +263,7 @@ impl LineJoint {
         // Lines are colinear
         else {
             Self {
-                kind: JointKind::Colinear,
+                kind: JoinKind::Colinear,
                 first_edge_end: EdgeCorners {
                     left: first_edge_left.end,
                     right: first_edge_right.end,
@@ -278,7 +278,7 @@ impl LineJoint {
 
     fn cap(&self, cap: &EdgeCorners) -> [Option<Line>; 2] {
         let midpoint = match self.kind {
-            JointKind::Bevel { filler_line, .. } | JointKind::Degenerate { filler_line, .. } => {
+            JoinKind::Bevel { filler_line, .. } | JoinKind::Degenerate { filler_line, .. } => {
                 filler_line.midpoint()
             }
             _ => return [Line::new(cap.left, cap.right).into(), None],
@@ -292,14 +292,14 @@ impl LineJoint {
 
     /// Start node bevel line(s).
     ///
-    /// If the joint is a bevel joint, this will return two lines, otherwise one.
+    /// If the join is a bevel join, this will return two lines, otherwise one.
     pub fn start_cap_lines(&self) -> [Option<Line>; 2] {
         self.cap(&self.second_edge_start)
     }
 
     /// End node bevel line(s).
     ///
-    /// If the joint is a bevel joint, this will return two lines, otherwise one.
+    /// If the join is a bevel join, this will return two lines, otherwise one.
     pub fn end_cap_lines(&self) -> [Option<Line>; 2] {
         self.cap(&self.first_edge_end)
     }

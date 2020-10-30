@@ -5,21 +5,21 @@
 
 use crate::{
     geometry::Dimensions,
-    primitives::{line_joint::LineJoint, Line, Rectangle},
+    primitives::{line_join::LineJoin, Line, Rectangle},
 };
 
 #[derive(Debug, Clone, Copy)]
 pub(in crate::primitives) struct ThickSegment {
-    start_joint: LineJoint,
-    end_joint: LineJoint,
+    start_join: LineJoin,
+    end_join: LineJoin,
 }
 
 impl ThickSegment {
     /// Create a new thick segment from two joints.
-    pub fn new(start_joint: LineJoint, end_joint: LineJoint) -> Self {
+    pub fn new(start_join: LineJoin, end_join: LineJoin) -> Self {
         Self {
-            start_joint,
-            end_joint,
+            start_join,
+            end_join,
         }
     }
 
@@ -27,12 +27,12 @@ impl ThickSegment {
     fn edges(&self) -> (Line, Line) {
         (
             Line::new(
-                self.start_joint.second_edge_start.right,
-                self.end_joint.first_edge_end.right,
+                self.start_join.second_edge_start.right,
+                self.end_join.first_edge_end.right,
             ),
             Line::new(
-                self.end_joint.first_edge_end.left,
-                self.start_joint.second_edge_start.left,
+                self.end_join.first_edge_end.left,
+                self.start_join.second_edge_start.left,
             ),
         )
     }
@@ -60,11 +60,11 @@ impl ThickSegment {
 
     /// Get up to 6 lines comprising the perimiter of this segment.
     ///
-    /// Note: This array could be stored as a `ThickSegment` property, but it's calculated on the fly
-    /// for memory reasons.
+    /// Note: This array could be stored as a `ThickSegment` property, but it's calculated on the
+    /// fly for memory reasons.
     fn perimiter(&self) -> [Option<Line>; 6] {
-        let start_cap = self.start_joint.start_cap_lines();
-        let end_cap = self.end_joint.end_cap_lines();
+        let start_cap = self.start_join.start_cap_lines();
+        let end_cap = self.end_join.end_cap_lines();
         let edges = self.edges();
 
         [

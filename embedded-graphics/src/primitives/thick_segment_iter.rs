@@ -2,7 +2,7 @@
 
 use crate::{
     geometry::Point,
-    primitives::{line_joint::JointKind, line_joint::LineJoint},
+    primitives::line_join::{JoinKind, LineJoin},
     style::StrokeAlignment,
 };
 
@@ -15,8 +15,8 @@ use super::thick_segment::ThickSegment;
 #[derive(Clone, Debug)]
 pub(in crate::primitives) struct ThickSegmentIter<'a> {
     windows: core::slice::Windows<'a, Point>,
-    start_joint: LineJoint,
-    end_joint: LineJoint,
+    start_join: LineJoin,
+    end_join: LineJoin,
     width: u32,
     alignment: StrokeAlignment,
     points: &'a [Point],
@@ -35,13 +35,13 @@ impl<'a> ThickSegmentIter<'a> {
         let mut windows = points.windows(3);
 
         if let Some([start, mid, end]) = windows.next() {
-            let start_joint = LineJoint::start(*start, *mid, width, alignment);
-            let end_joint = LineJoint::from_points(*start, *mid, *end, width, alignment);
+            let start_join = LineJoin::start(*start, *mid, width, alignment);
+            let end_join = LineJoin::from_points(*start, *mid, *end, width, alignment);
 
             Self {
                 windows,
-                start_joint,
-                end_joint,
+                start_join,
+                end_join,
                 width,
                 alignment,
                 points,
@@ -49,13 +49,13 @@ impl<'a> ThickSegmentIter<'a> {
             }
         } else if let [start, end] = points {
             // Single line segment.
-            let start_joint = LineJoint::start(*start, *end, width, alignment);
-            let end_joint = LineJoint::end(*start, *end, width, alignment);
+            let start_join = LineJoin::start(*start, *end, width, alignment);
+            let end_join = LineJoin::end(*start, *end, width, alignment);
 
             Self {
                 windows: EMPTY.windows(3),
-                start_joint,
-                end_joint,
+                start_join,
+                end_join,
                 width,
                 alignment,
                 points,
@@ -71,8 +71,8 @@ impl<'a> ThickSegmentIter<'a> {
     fn empty() -> Self {
         Self {
             windows: EMPTY.windows(3),
-            start_joint: LineJoint::empty(),
-            end_joint: LineJoint::empty(),
+            start_join: LineJoin::empty(),
+            end_join: LineJoin::empty(),
             width: 0,
             alignment: StrokeAlignment::Center,
             points: EMPTY,
@@ -89,17 +89,17 @@ impl<'a> Iterator for ThickSegmentIter<'a> {
             return None;
         }
 
-        let segment = ThickSegment::new(self.start_joint, self.end_joint);
+        let segment = ThickSegment::new(self.start_join, self.end_join);
 
-        self.start_joint = self.end_joint;
+        self.start_join = self.end_join;
 
         if let Some([start, mid, end]) = self.windows.next() {
-            self.end_joint = LineJoint::from_points(*start, *mid, *end, self.width, self.alignment);
-        } else if self.end_joint.kind != JointKind::End {
+            self.end_join = LineJoin::from_points(*start, *mid, *end, self.width, self.alignment);
+        } else if self.end_join.kind != JoinKind::End {
             let start = *self.points.get(self.points.len() - 2)?;
             let end = *self.points.last()?;
 
-            self.end_joint = LineJoint::end(start, end, self.width, self.alignment);
+            self.end_join = LineJoin::end(start, end, self.width, self.alignment);
         } else {
             self.stop = true;
         }
