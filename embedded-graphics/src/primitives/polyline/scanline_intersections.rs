@@ -109,7 +109,6 @@ impl<'a> ScanlineIntersections<'a> {
 impl<'a> Iterator for ScanlineIntersections<'a> {
     type Item = Line;
 
-    #[allow(unused)]
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if self.stop {
