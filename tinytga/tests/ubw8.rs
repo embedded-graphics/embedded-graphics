@@ -1,16 +1,16 @@
-use tinytga::{Bpp, ImageOrigin, ImageType, Tga, TgaHeader};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawTga, TgaHeader};
 
 #[test]
 fn ubw8() {
     let data = include_bytes!("./ubw8.tga");
 
-    let img = Tga::from_slice_raw(data).unwrap();
+    let img = RawTga::from_slice(data).unwrap();
 
-    println!("{:#?}", img.raw_header());
-    println!("Raw image data len {:#?}", img.raw_image_data().len());
+    println!("{:#?}", img.header());
+    println!("Raw image data len {:#?}", img.image_data().len());
 
     assert_eq!(
-        img.raw_header(),
+        img.header(),
         TgaHeader {
             id_len: 26,
             has_color_map: false,
@@ -30,12 +30,12 @@ fn ubw8() {
 
     const TGA_FOOTER_LENGTH: usize = 26;
     assert_eq!(
-        img.raw_extension_area(),
+        img.extension_area(),
         Some(&data[20526..data.len() - TGA_FOOTER_LENGTH])
     );
-    assert_eq!(img.raw_developer_directory(), None);
+    assert_eq!(img.developer_directory(), None);
 
-    let pixels: Vec<_> = img.raw_pixels().collect();
+    let pixels: Vec<_> = img.pixels().collect();
 
     assert_eq!(pixels.len(), 128 * 128);
 }

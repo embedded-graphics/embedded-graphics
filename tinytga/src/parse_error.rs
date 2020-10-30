@@ -1,3 +1,5 @@
+use crate::header::{Bpp, ImageType};
+
 /// Possible parse errors
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
@@ -24,4 +26,7 @@ pub enum ParseError {
     ///
     /// [`Tga::from_slice`]: struct.Tga.html#method.from_slice
     MismatchedBpp(u8),
+
+    /// The image type and bits per pixel combination isn't supported by `DynamicTga`.
+    UnsupportedDynamicTgaType(ImageType, Bpp),
 }

@@ -1,12 +1,16 @@
-use tinytga::Tga;
+use tinytga::RawTga;
 
+/// Test for issue #216
+///
+/// RLE compressed images caused an integer overflow if `number_of_pixels * bytes_per_pixel` in a
+/// RLE packet was larger than 255.
 #[test]
 fn issue_216() {
-    let uncompressed = Tga::from_slice_raw(include_bytes!("issue_216_uncompressed.tga")).unwrap();
-    let compressed = Tga::from_slice_raw(include_bytes!("issue_216_compressed.tga")).unwrap();
+    let uncompressed = RawTga::from_slice(include_bytes!("issue_216_uncompressed.tga")).unwrap();
+    let compressed = RawTga::from_slice(include_bytes!("issue_216_compressed.tga")).unwrap();
 
-    let uncompressed_header = uncompressed.raw_header();
-    let compressed_header = uncompressed.raw_header();
+    let uncompressed_header = uncompressed.header();
+    let compressed_header = uncompressed.header();
 
     assert_eq!(uncompressed_header.width, compressed_header.width);
     assert_eq!(uncompressed_header.height, compressed_header.height);
@@ -15,5 +19,5 @@ fn issue_216() {
         compressed_header.pixel_depth
     );
 
-    assert!(uncompressed.raw_pixels().eq(compressed.raw_pixels()));
+    assert!(uncompressed.pixels().eq(compressed.pixels()));
 }

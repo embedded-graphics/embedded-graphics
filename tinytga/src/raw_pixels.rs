@@ -1,13 +1,15 @@
-use crate::{packet::Packet, Tga};
+use crate::{packet::Packet, raw_tga::RawTga};
 use embedded_graphics::prelude::*;
 
-/// Iterator over individual TGA pixels
+/// Iterator over individual TGA pixels.
 ///
-/// This can be used to build a raw image buffer to pass around
+/// See the [`pixels`] method for additional information.
+///
+/// [`pixels`]: struct.RawTga.html#method.pixels
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct RawPixels<'a, 'b, C> {
+pub struct RawPixels<'a, 'b> {
     /// Reference to original TGA image
-    tga: &'a Tga<'b, C>,
+    raw_tga: &'a RawTga<'b>,
 
     position: Point,
 
@@ -16,30 +18,33 @@ pub struct RawPixels<'a, 'b, C> {
     remaining_data: &'b [u8],
 }
 
-impl<'a, 'b, C> RawPixels<'a, 'b, C> {
-    pub(crate) fn new(tga: &'a Tga<'b, C>) -> Self {
-        let size = tga.size();
+impl<'a, 'b> RawPixels<'a, 'b> {
+    pub(crate) fn new(raw_tga: &'a RawTga<'b>) -> Self {
+        let size = raw_tga.size();
         let remaining_pixels = size.width as usize * size.height as usize;
 
-        let image_data = tga.raw_image_data();
+        let image_data = raw_tga.image_data();
 
-        let (first_packet_pixels, data) = if tga.image_type.is_rle() {
+        let (first_packet_pixels, data) = if raw_tga.image_type().is_rle() {
             (0, image_data)
         } else {
             (remaining_pixels, &image_data[0..0])
         };
 
-        let packet =
-            Packet::from_uncompressed(tga.raw_image_data(), first_packet_pixels, tga.bpp.bytes());
+        let packet = Packet::from_uncompressed(
+            raw_tga.image_data(),
+            first_packet_pixels,
+            raw_tga.image_data_bpp().bytes(),
+        );
 
-        let start_y = if tga.image_origin.is_bottom() {
-            tga.size.height.saturating_sub(1)
+        let start_y = if raw_tga.image_origin().is_bottom() {
+            raw_tga.size().height.saturating_sub(1)
         } else {
             0
         };
 
         Self {
-            tga,
+            raw_tga: raw_tga,
             packet,
             remaining_data: data,
             position: Point::new(0, start_y as i32),
@@ -48,7 +53,7 @@ impl<'a, 'b, C> RawPixels<'a, 'b, C> {
 
     /// Returns the next pixel position.
     fn next_position(&mut self) -> Option<Point> {
-        if self.position.y < 0 || self.position.y >= self.tga.size.height as i32 {
+        if self.position.y < 0 || self.position.y >= self.raw_tga.size().height as i32 {
             return None;
         }
 
@@ -56,10 +61,10 @@ impl<'a, 'b, C> RawPixels<'a, 'b, C> {
 
         self.position.x += 1;
 
-        if self.position.x >= self.tga.size.width as i32 {
+        if self.position.x >= self.raw_tga.size().width as i32 {
             self.position.x = 0;
 
-            if self.tga.image_origin.is_bottom() {
+            if self.raw_tga.image_origin().is_bottom() {
                 self.position.y -= 1;
             } else {
                 self.position.y += 1;
@@ -70,7 +75,7 @@ impl<'a, 'b, C> RawPixels<'a, 'b, C> {
     }
 }
 
-impl<'a, 'b, C> Iterator for RawPixels<'a, 'b, C> {
+impl<'a, 'b> Iterator for RawPixels<'a, 'b> {
     type Item = RawPixel;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -79,7 +84,7 @@ impl<'a, 'b, C> Iterator for RawPixels<'a, 'b, C> {
         let color = if let Some(color) = self.packet.next() {
             color
         } else {
-            match Packet::parse(self.remaining_data, self.tga.bpp.bytes()) {
+            match Packet::parse(self.remaining_data, self.raw_tga.image_data_bpp().bytes()) {
                 Ok((data, packet)) => {
                     self.remaining_data = data;
                     self.packet = packet;
@@ -90,7 +95,7 @@ impl<'a, 'b, C> Iterator for RawPixels<'a, 'b, C> {
             }
         };
 
-        let color = if let Some(color_map) = &self.tga.color_map {
+        let color = if let Some(color_map) = self.raw_tga.color_map() {
             color_map.get_raw(color as usize).unwrap_or(0)
         } else {
             color
@@ -101,6 +106,10 @@ impl<'a, 'b, C> Iterator for RawPixels<'a, 'b, C> {
 }
 
 /// Pixel with raw pixel color.
+///
+/// This struct is returned by the [`RawPixels`] iterator.
+///
+/// [`RawPixels`]: struct.RawPixels.html
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Default)]
 pub struct RawPixel {
     /// The position relative to the top left corner of the image.

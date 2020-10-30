@@ -1,4 +1,4 @@
-use tinytga::{Bpp, ImageOrigin, ImageType, Tga, TgaHeader};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawTga, TgaHeader};
 
 const HEADER_DEFAULT: TgaHeader = TgaHeader {
     id_len: 0,
@@ -18,10 +18,10 @@ const HEADER_DEFAULT: TgaHeader = TgaHeader {
 
 #[test]
 fn type1_16bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type1_16bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type1_16bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::ColorMapped,
@@ -31,17 +31,19 @@ fn type1_16bpp_bl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type1_24bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type1_24bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type1_24bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::ColorMapped,
@@ -51,17 +53,19 @@ fn type1_24bpp_bl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type1_16bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type1_16bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type1_16bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::ColorMapped,
@@ -72,17 +76,19 @@ fn type1_16bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type1_24bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type1_24bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type1_24bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::ColorMapped,
@@ -93,51 +99,57 @@ fn type1_24bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type2_16bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type2_16bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type2_16bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::Truecolor,
             pixel_depth: Bpp::Bits16,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits16);
 }
 
 #[test]
 fn type2_24bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type2_24bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type2_24bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::Truecolor,
             pixel_depth: Bpp::Bits24,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits24);
 }
 
 #[test]
 fn type2_16bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type2_16bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type2_16bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::Truecolor,
             pixel_depth: Bpp::Bits16,
@@ -145,17 +157,19 @@ fn type2_16bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits16);
 }
 
 #[test]
 fn type2_24bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type2_24bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type2_24bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::Truecolor,
             pixel_depth: Bpp::Bits24,
@@ -163,50 +177,56 @@ fn type2_24bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits24);
 }
 
 #[test]
 fn type3_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type3_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type3_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::Monochrome,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits8);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type3_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type3_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type3_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::Monochrome,
             image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits8);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type9_16bpp() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type9_16bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type9_16bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::RleColorMapped,
@@ -216,17 +236,19 @@ fn type9_16bpp() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type9_24bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type9_24bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type9_24bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::RleColorMapped,
@@ -236,17 +258,19 @@ fn type9_24bpp_bl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type9_16bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type9_16bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type9_16bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::RleColorMapped,
@@ -257,17 +281,19 @@ fn type9_16bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type9_24bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type9_24bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type9_24bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             has_color_map: true,
             image_type: ImageType::RleColorMapped,
@@ -278,51 +304,57 @@ fn type9_24bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type10_16bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type10_16bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type10_16bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::RleTruecolor,
             pixel_depth: Bpp::Bits16,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits16);
 }
 
 #[test]
 fn type10_24bpp_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type10_24bpp_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type10_24bpp_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::RleTruecolor,
             pixel_depth: Bpp::Bits24,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits24);
 }
 
 #[test]
 fn type10_16bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type10_16bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type10_16bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::RleTruecolor,
             pixel_depth: Bpp::Bits16,
@@ -330,17 +362,19 @@ fn type10_16bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits16);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits16);
 }
 
 #[test]
 fn type10_24bpp_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type10_24bpp_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type10_24bpp_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::RleTruecolor,
             pixel_depth: Bpp::Bits24,
@@ -348,40 +382,46 @@ fn type10_24bpp_tl() {
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits24);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits24);
 }
 
 #[test]
 fn type11_bl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type11_bl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type11_bl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::RleMonochrome,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits8);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }
 
 #[test]
 fn type11_tl() {
-    let tga = Tga::from_slice_raw(include_bytes!("../tests/type11_tl.tga")).unwrap();
+    let tga = RawTga::from_slice(include_bytes!("../tests/type11_tl.tga")).unwrap();
 
     assert_eq!(
-        tga.raw_header(),
+        tga.header(),
         TgaHeader {
             image_type: ImageType::RleMonochrome,
             image_origin: ImageOrigin::TopLeft,
             ..HEADER_DEFAULT
         }
     );
-    assert_eq!(tga.raw_developer_directory(), None);
-    assert_eq!(tga.raw_extension_area(), None);
+    assert_eq!(tga.developer_directory(), None);
+    assert_eq!(tga.extension_area(), None);
+
     assert_eq!(tga.color_bpp(), Bpp::Bits8);
+    assert_eq!(tga.image_data_bpp(), Bpp::Bits8);
 }

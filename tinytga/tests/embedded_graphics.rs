@@ -5,7 +5,7 @@ use embedded_graphics::{
     prelude::*,
 };
 use paste::paste;
-use tinytga::Tga;
+use tinytga::{DynamicTga, Tga};
 
 const CHESSBOARD_PATTERN: &[&str] = &[
     "WKWK", //
@@ -56,13 +56,28 @@ fn test_tga<C>(data: &[u8], pattern: &[&str])
 where
     C: PixelColor + From<<C as PixelColor>::Raw> + ColorMapping,
 {
-    let im: Tga<C> = Tga::from_slice(data).unwrap();
-    let image = Image::new(&im, Point::zero());
+    let tga: Tga<C> = Tga::from_slice(data).unwrap();
+    let image = Image::new(&tga, Point::zero());
 
     let mut display = MockDisplay::new();
     image.draw(&mut display).unwrap();
 
     assert_eq!(display, MockDisplay::from_pattern(pattern));
+}
+
+fn test_dynamic_tga<C>(data: &[u8], pattern: &[&str])
+where
+    C: PixelColor + From<<C as PixelColor>::Raw> + Into<Rgb888> + ColorMapping,
+{
+    let tga = DynamicTga::from_slice(data).unwrap();
+    let image = Image::new(&tga, Point::zero());
+
+    let mut display = MockDisplay::new();
+    image.draw(&mut display).unwrap();
+
+    let expected: MockDisplay<Rgb888> = MockDisplay::<C>::from_pattern(pattern).map(|c| c.into());
+
+    assert_eq!(display, expected);
 }
 
 macro_rules! test_tga {
@@ -76,6 +91,16 @@ macro_rules! test_tga {
             #[test]
             fn [<$image_type _tl>]() {
                 test_tga::<$color_type>(include_bytes!(concat!(stringify!($image_type), "_tl.tga")), $pattern);
+            }
+
+            #[test]
+            fn [<$image_type _bl_dynamic>]() {
+                test_dynamic_tga::<$color_type>(include_bytes!(concat!(stringify!($image_type), "_bl.tga")), $pattern);
+            }
+
+            #[test]
+            fn [<$image_type _tl_dynamic>]() {
+                test_dynamic_tga::<$color_type>(include_bytes!(concat!(stringify!($image_type), "_tl.tga")), $pattern);
             }
         }
     };

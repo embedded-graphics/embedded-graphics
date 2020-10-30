@@ -7,7 +7,7 @@
 
 ## [Documentation](https://docs.rs/tinytga)
 
-A small TGA parser designed for use with [embedded-graphics] targetting no-std environments but
+A small TGA parser designed for use with [embedded-graphics] targeting no-std environments but
 usable anywhere. Beyond parsing the image header, no other allocations are made.
 
 tinytga provides two methods of accessing the pixel data inside a TGA file. The most convenient
@@ -16,7 +16,53 @@ the TGA file. But it is also possible to directly access the raw pixel represent
 
 ## Examples
 
-### Load a Run Length Encoded (RLE) TGA image
+### Using `Tga` to draw an image
+
+This example demonstrates how a TGA image can be drawn to a [embedded-graphics] draw target.
+
+The code uses the `Tga` struct and only works if the color format inside the TGA file is known
+at compile time. While this makes the code less flexible it offers the best performance by
+making sure that no unnecessary color conversions are used.
+
+```rust
+use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+use tinytga::Tga;
+
+// Include an image from a local path as bytes
+let data = include_bytes!("../tests/chessboard_4px_rle.tga");
+
+let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
+
+let image = Image::new(&tga, Point::zero());
+
+image.draw(&mut display)?;
+```
+
+### Using `DynamicTga` to draw an image
+
+The previous example had the limitation that the color format needed to be known at compile
+time. In some use cases this can be a problem, for example if user supplied images should
+be displayed. To handle these cases `DynamicTga` can be used, which performs color conversion
+if necessary.
+
+```rust
+use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+use tinytga::DynamicTga;
+
+// Include an image from a local path as bytes
+let data = include_bytes!("../tests/chessboard_4px_rle.tga");
+
+let tga = DynamicTga::from_slice(data).unwrap();
+
+let image = Image::new(&tga, Point::zero());
+
+image.draw(&mut display)?;
+```
+### Accessing pixels using an embedded-graphics color type
+
+If [embedded-graphics] is not used to draw the TGA image, the color types provided by
+[embedded-graphics] can still be used to access the pixel data using the
+`pixels` method.
 
 ```rust
 use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
@@ -36,41 +82,25 @@ assert_eq!(img.size(), Size::new(4, 4));
 let pixels: Vec<_> = img.pixels().collect();
 ```
 
-### Drawing an image using `embedded-graphics`
-
-This example demonstrates how a TGA image can be drawn to a [embedded-graphics] draw target.
-
-```rust
-use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
-use tinytga::Tga;
-
-// Include an image from a local path as bytes
-let data = include_bytes!("../tests/chessboard_4px_rle.tga");
-let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
-
-let image = Image::new(&tga, Point::zero());
-
-image.draw(&mut display)?;
-```
-
 ### Accessing raw pixel data
 
-If you do not want to use the color types provided by [embedded-graphics] you can also access
-the raw image data.
+If [embedded-graphics] is not used in the target application, the raw image data can be
+accessed with the `pixels` method on
+`RawTga`  The returned iterator produces a `u32` for each pixel value.
 
 ```rust
 use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
-use tinytga::{Bpp, ImageOrigin, ImageType, RawPixel, Tga, TgaHeader};
+use tinytga::{Bpp, ImageOrigin, ImageType, RawPixel, RawTga, TgaHeader};
 
 // Include an image from a local path as bytes.
 let data = include_bytes!("../tests/chessboard_4px_rle.tga");
 
 // Create a TGA instance from a byte slice.
-let img = Tga::from_slice_raw(data).unwrap();
+let img = RawTga::from_slice(data).unwrap();
 
 // Take a look at the raw image header.
 assert_eq!(
-    img.raw_header(),
+    img.header(),
     TgaHeader {
         id_len: 0,
         has_color_map: false,
@@ -89,10 +119,13 @@ assert_eq!(
 );
 
 // Collect raw pixels into a vector.
-let pixels: Vec<_> = img.raw_pixels().collect();
+let pixels: Vec<_> = img.pixels().collect();
 ```
 
 ## Embedded-graphics drawing performance
+
+`Tga` should by used instead of `DynamicTga` when possible to reduce the risk of
+accidentally adding unnecessary color conversions.
 
 `tinytga` uses different code paths to draw images with different `ImageOrigin` .
 The performance difference between the origins will depend on the display driver, but using

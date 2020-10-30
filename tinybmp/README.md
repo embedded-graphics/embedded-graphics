@@ -10,54 +10,15 @@
 A small BMP parser designed for embedded, no-std environments but usable anywhere. Beyond
 parsing the image header, no other allocations are made.
 
-To access the individual pixels in an image, the `BmpRaw` struct implements `IntoIterator`. It is
-also possible to access the raw image data by reading the `pixel_data` field.
-
-## Features
-
-* `graphics` - enables [embedded-graphics] integration.
+To use `tinybmp` without `embedded-graphics` the raw data for individual pixels in an image
+can be accessed using the `raw_pixels` and `raw_image_data` methods provided by the `Bmp` 
+struct.
 
 ## Examples
 
-### Load a BMP image and check its `Header` and returned pixels.
+### Draw a BMP image to an `embedded-graphics` draw target
 
-```rust
-use tinybmp::{BmpRaw, FileType, Header, Pixel};
-
-let bmp = BmpRaw::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
-    .expect("Failed to parse BMP image");
-
-// Read the BMP header
-assert_eq!(
-    bmp.header,
-    Header {
-        file_type: FileType::BM,
-        file_size: 314,
-        reserved_1: 0,
-        reserved_2: 0,
-        image_data_start: 122,
-        bpp: 24,
-        image_width: 8,
-        image_height: 8,
-        image_data_len: 192
-    }
-);
-
-// Check that raw image data slice is the correct length (according to parsed header)
-assert_eq!(bmp.image_data().len(), bmp.header.image_data_len as usize);
-
-// Get an iterator over the pixel coordinates and values in this image and load into a vec
-let pixels: Vec<Pixel> = bmp.into_iter().collect();
-
-// Loaded example image is 8x8px
-assert_eq!(pixels.len(), 8 * 8);
-```
-
-### Integrate with `embedded-graphics`
-
-This example loads a 16BPP image and draws it to an [embedded-graphics] compatible display.
-
-The `graphics` feature must be enabled for embedded-graphics support.
+This example loads a 16BPP image and draws it to an `embedded-graphics` compatible display.
 
 ```rust
 use embedded_graphics::{image::Image, prelude::*};
@@ -71,7 +32,41 @@ let image = Image::new(&bmp, Point::zero());
 image.draw(&mut display)?;
 ```
 
-[embedded-graphics]: https://crates.io/crates/embedded-graphics
+### Accessing the raw image data
+
+This example demonstrates how the image header and raw image data can be accessed to use
+`tinybmp` without `embedded-graphics` 
+
+```rust
+use tinybmp::{Bmp, Bpp, Header, RawPixel};
+
+let bmp = Bmp::from_slice_raw(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+    .expect("Failed to parse BMP image");
+
+// Read the BMP header
+assert_eq!(
+    bmp.header,
+    Header {
+        file_size: 314,
+        image_data_start: 122,
+        bpp: Bpp::Bits24,
+        image_width: 8,
+        image_height: 8,
+        image_data_len: 192
+    }
+);
+
+// Check that raw image data slice is the correct length (according to parsed header)
+assert_eq!(bmp.raw_image_data().len(), bmp.header.image_data_len as usize);
+
+// Get an iterator over the pixel coordinates and values in this image and load into a vec
+let pixels: Vec<RawPixel> = bmp.raw_pixels().collect();
+
+// Loaded example image is 8x8px
+assert_eq!(pixels.len(), 8 * 8);
+```
+
+[`embedded-graphics`]: https://crates.io/crates/embedded-graphics
 
 ## License
 

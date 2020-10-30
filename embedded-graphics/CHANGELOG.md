@@ -35,6 +35,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#420](https://github.com/jamwaffles/embedded-graphics/pull/420) Added support for `SubImage`s.
 - [#429](https://github.com/jamwaffles/embedded-graphics/pull/429) Added `ToBytes` trait to convert colors into byte arrays.
 - [#431](https://github.com/jamwaffles/embedded-graphics/pull/431) Added `MockDisplay::affected_area` to get the area affected by previous drawing operations.
+- [#450](https://github.com/jamwaffles/embedded-graphics/pull/450) Added `ColorConverted` and `DrawTargetExt::color_converted` to support color conversion for draw targets.
 
 ### Changed
 
