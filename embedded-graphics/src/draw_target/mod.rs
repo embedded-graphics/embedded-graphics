@@ -1,7 +1,7 @@
 //! A target for embedded-graphics drawing operations.
 
 mod clipped;
-mod convert_color;
+mod color_converted;
 mod cropped;
 mod translated;
 
@@ -13,7 +13,7 @@ use crate::{
 };
 
 pub use clipped::Clipped;
-pub use convert_color::ConvertColor;
+pub use color_converted::ColorConverted;
 pub use cropped::Cropped;
 pub use translated::Translated;
 
@@ -616,8 +616,8 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// // color type. This will fail to compile:
     /// // image.draw(&mut display)?;
     ///
-    /// // To fix this `convert_color` is added to enable color conversion.
-    /// image.draw(&mut display.convert_color())?;
+    /// // To fix this `color_converted` is added to enable color conversion.
+    /// image.draw(&mut display.color_converted())?;
     /// #
     /// # let mut expected = MockDisplay::from_pattern(&[
     /// #     "WWWW", //
@@ -630,8 +630,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-
-    fn convert_color<C>(&mut self) -> ConvertColor<'_, Self, C>
+    fn color_converted<C>(&mut self) -> ColorConverted<'_, Self, C>
     where
         C: PixelColor + Into<Self::Color>;
 }
@@ -652,10 +651,10 @@ where
         Clipped::new(self, area)
     }
 
-    fn convert_color<C>(&mut self) -> ConvertColor<'_, Self, C>
+    fn color_converted<C>(&mut self) -> ColorConverted<'_, Self, C>
     where
         C: PixelColor + Into<Self::Color>,
     {
-        ConvertColor::new(self)
+        ColorConverted::new(self)
     }
 }

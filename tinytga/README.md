@@ -60,8 +60,8 @@ image.draw(&mut display)?;
 ```
 ### Accessing pixels using an embedded-graphics color type
 
-Even if tinytga is used without using [embedded-graphics] to draw the image the color types
-provided by [embedded-graphics] can still be used to access the pixel data using the
+If [embedded-graphics] is not used to draw the TGA image, the color types provided by
+[embedded-graphics] can still be used to access the pixel data using the
 `pixels` method.
 
 ```rust
@@ -84,9 +84,9 @@ let pixels: Vec<_> = img.pixels().collect();
 
 ### Accessing raw pixel data
 
-If you do not want to use the color types provided by [embedded-graphics] you can also access
-the raw image data. The iterator returned by the `pixels`
-method uses `u32` values to return the raw color value of each pixel.
+If [embedded-graphics] is not used in the target application, the raw image data can be
+accessed with the `pixels` method on
+`RawTga`  The returned iterator produces a `u32` for each pixel value.
 
 ```rust
 use embedded_graphics::{prelude::*, pixelcolor::Rgb888};

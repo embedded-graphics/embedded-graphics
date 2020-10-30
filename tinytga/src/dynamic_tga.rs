@@ -77,9 +77,9 @@ where
         D: DrawTarget<Color = Self::Color>,
     {
         match self.color_type {
-            ColorType::Gray8 => self.raw.draw(&mut target.convert_color::<Gray8>()),
-            ColorType::Rgb555 => self.raw.draw(&mut target.convert_color::<Rgb555>()),
-            ColorType::Rgb888 => self.raw.draw(&mut target.convert_color::<Rgb888>()),
+            ColorType::Gray8 => self.raw.draw(&mut target.color_converted::<Gray8>()),
+            ColorType::Rgb555 => self.raw.draw(&mut target.color_converted::<Rgb555>()),
+            ColorType::Rgb888 => self.raw.draw(&mut target.color_converted::<Rgb888>()),
         }
     }
 }

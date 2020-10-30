@@ -6,13 +6,13 @@ use core::marker::PhantomData;
 
 /// Color conversion draw target.
 ///
-/// Created by calling [`convert_color`] on any [`DrawTarget`].
-/// See the [`convert_color`] method documentation for more information.
+/// Created by calling [`color_converted`] on any [`DrawTarget`].
+/// See the [`color_converted`] method documentation for more information.
 ///
 /// [`DrawTarget`]: trait.DrawTarget.html
-/// [`convert_color`]: trait.DrawTargetExt.html#tymethod.into_color
+/// [`color_converted`]: trait.DrawTargetExt.html#tymethod.color_converted
 #[derive(Debug)]
-pub struct ConvertColor<'a, T, C> {
+pub struct ColorConverted<'a, T, C> {
     /// The parent draw target.
     parent: &'a mut T,
 
@@ -20,7 +20,7 @@ pub struct ConvertColor<'a, T, C> {
     color_type: PhantomData<C>,
 }
 
-impl<'a, T, C> ConvertColor<'a, T, C>
+impl<'a, T, C> ColorConverted<'a, T, C>
 where
     T: DrawTarget,
     C: PixelColor + Into<T::Color>,
@@ -33,7 +33,7 @@ where
     }
 }
 
-impl<T, C> DrawTarget for ConvertColor<'_, T, C>
+impl<T, C> DrawTarget for ColorConverted<'_, T, C>
 where
     T: DrawTarget,
     C: PixelColor + Into<T::Color>,
@@ -66,7 +66,7 @@ where
     }
 }
 
-impl<T, C> Dimensions for ConvertColor<'_, T, C>
+impl<T, C> Dimensions for ColorConverted<'_, T, C>
 where
     T: DrawTarget,
 {
