@@ -111,53 +111,55 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
     #[allow(unused)]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.stop {
-            return None;
-        }
-
-        if self.end_join.kind == JoinKind::End {
-            self.stop = true;
-        }
-
-        let line = ThickSegment::new(self.start_join, self.end_join).intersection(self.scanline_y);
-
-        // Move window of joints along the line by 1 pair.
-        {
-            self.start_join = self.end_join;
-
-            if let Some([start, mid, end]) = self.windows.next() {
-                self.end_join =
-                    LineJoin::from_points(*start, *mid, *end, self.width, self.alignment);
-            } else {
-                let start = *self.points.get(self.points.len() - 2)?;
-                let end = *self.points.last()?;
-
-                self.end_join = LineJoin::end(start, end, self.width, self.alignment);
+        loop {
+            if self.stop {
+                break None;
             }
-        }
 
-        if let Some(mut line) = line {
-            // Do some checks to prevent adjacent line overdraw at end/start points.
-            if let Some(prev_line) = self.prev_line {
-                // NOTE: Lines returned from intersections are always X-sorted with start point to
-                // the left.
-                if let Some(fixed_overlap) = fix_overlap(prev_line, line) {
-                    line = fixed_overlap;
-                }
-                // Current line doesn't need to be drawn. Skip onto the next line that may extend
-                // prev_line.
-                else {
-                    return self.next();
+            if self.end_join.kind == JoinKind::End {
+                self.stop = true;
+            }
+
+            let line =
+                ThickSegment::new(self.start_join, self.end_join).intersection(self.scanline_y);
+
+            // Move window of joints along the line by 1 pair.
+            {
+                self.start_join = self.end_join;
+
+                if let Some([start, mid, end]) = self.windows.next() {
+                    self.end_join =
+                        LineJoin::from_points(*start, *mid, *end, self.width, self.alignment);
+                } else {
+                    let start = *self.points.get(self.points.len() - 2)?;
+                    let end = *self.points.last()?;
+
+                    self.end_join = LineJoin::end(start, end, self.width, self.alignment);
                 }
             }
 
-            self.prev_line = Some(line);
+            if let Some(mut line) = line {
+                // Do some checks to prevent adjacent line overdraw at end/start points.
+                if let Some(prev_line) = self.prev_line {
+                    // NOTE: Lines returned from intersections are always X-sorted with start point
+                    // to the left.
+                    if let Some(fixed_overlap) = fix_overlap(prev_line, line) {
+                        line = fixed_overlap;
+                    }
+                    // Current line doesn't need to be drawn. Skip onto the next line that may
+                    // extend prev_line.
+                    else {
+                        continue;
+                    }
+                }
 
-            Some(line)
-        }
-        // There was no intersection on this segment, so skip to the next one and check that.
-        else {
-            self.next()
+                self.prev_line = Some(line);
+
+                break Some(line);
+            }
+
+            // At this point, there was no intersection on this segment, so skip to the next one and
+            // check that.
         }
     }
 }

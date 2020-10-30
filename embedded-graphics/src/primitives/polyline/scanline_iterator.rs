@@ -54,22 +54,24 @@ impl<'a> Iterator for ScanlineIterator<'a> {
     type Item = Line;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.stop {
-            return None;
-        }
+        loop {
+            if self.stop {
+                break None;
+            }
 
-        if self.scanline_y == self.scanline_limit {
-            self.stop = true;
-        }
+            if self.scanline_y == self.scanline_limit {
+                self.stop = true;
+            }
 
-        if let Some(next) = self.intersections.next() {
-            Some(next)
-        } else {
-            self.scanline_y += 1;
+            if let Some(next) = self.intersections.next() {
+                break Some(next);
+            } else {
+                self.scanline_y += 1;
 
-            self.intersections.reset_with_new_scanline(self.scanline_y);
+                self.intersections.reset_with_new_scanline(self.scanline_y);
 
-            self.next()
+                continue;
+            }
         }
     }
 }
