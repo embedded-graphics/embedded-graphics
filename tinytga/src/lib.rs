@@ -57,8 +57,8 @@
 //! ```
 //! ## Accessing pixels using an embedded-graphics color type
 //!
-//! Even if tinytga is used without using [embedded-graphics] to draw the image the color types
-//! provided by [embedded-graphics] can still be used to access the pixel data using the
+//! If [embedded-graphics] is not used to draw the TGA image, the color types provided by 
+//! [embedded-graphics] can still be used to access the pixel data using the 
 //! [`pixels`](struct.Tga.html#method.pixels) method.
 //!
 //! ```rust

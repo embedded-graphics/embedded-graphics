@@ -575,7 +575,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// Creates a color conversion draw target.
     ///
     /// A color conversion draw target is used to draw drawables with a different color type to a
-    /// draw target. The drawable color type needs to implement `Into<C>`, where `C` is the draw
+    /// draw target. The drawable color type must implement `Into<C>`, where `C` is the draw
     /// target color type.
     ///
     /// # Performance
@@ -583,11 +583,11 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// Color conversion can be expensive on embedded hardware and should be avoided if possible.
     /// Using the same color type for drawables and the draw target makes sure that no unnecessary
     /// color conversion is used. But in some cases color conversion will be required, for example,
-    /// to draw images.
+    /// to draw images with a color format only known at runtime.
     ///
     /// # Examples
     ///
-    /// This example draws a `BinaryColor` image to a `Rgb888` display.
+    /// This example draws a `BinaryColor` image to an `Rgb888` display.
     ///
     /// ```
     /// use embedded_graphics::{
