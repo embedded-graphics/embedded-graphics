@@ -1,7 +1,4 @@
 //! A line segment constructed from two line joints.
-//!
-//! Segment always has one open side, so scanline intersections may return one or two points, but
-//! no more.
 
 use crate::{
     geometry::{Dimensions, Point},
@@ -39,8 +36,8 @@ impl ThickSegment {
 
     /// Get the bounding box containing the left/right edges of the segment.
     ///
-    /// Note that this does not include any bevel/cap lines as returned by `perimiter` which is why
-    /// this is not `impl Dimensions`. These lines don't need to be included as  other segments
+    /// Note that this does not include any bevel/cap lines as returned by `perimeter` which is why
+    /// this is not `impl Dimensions`. These lines don't need to be included as other segments
     /// in the polyline will expand the bounding box to the right place anyway.
     pub fn edges_bounding_box(&self) -> Rectangle {
         let (right, left) = self.edges();
@@ -58,11 +55,11 @@ impl ThickSegment {
         Rectangle::with_corners(tl, br)
     }
 
-    /// Get up to 6 lines comprising the perimiter of this segment.
+    /// Get up to 6 lines comprising the perimeter of this segment.
     ///
     /// Note: This array could be stored as a `ThickSegment` property, but it's calculated on the
     /// fly for memory reasons.
-    fn perimiter(&self) -> [Option<Line>; 6] {
+    fn perimeter(&self) -> [Option<Line>; 6] {
         let start_cap = self.start_join.start_cap_lines();
         let end_cap = self.end_join.end_cap_lines();
         let edges = self.edges();
@@ -78,10 +75,10 @@ impl ThickSegment {
     }
 
     pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
-        let perimiter = self.perimiter();
+        let perimeter = self.perimeter();
 
-        // Loop through perimiter and get any intersections
-        let it = perimiter
+        // Loop through perimeter and get any intersections
+        let it = perimeter
             .iter()
             .filter_map(|l| l.and_then(|l| bresenham_scanline_intersection(&l, scanline_y)));
 
