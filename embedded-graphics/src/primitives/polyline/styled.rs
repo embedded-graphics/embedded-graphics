@@ -44,8 +44,8 @@ where
             let mut scanline_iter = ScanlineIterator::new(styled);
             let line_iter = scanline_iter
                 .next()
-                .unwrap_or_else(|| Line::new(Point::zero(), Point::zero()))
-                .points();
+                .map(|line| line.points())
+                .unwrap_or_else(|| line::Points::empty());
 
             StyledIter::Thick {
                 scanline_iter,
@@ -196,7 +196,7 @@ mod tests {
     ];
 
     #[test]
-    fn mock_display() {
+    fn one_px_stroke() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
         Polyline::new(&PATTERN)
@@ -460,5 +460,18 @@ mod tests {
             Rectangle::new(Point::new(5, 10), Size::zero()),
             "one point"
         );
+    }
+
+    #[test]
+    fn empty_line_no_draw() {
+        let mut display = MockDisplay::new();
+
+        Polyline::new(&[])
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 2))
+            .into_pixels()
+            .draw(&mut display)
+            .unwrap();
+
+        assert_eq!(display, MockDisplay::new());
     }
 }
