@@ -5,8 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        line::{self, Line},
-        polyline,
+        line, polyline,
         polyline::{scanline_iterator::ScanlineIterator, Polyline},
         thick_segment_iter::ThickSegmentIter,
         Primitive, Rectangle,

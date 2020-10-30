@@ -9,7 +9,7 @@ use crate::{
     geometry::{Dimensions, Point},
     primitives::{
         line::thick_points::{ParallelLineType, ParallelsIterator},
-        ContainsPoint, Primitive, Rectangle,
+        Primitive, Rectangle,
     },
     style::StrokeAlignment,
     transform::Transform,
