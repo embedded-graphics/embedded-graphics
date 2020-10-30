@@ -77,15 +77,14 @@ impl ThickSegment {
         ]
     }
 
-    /// TODO: DOc. Un-pub?
-    pub fn intersection(&self, scanline_y: i32) -> Option<Line> {
+    pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
         let perimiter = self.perimiter();
 
         // Loop through perimiter and get any intersections
         let it = perimiter.iter().filter_map(|l| {
             l.and_then(|l| {
                 l.bresenham_scanline_intersection(scanline_y)
-                    .map(|intersection| intersection.as_line())
+                    .map(|intersection| intersection.into_line())
             })
         });
 

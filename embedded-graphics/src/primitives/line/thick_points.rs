@@ -110,7 +110,7 @@ impl ParallelsIterator {
 
         // Thickness threshold, taking into account that fewer pixels are required to draw a
         // diagonal line of the same perceived width.
-        let thickness_threshold = (thickness * 2).pow(2) * line.length_squared() as i32;
+        let thickness_threshold = (thickness * 2).pow(2) * line.delta().length_squared();
         let thickness_accumulator =
             (parallel_parameters.error_step.minor + parallel_parameters.error_step.major) / 2;
 

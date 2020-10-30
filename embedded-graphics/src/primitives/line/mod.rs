@@ -120,10 +120,10 @@ pub(in crate::primitives) enum BresenhamIntersection {
 
 impl BresenhamIntersection {
     /// As a line
-    pub fn as_line(&self) -> Line {
+    pub fn into_line(self) -> Line {
         match self {
-            Self::Line(l) => *l,
-            Self::Point(p) => Line::new(*p, *p),
+            Self::Line(l) => l,
+            Self::Point(p) => Line::new(p, p),
         }
         .sorted_x()
     }
@@ -216,7 +216,7 @@ impl Line {
         (left_line, right_line)
     }
 
-    /// Sort line so point with smallest X coordinate is to the left.
+    /// Sort line so start point is to the left of the end point.
     fn sorted_x(&self) -> Self {
         let (start, end) = if self.start.x > self.end.x {
             (self.end, self.start)
@@ -227,7 +227,7 @@ impl Line {
         Self::new(start, end)
     }
 
-    /// Get the midpoint of the line.
+    /// Compute the midpoint of the line.
     pub fn midpoint(&self) -> Point {
         self.start + (self.end - self.start) / 2
     }
@@ -307,9 +307,8 @@ impl Line {
         // If we got here, line segments intersect. Compute intersection point using method similar
         // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
 
-        // The denom/2 is to get rounding instead of truncating. It is added or subtracted to the
-        // numerator, depending upon the sign of the numerator.
-        let offset = if denom < 0 { -denom / 2 } else { denom / 2 };
+        // The denom/2 is to get rounding instead of truncating.
+        let offset = denom.abs() / 2;
 
         let num = b1 * c2 - b2 * c1;
         let x = if num < 0 { num - offset } else { num + offset } / denom;
@@ -352,12 +351,9 @@ impl Line {
         Some(intersection)
     }
 
-    /// Get the squared length of the line
-    pub fn length_squared(&self) -> u32 {
-        let delta = self.end - self.start;
-
-        // Note: squaring result is always positive. `as u32` cast should be safe here.
-        delta.length_squared() as u32
+    /// Compute the delta (`end - start`) of the line.
+    pub fn delta(&self) -> Point {
+        self.end - self.start
     }
 }
 

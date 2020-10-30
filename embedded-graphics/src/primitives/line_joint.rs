@@ -180,7 +180,8 @@ impl LineJoint {
                         Side::Right => r_intersection,
                     },
                 )
-                .length_squared();
+                .delta()
+                .length_squared() as u32;
 
                 // Intersection is within limit at which it will be chopped off into a bevel, so
                 // return a miter.

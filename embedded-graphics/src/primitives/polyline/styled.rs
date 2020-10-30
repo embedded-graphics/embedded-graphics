@@ -117,10 +117,6 @@ where
         D: DrawTarget<Color = C>,
     {
         if let Some(stroke_color) = self.style.stroke_color {
-            if self.style.is_transparent() {
-                return Ok(());
-            }
-
             match self.style.stroke_width {
                 0 => Ok(()),
                 1 => display.draw_iter(
@@ -150,7 +146,7 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() {
+        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
             let (min, max) = ThickSegmentIter::new(
                 self.primitive.vertices,
                 self.style.stroke_width,
@@ -342,8 +338,6 @@ mod tests {
     fn degenerate_joint() {
         let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
 
-        display.set_allow_overdraw(true);
-
         Polyline::new(&[Point::new(2, 5), Point::new(25, 5), Point::new(5, 2)])
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 5))
             .draw(&mut display)
@@ -449,6 +443,22 @@ mod tests {
                 .bounding_box(),
             Rectangle::new(pl.bounding_box().center(), Size::zero()),
             "filled"
+        );
+
+        assert_eq!(
+            Polyline::new(&PATTERN[0..2])
+                .into_styled::<Rgb565>(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .bounding_box(),
+            Rectangle::new(Point::new(4, 3), Size::new(11, 9)),
+            "two points"
+        );
+
+        assert_eq!(
+            Polyline::new(&PATTERN[0..1])
+                .into_styled::<Rgb565>(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .bounding_box(),
+            Rectangle::new(Point::new(5, 10), Size::zero()),
+            "one point"
         );
     }
 }

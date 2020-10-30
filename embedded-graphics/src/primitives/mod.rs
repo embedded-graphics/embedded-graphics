@@ -4,13 +4,13 @@ pub mod arc;
 pub mod circle;
 pub mod ellipse;
 pub mod line;
-pub mod line_joint;
+mod line_joint;
 pub mod polyline;
 pub mod rectangle;
 pub mod rounded_rectangle;
 pub mod sector;
-pub mod thick_segment;
-pub mod thick_segment_iter;
+mod thick_segment;
+mod thick_segment_iter;
 pub mod triangle;
 
 pub use self::{
