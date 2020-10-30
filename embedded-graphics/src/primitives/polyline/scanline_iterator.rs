@@ -24,6 +24,11 @@ impl<'a> ScanlineIterator<'a> {
     where
         C: PixelColor,
     {
+        debug_assert!(
+            styled.style.stroke_width > 1,
+            "Polyline ScanlineIterator should only be used for stroke widths greater than 1"
+        );
+
         let bb = styled.bounding_box();
 
         let scanline_y = bb.top_left.y;
