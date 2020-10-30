@@ -57,8 +57,8 @@
 //! ```
 //! ## Accessing pixels using an embedded-graphics color type
 //!
-//! If [embedded-graphics] is not used to draw the TGA image, the color types provided by 
-//! [embedded-graphics] can still be used to access the pixel data using the 
+//! If [embedded-graphics] is not used to draw the TGA image, the color types provided by
+//! [embedded-graphics] can still be used to access the pixel data using the
 //! [`pixels`](struct.Tga.html#method.pixels) method.
 //!
 //! ```rust
@@ -221,7 +221,7 @@ where
     /// The [`RawTga`] object can be used to access lower level details about the TGA file.
     ///
     /// [`RawTga`]: struct.RawTga.html
-    pub fn raw(&self) -> &RawTga<'a> {
+    pub fn as_raw(&self) -> &RawTga<'a> {
         &self.raw
     }
 

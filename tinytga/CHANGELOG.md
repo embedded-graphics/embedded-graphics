@@ -16,7 +16,7 @@
 - **(breaking)** [#450](https://github.com/jamwaffles/embedded-graphics/pull/450) The `TgaFooter` struct was replaced by the `developer_dictionary` and `extension_area` methods in `RawTga`.
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) `Tga::width` and `Tga::height` were replaced by `Tga::size` which requires `embedded_graphics::geometry::OriginDimensions` to be in scope (also included in the embedded-graphics `prelude`).
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) The color map can now be accessed using the new `ColorMap` type.
-- **(breaking)** [#450](https://github.com/jamwaffles/embedded-graphics/pull/450) `Tga` no longer provides direct access to low level information like the TGA header, instead `Tga::raw` can be used to access the underlying `RawTga` instance.
+- **(breaking)** [#450](https://github.com/jamwaffles/embedded-graphics/pull/450) `Tga` no longer provides direct access to low level information like the TGA header, instead `Tga::as_raw` can be used to access the underlying `RawTga` instance.
 
 ### Added
 

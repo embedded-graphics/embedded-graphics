@@ -55,7 +55,7 @@ where
     /// The [`RawTga`] object can be used to access lower level details about the TGA file.
     ///
     /// [`RawTga`]: struct.RawTga.html
-    pub fn raw(&self) -> &RawTga<'a> {
+    pub fn as_raw(&self) -> &RawTga<'a> {
         &self.raw
     }
 }
