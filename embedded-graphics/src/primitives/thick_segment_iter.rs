@@ -1,17 +1,20 @@
-//! Thick line joint.
+//! Thick segment iterator.
 
 use crate::{
     geometry::Point,
-    primitives::line_join::{JoinKind, LineJoin},
+    primitives::{
+        line_join::{JoinKind, LineJoin},
+        thick_segment::ThickSegment,
+    },
     style::StrokeAlignment,
 };
-
-use super::thick_segment::ThickSegment;
 
 /// Thick segments iterator.
 ///
 /// Iterates over all line segments in the polyline, returning a 6-sided shape as a [`ThickSegment`]
-/// for each segment. These are tesselated and are used to produce scanline intersections.
+/// for each segment. These are tessellated and are used to produce scanline intersections.
+///
+/// [`ThickSegment`]: ../thick_segment/struct.ThickSegment.html
 #[derive(Clone, Debug)]
 pub(in crate::primitives) struct ThickSegmentIter<'a> {
     windows: core::slice::Windows<'a, Point>,
