@@ -105,30 +105,6 @@ pub enum Intersection {
     Colinear,
 }
 
-/// Bresenham intersection result.
-#[derive(Debug, Copy, Clone)]
-pub(in crate::primitives) enum BresenhamIntersection {
-    /// Point
-    Point(Point),
-
-    /// Multiple intersection points.
-    ///
-    /// This may be caused by e.g. a shallow line where multiple points lie on the same Y
-    /// coordinate.
-    Line(Line),
-}
-
-impl BresenhamIntersection {
-    /// As a line
-    pub fn into_line(self) -> Line {
-        match self {
-            Self::Line(l) => l,
-            Self::Point(p) => Line::new(p, p),
-        }
-        .sorted_x()
-    }
-}
-
 impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
@@ -217,7 +193,7 @@ impl Line {
     }
 
     /// Sort line so start point is to the left of the end point.
-    fn sorted_x(&self) -> Self {
+    pub(in crate::primitives) fn sorted_x(&self) -> Self {
         let (start, end) = if self.start.x > self.end.x {
             (self.end, self.start)
         } else {
@@ -320,35 +296,6 @@ impl Line {
             point: Point::new(x, y),
             outer_side: if denom > 0 { Side::Right } else { Side::Left },
         }
-    }
-
-    /// Intersect a horizontal scan line with the Bresenham representation of this line segment.
-    pub(in crate::primitives) fn bresenham_scanline_intersection(
-        &self,
-        scan_y: i32,
-    ) -> Option<BresenhamIntersection> {
-        if !self
-            .bounding_box()
-            .contains(Point::new(self.start.x, scan_y))
-        {
-            return None;
-        }
-
-        let mut points = self.points().filter(|p| p.y == scan_y);
-
-        let first = points.next()?;
-
-        let intersection = if let Some(last) = points.last() {
-            if last != first {
-                BresenhamIntersection::Line(Line::new(first, last))
-            } else {
-                BresenhamIntersection::Point(first)
-            }
-        } else {
-            BresenhamIntersection::Point(first)
-        };
-
-        Some(intersection)
     }
 
     /// Compute the delta (`end - start`) of the line.

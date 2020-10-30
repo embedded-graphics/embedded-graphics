@@ -4,8 +4,8 @@
 //! no more.
 
 use crate::{
-    geometry::Dimensions,
-    primitives::{line_join::LineJoin, Line, Rectangle},
+    geometry::{Dimensions, Point},
+    primitives::{line_join::LineJoin, ContainsPoint, Line, Primitive, Rectangle},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -81,12 +81,9 @@ impl ThickSegment {
         let perimiter = self.perimiter();
 
         // Loop through perimiter and get any intersections
-        let it = perimiter.iter().filter_map(|l| {
-            l.and_then(|l| {
-                l.bresenham_scanline_intersection(scanline_y)
-                    .map(|intersection| intersection.into_line())
-            })
-        });
+        let it = perimiter
+            .iter()
+            .filter_map(|l| l.and_then(|l| bresenham_scanline_intersection(&l, scanline_y)));
 
         // Loop through intersections and collect min/max bounds of all of them into a single line
         let line = it.fold(None, |acc: Option<Line>, line| {
@@ -102,4 +99,24 @@ impl ThickSegment {
 
         Some(line)
     }
+}
+
+/// Intersect a horizontal scan line with the Bresenham representation of this line segment.
+fn bresenham_scanline_intersection(line: &Line, scan_y: i32) -> Option<Line> {
+    if !line
+        .bounding_box()
+        .contains(Point::new(line.start.x, scan_y))
+    {
+        return None;
+    }
+
+    let mut points = line.points().filter(|p| p.y == scan_y);
+
+    let first = points.next()?;
+
+    points
+        .last()
+        .filter(|last| *last != first)
+        .map(|last| Line::new(first, last).sorted_x())
+        .or_else(|| Some(Line::new(first, first)))
 }
