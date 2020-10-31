@@ -11,12 +11,6 @@
 
 use crate::pixelcolor::{PixelColor, RgbColor};
 
-macro_rules! conv {
-    ($value:expr, $from_max:expr, $to_max:expr) => {
-        (($value * $to_max as u16 + $from_max / 2) / $from_max) as u8
-    };
-}
-
 macro_rules! trait_const {
     ($ident:ident, $name:expr,  $value:expr) => {
         #[doc = "<span style=\"background:rgb("]
@@ -173,343 +167,175 @@ pub trait WebColors: PixelColor + RgbColor {
     trait_const!(CSS_YELLOW_GREEN, "Yellow Green", "154, 205, 50");
 }
 
-macro_rules! u24_color {
-    ($ident:ident, $r:expr, $g:expr, $b:expr, $container:path, $name:expr,  $value:expr) => {
+macro_rules! web_color {
+    ($ident:ident, $r:expr, $g:expr, $b:expr, $name:expr, $value:expr) => {
         #[doc = "<span style=\"background:rgb("]
         #[doc = $value]
         #[doc = ");border-radius:3px;display:inline-block;width:0.9em;height:0.9em\"></span>"]
         #[doc = $name]
-        const $ident: Self = Self::new($r, $g, $b);
+        const $ident: Self = Self::with_rgb888($r, $g, $b);
     };
 }
 
 #[rustfmt::skip]
-macro_rules! impl_u24_web_colors {
+macro_rules! impl_web_colors {
     ($mod:ident, $container_str:expr, $container:path) => {
         #[doc = "Named web colors for the"]
         #[doc = $container_str]
         #[doc = "color type."]
         #[allow(unused)]
         impl WebColors for $container {
-            u24_color!(CSS_ALICE_BLUE, 240, 248, 255, $container, "Alice Blue", "240, 248, 255");
-            u24_color!(CSS_ANTIQUE_WHITE, 250, 235, 215, $container, "Antique White", "250, 235, 215");
-            u24_color!(CSS_AQUA, 0, 255, 255, $container, "Aqua", "0, 255, 255");
-            u24_color!(CSS_AQUAMARINE, 127, 255, 212, $container, "Aquamarine", "127, 255, 212");
-            u24_color!(CSS_AZURE, 240, 255, 255, $container, "Azure", "240, 255, 255");
-            u24_color!(CSS_BEIGE, 245, 245, 220, $container, "Beige", "245, 245, 220");
-            u24_color!(CSS_BISQUE, 255, 228, 196, $container, "Bisque", "255, 228, 196");
-            u24_color!(CSS_BLACK, 0, 0, 0, $container, "Black", "0, 0, 0");
-            u24_color!(CSS_BLANCHED_ALMOND, 255, 235, 205, $container, "Blanched Almond", "255, 235, 205");
-            u24_color!(CSS_BLUE, 0, 0, 255, $container, "Blue", "0, 0, 255");
-            u24_color!(CSS_BLUE_VIOLET, 138, 43, 226, $container, "Blue Violet", "138, 43, 226");
-            u24_color!(CSS_BROWN, 165, 42, 42, $container, "Brown", "165, 42, 42");
-            u24_color!(CSS_BURLY_WOOD, 222, 184, 135, $container, "Burly Wood", "222, 184, 135");
-            u24_color!(CSS_CADET_BLUE, 95, 158, 160, $container, "Cadet Blue", "95, 158, 160");
-            u24_color!(CSS_CHARTREUSE, 127, 255, 0, $container, "Chartreuse", "127, 255, 0");
-            u24_color!(CSS_CHOCOLATE, 210, 105, 30, $container, "Chocolate", "210, 105, 30");
-            u24_color!(CSS_CORAL, 255, 127, 80, $container, "Coral", "255, 127, 80");
-            u24_color!(CSS_CORNFLOWER_BLUE, 100, 149, 237, $container, "Cornflower Blue", "100, 149, 237");
-            u24_color!(CSS_CORNSILK, 255, 248, 220, $container, "Cornsilk", "255, 248, 220");
-            u24_color!(CSS_CRIMSON, 220, 20, 60, $container, "Crimson", "220, 20, 60");
-            u24_color!(CSS_CYAN, 0, 255, 255, $container, "Cyan", "0, 255, 255");
-            u24_color!(CSS_DARK_BLUE, 0, 0, 139, $container, "Dark Blue", "0, 0, 139");
-            u24_color!(CSS_DARK_CYAN, 0, 139, 139, $container, "Dark Cyan", "0, 139, 139");
-            u24_color!(CSS_DARK_GOLDENROD, 184, 134, 11, $container, "Dark Goldenrod", "184, 134, 11");
-            u24_color!(CSS_DARK_GRAY, 169, 169, 169, $container, "Dark Gray", "169, 169, 169");
-            u24_color!(CSS_DARK_GREEN, 0, 100, 0, $container, "Dark Green", "0, 100, 0");
-            u24_color!(CSS_DARK_KHAKI, 189, 183, 107, $container, "Dark Khaki", "189, 183, 107");
-            u24_color!(CSS_DARK_MAGENTA, 139, 0, 139, $container, "Dark Magenta", "139, 0, 139");
-            u24_color!(CSS_DARK_OLIVE_GREEN, 85, 107, 47, $container, "Dark Olive Green", "85, 107, 47");
-            u24_color!(CSS_DARK_ORANGE, 255, 140, 0, $container, "Dark Orange", "255, 140, 0");
-            u24_color!(CSS_DARK_ORCHID, 153, 50, 204, $container, "Dark Orchid", "153, 50, 204");
-            u24_color!(CSS_DARK_RED, 139, 0, 0, $container, "Dark Red", "139, 0, 0");
-            u24_color!(CSS_DARK_SALMON, 233, 150, 122, $container, "Dark Salmon", "233, 150, 122");
-            u24_color!(CSS_DARK_SEA_GREEN, 143, 188, 143, $container, "Dark Sea Green", "143, 188, 143");
-            u24_color!(CSS_DARK_SLATE_BLUE, 72, 61, 139, $container, "Dark Slate Blue", "72, 61, 139");
-            u24_color!(CSS_DARK_SLATE_GRAY, 47, 79, 79, $container, "Dark Slate Gray", "47, 79, 79");
-            u24_color!(CSS_DARK_TURQUOISE, 0, 206, 209, $container, "Dark Turquoise", "0, 206, 209");
-            u24_color!(CSS_DARK_VIOLET, 148, 0, 211, $container, "Dark Violet", "148, 0, 211");
-            u24_color!(CSS_DEEP_PINK, 255, 20, 147, $container, "Deep Pink", "255, 20, 147");
-            u24_color!(CSS_DEEP_SKY_BLUE, 0, 191, 255, $container, "Deep Sky Blue", "0, 191, 255");
-            u24_color!(CSS_DIM_GRAY, 105, 105, 105, $container, "Dim Gray", "105, 105, 105");
-            u24_color!(CSS_DODGER_BLUE, 30, 144, 255, $container, "Dodger Blue", "30, 144, 255");
-            u24_color!(CSS_FIRE_BRICK, 178, 34, 34, $container, "Fire Brick", "178, 34, 34");
-            u24_color!(CSS_FLORAL_WHITE, 255, 250, 240, $container, "Floral White", "255, 250, 240");
-            u24_color!(CSS_FOREST_GREEN, 34, 139, 34, $container, "Forest Green", "34, 139, 34");
-            u24_color!(CSS_FUCHSIA, 255, 0, 255, $container, "Fuchsia", "255, 0, 255");
-            u24_color!(CSS_GAINSBORO, 220, 220, 220, $container, "Gainsboro", "220, 220, 220");
-            u24_color!(CSS_GHOST_WHITE, 248, 248, 255, $container, "Ghost White", "248, 248, 255");
-            u24_color!(CSS_GOLD, 255, 215, 0, $container, "Gold", "255, 215, 0");
-            u24_color!(CSS_GOLDENROD, 218, 165, 32, $container, "Goldenrod", "218, 165, 32");
-            u24_color!(CSS_GRAY, 128, 128, 128, $container, "Gray", "128, 128, 128");
-            u24_color!(CSS_GREEN, 0, 128, 0, $container, "Green", "0, 128, 0");
-            u24_color!(CSS_GREEN_YELLOW, 173, 255, 47, $container, "Green Yellow", "173, 255, 47");
-            u24_color!(CSS_HONEYDEW, 240, 255, 240, $container, "Honeydew", "240, 255, 240");
-            u24_color!(CSS_HOT_PINK, 255, 105, 180, $container, "Hot Pink", "255, 105, 180");
-            u24_color!(CSS_INDIAN_RED, 205, 92, 92, $container, "Indian Red", "205, 92, 92");
-            u24_color!(CSS_INDIGO, 75, 0, 130, $container, "Indigo", "75, 0, 130");
-            u24_color!(CSS_IVORY, 255, 255, 240, $container, "Ivory", "255, 255, 240");
-            u24_color!(CSS_KHAKI, 240, 230, 140, $container, "Khaki", "240, 230, 140");
-            u24_color!(CSS_LAVENDER, 230, 230, 250, $container, "Lavender", "230, 230, 250");
-            u24_color!(CSS_LAVENDER_BLUSH, 255, 240, 245, $container, "Lavender Blush", "255, 240, 245");
-            u24_color!(CSS_LAWN_GREEN, 124, 252, 0, $container, "Lawn Green", "124, 252, 0");
-            u24_color!(CSS_LEMON_CHIFFON, 255, 250, 205, $container, "Lemon Chiffon", "255, 250, 205");
-            u24_color!(CSS_LIGHT_BLUE, 173, 216, 230, $container, "Light Blue", "173, 216, 230");
-            u24_color!(CSS_LIGHT_CORAL, 240, 128, 128, $container, "Light Coral", "240, 128, 128");
-            u24_color!(CSS_LIGHT_CYAN, 224, 255, 255, $container, "Light Cyan", "224, 255, 255");
-            u24_color!(CSS_LIGHT_GOLDENROD_YELLOW, 250, 250, 210, $container, "Light Goldenrod Yellow", "250, 250, 210");
-            u24_color!(CSS_LIGHT_GRAY, 211, 211, 211, $container, "Light Gray", "211, 211, 211");
-            u24_color!(CSS_LIGHT_GREEN, 144, 238, 144, $container, "Light Green", "144, 238, 144");
-            u24_color!(CSS_LIGHT_PINK, 255, 182, 193, $container, "Light Pink", "255, 182, 193");
-            u24_color!(CSS_LIGHT_SALMON, 255, 160, 122, $container, "Light Salmon", "255, 160, 122");
-            u24_color!(CSS_LIGHT_SEA_GREEN, 32, 178, 170, $container, "Light Sea Green", "32, 178, 170");
-            u24_color!(CSS_LIGHT_SKY_BLUE, 135, 206, 250, $container, "Light Sky Blue", "135, 206, 250");
-            u24_color!(CSS_LIGHT_SLATE_GRAY, 119, 136, 153, $container, "Light Slate Gray", "119, 136, 153");
-            u24_color!(CSS_LIGHT_STEEL_BLUE, 176, 196, 222, $container, "Light Steel Blue", "176, 196, 222");
-            u24_color!(CSS_LIGHT_YELLOW, 255, 255, 224, $container, "Light Yellow", "255, 255, 224");
-            u24_color!(CSS_LIME, 0, 255, 0, $container, "Lime", "0, 255, 0");
-            u24_color!(CSS_LIME_GREEN, 50, 205, 50, $container, "Lime Green", "50, 205, 50");
-            u24_color!(CSS_LINEN, 250, 240, 230, $container, "Linen", "250, 240, 230");
-            u24_color!(CSS_MAGENTA, 255, 0, 255, $container, "Magenta", "255, 0, 255");
-            u24_color!(CSS_MAROON, 128, 0, 0, $container, "Maroon", "128, 0, 0");
-            u24_color!(CSS_MEDIUM_AQUAMARINE, 102, 205, 170, $container, "Medium Aquamarine", "102, 205, 170");
-            u24_color!(CSS_MEDIUM_BLUE, 0, 0, 205, $container, "Medium Blue", "0, 0, 205");
-            u24_color!(CSS_MEDIUM_ORCHID, 186, 85, 211, $container, "Medium Orchid", "186, 85, 211");
-            u24_color!(CSS_MEDIUM_PURPLE, 147, 112, 219, $container, "Medium Purple", "147, 112, 219");
-            u24_color!(CSS_MEDIUM_SEA_GREEN, 60, 179, 113, $container, "Medium Sea Green", "60, 179, 113");
-            u24_color!(CSS_MEDIUM_SLATE_BLUE, 123, 104, 238, $container, "Medium Slate Blue", "123, 104, 238");
-            u24_color!(CSS_MEDIUM_SPRING_GREEN, 0, 250, 154, $container, "Medium Spring Green", "0, 250, 154");
-            u24_color!(CSS_MEDIUM_TURQUOISE, 72, 209, 204, $container, "Medium Turquoise", "72, 209, 204");
-            u24_color!(CSS_MEDIUM_VIOLET_RED, 199, 21, 133, $container, "Medium Violet Red", "199, 21, 133");
-            u24_color!(CSS_MIDNIGHT_BLUE, 25, 25, 112, $container, "Midnight Blue", "25, 25, 112");
-            u24_color!(CSS_MINT_CREAM, 245, 255, 250, $container, "Mint Cream", "245, 255, 250");
-            u24_color!(CSS_MISTY_ROSE, 255, 228, 225, $container, "Misty Rose", "255, 228, 225");
-            u24_color!(CSS_MOCCASIN, 255, 228, 181, $container, "Moccasin", "255, 228, 181");
-            u24_color!(CSS_NAVAJO_WHITE, 255, 222, 173, $container, "Navajo White", "255, 222, 173");
-            u24_color!(CSS_NAVY, 0, 0, 128, $container, "Navy", "0, 0, 128");
-            u24_color!(CSS_OLD_LACE, 253, 245, 230, $container, "Old Lace", "253, 245, 230");
-            u24_color!(CSS_OLIVE, 128, 128, 0, $container, "Olive", "128, 128, 0");
-            u24_color!(CSS_OLIVE_DRAB, 107, 142, 35, $container, "Olive Drab", "107, 142, 35");
-            u24_color!(CSS_ORANGE, 255, 165, 0, $container, "Orange", "255, 165, 0");
-            u24_color!(CSS_ORANGE_RED, 255, 69, 0, $container, "Orange Red", "255, 69, 0");
-            u24_color!(CSS_ORCHID, 218, 112, 214, $container, "Orchid", "218, 112, 214");
-            u24_color!(CSS_PALE_GOLDENROD, 238, 232, 170, $container, "Pale Goldenrod", "238, 232, 170");
-            u24_color!(CSS_PALE_GREEN, 152, 251, 152, $container, "Pale Green", "152, 251, 152");
-            u24_color!(CSS_PALE_TURQUOISE, 175, 238, 238, $container, "Pale Turquoise", "175, 238, 238");
-            u24_color!(CSS_PALE_VIOLET_RED, 219, 112, 147, $container, "Pale Violet Red", "219, 112, 147");
-            u24_color!(CSS_PAPAYA_WHIP, 255, 239, 213, $container, "Papaya Whip", "255, 239, 213");
-            u24_color!(CSS_PEACH_PUFF, 255, 218, 185, $container, "Peach Puff", "255, 218, 185");
-            u24_color!(CSS_PERU, 205, 133, 63, $container, "Peru", "205, 133, 63");
-            u24_color!(CSS_PINK, 255, 192, 203, $container, "Pink", "255, 192, 203");
-            u24_color!(CSS_PLUM, 221, 160, 221, $container, "Plum", "221, 160, 221");
-            u24_color!(CSS_POWDER_BLUE, 176, 224, 230, $container, "Powder Blue", "176, 224, 230");
-            u24_color!(CSS_PURPLE, 128, 0, 128, $container, "Purple", "128, 0, 128");
-            u24_color!(CSS_REBECCAPURPLE, 102, 51, 153, $container, "Rebeccapurple", "102, 51, 153");
-            u24_color!(CSS_RED, 255, 0, 0, $container, "Red", "255, 0, 0");
-            u24_color!(CSS_ROSY_BROWN, 188, 143, 143, $container, "Rosy Brown", "188, 143, 143");
-            u24_color!(CSS_ROYAL_BLUE, 65, 105, 225, $container, "Royal Blue", "65, 105, 225");
-            u24_color!(CSS_SADDLE_BROWN, 139, 69, 19, $container, "Saddle Brown", "139, 69, 19");
-            u24_color!(CSS_SALMON, 250, 128, 114, $container, "Salmon", "250, 128, 114");
-            u24_color!(CSS_SANDY_BROWN, 244, 164, 96, $container, "Sandy Brown", "244, 164, 96");
-            u24_color!(CSS_SEA_GREEN, 46, 139, 87, $container, "Sea Green", "46, 139, 87");
-            u24_color!(CSS_SEASHELL, 255, 245, 238, $container, "Seashell", "255, 245, 238");
-            u24_color!(CSS_SIENNA, 160, 82, 45, $container, "Sienna", "160, 82, 45");
-            u24_color!(CSS_SILVER, 192, 192, 192, $container, "Silver", "192, 192, 192");
-            u24_color!(CSS_SKY_BLUE, 135, 206, 235, $container, "Sky Blue", "135, 206, 235");
-            u24_color!(CSS_SLATE_BLUE, 106, 90, 205, $container, "Slate Blue", "106, 90, 205");
-            u24_color!(CSS_SLATE_GRAY, 112, 128, 144, $container, "Slate Gray", "112, 128, 144");
-            u24_color!(CSS_SNOW, 255, 250, 250, $container, "Snow", "255, 250, 250");
-            u24_color!(CSS_SPRING_GREEN, 0, 255, 127, $container, "Spring Green", "0, 255, 127");
-            u24_color!(CSS_STEEL_BLUE, 70, 130, 180, $container, "Steel Blue", "70, 130, 180");
-            u24_color!(CSS_TAN, 210, 180, 140, $container, "Tan", "210, 180, 140");
-            u24_color!(CSS_TEAL, 0, 128, 128, $container, "Teal", "0, 128, 128");
-            u24_color!(CSS_THISTLE, 216, 191, 216, $container, "Thistle", "216, 191, 216");
-            u24_color!(CSS_TOMATO, 255, 99, 71, $container, "Tomato", "255, 99, 71");
-            u24_color!(CSS_TURQUOISE, 64, 224, 208, $container, "Turquoise", "64, 224, 208");
-            u24_color!(CSS_VIOLET, 238, 130, 238, $container, "Violet", "238, 130, 238");
-            u24_color!(CSS_WHEAT, 245, 222, 179, $container, "Wheat", "245, 222, 179");
-            u24_color!(CSS_WHITE, 255, 255, 255, $container, "White", "255, 255, 255");
-            u24_color!(CSS_WHITE_SMOKE, 245, 245, 245, $container, "White Smoke", "245, 245, 245");
-            u24_color!(CSS_YELLOW, 255, 255, 0, $container, "Yellow", "255, 255, 0");
-            u24_color!(CSS_YELLOW_GREEN, 154, 205, 50, $container, "Yellow Green", "154, 205, 50");
+            web_color!(CSS_ALICE_BLUE, 240, 248, 255, "Alice Blue", "240, 248, 255");
+            web_color!(CSS_ANTIQUE_WHITE, 250, 235, 215, "Antique White", "250, 235, 215");
+            web_color!(CSS_AQUA, 0, 255, 255, "Aqua", "0, 255, 255");
+            web_color!(CSS_AQUAMARINE, 127, 255, 212, "Aquamarine", "127, 255, 212");
+            web_color!(CSS_AZURE, 240, 255, 255, "Azure", "240, 255, 255");
+            web_color!(CSS_BEIGE, 245, 245, 220, "Beige", "245, 245, 220");
+            web_color!(CSS_BISQUE, 255, 228, 196, "Bisque", "255, 228, 196");
+            web_color!(CSS_BLACK, 0, 0, 0, "Black", "0, 0, 0");
+            web_color!(CSS_BLANCHED_ALMOND, 255, 235, 205, "Blanched Almond", "255, 235, 205");
+            web_color!(CSS_BLUE, 0, 0, 255, "Blue", "0, 0, 255");
+            web_color!(CSS_BLUE_VIOLET, 138, 43, 226, "Blue Violet", "138, 43, 226");
+            web_color!(CSS_BROWN, 165, 42, 42, "Brown", "165, 42, 42");
+            web_color!(CSS_BURLY_WOOD, 222, 184, 135, "Burly Wood", "222, 184, 135");
+            web_color!(CSS_CADET_BLUE, 95, 158, 160, "Cadet Blue", "95, 158, 160");
+            web_color!(CSS_CHARTREUSE, 127, 255, 0, "Chartreuse", "127, 255, 0");
+            web_color!(CSS_CHOCOLATE, 210, 105, 30, "Chocolate", "210, 105, 30");
+            web_color!(CSS_CORAL, 255, 127, 80, "Coral", "255, 127, 80");
+            web_color!(CSS_CORNFLOWER_BLUE, 100, 149, 237, "Cornflower Blue", "100, 149, 237");
+            web_color!(CSS_CORNSILK, 255, 248, 220, "Cornsilk", "255, 248, 220");
+            web_color!(CSS_CRIMSON, 220, 20, 60, "Crimson", "220, 20, 60");
+            web_color!(CSS_CYAN, 0, 255, 255, "Cyan", "0, 255, 255");
+            web_color!(CSS_DARK_BLUE, 0, 0, 139, "Dark Blue", "0, 0, 139");
+            web_color!(CSS_DARK_CYAN, 0, 139, 139, "Dark Cyan", "0, 139, 139");
+            web_color!(CSS_DARK_GOLDENROD, 184, 134, 11, "Dark Goldenrod", "184, 134, 11");
+            web_color!(CSS_DARK_GRAY, 169, 169, 169, "Dark Gray", "169, 169, 169");
+            web_color!(CSS_DARK_GREEN, 0, 100, 0, "Dark Green", "0, 100, 0");
+            web_color!(CSS_DARK_KHAKI, 189, 183, 107, "Dark Khaki", "189, 183, 107");
+            web_color!(CSS_DARK_MAGENTA, 139, 0, 139, "Dark Magenta", "139, 0, 139");
+            web_color!(CSS_DARK_OLIVE_GREEN, 85, 107, 47, "Dark Olive Green", "85, 107, 47");
+            web_color!(CSS_DARK_ORANGE, 255, 140, 0, "Dark Orange", "255, 140, 0");
+            web_color!(CSS_DARK_ORCHID, 153, 50, 204, "Dark Orchid", "153, 50, 204");
+            web_color!(CSS_DARK_RED, 139, 0, 0, "Dark Red", "139, 0, 0");
+            web_color!(CSS_DARK_SALMON, 233, 150, 122, "Dark Salmon", "233, 150, 122");
+            web_color!(CSS_DARK_SEA_GREEN, 143, 188, 143, "Dark Sea Green", "143, 188, 143");
+            web_color!(CSS_DARK_SLATE_BLUE, 72, 61, 139, "Dark Slate Blue", "72, 61, 139");
+            web_color!(CSS_DARK_SLATE_GRAY, 47, 79, 79, "Dark Slate Gray", "47, 79, 79");
+            web_color!(CSS_DARK_TURQUOISE, 0, 206, 209, "Dark Turquoise", "0, 206, 209");
+            web_color!(CSS_DARK_VIOLET, 148, 0, 211, "Dark Violet", "148, 0, 211");
+            web_color!(CSS_DEEP_PINK, 255, 20, 147, "Deep Pink", "255, 20, 147");
+            web_color!(CSS_DEEP_SKY_BLUE, 0, 191, 255, "Deep Sky Blue", "0, 191, 255");
+            web_color!(CSS_DIM_GRAY, 105, 105, 105, "Dim Gray", "105, 105, 105");
+            web_color!(CSS_DODGER_BLUE, 30, 144, 255, "Dodger Blue", "30, 144, 255");
+            web_color!(CSS_FIRE_BRICK, 178, 34, 34, "Fire Brick", "178, 34, 34");
+            web_color!(CSS_FLORAL_WHITE, 255, 250, 240, "Floral White", "255, 250, 240");
+            web_color!(CSS_FOREST_GREEN, 34, 139, 34, "Forest Green", "34, 139, 34");
+            web_color!(CSS_FUCHSIA, 255, 0, 255, "Fuchsia", "255, 0, 255");
+            web_color!(CSS_GAINSBORO, 220, 220, 220, "Gainsboro", "220, 220, 220");
+            web_color!(CSS_GHOST_WHITE, 248, 248, 255, "Ghost White", "248, 248, 255");
+            web_color!(CSS_GOLD, 255, 215, 0, "Gold", "255, 215, 0");
+            web_color!(CSS_GOLDENROD, 218, 165, 32, "Goldenrod", "218, 165, 32");
+            web_color!(CSS_GRAY, 128, 128, 128, "Gray", "128, 128, 128");
+            web_color!(CSS_GREEN, 0, 128, 0, "Green", "0, 128, 0");
+            web_color!(CSS_GREEN_YELLOW, 173, 255, 47, "Green Yellow", "173, 255, 47");
+            web_color!(CSS_HONEYDEW, 240, 255, 240, "Honeydew", "240, 255, 240");
+            web_color!(CSS_HOT_PINK, 255, 105, 180, "Hot Pink", "255, 105, 180");
+            web_color!(CSS_INDIAN_RED, 205, 92, 92, "Indian Red", "205, 92, 92");
+            web_color!(CSS_INDIGO, 75, 0, 130, "Indigo", "75, 0, 130");
+            web_color!(CSS_IVORY, 255, 255, 240, "Ivory", "255, 255, 240");
+            web_color!(CSS_KHAKI, 240, 230, 140, "Khaki", "240, 230, 140");
+            web_color!(CSS_LAVENDER, 230, 230, 250, "Lavender", "230, 230, 250");
+            web_color!(CSS_LAVENDER_BLUSH, 255, 240, 245, "Lavender Blush", "255, 240, 245");
+            web_color!(CSS_LAWN_GREEN, 124, 252, 0, "Lawn Green", "124, 252, 0");
+            web_color!(CSS_LEMON_CHIFFON, 255, 250, 205, "Lemon Chiffon", "255, 250, 205");
+            web_color!(CSS_LIGHT_BLUE, 173, 216, 230, "Light Blue", "173, 216, 230");
+            web_color!(CSS_LIGHT_CORAL, 240, 128, 128, "Light Coral", "240, 128, 128");
+            web_color!(CSS_LIGHT_CYAN, 224, 255, 255, "Light Cyan", "224, 255, 255");
+            web_color!(CSS_LIGHT_GOLDENROD_YELLOW, 250, 250, 210, "Light Goldenrod Yellow", "250, 250, 210");
+            web_color!(CSS_LIGHT_GRAY, 211, 211, 211, "Light Gray", "211, 211, 211");
+            web_color!(CSS_LIGHT_GREEN, 144, 238, 144, "Light Green", "144, 238, 144");
+            web_color!(CSS_LIGHT_PINK, 255, 182, 193, "Light Pink", "255, 182, 193");
+            web_color!(CSS_LIGHT_SALMON, 255, 160, 122, "Light Salmon", "255, 160, 122");
+            web_color!(CSS_LIGHT_SEA_GREEN, 32, 178, 170, "Light Sea Green", "32, 178, 170");
+            web_color!(CSS_LIGHT_SKY_BLUE, 135, 206, 250, "Light Sky Blue", "135, 206, 250");
+            web_color!(CSS_LIGHT_SLATE_GRAY, 119, 136, 153, "Light Slate Gray", "119, 136, 153");
+            web_color!(CSS_LIGHT_STEEL_BLUE, 176, 196, 222, "Light Steel Blue", "176, 196, 222");
+            web_color!(CSS_LIGHT_YELLOW, 255, 255, 224, "Light Yellow", "255, 255, 224");
+            web_color!(CSS_LIME, 0, 255, 0, "Lime", "0, 255, 0");
+            web_color!(CSS_LIME_GREEN, 50, 205, 50, "Lime Green", "50, 205, 50");
+            web_color!(CSS_LINEN, 250, 240, 230, "Linen", "250, 240, 230");
+            web_color!(CSS_MAGENTA, 255, 0, 255, "Magenta", "255, 0, 255");
+            web_color!(CSS_MAROON, 128, 0, 0, "Maroon", "128, 0, 0");
+            web_color!(CSS_MEDIUM_AQUAMARINE, 102, 205, 170, "Medium Aquamarine", "102, 205, 170");
+            web_color!(CSS_MEDIUM_BLUE, 0, 0, 205, "Medium Blue", "0, 0, 205");
+            web_color!(CSS_MEDIUM_ORCHID, 186, 85, 211, "Medium Orchid", "186, 85, 211");
+            web_color!(CSS_MEDIUM_PURPLE, 147, 112, 219, "Medium Purple", "147, 112, 219");
+            web_color!(CSS_MEDIUM_SEA_GREEN, 60, 179, 113, "Medium Sea Green", "60, 179, 113");
+            web_color!(CSS_MEDIUM_SLATE_BLUE, 123, 104, 238, "Medium Slate Blue", "123, 104, 238");
+            web_color!(CSS_MEDIUM_SPRING_GREEN, 0, 250, 154, "Medium Spring Green", "0, 250, 154");
+            web_color!(CSS_MEDIUM_TURQUOISE, 72, 209, 204, "Medium Turquoise", "72, 209, 204");
+            web_color!(CSS_MEDIUM_VIOLET_RED, 199, 21, 133, "Medium Violet Red", "199, 21, 133");
+            web_color!(CSS_MIDNIGHT_BLUE, 25, 25, 112, "Midnight Blue", "25, 25, 112");
+            web_color!(CSS_MINT_CREAM, 245, 255, 250, "Mint Cream", "245, 255, 250");
+            web_color!(CSS_MISTY_ROSE, 255, 228, 225, "Misty Rose", "255, 228, 225");
+            web_color!(CSS_MOCCASIN, 255, 228, 181, "Moccasin", "255, 228, 181");
+            web_color!(CSS_NAVAJO_WHITE, 255, 222, 173, "Navajo White", "255, 222, 173");
+            web_color!(CSS_NAVY, 0, 0, 128, "Navy", "0, 0, 128");
+            web_color!(CSS_OLD_LACE, 253, 245, 230, "Old Lace", "253, 245, 230");
+            web_color!(CSS_OLIVE, 128, 128, 0, "Olive", "128, 128, 0");
+            web_color!(CSS_OLIVE_DRAB, 107, 142, 35, "Olive Drab", "107, 142, 35");
+            web_color!(CSS_ORANGE, 255, 165, 0, "Orange", "255, 165, 0");
+            web_color!(CSS_ORANGE_RED, 255, 69, 0, "Orange Red", "255, 69, 0");
+            web_color!(CSS_ORCHID, 218, 112, 214, "Orchid", "218, 112, 214");
+            web_color!(CSS_PALE_GOLDENROD, 238, 232, 170, "Pale Goldenrod", "238, 232, 170");
+            web_color!(CSS_PALE_GREEN, 152, 251, 152, "Pale Green", "152, 251, 152");
+            web_color!(CSS_PALE_TURQUOISE, 175, 238, 238, "Pale Turquoise", "175, 238, 238");
+            web_color!(CSS_PALE_VIOLET_RED, 219, 112, 147, "Pale Violet Red", "219, 112, 147");
+            web_color!(CSS_PAPAYA_WHIP, 255, 239, 213, "Papaya Whip", "255, 239, 213");
+            web_color!(CSS_PEACH_PUFF, 255, 218, 185, "Peach Puff", "255, 218, 185");
+            web_color!(CSS_PERU, 205, 133, 63, "Peru", "205, 133, 63");
+            web_color!(CSS_PINK, 255, 192, 203, "Pink", "255, 192, 203");
+            web_color!(CSS_PLUM, 221, 160, 221, "Plum", "221, 160, 221");
+            web_color!(CSS_POWDER_BLUE, 176, 224, 230, "Powder Blue", "176, 224, 230");
+            web_color!(CSS_PURPLE, 128, 0, 128, "Purple", "128, 0, 128");
+            web_color!(CSS_REBECCAPURPLE, 102, 51, 153, "Rebeccapurple", "102, 51, 153");
+            web_color!(CSS_RED, 255, 0, 0, "Red", "255, 0, 0");
+            web_color!(CSS_ROSY_BROWN, 188, 143, 143, "Rosy Brown", "188, 143, 143");
+            web_color!(CSS_ROYAL_BLUE, 65, 105, 225, "Royal Blue", "65, 105, 225");
+            web_color!(CSS_SADDLE_BROWN, 139, 69, 19, "Saddle Brown", "139, 69, 19");
+            web_color!(CSS_SALMON, 250, 128, 114, "Salmon", "250, 128, 114");
+            web_color!(CSS_SANDY_BROWN, 244, 164, 96, "Sandy Brown", "244, 164, 96");
+            web_color!(CSS_SEA_GREEN, 46, 139, 87, "Sea Green", "46, 139, 87");
+            web_color!(CSS_SEASHELL, 255, 245, 238, "Seashell", "255, 245, 238");
+            web_color!(CSS_SIENNA, 160, 82, 45, "Sienna", "160, 82, 45");
+            web_color!(CSS_SILVER, 192, 192, 192, "Silver", "192, 192, 192");
+            web_color!(CSS_SKY_BLUE, 135, 206, 235, "Sky Blue", "135, 206, 235");
+            web_color!(CSS_SLATE_BLUE, 106, 90, 205, "Slate Blue", "106, 90, 205");
+            web_color!(CSS_SLATE_GRAY, 112, 128, 144, "Slate Gray", "112, 128, 144");
+            web_color!(CSS_SNOW, 255, 250, 250, "Snow", "255, 250, 250");
+            web_color!(CSS_SPRING_GREEN, 0, 255, 127, "Spring Green", "0, 255, 127");
+            web_color!(CSS_STEEL_BLUE, 70, 130, 180, "Steel Blue", "70, 130, 180");
+            web_color!(CSS_TAN, 210, 180, 140, "Tan", "210, 180, 140");
+            web_color!(CSS_TEAL, 0, 128, 128, "Teal", "0, 128, 128");
+            web_color!(CSS_THISTLE, 216, 191, 216, "Thistle", "216, 191, 216");
+            web_color!(CSS_TOMATO, 255, 99, 71, "Tomato", "255, 99, 71");
+            web_color!(CSS_TURQUOISE, 64, 224, 208, "Turquoise", "64, 224, 208");
+            web_color!(CSS_VIOLET, 238, 130, 238, "Violet", "238, 130, 238");
+            web_color!(CSS_WHEAT, 245, 222, 179, "Wheat", "245, 222, 179");
+            web_color!(CSS_WHITE, 255, 255, 255, "White", "255, 255, 255");
+            web_color!(CSS_WHITE_SMOKE, 245, 245, 245, "White Smoke", "245, 245, 245");
+            web_color!(CSS_YELLOW, 255, 255, 0, "Yellow", "255, 255, 0");
+            web_color!(CSS_YELLOW_GREEN, 154, 205, 50, "Yellow Green", "154, 205, 50");
         }
     };
 }
 
-impl_u24_web_colors!(rgb888, "Rgb888", crate::pixelcolor::Rgb888);
-impl_u24_web_colors!(bgr888, "Bgr888", crate::pixelcolor::Bgr888);
-
-#[rustfmt::skip]
-macro_rules! impl_u16_web_colors {
-    ($mod:ident, $container_str:expr, $container:path) => {
-        #[doc = "Named web colors for the"]
-        #[doc = $container_str]
-        #[doc = "color type."]
-        #[allow(unused)]
-        impl WebColors for $container {
-            u16_color!(CSS_ALICE_BLUE, 240, 248, 255, $container, "Alice Blue", "240, 248, 255");
-            u16_color!(CSS_ANTIQUE_WHITE, 250, 235, 215, $container, "Antique White", "250, 235, 215");
-            u16_color!(CSS_AQUA, 0, 255, 255, $container, "Aqua", "0, 255, 255");
-            u16_color!(CSS_AQUAMARINE, 127, 255, 212, $container, "Aquamarine", "127, 255, 212");
-            u16_color!(CSS_AZURE, 240, 255, 255, $container, "Azure", "240, 255, 255");
-            u16_color!(CSS_BEIGE, 245, 245, 220, $container, "Beige", "245, 245, 220");
-            u16_color!(CSS_BISQUE, 255, 228, 196, $container, "Bisque", "255, 228, 196");
-            u16_color!(CSS_BLACK, 0, 0, 0, $container, "Black", "0, 0, 0");
-            u16_color!(CSS_BLANCHED_ALMOND, 255, 235, 205, $container, "Blanched Almond", "255, 235, 205");
-            u16_color!(CSS_BLUE, 0, 0, 255, $container, "Blue", "0, 0, 255");
-            u16_color!(CSS_BLUE_VIOLET, 138, 43, 226, $container, "Blue Violet", "138, 43, 226");
-            u16_color!(CSS_BROWN, 165, 42, 42, $container, "Brown", "165, 42, 42");
-            u16_color!(CSS_BURLY_WOOD, 222, 184, 135, $container, "Burly Wood", "222, 184, 135");
-            u16_color!(CSS_CADET_BLUE, 95, 158, 160, $container, "Cadet Blue", "95, 158, 160");
-            u16_color!(CSS_CHARTREUSE, 127, 255, 0, $container, "Chartreuse", "127, 255, 0");
-            u16_color!(CSS_CHOCOLATE, 210, 105, 30, $container, "Chocolate", "210, 105, 30");
-            u16_color!(CSS_CORAL, 255, 127, 80, $container, "Coral", "255, 127, 80");
-            u16_color!(CSS_CORNFLOWER_BLUE, 100, 149, 237, $container, "Cornflower Blue", "100, 149, 237");
-            u16_color!(CSS_CORNSILK, 255, 248, 220, $container, "Cornsilk", "255, 248, 220");
-            u16_color!(CSS_CRIMSON, 220, 20, 60, $container, "Crimson", "220, 20, 60");
-            u16_color!(CSS_CYAN, 0, 255, 255, $container, "Cyan", "0, 255, 255");
-            u16_color!(CSS_DARK_BLUE, 0, 0, 139, $container, "Dark Blue", "0, 0, 139");
-            u16_color!(CSS_DARK_CYAN, 0, 139, 139, $container, "Dark Cyan", "0, 139, 139");
-            u16_color!(CSS_DARK_GOLDENROD, 184, 134, 11, $container, "Dark Goldenrod", "184, 134, 11");
-            u16_color!(CSS_DARK_GRAY, 169, 169, 169, $container, "Dark Gray", "169, 169, 169");
-            u16_color!(CSS_DARK_GREEN, 0, 100, 0, $container, "Dark Green", "0, 100, 0");
-            u16_color!(CSS_DARK_KHAKI, 189, 183, 107, $container, "Dark Khaki", "189, 183, 107");
-            u16_color!(CSS_DARK_MAGENTA, 139, 0, 139, $container, "Dark Magenta", "139, 0, 139");
-            u16_color!(CSS_DARK_OLIVE_GREEN, 85, 107, 47, $container, "Dark Olive Green", "85, 107, 47");
-            u16_color!(CSS_DARK_ORANGE, 255, 140, 0, $container, "Dark Orange", "255, 140, 0");
-            u16_color!(CSS_DARK_ORCHID, 153, 50, 204, $container, "Dark Orchid", "153, 50, 204");
-            u16_color!(CSS_DARK_RED, 139, 0, 0, $container, "Dark Red", "139, 0, 0");
-            u16_color!(CSS_DARK_SALMON, 233, 150, 122, $container, "Dark Salmon", "233, 150, 122");
-            u16_color!(CSS_DARK_SEA_GREEN, 143, 188, 143, $container, "Dark Sea Green", "143, 188, 143");
-            u16_color!(CSS_DARK_SLATE_BLUE, 72, 61, 139, $container, "Dark Slate Blue", "72, 61, 139");
-            u16_color!(CSS_DARK_SLATE_GRAY, 47, 79, 79, $container, "Dark Slate Gray", "47, 79, 79");
-            u16_color!(CSS_DARK_TURQUOISE, 0, 206, 209, $container, "Dark Turquoise", "0, 206, 209");
-            u16_color!(CSS_DARK_VIOLET, 148, 0, 211, $container, "Dark Violet", "148, 0, 211");
-            u16_color!(CSS_DEEP_PINK, 255, 20, 147, $container, "Deep Pink", "255, 20, 147");
-            u16_color!(CSS_DEEP_SKY_BLUE, 0, 191, 255, $container, "Deep Sky Blue", "0, 191, 255");
-            u16_color!(CSS_DIM_GRAY, 105, 105, 105, $container, "Dim Gray", "105, 105, 105");
-            u16_color!(CSS_DODGER_BLUE, 30, 144, 255, $container, "Dodger Blue", "30, 144, 255");
-            u16_color!(CSS_FIRE_BRICK, 178, 34, 34, $container, "Fire Brick", "178, 34, 34");
-            u16_color!(CSS_FLORAL_WHITE, 255, 250, 240, $container, "Floral White", "255, 250, 240");
-            u16_color!(CSS_FOREST_GREEN, 34, 139, 34, $container, "Forest Green", "34, 139, 34");
-            u16_color!(CSS_FUCHSIA, 255, 0, 255, $container, "Fuchsia", "255, 0, 255");
-            u16_color!(CSS_GAINSBORO, 220, 220, 220, $container, "Gainsboro", "220, 220, 220");
-            u16_color!(CSS_GHOST_WHITE, 248, 248, 255, $container, "Ghost White", "248, 248, 255");
-            u16_color!(CSS_GOLD, 255, 215, 0, $container, "Gold", "255, 215, 0");
-            u16_color!(CSS_GOLDENROD, 218, 165, 32, $container, "Goldenrod", "218, 165, 32");
-            u16_color!(CSS_GRAY, 128, 128, 128, $container, "Gray", "128, 128, 128");
-            u16_color!(CSS_GREEN, 0, 128, 0, $container, "Green", "0, 128, 0");
-            u16_color!(CSS_GREEN_YELLOW, 173, 255, 47, $container, "Green Yellow", "173, 255, 47");
-            u16_color!(CSS_HONEYDEW, 240, 255, 240, $container, "Honeydew", "240, 255, 240");
-            u16_color!(CSS_HOT_PINK, 255, 105, 180, $container, "Hot Pink", "255, 105, 180");
-            u16_color!(CSS_INDIAN_RED, 205, 92, 92, $container, "Indian Red", "205, 92, 92");
-            u16_color!(CSS_INDIGO, 75, 0, 130, $container, "Indigo", "75, 0, 130");
-            u16_color!(CSS_IVORY, 255, 255, 240, $container, "Ivory", "255, 255, 240");
-            u16_color!(CSS_KHAKI, 240, 230, 140, $container, "Khaki", "240, 230, 140");
-            u16_color!(CSS_LAVENDER, 230, 230, 250, $container, "Lavender", "230, 230, 250");
-            u16_color!(CSS_LAVENDER_BLUSH, 255, 240, 245, $container, "Lavender Blush", "255, 240, 245");
-            u16_color!(CSS_LAWN_GREEN, 124, 252, 0, $container, "Lawn Green", "124, 252, 0");
-            u16_color!(CSS_LEMON_CHIFFON, 255, 250, 205, $container, "Lemon Chiffon", "255, 250, 205");
-            u16_color!(CSS_LIGHT_BLUE, 173, 216, 230, $container, "Light Blue", "173, 216, 230");
-            u16_color!(CSS_LIGHT_CORAL, 240, 128, 128, $container, "Light Coral", "240, 128, 128");
-            u16_color!(CSS_LIGHT_CYAN, 224, 255, 255, $container, "Light Cyan", "224, 255, 255");
-            u16_color!(CSS_LIGHT_GOLDENROD_YELLOW, 250, 250, 210, $container, "Light Goldenrod Yellow", "250, 250, 210");
-            u16_color!(CSS_LIGHT_GRAY, 211, 211, 211, $container, "Light Gray", "211, 211, 211");
-            u16_color!(CSS_LIGHT_GREEN, 144, 238, 144, $container, "Light Green", "144, 238, 144");
-            u16_color!(CSS_LIGHT_PINK, 255, 182, 193, $container, "Light Pink", "255, 182, 193");
-            u16_color!(CSS_LIGHT_SALMON, 255, 160, 122, $container, "Light Salmon", "255, 160, 122");
-            u16_color!(CSS_LIGHT_SEA_GREEN, 32, 178, 170, $container, "Light Sea Green", "32, 178, 170");
-            u16_color!(CSS_LIGHT_SKY_BLUE, 135, 206, 250, $container, "Light Sky Blue", "135, 206, 250");
-            u16_color!(CSS_LIGHT_SLATE_GRAY, 119, 136, 153, $container, "Light Slate Gray", "119, 136, 153");
-            u16_color!(CSS_LIGHT_STEEL_BLUE, 176, 196, 222, $container, "Light Steel Blue", "176, 196, 222");
-            u16_color!(CSS_LIGHT_YELLOW, 255, 255, 224, $container, "Light Yellow", "255, 255, 224");
-            u16_color!(CSS_LIME, 0, 255, 0, $container, "Lime", "0, 255, 0");
-            u16_color!(CSS_LIME_GREEN, 50, 205, 50, $container, "Lime Green", "50, 205, 50");
-            u16_color!(CSS_LINEN, 250, 240, 230, $container, "Linen", "250, 240, 230");
-            u16_color!(CSS_MAGENTA, 255, 0, 255, $container, "Magenta", "255, 0, 255");
-            u16_color!(CSS_MAROON, 128, 0, 0, $container, "Maroon", "128, 0, 0");
-            u16_color!(CSS_MEDIUM_AQUAMARINE, 102, 205, 170, $container, "Medium Aquamarine", "102, 205, 170");
-            u16_color!(CSS_MEDIUM_BLUE, 0, 0, 205, $container, "Medium Blue", "0, 0, 205");
-            u16_color!(CSS_MEDIUM_ORCHID, 186, 85, 211, $container, "Medium Orchid", "186, 85, 211");
-            u16_color!(CSS_MEDIUM_PURPLE, 147, 112, 219, $container, "Medium Purple", "147, 112, 219");
-            u16_color!(CSS_MEDIUM_SEA_GREEN, 60, 179, 113, $container, "Medium Sea Green", "60, 179, 113");
-            u16_color!(CSS_MEDIUM_SLATE_BLUE, 123, 104, 238, $container, "Medium Slate Blue", "123, 104, 238");
-            u16_color!(CSS_MEDIUM_SPRING_GREEN, 0, 250, 154, $container, "Medium Spring Green", "0, 250, 154");
-            u16_color!(CSS_MEDIUM_TURQUOISE, 72, 209, 204, $container, "Medium Turquoise", "72, 209, 204");
-            u16_color!(CSS_MEDIUM_VIOLET_RED, 199, 21, 133, $container, "Medium Violet Red", "199, 21, 133");
-            u16_color!(CSS_MIDNIGHT_BLUE, 25, 25, 112, $container, "Midnight Blue", "25, 25, 112");
-            u16_color!(CSS_MINT_CREAM, 245, 255, 250, $container, "Mint Cream", "245, 255, 250");
-            u16_color!(CSS_MISTY_ROSE, 255, 228, 225, $container, "Misty Rose", "255, 228, 225");
-            u16_color!(CSS_MOCCASIN, 255, 228, 181, $container, "Moccasin", "255, 228, 181");
-            u16_color!(CSS_NAVAJO_WHITE, 255, 222, 173, $container, "Navajo White", "255, 222, 173");
-            u16_color!(CSS_NAVY, 0, 0, 128, $container, "Navy", "0, 0, 128");
-            u16_color!(CSS_OLD_LACE, 253, 245, 230, $container, "Old Lace", "253, 245, 230");
-            u16_color!(CSS_OLIVE, 128, 128, 0, $container, "Olive", "128, 128, 0");
-            u16_color!(CSS_OLIVE_DRAB, 107, 142, 35, $container, "Olive Drab", "107, 142, 35");
-            u16_color!(CSS_ORANGE, 255, 165, 0, $container, "Orange", "255, 165, 0");
-            u16_color!(CSS_ORANGE_RED, 255, 69, 0, $container, "Orange Red", "255, 69, 0");
-            u16_color!(CSS_ORCHID, 218, 112, 214, $container, "Orchid", "218, 112, 214");
-            u16_color!(CSS_PALE_GOLDENROD, 238, 232, 170, $container, "Pale Goldenrod", "238, 232, 170");
-            u16_color!(CSS_PALE_GREEN, 152, 251, 152, $container, "Pale Green", "152, 251, 152");
-            u16_color!(CSS_PALE_TURQUOISE, 175, 238, 238, $container, "Pale Turquoise", "175, 238, 238");
-            u16_color!(CSS_PALE_VIOLET_RED, 219, 112, 147, $container, "Pale Violet Red", "219, 112, 147");
-            u16_color!(CSS_PAPAYA_WHIP, 255, 239, 213, $container, "Papaya Whip", "255, 239, 213");
-            u16_color!(CSS_PEACH_PUFF, 255, 218, 185, $container, "Peach Puff", "255, 218, 185");
-            u16_color!(CSS_PERU, 205, 133, 63, $container, "Peru", "205, 133, 63");
-            u16_color!(CSS_PINK, 255, 192, 203, $container, "Pink", "255, 192, 203");
-            u16_color!(CSS_PLUM, 221, 160, 221, $container, "Plum", "221, 160, 221");
-            u16_color!(CSS_POWDER_BLUE, 176, 224, 230, $container, "Powder Blue", "176, 224, 230");
-            u16_color!(CSS_PURPLE, 128, 0, 128, $container, "Purple", "128, 0, 128");
-            u16_color!(CSS_REBECCAPURPLE, 102, 51, 153, $container, "Rebeccapurple", "102, 51, 153");
-            u16_color!(CSS_RED, 255, 0, 0, $container, "Red", "255, 0, 0");
-            u16_color!(CSS_ROSY_BROWN, 188, 143, 143, $container, "Rosy Brown", "188, 143, 143");
-            u16_color!(CSS_ROYAL_BLUE, 65, 105, 225, $container, "Royal Blue", "65, 105, 225");
-            u16_color!(CSS_SADDLE_BROWN, 139, 69, 19, $container, "Saddle Brown", "139, 69, 19");
-            u16_color!(CSS_SALMON, 250, 128, 114, $container, "Salmon", "250, 128, 114");
-            u16_color!(CSS_SANDY_BROWN, 244, 164, 96, $container, "Sandy Brown", "244, 164, 96");
-            u16_color!(CSS_SEA_GREEN, 46, 139, 87, $container, "Sea Green", "46, 139, 87");
-            u16_color!(CSS_SEASHELL, 255, 245, 238, $container, "Seashell", "255, 245, 238");
-            u16_color!(CSS_SIENNA, 160, 82, 45, $container, "Sienna", "160, 82, 45");
-            u16_color!(CSS_SILVER, 192, 192, 192, $container, "Silver", "192, 192, 192");
-            u16_color!(CSS_SKY_BLUE, 135, 206, 235, $container, "Sky Blue", "135, 206, 235");
-            u16_color!(CSS_SLATE_BLUE, 106, 90, 205, $container, "Slate Blue", "106, 90, 205");
-            u16_color!(CSS_SLATE_GRAY, 112, 128, 144, $container, "Slate Gray", "112, 128, 144");
-            u16_color!(CSS_SNOW, 255, 250, 250, $container, "Snow", "255, 250, 250");
-            u16_color!(CSS_SPRING_GREEN, 0, 255, 127, $container, "Spring Green", "0, 255, 127");
-            u16_color!(CSS_STEEL_BLUE, 70, 130, 180, $container, "Steel Blue", "70, 130, 180");
-            u16_color!(CSS_TAN, 210, 180, 140, $container, "Tan", "210, 180, 140");
-            u16_color!(CSS_TEAL, 0, 128, 128, $container, "Teal", "0, 128, 128");
-            u16_color!(CSS_THISTLE, 216, 191, 216, $container, "Thistle", "216, 191, 216");
-            u16_color!(CSS_TOMATO, 255, 99, 71, $container, "Tomato", "255, 99, 71");
-            u16_color!(CSS_TURQUOISE, 64, 224, 208, $container, "Turquoise", "64, 224, 208");
-            u16_color!(CSS_VIOLET, 238, 130, 238, $container, "Violet", "238, 130, 238");
-            u16_color!(CSS_WHEAT, 245, 222, 179, $container, "Wheat", "245, 222, 179");
-            u16_color!(CSS_WHITE, 255, 255, 255, $container, "White", "255, 255, 255");
-            u16_color!(CSS_WHITE_SMOKE, 245, 245, 245, $container, "White Smoke", "245, 245, 245");
-            u16_color!(CSS_YELLOW, 255, 255, 0, $container, "Yellow", "255, 255, 0");
-            u16_color!(CSS_YELLOW_GREEN, 154, 205, 50, $container, "Yellow Green", "154, 205, 50");
-        }
-    };
-}
-
-macro_rules! u16_color {
-    ($ident:ident, $r:expr, $g:expr, $b:expr, $container:path, $name:expr,  $value:expr) => {
-        #[doc = "<span style=\"background:rgb("]
-        #[doc = $value]
-        #[doc = ");border-radius:3px;display:inline-block;width:0.9em;height:0.9em\"></span>"]
-        #[doc = $name]
-        const $ident: Self = Self::new(
-            conv!($r, 255u16, Self::MAX_R),
-            conv!($g, 255u16, Self::MAX_G),
-            conv!($b, 255u16, Self::MAX_B),
-        );
-    };
-}
-
-impl_u16_web_colors!(rgb555, "Rgb555", crate::pixelcolor::Rgb555);
-impl_u16_web_colors!(bgr555, "Bgr555", crate::pixelcolor::Bgr555);
-impl_u16_web_colors!(rgb565, "Rgb565", crate::pixelcolor::Rgb565);
-impl_u16_web_colors!(bgr565, "Bgr565", crate::pixelcolor::Bgr565);
+impl_web_colors!(rgb555, "Rgb555", crate::pixelcolor::Rgb555);
+impl_web_colors!(bgr555, "Bgr555", crate::pixelcolor::Bgr555);
+impl_web_colors!(rgb565, "Rgb565", crate::pixelcolor::Rgb565);
+impl_web_colors!(bgr565, "Bgr565", crate::pixelcolor::Bgr565);
+impl_web_colors!(rgb888, "Rgb888", crate::pixelcolor::Rgb888);
+impl_web_colors!(bgr888, "Bgr888", crate::pixelcolor::Bgr888);
 
 #[cfg(test)]
 mod tests {
