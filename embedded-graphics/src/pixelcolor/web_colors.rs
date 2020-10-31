@@ -25,7 +25,7 @@ macro_rules! color_doc {
                 "display:inline-block;",
                 "width:0.9em;",
                 "height:0.9em",
-            "\"></span>",
+            "\"></span> ",
             $name
         ), $($rest)*);
     };
