@@ -6,12 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
-## [0.7.0-alpha.1] - 2020-09-19
-
 ### Added
 
 - [#386](https://github.com/jamwaffles/embedded-graphics/pull/386) Added `Line::midpoint` to get the midpoint of a line.
-- [#386](https://github.com/jamwaffles/embedded-graphics/pull/386) `Polyline` now supports stroke widths greater than 1. Stroke alignment is not supported.
+- [#386](https://github.com/jamwaffles/embedded-graphics/pull/386) `Polyline` now supports stroke widths greater than 1.
 - [#386](https://github.com/jamwaffles/embedded-graphics/pull/386) Added the `delta` method to `Line` to compute the difference between start and end points.
 
 ## [0.7.0-alpha.1] - 2020-09-19
