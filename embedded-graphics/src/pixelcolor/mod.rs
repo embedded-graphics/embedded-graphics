@@ -94,6 +94,7 @@ pub use binary_color::*;
 pub use gray_color::*;
 use raw::RawData;
 pub use rgb_color::*;
+pub use web_colors::WebColors;
 
 /// Pixel color trait.
 ///
