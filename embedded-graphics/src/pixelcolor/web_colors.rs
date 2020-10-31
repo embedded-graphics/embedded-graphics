@@ -1,13 +1,4 @@
-//! Named colors as defined in the CSS specification
-//!
-//! This list includes the [basic color keywords] as well as all colors in the
-//! [extended color keywords] list.
-//!
-//! Note that the `grEy` variants of some colors as defined in the spec are absent from this list.
-//! The `grAy` variants of these colors should be used instead.
-//!
-//! [basic color keywords]: https://drafts.csswg.org/css-color-3/#html4
-//! [extended color keywords]: https://drafts.csswg.org/css-color-3/#svg-color
+//! Named colors as defined in the CSS specification.
 
 use crate::pixelcolor::{Bgr555, Bgr565, Bgr888, PixelColor, Rgb555, Rgb565, Rgb888, RgbColor};
 
@@ -33,7 +24,16 @@ macro_rules! color_doc {
 
 macro_rules! web_colors_trait {
     ([$(($ident:ident, $name:expr, ($r:expr, $g:expr, $b:expr)),)*]) => {
-        /// Web colors.
+        /// Named colors as defined in the CSS specification.
+        ///
+        /// This list includes the [basic color keywords] as well as all colors in the
+        /// [extended color keywords] list.
+        ///
+        /// Note that the `grEy` variants of some colors as defined in the spec are absent from this list.
+        /// The `grAy` variants of these colors should be used instead.
+        ///
+        /// [basic color keywords]: https://drafts.csswg.org/css-color-3/#html4
+        /// [extended color keywords]: https://drafts.csswg.org/css-color-3/#svg-color
         #[rustfmt::skip]
         pub trait WebColors: PixelColor + RgbColor {
             $( color_doc! {

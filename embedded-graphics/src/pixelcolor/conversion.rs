@@ -1,7 +1,7 @@
 use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*};
 
 /// Convert color channel values from one bit depth to another.
-pub const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {
+const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {
     ((value as u16 * to_max as u16 + from_max as u16 / 2) / from_max as u16) as u8
 }
 
