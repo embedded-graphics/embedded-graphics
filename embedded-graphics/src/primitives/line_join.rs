@@ -3,10 +3,9 @@
 use crate::{
     geometry::Point,
     primitives::{
-        line::{Intersection, Side},
+        line::{Intersection, Side, StrokeOffset},
         Line,
     },
-    style::StrokeAlignment,
 };
 
 /// Join kind
@@ -59,7 +58,7 @@ pub struct EdgeCorners {
 
 /// A join between two lines.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct LineJoin {
+pub(in crate::primitives) struct LineJoin {
     /// Join kind.
     pub kind: JoinKind,
 
@@ -74,10 +73,10 @@ impl LineJoin {
     /// Create a starting join.
     ///
     /// `first_edge_end` and `second_edge_start` are set to the same points.
-    pub fn start(start: Point, mid: Point, width: u32, alignment: StrokeAlignment) -> Self {
+    pub fn start(start: Point, mid: Point, width: u32, stroke_offset: StrokeOffset) -> Self {
         let line = Line::new(start, mid);
 
-        let (l, r) = line.extents(width, alignment);
+        let (l, r) = line.extents(width, stroke_offset);
 
         let points = EdgeCorners {
             left: l.start,
@@ -94,10 +93,10 @@ impl LineJoin {
     /// Create an ending join.
     ///
     /// `first_edge_end` and `second_edge_start` are set to the same points.
-    pub fn end(mid: Point, end: Point, width: u32, alignment: StrokeAlignment) -> Self {
+    pub fn end(mid: Point, end: Point, width: u32, stroke_offset: StrokeOffset) -> Self {
         let line = Line::new(mid, end);
 
-        let (l, r) = line.extents(width, alignment);
+        let (l, r) = line.extents(width, stroke_offset);
 
         let points = EdgeCorners {
             left: l.end,
@@ -132,7 +131,7 @@ impl LineJoin {
         mid: Point,
         end: Point,
         width: u32,
-        alignment: StrokeAlignment,
+        stroke_offset: StrokeOffset,
     ) -> Self {
         let first_line = Line::new(start, mid);
         let second_line = Line::new(mid, end);
@@ -141,9 +140,9 @@ impl LineJoin {
         let miter_limit = (width * 2).pow(2);
 
         // Left and right edges of thick first segment
-        let (first_edge_left, first_edge_right) = first_line.extents(width, alignment);
+        let (first_edge_left, first_edge_right) = first_line.extents(width, stroke_offset);
         // Left and right edges of thick second segment
-        let (second_edge_left, second_edge_right) = second_line.extents(width, alignment);
+        let (second_edge_left, second_edge_right) = second_line.extents(width, stroke_offset);
 
         if let (
             Intersection::Point {

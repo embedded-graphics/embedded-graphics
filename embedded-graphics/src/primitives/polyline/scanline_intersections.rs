@@ -3,11 +3,11 @@
 use crate::{
     geometry::Point,
     primitives::{
+        line::StrokeOffset,
         line_join::{JoinKind, LineJoin},
         thick_segment::ThickSegment,
         Line,
     },
-    style::StrokeAlignment,
 };
 
 /// Scanline intersections iterator.
@@ -24,7 +24,6 @@ pub struct ScanlineIntersections<'a> {
     start_join: LineJoin,
     end_join: LineJoin,
     width: u32,
-    alignment: StrokeAlignment,
     stop: bool,
     prev_line: Option<Line>,
 }
@@ -33,28 +32,18 @@ static EMPTY: &[Point; 0] = &[];
 
 impl<'a> ScanlineIntersections<'a> {
     /// New
-    pub fn new(
-        points: &'a [Point],
-        width: u32,
-        _alignment: StrokeAlignment,
-        scanline_y: i32,
-    ) -> Self {
-        // Fix stroke alignment to Center. There are issues with degenerate joints when using
-        // Inside/Outside stroke alignment on polylines, so this is disabled for now.
-        let alignment = StrokeAlignment::Center;
-
+    pub fn new(points: &'a [Point], width: u32, scanline_y: i32) -> Self {
         let mut windows = points.windows(3);
 
         if let Some([start, mid, end]) = windows.next() {
-            let start_join = LineJoin::start(*start, *mid, width, alignment);
-            let end_join = LineJoin::from_points(*start, *mid, *end, width, alignment);
+            let start_join = LineJoin::start(*start, *mid, width, StrokeOffset::None);
+            let end_join = LineJoin::from_points(*start, *mid, *end, width, StrokeOffset::None);
 
             Self {
                 windows,
                 start_join,
                 end_join,
                 width,
-                alignment,
                 points,
                 scanline_y,
                 stop: false,
@@ -62,15 +51,14 @@ impl<'a> ScanlineIntersections<'a> {
             }
         } else if let [start, end] = points {
             // Single line segment.
-            let start_join = LineJoin::start(*start, *end, width, alignment);
-            let end_join = LineJoin::end(*start, *end, width, alignment);
+            let start_join = LineJoin::start(*start, *end, width, StrokeOffset::None);
+            let end_join = LineJoin::end(*start, *end, width, StrokeOffset::None);
 
             Self {
                 windows: EMPTY.windows(3),
                 start_join,
                 end_join,
                 width,
-                alignment,
                 points,
                 scanline_y,
                 stop: false,
@@ -89,7 +77,6 @@ impl<'a> ScanlineIntersections<'a> {
             start_join: LineJoin::empty(),
             end_join: LineJoin::empty(),
             width: 0,
-            alignment: StrokeAlignment::Center,
             points: EMPTY,
             scanline_y: 0,
             stop: true,
@@ -99,7 +86,7 @@ impl<'a> ScanlineIntersections<'a> {
 
     /// Reset scanline iterator with a new scanline.
     pub(in crate::primitives) fn reset_with_new_scanline(&mut self, scanline_y: i32) {
-        *self = Self::new(self.points, self.width, self.alignment, scanline_y);
+        *self = Self::new(self.points, self.width, scanline_y);
     }
 }
 
@@ -128,12 +115,12 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
                 if let Some([start, mid, end]) = self.windows.next() {
                     self.end_join =
-                        LineJoin::from_points(*start, *mid, *end, self.width, self.alignment);
+                        LineJoin::from_points(*start, *mid, *end, self.width, StrokeOffset::None);
                 } else {
                     let start = *self.points.get(self.points.len() - 2)?;
                     let end = *self.points.last()?;
 
-                    self.end_join = LineJoin::end(start, end, self.width, self.alignment);
+                    self.end_join = LineJoin::end(start, end, self.width, StrokeOffset::None);
                 }
             }
 

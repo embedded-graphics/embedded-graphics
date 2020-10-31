@@ -36,7 +36,6 @@ impl<'a> ScanlineIterator<'a> {
         let intersections = ScanlineIntersections::new(
             styled.primitive.vertices,
             styled.style.stroke_width,
-            styled.style.stroke_alignment,
             scanline_y,
         );
 

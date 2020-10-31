@@ -3,10 +3,10 @@
 use crate::{
     geometry::Point,
     primitives::{
+        line::StrokeOffset,
         line_join::{JoinKind, LineJoin},
         thick_segment::ThickSegment,
     },
-    style::StrokeAlignment,
 };
 
 /// Thick segments iterator.
@@ -21,7 +21,7 @@ pub(in crate::primitives) struct ThickSegmentIter<'a> {
     start_join: LineJoin,
     end_join: LineJoin,
     width: u32,
-    alignment: StrokeAlignment,
+    stroke_offset: StrokeOffset,
     points: &'a [Point],
     stop: bool,
 }
@@ -30,37 +30,37 @@ static EMPTY: &[Point; 0] = &[];
 
 impl<'a> ThickSegmentIter<'a> {
     /// Create a new thick segments iterator.
-    pub fn new(points: &'a [Point], width: u32, _alignment: StrokeAlignment) -> Self {
-        // Fix stroke alignment to Center. There are issues with degenerate joints when using
+    pub fn new(points: &'a [Point], width: u32, _stroke_offset: StrokeOffset) -> Self {
+        // Fix stroke alignment to None. There are issues with degenerate joints when using
         // Inside/Outside stroke alignment on polylines, so this is disabled for now.
-        let alignment = StrokeAlignment::Center;
+        let stroke_offset = StrokeOffset::None;
 
         let mut windows = points.windows(3);
 
         if let Some([start, mid, end]) = windows.next() {
-            let start_join = LineJoin::start(*start, *mid, width, alignment);
-            let end_join = LineJoin::from_points(*start, *mid, *end, width, alignment);
+            let start_join = LineJoin::start(*start, *mid, width, stroke_offset);
+            let end_join = LineJoin::from_points(*start, *mid, *end, width, stroke_offset);
 
             Self {
                 windows,
                 start_join,
                 end_join,
                 width,
-                alignment,
+                stroke_offset,
                 points,
                 stop: false,
             }
         } else if let [start, end] = points {
             // Single line segment.
-            let start_join = LineJoin::start(*start, *end, width, alignment);
-            let end_join = LineJoin::end(*start, *end, width, alignment);
+            let start_join = LineJoin::start(*start, *end, width, stroke_offset);
+            let end_join = LineJoin::end(*start, *end, width, stroke_offset);
 
             Self {
                 windows: EMPTY.windows(3),
                 start_join,
                 end_join,
                 width,
-                alignment,
+                stroke_offset,
                 points,
                 stop: false,
             }
@@ -77,7 +77,7 @@ impl<'a> ThickSegmentIter<'a> {
             start_join: LineJoin::empty(),
             end_join: LineJoin::empty(),
             width: 0,
-            alignment: StrokeAlignment::Center,
+            stroke_offset: StrokeOffset::None,
             points: EMPTY,
             stop: true,
         }
@@ -97,12 +97,13 @@ impl<'a> Iterator for ThickSegmentIter<'a> {
         self.start_join = self.end_join;
 
         if let Some([start, mid, end]) = self.windows.next() {
-            self.end_join = LineJoin::from_points(*start, *mid, *end, self.width, self.alignment);
+            self.end_join =
+                LineJoin::from_points(*start, *mid, *end, self.width, self.stroke_offset);
         } else if self.end_join.kind != JoinKind::End {
             let start = *self.points.get(self.points.len() - 2)?;
             let end = *self.points.last()?;
 
-            self.end_join = LineJoin::end(start, end, self.width, self.alignment);
+            self.end_join = LineJoin::end(start, end, self.width, self.stroke_offset);
         } else {
             self.stop = true;
         }

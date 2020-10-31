@@ -2,9 +2,8 @@ use crate::{
     geometry::Point,
     primitives::line::{
         bresenham::{self, Bresenham, BresenhamParameters, BresenhamPoint},
-        Line,
+        Line, StrokeOffset,
     },
-    style::StrokeAlignment,
 };
 
 const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
@@ -89,13 +88,14 @@ pub(in crate::primitives::line) struct ParallelsIterator {
     /// The next side which will be drawn.
     next_side: Side,
 
-    /// Stroke alignment.
-    alignment: StrokeAlignment,
+    // TODO: Add tests for stroke alignment when polygons/thick triangle support is added
+    /// Stroke offset.
+    stroke_offset: StrokeOffset,
 }
 
 impl ParallelsIterator {
     /// Creates a new parallels iterator.
-    pub fn new(mut line: &Line, thickness: i32, alignment: StrokeAlignment) -> Self {
+    pub fn new(mut line: &Line, thickness: i32, stroke_offset: StrokeOffset) -> Self {
         let start_point = line.start;
 
         // The lines orientation is undefined if start and end point are equal.
@@ -118,12 +118,10 @@ impl ParallelsIterator {
         let flip = perpendicular_parameters.position_step.minor
             == -parallel_parameters.position_step.major;
 
-        let (next_side, skip_side) = match alignment {
-            StrokeAlignment::Center => (Side::Right, Side::Left),
-            // Left side
-            StrokeAlignment::Outside => (Side::Left, Side::Right),
-            // Right side
-            StrokeAlignment::Inside => (Side::Right, Side::Left),
+        let (next_side, skip_side) = match stroke_offset {
+            StrokeOffset::None => (Side::Right, Side::Left),
+            StrokeOffset::Left => (Side::Left, Side::Right),
+            StrokeOffset::Right => (Side::Right, Side::Left),
         };
 
         let mut self_ = Self {
@@ -137,7 +135,7 @@ impl ParallelsIterator {
             right: Bresenham::new(start_point),
             right_error: 0,
             next_side,
-            alignment,
+            stroke_offset,
         };
 
         // Skip center line on left side iterator
@@ -211,7 +209,7 @@ impl Iterator for ParallelsIterator {
             }
         };
 
-        if self.alignment == StrokeAlignment::Center {
+        if self.stroke_offset == StrokeOffset::None {
             self.next_side = self.next_side.swap();
         }
 
@@ -236,7 +234,7 @@ impl ThickPoints {
             parallel: Bresenham::new(line.start),
             parallel_length: bresenham::major_length(line),
             parallel_points_remaining: 0,
-            iter: ParallelsIterator::new(line, thickness, StrokeAlignment::Center),
+            iter: ParallelsIterator::new(line, thickness, StrokeOffset::None),
         }
     }
 }
@@ -279,7 +277,7 @@ mod tests {
         // The maximum number of lines is 0xE, because 0xF is used to mark overdraw
         assert!(count < 0xF);
 
-        let mut parallels = ParallelsIterator::new(&line, 100, StrokeAlignment::Center);
+        let mut parallels = ParallelsIterator::new(&line, 100, StrokeOffset::None);
 
         let mut display = MockDisplay::new();
 

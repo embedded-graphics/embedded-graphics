@@ -5,7 +5,8 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        line, polyline,
+        line::{self, StrokeOffset},
+        polyline,
         polyline::{scanline_iterator::ScanlineIterator, Polyline},
         thick_segment_iter::ThickSegmentIter,
         Primitive, Rectangle,
@@ -149,7 +150,7 @@ where
             let (min, max) = ThickSegmentIter::new(
                 self.primitive.vertices,
                 self.style.stroke_width,
-                self.style.stroke_alignment,
+                StrokeOffset::None,
             )
             .fold(
                 (

@@ -11,7 +11,6 @@ use crate::{
         line::thick_points::{ParallelLineType, ParallelsIterator},
         Primitive, Rectangle,
     },
-    style::StrokeAlignment,
     transform::Transform,
     SaturatingCast,
 };
@@ -130,17 +129,17 @@ impl Line {
     pub(in crate::primitives) fn extents(
         &self,
         thickness: u32,
-        alignment: StrokeAlignment,
+        stroke_offset: StrokeOffset,
     ) -> (Line, Line) {
-        let mut it = ParallelsIterator::new(self, thickness.saturating_cast(), alignment);
+        let mut it = ParallelsIterator::new(self, thickness.saturating_cast(), stroke_offset);
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
 
         let mut left = (self.start, ParallelLineType::Normal);
         let mut right = (self.start, ParallelLineType::Normal);
 
-        match alignment {
-            StrokeAlignment::Center => loop {
+        match stroke_offset {
+            StrokeOffset::None => loop {
                 if let Some((bresenham, reduce)) = it.next() {
                     right = (bresenham.point, reduce);
                 } else {
@@ -153,14 +152,12 @@ impl Line {
                     break;
                 }
             },
-            // Left side
-            StrokeAlignment::Outside => {
+            StrokeOffset::Left => {
                 if let Some((bresenham, reduce)) = it.last() {
                     left = (bresenham.point, reduce);
                 }
             }
-            // Right side
-            StrokeAlignment::Inside => {
+            StrokeOffset::Right => {
                 if let Some((bresenham, reduce)) = it.last() {
                     right = (bresenham.point, reduce);
                 }
@@ -341,6 +338,18 @@ impl Transform for Line {
 
         self
     }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(in crate::primitives) enum StrokeOffset {
+    /// Stroke is centered around the line skeleton.
+    None,
+
+    /// Stroke is offset to the left of the line.
+    Left,
+
+    /// Stroke is offset to the right of the line.
+    Right,
 }
 
 /// Pixel iterator for each pixel in the line
@@ -602,7 +611,7 @@ mod tests {
     fn extents_zero_thickness() {
         let line = Line::new(Point::new(10, 20), Point::new(20, 10));
 
-        let (l, r) = line.extents(0, StrokeAlignment::Center);
+        let (l, r) = line.extents(0, StrokeOffset::None);
 
         assert_eq!(l, line);
         assert_eq!(r, line);

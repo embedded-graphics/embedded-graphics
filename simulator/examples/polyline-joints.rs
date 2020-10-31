@@ -1,5 +1,5 @@
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Line, primitives::*, style::PrimitiveStyleBuilder,
+    pixelcolor::Rgb888, prelude::*, primitives::*, style::PrimitiveStyleBuilder,
 };
 use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
@@ -9,7 +9,7 @@ use sdl2::keyboard::Keycode;
 fn draw(
     points: &[Point],
     width: u32,
-    mouse_pos: Point,
+    _mouse_pos: Point,
     display: &mut SimulatorDisplay<Rgb888>,
 ) -> Result<(), core::convert::Infallible> {
     display.clear(Rgb888::BLACK)?;
