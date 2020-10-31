@@ -2,12 +2,8 @@
 
 use crate::{
     geometry::Point,
-    primitives::{
-        line::StrokeOffset,
-        line_join::{JoinKind, LineJoin},
-        thick_segment::ThickSegment,
-        Line,
-    },
+    primitives::line::StrokeOffset,
+    primitives::{line_join::LineJoin, thick_segment::ThickSegment, Line},
 };
 
 /// Scanline intersections iterator.
@@ -18,68 +14,37 @@ use crate::{
 /// The result is one line of a filled polygon.
 #[derive(Clone, Debug)]
 pub struct ScanlineIntersections<'a> {
-    windows: core::slice::Windows<'a, Point>,
     points: &'a [Point],
+    remaining_points: &'a [Point],
     scanline_y: i32,
-    start_join: LineJoin,
-    end_join: LineJoin,
+    next_start_join: Option<LineJoin>,
     width: u32,
-    stop: bool,
     prev_line: Option<Line>,
 }
-
-static EMPTY: &[Point; 0] = &[];
 
 impl<'a> ScanlineIntersections<'a> {
     /// New
     pub fn new(points: &'a [Point], width: u32, scanline_y: i32) -> Self {
-        let mut windows = points.windows(3);
+        // let next_start_join = if let Some([first, second]) = points.get(0..1) {
+        //     Some(LineJoin::start(*first, *second, width, StrokeOffset::None))
+        // } else {
+        //     None
+        // };
 
-        if let Some([start, mid, end]) = windows.next() {
-            let start_join = LineJoin::start(*start, *mid, width, StrokeOffset::None);
-            let end_join = LineJoin::from_points(*start, *mid, *end, width, StrokeOffset::None);
-
-            Self {
-                windows,
-                start_join,
-                end_join,
-                width,
-                points,
-                scanline_y,
-                stop: false,
-                prev_line: None,
+        // TODO: Use subslice patterns when we bump MSRV to a version where it's stable.
+        let next_start_join = match points.get(0..2) {
+            Some([first, second]) => {
+                Some(LineJoin::start(*first, *second, width, StrokeOffset::None))
             }
-        } else if let [start, end] = points {
-            // Single line segment.
-            let start_join = LineJoin::start(*start, *end, width, StrokeOffset::None);
-            let end_join = LineJoin::end(*start, *end, width, StrokeOffset::None);
+            _ => None,
+        };
 
-            Self {
-                windows: EMPTY.windows(3),
-                start_join,
-                end_join,
-                width,
-                points,
-                scanline_y,
-                stop: false,
-                prev_line: None,
-            }
-        } else {
-            // Points must be at least 2 in length to make a polyline iterator out of.
-            Self::empty()
-        }
-    }
-
-    /// Empty scanline iterator.
-    fn empty() -> Self {
         Self {
-            windows: EMPTY.windows(3),
-            start_join: LineJoin::empty(),
-            end_join: LineJoin::empty(),
-            width: 0,
-            points: EMPTY,
-            scanline_y: 0,
-            stop: true,
+            next_start_join,
+            width,
+            points,
+            remaining_points: points,
+            scanline_y,
             prev_line: None,
         }
     }
@@ -87,6 +52,40 @@ impl<'a> ScanlineIntersections<'a> {
     /// Reset scanline iterator with a new scanline.
     pub(in crate::primitives) fn reset_with_new_scanline(&mut self, scanline_y: i32) {
         *self = Self::new(self.points, self.width, scanline_y);
+    }
+
+    fn next_segment(&mut self) -> Option<ThickSegment> {
+        let start_join = self.next_start_join?;
+
+        // let end_join = match self.remaining_points {
+        //     [start, mid, end, ..] => {
+        //         LineJoin::from_points(*start, *mid, *end, self.width, StrokeOffset::None)
+        //     }
+        //     [start, end] => LineJoin::end(*start, *end, self.width, StrokeOffset::None),
+        //     _ => return None,
+        // };
+
+        // TODO: Use subslice patterns when we bump MSRV to a version where it's stable.
+        let end_join = self
+            .remaining_points
+            .get(0..3)
+            .or_else(|| self.remaining_points.get(0..2))?;
+
+        let end_join = match end_join {
+            [start, mid, end] => {
+                LineJoin::from_points(*start, *mid, *end, self.width, StrokeOffset::None)
+            }
+            [mid, end] => LineJoin::end(*mid, *end, self.width, StrokeOffset::None),
+            _ => return None,
+        };
+
+        self.remaining_points = self.remaining_points.get(1..)?;
+
+        let segment = ThickSegment::new(start_join, end_join);
+
+        self.next_start_join = Some(end_join);
+
+        Some(segment)
     }
 }
 
@@ -98,33 +97,9 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.stop {
-                break None;
-            }
+            let segment = self.next_segment()?;
 
-            if self.end_join.kind == JoinKind::End {
-                self.stop = true;
-            }
-
-            let line =
-                ThickSegment::new(self.start_join, self.end_join).intersection(self.scanline_y);
-
-            // Move window of joints along the line by 1 pair.
-            {
-                self.start_join = self.end_join;
-
-                if let Some([start, mid, end]) = self.windows.next() {
-                    self.end_join =
-                        LineJoin::from_points(*start, *mid, *end, self.width, StrokeOffset::None);
-                } else {
-                    let start = *self.points.get(self.points.len() - 2)?;
-                    let end = *self.points.last()?;
-
-                    self.end_join = LineJoin::end(start, end, self.width, StrokeOffset::None);
-                }
-            }
-
-            if let Some(mut line) = line {
+            if let Some(mut line) = segment.intersection(self.scanline_y) {
                 // Do some checks to prevent adjacent line overdraw at end/start points.
                 if let Some(prev_line) = self.prev_line {
                     // NOTE: Lines returned from intersections are always X-sorted with start point
@@ -141,11 +116,8 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 
                 self.prev_line = Some(line);
 
-                break Some(line);
+                return Some(line);
             }
-
-            // At this point, there was no intersection on this segment, so skip to the next one and
-            // check that.
         }
     }
 }
