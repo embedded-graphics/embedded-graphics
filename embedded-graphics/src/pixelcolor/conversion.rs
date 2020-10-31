@@ -19,6 +19,16 @@ macro_rules! impl_rgb_conversion {
                 }
             }
         )*
+
+        impl $type {
+            pub(crate) const fn with_rgb888(r: u8, g: u8, b: u8) -> Self {
+                Self::new(
+                    convert_channel(r, Rgb888::MAX_R, $type::MAX_R),
+                    convert_channel(g, Rgb888::MAX_G, $type::MAX_G),
+                    convert_channel(b, Rgb888::MAX_B, $type::MAX_B),
+                )
+            }
+        }
     };
 }
 

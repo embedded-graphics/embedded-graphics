@@ -9,7 +9,7 @@ pub use crate::{
     iterator::{ContiguousIteratorExt, IntoPixels, PixelIteratorExt},
     pixelcolor::{
         raw::{RawData, ToBytes as _},
-        GrayColor, IntoStorage, PixelColor, RgbColor,
+        GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,
     },
     primitives::{ContainsPoint, Primitive},
     style::StyledPrimitiveAreas,
