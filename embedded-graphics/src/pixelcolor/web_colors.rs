@@ -90,7 +90,7 @@ pub trait WebColors: PixelColor + RgbColor {
     trait_const!(CSS_LIGHT_BLUE, "Light Blue", "173, 216, 230");
     trait_const!(CSS_LIGHT_CORAL, "Light Coral", "240, 128, 128");
     trait_const!(CSS_LIGHT_CYAN, "Light Cyan", "224, 255, 255");
-    trait_const!( CSS_LIGHT_GOLDENROD_YELLOW, "Light Goldenrod Yellow", "250, 250, 210" );
+    trait_const!(CSS_LIGHT_GOLDENROD_YELLOW, "Light Goldenrod Yellow", "250, 250, 210");
     trait_const!(CSS_LIGHT_GRAY, "Light Gray", "211, 211, 211");
     trait_const!(CSS_LIGHT_GREEN, "Light Green", "144, 238, 144");
     trait_const!(CSS_LIGHT_PINK, "Light Pink", "255, 182, 193");
@@ -111,7 +111,7 @@ pub trait WebColors: PixelColor + RgbColor {
     trait_const!(CSS_MEDIUM_PURPLE, "Medium Purple", "147, 112, 219");
     trait_const!(CSS_MEDIUM_SEA_GREEN, "Medium Sea Green", "60, 179, 113");
     trait_const!(CSS_MEDIUM_SLATE_BLUE, "Medium Slate Blue", "123, 104, 238");
-    trait_const!( CSS_MEDIUM_SPRING_GREEN, "Medium Spring Green", "0, 250, 154" );
+    trait_const!(CSS_MEDIUM_SPRING_GREEN, "Medium Spring Green", "0, 250, 154");
     trait_const!(CSS_MEDIUM_TURQUOISE, "Medium Turquoise", "72, 209, 204");
     trait_const!(CSS_MEDIUM_VIOLET_RED, "Medium Violet Red", "199, 21, 133");
     trait_const!(CSS_MIDNIGHT_BLUE, "Midnight Blue", "25, 25, 112");
