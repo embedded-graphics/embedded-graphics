@@ -275,31 +275,31 @@ impl LineJoin {
         }
     }
 
-    fn cap(&self, cap: &EdgeCorners) -> [Option<Line>; 2] {
+    fn cap(&self, cap: &EdgeCorners) -> (Line, Option<Line>) {
         let midpoint = match self.kind {
             JoinKind::Bevel { filler_line, .. } | JoinKind::Degenerate { filler_line, .. } => {
                 filler_line.midpoint()
             }
-            _ => return [Line::new(cap.left, cap.right).into(), None],
+            _ => return (Line::new(cap.left, cap.right).into(), None),
         };
 
         let l1 = Line::new(cap.left, midpoint);
         let l2 = Line::new(midpoint, cap.right);
 
-        [l1.into(), l2.into()]
+        (l1, l2.into())
     }
 
     /// Start node bevel line(s).
     ///
     /// If the join is a bevel join, this will return two lines, otherwise one.
-    pub fn start_cap_lines(&self) -> [Option<Line>; 2] {
+    pub fn start_cap_lines(&self) -> (Line, Option<Line>) {
         self.cap(&self.second_edge_start)
     }
 
     /// End node bevel line(s).
     ///
     /// If the join is a bevel join, this will return two lines, otherwise one.
-    pub fn end_cap_lines(&self) -> [Option<Line>; 2] {
+    pub fn end_cap_lines(&self) -> (Line, Option<Line>) {
         self.cap(&self.first_edge_end)
     }
 }

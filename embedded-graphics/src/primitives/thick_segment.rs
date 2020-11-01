@@ -55,32 +55,12 @@ impl ThickSegment {
         Rectangle::with_corners(tl, br)
     }
 
-    /// Get up to 6 lines comprising the perimeter of this segment.
-    ///
-    /// Note: This array could be stored as a `ThickSegment` property, but it's calculated on the
-    /// fly for memory reasons.
-    fn perimeter(&self) -> [Option<Line>; 6] {
-        let start_cap = self.start_join.start_cap_lines();
-        let end_cap = self.end_join.end_cap_lines();
-        let edges = self.edges();
-
-        [
-            start_cap[0],
-            start_cap[1],
-            end_cap[0],
-            end_cap[1],
-            edges.0.into(),
-            edges.1.into(),
-        ]
-    }
-
     pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
-        let perimeter = self.perimeter();
+        // let perimeter = self.perimeter();
 
         // Loop through perimeter and get any intersections
-        let it = perimeter
-            .iter()
-            .filter_map(|l| l.and_then(|l| bresenham_scanline_intersection(&l, scanline_y)));
+        let it = PerimiterLineIterator::new(&self)
+            .filter_map(|l| bresenham_scanline_intersection(&l, scanline_y));
 
         // Loop through intersections and collect min/max bounds of all of them into a single line
         let line = it.fold(None, |acc: Option<Line>, line| {
@@ -116,4 +96,59 @@ fn bresenham_scanline_intersection(line: &Line, scan_y: i32) -> Option<Line> {
         .filter(|last| *last != first)
         .map(|last| Line::new(first, last).sorted_x())
         .or_else(|| Some(Line::new(first, first)))
+}
+
+enum State {
+    StartCap,
+    EndCap,
+    Edges,
+    Done,
+}
+
+struct PerimiterLineIterator<'a> {
+    segment: &'a ThickSegment,
+    next_line: Option<Line>,
+    state: State,
+}
+
+impl<'a> PerimiterLineIterator<'a> {
+    fn new(segment: &'a ThickSegment) -> Self {
+        Self {
+            segment,
+            state: State::StartCap,
+            next_line: None,
+        }
+    }
+}
+
+impl<'a> Iterator for PerimiterLineIterator<'a> {
+    type Item = Line;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(next) = self.next_line.take() {
+            return Some(next);
+        }
+
+        match self.state {
+            State::StartCap => {
+                self.state = State::EndCap;
+                let (line, next) = self.segment.start_join.start_cap_lines();
+                self.next_line = next;
+                Some(line)
+            }
+            State::EndCap => {
+                self.state = State::Edges;
+                let (line, next) = self.segment.end_join.end_cap_lines();
+                self.next_line = next;
+                Some(line)
+            }
+            State::Edges => {
+                self.state = State::Done;
+                let (line, next) = self.segment.edges();
+                self.next_line = Some(next);
+                Some(line)
+            }
+            State::Done => None,
+        }
+    }
 }
