@@ -16,7 +16,7 @@ use crate::{
 };
 pub use points::Points;
 pub use styled::StyledPixels;
-pub(in crate::primitives) use thick_points::ThickPoints;
+pub(in crate::primitives) use thick_points::{Side, ThickPoints};
 
 /// Line primitive
 ///
@@ -66,6 +66,44 @@ impl Dimensions for Line {
     }
 }
 
+/// Check signs of two signed numbers
+///
+/// Fastest ASM output compared to other methods. See: https://godbolt.org/z/zVx9cD
+fn same_signs(a: i32, b: i32) -> bool {
+    (a >= 0) == (b >= 0)
+}
+
+/// Intersection test result.
+#[derive(Copy, Clone, Debug)]
+pub enum Intersection {
+    /// Intersection at point
+    Point {
+        /// Intersection point.
+        point: Point,
+
+        /// The "outer" side of the intersection, i.e. the side that has the joint's reflex angle.
+        ///
+        /// For example:
+        ///
+        /// ```text
+        /// # Left outer side:
+        ///
+        ///  ⎯
+        /// ╱
+        ///
+        /// # Right outer side:
+        ///  │
+        /// ╱
+        /// ```
+        ///
+        /// This is used to find the outside edge of a corner.
+        outer_side: Side,
+    },
+
+    /// No intersection: lines are colinear or parallel.
+    Colinear,
+}
+
 impl Line {
     /// Create a new line
     pub const fn new(start: Point, end: Point) -> Self {
@@ -86,33 +124,52 @@ impl Line {
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
-    fn extents(&self, thickness: u32) -> (Line, Line) {
-        let mut it = ParallelsIterator::new(self, thickness.saturating_cast());
+    pub(in crate::primitives) fn extents(
+        &self,
+        thickness: u32,
+        stroke_offset: StrokeOffset,
+    ) -> (Line, Line) {
+        let mut it = ParallelsIterator::new(self, thickness.saturating_cast(), stroke_offset);
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
 
         let mut left = (self.start, ParallelLineType::Normal);
         let mut right = (self.start, ParallelLineType::Normal);
 
-        loop {
-            if let Some((bresenham, reduce)) = it.next() {
-                right = (bresenham.point, reduce);
-            } else {
-                break;
-            }
+        match stroke_offset {
+            StrokeOffset::None => loop {
+                if let Some((bresenham, reduce)) = it.next() {
+                    right = (bresenham.point, reduce);
+                } else {
+                    break;
+                }
 
-            if let Some((bresenham, reduce)) = it.next() {
-                left = (bresenham.point, reduce);
-            } else {
-                break;
+                if let Some((bresenham, reduce)) = it.next() {
+                    left = (bresenham.point, reduce);
+                } else {
+                    break;
+                }
+            },
+            StrokeOffset::Left => {
+                if let Some((bresenham, reduce)) = it.last() {
+                    left = (bresenham.point, reduce);
+                }
             }
-        }
+            StrokeOffset::Right => {
+                if let Some((bresenham, reduce)) = it.last() {
+                    right = (bresenham.point, reduce);
+                }
+            }
+        };
+
+        let left_start = left.0;
+        let right_start = right.0;
 
         let delta = self.end - self.start;
 
         let left_line = Line::new(
-            left.0,
-            left.0 + delta
+            left_start,
+            left_start + delta
                 - match left.1 {
                     ParallelLineType::Normal => Point::zero(),
                     ParallelLineType::Extra => reduce,
@@ -120,14 +177,125 @@ impl Line {
         );
 
         let right_line = Line::new(
-            right.0,
-            right.0 + delta
+            right_start,
+            right_start + delta
                 - match right.1 {
                     ParallelLineType::Normal => Point::zero(),
                     ParallelLineType::Extra => reduce,
                 },
         );
         (left_line, right_line)
+    }
+
+    /// Sort line so start point is to the left of the end point.
+    pub(in crate::primitives) fn sorted_x(&self) -> Self {
+        let (start, end) = if self.start.x > self.end.x {
+            (self.end, self.start)
+        } else {
+            (self.start, self.end)
+        };
+
+        Self::new(start, end)
+    }
+
+    /// Compute the midpoint of the line.
+    pub fn midpoint(&self) -> Point {
+        self.start + (self.end - self.start) / 2
+    }
+
+    const fn coefficients(&self, other: &Self) -> (i32, i32, i32, i32, i32, i32, i32) {
+        let Point { x: x1, y: y1 } = self.start;
+        let Point { x: x2, y: y2 } = self.end;
+        let Point { x: x3, y: y3 } = other.start;
+        let Point { x: x4, y: y4 } = other.end;
+
+        // First line coefficients where "a1 x  +  b1 y  +  c1  =  0"
+        let a1 = y2 - y1;
+        let b1 = x1 - x2;
+        let c1 = x2 * y1 - x1 * y2;
+
+        // Second line coefficients
+        let a2 = y4 - y3;
+        let b2 = x3 - x4;
+        let c2 = x4 * y3 - x3 * y4;
+
+        let denom = a1 * b2 - a2 * b1;
+
+        (a1, b1, c1, a2, b2, c2, denom)
+    }
+
+    /// Check if two line segments intersect.
+    pub(in crate::primitives) fn segment_intersection(&self, other: &Self) -> bool {
+        // Note: a bounding box check here causes render time regression for thick polylines
+        let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
+
+        // Lines are colinear or parallel
+        if denom == 0 {
+            return false;
+        }
+
+        let Point { x: x1, y: y1 } = self.start;
+        let Point { x: x2, y: y2 } = self.end;
+        let Point { x: x3, y: y3 } = other.start;
+        let Point { x: x4, y: y4 } = other.end;
+
+        // Sign values for first line
+        let r1 = a2 * x1 + b2 * y1 + c2;
+        let r2 = a2 * x2 + b2 * y2 + c2;
+
+        // Sign values for second line
+        let r3 = a1 * x3 + b1 * y3 + c1;
+        let r4 = a1 * x4 + b1 * y4 + c1;
+
+        // If r1 is 0, the intersection is at the beginning of the first line
+        // If r2 is 0, the intersection is at the end of the first line
+        // If r3 is 0, the intersection is at the beginning of the second line
+        // If r4 is 0, the intersection is at the end of the second line
+
+        // Flag denoting whether intersection point is on given line segments. If this is false,
+        // the intersection occurs somewhere along the two mathematical, infinite lines instead.
+        //
+        // Check signs of r3 and r4.  If both point 3 and point 4 lie on same side of line 1, the
+        // line segments do not intersect.
+        //
+        // Check signs of r1 and r2.  If both point 1 and point 2 lie on same side of second line
+        // segment, the line segments do not intersect.
+        (r3 == 0 || r4 == 0 || !same_signs(r3, r4)) && (r1 == 0 || r2 == 0 || !same_signs(r1, r2))
+    }
+
+    /// Integer-only line intersection
+    ///
+    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
+    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
+    pub(in crate::primitives) fn line_intersection(&self, other: &Self) -> Intersection {
+        let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
+
+        // Lines are colinear or parallel
+        if denom == 0 {
+            return Intersection::Colinear;
+        }
+
+        // If we got here, line segments intersect. Compute intersection point using method similar
+        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
+
+        // The denom/2 is to get rounding instead of truncating.
+        let offset = denom.abs() / 2;
+
+        let num = b1 * c2 - b2 * c1;
+        let x = if num < 0 { num - offset } else { num + offset } / denom;
+
+        let num = a2 * c1 - a1 * c2;
+        let y = if num < 0 { num - offset } else { num + offset } / denom;
+
+        Intersection::Point {
+            point: Point::new(x, y),
+            outer_side: if denom > 0 { Side::Right } else { Side::Left },
+        }
+    }
+
+    /// Compute the delta (`end - start`) of the line.
+    pub fn delta(&self) -> Point {
+        self.end - self.start
     }
 }
 
@@ -168,6 +336,18 @@ impl Transform for Line {
 
         self
     }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub(in crate::primitives) enum StrokeOffset {
+    /// Stroke is centered around the line skeleton.
+    None,
+
+    /// Stroke is offset to the left of the line.
+    Left,
+
+    /// Stroke is offset to the right of the line.
+    Right,
 }
 
 /// Pixel iterator for each pixel in the line
@@ -429,7 +609,7 @@ mod tests {
     fn extents_zero_thickness() {
         let line = Line::new(Point::new(10, 20), Point::new(20, 10));
 
-        let (l, r) = line.extents(0);
+        let (l, r) = line.extents(0, StrokeOffset::None);
 
         assert_eq!(l, line);
         assert_eq!(r, line);

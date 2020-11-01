@@ -1,6 +1,8 @@
 //! The polyline primitive
 
 mod points;
+mod scanline_intersections;
+mod scanline_iterator;
 mod styled;
 
 use crate::{
@@ -13,14 +15,13 @@ pub use styled::StyledPixels;
 
 /// Polyline primitive
 ///
-/// Creates an unfilled chained line shape. Styles with a stroke width greater than 1px are not
-/// currently supported and will always render as a 1px wide line.
+/// Creates an unfilled chained line shape.
 ///
 /// # Examples
 ///
 /// ## Draw a "heartbeat" shaped polyline
 ///
-/// This example draws a stylized cardiogram in a 1px green stroke.
+/// This example draws a stylized cardiogram in a 5px green stroke.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -44,7 +45,7 @@ pub use styled::StyledPixels;
 ///     Point::new(300, 64),
 /// ];
 ///
-/// let line_style = PrimitiveStyle::with_stroke(Rgb565::GREEN, 1);
+/// let line_style = PrimitiveStyle::with_stroke(Rgb565::GREEN, 5);
 ///
 /// Polyline::new(&points)
 ///     .into_styled(line_style)

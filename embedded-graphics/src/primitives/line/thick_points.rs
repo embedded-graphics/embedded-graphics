@@ -2,7 +2,7 @@ use crate::{
     geometry::Point,
     primitives::line::{
         bresenham::{self, Bresenham, BresenhamParameters, BresenhamPoint},
-        Line,
+        Line, StrokeOffset,
     },
 };
 
@@ -13,8 +13,11 @@ const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-enum Side {
+pub enum Side {
+    /// Left side of the line
     Left,
+
+    /// Right side of the line
     Right,
 }
 
@@ -84,11 +87,15 @@ pub(in crate::primitives::line) struct ParallelsIterator {
 
     /// The next side which will be drawn.
     next_side: Side,
+
+    // TODO: Add tests for stroke alignment when polygons/thick triangle support is added
+    /// Stroke offset.
+    stroke_offset: StrokeOffset,
 }
 
 impl ParallelsIterator {
     /// Creates a new parallels iterator.
-    pub fn new(mut line: &Line, thickness: i32) -> Self {
+    pub fn new(mut line: &Line, thickness: i32, stroke_offset: StrokeOffset) -> Self {
         let start_point = line.start;
 
         // The lines orientation is undefined if start and end point are equal.
@@ -103,14 +110,19 @@ impl ParallelsIterator {
 
         // Thickness threshold, taking into account that fewer pixels are required to draw a
         // diagonal line of the same perceived width.
-        let delta = (line.end - line.start).abs();
-        let thickness_threshold = 4 * thickness.pow(2) * delta.length_squared();
+        let thickness_threshold = (thickness * 2).pow(2) * line.delta().length_squared();
         let thickness_accumulator =
             (parallel_parameters.error_step.minor + parallel_parameters.error_step.major) / 2;
 
         // Determine if the signs in the error calculation should be flipped.
         let flip = perpendicular_parameters.position_step.minor
             == -parallel_parameters.position_step.major;
+
+        let next_side = match stroke_offset {
+            StrokeOffset::None => Side::Right,
+            StrokeOffset::Left => Side::Left,
+            StrokeOffset::Right => Side::Right,
+        };
 
         let mut self_ = Self {
             parallel_parameters,
@@ -122,11 +134,12 @@ impl ParallelsIterator {
             left_error: 0,
             right: Bresenham::new(start_point),
             right_error: 0,
-            next_side: Side::Right,
+            next_side,
+            stroke_offset,
         };
 
-        // Skip center line on left side iterator
-        self_.next_parallel(Side::Left);
+        // Skip center line
+        self_.next_parallel(next_side.swap());
 
         self_
     }
@@ -196,7 +209,9 @@ impl Iterator for ParallelsIterator {
             }
         };
 
-        self.next_side = self.next_side.swap();
+        if self.stroke_offset == StrokeOffset::None {
+            self.next_side = self.next_side.swap();
+        }
 
         Some(ret)
     }
@@ -219,7 +234,7 @@ impl ThickPoints {
             parallel: Bresenham::new(line.start),
             parallel_length: bresenham::major_length(line),
             parallel_points_remaining: 0,
-            iter: ParallelsIterator::new(line, thickness),
+            iter: ParallelsIterator::new(line, thickness, StrokeOffset::None),
         }
     }
 }
@@ -262,7 +277,7 @@ mod tests {
         // The maximum number of lines is 0xE, because 0xF is used to mark overdraw
         assert!(count < 0xF);
 
-        let mut parallels = ParallelsIterator::new(&line, 100);
+        let mut parallels = ParallelsIterator::new(&line, 100, StrokeOffset::None);
 
         let mut display = MockDisplay::new();
 

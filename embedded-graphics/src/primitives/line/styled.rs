@@ -5,7 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        line::{thick_points::ThickPoints, Line},
+        line::{thick_points::ThickPoints, Line, StrokeOffset},
         Rectangle,
     },
     style::{PrimitiveStyle, Styled},
@@ -90,7 +90,9 @@ where
 {
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
-            let (l, r) = self.primitive.extents(self.style.stroke_width);
+            let (l, r) = self
+                .primitive
+                .extents(self.style.stroke_width, StrokeOffset::None);
 
             let min = l
                 .start

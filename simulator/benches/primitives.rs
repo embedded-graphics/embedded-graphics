@@ -150,6 +150,23 @@ fn polyline(c: &mut Criterion) {
     });
 }
 
+fn thick_polyline(c: &mut Criterion) {
+    c.bench_function("thick polyline", |b| {
+        let points = [
+            Point::new(5, 10),
+            Point::new(15, 20),
+            Point::new(5, 20),
+            Point::new(30, 50),
+            Point::new(100, 100),
+        ];
+
+        let object =
+            &Polyline::new(&points).into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 10));
+
+        b.iter(|| object.into_pixels().collect::<Vec<Pixel<Gray8>>>())
+    });
+}
+
 fn rounded_rectangle(c: &mut Criterion) {
     c.bench_function("rounded_rectangle", |b| {
         let object = &RoundedRectangle::new(
@@ -204,6 +221,7 @@ criterion_group!(
     ellipse,
     filled_ellipse,
     polyline,
+    thick_polyline,
     rounded_rectangle,
     rounded_rectangle_corners,
     arc,
