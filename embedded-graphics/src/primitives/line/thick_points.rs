@@ -118,10 +118,10 @@ impl ParallelsIterator {
         let flip = perpendicular_parameters.position_step.minor
             == -parallel_parameters.position_step.major;
 
-        let (next_side, skip_side) = match stroke_offset {
-            StrokeOffset::None => (Side::Right, Side::Left),
-            StrokeOffset::Left => (Side::Left, Side::Right),
-            StrokeOffset::Right => (Side::Right, Side::Left),
+        let next_side = match stroke_offset {
+            StrokeOffset::None => Side::Right,
+            StrokeOffset::Left => Side::Left,
+            StrokeOffset::Right => Side::Right,
         };
 
         let mut self_ = Self {
@@ -138,8 +138,8 @@ impl ParallelsIterator {
             stroke_offset,
         };
 
-        // Skip center line on left side iterator
-        self_.next_parallel(skip_side);
+        // Skip center line
+        self_.next_parallel(next_side.swap());
 
         self_
     }

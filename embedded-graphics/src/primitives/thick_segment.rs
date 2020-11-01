@@ -56,10 +56,8 @@ impl ThickSegment {
     }
 
     pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
-        // let perimeter = self.perimeter();
-
         // Loop through perimeter and get any intersections
-        let it = PerimiterLineIterator::new(&self)
+        let it = PerimeterLineIterator::new(&self)
             .filter_map(|l| bresenham_scanline_intersection(&l, scanline_y));
 
         // Loop through intersections and collect min/max bounds of all of them into a single line
@@ -105,13 +103,13 @@ enum State {
     Done,
 }
 
-struct PerimiterLineIterator<'a> {
+struct PerimeterLineIterator<'a> {
     segment: &'a ThickSegment,
     next_line: Option<Line>,
     state: State,
 }
 
-impl<'a> PerimiterLineIterator<'a> {
+impl<'a> PerimeterLineIterator<'a> {
     fn new(segment: &'a ThickSegment) -> Self {
         Self {
             segment,
@@ -121,7 +119,7 @@ impl<'a> PerimiterLineIterator<'a> {
     }
 }
 
-impl<'a> Iterator for PerimiterLineIterator<'a> {
+impl<'a> Iterator for PerimeterLineIterator<'a> {
     type Item = Line;
 
     fn next(&mut self) -> Option<Self::Item> {

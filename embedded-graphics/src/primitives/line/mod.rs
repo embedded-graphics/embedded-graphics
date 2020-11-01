@@ -124,8 +124,6 @@ impl Line {
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
-    /// Outside stroke alignment is on the left side of the line, making this compatible with
-    /// clockwise triangles, polygons, etc.
     pub(in crate::primitives) fn extents(
         &self,
         thickness: u32,
