@@ -7,13 +7,13 @@ use crate::{
     ParseError,
 };
 
-/// A BMP-format bitmap
+/// A BMP-format bitmap.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct RawBmp<'a> {
-    /// Image header
+    /// Image header.
     header: Header,
 
-    /// Image data
+    /// Image data.
     image_data: &'a [u8],
 }
 
