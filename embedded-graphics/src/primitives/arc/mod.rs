@@ -6,7 +6,7 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, AngleUnit, Dimensions, Point, Real, Size, Trigonometry},
+    geometry::{Angle, Dimensions, Point, Real, Trigonometry},
     primitives::{Circle, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
@@ -120,7 +120,7 @@ impl Arc {
     }
 
     /// Return a point on the arc from a given angle
-    fn point_from_angle(&self, angle: Angle) -> Point {
+    pub(in crate::primitives) fn point_from_angle(&self, angle: Angle) -> Point {
         let center = self.center();
         let radius = Real::from(self.diameter.saturating_sub(1)) / 2.into();
 
@@ -158,12 +158,6 @@ impl Dimensions for Arc {
             self.point_from_angle(Angle::from_degrees(360.0)),
         ];
 
-        println!("Quadrants");
-
-        for q in &quadrants {
-            println!("    {:?}", q);
-        }
-
         let start = self.point_from_angle(self.angle_start);
         let end = self.point_from_angle(self.angle_end());
         let center = self.center();
@@ -179,20 +173,14 @@ impl Dimensions for Arc {
                 |acc, point| (acc.0.component_min(*point), acc.1.component_max(*point)),
             );
 
-        println!(
-            "Min/max {:?} {:?} start/end {:?} {:?}",
-            min,
-            max,
-            self.angle_start,
-            self.angle_end()
-        );
+        if min != max {
+            if max.x > center.x {
+                max.x += 1;
+            }
 
-        if max.x > center.x {
-            max.x += 1;
-        }
-
-        if max.y > center.y {
-            max.y += 1;
+            if max.y > center.y {
+                max.y += 1;
+            }
         }
 
         Rectangle::with_corners(min, max)
@@ -246,7 +234,7 @@ mod tests {
 
         assert_eq!(
             arc.bounding_box(),
-            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+            Rectangle::new(Point::new(-11, -15), Size::new(6, 5))
         );
     }
 
@@ -256,7 +244,7 @@ mod tests {
 
         assert_eq!(
             arc.bounding_box(),
-            Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+            Rectangle::new(Point::new(9, 15), Size::new(6, 5))
         );
     }
 

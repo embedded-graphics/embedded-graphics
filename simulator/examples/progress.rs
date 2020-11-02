@@ -6,8 +6,9 @@ use embedded_graphics::{
     fonts::{Font12x16, Text},
     pixelcolor::Rgb888,
     prelude::*,
-    primitives::Arc,
     primitives::Circle,
+    primitives::OffsetOutline,
+    primitives::{Arc, Sector},
     style::PrimitiveStyle,
     style::{PrimitiveStyleBuilder, StrokeAlignment, TextStyle},
 };
@@ -22,8 +23,9 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     // Create styles used by the drawing operations.
     let arc_stroke = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb888::GREEN)
-        .stroke_width(20)
+        // .stroke_color(Rgb888::GREEN)
+        // .stroke_width(2)
+        .fill_color(Rgb888::CYAN)
         .stroke_alignment(StrokeAlignment::Inside)
         .build();
     let text_style = TextStyle::new(Font12x16, Rgb888::GREEN);
@@ -35,32 +37,42 @@ fn main() -> Result<(), std::convert::Infallible> {
     let mut progress = 0;
 
     'running: loop {
+        println!("---");
         display.clear(Rgb888::BLACK)?;
 
-        let sweep = progress as f32 * 360.0 / 100.0;
+        // let sweep = progress as f32 * 360.0 / 100.0;
+        let sweep = 352.0;
+        // let sweep = 90.0;
 
         // Draw an arc with a 5px wide stroke.
-        let thing = Arc::new(Point::new(2, 2), 64 - 4, (sweep / 2.0).deg(), sweep.deg());
-        // let thing = Arc::new(Point::new(2, 2), 64 - 4, 0.0.deg(), 90.0.deg());
+        let thing = Arc::new(Point::new(10, 10), 3, 0.0.deg(), 90.0.deg());
+        // let thing = Arc::new(Point::new(2, 2), 64 - 4, (sweep / 2.0).deg(), sweep.deg());
 
-        println!(
-            "Circle {:?}",
-            Circle::new(Point::new(2, 2), 64 - 4).bounding_box()
-        );
+        let styled = thing.into_styled(arc_stroke);
+
+        // println!(
+        //     "Circle {:?}",
+        //     Circle::new(Point::new(2, 2), 64 - 4).bounding_box()
+        // );
 
         thing
             .bounding_box()
             .into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 1))
             .draw(&mut display)?;
 
-        thing.into_styled(arc_stroke).draw(&mut display)?;
+        styled.draw(&mut display)?;
+
+        // styled
+        //     .bounding_box()
+        //     .into_styled(PrimitiveStyle::with_stroke(Rgb888::MAGENTA, 1))
+        //     .draw(&mut display)?;
 
         // Draw centered text.
         let text = format!("{}%", progress);
         let width = text.len() as i32 * 12;
-        Text::new(&text, Point::new(32 - width / 2, 32 - 16 / 2))
-            .into_styled(text_style)
-            .draw(&mut display)?;
+        // Text::new(&text, Point::new(32 - width / 2, 32 - 16 / 2))
+        //     .into_styled(text_style)
+        //     .draw(&mut display)?;
 
         window.update(&display);
 

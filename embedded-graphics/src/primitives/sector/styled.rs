@@ -150,6 +150,14 @@ where
     }
 }
 
+// FIXME: Remove and just use `Option::zip` when we ugprade to at least Rust 1.46.0
+fn zip<T>(a: Option<T>, b: Option<T>) -> Option<(T, T)> {
+    match (a, b) {
+        (Some(a), Some(b)) => Some((a, b)),
+        _ => None,
+    }
+}
+
 impl<C> Dimensions for Styled<Sector, PrimitiveStyle<C>>
 where
     C: PixelColor,
@@ -158,7 +166,22 @@ where
         if !self.style.is_transparent() {
             let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.offset(offset).bounding_box()
+            let bb = self.primitive.offset(offset).bounding_box();
+
+            if self.style.stroke_width > 1 {
+                let inner_offset = self.style.inside_stroke_width().saturating_cast();
+
+                let inner_bb = self.primitive.offset(-inner_offset).bounding_box();
+
+                Rectangle::with_corners(
+                    bb.top_left.component_min(inner_bb.top_left),
+                    zip(bb.bottom_right(), inner_bb.bottom_right())
+                        .map(|(bb_br, inner_bb_br)| bb_br.component_max(inner_bb_br))
+                        .unwrap_or(bb.top_left),
+                )
+            } else {
+                bb
+            }
         } else {
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
@@ -317,6 +340,7 @@ mod tests {
             .into_styled::<BinaryColor>(PrimitiveStyle::new());
 
         let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
         center.draw(&mut display).unwrap();
         assert_eq!(display.affected_area(), center.bounding_box());
 
