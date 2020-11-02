@@ -25,15 +25,8 @@ pub struct ScanlineIntersections<'a> {
 impl<'a> ScanlineIntersections<'a> {
     /// New
     pub fn new(points: &'a [Point], width: u32, scanline_y: i32) -> Self {
-        // let next_start_join = if let Some([first, second]) = points.get(0..1) {
-        //     Some(LineJoin::start(*first, *second, width, StrokeOffset::None))
-        // } else {
-        //     None
-        // };
-
-        // TODO: Use subslice patterns when we bump MSRV to a version where it's stable.
-        let next_start_join = match points.get(0..2) {
-            Some([first, second]) => {
+        let next_start_join = match points {
+            [first, second, ..] => {
                 Some(LineJoin::start(*first, *second, width, StrokeOffset::None))
             }
             _ => None,
@@ -57,22 +50,8 @@ impl<'a> ScanlineIntersections<'a> {
     fn next_segment(&mut self) -> Option<ThickSegment> {
         let start_join = self.next_start_join?;
 
-        // let end_join = match self.remaining_points {
-        //     [start, mid, end, ..] => {
-        //         LineJoin::from_points(*start, *mid, *end, self.width, StrokeOffset::None)
-        //     }
-        //     [start, end] => LineJoin::end(*start, *end, self.width, StrokeOffset::None),
-        //     _ => return None,
-        // };
-
-        // TODO: Use subslice patterns when we bump MSRV to a version where it's stable.
-        let end_join = self
-            .remaining_points
-            .get(0..3)
-            .or_else(|| self.remaining_points.get(0..2))?;
-
-        let end_join = match end_join {
-            [start, mid, end] => {
+        let end_join = match self.remaining_points {
+            [start, mid, end, ..] => {
                 LineJoin::from_points(*start, *mid, *end, self.width, StrokeOffset::None)
             }
             [mid, end] => LineJoin::end(*mid, *end, self.width, StrokeOffset::None),

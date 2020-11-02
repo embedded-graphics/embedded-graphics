@@ -65,7 +65,7 @@ impl BinaryColor {
     /// assert_eq!(BinaryColor::Off.invert(), BinaryColor::On);
     /// assert_eq!(BinaryColor::On.invert(), BinaryColor::Off);
     /// ```
-    pub fn invert(self) -> Self {
+    pub const fn invert(self) -> Self {
         match self {
             BinaryColor::On => BinaryColor::Off,
             BinaryColor::Off => BinaryColor::On,

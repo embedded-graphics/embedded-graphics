@@ -212,7 +212,7 @@ impl Point {
     ///
     /// assert_eq!(result, Point::new(-40, 90));
     /// ```
-    pub fn component_mul(self, other: Self) -> Self {
+    pub const fn component_mul(self, other: Self) -> Self {
         Self::new(self.x * other.x, self.y * other.y)
     }
 
@@ -229,7 +229,7 @@ impl Point {
     ///
     /// assert_eq!(result, Point::new(2, -10));
     /// ```
-    pub fn component_div(self, other: Self) -> Self {
+    pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
     }
 }
