@@ -1,4 +1,4 @@
-FROM cimg/rust:1.40.0
+FROM cimg/rust:1.47.0
 
 RUN sudo apt update && sudo apt install -y libsdl2-dev libssl-dev && sudo apt clean
 
