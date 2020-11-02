@@ -358,7 +358,7 @@ use nalgebra::{base::Scalar, Vector2};
 #[cfg(feature = "nalgebra_support")]
 impl<N> From<Vector2<N>> for Size
 where
-    N: Into<u32> + Scalar,
+    N: Into<u32> + Scalar + Copy,
 {
     fn from(other: Vector2<N>) -> Self {
         Self::new(other[0].into(), other[1].into())
@@ -368,7 +368,7 @@ where
 #[cfg(feature = "nalgebra_support")]
 impl<N> From<&Vector2<N>> for Size
 where
-    N: Into<u32> + Scalar,
+    N: Into<u32> + Scalar + Copy,
 {
     fn from(other: &Vector2<N>) -> Self {
         Self::new(other[0].into(), other[1].into())

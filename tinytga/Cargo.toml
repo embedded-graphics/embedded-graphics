@@ -19,11 +19,11 @@ exclude = [
 circle-ci = { repository = "jamwaffles/embedded-graphics", branch = "master" }
 
 [dev-dependencies]
-paste = "1.0"
+paste = "1.0.2"
+
+[dependencies]
+embedded-graphics = "0.7.0-alpha.1"
 
 [dependencies.nom]
-version = "5.1.0"
+version = "6.0.0"
 default-features = false
-
-[dependencies.embedded-graphics]
-version = "=0.7.0-alpha.1"

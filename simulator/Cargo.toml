@@ -39,20 +39,18 @@ harness = false
 name = "contains"
 
 [dependencies]
-image = "0.23.0"
-tinytga = { version = "0.3.2" }
+image = "0.23.11"
+tinytga = "0.3.2"
+embedded-graphics = "0.7.0-alpha.1"
 
 [dependencies.sdl2]
-version = "0.32.2"
+version = "0.34.3"
 optional = true
 
-[dependencies.embedded-graphics]
-version = "=0.7.0-alpha.1"
-
 [dev-dependencies]
-chrono = "0.4.10"
-criterion = { version = "0.3.0", default-features = false }
-tinybmp = { version = "0.2.2" }
+chrono = "0.4.19"
+criterion = { version = "0.3.3", default-features = false }
+tinybmp = "0.2.3"
 
 [features]
 default = [ "with-sdl" ]

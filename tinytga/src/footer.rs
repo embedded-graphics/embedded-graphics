@@ -82,10 +82,12 @@ fn offset(input: &[u8]) -> IResult<&[u8], Option<NonZeroUsize>> {
 }
 
 fn parse_footer<'a>(input: &'a [u8]) -> IResult<&[u8], TgaFooter> {
-    let footer_start = input
-        .len()
-        .checked_sub(TGA_FOOTER_LENGTH)
-        .ok_or(nom::Err::Incomplete(Needed::Size(TGA_FOOTER_LENGTH)))?;
+    let footer_start = input.len().checked_sub(TGA_FOOTER_LENGTH).ok_or_else(|| {
+        nom::Err::Incomplete(Needed::Size(
+            // SAFETY: TGA_FOOTER_LENGTH is not zero, so the unwrap here will never fail.
+            NonZeroUsize::new(TGA_FOOTER_LENGTH).unwrap(),
+        ))
+    })?;
     let input = &input[footer_start..input.len()];
 
     let (input, extension_area_offset) = offset(input)?;
