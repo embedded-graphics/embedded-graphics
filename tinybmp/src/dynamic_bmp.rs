@@ -10,7 +10,15 @@ use crate::{
     ParseError,
 };
 
-/// TODO: docs
+/// Dynamic BMP image.
+///
+/// `DynamicBmp` is used to draw images that don't have a known color type at compile time,
+/// for example user supplied images. If the color type is known at compile time consider using
+/// [`Bmp`] for improved performance.
+///
+/// `DynamicBmp` works for all embedded-graphics draw targets that use a color type that implements
+/// `From` for `Rgb555, `Rgb565`, `Rgb888` and `Gray8`, like every `Rgb...` and `Bgr...` type
+/// included in embedded-graphics.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct DynamicBmp<'a, C> {
     raw_bmp: RawBmp<'a>,
@@ -22,7 +30,7 @@ impl<'a, C> DynamicBmp<'a, C>
 where
     C: PixelColor + From<Rgb555> + From<Rgb565> + From<Rgb888> + From<Gray8>,
 {
-    /// TODO: docs
+    /// Creates a bitmap object from a byte slice.
     pub fn from_slice(bytes: &'a [u8]) -> Result<Self, ParseError> {
         let raw_bmp = RawBmp::from_slice(bytes)?;
 
@@ -37,8 +45,10 @@ where
                         _ => return Err(ParseError::UnsupportedDynamicBmpFormat),
                     }
                 } else {
-                    // TODO: should we assume Rgb555 or Rgb565 if no color masks are present?
-                    ColorType::Rgb565
+                    // According to the GDI docs the default 16 bpp color format is Rgb555 if no
+                    // color masks are defined:
+                    // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
+                    ColorType::Rgb555
                 }
             }
             Bpp::Bits24 => ColorType::Rgb888,
@@ -60,6 +70,15 @@ where
             color_type,
             target_color_type: PhantomData,
         })
+    }
+
+    /// Returns a reference to the raw BMP image.
+    ///
+    /// The [`RawBmp`] instance can be used to access lower level information about the BMP file.
+    ///
+    /// [`RawBmp`]: struct.RawBmp.html
+    pub fn as_raw(&self) -> &RawBmp<'a> {
+        &self.raw_bmp
     }
 }
 

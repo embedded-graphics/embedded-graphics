@@ -11,56 +11,84 @@ A small BMP parser designed for embedded, no-std environments but usable anywher
 parsing the image header, no other allocations are made.
 
 To use `tinybmp` without `embedded-graphics` the raw data for individual pixels in an image
-can be accessed using the `raw_pixels` and `raw_image_data` methods provided by the `Bmp`
-struct.
+can be accessed using the methods provided by the `RawBmp` struct.
 
 ## Examples
 
-### Draw a BMP image to an `embedded-graphics` draw target
+### Using `Bmp` to draw a BMP image
 
-This example loads a 16BPP image and draws it to an `embedded-graphics` compatible display.
+If the color format inside the BMP file is known at compile time the `Bmp` type can be used
+to draw an image to an `embedded-graphics` draw target. The BMP file used in this example
+uses 16 bits per pixel with a RGB565 format.
 
 ```rust
 use embedded_graphics::{image::Image, prelude::*};
 use tinybmp::Bmp;
 
-// Load 16BPP 8x8px image
-let bmp: Bmp<Rgb565> = Bmp::from_slice(include_bytes!("../tests/chessboard-8px-color-16bit.bmp")).unwrap();
+let bmp_data = include_bytes!("../tests/chessboard-8px-color-16bit.bmp");
 
-let image = Image::new(&bmp, Point::zero());
+// Load 16 BPP 8x8px image.
+// Note: The color type is specified explicitly to match the format used by the BMP image.
+let bmp = Bmp::<Rgb565>::from_slice(bmp_data).unwrap();
 
-image.draw(&mut display)?;
+// Draw the image with the top left corner at (10, 20) by wrapping it in
+// an embedded-graphics `Image`.
+Image::new(&bmp, Point::new(10, 20)).draw(&mut display)?;
+```
+
+### Using `DynamicBmp` to draw a BMP image
+
+If the exact color format used in the BMP file isn't known at compile time, for example to read
+user supplied images, the `DynamicBmp` can be used. Because automatic color conversion will
+be used the drawing performance might be degraded in comparison to `Bmp`.
+
+```rust
+use embedded_graphics::{image::Image, prelude::*};
+use tinybmp::DynamicBmp;
+
+let bmp_data = include_bytes!("../tests/chessboard-8px-color-16bit.bmp");
+
+// Load BMP image with unknown color format.
+// Note: There is no need to explicitly specify the color type.
+let bmp = DynamicBmp::from_slice(bmp_data).unwrap();
+
+// Draw the image with the top left corner at (10, 20) by wrapping it in
+// an embedded-graphics `Image`.
+Image::new(&bmp, Point::new(10, 20)).draw(&mut display)?;
 ```
 
 ### Accessing the raw image data
 
-This example demonstrates how the image header and raw image data can be accessed to use
-`tinybmp` without `embedded-graphics`.
+The `RawBmp` struct provides methods to access lower level information about a BMP file,
+like the BMP header or the raw image data. An instance of this type can be created by using
+`from_slice` or by accessing the underlying raw object of a `Bmp` or `DynamicBmp` object
+by using `as_raw`.
 
 ```rust
-use tinybmp::{Bmp, Bpp, Header, RawPixel};
+use embedded_graphics::prelude::*;
+use tinybmp::{RawBmp, Bpp, Header, RawPixel};
 
-let bmp = Bmp::from_slice_raw(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
+let bmp = RawBmp::from_slice(include_bytes!("../tests/chessboard-8px-24bit.bmp"))
     .expect("Failed to parse BMP image");
 
 // Read the BMP header
 assert_eq!(
-    bmp.header,
-    Header {
+    bmp.header(),
+    &Header {
         file_size: 314,
         image_data_start: 122,
         bpp: Bpp::Bits24,
-        image_width: 8,
-        image_height: 8,
-        image_data_len: 192
+        image_size: Size::new(8, 8),
+        image_data_len: 192,
+        channel_masks: None,
     }
 );
 
 // Check that raw image data slice is the correct length (according to parsed header)
-assert_eq!(bmp.raw_image_data().len(), bmp.header.image_data_len as usize);
+assert_eq!(bmp.image_data().len(), bmp.header().image_data_len as usize);
 
 // Get an iterator over the pixel coordinates and values in this image and load into a vec
-let pixels: Vec<RawPixel> = bmp.raw_pixels().collect();
+let pixels: Vec<RawPixel> = bmp.pixels().collect();
 
 // Loaded example image is 8x8px
 assert_eq!(pixels.len(), 8 * 8);

@@ -37,7 +37,7 @@ impl<'a> RawBmp<'a> {
         Ok(Self { header, image_data })
     }
 
-    /// TODO: docs
+    /// Returns the size of this image in pixels.
     pub fn size(&self) -> Size {
         self.header.image_size
     }
