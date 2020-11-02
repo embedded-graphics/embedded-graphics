@@ -86,7 +86,7 @@ let pixels: Vec<_> = img.pixels().collect();
 
 If [embedded-graphics] is not used in the target application, the raw image data can be
 accessed with the `pixels` method on
-`RawTga`  The returned iterator produces a `u32` for each pixel value.
+`RawTga`. The returned iterator produces a `u32` for each pixel value.
 
 ```rust
 use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
@@ -127,7 +127,7 @@ let pixels: Vec<_> = img.pixels().collect();
 `Tga` should by used instead of `DynamicTga` when possible to reduce the risk of
 accidentally adding unnecessary color conversions.
 
-`tinytga` uses different code paths to draw images with different `ImageOrigin` .
+`tinytga` uses different code paths to draw images with different `ImageOrigin`s.
 The performance difference between the origins will depend on the display driver, but using
 images with the origin at the top left corner will generally result in the best performance.
 

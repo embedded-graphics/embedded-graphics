@@ -9,4 +9,4 @@ s/\[(.+)\]\(.*(struct|enum|trait|type|fn|index).*\)/\1/g
 
 # Remove square braces from footer-reference-style inline links like "[`Foo`]",
 # leaving "`Foo`" in its place
-s/\[(`[^]]*`)\]([^\(:]|$)/\1 /g
+s/\[(`[^]]*`)\]([^\(:]|$)/\1\2/g

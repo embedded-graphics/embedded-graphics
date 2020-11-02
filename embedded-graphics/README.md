@@ -112,7 +112,7 @@ cargo run -p embedded-graphics-simulator --example hello
 Additional features can be enabled by adding the following features to your `Cargo.toml`.
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-support to enable conversions from `nalgebra::Vector2` to `Point` and `Size` 
+support to enable conversions from `nalgebra::Vector2` to `Point` and `Size`.
 
 * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 calculation.
@@ -124,7 +124,7 @@ Please read [the migration guide](https://github.com/jamwaffles/embedded-graphic
 ## Implementing `embedded_graphics` support for a display driver
 
 To add support for embedded-graphics to a display driver, `DrawTarget` must be implemented.
-This allows all embedded-graphics items to be rendered by the display. See the `DrawTarget` 
+This allows all embedded-graphics items to be rendered by the display. See the `DrawTarget`
 documentation for implementation details.
 
 ## Examples
