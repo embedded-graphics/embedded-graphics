@@ -61,7 +61,7 @@ impl<C> Iterator for RawPixels<'_, '_, C> {
 
         match self.bmp.color_bpp() {
             Bpp::Bits1 => self.pixel_data.get(byte_idx).map(|byte| {
-                let mask = 0b_1000_0000 >> self.bit_idx % 8;
+                let mask = 0b_1000_0000 >> (self.bit_idx % 8);
                 pixel_value[0] = (byte & mask != 0) as u8;
             }),
             Bpp::Bits8 => self

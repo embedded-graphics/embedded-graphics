@@ -22,6 +22,12 @@ pub enum BinaryColorTheme {
     OledBlue,
 }
 
+impl Default for BinaryColorTheme {
+    fn default() -> Self {
+        Self::Default
+    }
+}
+
 fn map_color(color: Rgb888, color_off: Rgb888, color_on: Rgb888) -> Rgb888 {
     match color {
         Rgb888::BLACK => color_off,

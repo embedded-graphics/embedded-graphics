@@ -44,7 +44,7 @@ impl<'a, 'b> RawPixels<'a, 'b> {
         };
 
         Self {
-            raw_tga: raw_tga,
+            raw_tga,
             packet,
             remaining_data: data,
             position: Point::new(0, start_y as i32),

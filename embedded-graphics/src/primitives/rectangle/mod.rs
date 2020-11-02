@@ -224,13 +224,13 @@ impl Rectangle {
             (Some(_other_bottom_right), None) => {
                 // Check if zero sized self is inside other
                 if other.contains(self.top_left) {
-                    return self.clone();
+                    return *self;
                 }
             }
             (None, Some(_self_bottom_right)) => {
                 // Check if zero sized other is inside self
                 if self.contains(other.top_left) {
-                    return other.clone();
+                    return *other;
                 }
             }
             (None, None) => (),

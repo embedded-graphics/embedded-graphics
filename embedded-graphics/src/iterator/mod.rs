@@ -45,7 +45,7 @@ where
     I::Item: PixelColor,
 {
     fn into_pixels(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self> {
-        contiguous::IntoPixels::new(self, bounding_box.clone())
+        contiguous::IntoPixels::new(self, *bounding_box)
     }
 }
 

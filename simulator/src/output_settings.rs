@@ -47,6 +47,7 @@ impl Default for OutputSettings {
 }
 
 /// Output settings builder.
+#[derive(Default)]
 pub struct OutputSettingsBuilder {
     scale: Option<u32>,
     pixel_spacing: Option<u32>,

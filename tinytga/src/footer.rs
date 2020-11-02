@@ -81,7 +81,7 @@ fn offset(input: &[u8]) -> IResult<&[u8], Option<NonZeroUsize>> {
     map(le_u32, |offset| NonZeroUsize::new(offset as usize))(input)
 }
 
-fn parse_footer<'a>(input: &'a [u8]) -> IResult<&[u8], TgaFooter> {
+fn parse_footer(input: &[u8]) -> IResult<&[u8], TgaFooter> {
     let footer_start = input.len().checked_sub(TGA_FOOTER_LENGTH).ok_or_else(|| {
         nom::Err::Incomplete(Needed::Size(
             // SAFETY: TGA_FOOTER_LENGTH is not zero, so the unwrap here will never fail.

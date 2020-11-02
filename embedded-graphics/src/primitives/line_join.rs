@@ -280,7 +280,7 @@ impl LineJoin {
             JoinKind::Bevel { filler_line, .. } | JoinKind::Degenerate { filler_line, .. } => {
                 filler_line.midpoint()
             }
-            _ => return (Line::new(cap.left, cap.right).into(), None),
+            _ => return (Line::new(cap.left, cap.right), None),
         };
 
         let l1 = Line::new(cap.left, midpoint);
