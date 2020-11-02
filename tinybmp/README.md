@@ -11,7 +11,7 @@ A small BMP parser designed for embedded, no-std environments but usable anywher
 parsing the image header, no other allocations are made.
 
 To use `tinybmp` without `embedded-graphics` the raw data for individual pixels in an image
-can be accessed using the `raw_pixels` and `raw_image_data` methods provided by the `Bmp` 
+can be accessed using the `raw_pixels` and `raw_image_data` methods provided by the `Bmp`
 struct.
 
 ## Examples
@@ -35,7 +35,7 @@ image.draw(&mut display)?;
 ### Accessing the raw image data
 
 This example demonstrates how the image header and raw image data can be accessed to use
-`tinybmp` without `embedded-graphics` 
+`tinybmp` without `embedded-graphics`.
 
 ```rust
 use tinybmp::{Bmp, Bpp, Header, RawPixel};
