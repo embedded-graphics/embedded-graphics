@@ -17,6 +17,7 @@
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) `Tga::width` and `Tga::height` were replaced by `Tga::size` which requires `embedded_graphics::geometry::OriginDimensions` to be in scope (also included in the embedded-graphics `prelude`).
 - **(breaking)** [#430](https://github.com/jamwaffles/embedded-graphics/pull/430) The color map can now be accessed using the new `ColorMap` type.
 - **(breaking)** [#450](https://github.com/jamwaffles/embedded-graphics/pull/450) `Tga` no longer provides direct access to low level information like the TGA header, instead `Tga::as_raw` can be used to access the underlying `RawTga` instance.
+- **(breaking)** [#456](https://github.com/jamwaffles/embedded-graphics/pull/456) The MSRV (Minimum Supported Rust Version) has been bumped from 1.40.0 to 1.47.0.
 
 ### Added
 
@@ -91,7 +92,7 @@
 - [#218](https://github.com/jamwaffles/embedded-graphics/pull/218) Test README examples in CI and update them to work with latest crate versions.
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/jamwaffles/tinytga/compare/tinytga-v0.3.2...HEAD
 [0.3.2]: https://github.com/jamwaffles/tinytga/compare/tinytga-v0.3.0...tinytga-v0.3.2
-
 [0.3.1]: https://github.com/jamwaffles/embedded-graphics/compare/tinytga-v0.2.0...tinytga-v0.3.1

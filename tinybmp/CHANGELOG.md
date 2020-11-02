@@ -15,6 +15,7 @@
 - **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::width` and `Bmp::height` were replaced by `Bmp::size` which requires `embedded_graphics::geometry::OriginDimensions` to be in scope (also included in the embedded-graphics `prelude`).
 - **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::from_slice` now checks if the image BPP matches the specified color type. To report possible errors it now returns the dedicated error type `ParseError` instead of `()`.
 - **(breaking)** [#444](https://github.com/jamwaffles/embedded-graphics/pull/444) `Bmp::bpp` was renamed to `Bmp::color_bpp` to be consistent with `tinytga` and the return type was changed to an enum.
+- **(breaking)** [#456](https://github.com/jamwaffles/embedded-graphics/pull/456) The MSRV (Minimum Supported Rust Version) has been bumped from 1.40.0 to 1.47.0.
 
 ## [0.2.3] - 2020-05-26
 
@@ -89,8 +90,8 @@
 - Release `tinybmp` crate to crates.io
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.3...HEAD
 
+[unreleased]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.3...HEAD
 [0.2.3]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.2...tinybmp-v0.2.3
 [0.2.2]: https://github.com/jamwaffles/tinybmp/compare/tinybmp-v0.2.0...tinybmp-v0.2.2
 [0.2.1]: https://github.com/jamwaffles/embedded-graphics/compare/tinybmp-v0.1.1...tinybmp-v0.2.1
