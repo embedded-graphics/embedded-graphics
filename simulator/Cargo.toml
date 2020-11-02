@@ -33,7 +33,6 @@ name = "fonts"
 [[bench]]
 harness = false
 name = "image"
-required-features = ["bmp"]
 [[bench]]
 harness = false
 name = "contains"

@@ -1,18 +1,15 @@
 use criterion::*;
-use embedded_graphics::{
-    drawable::Pixel,
-    image::{ImageBmp, ImageFile},
-    pixelcolor::Rgb565,
-};
+use embedded_graphics::{pixelcolor::Rgb565, Pixel};
+use tinybmp::Bmp;
 
 fn image_bmp_4x4(c: &mut Criterion) {
     c.bench_function("image BMP 4x4px", |b| {
-        let bytes = include_bytes!("../tests/chessboard-4px-color-16bit.bmp");
+        let bytes = include_bytes!("../../tinybmp/tests/chessboard-4px-color-16bit.bmp");
 
         b.iter(|| {
-            ImageBmp::new(bytes)
+            Bmp::from_slice(bytes)
                 .unwrap()
-                .into_iter()
+                .pixels()
                 .collect::<Vec<Pixel<Rgb565>>>()
         })
     });
