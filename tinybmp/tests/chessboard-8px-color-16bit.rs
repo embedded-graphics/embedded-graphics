@@ -1,31 +1,32 @@
-use tinybmp::{Bmp, Bpp, Header};
+use embedded_graphics::prelude::*;
+use tinybmp::{Bpp, ChannelMasks, Header, RawBmp};
 
 #[test]
 fn chessboard_8px_color_16bit() {
-    let bmp = Bmp::from_slice_raw(include_bytes!("./chessboard-8px-color-16bit.bmp"))
+    let bmp = RawBmp::from_slice(include_bytes!("./chessboard-8px-color-16bit.bmp"))
         .expect("Failed to parse");
 
     assert_eq!(
-        bmp.header,
-        Header {
+        bmp.header(),
+        &Header {
             file_size: 266,
             image_data_start: 138,
             bpp: Bpp::Bits16,
-            image_width: 8,
-            image_height: 8,
-            image_data_len: 128
+            image_size: Size::new(8, 8),
+            image_data_len: 128,
+            channel_masks: Some(ChannelMasks::RGB565)
         }
     );
 
-    assert_eq!(bmp.raw_image_data().len(), 266 - 138);
+    assert_eq!(bmp.image_data().len(), 266 - 138);
 }
 
 #[test]
 fn chessboard_8px_color_16bit_iter() {
-    let bmp = Bmp::from_slice_raw(include_bytes!("./chessboard-8px-color-16bit.bmp"))
+    let bmp = RawBmp::from_slice(include_bytes!("./chessboard-8px-color-16bit.bmp"))
         .expect("Failed to parse");
 
-    let pixels: Vec<u32> = bmp.raw_pixels().map(|pixel| pixel.color).collect();
+    let pixels: Vec<u32> = bmp.pixels().map(|pixel| pixel.color).collect();
 
     // 8px x 8px image. Check that iterator returns all pixels in it
     assert_eq!(pixels.len(), 8 * 8);
