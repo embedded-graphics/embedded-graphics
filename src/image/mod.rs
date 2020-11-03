@@ -19,7 +19,7 @@
 //! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
 //! with embedded-graphics.
 //!
-//! ```rust
+//! ```rust,ignore
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
 //! use tinytga::Tga;
@@ -50,7 +50,7 @@
 //! to get a sub image from an image drawable. [`ImageDrawableExt`] is included in the [`prelude`]
 //! which this example takes advantage of.
 //!
-//! ```rust
+//! ```rust,ignore
 //! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
 //! use tinytga::Tga;

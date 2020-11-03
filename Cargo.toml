@@ -37,9 +37,3 @@ fixed_point = [ "fixed" ]
 
 [dev-dependencies]
 arrayvec = { version = "0.5.1", default-features = false }
-
-[dev-dependencies.tinytga]
-# version = "0.3.2"
-# TODO: Remove when a new e-g alpha is released
-git = "https://github.com/embedded-graphics/tinytga"
-branch = "new-repo"
