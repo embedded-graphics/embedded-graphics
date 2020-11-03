@@ -20,31 +20,31 @@ consuming application to use far less RAM at little to no performance penalty.
 
 It contains built in items that make it easy to draw 2D graphics primitives:
 
-- Raw data images
-- Primitives
-  - Lines
-  - Rectangles (and squares)
-  - Circles
-  - Ellipses
-  - Arcs
-  - Sectors
-  - Triangles
-  - Polylines
-  - Rounded rectangles
-- Text with multiple fonts
+* Raw data images
+* Primitives
+    * Lines
+    * Rectangles (and squares)
+    * Circles
+    * Ellipses
+    * Arcs
+    * Sectors
+    * Triangles
+    * Polylines
+    * Rounded rectangles
+* Text with multiple fonts
 
 ## Additional functions provided by external crates
 
 Embedded-graphics is designed to be extended by the application or other crates. Examples of
 this are adding support for different image formats or implementing custom fonts.
 
-- [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
-- [TGA images - `tinytga`](https://crates.io/crates/tinytga)
-- [ProFont monospace font - `profont`](https://crates.io/crates/profont)
-- [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
-- [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
-- [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
-- [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
+* [BMP images - `tinybmp`](https://crates.io/crates/tinybmp)
+* [TGA images - `tinytga`](https://crates.io/crates/tinytga)
+* [ProFont monospace font - `profont`](https://crates.io/crates/profont)
+* [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
+* [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
+* [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
+* [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
@@ -70,20 +70,20 @@ that should be added to this list.
 
 Note that some drivers may not support the latest version of embedded-graphics.
 
-- [embedded-graphics-web-simulator](https://crates.io/crates/embedded-graphics-web-simulator): Simulated display in your browser via Webassembly
-- [epd-waveshare](https://crates.io/crates/epd-waveshare) Driver for various ePaper displays (EPD) from Waveshare
-- [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
-- [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
-- [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
-- [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
-- [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
-- [ssd1322](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
-- [ssd1331](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
-- [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
-- [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
-- [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
-- [st7789](https://crates.io/crates/st7789): A Rust driver library for ST7789 displays
-- [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
+* [embedded-graphics-web-simulator](https://crates.io/crates/embedded-graphics-web-simulator): Simulated display in your browser via Webassembly
+* [epd-waveshare](https://crates.io/crates/epd-waveshare) Driver for various ePaper displays (EPD) from Waveshare
+* [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
+* [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
+* [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
+* [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
+* [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
+* [ssd1322](https://crates.io/crates/ssd1322): Pure Rust driver for the SSD1322 OLED display chip
+* [ssd1331](https://crates.io/crates/ssd1331): SPI (4 wire) driver for the SSD1331 OLED display
+* [ssd1351](https://crates.io/crates/ssd1351): SSD1351 driver
+* [ssd1675](https://crates.io/crates/ssd1675): Rust driver for the Solomon Systech SSD1675 e-Paper display (EPD) controller
+* [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
+* [st7789](https://crates.io/crates/st7789): A Rust driver library for ST7789 displays
+* [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
 
 ## Simulator
 
@@ -111,11 +111,11 @@ cargo run -p embedded-graphics-simulator --example hello
 
 Additional features can be enabled by adding the following features to your `Cargo.toml`.
 
-- `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-  support to enable conversions from `nalgebra::Vector2` to `Point` and `Size`.
+* `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
+support to enable conversions from `nalgebra::Vector2` to `Point` and `Size`.
 
-- `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
-  calculation.
+* `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
+calculation.
 
 ## Migrating from 0.5 to 0.6
 
@@ -239,6 +239,7 @@ fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
 
 build_thing("Hello Rust!").draw(&mut display)?;
 ```
+
 
 ## Minimum supported Rust version
 
