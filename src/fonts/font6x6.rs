@@ -2,7 +2,7 @@ use crate::{fonts::Font, geometry::Size};
 
 /// 6x6 pixel variable width font.
 ///
-/// [![6x6 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x6.png)](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x6.png)
+/// [![6x6 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x6.png)](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x6.png)
 ///
 /// # Examples
 ///

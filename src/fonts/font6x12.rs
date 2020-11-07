@@ -2,7 +2,7 @@ use crate::{fonts::Font, geometry::Size};
 
 /// 6x12 pixel monospace font.
 ///
-/// [![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x12.png)](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x12.png)
+/// [![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png)](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png)
 ///
 /// # Examples
 ///
