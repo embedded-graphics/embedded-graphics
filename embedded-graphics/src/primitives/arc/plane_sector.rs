@@ -113,10 +113,13 @@ mod tests {
 
         let mut iter =
             PlaneSectorIterator::new(&arc, arc.center(), arc.angle_start, arc.angle_sweep);
+
         assert_eq!(iter.next(), Some(Point::new(1, 0)));
         assert_eq!(iter.next(), Some(Point::new(2, 0)));
+        assert_eq!(iter.next(), Some(Point::new(3, 0)));
         assert_eq!(iter.next(), Some(Point::new(1, 1)));
         assert_eq!(iter.next(), Some(Point::new(2, 1)));
+        assert_eq!(iter.next(), Some(Point::new(3, 1)));
         assert_eq!(iter.next(), None);
     }
 

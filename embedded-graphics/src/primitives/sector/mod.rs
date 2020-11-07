@@ -6,7 +6,8 @@ mod styled;
 use crate::{
     geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
     primitives::{
-        arc::PlaneSector, line::Line, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle,
+        arc::PlaneSector, line::Line, Arc, Circle, ContainsPoint, OffsetOutline, Primitive,
+        Rectangle,
     },
     transform::Transform,
 };
@@ -120,7 +121,7 @@ impl Sector {
 
     /// Return the center point of the sector
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
     }
 
     /// Return the end angle of the sector
@@ -170,7 +171,47 @@ impl ContainsPoint for Sector {
 
 impl Dimensions for Sector {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new_equal(self.diameter))
+        let arc = Arc::new(
+            self.top_left,
+            self.diameter,
+            self.angle_start,
+            self.angle_sweep,
+        );
+
+        let quadrants = [
+            arc.point_from_angle(Angle::from_degrees(0.0)),
+            arc.point_from_angle(Angle::from_degrees(90.0)),
+            arc.point_from_angle(Angle::from_degrees(180.0)),
+            arc.point_from_angle(Angle::from_degrees(270.0)),
+            arc.point_from_angle(Angle::from_degrees(360.0)),
+        ];
+
+        let start = arc.point_from_angle(self.angle_start);
+        let end = arc.point_from_angle(self.angle_end());
+        let center = self.center();
+
+        let plane_sector = PlaneSector::new(center, self.angle_start, self.angle_sweep);
+
+        let (min, mut max) = quadrants
+            .iter()
+            .filter(|quadrant| plane_sector.contains(**quadrant))
+            .chain([&start, &end, &center].iter().cloned())
+            .fold(
+                (start.component_min(end), start.component_max(end)),
+                |acc, point| (acc.0.component_min(*point), acc.1.component_max(*point)),
+            );
+
+        if min != max {
+            if max.x > center.x {
+                max.x += 1;
+            }
+
+            if max.y > center.y {
+                max.y += 1;
+            }
+        }
+
+        Rectangle::with_corners(min, max)
     }
 }
 
@@ -221,7 +262,7 @@ mod tests {
 
         assert_eq!(
             sector.bounding_box(),
-            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+            Rectangle::new(Point::new(-11, -15), Size::new(6, 5))
         );
     }
 
@@ -231,7 +272,7 @@ mod tests {
 
         assert_eq!(
             sector.bounding_box(),
-            Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+            Rectangle::new(Point::new(9, 15), Size::new(6, 5))
         );
     }
 

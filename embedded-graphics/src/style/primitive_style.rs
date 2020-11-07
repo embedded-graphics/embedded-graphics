@@ -75,7 +75,7 @@ where
     ///
     /// The outside stroke width is determined by `stroke_width` and `stroke_alignment`.
     /// If `stroke_color` is `None` the outside stroke width is always `0`.
-    pub(crate) fn outside_stroke_width(&self) -> u32 {
+    pub fn outside_stroke_width(&self) -> u32 {
         if self.stroke_color.is_none() {
             return 0;
         }
@@ -91,7 +91,7 @@ where
     ///
     /// The inside stroke width is determined by `stroke_width` and `stroke_alignment`.
     /// If `stroke_color` is `None` the inside stroke width is always `0`.
-    pub(crate) fn inside_stroke_width(&self) -> u32 {
+    pub fn inside_stroke_width(&self) -> u32 {
         if self.stroke_color.is_none() {
             return 0;
         }

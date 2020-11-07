@@ -6,8 +6,8 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Size},
-    primitives::{Circle, Primitive, Rectangle},
+    geometry::{Angle, Dimensions, Point, Real, Trigonometry},
+    primitives::{Circle, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
 pub(in crate::primitives) use linear_equation::LinearEquation;
@@ -111,7 +111,31 @@ impl Arc {
 
     /// Return the center point of the arc.
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
+    }
+
+    /// Return the end angle of the arc
+    fn angle_end(&self) -> Angle {
+        self.angle_start + self.angle_sweep
+    }
+
+    /// Return a point on the arc from a given angle
+    pub(in crate::primitives) fn point_from_angle(&self, angle: Angle) -> Point {
+        let center = self.center();
+        let radius = Real::from(self.diameter.saturating_sub(1)) / 2.into();
+
+        Point::new(
+            center.x + i32::from(angle.cos() * radius),
+            center.y - i32::from(angle.sin() * radius),
+        )
+    }
+}
+
+impl OffsetOutline for Arc {
+    fn offset(&self, offset: i32) -> Self {
+        let circle = self.to_circle().offset(offset);
+
+        Self::from_circle(circle, self.angle_start, self.angle_sweep)
     }
 }
 
@@ -124,8 +148,42 @@ impl Primitive for Arc {
 }
 
 impl Dimensions for Arc {
+    // https://stackoverflow.com/questions/1336663/2d-bounding-box-of-a-sector
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter))
+        let quadrants = [
+            self.point_from_angle(Angle::from_degrees(0.0)),
+            self.point_from_angle(Angle::from_degrees(90.0)),
+            self.point_from_angle(Angle::from_degrees(180.0)),
+            self.point_from_angle(Angle::from_degrees(270.0)),
+            self.point_from_angle(Angle::from_degrees(360.0)),
+        ];
+
+        let start = self.point_from_angle(self.angle_start);
+        let end = self.point_from_angle(self.angle_end());
+        let center = self.center();
+
+        let plane_sector = PlaneSector::new(center, self.angle_start, self.angle_sweep);
+
+        let (min, mut max) = quadrants
+            .iter()
+            .filter(|quadrant| plane_sector.contains(**quadrant))
+            .chain([&start, &end].iter().cloned())
+            .fold(
+                (start.component_min(end), start.component_max(end)),
+                |acc, point| (acc.0.component_min(*point), acc.1.component_max(*point)),
+            );
+
+        if min != max {
+            if max.x > center.x {
+                max.x += 1;
+            }
+
+            if max.y > center.y {
+                max.y += 1;
+            }
+        }
+
+        Rectangle::with_corners(min, max)
     }
 }
 
@@ -168,7 +226,7 @@ impl Transform for Arc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::AngleUnit;
+    use crate::geometry::{AngleUnit, Size};
 
     #[test]
     fn negative_dimensions() {
@@ -176,7 +234,7 @@ mod tests {
 
         assert_eq!(
             arc.bounding_box(),
-            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+            Rectangle::new(Point::new(-11, -15), Size::new(6, 5))
         );
     }
 
@@ -186,7 +244,7 @@ mod tests {
 
         assert_eq!(
             arc.bounding_box(),
-            Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+            Rectangle::new(Point::new(9, 15), Size::new(6, 5))
         );
     }
 
