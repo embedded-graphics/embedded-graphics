@@ -10,8 +10,8 @@ keywords = ["embedded-graphics", "graphics", "embedded"]
 readme = "./README.md"
 license = "MIT OR Apache-2.0"
 exclude = [
-    ".circleci",
-	".travis.yml",
+    "/.circleci/",
+    "/.github/",
 	".gitignore",
 	"convert_1bpp.sh",
 ]

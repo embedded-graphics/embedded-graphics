@@ -92,8 +92,8 @@
 //! cargo run -p embedded-graphics-simulator --example hello
 //! ```
 //!
-//! [simulator]: https://github.com/embedded-graphics/embedded-graphics/tree/master/simulator
-//! [simulator examples]: https://github.com/embedded-graphics/embedded-graphics/tree/master/simulator/examples
+//! [simulator]: https://github.com/embedded-graphics/simulator
+//! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 //!
 //! # Crate features
 //!
@@ -107,7 +107,7 @@
 //!
 //! # Migrating from 0.5 to 0.6
 //!
-//! Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/embedded-graphics/MIGRATING-0.5-0.6.md).
+//! Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
 //!
 //! # Implementing `embedded_graphics` support for a display driver
 //!
@@ -188,12 +188,12 @@
 //! }
 //! ```
 //!
-//! This example is also included in the [simulator](https://github.com/embedded-graphics/embedded-graphics/tree/master/simulator/examples) crate and
+//! This example is also included in the [simulator](https://github.com/embedded-graphics/simulator/tree/master/examples) crate and
 //! can be run using `cargo run --example hello-world`. It produces this output:
 //!
 //! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/hello-world-simulator.png)
 //!
-//! Additional examples can be found in the [simulator](https://github.com/embedded-graphics/embedded-graphics/tree/master/simulator) crate.
+//! Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
 //!
 //! ## Chaining
 //!

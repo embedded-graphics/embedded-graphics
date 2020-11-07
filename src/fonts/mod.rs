@@ -111,11 +111,11 @@
 //!
 //! | Type | Screenshot |
 //! |------|------------|
-//! | [`Font6x6`] | ![6x6 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x6.png) |
-//! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x8.png) |
-//! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font6x12.png) |
-//! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font8x16.png) |
-//! | [`Font12x16`] | ![12x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/embedded-graphics/data/font12x16.png) |
+//! | [`Font6x6`] | ![6x6 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x6.png) |
+//! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x8.png) |
+//! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png) |
+//! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font8x16.png) |
+//! | [`Font12x16`] | ![12x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font12x16.png) |
 //! | [`Font24x32`] | The 24x32 font is a pixel doubled version of the 12x16 font. |
 //!
 //! [built-in fonts]: #built-in-fonts

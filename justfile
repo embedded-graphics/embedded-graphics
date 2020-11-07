@@ -73,7 +73,7 @@ generate-readme: (_build-readme)
     cp {{target_dir}}/README.md README.md
 
 # Check README.md for a single crate
-check-readme: (_build-readme)
+@check-readme: (_build-readme)
     diff -q {{target_dir}}/README.md README.md || ( \
         echo -e "\033[1;31mError:\033[0m README.md needs to be regenerated."; \
         echo -e "       Run 'just generate-readme' to regenerate.\n"; \
