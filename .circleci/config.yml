@@ -8,13 +8,13 @@ precheck_steps: &precheck_steps
   steps:
     - checkout
     - restore_cache:
-        key: v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update
     - run: just build
     - save_cache:
-        key: v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
         paths:
           - ./target
           - /home/circleci/.cargo/registry
@@ -30,12 +30,12 @@ target_steps: &target_steps
     - checkout
     - restore_cache:
         keys:
-          - v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+          - v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
     - run: just install-targets
     - run: cargo update
     - run: just build-targets --release
     - save_cache:
-        key: v6-embedded-graphics-{{ .Environment.CIRCLE_JOB }}-{{ checksum "embedded-graphics/Cargo.toml" }}-{{ checksum "tinybmp/Cargo.toml" }}-{{ checksum "tinytga/Cargo.toml" }}-{{ checksum "simulator/Cargo.toml" }}
+        key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
         paths:
           - ./target
           - /home/circleci/.cargo/registry
@@ -62,14 +62,3 @@ workflows:
   version: 2
   build_all:
     <<: *build_jobs
-
-  # Build every day
-  nightly:
-    <<: *build_jobs
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - master
