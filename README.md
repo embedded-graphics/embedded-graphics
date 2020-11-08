@@ -248,7 +248,7 @@ Ensure you have the latest stable version of Rust installed, preferably through 
 
 ## Development setup
 
-Please see the [development setup guide](../doc/development-setup.md).
+Please see the [development setup guide](./doc/development-setup.md).
 
 ## Attribution
 
