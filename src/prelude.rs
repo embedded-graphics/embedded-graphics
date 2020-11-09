@@ -11,7 +11,7 @@ pub use crate::{
         raw::{RawData, ToBytes as _},
         GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,
     },
-    primitives::{ContainsPoint, Primitive},
+    primitives::{ContainsPoint, OffsetOutline, Primitive},
     style::StyledPrimitiveAreas,
     transform::Transform,
     Drawable, Pixel,
