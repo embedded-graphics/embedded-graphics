@@ -30,7 +30,8 @@ check-formatting:
 # Cross compiles embedded-graphics for a target
 build-target target *args:
     cargo build --target {{target}} {{args}}
-    cargo build --target {{target}} --all-features {{args}}
+    cargo build --target {{target}} --features nalgebra {{args}}
+    cargo build --target {{target}} --features fixed {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:
