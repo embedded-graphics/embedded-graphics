@@ -19,8 +19,8 @@ build-benches:
     cargo bench --features "criterion" --no-run
 
 # Run the benches
-bench:
-    cargo bench --features "criterion"
+bench *args:
+    cargo bench --features "criterion" {{args}}
 
 # Run cargo test in release mode
 test:
