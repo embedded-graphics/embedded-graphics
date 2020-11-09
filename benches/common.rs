@@ -1,6 +1,11 @@
 use embedded_graphics::prelude::*;
 use std::convert::TryFrom;
 
+#[cfg(not(feature = "criterion"))]
+compile_error!(
+    "The `criterion' feature must be enabled to run the benchmarks. Rerun with `just bench'."
+);
+
 const SIZE: usize = 256;
 
 pub struct Framebuffer<C> {

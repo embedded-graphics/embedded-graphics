@@ -16,7 +16,11 @@ build: check-formatting test test-all build-benches check-readme check-links
 
 # Build the benches
 build-benches:
-    cargo bench --no-run
+    cargo bench --features "criterion" --no-run
+
+# Run the benches
+bench:
+    cargo bench --features "criterion"
 
 # Run cargo test in release mode
 test:
