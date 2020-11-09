@@ -30,10 +30,32 @@ float-cmp = { version = "0.8.0" }
 micromath = { version = "1.0.0", default-features = false }
 nalgebra = { version = "0.19.0", optional = true, default-features = false }
 
+[dev-dependencies]
+arrayvec = { version = "0.5.1", default-features = false }
+criterion = { version = "0.3.3" }
+
 [features]
 default = []
 nalgebra_support = [ "nalgebra" ]
 fixed_point = [ "fixed" ]
 
-[dev-dependencies]
-arrayvec = { version = "0.5.1", default-features = false }
+[[bench]]
+harness = false
+name = "primitives"
+
+[[bench]]
+harness = false
+name = "primitives_fixed_point"
+required-features = ["fixed_point"]
+
+[[bench]]
+harness = false
+name = "fonts"
+
+[[bench]]
+harness = false
+name = "image"
+
+[[bench]]
+harness = false
+name = "contains"

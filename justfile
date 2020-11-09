@@ -9,7 +9,7 @@ ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-cimg"
 # Building
 #----------
 
-build: check-formatting test test-all check-readme check-links
+build: check-formatting test test-all build-benches check-readme check-links
 
 # Build the benches
 build-benches:
