@@ -6,7 +6,7 @@ target_dir := "target"
 ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-cimg"
 
 # list of all features except criterion
-all_features := "nalgebra fixed"
+all_features := "nalgebra_support fixed"
 
 #----------
 # Building
