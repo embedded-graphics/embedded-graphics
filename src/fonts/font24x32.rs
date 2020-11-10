@@ -44,7 +44,7 @@ mod tests {
         fonts::{tests::assert_text_from_pattern, MonospacedFont, Text},
         geometry::{Dimensions, Point, Size},
         pixelcolor::BinaryColor,
-        style::TextStyle,
+        style::MonospacedTextStyle,
     };
 
     const WIDTH: usize = Font24x32::CHARACTER_SIZE.width as usize;
@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::new(Font24x32, BinaryColor::On);
+        let style = MonospacedTextStyle::new(Font24x32, BinaryColor::On);
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
         let empty = Text::new("", Point::zero()).into_styled(style);
 

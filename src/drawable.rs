@@ -13,7 +13,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
 ///     primitives::Rectangle,
-///     style::{PrimitiveStyle, TextStyle},
+///     style::{PrimitiveStyle, MonospacedTextStyle},
 /// };
 ///
 /// struct Button<'a, C: PixelColor> {
@@ -39,7 +39,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///             .draw(display)?;
 ///
 ///         Text::new(self.text, Point::new(6, 6))
-///             .into_styled(TextStyle::new(Font6x8, self.fg_color))
+///             .into_styled(MonospacedTextStyle::new(Font6x8, self.fg_color))
 ///             .draw(display)
 ///     }
 /// }

@@ -4,7 +4,7 @@ use embedded_graphics::{
     geometry::Point,
     pixelcolor::Gray8,
     prelude::*,
-    style::TextStyle,
+    style::MonospacedTextStyle,
 };
 
 mod common;
@@ -14,7 +14,7 @@ use common::Framebuffer;
 fn font_6x8(c: &mut Criterion) {
     c.bench_function("font 6x8 Hello world!", |b| {
         let object = Text::new("Hello world!", Point::zero())
-            .into_styled(TextStyle::new(Font6x8, Gray8::new(10)));
+            .into_styled(MonospacedTextStyle::new(Font6x8, Gray8::new(10)));
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
@@ -24,7 +24,7 @@ fn font_6x8(c: &mut Criterion) {
 fn font_12x16(c: &mut Criterion) {
     c.bench_function("font 12x16 Hello world!", |b| {
         let object = Text::new("Hello world!", Point::zero())
-            .into_styled(TextStyle::new(Font12x16, Gray8::new(10)));
+            .into_styled(MonospacedTextStyle::new(Font12x16, Gray8::new(10)));
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))

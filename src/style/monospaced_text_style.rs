@@ -1,20 +1,21 @@
 use crate::{fonts::MonospacedFont, pixelcolor::PixelColor};
 
-/// Style properties for text.
+/// Style properties for text using a monospaced font.
 ///
-/// A `TextStyle` can be applied to a [`Text`] object to define how the text is drawn.
+/// A `MonospacedTextStyle` can be applied to a [`Text`] object to define how the text is drawn.
 ///
-/// Because `TextStyle` has the [`non_exhaustive`] attribute, it cannot be created using a struct
-/// literal. To create a `TextStyle` with a given text color and transparent background, use the
-/// [`new`] method. For more complex text styles, use the [`TextStyleBuilder`].
+/// Because `MonospacedTextStyle` has the [`non_exhaustive`] attribute, it cannot be created using a
+/// struct literal. To create a `MonospacedTextStyle` with a given text color and transparent
+/// background, use the [`new`] method. For more complex text styles, use the
+/// [`MonospacedTextStyleBuilder`].
 ///
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
-/// [`TextStyleBuilder`]: ./struct.TextStyleBuilder.html
+/// [`MonospacedTextStyleBuilder`]: ./struct.MonospacedTextStyleBuilder.html
 /// [`new`]: #method.new
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[non_exhaustive]
-pub struct TextStyle<C, F>
+pub struct MonospacedTextStyle<C, F>
 where
     C: PixelColor,
     F: MonospacedFont,
@@ -29,7 +30,7 @@ where
     pub font: F,
 }
 
-impl<C, F> TextStyle<C, F>
+impl<C, F> MonospacedTextStyle<C, F>
 where
     C: PixelColor,
     F: MonospacedFont,
@@ -44,9 +45,9 @@ where
     }
 }
 
-/// Text style builder.
+/// Text style builder for monospaced fonts.
 ///
-/// Use this builder to create [`TextStyle`]s for [`Text`].
+/// Use this builder to create [`MonospacedTextStyle`]s for [`Text`].
 ///
 /// # Examples
 ///
@@ -59,10 +60,10 @@ where
 ///     fonts::{Font6x8, Text},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     style::{TextStyle, TextStyleBuilder},
+///     style::{MonospacedTextStyle, MonospacedTextStyleBuilder},
 /// };
 ///
-/// let style: TextStyle<Rgb565, Font6x8> = TextStyleBuilder::new(Font6x8)
+/// let style: MonospacedTextStyle<Rgb565, Font6x8> = MonospacedTextStyleBuilder::new(Font6x8)
 ///     .text_color(Rgb565::YELLOW)
 ///     .background_color(Rgb565::BLUE)
 ///     .build();
@@ -72,18 +73,19 @@ where
 ///
 /// ## Transparent background
 ///
-/// If a property is ommitted, it will remain at its default value in the resulting `TextStyle`
-/// returned by `.build()`. This example draws white text with no background at all.
+/// If a property is omitted, it will remain at its default value in the resulting
+/// `MonospacedTextStyle`returned by `.build()`. This example draws white text with no background at
+/// all.
 ///
 /// ```rust
 /// use embedded_graphics::{
 ///     fonts::{Font6x8, Text},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     style::{TextStyle, TextStyleBuilder},
+///     style::{MonospacedTextStyle, MonospacedTextStyleBuilder},
 /// };
 ///
-/// let style: TextStyle<Rgb565, Font6x8> = TextStyleBuilder::new(Font6x8)
+/// let style: MonospacedTextStyle<Rgb565, Font6x8> = MonospacedTextStyleBuilder::new(Font6x8)
 ///     .text_color(Rgb565::WHITE)
 ///     .build();
 ///
@@ -95,17 +97,17 @@ where
 /// [`Font8x16`]: ../fonts/struct.Font8x16.html
 /// [other fonts]: ../fonts/index.html
 /// [`Text`]: ../fonts/struct.Text.html
-/// [`TextStyle`]: ./struct.TextStyle.html
+/// [`MonospacedTextStyle`]: ./struct.MonospacedTextStyle.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct TextStyleBuilder<C, F>
+pub struct MonospacedTextStyleBuilder<C, F>
 where
     C: PixelColor,
     F: MonospacedFont + Clone,
 {
-    style: TextStyle<C, F>,
+    style: MonospacedTextStyle<C, F>,
 }
 
-impl<C, F> TextStyleBuilder<C, F>
+impl<C, F> MonospacedTextStyleBuilder<C, F>
 where
     C: PixelColor,
     F: MonospacedFont + Clone,
@@ -113,7 +115,7 @@ where
     /// Creates a new text style builder with a given font.
     pub fn new(font: F) -> Self {
         Self {
-            style: TextStyle {
+            style: MonospacedTextStyle {
                 font,
                 background_color: None,
                 text_color: None,
@@ -136,7 +138,7 @@ where
     }
 
     /// Builds the text style.
-    pub fn build(self) -> TextStyle<C, F> {
+    pub fn build(self) -> MonospacedTextStyle<C, F> {
         self.style
     }
 }
@@ -149,8 +151,8 @@ mod tests {
     #[test]
     fn builder_default() {
         assert_eq!(
-            TextStyleBuilder::<BinaryColor, _>::new(Font12x16).build(),
-            TextStyle {
+            MonospacedTextStyleBuilder::<BinaryColor, _>::new(Font12x16).build(),
+            MonospacedTextStyle {
                 font: Font12x16,
                 text_color: None,
                 background_color: None
@@ -161,21 +163,21 @@ mod tests {
     #[test]
     fn builder_text_color() {
         assert_eq!(
-            TextStyleBuilder::new(Font12x16)
+            MonospacedTextStyleBuilder::new(Font12x16)
                 .text_color(BinaryColor::On)
                 .build(),
-            TextStyle::new(Font12x16, BinaryColor::On)
+            MonospacedTextStyle::new(Font12x16, BinaryColor::On)
         );
     }
 
     #[test]
     fn builder_background_color() {
         assert_eq!(
-            TextStyleBuilder::new(Font12x16)
+            MonospacedTextStyleBuilder::new(Font12x16)
                 .background_color(BinaryColor::On)
                 .build(),
             {
-                let mut style = TextStyleBuilder::new(Font12x16).build();
+                let mut style = MonospacedTextStyleBuilder::new(Font12x16).build();
 
                 style.text_color = None;
                 style.background_color = Some(BinaryColor::On);

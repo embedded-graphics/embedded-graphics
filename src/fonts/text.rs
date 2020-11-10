@@ -6,7 +6,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    style::{Styled, TextStyle},
+    style::{MonospacedTextStyle, Styled},
     transform::Transform,
 };
 
@@ -41,7 +41,10 @@ impl<'a> Text<'a> {
     }
 
     /// Attaches a text style to the text object.
-    pub fn into_styled<C, F>(self, style: TextStyle<C, F>) -> Styled<Self, TextStyle<C, F>>
+    pub fn into_styled<C, F>(
+        self,
+        style: MonospacedTextStyle<C, F>,
+    ) -> Styled<Self, MonospacedTextStyle<C, F>>
     where
         C: PixelColor,
         F: MonospacedFont,
@@ -65,7 +68,7 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<C, F> Drawable for Styled<Text<'_>, TextStyle<C, F>>
+impl<C, F> Drawable for Styled<Text<'_>, MonospacedTextStyle<C, F>>
 where
     C: PixelColor,
     F: MonospacedFont + Copy,
@@ -80,7 +83,7 @@ where
     }
 }
 
-impl<'a, C, F> IntoPixels for &Styled<Text<'a>, TextStyle<C, F>>
+impl<'a, C, F> IntoPixels for &Styled<Text<'a>, MonospacedTextStyle<C, F>>
 where
     C: PixelColor,
     F: MonospacedFont + Copy,
@@ -103,7 +106,7 @@ where
     }
 }
 
-impl<C, F> Dimensions for Styled<Text<'_>, TextStyle<C, F>>
+impl<C, F> Dimensions for Styled<Text<'_>, MonospacedTextStyle<C, F>>
 where
     C: PixelColor,
     F: MonospacedFont,
@@ -151,7 +154,7 @@ where
     top_left: Point,
     pos: Point,
     text: &'a str,
-    style: TextStyle<C, F>,
+    style: MonospacedTextStyle<C, F>,
 }
 
 impl<C, F> Iterator for StyledTextIterator<'_, C, F>
@@ -282,7 +285,7 @@ mod tests {
 
     #[test]
     fn character_spacing_dimensions() {
-        let style = TextStyle::new(SpacedFont, BinaryColor::On);
+        let style = MonospacedTextStyle::new(SpacedFont, BinaryColor::On);
 
         assert_eq!(
             Text::new("#", Point::zero())
@@ -333,7 +336,7 @@ mod tests {
 
     #[test]
     fn multiline_dimensions() {
-        let style = TextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonospacedTextStyle::new(Font6x8, BinaryColor::On);
         let text = Text::new("AB\nC", Point::zero()).into_styled(style);
 
         assert_eq!(
@@ -344,7 +347,7 @@ mod tests {
 
     #[test]
     fn position_and_translate() {
-        let style = TextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonospacedTextStyle::new(Font6x8, BinaryColor::On);
 
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
 
@@ -364,7 +367,7 @@ mod tests {
     #[test]
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
-        let style_inverse = TextStyle {
+        let style_inverse = MonospacedTextStyle {
             font: Font6x8,
             text_color: Some(BinaryColor::Off),
             background_color: Some(BinaryColor::On),
@@ -375,7 +378,7 @@ mod tests {
             .unwrap();
 
         let mut display_normal = MockDisplay::new();
-        let style_normal = TextStyle {
+        let style_normal = MonospacedTextStyle {
             font: Font6x8,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
@@ -392,7 +395,7 @@ mod tests {
     fn no_fill_does_not_hang() {
         let mut display = MockDisplay::new();
         Text::new(" ", Point::zero())
-            .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+            .into_styled(MonospacedTextStyle::new(Font6x8, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
 
@@ -401,7 +404,7 @@ mod tests {
 
     #[test]
     fn negative_y_no_infinite_loop() {
-        let style = TextStyle {
+        let style = MonospacedTextStyle {
             font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
@@ -415,7 +418,7 @@ mod tests {
 
     #[test]
     fn negative_x_no_infinite_loop() {
-        let style = TextStyle {
+        let style = MonospacedTextStyle {
             font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),

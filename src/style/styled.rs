@@ -1,10 +1,9 @@
-use super::TextStyle;
 use crate::{
     fonts::MonospacedFont,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{OffsetOutline, Primitive, Rectangle},
-    style::PrimitiveStyle,
+    style::{MonospacedTextStyle, PrimitiveStyle},
     transform::Transform,
     SaturatingCast,
 };
@@ -44,7 +43,7 @@ where
     }
 }
 
-impl<T, C, F> Dimensions for Styled<T, TextStyle<C, F>>
+impl<T, C, F> Dimensions for Styled<T, MonospacedTextStyle<C, F>>
 where
     T: Dimensions,
     C: PixelColor,
