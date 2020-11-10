@@ -111,7 +111,6 @@
 //!
 //! | Type | Screenshot |
 //! |------|------------|
-//! | [`Font6x6`] | ![6x6 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x6.png) |
 //! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x8.png) |
 //! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png) |
 //! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font8x16.png) |
@@ -119,7 +118,6 @@
 //! | [`Font24x32`] | The 24x32 font is a pixel doubled version of the 12x16 font. |
 //!
 //! [built-in fonts]: #built-in-fonts
-//! [`Font6x6`]: struct.Font6x6.html
 //! [`Font6x8`]: struct.Font6x8.html
 //! [`Font6x12`]: struct.Font6x12.html
 //! [`Font8x16`]: struct.Font8x16.html
@@ -134,7 +132,6 @@
 mod font12x16;
 mod font24x32;
 mod font6x12;
-mod font6x6;
 mod font6x8;
 mod font8x16;
 mod text;
@@ -144,7 +141,6 @@ pub use text::{StyledTextIterator, Text};
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
 pub use font6x12::Font6x12;
-pub use font6x6::Font6x6;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
 
@@ -169,32 +165,8 @@ pub trait MonospacedFont {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
-    /// Whether characters have a variable width or not.
-    ///
-    /// Variable width characters have a maximum width of CHARACTER_SIZE.x, but the empty columns at
-    /// the right of each characters are ignored, allowing some characters to be smaller than others.
-    const VARIABLE_WIDTH: bool = false;
-
     /// Returns the position a character in the font.
     fn char_offset(_: char) -> u32;
-
-    /// Returns the actual width of a character in the font.
-    fn char_width(c: char) -> u32 {
-        if Self::VARIABLE_WIDTH {
-            let mut x_max = 0;
-            for y in 0..Self::CHARACTER_SIZE.height {
-                for x in (x_max..Self::CHARACTER_SIZE.width).rev() {
-                    if Self::character_pixel(c, x, y) {
-                        x_max = x;
-                        break;
-                    }
-                }
-            }
-            x_max + 1
-        } else {
-            Self::CHARACTER_SIZE.width
-        }
-    }
 
     /// Returns the value of a pixel in a character in the font.
     fn character_pixel(c: char, x: u32, y: u32) -> bool {
