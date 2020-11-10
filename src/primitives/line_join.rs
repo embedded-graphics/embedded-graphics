@@ -275,18 +275,27 @@ impl LineJoin {
         }
     }
 
-    fn cap(&self, cap: &EdgeCorners) -> (Line, Option<Line>) {
-        let midpoint = match self.kind {
+    /// The filler line (if any) for bevel and degenerate joints.
+    fn filler_line(&self) -> Option<Line> {
+        match self.kind {
             JoinKind::Bevel { filler_line, .. } | JoinKind::Degenerate { filler_line, .. } => {
-                filler_line.midpoint()
+                Some(filler_line)
             }
-            _ => return (Line::new(cap.left, cap.right).into(), None),
-        };
+            _ => None,
+        }
+    }
 
-        let l1 = Line::new(cap.left, midpoint);
-        let l2 = Line::new(midpoint, cap.right);
+    fn cap(&self, cap: &EdgeCorners) -> (Line, Option<Line>) {
+        if let Some(filler) = self.filler_line() {
+            let midpoint = filler.midpoint();
 
-        (l1, l2.into())
+            let l1 = Line::new(cap.left, midpoint);
+            let l2 = Line::new(midpoint, cap.right);
+
+            (l1, l2.into())
+        } else {
+            (Line::new(cap.left, cap.right), None)
+        }
     }
 
     /// Start node bevel line(s).
@@ -301,5 +310,15 @@ impl LineJoin {
     /// If the join is a bevel join, this will return two lines, otherwise one.
     pub fn end_cap_lines(&self) -> (Line, Option<Line>) {
         self.cap(&self.first_edge_end)
+    }
+
+    /// Whether the join is degenerate (segments self-intersect) or not.
+    pub fn is_degenerate(&self) -> bool {
+        // MSRV: Use matches!() macro when we're at 1.42.0 or greater.
+        if let JoinKind::Degenerate { .. } = self.kind {
+            true
+        } else {
+            false
+        }
     }
 }

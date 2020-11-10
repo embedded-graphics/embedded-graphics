@@ -1,15 +1,39 @@
 use crate::{
-    geometry::Point,
-    primitives::triangle::{scanline_iterator::ScanlineIterator, Triangle},
+    geometry::{Dimensions, Point},
+    primitives::{
+        line::{self, Line, StrokeOffset},
+        triangle::{scanline_iterator::ScanlineIterator, Triangle},
+        Primitive,
+    },
 };
 
 /// Iterator over all points inside the triangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Points(ScanlineIterator);
+pub struct Points {
+    scanline_iter: ScanlineIterator,
+    current_line: line::Points,
+}
 
 impl Points {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-        Self(ScanlineIterator::new(triangle))
+        let mut scanline_iter = ScanlineIterator::new(
+            triangle,
+            0,
+            StrokeOffset::None,
+            true,
+            &triangle.bounding_box(),
+        );
+
+        let current_line = scanline_iter
+            .next()
+            .map(|(l, _ty)| l)
+            .unwrap_or_else(|| Line::new(Point::zero(), Point::zero()))
+            .points();
+
+        Self {
+            scanline_iter,
+            current_line,
+        }
     }
 }
 
@@ -17,7 +41,13 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|(_, p)| p)
+        if let Some(point) = self.current_line.next() {
+            Some(point)
+        } else {
+            self.current_line = self.scanline_iter.next()?.0.points();
+
+            self.current_line.next()
+        }
     }
 }
 

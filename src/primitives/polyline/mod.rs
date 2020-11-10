@@ -1,7 +1,7 @@
 //! The polyline primitive
 
 mod points;
-mod scanline_intersections;
+pub(in crate::primitives) mod scanline_intersections;
 mod scanline_iterator;
 mod styled;
 

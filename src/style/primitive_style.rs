@@ -1,4 +1,4 @@
-use crate::pixelcolor::PixelColor;
+use crate::{pixelcolor::PixelColor, primitives::line::StrokeOffset};
 
 /// Style properties for primitives.
 ///
@@ -253,6 +253,16 @@ pub enum StrokeAlignment {
     Center,
     /// Outside.
     Outside,
+}
+
+impl StrokeAlignment {
+    pub(crate) fn as_offset(self) -> StrokeOffset {
+        match self {
+            Self::Inside => StrokeOffset::Right,
+            Self::Outside => StrokeOffset::Left,
+            Self::Center => StrokeOffset::None,
+        }
+    }
 }
 
 impl Default for StrokeAlignment {

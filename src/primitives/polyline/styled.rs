@@ -45,7 +45,7 @@ where
             let line_iter = scanline_iter
                 .next()
                 .map(|line| line.points())
-                .unwrap_or_else(|| line::Points::empty());
+                .unwrap_or_else(line::Points::empty);
 
             StyledIter::Thick {
                 scanline_iter,

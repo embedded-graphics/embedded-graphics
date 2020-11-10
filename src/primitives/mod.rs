@@ -2,6 +2,7 @@
 
 pub mod arc;
 pub mod circle;
+mod closed_thick_segment_iter;
 pub mod ellipse;
 pub mod line;
 mod line_join;

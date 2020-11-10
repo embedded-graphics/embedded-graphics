@@ -263,6 +263,21 @@ impl Line {
         (r3 == 0 || r4 == 0 || !same_signs(r3, r4)) && (r1 == 0 || r2 == 0 || !same_signs(r1, r2))
     }
 
+    /// Get which side of a line a point lies on.
+    ///
+    /// If the result is zero, the point lies on the line. Otherwise, values greater than zero
+    /// denote that the point is on the left side of the line. Values less than zero denote the
+    /// point lies to the right.
+    pub(in crate::primitives) fn side(&self, point: Point) -> i32 {
+        let Point { x: x1, y: y1 } = self.start;
+        let Point { x: x2, y: y2 } = self.end;
+
+        let Point { x, y } = point;
+
+        // https://math.stackexchange.com/a/274728/4506
+        (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
+    }
+
     /// Integer-only line intersection
     ///
     /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
@@ -339,8 +354,7 @@ impl Transform for Line {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-#[allow(dead_code)]
-pub(in crate::primitives) enum StrokeOffset {
+pub(crate) enum StrokeOffset {
     /// Stroke is centered around the line skeleton.
     None,
 

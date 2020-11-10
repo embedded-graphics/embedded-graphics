@@ -8,6 +8,7 @@ use crate::{
 #[derive(Debug, Clone, Copy)]
 pub(in crate::primitives) struct ThickSegment {
     start_join: LineJoin,
+
     end_join: LineJoin,
 }
 
@@ -18,6 +19,11 @@ impl ThickSegment {
             start_join,
             end_join,
         }
+    }
+
+    /// Check whether the thick segment is thick or not.
+    pub fn is_skeleton(&self) -> bool {
+        self.start_join.first_edge_end.left == self.start_join.first_edge_end.right
     }
 
     /// Get the right/left edges of this line segment.
@@ -42,6 +48,10 @@ impl ThickSegment {
     pub fn edges_bounding_box(&self) -> Rectangle {
         let (right, left) = self.edges();
 
+        if self.is_skeleton() {
+            return left.bounding_box();
+        }
+
         let left = left.bounding_box();
         let right = right.bounding_box();
 
@@ -56,6 +66,11 @@ impl ThickSegment {
     }
 
     pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
+        // Single 1px line
+        if self.is_skeleton() {
+            return bresenham_scanline_intersection(&self.edges().0, scanline_y);
+        }
+
         // Loop through perimeter and get any intersections
         let it = PerimeterLineIterator::new(&self)
             .filter_map(|l| bresenham_scanline_intersection(&l, scanline_y));
@@ -77,7 +92,13 @@ impl ThickSegment {
 }
 
 /// Intersect a horizontal scan line with the Bresenham representation of this line segment.
-fn bresenham_scanline_intersection(line: &Line, scan_y: i32) -> Option<Line> {
+///
+/// Intersection lines produced by this function are sorted so that the start always lies to the
+/// left of the end.
+pub(in crate::primitives) fn bresenham_scanline_intersection(
+    line: &Line,
+    scan_y: i32,
+) -> Option<Line> {
     if !line
         .bounding_box()
         .contains(Point::new(line.start.x, scan_y))
@@ -127,26 +148,26 @@ impl<'a> Iterator for PerimeterLineIterator<'a> {
             return Some(next);
         }
 
-        match self.state {
+        let (line, next) = match self.state {
             State::StartCap => {
                 self.state = State::EndCap;
-                let (line, next) = self.segment.start_join.start_cap_lines();
-                self.next_line = next;
-                Some(line)
+                self.segment.start_join.start_cap_lines()
             }
             State::EndCap => {
                 self.state = State::Edges;
-                let (line, next) = self.segment.end_join.end_cap_lines();
-                self.next_line = next;
-                Some(line)
+                self.segment.end_join.end_cap_lines()
             }
             State::Edges => {
                 self.state = State::Done;
                 let (line, next) = self.segment.edges();
-                self.next_line = Some(next);
-                Some(line)
+                self.next_line = if next != line { Some(next) } else { None };
+                (line, Some(next))
             }
-            State::Done => None,
-        }
+            State::Done => return None,
+        };
+
+        self.next_line = next.filter(|n| *n != line);
+
+        Some(line)
     }
 }
