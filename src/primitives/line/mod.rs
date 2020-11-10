@@ -339,7 +339,7 @@ impl Transform for Line {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-#[allow(dead_code)] // TODO: remove when all variants are used
+#[allow(dead_code)]
 pub(in crate::primitives) enum StrokeOffset {
     /// Stroke is centered around the line skeleton.
     None,
