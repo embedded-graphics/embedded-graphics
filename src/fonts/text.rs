@@ -1,12 +1,12 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
+    drawable::Drawable,
     fonts::MonospacedFont,
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    style::{MonospacedTextStyle, Styled},
+    style::{MonospacedTextStyle, Styled, TextStyle, TextStylePixels},
     transform::Transform,
 };
 
@@ -68,168 +68,51 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<C, F> Drawable for Styled<Text<'_>, MonospacedTextStyle<C, F>>
+impl<C, S> Drawable for Styled<Text<'_>, S>
 where
     C: PixelColor,
-    F: MonospacedFont + Copy,
+    S: TextStyle<Color = C>,
 {
     type Color = C;
 
-    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        self.style.render_text(&self.primitive, target)
     }
 }
 
-impl<'a, C, F> IntoPixels for &Styled<Text<'a>, MonospacedTextStyle<C, F>>
+impl<'a, C, S> IntoPixels for &Styled<Text<'a>, S>
 where
     C: PixelColor,
-    F: MonospacedFont + Copy,
+    S: TextStyle<Color = C> + TextStylePixels<'a>,
 {
     type Color = C;
 
-    type Iter = StyledTextIterator<'a, C, F>;
+    type Iter = S::Iter;
 
     fn into_pixels(self) -> Self::Iter {
-        Self::Iter {
-            current_char: self.primitive.text.chars().next(),
-            idx: 0,
-            text: self.primitive.text,
-            char_walk_x: 0,
-            char_walk_y: 0,
-            top_left: self.primitive.position,
-            pos: self.primitive.position,
-            style: self.style,
-        }
+        self.style.pixels(&self.primitive)
     }
 }
 
-impl<C, F> Dimensions for Styled<Text<'_>, MonospacedTextStyle<C, F>>
+impl<C, S> Dimensions for Styled<Text<'_>, S>
 where
     C: PixelColor,
-    F: MonospacedFont,
+    S: TextStyle<Color = C>,
 {
     fn bounding_box(&self) -> Rectangle {
-        // If a piece of text is completely transparent, return an empty bounding box
-        if self.style.text_color.is_none() && self.style.background_color.is_none() {
-            return Rectangle::new(self.primitive.position, Size::new(0, 0));
-        }
-
-        let width = self
-            .primitive
-            .text
-            .lines()
-            .map(|line| {
-                (line.len() as u32 * (F::CHARACTER_SPACING + F::CHARACTER_SIZE.width))
-                    .saturating_sub(F::CHARACTER_SPACING)
-            })
-            .max()
-            .unwrap_or(0);
-
-        let height = if width > 0 {
-            F::CHARACTER_SIZE.height * self.primitive.text.lines().count() as u32
-        } else {
-            0
-        };
-
-        let size = Size::new(width, height);
-
-        Rectangle::new(self.primitive.position, size)
+        self.style.bounding_box(&self.primitive)
     }
 }
 
-/// Pixel iterator for styled text.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct StyledTextIterator<'a, C, F>
-where
-    C: PixelColor,
-    F: MonospacedFont,
-{
-    char_walk_x: i32,
-    char_walk_y: i32,
-    current_char: Option<char>,
-    idx: usize,
-    top_left: Point,
-    pos: Point,
-    text: &'a str,
-    style: MonospacedTextStyle<C, F>,
-}
-
-impl<C, F> Iterator for StyledTextIterator<'_, C, F>
-where
-    C: PixelColor,
-    F: MonospacedFont,
-{
-    type Item = Pixel<C>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.current_char == Some('\n') {
-                self.pos.x = self.top_left.x;
-                self.pos.y += F::CHARACTER_SIZE.height as i32;
-                self.idx += 1;
-                self.current_char = self.text.chars().nth(self.idx);
-            } else if self.char_walk_x < 0 {
-                let x = self.pos.x + self.char_walk_x;
-                let y = self.pos.y + self.char_walk_y;
-
-                self.char_walk_y += 1;
-
-                if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
-                    self.char_walk_y = 0;
-                    self.char_walk_x += 1;
-                }
-
-                if let Some(color) = self.style.background_color {
-                    break Some(Pixel(Point::new(x, y), color));
-                }
-            } else if let Some(current_char) = self.current_char {
-                let color = if F::character_pixel(
-                    current_char,
-                    self.char_walk_x as u32,
-                    self.char_walk_y as u32,
-                ) {
-                    self.style.text_color
-                } else {
-                    self.style.background_color
-                };
-
-                let x = self.pos.x + self.char_walk_x;
-                let y = self.pos.y + self.char_walk_y;
-
-                self.char_walk_x += 1;
-
-                if self.char_walk_x >= F::CHARACTER_SIZE.width as i32 {
-                    self.char_walk_x = 0;
-                    self.char_walk_y += 1;
-
-                    // Done with this char, move on to the next one
-                    if self.char_walk_y >= F::CHARACTER_SIZE.height as i32 {
-                        self.pos.x += (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING) as i32;
-                        self.char_walk_y = 0;
-                        self.char_walk_x -= F::CHARACTER_SPACING as i32;
-                        self.idx += 1;
-                        self.current_char = self.text.chars().nth(self.idx);
-                    }
-                }
-
-                // Skip to next point if pixel is transparent
-                if let Some(color) = color {
-                    break Some(Pixel(Point::new(x, y), color));
-                }
-            } else {
-                break None;
-            }
-        }
-    }
-}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
         fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8},
+        geometry::Size,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         prelude::*,
@@ -432,7 +315,7 @@ mod tests {
 
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
-        let style = TextStyle {
+        let style = MonospacedTextStyle {
             font: Font6x8,
             text_color: None,
             background_color: Some(BinaryColor::On),
@@ -469,7 +352,7 @@ mod tests {
 
     #[test]
     fn transparent_text_has_zero_size_but_retains_position() {
-        let style: TextStyle<BinaryColor, _> = TextStyle {
+        let style: MonospacedTextStyle<BinaryColor, _> = MonospacedTextStyle {
             font: Font6x8,
             text_color: None,
             background_color: None,

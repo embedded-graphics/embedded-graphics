@@ -1,4 +1,11 @@
-use crate::{fonts::MonospacedFont, pixelcolor::PixelColor};
+use crate::{
+    draw_target::DrawTarget,
+    fonts::{MonospacedFont, MonospacedPixels, Text},
+    geometry::Size,
+    pixelcolor::PixelColor,
+    primitives::Rectangle,
+    style::{TextStyle, TextStylePixels},
+};
 
 /// Style properties for text using a monospaced font.
 ///
@@ -42,6 +49,60 @@ where
             text_color: Some(text_color),
             background_color: None,
         }
+    }
+}
+
+impl<C, F> TextStyle for MonospacedTextStyle<C, F>
+where
+    C: PixelColor,
+    F: MonospacedFont + Copy,
+{
+    type Color = C;
+
+    fn render_text<D>(&self, text: &Text<'_>, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        target.draw_iter(MonospacedPixels::new(text, *self))
+    }
+
+    fn bounding_box(&self, text: &Text<'_>) -> Rectangle {
+        // If a piece of text is completely transparent, return an empty bounding box
+        if self.text_color.is_none() && self.background_color.is_none() {
+            return Rectangle::new(text.position, Size::zero());
+        }
+
+        let width = text
+            .text
+            .lines()
+            .map(|line| {
+                (line.len() as u32 * (F::CHARACTER_SPACING + F::CHARACTER_SIZE.width))
+                    .saturating_sub(F::CHARACTER_SPACING)
+            })
+            .max()
+            .unwrap_or(0);
+
+        let height = if width > 0 {
+            F::CHARACTER_SIZE.height * text.text.lines().count() as u32
+        } else {
+            0
+        };
+
+        let size = Size::new(width, height);
+
+        Rectangle::new(text.position, size)
+    }
+}
+
+impl<'a, C, F> TextStylePixels<'a> for MonospacedTextStyle<C, F>
+where
+    C: PixelColor + 'a,
+    F: MonospacedFont + Copy + 'a,
+{
+    type Iter = MonospacedPixels<'a, C, F>;
+
+    fn pixels(&self, text: &Text<'a>) -> Self::Iter {
+        MonospacedPixels::new(&text, self.clone())
     }
 }
 

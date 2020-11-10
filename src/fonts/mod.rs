@@ -134,9 +134,11 @@ mod font24x32;
 mod font6x12;
 mod font6x8;
 mod font8x16;
+mod monospaced_pixels;
 mod text;
 
-pub use text::{StyledTextIterator, Text};
+pub use monospaced_pixels::MonospacedPixels;
+pub use text::Text;
 
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
