@@ -1,12 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::Drawable,
-    fonts::MonospacedFont,
     geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    style::{MonospacedTextStyle, Styled, TextStyle, TextStylePixels},
+    style::{Styled, TextStyle, TextStylePixels},
     transform::Transform,
 };
 
@@ -41,13 +40,10 @@ impl<'a> Text<'a> {
     }
 
     /// Attaches a text style to the text object.
-    pub fn into_styled<C, F>(
-        self,
-        style: MonospacedTextStyle<C, F>,
-    ) -> Styled<Self, MonospacedTextStyle<C, F>>
+    pub fn into_styled<C, S>(self, style: S) -> Styled<Self, S>
     where
         C: PixelColor,
-        F: MonospacedFont,
+        S: TextStyle<Color = C>,
     {
         Styled::new(self, style)
     }
@@ -111,11 +107,12 @@ where
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8},
+        fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8, MonospacedFont},
         geometry::Size,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         prelude::*,
+        style::MonospacedTextStyle,
         style::PrimitiveStyle,
     };
 
