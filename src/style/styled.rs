@@ -1,6 +1,6 @@
 use super::TextStyle;
 use crate::{
-    fonts::Font,
+    fonts::MonospacedFont,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{OffsetOutline, Primitive, Rectangle},
@@ -48,7 +48,7 @@ impl<T, C, F> Dimensions for Styled<T, TextStyle<C, F>>
 where
     T: Dimensions,
     C: PixelColor,
-    F: Font,
+    F: MonospacedFont,
 {
     fn bounding_box(&self) -> Rectangle {
         self.primitive.bounding_box()

@@ -1,4 +1,4 @@
-use crate::{fonts::Font, pixelcolor::PixelColor};
+use crate::{fonts::MonospacedFont, pixelcolor::PixelColor};
 
 /// Style properties for text.
 ///
@@ -17,7 +17,7 @@ use crate::{fonts::Font, pixelcolor::PixelColor};
 pub struct TextStyle<C, F>
 where
     C: PixelColor,
-    F: Font,
+    F: MonospacedFont,
 {
     /// Text color.
     pub text_color: Option<C>,
@@ -32,7 +32,7 @@ where
 impl<C, F> TextStyle<C, F>
 where
     C: PixelColor,
-    F: Font,
+    F: MonospacedFont,
 {
     /// Creates a text style with transparent background.
     pub fn new(font: F, text_color: C) -> Self {
@@ -100,7 +100,7 @@ where
 pub struct TextStyleBuilder<C, F>
 where
     C: PixelColor,
-    F: Font + Clone,
+    F: MonospacedFont + Clone,
 {
     style: TextStyle<C, F>,
 }
@@ -108,7 +108,7 @@ where
 impl<C, F> TextStyleBuilder<C, F>
 where
     C: PixelColor,
-    F: Font + Clone,
+    F: MonospacedFont + Clone,
 {
     /// Creates a new text style builder with a given font.
     pub fn new(font: F) -> Self {

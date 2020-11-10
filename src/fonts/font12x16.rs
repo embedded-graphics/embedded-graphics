@@ -1,4 +1,4 @@
-use crate::{fonts::Font, geometry::Size};
+use crate::{fonts::MonospacedFont, geometry::Size};
 
 /// 12x16 pixel monospace font.
 ///
@@ -11,7 +11,7 @@ use crate::{fonts::Font, geometry::Size};
 pub struct Font12x16;
 
 /// Config for 12x16 font
-impl Font for Font12x16 {
+impl MonospacedFont for Font12x16 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font12x16_1bpp.raw");
     const FONT_IMAGE_WIDTH: u32 = 480;
 
@@ -36,7 +36,7 @@ impl Font for Font12x16 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, Font, Text},
+        fonts::{tests::assert_text_from_pattern, MonospacedFont, Text},
         geometry::{Dimensions, Point, Size},
         pixelcolor::BinaryColor,
         style::TextStyle,

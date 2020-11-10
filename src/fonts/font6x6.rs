@@ -1,4 +1,4 @@
-use crate::{fonts::Font, geometry::Size};
+use crate::{fonts::MonospacedFont, geometry::Size};
 
 /// 6x6 pixel variable width font.
 ///
@@ -10,7 +10,7 @@ use crate::{fonts::Font, geometry::Size};
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Font6x6;
 
-impl Font for Font6x6 {
+impl MonospacedFont for Font6x6 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font6x6_1bpp.raw");
     const FONT_IMAGE_WIDTH: u32 = 192;
 
@@ -41,7 +41,7 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable,
-        fonts::{tests::assert_text_from_pattern, Font, Text},
+        fonts::{tests::assert_text_from_pattern, MonospacedFont, Text},
         geometry::{Dimensions, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,

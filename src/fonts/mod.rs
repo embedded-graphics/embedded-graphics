@@ -151,7 +151,7 @@ pub use font8x16::Font8x16;
 use crate::geometry::Size;
 
 /// Monospaced bitmap font.
-pub trait Font {
+pub trait MonospacedFont {
     /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
 
@@ -234,7 +234,7 @@ mod tests {
     /// Draws a text using the given font and checks it against the expected pattern.
     pub(super) fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
     where
-        F: Font + Copy,
+        F: MonospacedFont + Copy,
     {
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())

@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    fonts::Font,
+    fonts::MonospacedFont,
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -44,7 +44,7 @@ impl<'a> Text<'a> {
     pub fn into_styled<C, F>(self, style: TextStyle<C, F>) -> Styled<Self, TextStyle<C, F>>
     where
         C: PixelColor,
-        F: Font,
+        F: MonospacedFont,
     {
         Styled::new(self, style)
     }
@@ -68,7 +68,7 @@ impl Transform for Text<'_> {
 impl<C, F> Drawable for Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
-    F: Font + Copy,
+    F: MonospacedFont + Copy,
 {
     type Color = C;
 
@@ -83,7 +83,7 @@ where
 impl<'a, C, F> IntoPixels for &Styled<Text<'a>, TextStyle<C, F>>
 where
     C: PixelColor,
-    F: Font + Copy,
+    F: MonospacedFont + Copy,
 {
     type Color = C;
 
@@ -107,7 +107,7 @@ where
 impl<C, F> Dimensions for Styled<Text<'_>, TextStyle<C, F>>
 where
     C: PixelColor,
-    F: Font,
+    F: MonospacedFont,
 {
     fn bounding_box(&self) -> Rectangle {
         // If a piece of text is completely transparent, return an empty bounding box
@@ -148,7 +148,7 @@ where
 pub struct StyledTextIterator<'a, C, F>
 where
     C: PixelColor,
-    F: Font,
+    F: MonospacedFont,
 {
     char_width: u32,
     char_walk_x: i32,
@@ -164,7 +164,7 @@ where
 impl<C, F> Iterator for StyledTextIterator<'_, C, F>
 where
     C: PixelColor,
-    F: Font,
+    F: MonospacedFont,
 {
     type Item = Pixel<C>;
 
@@ -250,7 +250,7 @@ mod tests {
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct SpacedFont;
 
-    impl Font for SpacedFont {
+    impl MonospacedFont for SpacedFont {
         const FONT_IMAGE: &'static [u8] = Font6x8::FONT_IMAGE;
         const FONT_IMAGE_WIDTH: u32 = Font6x8::FONT_IMAGE_WIDTH;
         const CHARACTER_SIZE: Size = Font6x8::CHARACTER_SIZE;
