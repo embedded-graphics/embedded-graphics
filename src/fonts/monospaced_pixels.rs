@@ -1,17 +1,17 @@
 use crate::{
-    fonts::{MonospacedFont, Text},
+    fonts::{MonoFont, Text},
     geometry::Point,
     pixelcolor::PixelColor,
-    style::MonospacedTextStyle,
+    style::MonoTextStyle,
     Pixel,
 };
 
 /// Pixel iterator for styled text with a monospaced font.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct MonospacedPixels<'a, C, F>
+pub struct MonoPixels<'a, C, F>
 where
     C: PixelColor,
-    F: MonospacedFont,
+    F: MonoFont,
 {
     char_walk_x: i32,
     char_walk_y: i32,
@@ -20,15 +20,15 @@ where
     top_left: Point,
     pos: Point,
     text: &'a str,
-    style: MonospacedTextStyle<C, F>,
+    style: MonoTextStyle<C, F>,
 }
 
-impl<'a, C, F> MonospacedPixels<'a, C, F>
+impl<'a, C, F> MonoPixels<'a, C, F>
 where
     C: PixelColor,
-    F: MonospacedFont,
+    F: MonoFont,
 {
-    pub(crate) fn new(text: &Text<'a>, style: MonospacedTextStyle<C, F>) -> Self {
+    pub(crate) fn new(text: &Text<'a>, style: MonoTextStyle<C, F>) -> Self {
         Self {
             current_char: text.text.chars().next(),
             idx: 0,
@@ -42,10 +42,10 @@ where
     }
 }
 
-impl<C, F> Iterator for MonospacedPixels<'_, C, F>
+impl<C, F> Iterator for MonoPixels<'_, C, F>
 where
     C: PixelColor,
-    F: MonospacedFont,
+    F: MonoFont,
 {
     type Item = Pixel<C>;
 

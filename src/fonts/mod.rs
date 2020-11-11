@@ -22,14 +22,14 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
-//!     style::{MonospacedTextStyle, MonospacedTextStyleBuilder},
+//!     style::{MonoTextStyle, MonoTextStyleBuilder},
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! // Create a new text style
-//! let style = MonospacedTextStyleBuilder::new(Font6x8)
+//! let style = MonoTextStyleBuilder::new(Font6x8)
 //!     .text_color(Rgb565::YELLOW)
 //!     .background_color(Rgb565::BLUE)
 //!     .build();
@@ -48,14 +48,14 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     style::MonospacedTextStyle,
+//!     style::MonoTextStyle,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(MonospacedTextStyle::new(Font6x8, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display)?;
 //!
@@ -64,7 +64,7 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(MonospacedTextStyle::new(Font6x8, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -82,7 +82,7 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
-//!     style::MonospacedTextStyleBuilder,
+//!     style::MonoTextStyleBuilder,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
@@ -98,7 +98,7 @@
 //!
 //! Text::new(&buf, Point::zero())
 //!     .into_styled(
-//!         MonospacedTextStyleBuilder::new(Font6x8)
+//!         MonoTextStyleBuilder::new(Font6x8)
 //!             .text_color(Rgb565::YELLOW)
 //!             .background_color(Rgb565::BLUE)
 //!             .build(),
@@ -125,7 +125,7 @@
 //! [`Font24x32`]: struct.Font24x32.html
 //! [`Text`]: struct.Text.html
 //! [`Styled`]: ../style/struct.Styled.html
-//! [`MonospacedTextStyle`]: ../style/struct.MonospacedTextStyle.html
+//! [`MonoTextStyle`]: ../style/struct.MonoTextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
@@ -137,7 +137,7 @@ mod font8x16;
 mod monospaced_pixels;
 mod text;
 
-pub use monospaced_pixels::MonospacedPixels;
+pub use monospaced_pixels::MonoPixels;
 pub use text::Text;
 
 pub use font12x16::Font12x16;
@@ -149,7 +149,7 @@ pub use font8x16::Font8x16;
 use crate::geometry::Size;
 
 /// Monospaced bitmap font.
-pub trait MonospacedFont {
+pub trait MonoFont {
     /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
 
@@ -202,17 +202,17 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable, geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor,
-        style::MonospacedTextStyle,
+        style::MonoTextStyle,
     };
 
     /// Draws a text using the given font and checks it against the expected pattern.
     pub(super) fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
     where
-        F: MonospacedFont + Copy,
+        F: MonoFont + Copy,
     {
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
-            .into_styled(MonospacedTextStyle::new(font, BinaryColor::On))
+            .into_styled(MonoTextStyle::new(font, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
 

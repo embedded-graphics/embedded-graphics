@@ -107,12 +107,12 @@ where
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8, MonospacedFont},
+        fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8, MonoFont},
         geometry::Size,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         prelude::*,
-        style::MonospacedTextStyle,
+        style::MonoTextStyle,
         style::PrimitiveStyle,
     };
 
@@ -121,7 +121,7 @@ mod tests {
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
     struct SpacedFont;
 
-    impl MonospacedFont for SpacedFont {
+    impl MonoFont for SpacedFont {
         const FONT_IMAGE: &'static [u8] = Font6x8::FONT_IMAGE;
         const FONT_IMAGE_WIDTH: u32 = Font6x8::FONT_IMAGE_WIDTH;
         const CHARACTER_SIZE: Size = Font6x8::CHARACTER_SIZE;
@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn character_spacing_dimensions() {
-        let style = MonospacedTextStyle::new(SpacedFont, BinaryColor::On);
+        let style = MonoTextStyle::new(SpacedFont, BinaryColor::On);
 
         assert_eq!(
             Text::new("#", Point::zero())
@@ -216,7 +216,7 @@ mod tests {
 
     #[test]
     fn multiline_dimensions() {
-        let style = MonospacedTextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
         let text = Text::new("AB\nC", Point::zero()).into_styled(style);
 
         assert_eq!(
@@ -227,7 +227,7 @@ mod tests {
 
     #[test]
     fn position_and_translate() {
-        let style = MonospacedTextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
 
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
 
@@ -247,7 +247,7 @@ mod tests {
     #[test]
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
-        let style_inverse = MonospacedTextStyle {
+        let style_inverse = MonoTextStyle {
             font: Font6x8,
             text_color: Some(BinaryColor::Off),
             background_color: Some(BinaryColor::On),
@@ -258,7 +258,7 @@ mod tests {
             .unwrap();
 
         let mut display_normal = MockDisplay::new();
-        let style_normal = MonospacedTextStyle {
+        let style_normal = MonoTextStyle {
             font: Font6x8,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
@@ -275,7 +275,7 @@ mod tests {
     fn no_fill_does_not_hang() {
         let mut display = MockDisplay::new();
         Text::new(" ", Point::zero())
-            .into_styled(MonospacedTextStyle::new(Font6x8, BinaryColor::On))
+            .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
 
@@ -284,7 +284,7 @@ mod tests {
 
     #[test]
     fn negative_y_no_infinite_loop() {
-        let style = MonospacedTextStyle {
+        let style = MonoTextStyle {
             font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
@@ -298,7 +298,7 @@ mod tests {
 
     #[test]
     fn negative_x_no_infinite_loop() {
-        let style = MonospacedTextStyle {
+        let style = MonoTextStyle {
             font: Font6x12,
             text_color: Some(BinaryColor::On),
             background_color: Some(BinaryColor::Off),
@@ -312,7 +312,7 @@ mod tests {
 
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
-        let style = MonospacedTextStyle {
+        let style = MonoTextStyle {
             font: Font6x8,
             text_color: None,
             background_color: Some(BinaryColor::On),
@@ -349,7 +349,7 @@ mod tests {
 
     #[test]
     fn transparent_text_has_zero_size_but_retains_position() {
-        let style: MonospacedTextStyle<BinaryColor, _> = MonospacedTextStyle {
+        let style: MonoTextStyle<BinaryColor, _> = MonoTextStyle {
             font: Font6x8,
             text_color: None,
             background_color: None,

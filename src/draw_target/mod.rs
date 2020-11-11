@@ -450,7 +450,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///     mock_display::MockDisplay,
     ///     pixelcolor::BinaryColor,
     ///     fonts::{Text, Font6x8},
-    ///     style::MonospacedTextStyle,
+    ///     style::MonoTextStyle,
     /// };
     ///
     /// let mut display = MockDisplay::new();
@@ -458,13 +458,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// // Draws text at position (10, 5) in the display coordinate system
     /// Text::new("Text", Point::zero())
-    ///     .into_styled(MonospacedTextStyle::new(Font6x8, BinaryColor::On))
+    ///     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
     ///     .draw(&mut translated_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
     /// # Text::new("Text", Point::new(10, 5))
-    /// #     .into_styled(MonospacedTextStyle::new(Font6x8, BinaryColor::On))
+    /// #     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #
     /// # assert_eq!(display, expected);
@@ -493,7 +493,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///     mock_display::MockDisplay,
     ///     pixelcolor::Rgb565,
     ///     fonts::{Text, Font6x8},
-    ///     style::MonospacedTextStyle,
+    ///     style::MonoTextStyle,
     ///     primitives::Rectangle,
     /// };
     ///
@@ -510,7 +510,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///     let text_position = Point::zero() + (target_size - text_size) / 2;
     ///
     ///     Text::new(text, text_position)
-    ///         .into_styled(MonospacedTextStyle::new(Font6x8, Rgb565::YELLOW))
+    ///         .into_styled(MonoTextStyle::new(Font6x8, Rgb565::YELLOW))
     ///         .draw(target)
     /// }
     ///
@@ -545,7 +545,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///     mock_display::MockDisplay,
     ///     pixelcolor::BinaryColor,
     ///     fonts::{Text, Font12x16},
-    ///     style::MonospacedTextStyle,
+    ///     style::MonoTextStyle,
     ///     primitives::Rectangle,
     /// };
     ///
@@ -557,13 +557,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// // Only the first 4 characters will be drawn, because the others are outside
     /// // the clipping area
     /// Text::new("Clipped", Point::zero())
-    ///     .into_styled(MonospacedTextStyle::new(Font12x16, BinaryColor::On))
+    ///     .into_styled(MonoTextStyle::new(Font12x16, BinaryColor::On))
     ///     .draw(&mut clipped_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
     /// # Text::new("Clip", Point::zero())
-    /// #     .into_styled(MonospacedTextStyle::new(Font12x16, BinaryColor::On))
+    /// #     .into_styled(MonoTextStyle::new(Font12x16, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #
     /// # assert_eq!(display, expected);
