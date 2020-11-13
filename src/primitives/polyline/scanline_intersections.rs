@@ -19,7 +19,7 @@ pub struct ScanlineIntersections<'a> {
     scanline_y: i32,
     next_start_join: Option<LineJoin>,
     width: u32,
-    prev_line: Option<Line>,
+    accum: Option<Line>,
 }
 
 impl<'a> ScanlineIntersections<'a> {
@@ -45,7 +45,7 @@ impl<'a> ScanlineIntersections<'a> {
             points,
             remaining_points: points,
             scanline_y,
-            prev_line: None,
+            accum: None,
         }
     }
 
@@ -89,103 +89,107 @@ impl<'a> ScanlineIntersections<'a> {
     }
 }
 
-// PERF: There may be some performance to be gained by merging adjacent line segments - this would
-// shrink the number of draw calls around polyline joints and any line segments that are directly
-// next to each other.
+/// This iterator loops through all scanline intersections for all segments. If two intersections
+/// are adjacent or overlapping, an accumulator line is extended. This repeats until the next
+/// intersection does not touch the current accumulator. At this point, the accumulated line
+/// segment is returned, and is reset to the next segment.
+///
+/// This process reduces the number of draw calls for adjacent scanlines, whilst preventing overdraw
+/// from overlapping scanline segments.
+///
+/// ```text
+/// # Adjacent - merge
+/// A---AB+++B
+///     ⇓
+/// A--------A
+///
+/// # Overlapping - merge
+/// A---B+++A+++B
+///      ⇓
+/// A-----------A
+///
+/// # Separate - leave alone
+/// A---A B---B
+///      ⇓
+/// A---A B---B
+/// ```
 impl<'a> Iterator for ScanlineIntersections<'a> {
     type Item = Line;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            let segment = self.next_segment()?;
+        while let Some(segment) = self.next_segment() {
+            if let Some(next_segment) = segment.intersection(self.scanline_y) {
+                if let Some(accum) = self.accum {
+                    // If next segment doesn't touch, return current accum state and reset accum
+                    // to new line.
+                    if !touches(accum, next_segment) {
+                        self.accum = Some(next_segment);
+                        return Some(accum);
+                    }
 
-            if let Some(mut line) = segment.intersection(self.scanline_y) {
-                // Do some checks to prevent adjacent line overdraw at end/start points.
-                if let Some(prev_line) = self.prev_line {
-                    // NOTE: Lines returned from intersections are always X-sorted with start point
-                    // to the left.
-                    if let Some(fixed_overlap) = fix_overlap(prev_line, line) {
-                        line = fixed_overlap;
-                    }
-                    // Current line doesn't need to be drawn. Skip onto the next line that may
-                    // extend prev_line.
-                    else {
-                        continue;
-                    }
+                    // If next segment touches current accum, extend accum and continue.
+                    self.accum = Some(extend(accum, next_segment));
                 }
-
-                self.prev_line = Some(line);
-
-                return Some(line);
+                // Initialize accumulator with a single line. Next iteration will return it if
+                // next intersection doesn't touch.
+                else {
+                    self.accum = Some(next_segment);
+                }
             }
         }
+
+        // No more segments - return the final accumulated line.
+        self.accum.take()
     }
 }
 
-/// Fix any overlap between two lines.
+/// Check for lines that are adjacent or overlapping.
 ///
-/// If the second line start point lies inside the first line, the second line start point will be
-/// shifted to 1px before or 1px after the first line so it doesn't overlap.
-/// If the second line doesn't need to be drawn at all, this function will return `None`.
-fn fix_overlap(l1: Line, l2: Line) -> Option<Line> {
-    let l1_range = l1.start.x..=l1.end.x;
+/// This assumes that both lines have the same y coordinate and are horizontal.
+fn touches(l1: Line, l2: Line) -> bool {
+    let first_range = (l1.start.x - 1)..=(l1.end.x + 1);
 
-    let is_completely_contained = l1_range.contains(&l2.start.x) && l1_range.contains(&l2.end.x);
+    first_range.contains(&l2.start.x) || first_range.contains(&l2.end.x)
+}
 
-    // Don't need to draw the second line if it will be completely obscured by first.
-    if l1 == l2 || is_completely_contained {
-        return None;
-    }
+/// Merge to lines into one longer line.
+///
+/// This assumes the lines are adjacent or touching, which is guaranteed by the iterator logic
+/// around where this function is called.
+fn extend(l1: Line, l2: Line) -> Line {
+    // Lines are scanlines, so we can reuse the same Y coordinate for everything.
+    let y = l1.start.y;
 
-    let mut l2 = l2;
-
-    // If one line contains the start of the other, push second line to start/end of first so
-    // they're adjacent without overlap.
-    if l1_range.contains(&l2.start.x) {
-        // Second line extends to the left of the first line. Clamp second end point to just before
-        // first line start.
-        if l2.start.x < l1.start.x {
-            l2.end.x = l1.start.x - 1;
-        }
-        // Second line extends to the right. Clamp start point to just after first line end.
-        else if l2.end.x > l1.end.x {
-            l2.start.x = l1.end.x + 1;
-        }
-    }
-
-    Some(l2)
+    Line::new(
+        Point::new(l1.start.x.min(l2.start.x), y),
+        Point::new(l1.end.x.max(l2.end.x), y),
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn run_overlap_test(
-        s1: i32,
-        e1: i32,
-        s2: i32,
-        e2: i32,
-        expected: Option<[i32; 2]>,
-        ident: &str,
-    ) {
-        let expected = expected.map(|[expected_start, expected_end]| {
-            Line::new(Point::new(expected_start, 0), Point::new(expected_end, 0))
-        });
-
+    fn run_touches_test(s1: i32, e1: i32, s2: i32, e2: i32, expected: bool, ident: &str) {
         let l1 = Line::new(Point::new(s1, 0), Point::new(e1, 0));
         let l2 = Line::new(Point::new(s2, 0), Point::new(e2, 0));
 
-        assert_eq!(fix_overlap(l1, l2), expected, "{}", ident);
+        assert_eq!(touches(l1, l2), expected, "{}", ident);
     }
 
     #[test]
-    fn test_fix_overlap() {
-        run_overlap_test(30, 40, 5, 15, Some([5, 15]), "Reversed");
-        run_overlap_test(0, 6, 5, 10, Some([7, 10]), "Contained");
-        run_overlap_test(11, 13, 11, 14, Some([14, 14]), "Contained 2");
-        run_overlap_test(10, 15, 25, 35, Some([25, 35]), "Separated");
-        run_overlap_test(10, 10, 10, 10, None, "Zero size");
-        run_overlap_test(10, 20, 10, 20, None, "Equal");
-        run_overlap_test(10, 20, 20, 10, None, "Equal reversed");
+    fn check_touches() {
+        run_touches_test(30, 40, 5, 15, false, "Reversed");
+        run_touches_test(0, 6, 5, 10, true, "Contained");
+        run_touches_test(11, 13, 11, 14, true, "Contained 2");
+        run_touches_test(10, 15, 25, 35, false, "Separated");
+        run_touches_test(10, 10, 10, 10, true, "Zero size");
+        run_touches_test(10, 20, 10, 20, true, "Equal");
+        run_touches_test(10, 20, 20, 10, true, "Equal reversed");
+        run_touches_test(79, 82, 82, 92, true, "Overlapping lines 1");
+        run_touches_test(82, 92, 79, 82, true, "Overlapping lines 1, reversed");
+        run_touches_test(80, 83, 83, 94, true, "Overlapping lines 2");
+        run_touches_test(83, 94, 80, 83, true, "Overlapping lines 2, reversed");
+        run_touches_test(83, 94, 94, 100, true, "Adjacent");
     }
 }
