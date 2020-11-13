@@ -5,15 +5,22 @@ target_dir := "target"
 # when upgrading the tag next time.
 ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-cimg"
 
+# list of all features except criterion
+all_features := "nalgebra_support fixed"
+
 #----------
 # Building
 #----------
 
-build: check-formatting test test-all check-readme check-links
+build: check-formatting test test-all build-benches check-readme check-links
 
 # Build the benches
 build-benches:
-    cargo bench --no-run
+    cargo bench --features "criterion" --no-run
+
+# Run the benches
+bench *args:
+    cargo bench --features "criterion" {{args}}
 
 # Run cargo test in release mode
 test:
@@ -21,7 +28,7 @@ test:
 
 # Run cargo test in release mode with all features enabled
 test-all:
-    cargo test --release --all-features
+    cargo test --release --features "{{all_features}}"
 
 # Check the formatting
 check-formatting:
@@ -30,10 +37,13 @@ check-formatting:
 # Cross compiles embedded-graphics for a target
 build-target target *args:
     cargo build --target {{target}} {{args}}
-    cargo build --target {{target}} --all-features {{args}}
+    cargo build --target {{target}} --features "{{all_features}}" {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:
+    #!/usr/bin/env bash
+    set -e
+
     for target in {{targets}}; do just build-target $target {{args}}; done
 
 # Install all targets used in the `build-targets` command
@@ -58,7 +68,7 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --all-features
+    cargo doc --features "{{all_features}}"
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs

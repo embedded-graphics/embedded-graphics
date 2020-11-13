@@ -14,6 +14,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#450](https://github.com/embedded-graphics/embedded-graphics/pull/450) Added `ColorConverted` and `DrawTargetExt::color_converted` to support color conversion for draw targets.
 - [#438](https://github.com/embedded-graphics/embedded-graphics/pull/438) Added majority CSS web colors as associated `const`s to the RGB color types.
 
+### Changed
+
+- **(breaking)** [#466](https://github.com/embedded-graphics/embedded-graphics/pull/466) Upgrade Nalgebra from 0.19.0 to 0.23.0.
+
 ## [0.7.0-alpha.1] - 2020-09-19
 
 ### Added
