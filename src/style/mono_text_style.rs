@@ -55,7 +55,7 @@ where
 impl<C, F> TextStyle for MonoTextStyle<C, F>
 where
     C: PixelColor,
-    F: MonoFont + Copy,
+    F: MonoFont,
 {
     type Color = C;
 
@@ -97,12 +97,12 @@ where
 impl<'a, C, F> TextStylePixels<'a> for MonoTextStyle<C, F>
 where
     C: PixelColor + 'a,
-    F: MonoFont + Copy + 'a,
+    F: MonoFont + 'a,
 {
     type Iter = MonoPixels<'a, C, F>;
 
     fn pixels(&self, text: &Text<'a>) -> Self::Iter {
-        MonoPixels::new(&text, self.clone())
+        MonoPixels::new(&text, *self)
     }
 }
 
@@ -163,7 +163,7 @@ where
 pub struct MonoTextStyleBuilder<C, F>
 where
     C: PixelColor,
-    F: MonoFont + Clone,
+    F: MonoFont,
 {
     style: MonoTextStyle<C, F>,
 }
@@ -171,7 +171,7 @@ where
 impl<C, F> MonoTextStyleBuilder<C, F>
 where
     C: PixelColor,
-    F: MonoFont + Clone,
+    F: MonoFont,
 {
     /// Creates a new text style builder with a given font.
     pub fn new(font: F) -> Self {
