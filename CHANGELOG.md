@@ -13,10 +13,17 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#386](https://github.com/embedded-graphics/embedded-graphics/pull/386) Added the `delta` method to `Line` to compute the difference between start and end points.
 - [#450](https://github.com/embedded-graphics/embedded-graphics/pull/450) Added `ColorConverted` and `DrawTargetExt::color_converted` to support color conversion for draw targets.
 - [#438](https://github.com/embedded-graphics/embedded-graphics/pull/438) Added majority CSS web colors as associated `const`s to the RGB color types.
+- [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Added support for external text renderers. External text renderers can be implemented using the new `TextStyle` trait.
 
 ### Changed
 
 - **(breaking)** [#466](https://github.com/embedded-graphics/embedded-graphics/pull/466) Upgrade Nalgebra from 0.19.0 to 0.23.0.
+- **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Renamed `Font`, `TextStyle` and `TextStyleBuilder` to `MonoFont`, `MonoTextStyle` and `MonoTextStyleBuilder`.
+
+### Removed
+
+- **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Support for fonts with variable character width was removed from the internal text renderer.
+- **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) `Font6x6` was removed.
 
 ## [0.7.0-alpha.1] - 2020-09-19
 

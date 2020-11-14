@@ -2,25 +2,30 @@ use crate::{
     draw_target::DrawTarget, fonts::Text, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
 };
 
-/// TODO: docs
+/// Text style.
+///
+/// The `TextStyle` trait is used to integrate text renderers into embedded-graphics. Users should
+/// not call it directly and instead use the functions provided by the [`Text`] type.
+///
+/// [`Text`]: ../fonts/struct.Text.html
 pub trait TextStyle {
-    /// TODO: docs
+    /// Color type.
     type Color: PixelColor;
 
-    /// TODO: docs
+    /// Render a text object using this style.
     fn render_text<D>(&self, text: &Text<'_>, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
 
-    /// TODO: docs
+    /// Returns the bounding box of a text object rendered using this style.
     fn bounding_box(&self, text: &Text<'_>) -> Rectangle;
 }
 
-/// TODO: docs
+/// Pixels iterator.
 pub trait TextStylePixels<'a>: TextStyle {
-    /// TODO: docs
+    /// Iterator type.
     type Iter: Iterator<Item = Pixel<Self::Color>> + 'a;
 
-    /// TODO: docs
+    /// Returns an iterator over the drawn pixels.
     fn pixels(&self, text: &Text<'a>) -> Self::Iter;
 }
