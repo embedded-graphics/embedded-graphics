@@ -7,8 +7,12 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
+    SaturatingCast,
 };
-use core::{cmp::min, ops::RangeInclusive};
+use core::{
+    cmp::min,
+    ops::{Range, RangeInclusive},
+};
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -299,6 +303,83 @@ impl Rectangle {
                 AnchorPoint::BottomCenter => Point::new(delta.x / 2, delta.y),
                 AnchorPoint::BottomRight => delta,
             }
+    }
+
+    /// Returns the range of Y coordinates in this rectangle.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::Rectangle};
+    ///
+    /// let rect = Rectangle::new(Point::new(10, 20), Size::new(3, 4));
+    /// assert_eq!(rect.rows(), 20..24);
+    /// ```
+    ///
+    /// By combining this method with [`columns`] it is possible to iterator over all pixels inside
+    /// the rectangle. This can be more flexible than using the [`points`] iterator, for example,
+    /// if a different iteration order is required or some operations should be called once per row.
+    ///
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::Rectangle};
+    ///
+    /// let rect = Rectangle::new(Point::new(10, 20), Size::new(3, 4));
+    ///
+    /// // Iterate over the y coordinates of the rows in reverse order.
+    /// for y in rect.rows().rev() {
+    ///     for x in rect.columns() {
+    ///         // use x, y coordinates
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [`columns`]: #method.columns
+    /// [`points`]: ../trait.Primitive.html#tymethod.points
+    pub fn rows(&self) -> Range<i32> {
+        self.top_left.y
+            ..self
+                .top_left
+                .y
+                .saturating_add(self.size.height.saturating_cast())
+    }
+
+    /// Returns the range of X coordinates in this rectangle.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::Rectangle};
+    ///
+    /// let rect = Rectangle::new(Point::new(10, 20), Size::new(3, 4));
+    ///
+    /// assert_eq!(rect.columns(), 10..13);
+    /// ```
+    ///
+    /// By combining this method with [`rows`] it is possible to iterator over all pixels inside
+    /// the rectangle. This can be more flexible than using the [`points`] iterator, for example,
+    /// if a different iteration order is required or some operations should be called once per row.
+    ///
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::Rectangle};
+    ///
+    /// let rect = Rectangle::new(Point::new(10, 20), Size::new(3, 4));
+    ///
+    /// // Iterate over all points starting from the top right corner and advancing downwards.
+    /// for x in rect.columns().rev() {
+    ///     for y in rect.rows() {
+    ///         // use x, y coordinates
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [`rows`]: #method.rows
+    /// [`points`]: ../trait.Primitive.html#tymethod.points
+    pub fn columns(&self) -> Range<i32> {
+        self.top_left.x
+            ..self
+                .top_left
+                .x
+                .saturating_add(self.size.width.saturating_cast())
     }
 }
 
@@ -696,5 +777,22 @@ mod tests {
                 anchor_point,
             );
         }
+    }
+
+    #[test]
+    fn rows_and_columns_zero_sized() {
+        let rect = Rectangle::zero();
+
+        assert_eq!(
+            rect.rows().next(),
+            None,
+            "the rows iterator for a zero sized rectangle shouldn't return any items"
+        );
+
+        assert_eq!(
+            rect.columns().next(),
+            None,
+            "the columns iterator for a zero sized rectangle shouldn't return any items"
+        );
     }
 }
