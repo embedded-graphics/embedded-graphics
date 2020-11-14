@@ -16,24 +16,36 @@ use crate::{
 pub struct PlaneSector {
     line_a: LinearEquation,
     line_b: LinearEquation,
-    draw_above_a: bool,
-    draw_above_b: bool,
+    side_a: LineSide,
+    side_b: LineSide,
     sweep: Angle,
 }
 
 impl PlaneSector {
-    pub fn new(center: Point, angle_start: Angle, angle_sweep: Angle) -> Self {
+    pub fn new(center_2x: Point, angle_start: Angle, angle_sweep: Angle) -> Self {
         let angle_end = angle_start + angle_sweep;
 
         let angle_start_norm = angle_start.normalize_from(-ANGLE_90DEG);
         let angle_end_norm = angle_end.normalize_from(-ANGLE_90DEG);
         let negative_sweep = angle_sweep < Angle::zero();
 
+        let side_a = if (angle_start_norm < ANGLE_90DEG) ^ negative_sweep {
+            LineSide::Above
+        } else {
+            LineSide::Below
+        };
+
+        let side_b = if (angle_end_norm >= ANGLE_90DEG) ^ negative_sweep {
+            LineSide::Above
+        } else {
+            LineSide::Below
+        };
+
         Self {
-            line_a: LinearEquation::from_point_angle(center, angle_start),
-            line_b: LinearEquation::from_point_angle(center, angle_end),
-            draw_above_a: (angle_start_norm < ANGLE_90DEG) ^ negative_sweep,
-            draw_above_b: (angle_end_norm >= ANGLE_90DEG) ^ negative_sweep,
+            line_a: LinearEquation::from_point_angle(center_2x, angle_start),
+            line_b: LinearEquation::from_point_angle(center_2x, angle_end),
+            side_a,
+            side_b,
             sweep: angle_sweep.abs(),
         }
     }
@@ -42,23 +54,23 @@ impl PlaneSector {
         Self {
             line_a: LinearEquation::new_horizontal(),
             line_b: LinearEquation::new_horizontal(),
-            draw_above_a: true,
-            draw_above_b: true,
+            side_a: LineSide::Above,
+            side_b: LineSide::Above,
             sweep: Angle::zero(),
         }
     }
 
     pub fn contains(&self, point: Point) -> bool {
-        let side_a = self.line_a.side(point);
-        let side_b = self.line_b.side(point);
+        // `PlaneSector` uses scaled coordinates for an increased resolution.
+        let point = point * 2;
 
-        let correct_a_side = self.draw_above_a ^ (side_a == LineSide::Below);
-        let correct_b_side = self.draw_above_b ^ (side_b == LineSide::Below);
+        let correct_side_a = self.line_a.check_side(point, self.side_a);
+        let correct_side_b = self.line_b.check_side(point, self.side_b);
 
         if self.sweep < ANGLE_180DEG {
-            correct_a_side && correct_b_side
+            correct_side_a && correct_side_b
         } else if self.sweep < ANGLE_360DEG {
-            correct_a_side || correct_b_side
+            correct_side_a || correct_side_b
         } else {
             true
         }
@@ -112,7 +124,7 @@ mod tests {
         let arc = Arc::new(Point::zero(), 3, 0.0.deg(), 90.0.deg());
 
         let mut iter =
-            PlaneSectorIterator::new(&arc, arc.center(), arc.angle_start, arc.angle_sweep);
+            PlaneSectorIterator::new(&arc, arc.center_2x(), arc.angle_start, arc.angle_sweep);
         assert_eq!(iter.next(), Some(Point::new(1, 0)));
         assert_eq!(iter.next(), Some(Point::new(2, 0)));
         assert_eq!(iter.next(), Some(Point::new(1, 1)));
@@ -124,5 +136,76 @@ mod tests {
     fn plane_sector_iter_empty() {
         let mut iter = PlaneSectorIterator::empty();
         assert_eq!(iter.next(), None);
+    }
+
+    /// Checks if the plane sector contains 8 different points.
+    ///
+    /// Four of the points lie on the boundary between two adjacent quadrants and should be
+    /// contained in both quadrants. The remaining points are inside a single quadrant.
+    fn contains(plane_sector: &PlaneSector) -> [bool; 8] {
+        [
+            plane_sector.contains(Point::new(10, 0)),
+            plane_sector.contains(Point::new(10, -10)),
+            plane_sector.contains(Point::new(0, -10)),
+            plane_sector.contains(Point::new(-10, -10)),
+            plane_sector.contains(Point::new(-10, 0)),
+            plane_sector.contains(Point::new(-10, 10)),
+            plane_sector.contains(Point::new(0, 10)),
+            plane_sector.contains(Point::new(10, 10)),
+        ]
+    }
+
+    #[test]
+    fn plane_sector_quadrants_positive_sweep() {
+        let plane_sector = PlaneSector::new(Point::zero(), 0.0.deg(), 90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [true, true, true, false, false, false, false, false]
+        );
+
+        let plane_sector = PlaneSector::new(Point::zero(), 90.0.deg(), 90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [false, false, true, true, true, false, false, false]
+        );
+
+        let plane_sector = PlaneSector::new(Point::zero(), 180.0.deg(), 90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [false, false, false, false, true, true, true, false]
+        );
+
+        let plane_sector = PlaneSector::new(Point::zero(), 270.0.deg(), 90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [true, false, false, false, false, false, true, true]
+        );
+    }
+
+    #[test]
+    fn plane_sector_quadrants_negative_sweep() {
+        let plane_sector = PlaneSector::new(Point::zero(), 0.0.deg(), -90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [true, false, false, false, false, false, true, true]
+        );
+
+        let plane_sector = PlaneSector::new(Point::zero(), 90.0.deg(), -90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [true, true, true, false, false, false, false, false]
+        );
+
+        let plane_sector = PlaneSector::new(Point::zero(), 180.0.deg(), -90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [false, false, true, true, true, false, false, false]
+        );
+
+        let plane_sector = PlaneSector::new(Point::zero(), 270.0.deg(), -90.0.deg());
+        assert_eq!(
+            contains(&plane_sector),
+            [false, false, false, false, true, true, true, false]
+        );
     }
 }

@@ -42,7 +42,7 @@ where
         let points = if !styled.style.is_transparent() {
             PlaneSectorIterator::new(
                 &outside_edge,
-                primitive.center(),
+                primitive.center_2x(),
                 primitive.angle_start,
                 primitive.angle_sweep,
             )
@@ -123,10 +123,12 @@ where
 mod tests {
     use super::*;
     use crate::{
+        draw_target::DrawTargetExt,
         geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::Primitive,
+        primitives::rectangle::AnchorPoint,
+        primitives::{Circle, Primitive},
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
@@ -149,6 +151,52 @@ mod tests {
         );
 
         Ok(())
+    }
+
+    /// Draws arcs with +/-90° sweep angle and compares the result with drawing a quarter circle.
+    #[test]
+    fn quadrant_arcs() {
+        let style = PrimitiveStyle::with_stroke(BinaryColor::On, 2);
+
+        for &diameter in &[11, 12] {
+            for &(angle_start, angle_sweep, anchor_point) in &[
+                (0.0.deg(), 90.0.deg(), AnchorPoint::TopRight),
+                (90.0.deg(), 90.0.deg(), AnchorPoint::TopLeft),
+                (180.0.deg(), 90.0.deg(), AnchorPoint::BottomLeft),
+                (270.0.deg(), 90.0.deg(), AnchorPoint::BottomRight),
+                (0.0.deg(), -90.0.deg(), AnchorPoint::BottomRight),
+                (90.0.deg(), -90.0.deg(), AnchorPoint::TopRight),
+                (180.0.deg(), -90.0.deg(), AnchorPoint::TopLeft),
+                (270.0.deg(), -90.0.deg(), AnchorPoint::BottomLeft),
+            ] {
+                let circle = Circle::new(Point::new(1, 1), diameter).into_styled(style);
+
+                // Calculate a clip rectangle for the tested quadrant.
+                let bounding_box = circle.bounding_box();
+                let clip_rect = bounding_box
+                    .resized((bounding_box.size + Size::new_equal(1)) / 2, anchor_point);
+
+                // Draw expected display by clipping the circle to the quadrant.
+                let mut expected = MockDisplay::new();
+                circle.draw(&mut expected.clipped(&clip_rect)).unwrap();
+
+                // Draw the arc.
+                let mut display = MockDisplay::new();
+                Arc::new(Point::new(1, 1), diameter, angle_start, angle_sweep)
+                    .into_styled(style)
+                    .draw(&mut display)
+                    .unwrap();
+
+                assert_eq!(
+                    display,
+                    expected,
+                    "diameter: {}, angle_start: {}, angle_sweep: {}",
+                    diameter,
+                    angle_start.to_degrees(),
+                    angle_sweep.to_degrees()
+                );
+            }
+        }
     }
 
     #[test]

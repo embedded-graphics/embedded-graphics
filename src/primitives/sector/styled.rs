@@ -56,7 +56,7 @@ where
         let points = if !styled.style.is_transparent() {
             PlaneSectorIterator::new(
                 &stroke_area,
-                stroke_area.center(),
+                stroke_area.center_2x(),
                 stroke_area.angle_start,
                 stroke_area.angle_sweep,
             )

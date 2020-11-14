@@ -123,6 +123,17 @@ impl Sector {
         self.bounding_box().center()
     }
 
+    /// Returns the center point of the sector scaled by a factor of 2.
+    ///
+    /// This method is used to accurately calculate the outside edge of the sector.
+    /// The result is not equivalent to `self.center() * 2` because of rounding.
+    fn center_2x(&self) -> Point {
+        // The radius scaled up by a factor of 2 is equal to the diameter
+        let radius = self.diameter.saturating_sub(1);
+
+        self.top_left * 2 + Size::new(radius, radius)
+    }
+
     /// Return the end angle of the sector
     fn angle_end(&self) -> Angle {
         self.angle_start + self.angle_sweep
@@ -161,7 +172,7 @@ impl Primitive for Sector {
 impl ContainsPoint for Sector {
     fn contains(&self, point: Point) -> bool {
         if self.to_circle().contains(point) {
-            PlaneSector::new(self.center(), self.angle_start, self.angle_sweep).contains(point)
+            PlaneSector::new(self.center_2x(), self.angle_start, self.angle_sweep).contains(point)
         } else {
             false
         }
