@@ -270,6 +270,36 @@ impl Rectangle {
             AnchorPoint::BottomRight => delta,
         }
     }
+
+    /// Returns an anchor point.
+    ///
+    /// # Examples
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::rectangle::{Rectangle, AnchorPoint}};
+    ///
+    /// let mut rect = Rectangle::new(Point::new(20, 20), Size::new(11, 21));
+    ///
+    /// assert_eq!(rect.get_anchor_point(AnchorPoint::TopLeft), Point::new(20, 20));
+    /// assert_eq!(rect.get_anchor_point(AnchorPoint::BottomCenter), Point::new(25, 40));
+    /// ```
+    pub fn get_anchor_point(&self, anchor_point: AnchorPoint) -> Point {
+        // Assume size = 1 for zero sized dimensions.
+        let one = Size::new_equal(1);
+        let delta = Point::zero() + self.size.component_max(one) - one;
+
+        self.top_left
+            + match anchor_point {
+                AnchorPoint::TopLeft => Point::zero(),
+                AnchorPoint::TopCenter => delta.x_axis() / 2,
+                AnchorPoint::TopRight => delta.x_axis(),
+                AnchorPoint::CenterLeft => delta.y_axis() / 2,
+                AnchorPoint::Center => delta / 2,
+                AnchorPoint::CenterRight => Point::new(delta.x, delta.y / 2),
+                AnchorPoint::BottomLeft => delta.y_axis(),
+                AnchorPoint::BottomCenter => Point::new(delta.x / 2, delta.y),
+                AnchorPoint::BottomRight => delta,
+            }
+    }
 }
 
 /// Checks if the two ranges overlap.
@@ -638,6 +668,30 @@ mod tests {
             assert_eq!(
                 resized,
                 Rectangle::new(expected_top_left, Size::zero()),
+                "{:?}",
+                anchor_point,
+            );
+        }
+    }
+
+    #[test]
+    fn get_anchor_point() {
+        let rect = Rectangle::new(Point::new(10, 20), Size::new(21, 31));
+
+        for &(anchor_point, expected) in &[
+            (AnchorPoint::TopLeft, Point::new(10, 20)),
+            (AnchorPoint::TopCenter, Point::new(20, 20)),
+            (AnchorPoint::TopRight, Point::new(30, 20)),
+            (AnchorPoint::CenterLeft, Point::new(10, 35)),
+            (AnchorPoint::Center, Point::new(20, 35)),
+            (AnchorPoint::CenterRight, Point::new(30, 35)),
+            (AnchorPoint::BottomLeft, Point::new(10, 50)),
+            (AnchorPoint::BottomCenter, Point::new(20, 50)),
+            (AnchorPoint::BottomRight, Point::new(30, 50)),
+        ] {
+            assert_eq!(
+                rect.get_anchor_point(anchor_point),
+                expected,
                 "{:?}",
                 anchor_point,
             );
