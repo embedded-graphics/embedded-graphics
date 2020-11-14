@@ -381,6 +381,24 @@ impl Rectangle {
                 .x
                 .saturating_add(self.size.width.saturating_cast())
     }
+
+    /// Returns `true` is the rectangle is zero sized.
+    ///
+    /// A rectangle is zero sized if the width or height are zero.
+    ///
+    /// # Examples
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::Rectangle};
+    ///
+    /// let rect = Rectangle::new(Point::new(10, 20), Size::new(10, 20));
+    /// assert_eq!(rect.is_zero_sized(), false);
+    ///
+    /// let rect = Rectangle::new(Point::new(10, 20), Size::zero());
+    /// assert_eq!(rect.is_zero_sized(), true);
+    /// ```
+    pub fn is_zero_sized(&self) -> bool {
+        self.size.height == 0 || self.size.width == 0
+    }
 }
 
 /// Checks if the two ranges overlap.
