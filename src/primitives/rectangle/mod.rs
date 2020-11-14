@@ -239,6 +239,37 @@ impl Rectangle {
         // No overlap present
         Rectangle::zero()
     }
+
+    /// Resizes the rectangle relative to an anchor point.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::rectangle::{Rectangle, AnchorPoint}};
+    ///
+    /// let mut rect = Rectangle::new(Point::new(20, 20), Size::new(10, 20));
+    /// rect.resize(Size::new(20, 10), AnchorPoint::Center);
+    ///
+    /// assert_eq!(rect, Rectangle::new(Point::new(15, 25), Size::new(20, 10)));
+    /// ```
+    pub fn resize(&mut self, size: Size, anchor_point: AnchorPoint) {
+        // Assume size = 1 for zero sized dimensions.
+        let one = Size::new_equal(1);
+        let delta = Point::zero() + self.size.component_max(one) - size.component_max(one);
+
+        self.size = size;
+        self.top_left += match anchor_point {
+            AnchorPoint::TopLeft => Point::zero(),
+            AnchorPoint::TopCenter => delta.x_axis() / 2,
+            AnchorPoint::TopRight => delta.x_axis(),
+            AnchorPoint::CenterLeft => delta.y_axis() / 2,
+            AnchorPoint::Center => delta / 2,
+            AnchorPoint::CenterRight => Point::new(delta.x, delta.y / 2),
+            AnchorPoint::BottomLeft => delta.y_axis(),
+            AnchorPoint::BottomCenter => Point::new(delta.x / 2, delta.y),
+            AnchorPoint::BottomRight => delta,
+        }
+    }
 }
 
 /// Checks if the two ranges overlap.
@@ -297,6 +328,29 @@ impl Transform for Rectangle {
 
         self
     }
+}
+
+/// Anchor point.
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Copy, Clone)]
+pub enum AnchorPoint {
+    /// Top left.
+    TopLeft,
+    /// Top center.
+    TopCenter,
+    /// Top right.
+    TopRight,
+    /// Center left.
+    CenterLeft,
+    /// Center.
+    Center,
+    /// Center right.
+    CenterRight,
+    /// Bottom left.
+    BottomLeft,
+    /// Bottom center.
+    BottomCenter,
+    /// Bottom right.
+    BottomRight,
 }
 
 #[cfg(test)]
@@ -480,5 +534,113 @@ mod tests {
             rect.offset(-3),
             Rectangle::with_center(center, Size::new(0, 0))
         );
+    }
+
+    #[test]
+    fn resize_smaller() {
+        let rect = Rectangle::new(Point::new(10, 20), Size::new(30, 40));
+
+        for &(anchor_point, expected_top_left) in &[
+            (AnchorPoint::TopLeft, Point::new(10, 20)),
+            (AnchorPoint::TopCenter, Point::new(20, 20)),
+            (AnchorPoint::TopRight, Point::new(30, 20)),
+            (AnchorPoint::CenterLeft, Point::new(10, 30)),
+            (AnchorPoint::Center, Point::new(20, 30)),
+            (AnchorPoint::CenterRight, Point::new(30, 30)),
+            (AnchorPoint::BottomLeft, Point::new(10, 40)),
+            (AnchorPoint::BottomCenter, Point::new(20, 40)),
+            (AnchorPoint::BottomRight, Point::new(30, 40)),
+        ] {
+            let mut resized = rect.clone();
+            resized.resize(Size::new(10, 20), anchor_point);
+
+            assert_eq!(
+                resized,
+                Rectangle::new(expected_top_left, Size::new(10, 20)),
+                "{:?}",
+                anchor_point,
+            );
+        }
+    }
+
+    #[test]
+    fn resize_larger() {
+        let rect = Rectangle::new(Point::new(10, 20), Size::new(30, 40));
+
+        for &(anchor_point, expected_top_left) in &[
+            (AnchorPoint::TopLeft, Point::new(10, 20)),
+            (AnchorPoint::TopCenter, Point::new(5, 20)),
+            (AnchorPoint::TopRight, Point::new(0, 20)),
+            (AnchorPoint::CenterLeft, Point::new(10, 15)),
+            (AnchorPoint::Center, Point::new(5, 15)),
+            (AnchorPoint::CenterRight, Point::new(0, 15)),
+            (AnchorPoint::BottomLeft, Point::new(10, 10)),
+            (AnchorPoint::BottomCenter, Point::new(5, 10)),
+            (AnchorPoint::BottomRight, Point::new(0, 10)),
+        ] {
+            let mut resized = rect.clone();
+            resized.resize(Size::new(40, 50), anchor_point);
+
+            assert_eq!(
+                resized,
+                Rectangle::new(expected_top_left, Size::new(40, 50)),
+                "{:?}",
+                anchor_point,
+            );
+        }
+    }
+
+    #[test]
+    fn resize_zero_sized() {
+        let rect = Rectangle::new(Point::new(10, 20), Size::zero());
+
+        for &(anchor_point, expected_top_left) in &[
+            (AnchorPoint::TopLeft, Point::new(10, 20)),
+            (AnchorPoint::TopCenter, Point::new(8, 20)),
+            (AnchorPoint::TopRight, Point::new(6, 20)),
+            (AnchorPoint::CenterLeft, Point::new(10, 17)),
+            (AnchorPoint::Center, Point::new(8, 17)),
+            (AnchorPoint::CenterRight, Point::new(6, 17)),
+            (AnchorPoint::BottomLeft, Point::new(10, 14)),
+            (AnchorPoint::BottomCenter, Point::new(8, 14)),
+            (AnchorPoint::BottomRight, Point::new(6, 14)),
+        ] {
+            let mut resized = rect.clone();
+            resized.resize(Size::new(5, 7), anchor_point);
+
+            assert_eq!(
+                resized,
+                Rectangle::new(expected_top_left, Size::new(5, 7)),
+                "{:?}",
+                anchor_point,
+            );
+        }
+    }
+
+    #[test]
+    fn resize_to_zero_sized() {
+        let rect = Rectangle::new(Point::new(10, 20), Size::new(21, 31));
+
+        for &(anchor_point, expected_top_left) in &[
+            (AnchorPoint::TopLeft, Point::new(10, 20)),
+            (AnchorPoint::TopCenter, Point::new(20, 20)),
+            (AnchorPoint::TopRight, Point::new(30, 20)),
+            (AnchorPoint::CenterLeft, Point::new(10, 35)),
+            (AnchorPoint::Center, Point::new(20, 35)),
+            (AnchorPoint::CenterRight, Point::new(30, 35)),
+            (AnchorPoint::BottomLeft, Point::new(10, 50)),
+            (AnchorPoint::BottomCenter, Point::new(20, 50)),
+            (AnchorPoint::BottomRight, Point::new(30, 50)),
+        ] {
+            let mut resized = rect.clone();
+            resized.resize(Size::zero(), anchor_point);
+
+            assert_eq!(
+                resized,
+                Rectangle::new(expected_top_left, Size::zero()),
+                "{:?}",
+                anchor_point,
+            );
+        }
     }
 }
