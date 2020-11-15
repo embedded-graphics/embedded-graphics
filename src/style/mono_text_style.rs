@@ -135,7 +135,7 @@ where
 /// ## Transparent background
 ///
 /// If a property is omitted, it will remain at its default value in the resulting
-/// `MonoTextStyle`returned by `.build()`. This example draws white text with no background at
+/// `MonoTextStyle` returned by `.build()`. This example draws white text with no background at
 /// all.
 ///
 /// ```rust

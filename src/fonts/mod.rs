@@ -167,7 +167,7 @@ pub trait MonoFont: Copy {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
-    /// Returns the position a character in the font.
+    /// Returns the position of a character in the font.
     fn char_offset(_: char) -> u32;
 
     /// Returns the value of a pixel in a character in the font.
