@@ -20,8 +20,8 @@ pub struct LinearEquation {
 impl LinearEquation {
     /// Create a new linear equation based on one point and one angle
     pub fn from_point_angle(point: Point, angle: Angle) -> Self {
-        // FIXE: angle.tan() for 180.0 degrees isn't exactly 0 which causes problems when drawing
-        //       a single quadrant. Is there a better solution to fix this?
+        // FIXME: angle.tan() for 180.0 degrees isn't exactly 0 which causes problems when drawing
+        //        a single quadrant. Is there a better solution to fix this?
         let (a, b) = if angle == Angle::from_degrees(180.0) {
             (Real::from(0.0), Real::from(-1.0))
         } else {
