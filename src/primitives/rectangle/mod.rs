@@ -244,35 +244,39 @@ impl Rectangle {
         Rectangle::zero()
     }
 
-    /// Resizes the rectangle relative to an anchor point.
+    /// Returns a resized copy of this rectangle.
+    ///
+    /// The rectangle is resized relative to the given anchor point.
     ///
     /// # Examples
     ///
     /// ```
     /// use embedded_graphics::{prelude::*, primitives::rectangle::{Rectangle, AnchorPoint}};
     ///
-    /// let mut rect = Rectangle::new(Point::new(20, 20), Size::new(10, 20));
-    /// rect.resize(Size::new(20, 10), AnchorPoint::Center);
+    /// let rect = Rectangle::new(Point::new(20, 20), Size::new(10, 20));
+    /// let resized = rect.resized(Size::new(20, 10), AnchorPoint::Center);
     ///
-    /// assert_eq!(rect, Rectangle::new(Point::new(15, 25), Size::new(20, 10)));
+    /// assert_eq!(resized, Rectangle::new(Point::new(15, 25), Size::new(20, 10)));
     /// ```
-    pub fn resize(&mut self, size: Size, anchor_point: AnchorPoint) {
+    pub fn resized(&self, size: Size, anchor_point: AnchorPoint) -> Self {
         // Assume size = 1 for zero sized dimensions.
         let one = Size::new_equal(1);
         let delta = Point::zero() + self.size.component_max(one) - size.component_max(one);
 
-        self.size = size;
-        self.top_left += match anchor_point {
-            AnchorPoint::TopLeft => Point::zero(),
-            AnchorPoint::TopCenter => delta.x_axis() / 2,
-            AnchorPoint::TopRight => delta.x_axis(),
-            AnchorPoint::CenterLeft => delta.y_axis() / 2,
-            AnchorPoint::Center => delta / 2,
-            AnchorPoint::CenterRight => Point::new(delta.x, delta.y / 2),
-            AnchorPoint::BottomLeft => delta.y_axis(),
-            AnchorPoint::BottomCenter => Point::new(delta.x / 2, delta.y),
-            AnchorPoint::BottomRight => delta,
-        }
+        let top_left = self.top_left
+            + match anchor_point {
+                AnchorPoint::TopLeft => Point::zero(),
+                AnchorPoint::TopCenter => delta.x_axis() / 2,
+                AnchorPoint::TopRight => delta.x_axis(),
+                AnchorPoint::CenterLeft => delta.y_axis() / 2,
+                AnchorPoint::Center => delta / 2,
+                AnchorPoint::CenterRight => Point::new(delta.x, delta.y / 2),
+                AnchorPoint::BottomLeft => delta.y_axis(),
+                AnchorPoint::BottomCenter => Point::new(delta.x / 2, delta.y),
+                AnchorPoint::BottomRight => delta,
+            };
+
+        Self::new(top_left, size)
     }
 
     /// Returns an anchor point.
@@ -283,8 +287,8 @@ impl Rectangle {
     ///
     /// let mut rect = Rectangle::new(Point::new(20, 20), Size::new(11, 21));
     ///
-    /// assert_eq!(rect.get_anchor_point(AnchorPoint::TopLeft), Point::new(20, 20));
-    /// assert_eq!(rect.get_anchor_point(AnchorPoint::BottomCenter), Point::new(25, 40));
+    /// assert_eq!(rect.anchor_point(AnchorPoint::TopLeft), Point::new(20, 20));
+    /// assert_eq!(rect.anchor_point(AnchorPoint::BottomCenter), Point::new(25, 40));
     /// ```
     pub fn anchor_point(&self, anchor_point: AnchorPoint) -> Point {
         // Assume size = 1 for zero sized dimensions.
@@ -667,7 +671,7 @@ mod tests {
     }
 
     #[test]
-    fn resize_smaller() {
+    fn resized_smaller() {
         let rect = Rectangle::new(Point::new(10, 20), Size::new(30, 40));
 
         for &(anchor_point, expected_top_left) in &[
@@ -681,8 +685,7 @@ mod tests {
             (AnchorPoint::BottomCenter, Point::new(20, 40)),
             (AnchorPoint::BottomRight, Point::new(30, 40)),
         ] {
-            let mut resized = rect.clone();
-            resized.resize(Size::new(10, 20), anchor_point);
+            let resized = rect.resized(Size::new(10, 20), anchor_point);
 
             assert_eq!(
                 resized,
@@ -694,7 +697,7 @@ mod tests {
     }
 
     #[test]
-    fn resize_larger() {
+    fn resized_larger() {
         let rect = Rectangle::new(Point::new(10, 20), Size::new(30, 40));
 
         for &(anchor_point, expected_top_left) in &[
@@ -708,8 +711,7 @@ mod tests {
             (AnchorPoint::BottomCenter, Point::new(5, 10)),
             (AnchorPoint::BottomRight, Point::new(0, 10)),
         ] {
-            let mut resized = rect.clone();
-            resized.resize(Size::new(40, 50), anchor_point);
+            let resized = rect.resized(Size::new(40, 50), anchor_point);
 
             assert_eq!(
                 resized,
@@ -721,7 +723,7 @@ mod tests {
     }
 
     #[test]
-    fn resize_zero_sized() {
+    fn resized_zero_sized() {
         let rect = Rectangle::new(Point::new(10, 20), Size::zero());
 
         for &(anchor_point, expected_top_left) in &[
@@ -735,8 +737,7 @@ mod tests {
             (AnchorPoint::BottomCenter, Point::new(8, 14)),
             (AnchorPoint::BottomRight, Point::new(6, 14)),
         ] {
-            let mut resized = rect.clone();
-            resized.resize(Size::new(5, 7), anchor_point);
+            let resized = rect.resized(Size::new(5, 7), anchor_point);
 
             assert_eq!(
                 resized,
@@ -748,7 +749,7 @@ mod tests {
     }
 
     #[test]
-    fn resize_to_zero_sized() {
+    fn resized_to_zero_sized() {
         let rect = Rectangle::new(Point::new(10, 20), Size::new(21, 31));
 
         for &(anchor_point, expected_top_left) in &[
@@ -762,8 +763,7 @@ mod tests {
             (AnchorPoint::BottomCenter, Point::new(20, 50)),
             (AnchorPoint::BottomRight, Point::new(30, 50)),
         ] {
-            let mut resized = rect.clone();
-            resized.resize(Size::zero(), anchor_point);
+            let resized = rect.resized(Size::zero(), anchor_point);
 
             assert_eq!(
                 resized,
