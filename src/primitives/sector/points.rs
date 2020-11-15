@@ -15,7 +15,7 @@ impl Points {
         let circle = sector.to_circle();
         let points = PlaneSectorIterator::new(
             sector,
-            sector.center(),
+            sector.center_2x(),
             sector.angle_start,
             sector.angle_sweep,
         );

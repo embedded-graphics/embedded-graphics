@@ -26,6 +26,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Support for fonts with variable character width was removed from the internal text renderer.
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) `Font6x6` was removed.
 
+### Fixed
+
+- [#477](https://github.com/embedded-graphics/embedded-graphics/pull/477) Drawing a 90° `Arc` is now equal to drawing a quarter of a circle.
+
 ## [0.7.0-alpha.1] - 2020-09-19
 
 ### Added

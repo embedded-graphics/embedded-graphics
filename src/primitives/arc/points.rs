@@ -21,7 +21,8 @@ impl Points {
         let outer_circle = arc.to_circle();
         let inner_circle = outer_circle.offset(-1);
 
-        let points = PlaneSectorIterator::new(arc, arc.center(), arc.angle_start, arc.angle_sweep);
+        let points =
+            PlaneSectorIterator::new(arc, arc.center_2x(), arc.angle_start, arc.angle_sweep);
 
         Self {
             iter: outer_circle.distances(points),
