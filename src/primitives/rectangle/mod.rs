@@ -396,8 +396,8 @@ impl Rectangle {
     /// let rect = Rectangle::new(Point::new(10, 20), Size::zero());
     /// assert_eq!(rect.is_zero_sized(), true);
     /// ```
-// MSRV: Add const when upgrading to at least 1.46.0
-   pub fn is_zero_sized(&self) -> bool {
+    // MSRV: Add const when upgrading to at least 1.46.0
+    pub fn is_zero_sized(&self) -> bool {
         self.size.height == 0 || self.size.width == 0
     }
 }
@@ -775,7 +775,7 @@ mod tests {
     }
 
     #[test]
-    fn get_anchor_point() {
+    fn anchor_point() {
         let rect = Rectangle::new(Point::new(10, 20), Size::new(21, 31));
 
         for &(anchor_point, expected) in &[
@@ -790,7 +790,7 @@ mod tests {
             (AnchorPoint::BottomRight, Point::new(30, 50)),
         ] {
             assert_eq!(
-                rect.get_anchor_point(anchor_point),
+                rect.anchor_point(anchor_point),
                 expected,
                 "{:?}",
                 anchor_point,
