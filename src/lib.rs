@@ -136,7 +136,7 @@
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //!     primitives::{Circle, Rectangle, Triangle},
-//!     style::{PrimitiveStyle, TextStyle},
+//!     style::{PrimitiveStyle, MonoTextStyle},
 //!     mock_display::MockDisplay,
 //! };
 //!
@@ -149,7 +149,7 @@
 //!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 //!     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
 //!     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
-//!     let text_style = TextStyle::new(Font6x8, BinaryColor::On);
+//!     let text_style = MonoTextStyle::new(Font6x8, BinaryColor::On);
 //!
 //!     let yoffset = 10;
 //!
@@ -207,7 +207,7 @@
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     primitives::{Circle, Rectangle},
-//!     style::{PrimitiveStyle, TextStyle},
+//!     style::{PrimitiveStyle, MonoTextStyle},
 //! };
 //!
 //! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
@@ -221,7 +221,7 @@
 //!         )
 //!         .chain(
 //!             Text::new(text, Point::new(20, 16))
-//!                 .into_styled(TextStyle::new(Font6x8, Rgb565::GREEN))
+//!                 .into_styled(MonoTextStyle::new(Font6x8, Rgb565::GREEN))
 //!                 .into_pixels(),
 //!         )
 //! }

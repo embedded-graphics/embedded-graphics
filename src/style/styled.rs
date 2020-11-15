@@ -1,10 +1,9 @@
-use super::TextStyle;
 use crate::{
-    fonts::Font,
+    fonts::MonoFont,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{OffsetOutline, Primitive, Rectangle},
-    style::PrimitiveStyle,
+    style::{MonoTextStyle, PrimitiveStyle},
     transform::Transform,
     SaturatingCast,
 };
@@ -44,11 +43,11 @@ where
     }
 }
 
-impl<T, C, F> Dimensions for Styled<T, TextStyle<C, F>>
+impl<T, C, F> Dimensions for Styled<T, MonoTextStyle<C, F>>
 where
     T: Dimensions,
     C: PixelColor,
-    F: Font,
+    F: MonoFont,
 {
     fn bounding_box(&self) -> Rectangle {
         self.primitive.bounding_box()

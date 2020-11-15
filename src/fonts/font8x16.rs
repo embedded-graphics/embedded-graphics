@@ -1,4 +1,4 @@
-use crate::{fonts::Font, geometry::Size};
+use crate::{fonts::MonoFont, geometry::Size};
 
 /// 8x16 pixel monospace font.
 ///
@@ -10,7 +10,7 @@ use crate::{fonts::Font, geometry::Size};
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Font8x16;
 
-impl Font for Font8x16 {
+impl MonoFont for Font8x16 {
     const FONT_IMAGE: &'static [u8] = include_bytes!("../../data/font8x16_1bpp.raw");
     const FONT_IMAGE_WIDTH: u32 = 240;
 
@@ -35,10 +35,10 @@ impl Font for Font8x16 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, Font, Text},
+        fonts::{tests::assert_text_from_pattern, MonoFont, Text},
         geometry::{Dimensions, Point, Size},
         pixelcolor::BinaryColor,
-        style::TextStyle,
+        style::MonoTextStyle,
     };
 
     const WIDTH: usize = Font8x16::CHARACTER_SIZE.width as usize;
@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn text_dimensions() {
-        let style = TextStyle::new(Font8x16, BinaryColor::On);
+        let style = MonoTextStyle::new(Font8x16, BinaryColor::On);
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
         let empty = Text::new("", Point::zero()).into_styled(style);
 

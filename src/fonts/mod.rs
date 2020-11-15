@@ -22,14 +22,14 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
-//!     style::{TextStyle, TextStyleBuilder},
+//!     style::{MonoTextStyle, MonoTextStyleBuilder},
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! // Create a new text style
-//! let style = TextStyleBuilder::new(Font6x8)
+//! let style = MonoTextStyleBuilder::new(Font6x8)
 //!     .text_color(Rgb565::YELLOW)
 //!     .background_color(Rgb565::BLUE)
 //!     .build();
@@ -48,14 +48,14 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     style::TextStyle,
+//!     style::MonoTextStyle,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display)?;
 //!
@@ -64,7 +64,7 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(TextStyle::new(Font6x8, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -82,7 +82,7 @@
 //!     fonts::{Font6x8, Text},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
-//!     style::TextStyleBuilder,
+//!     style::MonoTextStyleBuilder,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
@@ -98,7 +98,7 @@
 //!
 //! Text::new(&buf, Point::zero())
 //!     .into_styled(
-//!         TextStyleBuilder::new(Font6x8)
+//!         MonoTextStyleBuilder::new(Font6x8)
 //!             .text_color(Rgb565::YELLOW)
 //!             .background_color(Rgb565::BLUE)
 //!             .build(),
@@ -111,7 +111,6 @@
 //!
 //! | Type | Screenshot |
 //! |------|------------|
-//! | [`Font6x6`] | ![6x6 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x6.png) |
 //! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x8.png) |
 //! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png) |
 //! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font8x16.png) |
@@ -119,7 +118,6 @@
 //! | [`Font24x32`] | The 24x32 font is a pixel doubled version of the 12x16 font. |
 //!
 //! [built-in fonts]: #built-in-fonts
-//! [`Font6x6`]: struct.Font6x6.html
 //! [`Font6x8`]: struct.Font6x8.html
 //! [`Font6x12`]: struct.Font6x12.html
 //! [`Font8x16`]: struct.Font8x16.html
@@ -127,31 +125,31 @@
 //! [`Font24x32`]: struct.Font24x32.html
 //! [`Text`]: struct.Text.html
 //! [`Styled`]: ../style/struct.Styled.html
-//! [`TextStyle`]: ../style/struct.TextStyle.html
+//! [`MonoTextStyle`]: ../style/struct.MonoTextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
 mod font12x16;
 mod font24x32;
 mod font6x12;
-mod font6x6;
 mod font6x8;
 mod font8x16;
+mod monospaced_pixels;
 mod text;
 
-pub use text::{StyledTextIterator, Text};
+pub use monospaced_pixels::MonoPixels;
+pub use text::Text;
 
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
 pub use font6x12::Font6x12;
-pub use font6x6::Font6x6;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
 
 use crate::geometry::Size;
 
 /// Monospaced bitmap font.
-pub trait Font {
+pub trait MonoFont: Copy {
     /// Raw image data containing the font.
     const FONT_IMAGE: &'static [u8];
 
@@ -169,32 +167,8 @@ pub trait Font {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
-    /// Whether characters have a variable width or not.
-    ///
-    /// Variable width characters have a maximum width of CHARACTER_SIZE.x, but the empty columns at
-    /// the right of each characters are ignored, allowing some characters to be smaller than others.
-    const VARIABLE_WIDTH: bool = false;
-
-    /// Returns the position a character in the font.
+    /// Returns the position of a character in the font.
     fn char_offset(_: char) -> u32;
-
-    /// Returns the actual width of a character in the font.
-    fn char_width(c: char) -> u32 {
-        if Self::VARIABLE_WIDTH {
-            let mut x_max = 0;
-            for y in 0..Self::CHARACTER_SIZE.height {
-                for x in (x_max..Self::CHARACTER_SIZE.width).rev() {
-                    if Self::character_pixel(c, x, y) {
-                        x_max = x;
-                        break;
-                    }
-                }
-            }
-            x_max + 1
-        } else {
-            Self::CHARACTER_SIZE.width
-        }
-    }
 
     /// Returns the value of a pixel in a character in the font.
     fn character_pixel(c: char, x: u32, y: u32) -> bool {
@@ -228,17 +202,17 @@ mod tests {
     use super::*;
     use crate::{
         drawable::Drawable, geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor,
-        style::TextStyle,
+        style::MonoTextStyle,
     };
 
     /// Draws a text using the given font and checks it against the expected pattern.
     pub(super) fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
     where
-        F: Font + Copy,
+        F: MonoFont,
     {
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
-            .into_styled(TextStyle::new(font, BinaryColor::On))
+            .into_styled(MonoTextStyle::new(font, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
 
