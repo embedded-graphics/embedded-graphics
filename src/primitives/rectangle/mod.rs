@@ -286,7 +286,7 @@ impl Rectangle {
     /// assert_eq!(rect.get_anchor_point(AnchorPoint::TopLeft), Point::new(20, 20));
     /// assert_eq!(rect.get_anchor_point(AnchorPoint::BottomCenter), Point::new(25, 40));
     /// ```
-    pub fn get_anchor_point(&self, anchor_point: AnchorPoint) -> Point {
+    pub fn anchor_point(&self, anchor_point: AnchorPoint) -> Point {
         // Assume size = 1 for zero sized dimensions.
         let one = Size::new_equal(1);
         let delta = Point::zero() + self.size.component_max(one) - one;
@@ -316,7 +316,7 @@ impl Rectangle {
     /// assert_eq!(rect.rows(), 20..24);
     /// ```
     ///
-    /// By combining this method with [`columns`] it is possible to iterator over all pixels inside
+    /// By combining this method with [`columns`] it is possible to iterate over all pixels inside
     /// the rectangle. This can be more flexible than using the [`points`] iterator, for example,
     /// if a different iteration order is required or some operations should be called once per row.
     ///
@@ -396,7 +396,8 @@ impl Rectangle {
     /// let rect = Rectangle::new(Point::new(10, 20), Size::zero());
     /// assert_eq!(rect.is_zero_sized(), true);
     /// ```
-    pub fn is_zero_sized(&self) -> bool {
+// MSRV: Add const when upgrading to at least 1.46.0
+   pub fn is_zero_sized(&self) -> bool {
         self.size.height == 0 || self.size.width == 0
     }
 }
