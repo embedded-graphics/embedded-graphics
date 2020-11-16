@@ -48,9 +48,7 @@ impl Iterator for ScanlineIterator {
     type Item = (Line, PointType);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(border) = self.intersections.next() {
-            Some(border)
-        } else {
+        self.intersections.next().or_else(|| {
             self.scanline_y += 1;
 
             if self.scanline_y > self.scanline_limit {
@@ -60,6 +58,6 @@ impl Iterator for ScanlineIterator {
             self.intersections.reset_with_new_scanline(self.scanline_y);
 
             self.intersections.next()
-        }
+        })
     }
 }

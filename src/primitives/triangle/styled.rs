@@ -38,7 +38,7 @@ where
         let mut lines_iter = ScanlineIterator::new(
             &styled.primitive,
             style.stroke_width,
-            style.stroke_alignment.as_offset(),
+            style.stroke_alignment.to_offset(),
             style.fill_color.is_some(),
             &styled.bounding_box(),
         );
@@ -115,7 +115,7 @@ where
             for (line, kind) in ScanlineIterator::new(
                 &self.primitive,
                 self.style.stroke_width,
-                self.style.stroke_alignment.as_offset(),
+                self.style.stroke_alignment.to_offset(),
                 self.style.fill_color.is_some(),
                 &self.bounding_box(),
             ) {
@@ -151,7 +151,7 @@ where
             let (min, max) = ClosedThickSegmentIter::new(
                 &[t.p1, t.p2, t.p3],
                 self.style.stroke_width,
-                self.style.stroke_alignment.as_offset(),
+                self.style.stroke_alignment.to_offset(),
             )
             .fold(
                 (

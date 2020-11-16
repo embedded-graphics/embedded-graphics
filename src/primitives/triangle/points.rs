@@ -1,7 +1,7 @@
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        line::{self, Line, StrokeOffset},
+        line::{self, StrokeOffset},
         triangle::{scanline_iterator::ScanlineIterator, Triangle},
         Primitive,
     },
@@ -24,7 +24,7 @@ impl Points {
             &triangle.bounding_box(),
         );
 
-        let current_line = line::Points::iter();
+        let current_line = line::Points::empty();
 
         Self {
             scanline_iter,

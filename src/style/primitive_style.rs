@@ -256,7 +256,7 @@ pub enum StrokeAlignment {
 }
 
 impl StrokeAlignment {
-    pub(crate) fn as_offset(self) -> StrokeOffset {
+    pub(crate) fn to_offset(self) -> StrokeOffset {
         match self {
             Self::Inside => StrokeOffset::Right,
             Self::Outside => StrokeOffset::Left,
