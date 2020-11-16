@@ -22,6 +22,8 @@ pub struct ScanlineIntersections<'a> {
     accum: Option<Line>,
 }
 
+const EMPTY: &[Point; 3] = &[Point::zero(); 3];
+
 impl<'a> ScanlineIntersections<'a> {
     /// New
     pub fn new(points: &'a [Point], width: u32, scanline_y: i32) -> Self {
@@ -45,6 +47,18 @@ impl<'a> ScanlineIntersections<'a> {
             points,
             remaining_points: points,
             scanline_y,
+            accum: None,
+        }
+    }
+
+    /// Empty scanline iterator.
+    pub(in crate::primitives) fn empty() -> Self {
+        Self {
+            next_start_join: None,
+            width: 0,
+            points: EMPTY,
+            remaining_points: EMPTY,
+            scanline_y: 0,
             accum: None,
         }
     }
