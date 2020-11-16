@@ -15,10 +15,10 @@ use crate::{
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum PointType {
     /// Represents part of the stroke.
-    Border,
+    Stroke,
 
     /// Represents the interior of the shape.
-    Inside,
+    Fill,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -167,7 +167,7 @@ fn generate_lines(
         Some(LineConfig {
             internal: triangle
                 .scanline_intersection(scanline_y)
-                .map(|l| (l, PointType::Border)),
+                .map(|l| (l, PointType::Stroke)),
             ..LineConfig::default()
         })
     } else {
@@ -212,7 +212,7 @@ fn generate_lines(
         Some(LineConfig {
             first,
             second,
-            internal: internal.map(|l| (l, PointType::Inside)),
+            internal: internal.map(|l| (l, PointType::Fill)),
         })
     }
 }
@@ -224,7 +224,7 @@ impl Iterator for ScanlineIntersections {
         self.lines
             .internal
             .take()
-            .or_else(|| self.lines.first.take().map(|l| (l, PointType::Border)))
-            .or_else(|| self.lines.second.take().map(|l| (l, PointType::Border)))
+            .or_else(|| self.lines.first.take().map(|l| (l, PointType::Stroke)))
+            .or_else(|| self.lines.second.take().map(|l| (l, PointType::Stroke)))
     }
 }

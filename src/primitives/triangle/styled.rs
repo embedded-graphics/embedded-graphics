@@ -10,7 +10,7 @@ use crate::{
         triangle::{
             scanline_intersections::PointType, scanline_iterator::ScanlineIterator, Triangle,
         },
-        Line, Primitive, Rectangle,
+        Primitive, Rectangle,
     },
     style::{PrimitiveStyle, StrokeAlignment, Styled},
 };
@@ -46,11 +46,11 @@ where
         let (current_line, point_type) = lines_iter
             .next()
             .map(|(l, t)| (l.points(), t))
-            .unwrap_or_else(|| (line::Points::empty(), PointType::Border));
+            .unwrap_or_else(|| (line::Points::empty(), PointType::Stroke));
 
         let current_color = match point_type {
-            PointType::Border => styled.style.effective_stroke_color(),
-            PointType::Inside => styled.style.fill_color,
+            PointType::Stroke => styled.style.effective_stroke_color(),
+            PointType::Fill => styled.style.fill_color,
         };
 
         Self {
@@ -72,15 +72,15 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(p) = self.current_line.next() {
-                return Some(Pixel(p, self.current_color?))
+                return Some(Pixel(p, self.current_color?));
             } else {
                 let (next_line, next_type) = self.lines_iter.next()?;
 
                 self.current_line = next_line.points();
 
                 self.current_color = match next_type {
-                    PointType::Border => self.stroke_color,
-                    PointType::Inside => self.fill_color,
+                    PointType::Stroke => self.stroke_color,
+                    PointType::Fill => self.fill_color,
                 };
             }
         }
@@ -119,8 +119,8 @@ where
                 &self.bounding_box(),
             ) {
                 let color = match kind {
-                    PointType::Border => self.style.effective_stroke_color(),
-                    PointType::Inside => self.style.fill_color,
+                    PointType::Stroke => self.style.effective_stroke_color(),
+                    PointType::Fill => self.style.fill_color,
                 };
 
                 if let Some(color) = color {
