@@ -51,17 +51,18 @@ impl ThickSegment {
             return left.bounding_box();
         }
 
-        let left = left.bounding_box();
-        let right = right.bounding_box();
-
-        let tl = left.top_left.component_min(right.top_left);
-
-        let left_br = left.bottom_right().unwrap_or(tl);
-        let right_br = right.bottom_right().unwrap_or(tl);
-
-        let br = left_br.component_max(right_br);
-
-        Rectangle::with_corners(tl, br)
+        Rectangle::with_corners(
+            right
+                .start
+                .component_min(right.end)
+                .component_min(left.start)
+                .component_min(left.end),
+            right
+                .start
+                .component_max(right.end)
+                .component_max(left.start)
+                .component_max(left.end),
+        )
     }
 
     pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
