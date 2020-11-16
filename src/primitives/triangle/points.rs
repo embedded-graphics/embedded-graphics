@@ -16,7 +16,7 @@ pub struct Points {
 
 impl Points {
     pub(in crate::primitives) fn new(triangle: &Triangle) -> Self {
-        let mut scanline_iter = ScanlineIterator::new(
+        let scanline_iter = ScanlineIterator::new(
             triangle,
             0,
             StrokeOffset::None,
@@ -24,11 +24,7 @@ impl Points {
             &triangle.bounding_box(),
         );
 
-        let current_line = scanline_iter
-            .next()
-            .map(|(l, _ty)| l)
-            .unwrap_or_else(|| Line::new(Point::zero(), Point::zero()))
-            .points();
+        let current_line = line::Points::iter();
 
         Self {
             scanline_iter,
@@ -41,13 +37,11 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(point) = self.current_line.next() {
-            Some(point)
-        } else {
+        self.current_line.next().or_else(|| {
             self.current_line = self.scanline_iter.next()?.0.points();
 
             self.current_line.next()
-        }
+        })
     }
 }
 
