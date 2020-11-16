@@ -8,7 +8,6 @@ use crate::{
 #[derive(Debug, Clone, Copy)]
 pub(in crate::primitives) struct ThickSegment {
     start_join: LineJoin,
-
     end_join: LineJoin,
 }
 
