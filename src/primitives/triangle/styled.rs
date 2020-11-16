@@ -45,9 +45,8 @@ where
 
         let (current_line, point_type) = lines_iter
             .next()
-            .unwrap_or_else(|| (Line::new(Point::zero(), Point::zero()), PointType::Border));
-
-        let current_line = current_line.points();
+            .map(|(l, t)| (l.points(), t))
+            .unwrap_or_else(|| (line::Points::empty(), PointType::Border));
 
         let current_color = match point_type {
             PointType::Border => styled.style.effective_stroke_color(),
@@ -71,19 +70,19 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(p) = self.current_line.next() {
-            Some(Pixel(p, self.current_color?))
-        } else {
-            let (next_line, next_type) = self.lines_iter.next()?;
+        loop {
+            if let Some(p) = self.current_line.next() {
+                return Some(Pixel(p, self.current_color?))
+            } else {
+                let (next_line, next_type) = self.lines_iter.next()?;
 
-            self.current_line = next_line.points();
+                self.current_line = next_line.points();
 
-            self.current_color = match next_type {
-                PointType::Border => self.stroke_color,
-                PointType::Inside => self.fill_color,
-            };
-
-            self.next()
+                self.current_color = match next_type {
+                    PointType::Border => self.stroke_color,
+                    PointType::Inside => self.fill_color,
+                };
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
-//! Closed thick segment iterator.
+//! Closed shape thick segment iterator.
 
 use crate::{
     geometry::Point,
     primitives::{line::StrokeOffset, line_join::LineJoin, thick_segment::ThickSegment},
 };
 
-/// Closed thick segments iterator.
+/// Closed shape thick segments iterator.
 ///
 /// Iterates over all line segments in the polyline, returning a 6-sided shape as a [`ThickSegment`]
 /// for each segment. These are tessellated and are used to produce scanline intersections.
