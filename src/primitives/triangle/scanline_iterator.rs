@@ -5,12 +5,13 @@ use crate::primitives::{
     triangle::scanline_intersections::{PointType, ScanlineIntersections},
     Line, Rectangle, Triangle,
 };
+use core::ops::Range;
 
 /// Iterate over every scanline in the triangle's bounding box.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub(in crate::primitives::triangle) struct ScanlineIterator {
+    rows: Range<i32>,
     scanline_y: i32,
-    scanline_limit: i32,
     intersections: ScanlineIntersections,
 }
 
@@ -25,21 +26,32 @@ impl ScanlineIterator {
     ) -> Self {
         let triangle = triangle.sorted_clockwise();
 
-        let scanline_y = bounding_box.top_left.y;
-        let scanline_limit = scanline_y + bounding_box.size.height as i32;
+        let mut rows = bounding_box.rows();
 
-        let intersections = ScanlineIntersections::new(
-            &triangle,
-            stroke_width,
-            stroke_offset,
-            has_fill,
-            scanline_y,
-        );
+        if let Some(scanline_y) = rows.next() {
+            let intersections = ScanlineIntersections::new(
+                &triangle,
+                stroke_width,
+                stroke_offset,
+                has_fill,
+                scanline_y,
+            );
 
+            Self {
+                rows,
+                scanline_y,
+                intersections,
+            }
+        } else {
+            Self::empty()
+        }
+    }
+
+    fn empty() -> Self {
         Self {
-            scanline_y,
-            scanline_limit,
-            intersections,
+            rows: 0i32..0,
+            scanline_y: 0,
+            intersections: ScanlineIntersections::empty(),
         }
     }
 }
@@ -49,11 +61,7 @@ impl Iterator for ScanlineIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.intersections.next().or_else(|| {
-            self.scanline_y += 1;
-
-            if self.scanline_y > self.scanline_limit {
-                return None;
-            }
+            self.scanline_y = self.rows.next()?;
 
             self.intersections.reset_with_new_scanline(self.scanline_y);
 

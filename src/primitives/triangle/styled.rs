@@ -16,7 +16,7 @@ use crate::{
 };
 
 /// Pixel iterator for each pixel in the triangle border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct StyledPixels<C>
 where
     C: PixelColor,
