@@ -1,26 +1,29 @@
 use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, Size},
+    geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
+        closed_thick_segment_iter::ClosedThickSegmentIter,
+        line,
         triangle::{
-            scanline_iterator::{PointType, ScanlineIterator},
-            Triangle,
+            scanline_intersections::PointType, scanline_iterator::ScanlineIterator, Triangle,
         },
-        Rectangle,
+        Primitive, Rectangle,
     },
-    style::{PrimitiveStyle, Styled},
+    style::{PrimitiveStyle, StrokeAlignment, Styled},
 };
 
 /// Pixel iterator for each pixel in the triangle border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: ScanlineIterator,
+    lines_iter: ScanlineIterator,
+    current_line: line::Points,
+    current_color: Option<C>,
     fill_color: Option<C>,
     stroke_color: Option<C>,
 }
@@ -30,14 +33,30 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<Triangle, PrimitiveStyle<C>>) -> Self {
-        let iter = if !styled.style.is_transparent() {
-            ScanlineIterator::new(&styled.primitive)
-        } else {
-            ScanlineIterator::empty()
+        let style = styled.style;
+
+        let mut lines_iter = ScanlineIterator::new(
+            &styled.primitive,
+            style.stroke_width,
+            style.stroke_alignment.to_offset(),
+            style.fill_color.is_some(),
+            &styled.bounding_box(),
+        );
+
+        let (current_line, point_type) = lines_iter
+            .next()
+            .map(|(l, t)| (l.points(), t))
+            .unwrap_or_else(|| (line::Points::empty(), PointType::Stroke));
+
+        let current_color = match point_type {
+            PointType::Stroke => styled.style.effective_stroke_color(),
+            PointType::Fill => styled.style.fill_color,
         };
 
         Self {
-            iter,
+            lines_iter,
+            current_line,
+            current_color,
             fill_color: styled.style.fill_color,
             stroke_color: styled.style.effective_stroke_color(),
         }
@@ -51,19 +70,20 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Self {
-            ref stroke_color,
-            ref fill_color,
-            ..
-        } = self;
+        loop {
+            if let Some(p) = self.current_line.next() {
+                return Some(Pixel(p, self.current_color?));
+            } else {
+                let (next_line, next_type) = self.lines_iter.next()?;
 
-        self.iter.find_map(|(point_type, point)| {
-            match point_type {
-                PointType::Border => stroke_color.or(*fill_color),
-                PointType::Inside => *fill_color,
+                self.current_line = next_line.points();
+
+                self.current_color = match next_type {
+                    PointType::Stroke => self.stroke_color,
+                    PointType::Fill => self.fill_color,
+                };
             }
-            .map(|c| Pixel(point, c))
-        })
+        }
     }
 }
 
@@ -90,7 +110,26 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        if !self.style.is_transparent() {
+            for (line, kind) in ScanlineIterator::new(
+                &self.primitive,
+                self.style.stroke_width,
+                self.style.stroke_alignment.to_offset(),
+                self.style.fill_color.is_some(),
+                &self.bounding_box(),
+            ) {
+                let color = match kind {
+                    PointType::Stroke => self.style.effective_stroke_color(),
+                    PointType::Fill => self.style.fill_color,
+                };
+
+                if let Some(color) = color {
+                    display.fill_solid(&Rectangle::with_corners(line.start, line.end), color)?;
+                }
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -98,15 +137,39 @@ impl<C> Dimensions for Styled<Triangle, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // FIXME: Triangles don't support stroke width or offset at the moment. This method should be
-    // fixed when support is implemented.
     fn bounding_box(&self) -> Rectangle {
-        let bb = self.primitive.bounding_box();
-
         if !self.style.is_transparent() {
-            bb
+            // Short circuit special cases
+            if self.style.stroke_width < 2 || self.style.stroke_alignment == StrokeAlignment::Inside
+            {
+                return self.primitive.bounding_box();
+            }
+
+            let t = self.primitive.sorted_clockwise();
+
+            let (min, max) = ClosedThickSegmentIter::new(
+                &[t.p1, t.p2, t.p3],
+                self.style.stroke_width,
+                self.style.stroke_alignment.to_offset(),
+            )
+            .fold(
+                (
+                    Point::new_equal(core::i32::MAX),
+                    Point::new_equal(core::i32::MIN),
+                ),
+                |(min, max), segment| {
+                    let bb = segment.edges_bounding_box();
+
+                    (
+                        min.component_min(bb.top_left),
+                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
+                    )
+                },
+            );
+
+            Rectangle::with_corners(min, max)
         } else {
-            Rectangle::new(bb.center(), Size::zero())
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
     }
 }
@@ -118,9 +181,10 @@ mod tests {
         drawable::Drawable,
         geometry::Point,
         mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        pixelcolor::{BinaryColor, Rgb565, Rgb888, RgbColor},
         primitives::{Line, Primitive},
         style::PrimitiveStyleBuilder,
+        style::StrokeAlignment,
         transform::Transform,
     };
 
@@ -284,17 +348,16 @@ mod tests {
         styled.draw(&mut display).unwrap();
     }
 
-    // FIXME: Triangles don't support stroke width or offset at the moment. This test should be
-    // ammended to test stroke offsets when support is implemented.
     #[test]
     fn bounding_box() {
         let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
 
-        let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 30));
-
-        assert_eq!(triangle.bounding_box(), styled.bounding_box());
+        let styled = triangle.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 20));
 
         let mut display = MockDisplay::new();
+
+        display.set_allow_overdraw(true);
+
         styled.draw(&mut display).unwrap();
         assert_eq!(display.affected_area(), styled.bounding_box());
     }
@@ -308,6 +371,240 @@ mod tests {
         assert_eq!(
             styled.bounding_box(),
             Rectangle::new(triangle.bounding_box().center(), Size::zero())
+        );
+    }
+
+    #[test]
+    fn outside_rendering_missing_lines() {
+        let p1 = Point::new(10, 11);
+        let p2 = Point::new(20, 11);
+        let p3 = Point::new(8, 4);
+
+        let styled = Triangle::new(p1, p2, p3).into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_alignment(StrokeAlignment::Outside)
+                .stroke_width(5)
+                .stroke_color(Rgb565::RED)
+                .fill_color(Rgb565::GREEN)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        styled.draw(&mut display).unwrap();
+
+        assert_eq!(
+            display,
+            // Believe it or not, this is actually a triangle.
+            MockDisplay::from_pattern(&[
+                "          R            ",
+                "         RRRR          ",
+                "        RRRRRRR        ",
+                "       RRRRRRRRR       ",
+                "     RRRRRRRRRRRRR     ",
+                "    RRRRRRRRRRRRRRRR   ",
+                "    RRRRRRGRRRRRRRRRRR ",
+                "     RRRRRGGGRRRRRRRRRR",
+                "     RRRRRGGGGGRRRRRRRR",
+                "     RRRRRGGGGGGRRRRRRR",
+                "     RRRRRRGGGGGGGRRRR ",
+                "      RRRRRRRRRRRRRRRR ",
+                "      RRRRRRRRRRRRRRRR ",
+                "      RRRRRRRRRRRRRRR  ",
+                "       RRRRRRRRRRRRRR  ",
+                "       RRRRRRRRRRRRRR  ",
+            ])
+        );
+    }
+
+    #[test]
+    fn thick_stroke_only_no_overdraw() {
+        let p1 = Point::new(10, 11);
+        let p2 = Point::new(20, 11);
+        let p3 = Point::new(8, 4);
+
+        let styled = Triangle::new(p1, p2, p3).into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_alignment(StrokeAlignment::Outside)
+                .stroke_width(5)
+                .stroke_color(Rgb565::RED)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+
+        styled.draw(&mut display).unwrap();
+    }
+
+    #[test]
+    fn inner_fill_leak() {
+        let p1 = Point::new(0, 20);
+        let p2 = Point::new(20, 0);
+        let p3 = Point::new(14, 24);
+
+        let styled = Triangle::new(p1, p2, p3).into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_alignment(StrokeAlignment::Inside)
+                .stroke_width(5)
+                .stroke_color(Rgb565::RED)
+                .fill_color(Rgb565::GREEN)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+
+        styled.draw(&mut display).unwrap();
+
+        assert_eq!(
+            display,
+            // In the failing case, there are some `G`s sitting on the end of each line that
+            // shouldn't be there.
+            MockDisplay::from_pattern(&[
+                "                    R",
+                "                   RR",
+                "                  RR ",
+                "                 RRR ",
+                "                RRRR ",
+                "               RRRRR ",
+                "              RRRRR  ",
+                "             RRRRRR  ",
+                "            RRRRRRR  ",
+                "           RRRRRRRR  ",
+                "          RRRRRRRR   ",
+                "         RRRRRRRRR   ",
+                "        RRRRRRRRRR   ",
+                "       RRRRRRRRRRR   ",
+                "      RRRRRRRRRRR    ",
+                "     RRRRRRRRRRRR    ",
+                "    RRRRRRRGRRRRR    ",
+                "   RRRRRRRGRRRRRR    ",
+                "  RRRRRRRRGRRRRR     ",
+                " RRRRRRRRRRRRRRR     ",
+                "RRRRRRRRRRRRRRRR     ",
+                "  RRRRRRRRRRRRRR     ",
+                "      RRRRRRRRR      ",
+                "         RRRRRR      ",
+                "             RR      ",
+            ])
+        );
+    }
+
+    #[test]
+    fn colinear() {
+        let p1 = Point::new(90, 80);
+        let p2 = Point::new(100, 70);
+        let p3 = Point::new(95, 75);
+
+        let t = Triangle::new(p1, p2, p3).translate(Point::new(-85, -70));
+
+        let styled = t.into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_alignment(StrokeAlignment::Inside)
+                .stroke_width(5)
+                .stroke_color(Rgb565::RED)
+                .fill_color(Rgb565::GREEN)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+
+        styled.draw(&mut display).unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "               R",
+                "              R ",
+                "             R  ",
+                "            R   ",
+                "           R    ",
+                "          R     ",
+                "         R      ",
+                "        R       ",
+                "       R        ",
+                "      R         ",
+                "     R          ",
+            ])
+        );
+    }
+
+    // Original bug has a weird "lump" drawn at one end of a colinear triangle.
+    #[test]
+    fn colinear_lump() {
+        let p1 = Point::new(90, 80);
+        let p2 = Point::new(100, 70);
+        let p3 = Point::new(102, 73);
+
+        let t = Triangle::new(p1, p2, p3).translate(Point::new(-90, -70));
+
+        let styled = t.into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_alignment(StrokeAlignment::Inside)
+                .stroke_width(5)
+                .stroke_color(Rgb565::RED)
+                .fill_color(Rgb565::GREEN)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+
+        styled.draw(&mut display).unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "          R  ",
+                "         RRR ",
+                "        RRRR ",
+                "       RRRRRR",
+                "      RRRRRR ",
+                "     RRRRR   ",
+                "    RRRR     ",
+                "   RRR       ",
+                "  RRR        ",
+                " RR          ",
+                "R            ",
+            ])
+        );
+    }
+
+    #[test]
+    fn colinear_lump_2() {
+        let p1 = Point::new(90, 80);
+        let p2 = Point::new(100, 70);
+        let p3 = Point::new(102, 73);
+
+        let t = Triangle::new(p1, p2, p3).translate(Point::new(-90, -70));
+
+        let styled = t.into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_alignment(StrokeAlignment::Inside)
+                .stroke_width(5)
+                .stroke_color(Rgb565::RED)
+                .fill_color(Rgb565::GREEN)
+                .build(),
+        );
+
+        let mut display = MockDisplay::new();
+
+        styled.draw(&mut display).unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "          R  ",
+                "         RRR ",
+                "        RRRR ",
+                "       RRRRRR",
+                "      RRRRRR ",
+                "     RRRRR   ",
+                "    RRRR     ",
+                "   RRR       ",
+                "  RRR        ",
+                " RR          ",
+                "R            ",
+            ])
         );
     }
 }

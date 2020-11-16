@@ -16,9 +16,6 @@ pub enum JoinKind {
 
     /// Bevelled (flattened point)
     Bevel {
-        /// Line filling the outside of the bevel.
-        filler_line: Line,
-
         /// Left side or right side?
         outer_side: Side,
     },
@@ -27,9 +24,6 @@ pub enum JoinKind {
     ///
     /// Degenerate corners are rendered with a bevel.
     Degenerate {
-        /// Line filling the outside of the bevel.
-        filler_line: Line,
-
         /// Left side or right side?
         outer_side: Side,
     },
@@ -198,17 +192,9 @@ impl LineJoin {
                 }
                 // Miter is too long, chop it into bevel-style corner
                 else {
-                    // PERF: By removing the now-unused `filler_triangle`, I can probably get rid of
-                    // this match with some more concise if()s.
                     match outer_side {
                         Side::Right => Self {
-                            kind: JoinKind::Bevel {
-                                filler_line: Line::new(
-                                    first_edge_right.end,
-                                    second_edge_right.start,
-                                ),
-                                outer_side,
-                            },
+                            kind: JoinKind::Bevel { outer_side },
                             first_edge_end: EdgeCorners {
                                 left: l_intersection,
                                 right: first_edge_right.end,
@@ -219,10 +205,7 @@ impl LineJoin {
                             },
                         },
                         Side::Left => Self {
-                            kind: JoinKind::Bevel {
-                                filler_line: Line::new(first_edge_left.end, second_edge_left.start),
-                                outer_side,
-                            },
+                            kind: JoinKind::Bevel { outer_side },
                             first_edge_end: EdgeCorners {
                                 left: first_edge_left.end,
                                 right: r_intersection,
@@ -239,14 +222,8 @@ impl LineJoin {
             else {
                 Self {
                     kind: match outer_side {
-                        Side::Left => JoinKind::Degenerate {
-                            filler_line: Line::new(first_edge_left.end, second_edge_left.start),
-                            outer_side,
-                        },
-                        Side::Right => JoinKind::Degenerate {
-                            filler_line: Line::new(first_edge_right.end, second_edge_right.start),
-                            outer_side,
-                        },
+                        Side::Left => JoinKind::Degenerate { outer_side },
+                        Side::Right => JoinKind::Degenerate { outer_side },
                     },
                     first_edge_end: EdgeCorners {
                         left: first_edge_left.end,
@@ -275,18 +252,34 @@ impl LineJoin {
         }
     }
 
-    fn cap(&self, cap: &EdgeCorners) -> (Line, Option<Line>) {
-        let midpoint = match self.kind {
-            JoinKind::Bevel { filler_line, .. } | JoinKind::Degenerate { filler_line, .. } => {
-                filler_line.midpoint()
+    /// The filler line (if any) for bevel and degenerate joints.
+    fn filler_line(&self) -> Option<Line> {
+        match self.kind {
+            JoinKind::Bevel { outer_side, .. } | JoinKind::Degenerate { outer_side, .. } => {
+                let line = match outer_side {
+                    Side::Left => Line::new(self.first_edge_end.left, self.second_edge_start.left),
+                    Side::Right => {
+                        Line::new(self.first_edge_end.right, self.second_edge_start.right)
+                    }
+                };
+
+                Some(line)
             }
-            _ => return (Line::new(cap.left, cap.right).into(), None),
-        };
+            _ => None,
+        }
+    }
 
-        let l1 = Line::new(cap.left, midpoint);
-        let l2 = Line::new(midpoint, cap.right);
+    fn cap(&self, cap: &EdgeCorners) -> (Line, Option<Line>) {
+        if let Some(filler) = self.filler_line() {
+            let midpoint = filler.midpoint();
 
-        (l1, l2.into())
+            let l1 = Line::new(cap.left, midpoint);
+            let l2 = Line::new(midpoint, cap.right);
+
+            (l1, l2.into())
+        } else {
+            (Line::new(cap.left, cap.right), None)
+        }
     }
 
     /// Start node bevel line(s).
@@ -301,5 +294,15 @@ impl LineJoin {
     /// If the join is a bevel join, this will return two lines, otherwise one.
     pub fn end_cap_lines(&self) -> (Line, Option<Line>) {
         self.cap(&self.first_edge_end)
+    }
+
+    /// Whether the join is degenerate (segments self-intersect) or not.
+    pub fn is_degenerate(&self) -> bool {
+        // MSRV: Use matches!() macro when we're at 1.42.0 or greater.
+        if let JoinKind::Degenerate { .. } = self.kind {
+            true
+        } else {
+            false
+        }
     }
 }

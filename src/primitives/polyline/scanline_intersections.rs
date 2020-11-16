@@ -22,6 +22,8 @@ pub struct ScanlineIntersections<'a> {
     accum: Option<Line>,
 }
 
+const EMPTY: &[Point; 3] = &[Point::zero(); 3];
+
 impl<'a> ScanlineIntersections<'a> {
     /// New
     pub fn new(points: &'a [Point], width: u32, scanline_y: i32) -> Self {
@@ -31,7 +33,7 @@ impl<'a> ScanlineIntersections<'a> {
         //     None
         // };
 
-        // TODO: Use subslice patterns when we bump MSRV to a version where it's stable.
+        // MSRV: Use subslice patterns when we bump to at least 1.42.0
         let next_start_join = match points.get(0..2) {
             Some([first, second]) => {
                 Some(LineJoin::start(*first, *second, width, StrokeOffset::None))
@@ -45,6 +47,18 @@ impl<'a> ScanlineIntersections<'a> {
             points,
             remaining_points: points,
             scanline_y,
+            accum: None,
+        }
+    }
+
+    /// Empty scanline iterator.
+    pub(in crate::primitives) fn empty() -> Self {
+        Self {
+            next_start_join: None,
+            width: 0,
+            points: EMPTY,
+            remaining_points: EMPTY,
+            scanline_y: 0,
             accum: None,
         }
     }
@@ -65,7 +79,7 @@ impl<'a> ScanlineIntersections<'a> {
         //     _ => return None,
         // };
 
-        // TODO: Use subslice patterns when we bump MSRV to a version where it's stable.
+        // MSRV: Use subslice patterns when we bump to at least 1.42.0
         let end_join = self
             .remaining_points
             .get(0..3)
@@ -146,7 +160,7 @@ impl<'a> Iterator for ScanlineIntersections<'a> {
 /// Check for lines that are adjacent or overlapping.
 ///
 /// This assumes that both lines have the same y coordinate and are horizontal.
-fn touches(l1: Line, l2: Line) -> bool {
+pub(in crate::primitives) fn touches(l1: Line, l2: Line) -> bool {
     let first_range = (l1.start.x - 1)..=(l1.end.x + 1);
 
     first_range.contains(&l2.start.x) || first_range.contains(&l2.end.x)
@@ -156,7 +170,7 @@ fn touches(l1: Line, l2: Line) -> bool {
 ///
 /// This assumes the lines are adjacent or touching, which is guaranteed by the iterator logic
 /// around where this function is called.
-fn extend(l1: Line, l2: Line) -> Line {
+pub(in crate::primitives) fn extend(l1: Line, l2: Line) -> Line {
     // Lines are scanlines, so we can reuse the same Y coordinate for everything.
     let y = l1.start.y;
 

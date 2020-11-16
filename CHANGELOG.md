@@ -9,11 +9,12 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Added
 
 - [#386](https://github.com/embedded-graphics/embedded-graphics/pull/386) Added `Line::midpoint` to get the midpoint of a line.
-- [#386](https://github.com/embedded-graphics/embedded-graphics/pull/386) `Polyline` now supports stroke widths greater than 1.
+- [#386](https://github.com/embedded-graphics/embedded-graphics/pull/386) `Polyline`s can now be drawn with stroke widths greater than 1.
 - [#386](https://github.com/embedded-graphics/embedded-graphics/pull/386) Added the `delta` method to `Line` to compute the difference between start and end points.
 - [#450](https://github.com/embedded-graphics/embedded-graphics/pull/450) Added `ColorConverted` and `DrawTargetExt::color_converted` to support color conversion for draw targets.
 - [#438](https://github.com/embedded-graphics/embedded-graphics/pull/438) Added majority CSS web colors as associated `const`s to the RGB color types.
 - [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Added support for external text renderers. External text renderers can be implemented using the new `TextStyle` trait.
+- [#475](https://github.com/embedded-graphics/embedded-graphics/pull/475) `Triangle`s can now be drawn with stroke widths greater than 1.
 - [#478](https://github.com/embedded-graphics/embedded-graphics/pull/478) Added `resized`, `anchor_point`, `rows`, `columns` and `is_zero_sized` methods to `Rectangle`.
 
 ### Changed

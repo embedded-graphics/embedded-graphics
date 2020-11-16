@@ -1,17 +1,21 @@
 //! The triangle primitive.
 
 mod points;
+mod scanline_intersections;
 mod scanline_iterator;
 mod styled;
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{ContainsPoint, Line, Primitive, Rectangle},
+    primitives::{
+        line::StrokeOffset, line_join::LineJoin, thick_segment::bresenham_scanline_intersection,
+        ContainsPoint, Line, Primitive, Rectangle,
+    },
     transform::Transform,
 };
 use core::{
     borrow::Borrow,
-    cmp::{max, min},
+    cmp::{max, min, Ordering},
 };
 pub use points::Points;
 pub use styled::StyledPixels;
@@ -125,7 +129,7 @@ impl ContainsPoint for Triangle {
 
         // Sort points into same order as `ScanlineIterator` so this check produces the same results
         // as a rendered triangle would.
-        let (p1, p2, p3) = sort_yx(p1, p2, p3);
+        let Triangle { p1, p2, p3 } = self.sorted_yx();
 
         // Special case: due to the Bresenham algorithm being used to render triangles, some pixel
         // centers on a Styled<Triangle> lie outside the mathematical triangle. This check
@@ -180,10 +184,122 @@ impl Triangle {
     ///
     /// This method can be used to determine if the triangle is colinear by checking if the returned
     /// value is equal to zero.
-    fn area_doubled(&self) -> i32 {
+    pub(in crate::primitives) fn area_doubled(&self) -> i32 {
         let Self { p1, p2, p3 } = self;
 
         -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y
+    }
+
+    /// Create a new triangle with points sorted in a clockwise direction.
+    pub(in crate::primitives::triangle) fn sorted_clockwise(&self) -> Self {
+        let Self { p1, p2, p3 } = self;
+
+        let determinant = -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y;
+
+        match determinant.cmp(&0) {
+            // Triangle is wound CCW. Swap two points to make it CW.
+            Ordering::Less => Self::new(*p2, *p1, *p3),
+            // Triangle is already CW, do nothing.
+            Ordering::Greater => *self,
+            // Triangle is colinear. Sort points so they lie sequentially along the line.
+            Ordering::Equal => {
+                let (p1, p2, p3) = sort_yx(*p1, *p2, *p3);
+
+                Self::new(p1, p2, p3)
+            }
+        }
+    }
+
+    fn sorted_yx(&self) -> Self {
+        let (p1, p2, p3) = sort_yx(self.p1, self.p2, self.p3);
+
+        Self::new(p1, p2, p3)
+    }
+
+    pub(in crate::primitives::triangle) fn scanline_intersection(
+        &self,
+        scanline_y: i32,
+    ) -> Option<Line> {
+        let Triangle { p1, p2, p3 } = self.sorted_yx();
+
+        // Triangle is colinear. We can get away with only intersecting the single line.
+        if self.area_doubled() == 0 {
+            return bresenham_scanline_intersection(&Line::new(p1, p3), scanline_y);
+        }
+
+        let line_a = Line::new(p1, p2);
+        let line_b = Line::new(p1, p3);
+        let line_c = Line::new(p2, p3);
+
+        let first = bresenham_scanline_intersection(&line_b, scanline_y)?;
+        let second = bresenham_scanline_intersection(&line_a, scanline_y)
+            .or_else(|| bresenham_scanline_intersection(&line_c, scanline_y))?;
+
+        Some(Line::new(
+            first.start.component_min(second.start),
+            first.end.component_max(second.end),
+        ))
+    }
+
+    /// Generate a line join for each corner of the triangle.
+    fn joins(&self, stroke_width: u32, stroke_offset: StrokeOffset) -> [LineJoin; 3] {
+        [
+            LineJoin::from_points(self.p3, self.p1, self.p2, stroke_width, stroke_offset),
+            LineJoin::from_points(self.p1, self.p2, self.p3, stroke_width, stroke_offset),
+            LineJoin::from_points(self.p2, self.p3, self.p1, stroke_width, stroke_offset),
+        ]
+    }
+
+    /// Compute whether a triangle with thick stroke has a hole in its center or is completely
+    /// filled by stroke.
+    // PERF: This doesn't need to compute the entire join, much like how `thick_stroke_inset`
+    // doesn't
+    pub(in crate::primitives::triangle) fn is_collapsed(
+        &self,
+        stroke_width: u32,
+        stroke_offset: StrokeOffset,
+    ) -> bool {
+        let joins = self.joins(stroke_width, stroke_offset);
+
+        joins.iter().enumerate().any(|(i, join)| {
+            // Quick check: if the join is degenerate, no hole can occur.
+            if join.is_degenerate() {
+                return true;
+            }
+
+            // Compute inner-most points of each join. The triangle is sorted clockwise, so that's
+            // the right-side point. The `first_edge_end` and `second_edge_start` points are always
+            // the same in this case, as this is the "pinched" side of the join, so we'll
+            // arbitrarily pick `first_edge_end`.
+            let inner_point = join.first_edge_end.right;
+
+            // Find opposite edge to the given point.
+            let opposite = {
+                let start = self.vertex(i + 1);
+                let end = self.vertex(i + 2);
+
+                // Get right side extent (triangle is sorted clockwise, remember)
+                Line::new(start, end).extents(stroke_width, stroke_offset).1
+            };
+
+            // If the inner point is to the left of the opposite side line, the triangle edges self-
+            // intersect, so the triangle is collapsed.
+            opposite.side(inner_point) >= 0
+        })
+    }
+
+    /// Get a vertex at a given index.
+    ///
+    /// The given index will always wrap in the range 0..=2.
+    pub(in crate::primitives::triangle) fn vertex(&self, idx: usize) -> Point {
+        let idx = idx % 3;
+
+        match idx {
+            0 => self.p1,
+            1 => self.p2,
+            2 => self.p3,
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -248,12 +364,6 @@ fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
     let (y2, y3) = sort_two_yx(y3, y2);
 
     (y1, y2, y3)
-}
-
-enum IterState {
-    Border(Point),
-    LeftRight(Point, Point),
-    None,
 }
 
 #[cfg(test)]
