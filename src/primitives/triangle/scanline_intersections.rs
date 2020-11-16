@@ -110,16 +110,16 @@ fn generate_lines(
 
             while idx < 3 {
                 let start = LineJoin::from_points(
-                    t[idx],
-                    t[(idx + 1) % 3],
-                    t[(idx + 2) % 3],
+                    t.vertex(idx),
+                    t.vertex(idx + 1),
+                    t.vertex(idx + 2),
                     stroke_width,
                     stroke_offset,
                 );
                 let end = LineJoin::from_points(
-                    t[(idx + 1) % 3],
-                    t[(idx + 2) % 3],
-                    t[(idx + 3) % 3],
+                    t.vertex(idx + 1),
+                    t.vertex(idx + 2),
+                    t.vertex(idx + 3),
                     stroke_width,
                     stroke_offset,
                 );

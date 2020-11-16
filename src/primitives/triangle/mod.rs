@@ -275,8 +275,8 @@ impl Triangle {
 
             // Find opposite edge to the given point.
             let opposite = {
-                let start = self[(i + 1) % 3];
-                let end = self[(i + 2) % 3];
+                let start = self.vertex(i + 1);
+                let end = self.vertex(i + 2);
 
                 // Get right side extent (triangle is sorted clockwise, remember)
                 Line::new(start, end).extents(stroke_width, stroke_offset).1
@@ -287,16 +287,17 @@ impl Triangle {
             opposite.side(inner_point) >= 0
         })
     }
-}
 
-impl core::ops::Index<usize> for Triangle {
-    type Output = Point;
+    /// Get a vertex at a given index.
+    ///
+    /// The given index will always wrap in the range 0..=2.
+    pub(in crate::primitives::triangle) fn vertex(&self, idx: usize) -> Point {
+        let idx = idx % 3;
 
-    fn index(&self, idx: usize) -> &Self::Output {
         match idx {
-            0 => &self.p1,
-            1 => &self.p2,
-            2 => &self.p3,
+            0 => self.p1,
+            1 => self.p2,
+            2 => self.p3,
             _ => unreachable!(),
         }
     }
