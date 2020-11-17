@@ -152,19 +152,14 @@ impl LineJoin {
             second_edge_left.line_intersection(&first_edge_left),
             second_edge_right.line_intersection(&first_edge_right),
         ) {
-            let first_segment_start_edge = Line::new(first_edge_left.start, first_edge_right.start);
-            let second_segment_end_edge = Line::new(second_edge_left.end, second_edge_right.end);
-
-            let self_intersection_l = first_segment_start_edge
-                .segment_intersection(&second_edge_left)
-                || second_segment_end_edge.segment_intersection(&first_edge_left);
-
-            let self_intersection_r = first_segment_start_edge
-                .segment_intersection(&second_edge_right)
-                || second_segment_end_edge.segment_intersection(&first_edge_right);
+            // Check if the inside end point of the second line lies inside the first segment.
+            let self_intersection = match outer_side {
+                Side::Right => first_edge_left.side(second_edge_left.end) <= 0,
+                Side::Left => first_edge_right.side(second_edge_right.end) >= 0,
+            };
 
             // Normal line: non-overlapping line end caps
-            if !self_intersection_r && !self_intersection_l {
+            if !self_intersection {
                 // Distance from midpoint to miter outside end point.
                 let miter_length_squared = Line::new(
                     mid,
