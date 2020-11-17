@@ -120,7 +120,9 @@ where
                 ),
                 _ => {
                     for line in ScanlineIterator::new(self) {
-                        if let Some(rect) = line.try_to_rectangle() {
+                        let rect = line.to_rectangle();
+
+                        if !rect.is_zero_sized() {
                             display.fill_solid(&rect, stroke_color)?;
                         }
                     }

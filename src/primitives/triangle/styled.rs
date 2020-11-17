@@ -122,7 +122,9 @@ where
                 };
 
                 if let Some(color) = color {
-                    if let Some(rect) = line.try_to_rectangle() {
+                    let rect = line.to_rectangle();
+
+                    if !rect.is_zero_sized() {
                         display.fill_solid(&rect, color)?;
                     }
                 }

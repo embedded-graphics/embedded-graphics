@@ -1,7 +1,7 @@
 use core::ops::Range;
 
 use crate::{
-    geometry::Point,
+    geometry::{Point, Size},
     prelude::Primitive,
     primitives::{Line, Rectangle},
 };
@@ -103,15 +103,15 @@ impl Scanline {
         }
     }
 
-    pub fn try_to_rectangle(&self) -> Option<Rectangle> {
-        if !self.is_empty() {
-            Some(Rectangle::with_corners(
-                Point::new(self.x.start, self.y),
-                Point::new(self.x.end - 1, self.y),
-            ))
+    /// Converts the scanline into a 1px high rectangle.
+    pub fn to_rectangle(&self) -> Rectangle {
+        let width = if self.x.end >= self.x.start {
+            (self.x.end - self.x.start) as u32
         } else {
-            None
-        }
+            0
+        };
+
+        Rectangle::new(Point::new(self.x.start, self.y), Size::new(width, 1))
     }
 
     /// Renamed to try_take to because of conflict with Iterator::take
