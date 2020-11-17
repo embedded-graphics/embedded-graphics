@@ -196,25 +196,9 @@ impl Line {
         self.start + (self.end - self.start) / 2
     }
 
-    const fn coefficients(&self, other: &Self) -> (i32, i32, i32, i32, i32, i32, i32) {
-        let Point { x: x1, y: y1 } = self.start;
-        let Point { x: x2, y: y2 } = self.end;
-        let Point { x: x3, y: y3 } = other.start;
-        let Point { x: x4, y: y4 } = other.end;
-
-        // First line coefficients where "a1 x  +  b1 y  +  c1  =  0"
-        let a1 = y2 - y1;
-        let b1 = x1 - x2;
-        let c1 = x2 * y1 - x1 * y2;
-
-        // Second line coefficients
-        let a2 = y4 - y3;
-        let b2 = x3 - x4;
-        let c2 = x4 * y3 - x3 * y4;
-
-        let denom = a1 * b2 - a2 * b1;
-
-        (a1, b1, c1, a2, b2, c2, denom)
+    /// Compute the delta (`end - start`) of the line.
+    pub fn delta(&self) -> Point {
+        self.end - self.start
     }
 
     /// Get which side of a line a point lies on.
@@ -230,41 +214,6 @@ impl Line {
 
         // https://math.stackexchange.com/a/274728/4506
         (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
-    }
-
-    /// Integer-only line intersection
-    ///
-    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
-    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
-    pub(in crate::primitives) fn line_intersection(&self, other: &Self) -> Intersection {
-        let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
-
-        // Lines are colinear or parallel
-        if denom == 0 {
-            return Intersection::Colinear;
-        }
-
-        // If we got here, line segments intersect. Compute intersection point using method similar
-        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
-
-        // The denom/2 is to get rounding instead of truncating.
-        let offset = denom.abs() / 2;
-
-        let num = b1 * c2 - b2 * c1;
-        let x = if num < 0 { num - offset } else { num + offset } / denom;
-
-        let num = a2 * c1 - a1 * c2;
-        let y = if num < 0 { num - offset } else { num + offset } / denom;
-
-        Intersection::Point {
-            point: Point::new(x, y),
-            outer_side: if denom > 0 { Side::Right } else { Side::Left },
-        }
-    }
-
-    /// Compute the delta (`end - start`) of the line.
-    pub fn delta(&self) -> Point {
-        self.end - self.start
     }
 }
 
