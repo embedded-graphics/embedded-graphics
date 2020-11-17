@@ -1,14 +1,13 @@
 //! The arc primitive
 
+mod points;
+mod styled;
+
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
     primitives::{Circle, Primitive, Rectangle},
     transform::Transform,
 };
-
-mod points;
-mod styled;
-
 pub use points::Points;
 pub use styled::StyledPixels;
 
