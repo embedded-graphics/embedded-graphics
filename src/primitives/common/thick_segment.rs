@@ -2,11 +2,11 @@
 
 use crate::{
     geometry::{Dimensions, Point},
-    primitives::{line_join::LineJoin, ContainsPoint, Line, Primitive, Rectangle},
+    primitives::{common::LineJoin, ContainsPoint, Line, Primitive, Rectangle},
 };
 
 #[derive(Debug, Clone, Copy)]
-pub(in crate::primitives) struct ThickSegment {
+pub struct ThickSegment {
     start_join: LineJoin,
     end_join: LineJoin,
 }
@@ -95,10 +95,7 @@ impl ThickSegment {
 ///
 /// Intersection lines produced by this function are sorted so that the start always lies to the
 /// left of the end.
-pub(in crate::primitives) fn bresenham_scanline_intersection(
-    line: &Line,
-    scan_y: i32,
-) -> Option<Line> {
+pub fn bresenham_scanline_intersection(line: &Line, scan_y: i32) -> Option<Line> {
     if !line
         .bounding_box()
         .contains(Point::new(line.start.x, scan_y))

@@ -1,6 +1,6 @@
 use crate::{
     geometry::Point,
-    primitives::{arc::PlaneSectorIterator, circle::DistanceIterator, sector::Sector},
+    primitives::{circle::DistanceIterator, common::PlaneSectorIterator, sector::Sector},
 };
 
 /// Iterator over all points inside the sector.

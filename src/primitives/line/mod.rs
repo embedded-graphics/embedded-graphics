@@ -8,6 +8,7 @@ mod thick_points;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
+        common::StrokeOffset,
         line::thick_points::{ParallelLineType, ParallelsIterator},
         Primitive, Rectangle,
     },
@@ -254,18 +255,6 @@ impl Transform for Line {
 
         self
     }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) enum StrokeOffset {
-    /// Stroke is centered around the line skeleton.
-    None,
-
-    /// Stroke is offset to the left of the line.
-    Left,
-
-    /// Stroke is offset to the right of the line.
-    Right,
 }
 
 /// Pixel iterator for each pixel in the line

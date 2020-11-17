@@ -1,7 +1,7 @@
 use crate::{
     geometry::{angle_consts::*, Angle, Dimensions, Point},
     primitives::{
-        arc::{linear_equation::LineSide, LinearEquation},
+        common::{LineSide, LinearEquation},
         rectangle, Primitive, Rectangle,
     },
 };

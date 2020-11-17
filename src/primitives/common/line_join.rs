@@ -3,7 +3,8 @@
 use crate::{
     geometry::Point,
     primitives::{
-        line::{Intersection, Side, StrokeOffset},
+        common::StrokeOffset,
+        line::{Intersection, Side},
         Line,
     },
 };
@@ -63,7 +64,7 @@ struct Coefficients {
 
 /// A join between two lines.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(in crate::primitives) struct LineJoin {
+pub struct LineJoin {
     /// Join kind.
     pub kind: JoinKind,
 

@@ -6,7 +6,7 @@ mod styled;
 use crate::{
     geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
     primitives::{
-        arc::PlaneSector, line::Line, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle,
+        common::PlaneSector, line::Line, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle,
     },
     transform::Transform,
 };

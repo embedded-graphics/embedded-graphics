@@ -1,7 +1,7 @@
 //! Scanline iterator.
 
 use crate::primitives::{
-    line::StrokeOffset,
+    common::StrokeOffset,
     triangle::scanline_intersections::{PointType, ScanlineIntersections},
     Line, Rectangle, Triangle,
 };

@@ -8,7 +8,7 @@ mod styled;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        line::StrokeOffset, line_join::LineJoin, thick_segment::bresenham_scanline_intersection,
+        common::{bresenham_scanline_intersection, LineJoin, StrokeOffset},
         ContainsPoint, Line, Primitive, Rectangle,
     },
     transform::Transform,

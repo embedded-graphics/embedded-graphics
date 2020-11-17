@@ -1,10 +1,6 @@
 use crate::{
     geometry::Point,
-    primitives::{
-        arc::{Arc, PlaneSectorIterator},
-        circle::DistanceIterator,
-        OffsetOutline,
-    },
+    primitives::{arc::Arc, circle::DistanceIterator, common::PlaneSectorIterator, OffsetOutline},
 };
 
 /// Iterator over all points on the arc line.

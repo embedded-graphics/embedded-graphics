@@ -1,7 +1,8 @@
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        line::{self, StrokeOffset},
+        common::StrokeOffset,
+        line,
         triangle::{scanline_iterator::ScanlineIterator, Triangle},
         Primitive,
     },
