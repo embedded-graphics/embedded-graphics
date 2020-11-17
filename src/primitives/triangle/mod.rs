@@ -8,7 +8,7 @@ mod styled;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::{bresenham_scanline_intersection, LineJoin, LineSide, StrokeOffset},
+        common::{LineJoin, LineSide, Scanline, StrokeOffset},
         ContainsPoint, Line, Primitive, Rectangle,
     },
     transform::Transform,
@@ -219,26 +219,23 @@ impl Triangle {
     pub(in crate::primitives::triangle) fn scanline_intersection(
         &self,
         scanline_y: i32,
-    ) -> Option<Line> {
+    ) -> Scanline {
         let Triangle { p1, p2, p3 } = self.sorted_yx();
+
+        let mut scanline = Scanline::new(scanline_y);
 
         // Triangle is colinear. We can get away with only intersecting the single line.
         if self.area_doubled() == 0 {
-            return bresenham_scanline_intersection(&Line::new(p1, p3), scanline_y);
+            scanline.bresenham_intersection(&Line::new(p1, p3));
+
+            return scanline;
         }
 
-        let line_a = Line::new(p1, p2);
-        let line_b = Line::new(p1, p3);
-        let line_c = Line::new(p2, p3);
+        scanline.bresenham_intersection(&Line::new(p1, p2));
+        scanline.bresenham_intersection(&Line::new(p1, p3));
+        scanline.bresenham_intersection(&Line::new(p2, p3));
 
-        let first = bresenham_scanline_intersection(&line_b, scanline_y)?;
-        let second = bresenham_scanline_intersection(&line_a, scanline_y)
-            .or_else(|| bresenham_scanline_intersection(&line_c, scanline_y))?;
-
-        Some(Line::new(
-            first.start.component_min(second.start),
-            first.end.component_max(second.end),
-        ))
+        scanline
     }
 
     /// Generate a line join for each corner of the triangle.

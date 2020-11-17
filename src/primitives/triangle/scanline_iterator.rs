@@ -1,9 +1,9 @@
 //! Scanline iterator.
 
 use crate::primitives::{
-    common::StrokeOffset,
+    common::{Scanline, StrokeOffset},
     triangle::scanline_intersections::{PointType, ScanlineIntersections},
-    Line, Rectangle, Triangle,
+    Rectangle, Triangle,
 };
 use core::ops::Range;
 
@@ -57,7 +57,7 @@ impl ScanlineIterator {
 }
 
 impl Iterator for ScanlineIterator {
-    type Item = (Line, PointType);
+    type Item = (Scanline, PointType);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.intersections.next().or_else(|| {

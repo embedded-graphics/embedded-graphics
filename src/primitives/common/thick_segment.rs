@@ -1,8 +1,11 @@
 //! A line segment constructed from two line joints.
 
 use crate::{
-    geometry::{Dimensions, Point},
-    primitives::{common::LineJoin, ContainsPoint, Line, Primitive, Rectangle},
+    geometry::Dimensions,
+    primitives::{
+        common::{LineJoin, Scanline},
+        Line, Rectangle,
+    },
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -65,106 +68,30 @@ impl ThickSegment {
         )
     }
 
-    pub(in crate::primitives) fn intersection(&self, scanline_y: i32) -> Option<Line> {
+    pub fn intersection(&self, scanline_y: i32) -> Scanline {
+        let mut scanline = Scanline::new(scanline_y);
+
         // Single 1px line
         if self.is_skeleton() {
-            return bresenham_scanline_intersection(&self.edges().0, scanline_y);
+            scanline.bresenham_intersection(&self.edges().0);
+        } else {
+            let (line1, line2) = self.start_join.start_cap_lines();
+            scanline.bresenham_intersection(&line1);
+            if let Some(line2) = line2 {
+                scanline.bresenham_intersection(&line2);
+            }
+
+            let (line1, line2) = self.end_join.end_cap_lines();
+            scanline.bresenham_intersection(&line1);
+            if let Some(line2) = line2 {
+                scanline.bresenham_intersection(&line2);
+            }
+
+            let (line1, line2) = self.edges();
+            scanline.bresenham_intersection(&line1);
+            scanline.bresenham_intersection(&line2);
         }
 
-        // Loop through perimeter and get any intersections
-        let it = PerimeterLineIterator::new(&self)
-            .filter_map(|l| bresenham_scanline_intersection(&l, scanline_y));
-
-        // Loop through intersections and collect min/max bounds of all of them into a single line
-        let line = it.fold(None, |acc: Option<Line>, line| {
-            if let Some(acc) = acc {
-                Some(Line::new(
-                    acc.start.component_min(line.start),
-                    acc.end.component_max(line.end),
-                ))
-            } else {
-                Some(line)
-            }
-        })?;
-
-        Some(line)
-    }
-}
-
-/// Intersect a horizontal scan line with the Bresenham representation of this line segment.
-///
-/// Intersection lines produced by this function are sorted so that the start always lies to the
-/// left of the end.
-pub fn bresenham_scanline_intersection(line: &Line, scan_y: i32) -> Option<Line> {
-    if !line
-        .bounding_box()
-        .contains(Point::new(line.start.x, scan_y))
-    {
-        return None;
-    }
-
-    let mut points = line.points().filter(|p| p.y == scan_y);
-
-    let first = points.next()?;
-
-    points
-        .last()
-        .filter(|last| *last != first)
-        .map(|last| Line::new(first, last).sorted_x())
-        .or_else(|| Some(Line::new(first, first)))
-}
-
-enum State {
-    StartCap,
-    EndCap,
-    Edges,
-    Done,
-}
-
-struct PerimeterLineIterator<'a> {
-    segment: &'a ThickSegment,
-    next_line: Option<Line>,
-    state: State,
-}
-
-impl<'a> PerimeterLineIterator<'a> {
-    fn new(segment: &'a ThickSegment) -> Self {
-        Self {
-            segment,
-            state: State::StartCap,
-            next_line: None,
-        }
-    }
-}
-
-impl<'a> Iterator for PerimeterLineIterator<'a> {
-    type Item = Line;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.next_line.take() {
-            return Some(next);
-        }
-
-        let (line, next) = match self.state {
-            State::StartCap => {
-                self.state = State::EndCap;
-                self.segment.start_join.start_cap_lines()
-            }
-            State::EndCap => {
-                self.state = State::Edges;
-                self.segment.end_join.end_cap_lines()
-            }
-            State::Edges => {
-                self.state = State::Done;
-                let (line, next) = self.segment.edges();
-                self.next_line = if next != line { Some(next) } else { None };
-                (line, Some(next))
-            }
-            State::Done => return None,
-        };
-
-        self.next_line = next.filter(|n| *n != line);
-
-        Some(line)
+        scanline
     }
 }

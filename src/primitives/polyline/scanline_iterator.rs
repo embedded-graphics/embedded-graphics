@@ -5,7 +5,9 @@ use core::ops::Range;
 use crate::{
     geometry::Dimensions,
     pixelcolor::PixelColor,
-    primitives::{polyline::scanline_intersections::ScanlineIntersections, Line, Polyline},
+    primitives::{
+        common::Scanline, polyline::scanline_intersections::ScanlineIntersections, Polyline,
+    },
     style::{PrimitiveStyle, Styled},
 };
 
@@ -59,12 +61,14 @@ impl<'a> ScanlineIterator<'a> {
 }
 
 impl<'a> Iterator for ScanlineIterator<'a> {
-    type Item = Line;
+    type Item = Scanline;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(next) = self.intersections.next() {
-                break Some(next);
+                if !next.is_empty() {
+                    break Some(next);
+                }
             } else {
                 self.scanline_y = self.rows.next()?;
 

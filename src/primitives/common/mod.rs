@@ -2,6 +2,7 @@ mod closed_thick_segment_iter;
 mod line_join;
 mod linear_equation;
 mod plane_sector;
+mod scanline;
 mod thick_segment;
 mod thick_segment_iter;
 
@@ -9,7 +10,8 @@ pub use closed_thick_segment_iter::ClosedThickSegmentIter;
 pub use line_join::{JoinKind, LineJoin};
 pub use linear_equation::LinearEquation;
 pub use plane_sector::{PlaneSector, PlaneSectorIterator};
-pub use thick_segment::{bresenham_scanline_intersection, ThickSegment};
+pub use scanline::Scanline;
+pub use thick_segment::ThickSegment;
 pub use thick_segment_iter::ThickSegmentIter;
 
 use crate::style::StrokeAlignment;

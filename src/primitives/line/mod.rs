@@ -181,17 +181,6 @@ impl Line {
         (left_line, right_line)
     }
 
-    /// Sort line so start point is to the left of the end point.
-    pub(in crate::primitives) fn sorted_x(&self) -> Self {
-        let (start, end) = if self.start.x > self.end.x {
-            (self.end, self.start)
-        } else {
-            (self.start, self.end)
-        };
-
-        Self::new(start, end)
-    }
-
     /// Compute the midpoint of the line.
     pub fn midpoint(&self) -> Point {
         self.start + (self.end - self.start) / 2

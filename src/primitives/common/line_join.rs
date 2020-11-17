@@ -131,27 +131,16 @@ impl LineJoin {
         let first_line = Line::new(start, mid);
         let second_line = Line::new(mid, end);
 
-        // Miter length limit is double the line width (but squared to avoid sqrt() costs)
-        let miter_limit = (width * 2).pow(2);
-
         // Left and right edges of thick first segment
         let (first_edge_left, first_edge_right) = first_line.extents(width, stroke_offset);
         // Left and right edges of thick second segment
         let (second_edge_left, second_edge_right) = second_line.extents(width, stroke_offset);
 
-        if let (
-            Intersection::Point {
-                point: l_intersection,
-                outer_side,
-                ..
-            },
-            Intersection::Point {
-                point: r_intersection,
-                ..
-            },
-        ) = (
-            second_edge_left.intersection(&first_edge_left),
-            second_edge_right.intersection(&first_edge_right),
+        if let Some((l_intersection, outer_side, r_intersection)) = intersections(
+            &first_edge_left,
+            &first_edge_right,
+            &second_edge_left,
+            &second_edge_right,
         ) {
             // Check if the inside end point of the second line lies inside the first segment.
             let self_intersection = match outer_side {
@@ -175,6 +164,9 @@ impl LineJoin {
                 )
                 .delta()
                 .length_squared() as u32;
+
+                // Miter length limit is double the line width (but squared to avoid sqrt() costs)
+                let miter_limit = (width * 2).pow(2);
 
                 // Intersection is within limit at which it will be chopped off into a bevel, so
                 // return a miter.
@@ -307,4 +299,30 @@ impl LineJoin {
             false
         }
     }
+}
+
+fn intersections(
+    first_edge_left: &Line,
+    first_edge_right: &Line,
+    second_edge_left: &Line,
+    second_edge_right: &Line,
+) -> Option<(Point, LineSide, Point)> {
+    let (l_intersection, outer_side) = if let Intersection::Point {
+        point, outer_side, ..
+    } = second_edge_left.intersection(&first_edge_left)
+    {
+        (point, outer_side)
+    } else {
+        return None;
+    };
+
+    let r_intersection = if let Intersection::Point { point, .. } =
+        second_edge_right.intersection(&first_edge_right)
+    {
+        point
+    } else {
+        return None;
+    };
+
+    Some((l_intersection, outer_side, r_intersection))
 }
