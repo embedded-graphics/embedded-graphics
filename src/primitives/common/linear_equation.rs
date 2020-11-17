@@ -57,7 +57,6 @@ impl LinearEquation<Real> {
         let t = self.a * point.x.into() + self.b * point.y.into() + self.c;
 
         match side {
-            // TODO: check
             LineSide::Right => t <= Real::from(0.0),
             LineSide::Left => t >= Real::from(0.0),
         }

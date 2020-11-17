@@ -6,6 +6,7 @@ use crate::{
     primitives::{Line, Rectangle},
 };
 
+/// Scanline.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Scanline {
     pub y: i32,
@@ -13,15 +14,18 @@ pub struct Scanline {
 }
 
 impl Scanline {
+    /// Creates a new empty scanline.
     pub const fn new(y: i32) -> Self {
         Self { y, x: 0..0 }
     }
 
+    /// Returns `true` if the x range of the scanline is empty.
     pub fn is_empty(&self) -> bool {
         // MSRV: use `Range::is_empty` on version >= 1.47.0
         !(self.x.start < self.x.end)
     }
 
+    /// Extends the scanline to include the given x coordinate.
     fn extend(&mut self, x: i32) {
         if self.is_empty() {
             self.x = x..x + 1;
@@ -114,7 +118,10 @@ impl Scanline {
         Rectangle::new(Point::new(self.x.start, self.y), Size::new(width, 1))
     }
 
-    /// Renamed to try_take to because of conflict with Iterator::take
+    /// Returns a clone of the scanline if it isn't empty.
+    ///
+    /// This method is used similar to `Option::take`, but was renamed to `try_take` because
+    /// of a naming conflict with `Iterator::take`.
     pub fn try_take(&mut self) -> Option<Self> {
         if !self.is_empty() {
             let ret = self.clone();
