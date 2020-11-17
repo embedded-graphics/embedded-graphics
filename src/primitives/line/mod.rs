@@ -202,19 +202,22 @@ impl Line {
         self.end - self.start
     }
 
-    /// Get which side of a line a point lies on.
+    /// Checks if the point lies on the given side of the line.
     ///
-    /// If the result is zero, the point lies on the line. Otherwise, values greater than zero
-    /// denote that the point is on the left side of the line. Values less than zero denote the
-    /// point lies to the right.
-    pub(in crate::primitives) fn side(&self, point: Point) -> i32 {
+    /// Returns `true` if the point lies on the correct side or on the line.
+    pub(in crate::primitives) fn check_side(&self, point: Point, side: LineSide) -> bool {
         let Point { x: x1, y: y1 } = self.start;
         let Point { x: x2, y: y2 } = self.end;
 
         let Point { x, y } = point;
 
         // https://math.stackexchange.com/a/274728/4506
-        (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
+        let t = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+
+        match side {
+            LineSide::Left => t >= 0,
+            LineSide::Right => t <= 0,
+        }
     }
 
     /// Integer-only line intersection
