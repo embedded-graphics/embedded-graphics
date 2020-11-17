@@ -66,13 +66,6 @@ impl Dimensions for Line {
     }
 }
 
-/// Check signs of two signed numbers
-///
-/// Fastest ASM output compared to other methods. See: https://godbolt.org/z/zVx9cD
-fn same_signs(a: i32, b: i32) -> bool {
-    (a >= 0) == (b >= 0)
-}
-
 /// Intersection test result.
 #[derive(Copy, Clone, Debug)]
 pub enum Intersection {
@@ -222,45 +215,6 @@ impl Line {
         let denom = a1 * b2 - a2 * b1;
 
         (a1, b1, c1, a2, b2, c2, denom)
-    }
-
-    /// Check if two line segments intersect.
-    pub(in crate::primitives) fn segment_intersection(&self, other: &Self) -> bool {
-        // Note: a bounding box check here causes render time regression for thick polylines
-        let (a1, b1, c1, a2, b2, c2, denom) = self.coefficients(other);
-
-        // Lines are colinear or parallel
-        if denom == 0 {
-            return false;
-        }
-
-        let Point { x: x1, y: y1 } = self.start;
-        let Point { x: x2, y: y2 } = self.end;
-        let Point { x: x3, y: y3 } = other.start;
-        let Point { x: x4, y: y4 } = other.end;
-
-        // Sign values for first line
-        let r1 = a2 * x1 + b2 * y1 + c2;
-        let r2 = a2 * x2 + b2 * y2 + c2;
-
-        // Sign values for second line
-        let r3 = a1 * x3 + b1 * y3 + c1;
-        let r4 = a1 * x4 + b1 * y4 + c1;
-
-        // If r1 is 0, the intersection is at the beginning of the first line
-        // If r2 is 0, the intersection is at the end of the first line
-        // If r3 is 0, the intersection is at the beginning of the second line
-        // If r4 is 0, the intersection is at the end of the second line
-
-        // Flag denoting whether intersection point is on given line segments. If this is false,
-        // the intersection occurs somewhere along the two mathematical, infinite lines instead.
-        //
-        // Check signs of r3 and r4.  If both point 3 and point 4 lie on same side of line 1, the
-        // line segments do not intersect.
-        //
-        // Check signs of r1 and r2.  If both point 1 and point 2 lie on same side of second line
-        // segment, the line segments do not intersect.
-        (r3 == 0 || r4 == 0 || !same_signs(r3, r4)) && (r1 == 0 || r2 == 0 || !same_signs(r1, r2))
     }
 
     /// Get which side of a line a point lies on.
