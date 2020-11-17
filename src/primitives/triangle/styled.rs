@@ -5,7 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        closed_thick_segment_iter::ClosedThickSegmentIter,
+        common::{ClosedThickSegmentIter, StrokeOffset},
         line,
         triangle::{
             scanline_intersections::PointType, scanline_iterator::ScanlineIterator, Triangle,
@@ -38,7 +38,7 @@ where
         let mut lines_iter = ScanlineIterator::new(
             &styled.primitive,
             style.stroke_width,
-            style.stroke_alignment.to_offset(),
+            StrokeOffset::from(style.stroke_alignment),
             style.fill_color.is_some(),
             &styled.bounding_box(),
         );
@@ -114,7 +114,7 @@ where
             for (line, kind) in ScanlineIterator::new(
                 &self.primitive,
                 self.style.stroke_width,
-                self.style.stroke_alignment.to_offset(),
+                StrokeOffset::from(self.style.stroke_alignment),
                 self.style.fill_color.is_some(),
                 &self.bounding_box(),
             ) {
@@ -150,7 +150,7 @@ where
             let (min, max) = ClosedThickSegmentIter::new(
                 &[t.p1, t.p2, t.p3],
                 self.style.stroke_width,
-                self.style.stroke_alignment.to_offset(),
+                StrokeOffset::from(self.style.stroke_alignment),
             )
             .fold(
                 (

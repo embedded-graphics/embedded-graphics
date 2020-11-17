@@ -2,8 +2,10 @@
 
 use crate::{
     geometry::Point,
-    primitives::line::StrokeOffset,
-    primitives::{line_join::LineJoin, thick_segment::ThickSegment, Line},
+    primitives::{
+        common::{LineJoin, StrokeOffset, ThickSegment},
+        Line,
+    },
 };
 
 /// Scanline intersections iterator.

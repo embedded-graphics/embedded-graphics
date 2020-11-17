@@ -3,10 +3,8 @@
 use crate::{
     geometry::Point,
     primitives::{
-        line::StrokeOffset,
-        line_join::LineJoin,
+        common::{LineJoin, StrokeOffset, ThickSegment},
         polyline::scanline_intersections::{extend, touches},
-        thick_segment::ThickSegment,
         Line, Triangle,
     },
 };

@@ -2,7 +2,7 @@
 
 use crate::{
     geometry::Point,
-    primitives::{line::StrokeOffset, line_join::LineJoin, thick_segment::ThickSegment},
+    primitives::common::{LineJoin, StrokeOffset, ThickSegment},
 };
 
 /// Closed shape thick segments iterator.
@@ -16,7 +16,7 @@ use crate::{
 /// [`ThickSegment`]: ../thick_segment/struct.ThickSegment.html
 /// [`ThickSegmentIter`]: ../thick_segment_iter/struct.ThickSegmentIter.html
 #[derive(Clone, Debug)]
-pub(in crate::primitives) struct ClosedThickSegmentIter<'a> {
+pub struct ClosedThickSegmentIter<'a> {
     windows: core::slice::Windows<'a, Point>,
     first_join: LineJoin,
     start_join: LineJoin,

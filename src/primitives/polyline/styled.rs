@@ -5,10 +5,9 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        line::{self, StrokeOffset},
-        polyline,
-        polyline::{scanline_iterator::ScanlineIterator, Polyline},
-        thick_segment_iter::ThickSegmentIter,
+        common::{StrokeOffset, ThickSegmentIter},
+        line,
+        polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
         Primitive, Rectangle,
     },
     style::{PrimitiveStyle, Styled},

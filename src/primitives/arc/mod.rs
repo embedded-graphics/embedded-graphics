@@ -1,17 +1,14 @@
 //! The arc primitive
 
-mod linear_equation;
-mod plane_sector;
-mod points;
-mod styled;
-
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
     primitives::{Circle, Primitive, Rectangle},
     transform::Transform,
 };
-pub(in crate::primitives) use linear_equation::LinearEquation;
-pub(in crate::primitives) use plane_sector::{PlaneSector, PlaneSectorIterator};
+
+mod points;
+mod styled;
+
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -118,7 +115,7 @@ impl Arc {
     ///
     /// This method is used to accurately calculate the outside edge of the arc.
     /// The result is not equivalent to `self.center() * 2` because of rounding.
-    fn center_2x(&self) -> Point {
+    pub(in crate::primitives) fn center_2x(&self) -> Point {
         // The radius scaled up by a factor of 2 is equal to the diameter
         let radius = self.diameter.saturating_sub(1);
 

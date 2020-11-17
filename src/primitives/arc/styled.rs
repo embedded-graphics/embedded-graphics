@@ -5,9 +5,8 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        arc::{plane_sector::PlaneSectorIterator, Arc},
-        circle::DistanceIterator,
-        OffsetOutline, Rectangle, Styled,
+        arc::Arc, circle::DistanceIterator, common::PlaneSectorIterator, OffsetOutline, Rectangle,
+        Styled,
     },
     style::PrimitiveStyle,
     SaturatingCast,
