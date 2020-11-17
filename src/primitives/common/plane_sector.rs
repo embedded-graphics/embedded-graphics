@@ -30,15 +30,15 @@ impl PlaneSector {
         let negative_sweep = angle_sweep < Angle::zero();
 
         let side_a = if (angle_start_norm < ANGLE_90DEG) ^ negative_sweep {
-            LineSide::Above
+            LineSide::Left
         } else {
-            LineSide::Below
+            LineSide::Right
         };
 
         let side_b = if (angle_end_norm >= ANGLE_90DEG) ^ negative_sweep {
-            LineSide::Above
+            LineSide::Left
         } else {
-            LineSide::Below
+            LineSide::Right
         };
 
         Self {
@@ -54,8 +54,8 @@ impl PlaneSector {
         Self {
             line_a: LinearEquation::new_horizontal(),
             line_b: LinearEquation::new_horizontal(),
-            side_a: LineSide::Above,
-            side_b: LineSide::Above,
+            side_a: LineSide::Left,
+            side_b: LineSide::Left,
             sweep: Angle::zero(),
         }
     }

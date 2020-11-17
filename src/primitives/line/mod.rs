@@ -8,7 +8,7 @@ mod thick_points;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::{LinearEquation, StrokeOffset},
+        common::{LineSide, LinearEquation, StrokeOffset},
         line::thick_points::{ParallelLineType, ParallelsIterator},
         Primitive, Rectangle,
     },
@@ -17,7 +17,7 @@ use crate::{
 };
 pub use points::Points;
 pub use styled::StyledPixels;
-pub(in crate::primitives) use thick_points::{Side, ThickPoints};
+pub(in crate::primitives) use thick_points::ThickPoints;
 
 /// Line primitive
 ///
@@ -91,7 +91,7 @@ pub enum Intersection {
         /// ```
         ///
         /// This is used to find the outside edge of a corner.
-        outer_side: Side,
+        outer_side: LineSide,
     },
 
     /// No intersection: lines are colinear or parallel.
@@ -246,7 +246,11 @@ impl Line {
 
         Intersection::Point {
             point: Point::new(x, y),
-            outer_side: if denom > 0 { Side::Right } else { Side::Left },
+            outer_side: if denom > 0 {
+                LineSide::Right
+            } else {
+                LineSide::Left
+            },
         }
     }
 }

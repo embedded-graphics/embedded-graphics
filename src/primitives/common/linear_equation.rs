@@ -1,14 +1,7 @@
 use crate::{
     geometry::{Angle, Point, Real, Trigonometry},
-    primitives::Line,
+    primitives::{common::LineSide, Line},
 };
-
-/// Define one side of a line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum LineSide {
-    Above,
-    Below,
-}
 
 /// Linear equation representation
 ///
@@ -64,8 +57,9 @@ impl LinearEquation<Real> {
         let t = self.a * point.x.into() + self.b * point.y.into() + self.c;
 
         match side {
-            LineSide::Below => t <= Real::from(0.0),
-            LineSide::Above => t >= Real::from(0.0),
+            // TODO: check
+            LineSide::Right => t <= Real::from(0.0),
+            LineSide::Left => t >= Real::from(0.0),
         }
     }
 }

@@ -3,8 +3,8 @@
 use crate::{
     geometry::Point,
     primitives::{
-        common::StrokeOffset,
-        line::{Intersection, Side},
+        common::{LineSide, StrokeOffset},
+        line::Intersection,
         Line,
     },
 };
@@ -18,7 +18,7 @@ pub enum JoinKind {
     /// Bevelled (flattened point)
     Bevel {
         /// Left side or right side?
-        outer_side: Side,
+        outer_side: LineSide,
     },
 
     /// Degenerate (angle between lines is too small to properly render stroke).
@@ -26,7 +26,7 @@ pub enum JoinKind {
     /// Degenerate corners are rendered with a bevel.
     Degenerate {
         /// Left side or right side?
-        outer_side: Side,
+        outer_side: LineSide,
     },
 
     /// Lines are colinear.
@@ -155,8 +155,8 @@ impl LineJoin {
         ) {
             // Check if the inside end point of the second line lies inside the first segment.
             let self_intersection = match outer_side {
-                Side::Right => first_edge_left.side(second_edge_left.end) <= 0,
-                Side::Left => first_edge_right.side(second_edge_right.end) >= 0,
+                LineSide::Right => first_edge_left.side(second_edge_left.end) <= 0,
+                LineSide::Left => first_edge_right.side(second_edge_right.end) >= 0,
             };
 
             // Normal line: non-overlapping line end caps
@@ -165,8 +165,8 @@ impl LineJoin {
                 let miter_length_squared = Line::new(
                     mid,
                     match outer_side {
-                        Side::Left => l_intersection,
-                        Side::Right => r_intersection,
+                        LineSide::Left => l_intersection,
+                        LineSide::Right => r_intersection,
                     },
                 )
                 .delta()
@@ -189,7 +189,7 @@ impl LineJoin {
                 // Miter is too long, chop it into bevel-style corner
                 else {
                     match outer_side {
-                        Side::Right => Self {
+                        LineSide::Right => Self {
                             kind: JoinKind::Bevel { outer_side },
                             first_edge_end: EdgeCorners {
                                 left: l_intersection,
@@ -200,7 +200,7 @@ impl LineJoin {
                                 right: second_edge_right.start,
                             },
                         },
-                        Side::Left => Self {
+                        LineSide::Left => Self {
                             kind: JoinKind::Bevel { outer_side },
                             first_edge_end: EdgeCorners {
                                 left: first_edge_left.end,
@@ -218,8 +218,8 @@ impl LineJoin {
             else {
                 Self {
                     kind: match outer_side {
-                        Side::Left => JoinKind::Degenerate { outer_side },
-                        Side::Right => JoinKind::Degenerate { outer_side },
+                        LineSide::Left => JoinKind::Degenerate { outer_side },
+                        LineSide::Right => JoinKind::Degenerate { outer_side },
                     },
                     first_edge_end: EdgeCorners {
                         left: first_edge_left.end,
@@ -253,8 +253,10 @@ impl LineJoin {
         match self.kind {
             JoinKind::Bevel { outer_side, .. } | JoinKind::Degenerate { outer_side, .. } => {
                 let line = match outer_side {
-                    Side::Left => Line::new(self.first_edge_end.left, self.second_edge_start.left),
-                    Side::Right => {
+                    LineSide::Left => {
+                        Line::new(self.first_edge_end.left, self.second_edge_start.left)
+                    }
+                    LineSide::Right => {
                         Line::new(self.first_edge_end.right, self.second_edge_start.right)
                     }
                 };

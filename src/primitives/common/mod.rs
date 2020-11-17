@@ -7,7 +7,7 @@ mod thick_segment_iter;
 
 pub use closed_thick_segment_iter::ClosedThickSegmentIter;
 pub use line_join::{JoinKind, LineJoin};
-pub use linear_equation::{LineSide, LinearEquation};
+pub use linear_equation::LinearEquation;
 pub use plane_sector::{PlaneSector, PlaneSectorIterator};
 pub use thick_segment::{bresenham_scanline_intersection, ThickSegment};
 pub use thick_segment_iter::ThickSegmentIter;
@@ -32,6 +32,29 @@ impl From<StrokeAlignment> for StrokeOffset {
             StrokeAlignment::Inside => Self::Right,
             StrokeAlignment::Outside => Self::Left,
             StrokeAlignment::Center => Self::None,
+        }
+    }
+}
+
+/// Which side of the center line to draw on.
+///
+/// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
+/// your right.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum LineSide {
+    /// Left side of the line
+    Left,
+
+    /// Right side of the line
+    Right,
+}
+
+impl LineSide {
+    /// Swap side.
+    pub fn swap(self) -> Self {
+        match self {
+            Self::Left => Self::Right,
+            Self::Right => Self::Left,
         }
     }
 }
