@@ -51,17 +51,6 @@ pub struct EdgeCorners {
     pub right: Point,
 }
 
-/// Line coefficients.
-struct Coefficients {
-    a1: i32,
-    b1: i32,
-    c1: i32,
-    a2: i32,
-    b2: i32,
-    c2: i32,
-    denom: i32,
-}
-
 /// A join between two lines.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct LineJoin {
@@ -131,73 +120,6 @@ impl LineJoin {
         }
     }
 
-    const fn coefficients(l1: &Line, l2: &Line) -> Coefficients {
-        let Point { x: x1, y: y1 } = l1.start;
-        let Point { x: x2, y: y2 } = l1.end;
-        let Point { x: x3, y: y3 } = l2.start;
-        let Point { x: x4, y: y4 } = l2.end;
-
-        // First line coefficients where "a1 x  +  b1 y  +  c1  =  0"
-        let a1 = y2 - y1;
-        let b1 = x1 - x2;
-        let c1 = x2 * y1 - x1 * y2;
-
-        // Second line coefficients
-        let a2 = y4 - y3;
-        let b2 = x3 - x4;
-        let c2 = x4 * y3 - x3 * y4;
-
-        let denom = a1 * b2 - a2 * b1;
-
-        Coefficients {
-            a1,
-            b1,
-            c1,
-            a2,
-            b2,
-            c2,
-            denom,
-        }
-    }
-
-    /// Integer-only line intersection
-    ///
-    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
-    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
-    pub(in crate::primitives) fn line_intersection(l1: &Line, l2: &Line) -> Intersection {
-        let Coefficients {
-            a1,
-            b1,
-            c1,
-            a2,
-            b2,
-            c2,
-            denom,
-        } = Self::coefficients(l1, l2);
-
-        // Lines are colinear or parallel
-        if denom == 0 {
-            return Intersection::Colinear;
-        }
-
-        // If we got here, line segments intersect. Compute intersection point using method similar
-        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
-
-        // The denom/2 is to get rounding instead of truncating.
-        let offset = denom.abs() / 2;
-
-        let num = b1 * c2 - b2 * c1;
-        let x = if num < 0 { num - offset } else { num + offset } / denom;
-
-        let num = a2 * c1 - a1 * c2;
-        let y = if num < 0 { num - offset } else { num + offset } / denom;
-
-        Intersection::Point {
-            point: Point::new(x, y),
-            outer_side: if denom > 0 { Side::Right } else { Side::Left },
-        }
-    }
-
     /// Compute a join.
     pub fn from_points(
         start: Point,
@@ -228,8 +150,8 @@ impl LineJoin {
                 ..
             },
         ) = (
-            Self::line_intersection(&second_edge_left, &first_edge_left),
-            Self::line_intersection(&second_edge_right, &first_edge_right),
+            second_edge_left.intersection(&first_edge_left),
+            second_edge_right.intersection(&first_edge_right),
         ) {
             // Check if the inside end point of the second line lies inside the first segment.
             let self_intersection = match outer_side {

@@ -1,5 +1,5 @@
 use crate::{
-    geometry::{angle_consts::*, Angle, Dimensions, Point},
+    geometry::{angle_consts::*, Angle, Dimensions, Point, Real},
     primitives::{
         common::{LineSide, LinearEquation},
         rectangle, Primitive, Rectangle,
@@ -14,8 +14,8 @@ use crate::{
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct PlaneSector {
-    line_a: LinearEquation,
-    line_b: LinearEquation,
+    line_a: LinearEquation<Real>,
+    line_b: LinearEquation<Real>,
     side_a: LineSide,
     side_b: LineSide,
     sweep: Angle,

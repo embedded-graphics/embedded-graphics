@@ -8,7 +8,7 @@ mod thick_points;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::StrokeOffset,
+        common::{LinearEquation, StrokeOffset},
         line::thick_points::{ParallelLineType, ParallelsIterator},
         Primitive, Rectangle,
     },
@@ -215,6 +215,39 @@ impl Line {
 
         // https://math.stackexchange.com/a/274728/4506
         (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
+    }
+
+    /// Integer-only line intersection
+    ///
+    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
+    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
+    pub(in crate::primitives) fn intersection(&self, other: &Line) -> Intersection {
+        let line1 = LinearEquation::from_line(self);
+        let line2 = LinearEquation::from_line(other);
+
+        let denom = line1.a * line2.b - line2.a * line1.b;
+
+        // Lines are colinear or parallel
+        if denom == 0 {
+            return Intersection::Colinear;
+        }
+
+        // If we got here, line segments intersect. Compute intersection point using method similar
+        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
+
+        // The denom/2 is to get rounding instead of truncating.
+        let offset = denom.abs() / 2;
+
+        let num = line1.b * line2.c - line2.b * line1.c;
+        let x = if num < 0 { num - offset } else { num + offset } / denom;
+
+        let num = line2.a * line1.c - line1.a * line2.c;
+        let y = if num < 0 { num - offset } else { num + offset } / denom;
+
+        Intersection::Point {
+            point: Point::new(x, y),
+            outer_side: if denom > 0 { Side::Right } else { Side::Left },
+        }
     }
 }
 
