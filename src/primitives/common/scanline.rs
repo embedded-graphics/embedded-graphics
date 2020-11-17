@@ -1,8 +1,9 @@
 use core::ops::Range;
 
 use crate::{
-    geometry::{Dimensions, Point},
-    primitives::{ContainsPoint, Line, Primitive, Rectangle},
+    geometry::Point,
+    prelude::Primitive,
+    primitives::{Line, Rectangle},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -38,21 +39,27 @@ impl Scanline {
     /// Intersection lines produced by this function are sorted so that the start always lies to the
     /// left of the end.
     pub fn bresenham_intersection(&mut self, line: &Line) {
-        if !line
-            .bounding_box()
-            .contains(Point::new(line.start.x, self.y))
-        {
+        // Check if the scanline is in the y range of the line.
+        let y_range = if line.start.y <= line.end.y {
+            line.start.y..=line.end.y
+        } else {
+            line.end.y..=line.start.y
+        };
+
+        if !y_range.contains(&self.y) {
             return;
         }
 
         let y = self.y;
-        let mut points = line.points().filter(|p| p.y == y);
+        let mut points = line.points();
 
-        if let Some(first) = points.next() {
+        // Find the first point with the same y coordinate.
+        while let Some(first) = points.find(|p| p.y == y) {
             self.extend(first.x);
         }
 
-        if let Some(last) = points.last() {
+        // Check points until the y coordinate changes.
+        if let Some(last) = points.take_while(|p| p.y == y).last() {
             self.extend(last.x);
         }
     }
