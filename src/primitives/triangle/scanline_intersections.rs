@@ -35,6 +35,7 @@ pub struct ScanlineIntersections {
     stroke_width: u32,
     stroke_offset: StrokeOffset,
     has_fill: bool,
+    is_collapsed: bool,
 }
 
 impl ScanlineIntersections {
@@ -46,11 +47,18 @@ impl ScanlineIntersections {
         has_fill: bool,
         scanline_y: i32,
     ) -> Self {
+        // Special case: If thick strokes completely fill the triangle interior and the stroke is
+        // inside the triangle, the normal triangle shape can be used to detect the intersection,
+        // with the line type being marked as Border so, when rendered, the correct color is used.
+        let is_collapsed = triangle.is_collapsed(stroke_width, stroke_offset)
+            && stroke_offset == StrokeOffset::Right;
+
         let mut self_ = Self {
             has_fill,
             triangle: *triangle,
             stroke_offset,
             stroke_width,
+            is_collapsed,
             ..Self::empty()
         };
 
@@ -72,6 +80,7 @@ impl ScanlineIntersections {
             triangle: Triangle::new(Point::zero(), Point::zero(), Point::zero()),
             stroke_width: 0,
             stroke_offset: StrokeOffset::None,
+            is_collapsed: false,
         }
     }
 
@@ -140,14 +149,7 @@ impl ScanlineIntersections {
     fn generate_lines(&self, scanline_y: i32) -> Option<LineConfig> {
         let mut edge_intersections = self.edge_intersections(scanline_y);
 
-        // Special case: If thick strokes completely fill the triangle interior and the stroke is
-        // inside the triangle, the normal triangle shape can be used to detect the intersection,
-        // with the line type being marked as Border so, when rendered, the correct color is used.
-        if self
-            .triangle
-            .is_collapsed(self.stroke_width, self.stroke_offset)
-            && self.stroke_offset == StrokeOffset::Right
-        {
+        if self.is_collapsed {
             Some(LineConfig {
                 internal: self.triangle.scanline_intersection(scanline_y),
                 internal_type: PointType::Stroke,
@@ -164,7 +166,7 @@ impl ScanlineIntersections {
             // triangle (assuming the edge line merging logic is correct). In this case, we need a
             // scanline between the two edge intersections.
             let internal = if self.has_fill {
-                match (first.clone(), second.clone()) {
+                match (&first, &second) {
                     // Triangle stroke is non-zero, so the fill line is between the insides of each
                     // stroke.
                     (Some(first), Some(second)) => {
