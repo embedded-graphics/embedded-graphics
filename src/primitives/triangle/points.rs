@@ -1,10 +1,8 @@
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::StrokeOffset,
-        line,
+        common::{Scanline, StrokeOffset},
         triangle::{scanline_iterator::ScanlineIterator, Triangle},
-        Primitive,
     },
 };
 
@@ -12,7 +10,7 @@ use crate::{
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
     scanline_iter: ScanlineIterator,
-    current_line: line::Points,
+    current_line: Scanline,
 }
 
 impl Points {
@@ -25,7 +23,7 @@ impl Points {
             &triangle.bounding_box(),
         );
 
-        let current_line = line::Points::empty();
+        let current_line = Scanline::new(0);
 
         Self {
             scanline_iter,
@@ -39,7 +37,7 @@ impl Iterator for Points {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.current_line.next().or_else(|| {
-            self.current_line = self.scanline_iter.next()?.0.points();
+            self.current_line = self.scanline_iter.next()?.0;
 
             self.current_line.next()
         })

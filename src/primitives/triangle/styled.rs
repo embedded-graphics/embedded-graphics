@@ -5,12 +5,11 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        common::{ClosedThickSegmentIter, StrokeOffset},
-        line,
+        common::{ClosedThickSegmentIter, Scanline, StrokeOffset},
         triangle::{
             scanline_intersections::PointType, scanline_iterator::ScanlineIterator, Triangle,
         },
-        Primitive, Rectangle,
+        Rectangle,
     },
     style::{PrimitiveStyle, StrokeAlignment, Styled},
 };
@@ -22,7 +21,7 @@ where
     C: PixelColor,
 {
     lines_iter: ScanlineIterator,
-    current_line: line::Points,
+    current_line: Scanline,
     current_color: Option<C>,
     fill_color: Option<C>,
     stroke_color: Option<C>,
@@ -45,8 +44,7 @@ where
 
         let (current_line, point_type) = lines_iter
             .next()
-            .map(|(l, t)| (l.points(), t))
-            .unwrap_or_else(|| (line::Points::empty(), PointType::Stroke));
+            .unwrap_or_else(|| (Scanline::new(0), PointType::Stroke));
 
         let current_color = match point_type {
             PointType::Stroke => styled.style.effective_stroke_color(),
@@ -76,7 +74,7 @@ where
             } else {
                 let (next_line, next_type) = self.lines_iter.next()?;
 
-                self.current_line = next_line.points();
+                self.current_line = next_line;
 
                 self.current_color = match next_type {
                     PointType::Stroke => self.stroke_color,
@@ -124,7 +122,11 @@ where
                 };
 
                 if let Some(color) = color {
-                    display.fill_solid(&Rectangle::with_corners(line.start, line.end), color)?;
+                    let rect = line.to_rectangle();
+
+                    if !rect.is_zero_sized() {
+                        display.fill_solid(&rect, color)?;
+                    }
                 }
             }
         }
@@ -319,7 +321,6 @@ mod tests {
         styled.draw(&mut tri_display).unwrap();
 
         let mut lines_display: MockDisplay<BinaryColor> = MockDisplay::new();
-        lines_display.set_allow_out_of_bounds_drawing(true);
         lines_display.set_allow_overdraw(true);
         Line::new(triangle.p1, triangle.p2)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))

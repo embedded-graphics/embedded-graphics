@@ -8,7 +8,7 @@ mod thick_points;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::StrokeOffset,
+        common::{LineSide, LinearEquation, StrokeOffset},
         line::thick_points::{ParallelLineType, ParallelsIterator},
         Primitive, Rectangle,
     },
@@ -17,7 +17,7 @@ use crate::{
 };
 pub use points::Points;
 pub use styled::StyledPixels;
-pub(in crate::primitives) use thick_points::{Side, ThickPoints};
+pub(in crate::primitives) use thick_points::ThickPoints;
 
 /// Line primitive
 ///
@@ -91,7 +91,7 @@ pub enum Intersection {
         /// ```
         ///
         /// This is used to find the outside edge of a corner.
-        outer_side: Side,
+        outer_side: LineSide,
     },
 
     /// No intersection: lines are colinear or parallel.
@@ -181,17 +181,6 @@ impl Line {
         (left_line, right_line)
     }
 
-    /// Sort line so start point is to the left of the end point.
-    pub(in crate::primitives) fn sorted_x(&self) -> Self {
-        let (start, end) = if self.start.x > self.end.x {
-            (self.end, self.start)
-        } else {
-            (self.start, self.end)
-        };
-
-        Self::new(start, end)
-    }
-
     /// Compute the midpoint of the line.
     pub fn midpoint(&self) -> Point {
         self.start + (self.end - self.start) / 2
@@ -202,19 +191,59 @@ impl Line {
         self.end - self.start
     }
 
-    /// Get which side of a line a point lies on.
+    /// Checks if the point lies on the given side of the line.
     ///
-    /// If the result is zero, the point lies on the line. Otherwise, values greater than zero
-    /// denote that the point is on the left side of the line. Values less than zero denote the
-    /// point lies to the right.
-    pub(in crate::primitives) fn side(&self, point: Point) -> i32 {
+    /// Returns `true` if the point lies on the correct side or on the line.
+    pub(in crate::primitives) fn check_side(&self, point: Point, side: LineSide) -> bool {
         let Point { x: x1, y: y1 } = self.start;
         let Point { x: x2, y: y2 } = self.end;
 
         let Point { x, y } = point;
 
         // https://math.stackexchange.com/a/274728/4506
-        (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
+        let t = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+
+        match side {
+            LineSide::Left => t >= 0,
+            LineSide::Right => t <= 0,
+        }
+    }
+
+    /// Integer-only line intersection
+    ///
+    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
+    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
+    pub(in crate::primitives) fn intersection(&self, other: &Line) -> Intersection {
+        let line1 = LinearEquation::from_line(self);
+        let line2 = LinearEquation::from_line(other);
+
+        let denom = line1.a * line2.b - line2.a * line1.b;
+
+        // Lines are colinear or parallel
+        if denom == 0 {
+            return Intersection::Colinear;
+        }
+
+        // If we got here, line segments intersect. Compute intersection point using method similar
+        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
+
+        // The denom/2 is to get rounding instead of truncating.
+        let offset = denom.abs() / 2;
+
+        let num = line1.b * line2.c - line2.b * line1.c;
+        let x = if num < 0 { num - offset } else { num + offset } / denom;
+
+        let num = line2.a * line1.c - line1.a * line2.c;
+        let y = if num < 0 { num - offset } else { num + offset } / denom;
+
+        Intersection::Point {
+            point: Point::new(x, y),
+            outer_side: if denom > 0 {
+                LineSide::Right
+            } else {
+                LineSide::Left
+            },
+        }
     }
 }
 

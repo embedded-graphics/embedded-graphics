@@ -5,8 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        common::{StrokeOffset, ThickSegmentIter},
-        line,
+        common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
         Primitive, Rectangle,
     },
@@ -18,7 +17,7 @@ enum StyledIter<'a> {
     Thin(polyline::Points<'a>),
     Thick {
         scanline_iter: ScanlineIterator<'a>,
-        line_iter: line::Points,
+        line_iter: Scanline,
     },
 }
 
@@ -41,10 +40,7 @@ where
             StyledIter::Thin(styled.primitive.points())
         } else {
             let mut scanline_iter = ScanlineIterator::new(styled);
-            let line_iter = scanline_iter
-                .next()
-                .map(|line| line.points())
-                .unwrap_or_else(line::Points::empty);
+            let line_iter = scanline_iter.next().unwrap_or_else(|| Scanline::new(0));
 
             StyledIter::Thick {
                 scanline_iter,
@@ -81,8 +77,7 @@ where
                 }
                 // Finished this line. Get the next one from the scanline iterator.
                 else {
-                    let next_line_iter = scanline_iter.next()?;
-                    *line_iter = next_line_iter.points();
+                    *line_iter = scanline_iter.next()?;
 
                     line_iter.next()
                 }
@@ -125,10 +120,11 @@ where
                 ),
                 _ => {
                     for line in ScanlineIterator::new(self) {
-                        display.fill_solid(
-                            &Rectangle::with_corners(line.start, line.end),
-                            stroke_color,
-                        )?;
+                        let rect = line.to_rectangle();
+
+                        if !rect.is_zero_sized() {
+                            display.fill_solid(&rect, stroke_color)?;
+                        }
                     }
 
                     Ok(())

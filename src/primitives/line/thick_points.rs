@@ -1,34 +1,15 @@
 use crate::{
     geometry::Point,
-    primitives::line::{
-        bresenham::{self, Bresenham, BresenhamParameters, BresenhamPoint},
-        Line, StrokeOffset,
+    primitives::{
+        common::LineSide,
+        line::{
+            bresenham::{self, Bresenham, BresenhamParameters, BresenhamPoint},
+            Line, StrokeOffset,
+        },
     },
 };
 
 const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
-
-/// Which side of the center line to draw on
-///
-/// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
-/// your right.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum Side {
-    /// Left side of the line
-    Left,
-
-    /// Right side of the line
-    Right,
-}
-
-impl Side {
-    fn swap(self) -> Self {
-        match self {
-            Self::Left => Self::Right,
-            Self::Right => Self::Left,
-        }
-    }
-}
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives::line) enum ParallelLineType {
@@ -86,7 +67,7 @@ pub(in crate::primitives::line) struct ParallelsIterator {
     right_error: i32,
 
     /// The next side which will be drawn.
-    next_side: Side,
+    next_side: LineSide,
 
     // TODO: Add tests for stroke alignment when polygons/thick triangle support is added
     /// Stroke offset.
@@ -119,9 +100,9 @@ impl ParallelsIterator {
             == -parallel_parameters.position_step.major;
 
         let next_side = match stroke_offset {
-            StrokeOffset::None => Side::Right,
-            StrokeOffset::Left => Side::Left,
-            StrokeOffset::Right => Side::Right,
+            StrokeOffset::None => LineSide::Right,
+            StrokeOffset::Left => LineSide::Left,
+            StrokeOffset::Right => LineSide::Right,
         };
 
         let mut self_ = Self {
@@ -145,16 +126,16 @@ impl ParallelsIterator {
     }
 
     /// Returns the next parallel on the given side.
-    fn next_parallel(&mut self, side: Side) -> (BresenhamPoint, i32) {
+    fn next_parallel(&mut self, side: LineSide) -> (BresenhamPoint, i32) {
         let (error, decrease_error) = match side {
-            Side::Left => (&mut self.left_error, self.flip),
-            Side::Right => (&mut self.right_error, !self.flip),
+            LineSide::Left => (&mut self.left_error, self.flip),
+            LineSide::Right => (&mut self.right_error, !self.flip),
         };
 
         loop {
             let point = match side {
-                Side::Left => self.left.next_all(&self.perpendicular_parameters),
-                Side::Right => self.right.previous_all(&self.perpendicular_parameters),
+                LineSide::Left => self.left.next_all(&self.perpendicular_parameters),
+                LineSide::Right => self.right.previous_all(&self.perpendicular_parameters),
             };
 
             match point {

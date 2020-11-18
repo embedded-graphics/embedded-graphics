@@ -2,10 +2,7 @@
 
 use crate::{
     geometry::Point,
-    primitives::{
-        common::{LineJoin, StrokeOffset, ThickSegment},
-        Line,
-    },
+    primitives::common::{LineJoin, Scanline, StrokeOffset, ThickSegment},
 };
 
 /// Scanline intersections iterator.
@@ -18,10 +15,9 @@ use crate::{
 pub struct ScanlineIntersections<'a> {
     points: &'a [Point],
     remaining_points: &'a [Point],
-    scanline_y: i32,
     next_start_join: Option<LineJoin>,
     width: u32,
-    accum: Option<Line>,
+    scanline: Scanline,
 }
 
 const EMPTY: &[Point; 3] = &[Point::zero(); 3];
@@ -48,8 +44,7 @@ impl<'a> ScanlineIntersections<'a> {
             width,
             points,
             remaining_points: points,
-            scanline_y,
-            accum: None,
+            scanline: Scanline::new(scanline_y),
         }
     }
 
@@ -60,8 +55,7 @@ impl<'a> ScanlineIntersections<'a> {
             width: 0,
             points: EMPTY,
             remaining_points: EMPTY,
-            scanline_y: 0,
-            accum: None,
+            scanline: Scanline::new(0),
         }
     }
 
@@ -130,82 +124,21 @@ impl<'a> ScanlineIntersections<'a> {
 /// A---A B---B
 /// ```
 impl<'a> Iterator for ScanlineIntersections<'a> {
-    type Item = Line;
+    type Item = Scanline;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(segment) = self.next_segment() {
-            if let Some(next_segment) = segment.intersection(self.scanline_y) {
-                if let Some(accum) = self.accum {
-                    // If next segment doesn't touch, return current accum state and reset accum
-                    // to new line.
-                    if !touches(accum, next_segment) {
-                        self.accum = Some(next_segment);
-                        return Some(accum);
-                    }
+            let next_scanline = segment.intersection(self.scanline.y);
 
-                    // If next segment touches current accum, extend accum and continue.
-                    self.accum = Some(extend(accum, next_segment));
-                }
-                // Initialize accumulator with a single line. Next iteration will return it if
-                // next intersection doesn't touch.
-                else {
-                    self.accum = Some(next_segment);
-                }
+            if !self.scanline.try_extend(&next_scanline) {
+                let ret = self.scanline.clone();
+                self.scanline = next_scanline;
+
+                return Some(ret);
             }
         }
 
         // No more segments - return the final accumulated line.
-        self.accum.take()
-    }
-}
-
-/// Check for lines that are adjacent or overlapping.
-///
-/// This assumes that both lines have the same y coordinate and are horizontal.
-pub(in crate::primitives) fn touches(l1: Line, l2: Line) -> bool {
-    let first_range = (l1.start.x - 1)..=(l1.end.x + 1);
-
-    first_range.contains(&l2.start.x) || first_range.contains(&l2.end.x)
-}
-
-/// Merge to lines into one longer line.
-///
-/// This assumes the lines are adjacent or touching, which is guaranteed by the iterator logic
-/// around where this function is called.
-pub(in crate::primitives) fn extend(l1: Line, l2: Line) -> Line {
-    // Lines are scanlines, so we can reuse the same Y coordinate for everything.
-    let y = l1.start.y;
-
-    Line::new(
-        Point::new(l1.start.x.min(l2.start.x), y),
-        Point::new(l1.end.x.max(l2.end.x), y),
-    )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn run_touches_test(s1: i32, e1: i32, s2: i32, e2: i32, expected: bool, ident: &str) {
-        let l1 = Line::new(Point::new(s1, 0), Point::new(e1, 0));
-        let l2 = Line::new(Point::new(s2, 0), Point::new(e2, 0));
-
-        assert_eq!(touches(l1, l2), expected, "{}", ident);
-    }
-
-    #[test]
-    fn check_touches() {
-        run_touches_test(30, 40, 5, 15, false, "Reversed");
-        run_touches_test(0, 6, 5, 10, true, "Contained");
-        run_touches_test(11, 13, 11, 14, true, "Contained 2");
-        run_touches_test(10, 15, 25, 35, false, "Separated");
-        run_touches_test(10, 10, 10, 10, true, "Zero size");
-        run_touches_test(10, 20, 10, 20, true, "Equal");
-        run_touches_test(10, 20, 20, 10, true, "Equal reversed");
-        run_touches_test(79, 82, 82, 92, true, "Overlapping lines 1");
-        run_touches_test(82, 92, 79, 82, true, "Overlapping lines 1, reversed");
-        run_touches_test(80, 83, 83, 94, true, "Overlapping lines 2");
-        run_touches_test(83, 94, 80, 83, true, "Overlapping lines 2, reversed");
-        run_touches_test(83, 94, 94, 100, true, "Adjacent");
+        self.scanline.try_take()
     }
 }

@@ -1,23 +1,29 @@
-use crate::geometry::{Angle, Point, Real, Trigonometry};
-
-/// Define one side of a line
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum LineSide {
-    Above,
-    Below,
-}
+use crate::{
+    geometry::{Angle, Point, Real, Trigonometry},
+    primitives::{common::LineSide, Line},
+};
 
 /// Linear equation representation
 ///
 /// The equation is stored as the a, b and c coefficients of the ax + by + c = 0 equation
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub struct LinearEquation {
-    a: Real,
-    b: Real,
-    c: Real,
+pub struct LinearEquation<T> {
+    pub a: T,
+    pub b: T,
+    pub c: T,
 }
 
-impl LinearEquation {
+impl LinearEquation<i32> {
+    pub const fn from_line(line: &Line) -> Self {
+        Self {
+            a: line.end.y - line.start.y,
+            b: line.start.x - line.end.x,
+            c: line.end.x * line.start.y - line.start.x * line.end.y,
+        }
+    }
+}
+
+impl LinearEquation<Real> {
     /// Create a new linear equation based on one point and one angle
     pub fn from_point_angle(point: Point, angle: Angle) -> Self {
         // FIXME: angle.tan() for 180.0 degrees isn't exactly 0 which causes problems when drawing
@@ -51,8 +57,8 @@ impl LinearEquation {
         let t = self.a * point.x.into() + self.b * point.y.into() + self.c;
 
         match side {
-            LineSide::Below => t <= Real::from(0.0),
-            LineSide::Above => t >= Real::from(0.0),
+            LineSide::Right => t <= Real::from(0.0),
+            LineSide::Left => t >= Real::from(0.0),
         }
     }
 }

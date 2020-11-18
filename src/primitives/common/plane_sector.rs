@@ -1,5 +1,5 @@
 use crate::{
-    geometry::{angle_consts::*, Angle, Dimensions, Point},
+    geometry::{angle_consts::*, Angle, Dimensions, Point, Real},
     primitives::{
         common::{LineSide, LinearEquation},
         rectangle, Primitive, Rectangle,
@@ -14,8 +14,8 @@ use crate::{
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct PlaneSector {
-    line_a: LinearEquation,
-    line_b: LinearEquation,
+    line_a: LinearEquation<Real>,
+    line_b: LinearEquation<Real>,
     side_a: LineSide,
     side_b: LineSide,
     sweep: Angle,
@@ -30,15 +30,15 @@ impl PlaneSector {
         let negative_sweep = angle_sweep < Angle::zero();
 
         let side_a = if (angle_start_norm < ANGLE_90DEG) ^ negative_sweep {
-            LineSide::Above
+            LineSide::Left
         } else {
-            LineSide::Below
+            LineSide::Right
         };
 
         let side_b = if (angle_end_norm >= ANGLE_90DEG) ^ negative_sweep {
-            LineSide::Above
+            LineSide::Left
         } else {
-            LineSide::Below
+            LineSide::Right
         };
 
         Self {
@@ -54,8 +54,8 @@ impl PlaneSector {
         Self {
             line_a: LinearEquation::new_horizontal(),
             line_b: LinearEquation::new_horizontal(),
-            side_a: LineSide::Above,
-            side_b: LineSide::Above,
+            side_a: LineSide::Left,
+            side_b: LineSide::Left,
             sweep: Angle::zero(),
         }
     }
