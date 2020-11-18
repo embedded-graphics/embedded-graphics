@@ -184,11 +184,6 @@ fn generate_lines(
                     let start_x = first.x.end.min(second.x.end);
                     let end_x = first.x.start.max(second.x.start);
 
-                    // TODO: check
-                    //  // Line needs to be shrunk by 1px off each end to prevent overdraw.
-                    //  // This can only happen if there's enough room to do so.
-                    //  if (end_x - start_x) > 1 {
-
                     Scanline {
                         x: start_x..end_x,
                         y: scanline_y,

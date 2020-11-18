@@ -55,17 +55,13 @@ impl Scanline {
         }
 
         let y = self.y;
-        let mut points = line.points();
 
-        // Find the first point with the same y coordinate.
-        while let Some(first) = points.find(|p| p.y == y) {
-            self.extend(first.x);
-        }
-
-        // Check points until the y coordinate changes.
-        if let Some(last) = points.take_while(|p| p.y == y).last() {
-            self.extend(last.x);
-        }
+        line.points()
+            .skip_while(|p| p.y != y)
+            .take_while(|p| p.y == y)
+            .for_each(|p| {
+                self.extend(p.x);
+            });
     }
 
     /// Check for lines that are adjacent or overlapping.
