@@ -172,7 +172,8 @@ mod tests {
     use crate::{
         geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        primitives::Circle,
         primitives::Primitive,
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
@@ -326,5 +327,255 @@ mod tests {
 
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());
+    }
+
+    /// The radial lines should be connected using a line join.
+    #[test]
+    #[ignore]
+    fn issue_484_line_join_90_deg() {
+        let mut display = MockDisplay::<Rgb888>::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::new(Point::new(-6, 1), 15, 0.0.deg(), 90.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .stroke_color(Rgb888::RED)
+                    .stroke_width(3)
+                    .fill_color(Rgb888::GREEN)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "RRRR      ",
+            "RRRRRR    ",
+            "RRRRRRRR  ",
+            "RRRGRRRR  ",
+            "RRRGGRRRR ",
+            "RRRGGGRRR ",
+            "RRRGGGGRRR",
+            "RRRRRRRRRR",
+            "RRRRRRRRRR",
+            "RRRRRRRRRR",
+        ]);
+    }
+
+    // TODO: add tests for other angles with mitre and bevel joins
+
+    /// The stroke for the radial lines shouldn't overlap the outer edge of the stroke on the
+    /// circular part of the sector.
+    #[test]
+    #[ignore]
+    fn issue_484_stroke_should_not_overlap_outer_edge() {
+        let mut display = MockDisplay::<Rgb888>::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::with_center(Point::new(10, 15), 11, 0.0.deg(), 90.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .stroke_color(Rgb888::RED)
+                    .stroke_width(21)
+                    .fill_color(Rgb888::GREEN)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "RRRRRRRRRRRRRR            ",
+            "RRRRRRRRRRRRRRRRR         ",
+            "RRRRRRRRRRRRRRRRRRR       ",
+            "RRRRRRRRRRRRRRRRRRRR      ",
+            "RRRRRRRRRRRRRRRRRRRRR     ",
+            "RRRRRRRRRRRRRRRRRRRRRR    ",
+            "RRRRRRRRRRRRRRRRRRRRRRR   ",
+            "RRRRRRRRRRRRRRRRRRRRRRRR  ",
+            "RRRRRRRRRRRRRRRRRRRRRRRR  ",
+            "RRRRRRRRRRRRRRRRRRRRRRRRR ",
+            "RRRRRRRRRRRRRRRRRRRRRRRRR ",
+            "RRRRRRRRRRRRRRRRRRRRRRRRR ",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRR",
+        ]);
+    }
+
+    /// Both radial lines should be perfectly aligned for 180° sweep angle.
+    #[test]
+    #[ignore]
+    fn issue_484_stroke_center_semicircle() {
+        let mut display = MockDisplay::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::new(Point::new_equal(1), 15, 0.0.deg(), 180.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(BinaryColor::On)
+                    .stroke_color(BinaryColor::Off)
+                    .stroke_width(2)
+                    .stroke_alignment(StrokeAlignment::Center)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "      .....      ",
+            "    .........    ",
+            "  ....#####....  ",
+            "  ..#########..  ",
+            " ..###########.. ",
+            " ..###########.. ",
+            "..#############..",
+            ".................",
+            ".................",
+        ]);
+    }
+
+    /// Both radial lines should be perfectly aligned for 180° sweep angle.
+    #[test]
+    #[ignore]
+    fn issue_484_stroke_center_semicircle_vertical() {
+        let mut display = MockDisplay::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::new(Point::new_equal(1), 15, 90.0.deg(), 180.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(BinaryColor::On)
+                    .stroke_color(BinaryColor::Off)
+                    .stroke_width(2)
+                    .stroke_alignment(StrokeAlignment::Center)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "      ...",
+            "    .....",
+            "  ....#..",
+            "  ..###..",
+            " ..####..",
+            " ..####..",
+            "..#####..",
+            "..#####..",
+            "..#####..",
+            "..#####..",
+            "..#####..",
+            " ..####..",
+            " ..####..",
+            "  ..###..",
+            "  ....#..",
+            "    .....",
+            "      ...",
+        ]);
+    }
+
+    /// The fill shouldn't overlap the stroke and there should be no gaps between stroke and fill.
+    #[test]
+    #[ignore]
+    fn issue_484_gaps_and_overlap() {
+        let mut display = MockDisplay::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::with_center(Point::new(2, 20), 40, -14.0.deg(), 90.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(Rgb888::GREEN)
+                    .stroke_color(Rgb888::RED)
+                    .stroke_width(2)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            // TODO: Update expected pattern
+        ]);
+    }
+
+    /// No radial lines should be drawn if the sweep angle is 360°.
+    #[test]
+    #[ignore]
+    fn issue_484_no_radial_lines_for_360_degree_sweep_angle() {
+        let style = PrimitiveStyleBuilder::new()
+            .fill_color(Rgb888::GREEN)
+            .stroke_color(Rgb888::RED)
+            .stroke_width(1)
+            .build();
+
+        let circle = Circle::new(Point::new_equal(1), 11);
+
+        let mut expected = MockDisplay::new();
+        circle.into_styled(style).draw(&mut expected).unwrap();
+
+        let mut display = MockDisplay::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::new(Point::new_equal(1), 11, 0.0.deg(), 360.0.deg())
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_eq(&expected);
+    }
+
+    /// No radial lines should be drawn for sweep angles larger than 360°.
+    #[test]
+    #[ignore]
+    fn issue_484_no_radial_lines_for_sweep_angles_larger_than_360_degree() {
+        let style = PrimitiveStyleBuilder::new()
+            .fill_color(Rgb888::GREEN)
+            .stroke_color(Rgb888::RED)
+            .stroke_width(1)
+            .build();
+
+        let circle = Circle::new(Point::new_equal(1), 11);
+
+        let mut expected = MockDisplay::new();
+        circle.into_styled(style).draw(&mut expected).unwrap();
+
+        let mut display = MockDisplay::new();
+        // TODO: sectors shouldn't overdraw
+        display.set_allow_overdraw(true);
+
+        Sector::from_circle(circle, 90.0.deg(), -472.0.deg())
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_eq(&expected);
+    }
+
+    /// The sector was mirrored along the Y axis if the start angle was exactly 360°.
+    #[test]
+    fn issue_484_sector_flips_at_360_degrees() {
+        let mut display = MockDisplay::new();
+
+        // This would trigger the out of bounds drawing check if the sector
+        // would be mirrored along the Y axis.
+        Sector::new(Point::new(-15, 0), 31, 360.0.deg(), 90.0.deg())
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
     }
 }
