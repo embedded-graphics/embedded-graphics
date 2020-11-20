@@ -206,6 +206,8 @@ mod tests {
     };
 
     /// Draws a text using the given font and checks it against the expected pattern.
+    // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
+    // #[track_caller]
     pub(super) fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
     where
         F: MonoFont,
