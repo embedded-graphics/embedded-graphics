@@ -1,10 +1,10 @@
-use core::ops::Range;
-
 use crate::{
     geometry::{Point, Size},
     prelude::Primitive,
     primitives::{Line, Rectangle},
+    transform::Transform,
 };
+use core::ops::Range;
 
 /// Scanline.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -125,6 +125,14 @@ impl Scanline {
             Some(ret)
         } else {
             None
+        }
+    }
+
+    /// Create a translated copy of the scanline.
+    pub fn translated(&self, by: Point) -> Self {
+        Self {
+            x: (self.x.start + by.x)..(self.x.end + by.x),
+            y: self.y + by.y,
         }
     }
 }
