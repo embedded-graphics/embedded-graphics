@@ -46,8 +46,8 @@ pub use styled::StyledPixels;
 ///
 /// ## Create a triangle from a slice
 ///
-/// A triangle can be created from the first 3 items of a `&[Point]` slice. If the slice is less
-/// than 3 elements long, the [`from_slice`] method will panic.
+/// A triangle can be created from a `&[Point]` slice. If the slice is not exactly 3 elements long,
+/// the [`from_slice`] method will panic.
 ///
 /// ```rust
 /// use embedded_graphics::{geometry::Point, primitives::Triangle};
@@ -155,17 +155,18 @@ impl Triangle {
         }
     }
 
-    /// Creates a new triangle from the first three elements of a [`Point`] slice.
+    /// Creates a new triangle from a [`Point`] slice.
     ///
     /// # Panics
     ///
-    /// This method will panic if the given slice is less than 3 items long.
+    /// This method will panic if the given slice is not exactly 3 items long.
     ///
     /// [`Point`]: ../../geometry/struct.Point.html
     // MSRV: Consider subslice patterns for rust >= 1.42.0
     pub fn from_slice(vertices: &[Point]) -> Self {
-        Triangle {
-            vertices: [vertices[0], vertices[1], vertices[2]],
+        match vertices {
+            [p1, p2, p3] => Self::new(*p1, *p2, *p3),
+            vertices => panic!("source slice length ({}) must equal 3", vertices.len()),
         }
     }
 
@@ -414,5 +415,39 @@ mod tests {
                 assert_eq!(triangle.contains(point), false);
             }
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "source slice length (2) must equal 3")]
+    fn slice_panic_too_short() {
+        let points = [Point::zero(), Point::zero()];
+
+        Triangle::from_slice(&points);
+    }
+
+    #[test]
+    #[should_panic(expected = "source slice length (4) must equal 3")]
+    fn slice_panic_too_long() {
+        let points = [Point::zero(), Point::zero(), Point::zero(), Point::zero()];
+
+        Triangle::from_slice(&points);
+    }
+
+    #[test]
+    fn slice_just_right() {
+        let points = [
+            Point::new_equal(1),
+            Point::new_equal(2),
+            Point::new_equal(3),
+        ];
+
+        assert_eq!(
+            Triangle::from_slice(&points),
+            Triangle::new(
+                Point::new_equal(1),
+                Point::new_equal(2),
+                Point::new_equal(3)
+            )
+        );
     }
 }
