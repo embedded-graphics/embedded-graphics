@@ -45,6 +45,21 @@ where
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
     }
+
+    fn draw_thick<D>(&self, stroke_color: C, display: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        for line in ScanlineIterator::new(self) {
+            let rect = line.to_rectangle();
+
+            if !rect.is_zero_sized() {
+                display.fill_solid(&rect, stroke_color)?;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -159,26 +174,13 @@ where
                 ),
                 _ => {
                     if self.primitive.translate != Point::zero() {
-                        let mut display = display.translated(self.primitive.translate);
-
-                        for line in ScanlineIterator::new(self) {
-                            let rect = line.to_rectangle();
-
-                            if !rect.is_zero_sized() {
-                                display.fill_solid(&rect, stroke_color)?;
-                            }
-                        }
+                        self.draw_thick(
+                            stroke_color,
+                            &mut display.translated(self.primitive.translate),
+                        )
                     } else {
-                        for line in ScanlineIterator::new(self) {
-                            let rect = line.to_rectangle();
-
-                            if !rect.is_zero_sized() {
-                                display.fill_solid(&rect, stroke_color)?;
-                            }
-                        }
+                        self.draw_thick(stroke_color, display)
                     }
-
-                    Ok(())
                 }
             }
         } else {
