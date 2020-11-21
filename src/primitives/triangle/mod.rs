@@ -149,9 +149,9 @@ impl Dimensions for Triangle {
 
 impl Triangle {
     /// Create a new triangle with the given vertices.
-    pub const fn new(p1: Point, p2: Point, p3: Point) -> Self {
+    pub const fn new(vertex1: Point, vertex2: Point, vertex3: Point) -> Self {
         Triangle {
-            vertices: [p1, p2, p3],
+            vertices: [vertex1, vertex2, vertex3],
         }
     }
 
