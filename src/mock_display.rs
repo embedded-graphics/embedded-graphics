@@ -525,7 +525,7 @@ where
     ///
     /// # Panics
     ///
-    /// Panics if the display aren't equal.
+    /// Panics if the displays aren't equal.
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_eq(&self, other: &MockDisplay<C>) {
@@ -540,7 +540,7 @@ where
         }
     }
 
-    /// Checks if the displays is equal to to the pattern.
+    /// Checks if the display is equal to the given pattern.
     ///
     /// # Panics
     ///
@@ -658,12 +658,7 @@ fn write_display<C>(
 where
     C: PixelColor + ColorMapping,
 {
-    for y in bounding_box.rows() {
-        if y % 2 != 0 {
-            // Skip all odd y coordinates, because `write_row` outputs two pixel rows with
-            // a single row of characters.
-            continue;
-        }
+    for y in bounding_box.rows().step_by(2) {
 
         write_row(f, display, bounding_box, y, 0)?;
         f.write_char('\n')?
@@ -776,12 +771,7 @@ where
 
             write_header(f, column_width)?;
 
-            for y in bounding_box.rows() {
-                if y % 2 != 0 {
-                    // Skip all odd y coordinates, because `write_row` outputs two pixel rows with
-                    // a single row of characters.
-                    continue;
-                }
+            for y in bounding_box.rows().step_by(2) {
 
                 f.write_str("| ")?;
                 write_row(f, self.display, &bounding_box, y, column_width)?;
