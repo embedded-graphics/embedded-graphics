@@ -103,16 +103,16 @@ impl ScanlineIntersections {
 
             while idx < 3 {
                 let start = LineJoin::from_points(
-                    self.triangle.vertex(idx),
-                    self.triangle.vertex(idx + 1),
-                    self.triangle.vertex(idx + 2),
+                    self.triangle.vertices[idx % 3],
+                    self.triangle.vertices[(idx + 1) % 3],
+                    self.triangle.vertices[(idx + 2) % 3],
                     self.stroke_width,
                     self.stroke_offset,
                 );
                 let end = LineJoin::from_points(
-                    self.triangle.vertex(idx + 1),
-                    self.triangle.vertex(idx + 2),
-                    self.triangle.vertex(idx + 3),
+                    self.triangle.vertices[(idx + 1) % 3],
+                    self.triangle.vertices[(idx + 2) % 3],
+                    self.triangle.vertices[(idx + 3) % 3],
                     self.stroke_width,
                     self.stroke_offset,
                 );

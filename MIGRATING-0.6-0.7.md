@@ -19,6 +19,7 @@
   - [Primitives](#primitives-1)
     - [Circle](#circle)
     - [Rectangle](#rectangle)
+    - [Triangle](#triangle)
   - [Geometry](#geometry-1)
   - [Mock display](#mock-display-1)
 
@@ -241,6 +242,37 @@ use embedded_graphics::{geometry::{Point}, primitives::Rectangle};
 - let rectangle = Rectangle::new(Point::new(20, 30), Point::new(40, 50));
 + let rectangle = Rectangle::with_corners(Point::new(20, 30), Point::new(40, 50));
 ```
+
+### Triangle
+
+The vertices of a triangle are now stored in a single `vertices` field with the type `[Point; 3]`. Previously, they were stored in three separate fields `p1`, `p2` and `p3`.
+
+To access an individual vertex of a triangle, use `triangle.vertices[]`.
+
+```diff
+use embedded_graphics::{prelude::*, primitives::Triangle};
+
+let triangle = Triangle::new(Point::new(20, 30), Point::new(40, 50), Point::new(60, 70));
+
+- let p1 = triangle.p1;
+- let p2 = triangle.p2;
+- let p3 = triangle.p3;
++ let p1 = triangle.vertices[0];
++ let p2 = triangle.vertices[1];
++ let p3 = triangle.vertices[2];
+```
+
+To create a triangle from a slice, use the new `Triangle::from_slice` method:
+
+```rust
+use embedded_graphics::{geometry::{Point}, primitives::Triangle};
+
+let points = [Point::new(20, 30), Point::new(40, 50), Point::new(60, 70)];
+
+let triangle = Triangle::from_slice(&points);
+```
+
+It is no longer possible to create a triangle from an array of `Point`s. Instead, pass a reference to `Triangle::from_slice`.
 
 ## Geometry
 

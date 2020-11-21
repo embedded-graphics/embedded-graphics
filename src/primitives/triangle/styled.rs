@@ -150,7 +150,7 @@ where
             let t = self.primitive.sorted_clockwise();
 
             let (min, max) = ClosedThickSegmentIter::new(
-                &[t.p1, t.p2, t.p3],
+                &t.vertices,
                 self.style.stroke_width,
                 StrokeOffset::from(self.style.stroke_alignment),
             )
@@ -322,15 +322,18 @@ mod tests {
 
         let mut lines_display: MockDisplay<BinaryColor> = MockDisplay::new();
         lines_display.set_allow_overdraw(true);
-        Line::new(triangle.p1, triangle.p2)
+
+        let [p1, p2, p3] = triangle.vertices;
+
+        Line::new(p1, p2)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut lines_display)
             .unwrap();
-        Line::new(triangle.p2, triangle.p3)
+        Line::new(p2, p3)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut lines_display)
             .unwrap();
-        Line::new(triangle.p3, triangle.p1)
+        Line::new(p3, p1)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut lines_display)
             .unwrap();
