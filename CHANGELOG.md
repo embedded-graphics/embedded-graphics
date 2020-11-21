@@ -16,7 +16,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Added support for external text renderers. External text renderers can be implemented using the new `TextStyle` trait.
 - [#475](https://github.com/embedded-graphics/embedded-graphics/pull/475) `Triangle`s can now be drawn with stroke widths greater than 1.
 - [#478](https://github.com/embedded-graphics/embedded-graphics/pull/478) Added `resized`, `anchor_point`, `rows`, `columns` and `is_zero_sized` methods to `Rectangle`.
-- [#493](https://github.com/embedded-graphics/embedded-graphics/pull/493) Added `assert_eq` and `assert_pattern` methods to `MockDisplay`.
+- [#493](https://github.com/embedded-graphics/embedded-graphics/pull/493) Added `assert_eq`, `assert_pattern` and `diff` methods to `MockDisplay`. Improved error messages for failing assertions can be enabled by setting the `EG_FANCY_PANIC` environment variable to `1` at compile time.
 
 ### Changed
 

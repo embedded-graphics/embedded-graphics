@@ -10,6 +10,25 @@
 //!
 //! The display is internally capped at 64x64px.
 //!
+//! # Assertions
+//!
+//! [`MockDisplay`] provides the [`assert_eq`] and [`assert_pattern`] methods to check if the
+//! display is in the correct state after some drawing operations were executed. It's recommended
+//! to use these methods instead of the standard `assert_eq!` macro, because they provide an
+//! optional improved debug output for failing tests. If the `EG_FANCY_PANIC` environment variable
+//! is set to `1` at compile time a graphic representation of the display content and a diff of the
+//! display and the expected output will be shown:
+//!
+//! ```bash
+//! EG_FANCY_PANIC=1 cargo test
+//! ```
+//!
+//! Enabling the advanced test output requires a terminal that supports 24 BPP colors and a font
+//! that includes the upper half block character `'\u{2580}'`.
+//!
+//! The color code used to show the difference between the display and the expected output is show
+//! in the documentation of the [`diff`] method.
+//!
 //! # Additional out of bounds and overdraw checks
 //!
 //! [`MockDisplay`] implements additional checks during drawing operations that will cause a panic if
@@ -106,15 +125,11 @@
 //! Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display);
 //! Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
 //!
-//! #[rustfmt::skip]
-//! assert_eq!(
-//!     display,
-//!     MockDisplay::from_pattern(&[
-//!         "#  ",
-//!         "  #",
-//!         " # ",
-//!     ])
-//! );
+//! display.assert_pattern(&[
+//!     "#  ", //
+//!     "  #", //
+//!     " # ", //
+//! ]);
 //! ```
 //!
 //! ## Load and validate a 24BPP TGA image
@@ -146,16 +161,13 @@
 //!
 //! image.draw(&mut display);
 //!
-//! assert_eq!(
-//!     display,
-//!     MockDisplay::from_pattern(&[
-//!         "WKRGBYMCW",
-//!         "KKRGBYMCW",
-//!         "WKRGBYMCW",
-//!         "KKKKKKKKK",
-//!         "WKWCMYBGR",
-//!     ])
-//! );
+//! display.assert_pattern(&[,
+//!     "WKRGBYMCW",
+//!     "KKRGBYMCW",
+//!     "WKRGBYMCW",
+//!     "KKKKKKKKK",
+//!     "WKWCMYBGR",
+//! ]);
 //! ```
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs
@@ -165,6 +177,9 @@
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
 //! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 //! [`MockDisplay`]: struct.MockDisplay.html
+//! [`assert_eq`]: struct.MockDisplay.html#method.assert_eq
+//! [`assert_pattern`]: struct.MockDisplay.html#method.assert_pattern
+//! [`diff`]: struct.MockDisplay.html#method.diff
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
 //! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
@@ -318,20 +333,17 @@ where
     /// ]);
     ///
     /// let mirrored = display.swap_xy();
-    /// assert_eq!(
-    ///     mirrored,
-    ///     MockDisplay::from_pattern(&[
-    ///         "#####",
-    ///         "# # #",
-    ///         "# # #",
-    ///         "#   #",
-    ///         "     ",
-    ///         "#####",
-    ///         "#   #",
-    ///         "# # #",
-    ///         "# ###",
-    ///     ])
-    /// );
+    /// mirrored.assert_pattern(&[
+    ///     "#####",
+    ///     "# # #",
+    ///     "# # #",
+    ///     "#   #",
+    ///     "     ",
+    ///     "#####",
+    ///     "#   #",
+    ///     "# # #",
+    ///     "# ###",
+    /// ]);
     /// ```
     pub fn swap_xy(&self) -> MockDisplay<C> {
         let mut mirrored = MockDisplay::new();
@@ -362,11 +374,11 @@ where
     /// ]);
     ///
     /// let inverted = display.map(|c| c.invert());
-    /// assert_eq!(inverted, MockDisplay::from_pattern(&[
+    /// inverted.assert_pattern(&[
     ///     "....",
     ///     ".  #",
     ///     "####",
-    /// ]));
+    /// ]);
     /// ```
     pub fn map<CT, F>(&self, f: F) -> MockDisplay<CT>
     where
@@ -431,12 +443,12 @@ impl MockDisplay<BinaryColor> {
     ///
     /// let mut display = MockDisplay::from_points(circle.points());
     ///
-    /// assert_eq!(display, MockDisplay::from_pattern(&[
+    /// display.assert_pattern(&[
     ///     " ## ",
     ///     "####",
     ///     "####",
     ///     " ## ",
-    /// ]));
+    /// ]);
     /// ```
     ///
     /// [`Point`]: ../geometry/struct.Point.html
@@ -523,9 +535,14 @@ where
 
     /// Checks if the displays are equal.
     ///
+    /// An advanced output for failing tests can be enabled, see the [module-level documentation]
+    /// for more details.
+    ///
     /// # Panics
     ///
     /// Panics if the displays aren't equal.
+    ///
+    /// [module-level documentation]: index.html#assertions
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_eq(&self, other: &MockDisplay<C>) {
@@ -542,9 +559,14 @@ where
 
     /// Checks if the display is equal to the given pattern.
     ///
+    /// An advanced output for failing tests can be enabled, see the [module-level documentation]
+    /// for more details.
+    ///
     /// # Panics
     ///
     /// Panics if the display content isn't equal to the pattern.
+    ///
+    /// [module-level documentation]: index.html#assertions
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_pattern(&self, pattern: &[&str]) {
@@ -658,8 +680,8 @@ fn write_display<C>(
 where
     C: PixelColor + ColorMapping,
 {
+    // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
     for y in bounding_box.rows().step_by(2) {
-
         write_row(f, display, bounding_box, y, 0)?;
         f.write_char('\n')?
     }
@@ -771,8 +793,8 @@ where
 
             write_header(f, column_width)?;
 
+            // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
             for y in bounding_box.rows().step_by(2) {
-
                 f.write_str("| ")?;
                 write_row(f, self.display, &bounding_box, y, column_width)?;
                 f.write_str(" | ")?;
