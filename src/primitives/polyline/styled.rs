@@ -338,7 +338,7 @@ mod tests {
 
         pl.into_pixels().draw(&mut d2).unwrap();
 
-        assert_eq!(d1, d2);
+        d1.assert_eq(&d2);
     }
 
     #[test]
