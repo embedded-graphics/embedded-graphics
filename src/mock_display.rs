@@ -26,7 +26,7 @@
 //! Enabling the advanced test output requires a terminal that supports 24 BPP colors and a font
 //! that includes the upper half block character `'\u{2580}'`.
 //!
-//! The color code used to show the difference between the display and the expected output is show
+//! The color code used to show the difference between the display and the expected output is shown
 //! in the documentation of the [`diff`] method.
 //!
 //! # Additional out of bounds and overdraw checks
@@ -535,8 +535,8 @@ where
 
     /// Checks if the displays are equal.
     ///
-    /// An advanced output for failing tests can be enabled, see the [module-level documentation]
-    /// for more details.
+    /// An advanced output for failing tests can be enabled by setting the environment variable
+    /// `EG_FANCY_PANIC=1`. See the [module-level documentation] for more details.
     ///
     /// # Panics
     ///
