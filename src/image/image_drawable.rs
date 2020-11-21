@@ -67,20 +67,29 @@ pub trait ImageDrawableExt: Sized {
     ///
     /// # Examples
     ///
-    /// This example loads an image containing multiple 32x32px sprites and draws two of them to a
-    /// display, with their top-left corners positioned at `(100, 100)` and `(100, 140)`.
+    /// This example loads a raw image containing multiple 32x32px sprites and draws two of them to
+    /// a display, with their top-left corners positioned at `(100, 100)` and `(100, 140)`.
     ///
-    /// ```rust,ignore
-    /// use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     image::{Image, ImageRaw, ImageRawBE},
+    ///     pixelcolor::Rgb565,
+    ///     prelude::*,
+    ///     primitives::Rectangle,
+    /// };
     /// # use embedded_graphics::mock_display::MockDisplay as Display;
-    /// use tinytga::Tga;
+    /// let mut display: Display<Rgb565> = Display::default();
     ///
-    /// let mut display: Display<Rgb888> = Display::default();
+    /// let data = [
+    ///     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
+    ///     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
+    ///     // .
+    ///     // .
+    ///     // .
+    ///     0xFF, 0xFF, 0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F,
+    /// ];
     ///
-    /// let sprite_atlas: Tga<Rgb888> = Tga::from_slice(include_bytes!(
-    ///     "../../assets/tiles.tga"
-    /// ))
-    /// .unwrap();
+    /// let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 3);
     ///
     /// let sprite_1 = sprite_atlas.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(32, 32)));
     /// let sprite_2 = sprite_atlas.sub_image(&Rectangle::new(Point::new(32, 0), Size::new(32, 32)));

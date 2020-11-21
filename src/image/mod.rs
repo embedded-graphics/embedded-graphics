@@ -11,31 +11,38 @@
 //!
 //! # Examples
 //!
-//! ## Load a TGA image and draw it to a display
+//! ## Load an RGB565 raw data imge and display it
 //!
-//! This example loads a TGA-formatted image using the [tinytga] crate and draws it to the display
-//! using an [`Image`] object.
+//! This example loads a small image from a raw data array and displays it. The image is RGB565
+//! encoded, so uses the `Rgb565` color type.
 //!
 //! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
 //! with embedded-graphics.
 //!
-//! ```rust,ignore
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*};
+//! ```rust
+//! use embedded_graphics::{
+//!     image::{Image, ImageRaw, ImageRawBE},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//! };
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
-//! use tinytga::Tga;
 //!
-//! let mut display: Display<Rgb888> = Display::default();
+//! let mut display: Display<Rgb565> = Display::default();
 //!
-//! // Load the TGA file.
-//! // Note that the color type is set explicitly to match the format used in the TGA file,
+//! // Raw image data for demonstration purposes.
+//! let data = [
+//!     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
+//!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, /*
+//!            * ... */
+//! ];
+//!
+//! // Load the image file.
+//! // Note that the color type is set explicitly to match the format used in the image file,
 //! // otherwise the compiler might infer an incorrect type.
-//! let tga: Tga<Rgb888> = Tga::from_slice(include_bytes!(
-//!     "../../assets/rust-pride.tga"
-//! ))
-//! .unwrap();
+//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 2);
 //!
-//! // Create a `Image` object to position the image at `Point::zero()`.
-//! let image = Image::new(&tga, Point::zero());
+//! // Create an `Image` object to position the image at `Point::zero()`.
+//! let image = Image::new(&raw, Point::zero());
 //!
 //! // Draw the image to the display.
 //! image.draw(&mut display)?;
@@ -50,20 +57,31 @@
 //! to get a sub image from an image drawable. [`ImageDrawableExt`] is included in the [`prelude`]
 //! which this example takes advantage of.
 //!
-//! ```rust,ignore
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
+//! ```rust
+//! use embedded_graphics::{
+//!     image::{Image, ImageRaw, ImageRawBE},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     primitives::Rectangle,
+//! };
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
-//! use tinytga::Tga;
 //!
-//! let mut display: Display<Rgb888> = Display::default();
+//! let mut display: Display<Rgb565> = Display::default();
 //!
-//! // Load the TGA file with the sprite atlas.
-//! // Note that the color type is set explicitly to match the format used in the TGA file,
+//! // Raw image data for demonstration purposes.
+//! let data = [
+//!     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
+//!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
+//!     // .
+//!     // .
+//!     // .
+//!     0xFF, 0xFF, 0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F,
+//! ];
+//!
+//! // Load the image file with the sprite atlas.
+//! // Note that the color type is set explicitly to match the format used in the image file,
 //! // otherwise the compiler might infer an incorrect type.
-//! let sprite_atlas: Tga<Rgb888> = Tga::from_slice(include_bytes!(
-//!     "../../assets/tiles.tga"
-//! ))
-//! .unwrap();
+//! let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 3);
 //!
 //! // Create individual sub images for each sprite in the sprite atlas.
 //! // The position and size of the sub images is defined by a `Rectangle`.

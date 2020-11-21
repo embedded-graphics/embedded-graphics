@@ -132,42 +132,35 @@
 //! ]);
 //! ```
 //!
-//! ## Load and validate a 24BPP TGA image
+//! ## Load and validate a 16BPP image
 //!
 //! This example loads the following test image (scaled 10x to make it visible) and tests the
 //! returned pixels against an expected pattern.
 //!
-//! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
-//! with embedded-graphics.
+//! ![Test image, scaled 1000%](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAIAAABwJOjsAAAAMUlEQVRIx2NkwAv+45Vl/E++XiaGAQKjFo9aPGrx0LeYhVAJMxrUoxaPWjxq8aCzGAAVwwQnmlfSgwAAAABJRU5ErkJggg==)
 //!
-//! ![TGA test image, scaled 1000%]( data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAAyBAMAAAAuIdEGAAAAGFBMVEUAAAD/AAAA/wD//wAAAP//AP8A//////8V3DX3AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5AEODTI3wavPmgAAAEtJREFUSMdjKAcBBhAQBAElEHABAWMQCAWBNBCAqBtVPZhVI8Co6qGuejR9D8d8OQqGOkDEKJgFjmVwfINjHpwGwKkBnC5GVQ9m1QAE0rmq9y8gWgAAAABJRU5ErkJggg==)
-//!
-//! ```rust,ignore
+//! ```rust
 //! use embedded_graphics::{
-//!     image::Image,
+//!     image::{Image, ImageRaw, ImageRawBE},
 //!     mock_display::MockDisplay,
-//!     pixelcolor::{Rgb888, RgbColor},
+//!     pixelcolor::{Rgb565, RgbColor},
 //!     prelude::*,
 //! };
-//! use tinytga::Tga;
 //!
-//! let data = include_bytes!("../../tinytga/tests/type1_24bpp_tl.tga");
+//! let data = [
+//!     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
+//!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF,
+//! ];
 //!
-//! let tga: Tga<Rgb888> = Tga::from_slice(data).unwrap();
+//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 2);
 //!
-//! let image = Image::new(&tga, Point::zero());
+//! let image = Image::new(&raw, Point::zero());
 //!
-//! let mut display: MockDisplay<Rgb888> = MockDisplay::new();
+//! let mut display: MockDisplay<Rgb565> = MockDisplay::new();
 //!
 //! image.draw(&mut display);
 //!
-//! display.assert_pattern(&[,
-//!     "WKRGBYMCW",
-//!     "KKRGBYMCW",
-//!     "WKRGBYMCW",
-//!     "KKKKKKKKK",
-//!     "WKWCMYBGR",
-//! ]);
+//! display.assert_pattern(&["KRGY", "BCMW"]);
 //! ```
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs
