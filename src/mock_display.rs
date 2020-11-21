@@ -10,6 +10,25 @@
 //!
 //! The display is internally capped at 64x64px.
 //!
+//! # Assertions
+//!
+//! [`MockDisplay`] provides the [`assert_eq`] and [`assert_pattern`] methods to check if the
+//! display is in the correct state after some drawing operations were executed. It's recommended
+//! to use these methods instead of the standard `assert_eq!` macro, because they provide an
+//! optional improved debug output for failing tests. If the `EG_FANCY_PANIC` environment variable
+//! is set to `1` at compile time a graphic representation of the display content and a diff of the
+//! display and the expected output will be shown:
+//!
+//! ```bash
+//! EG_FANCY_PANIC=1 cargo test
+//! ```
+//!
+//! Enabling the advanced test output requires a terminal that supports 24 BPP colors and a font
+//! that includes the upper half block character `'\u{2580}'`.
+//!
+//! The color code used to show the difference between the display and the expected output is shown
+//! in the documentation of the [`diff`] method.
+//!
 //! # Additional out of bounds and overdraw checks
 //!
 //! [`MockDisplay`] implements additional checks during drawing operations that will cause a panic if
@@ -106,15 +125,11 @@
 //! Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display);
 //! Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display);
 //!
-//! #[rustfmt::skip]
-//! assert_eq!(
-//!     display,
-//!     MockDisplay::from_pattern(&[
-//!         "#  ",
-//!         "  #",
-//!         " # ",
-//!     ])
-//! );
+//! display.assert_pattern(&[
+//!     "#  ", //
+//!     "  #", //
+//!     " # ", //
+//! ]);
 //! ```
 //!
 //! ## Load and validate a 24BPP TGA image
@@ -146,16 +161,13 @@
 //!
 //! image.draw(&mut display);
 //!
-//! assert_eq!(
-//!     display,
-//!     MockDisplay::from_pattern(&[
-//!         "WKRGBYMCW",
-//!         "KKRGBYMCW",
-//!         "WKRGBYMCW",
-//!         "KKKKKKKKK",
-//!         "WKWCMYBGR",
-//!     ])
-//! );
+//! display.assert_pattern(&[,
+//!     "WKRGBYMCW",
+//!     "KKRGBYMCW",
+//!     "WKRGBYMCW",
+//!     "KKKKKKKKK",
+//!     "WKWCMYBGR",
+//! ]);
 //! ```
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs
@@ -165,6 +177,9 @@
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
 //! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 //! [`MockDisplay`]: struct.MockDisplay.html
+//! [`assert_eq`]: struct.MockDisplay.html#method.assert_eq
+//! [`assert_pattern`]: struct.MockDisplay.html#method.assert_pattern
+//! [`diff`]: struct.MockDisplay.html#method.diff
 //! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
 //! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw
 //! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
@@ -175,14 +190,14 @@ use crate::{
     geometry::{Dimensions, OriginDimensions, Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
-        Rgb565, Rgb888, RgbColor,
+        Rgb565, Rgb888, RgbColor, WebColors,
     },
     prelude::Primitive,
     primitives::{ContainsPoint, Rectangle},
 };
 use core::{
     cmp::PartialEq,
-    fmt::{self, Write},
+    fmt::{self, Display, Write},
     iter,
 };
 
@@ -262,6 +277,14 @@ where
         }
     }
 
+    /// Returns the `affected_area` with the top left corner extended to `(0, 0)`.
+    fn affected_area_origin(&self) -> Rectangle {
+        self.affected_area()
+            .bottom_right()
+            .map(|bottom_right| Rectangle::with_corners(Point::zero(), bottom_right))
+            .unwrap_or_default()
+    }
+
     /// Changes the color of a pixel.
     ///
     /// # Panics
@@ -310,20 +333,17 @@ where
     /// ]);
     ///
     /// let mirrored = display.swap_xy();
-    /// assert_eq!(
-    ///     mirrored,
-    ///     MockDisplay::from_pattern(&[
-    ///         "#####",
-    ///         "# # #",
-    ///         "# # #",
-    ///         "#   #",
-    ///         "     ",
-    ///         "#####",
-    ///         "#   #",
-    ///         "# # #",
-    ///         "# ###",
-    ///     ])
-    /// );
+    /// mirrored.assert_pattern(&[
+    ///     "#####",
+    ///     "# # #",
+    ///     "# # #",
+    ///     "#   #",
+    ///     "     ",
+    ///     "#####",
+    ///     "#   #",
+    ///     "# # #",
+    ///     "# ###",
+    /// ]);
     /// ```
     pub fn swap_xy(&self) -> MockDisplay<C> {
         let mut mirrored = MockDisplay::new();
@@ -354,11 +374,11 @@ where
     /// ]);
     ///
     /// let inverted = display.map(|c| c.invert());
-    /// assert_eq!(inverted, MockDisplay::from_pattern(&[
+    /// inverted.assert_pattern(&[
     ///     "....",
     ///     ".  #",
     ///     "####",
-    /// ]));
+    /// ]);
     /// ```
     pub fn map<CT, F>(&self, f: F) -> MockDisplay<CT>
     where
@@ -372,6 +392,36 @@ where
         }
 
         target
+    }
+
+    /// Compares the display to another display.
+    ///
+    /// The following color code is used to show the difference between the displays:
+    ///
+    /// | Color               | Description                                                   |
+    /// |---------------------|---------------------------------------------------------------|
+    /// | None                | The color of the pixel is equal in both displays.             |
+    /// | Some(Rgb888::GREEN) | The pixel was only set in `self`                              |
+    /// | Some(Rgb888::RED)   | The pixel was only set in `other`                             |
+    /// | Some(Rgb888::BLUE)  | The pixel was set to a different colors in `self` and `other` |
+    pub fn diff(&self, other: &MockDisplay<C>) -> MockDisplay<Rgb888> {
+        let mut display = MockDisplay::new();
+
+        for point in display.bounding_box().points() {
+            let self_color = self.get_pixel(point);
+            let other_color = other.get_pixel(point);
+
+            let diff_color = match (self_color, other_color) {
+                (Some(_), None) => Some(Rgb888::GREEN),
+                (None, Some(_)) => Some(Rgb888::RED),
+                (Some(s), Some(o)) if s != o => Some(Rgb888::BLUE),
+                _ => None,
+            };
+
+            display.set_pixel(point, diff_color);
+        }
+
+        display
     }
 }
 
@@ -393,12 +443,12 @@ impl MockDisplay<BinaryColor> {
     ///
     /// let mut display = MockDisplay::from_points(circle.points());
     ///
-    /// assert_eq!(display, MockDisplay::from_pattern(&[
+    /// display.assert_pattern(&[
     ///     " ## ",
     ///     "####",
     ///     "####",
     ///     " ## ",
-    /// ]));
+    /// ]);
     /// ```
     ///
     /// [`Point`]: ../geometry/struct.Point.html
@@ -482,6 +532,48 @@ where
 
         display
     }
+
+    /// Checks if the displays are equal.
+    ///
+    /// An advanced output for failing tests can be enabled by setting the environment variable
+    /// `EG_FANCY_PANIC=1`. See the [module-level documentation] for more details.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the displays aren't equal.
+    ///
+    /// [module-level documentation]: index.html#assertions
+    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
+    // #[track_caller]
+    pub fn assert_eq(&self, other: &MockDisplay<C>) {
+        if option_env!("EG_FANCY_PANIC") != Some("1") {
+            assert_eq!(self, other);
+            return;
+        }
+
+        if self != other {
+            let fancy_panic = FancyPanic::new(self, other);
+            panic!("{}", fancy_panic);
+        }
+    }
+
+    /// Checks if the display is equal to the given pattern.
+    ///
+    /// An advanced output for failing tests can be enabled, see the [module-level documentation]
+    /// for more details.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the display content isn't equal to the pattern.
+    ///
+    /// [module-level documentation]: index.html#assertions
+    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
+    // #[track_caller]
+    pub fn assert_pattern(&self, pattern: &[&str]) {
+        let other = MockDisplay::<C>::from_pattern(pattern);
+
+        self.assert_eq(&other);
+    }
 }
 
 impl<C> Default for MockDisplay<C>
@@ -563,12 +655,185 @@ where
     }
 }
 
+struct FancyPanic<'a, C>
+where
+    C: PixelColor,
+{
+    display: &'a MockDisplay<C>,
+    expected: &'a MockDisplay<C>,
+}
+
+impl<'a, C> FancyPanic<'a, C>
+where
+    C: PixelColor,
+{
+    fn new(display: &'a MockDisplay<C>, expected: &'a MockDisplay<C>) -> Self {
+        Self { display, expected }
+    }
+}
+
+fn write_display<C>(
+    f: &mut fmt::Formatter<'_>,
+    display: &MockDisplay<C>,
+    bounding_box: &Rectangle,
+) -> fmt::Result
+where
+    C: PixelColor + ColorMapping,
+{
+    // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
+    for y in bounding_box.rows().step_by(2) {
+        write_row(f, display, bounding_box, y, 0)?;
+        f.write_char('\n')?
+    }
+
+    Ok(())
+}
+
+fn write_row<C>(
+    f: &mut fmt::Formatter<'_>,
+    display: &MockDisplay<C>,
+    bounding_box: &Rectangle,
+    y: i32,
+    column_width: usize,
+) -> fmt::Result
+where
+    C: PixelColor + ColorMapping,
+{
+    for x in bounding_box.columns() {
+        let point_top = Point::new(x, y);
+        let point_bottom = Point::new(x, y + 1);
+
+        // Set foreground color.
+        if bounding_box.contains(point_top) {
+            let color = display
+                .get_pixel(point_top)
+                .map(|c| c.into())
+                .unwrap_or(C::NONE_COLOR);
+
+            write!(f, "\x1b[38;2;{};{};{}m", color.r(), color.g(), color.b())?;
+        } else {
+            write!(f, "\x1b[39m")?;
+        };
+
+        // Set background color.
+        if bounding_box.contains(point_bottom) {
+            let color = display
+                .get_pixel(point_bottom)
+                .map(|c| c.into())
+                .unwrap_or(C::NONE_COLOR);
+
+            write!(f, "\x1b[48;2;{};{};{}m", color.r(), color.g(), color.b())?;
+        } else {
+            write!(f, "\x1b[49m")?;
+        };
+
+        // Write "upper half block" character.
+        f.write_char('\u{2580}')?;
+    }
+
+    // Reset colors.
+    f.write_str("\x1b[0;m")?;
+
+    // Pad output with spaces if column width is larger than the width of the bounding box.
+    for _ in bounding_box.size.width as usize..column_width {
+        f.write_char(' ')?
+    }
+
+    Ok(())
+}
+
+fn write_vertical_border(f: &mut fmt::Formatter<'_>, column_width: usize) -> fmt::Result {
+    write!(
+        f,
+        "+-{:-<width$}-+-{:-<width$}-+-{:-<width$}-+\n",
+        "",
+        "",
+        "",
+        width = column_width
+    )
+}
+
+fn write_header(f: &mut fmt::Formatter<'_>, column_width: usize) -> fmt::Result {
+    write_vertical_border(f, column_width)?;
+    write!(
+        f,
+        "| {:^width$} | {:^width$} | {:^width$} |\n",
+        "display",
+        "expected",
+        "diff",
+        width = column_width
+    )?;
+    write_vertical_border(f, column_width)
+}
+
+impl<C> Display for FancyPanic<'_, C>
+where
+    C: PixelColor + ColorMapping,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let diff = self.display.diff(self.expected);
+
+        let bounding_box_display = self.display.affected_area_origin();
+        let bounding_box_expected = self.expected.affected_area_origin();
+
+        let bounding_box = Rectangle::new(
+            Point::zero(),
+            bounding_box_display
+                .size
+                .component_max(bounding_box_expected.size),
+        );
+
+        f.write_char('\n')?;
+
+        // Output the 3 displays in columns if they are less than 30 pixels wide.
+        if bounding_box.size.width <= 30 {
+            // Set the width of the output columns to the width of the bounding box,
+            // but at least 10 characters to ensure the column labels fit.
+            let column_width = (bounding_box.size.width as usize).max(10);
+
+            write_header(f, column_width)?;
+
+            // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
+            for y in bounding_box.rows().step_by(2) {
+                f.write_str("| ")?;
+                write_row(f, self.display, &bounding_box, y, column_width)?;
+                f.write_str(" | ")?;
+                write_row(f, self.expected, &bounding_box, y, column_width)?;
+                f.write_str(" | ")?;
+                write_row(f, &diff, &bounding_box, y, column_width)?;
+                f.write_str(" |\n")?;
+            }
+
+            write_vertical_border(f, column_width)?;
+        } else {
+            let width = bounding_box.size.width as usize;
+
+            write!(f, "display\n{:-<width$}\n", "", width = width)?;
+            write_display(f, self.display, &bounding_box)?;
+
+            write!(f, "\nexpected\n{:-<width$}\n", "", width = width)?;
+            write_display(f, &self.expected, &bounding_box)?;
+
+            write!(f, "\ndiff\n{:-<width$}\n", "", width = width)?;
+            write_display(f, &diff, &bounding_box)?;
+        }
+
+        Ok(())
+    }
+}
+
 /// Mapping between `char`s and colors.
 ///
 /// See the [module-level documentation] for a table of implemented mappings.
 ///
 /// [module-level documentation]: index.html
-pub trait ColorMapping {
+pub trait ColorMapping: Into<Rgb888> {
+    /// Color used to display `None` values when `EG_FANCY_PANIC` is enabled.
+    ///
+    /// This color must be set to a color that isn't available in normal patterns to make it
+    /// distinguishable in the output. For non grayscale colors the default value should be used.
+    const NONE_COLOR: Rgb888 = Rgb888::new(128, 128, 128);
+
     /// Converts a char into a color of type `C`.
     fn char_to_color(c: char) -> Self;
 
@@ -596,6 +861,8 @@ impl ColorMapping for BinaryColor {
 macro_rules! impl_gray_color_mapping {
     ($type:ident, $radix:expr) => {
         impl ColorMapping for $type {
+            const NONE_COLOR: Rgb888 = Rgb888::CSS_STEEL_BLUE;
+
             fn char_to_color(c: char) -> Self {
                 if let Some(digit) = c.to_digit($radix) {
                     Self::new(digit as u8)
@@ -617,6 +884,8 @@ impl_gray_color_mapping!(Gray2, 4);
 impl_gray_color_mapping!(Gray4, 16);
 
 impl ColorMapping for Gray8 {
+    const NONE_COLOR: Rgb888 = Rgb888::CSS_STEEL_BLUE;
+
     fn char_to_color(c: char) -> Self {
         if let Some(digit) = c.to_digit(16) {
             Self::new(digit as u8 * 0x11)
@@ -785,5 +1054,14 @@ mod tests {
             disp.affected_area(),
             Rectangle::new(Point::zero(), Size::zero())
         );
+    }
+
+    #[test]
+    fn diff() {
+        let display1 = MockDisplay::<Rgb565>::from_pattern(&[" R RR"]);
+        let display2 = MockDisplay::<Rgb565>::from_pattern(&[" RR B"]);
+        let expected = MockDisplay::<Rgb888>::from_pattern(&["  RGB"]);
+
+        assert_eq!(display1.diff(&display2), expected);
     }
 }
