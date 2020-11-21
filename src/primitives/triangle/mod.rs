@@ -181,30 +181,27 @@ impl Triangle {
 
     /// Create a new triangle with points sorted in a clockwise direction.
     pub(in crate::primitives::triangle) fn sorted_clockwise(&self) -> Self {
-        let [p1, p2, p3] = self.vertices;
-
-        let determinant = -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y;
-
-        match determinant.cmp(&0) {
+        match self.area_doubled().cmp(&0) {
             // Triangle is wound CCW. Swap two points to make it CW.
-            Ordering::Less => Self::new(p2, p1, p3),
+            Ordering::Less => Self::new(self.vertices[1], self.vertices[0], self.vertices[2]),
             // Triangle is already CW, do nothing.
             Ordering::Greater => *self,
             // Triangle is colinear. Sort points so they lie sequentially along the line.
-            Ordering::Equal => {
-                let (p1, p2, p3) = sort_yx(p1, p2, p3);
-
-                Self::new(p1, p2, p3)
-            }
+            Ordering::Equal => self.sorted_yx(),
         }
     }
 
+    /// Sort the 3 vertices of the triangle in order of increasing Y value.
+    ///
+    /// If two points have the same Y value, the one with the lesser X value is put before.
     fn sorted_yx(&self) -> Self {
         let [p1, p2, p3] = self.vertices;
 
-        let (p1, p2, p3) = sort_yx(p1, p2, p3);
+        let (y1, y2) = sort_two_yx(p1, p2);
+        let (y1, y3) = sort_two_yx(p3, y1);
+        let (y2, y3) = sort_two_yx(y3, y2);
 
-        Self::new(p1, p2, p3)
+        Self::new(y1, y2, y3)
     }
 
     pub(in crate::primitives::triangle) fn scanline_intersection(
@@ -295,13 +292,9 @@ impl Transform for Triangle {
     /// );
     /// ```
     fn translate(&self, by: Point) -> Self {
-        Self {
-            vertices: [
-                self.vertices[0] + by,
-                self.vertices[1] + by,
-                self.vertices[2] + by,
-            ],
-        }
+        let mut triangle = *self;
+        triangle.translate_mut(by);
+        triangle
     }
 
     /// Translate the triangle from its current position to a new position by (x, y) pixels.
@@ -332,16 +325,6 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
     } else {
         (p2, p1)
     }
-}
-
-/// Sort 3 points in order of increasing Y value. If two points have the same Y value, the one with
-/// the lesser X value is put before.
-fn sort_yx(p1: Point, p2: Point, p3: Point) -> (Point, Point, Point) {
-    let (y1, y2) = sort_two_yx(p1, p2);
-    let (y1, y3) = sort_two_yx(p3, y1);
-    let (y2, y3) = sort_two_yx(y3, y2);
-
-    (y1, y2, y3)
 }
 
 #[cfg(test)]
