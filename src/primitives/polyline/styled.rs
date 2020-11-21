@@ -1,5 +1,5 @@
 use crate::{
-    draw_target::DrawTarget,
+    draw_target::{DrawTarget, DrawTargetExt},
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
@@ -10,7 +10,57 @@ use crate::{
         Primitive, Rectangle,
     },
     style::{PrimitiveStyle, Styled},
+    transform::Transform,
 };
+
+impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    /// Compute the bounding box of the non-translated polyline.
+    pub(in crate::primitives::polyline) fn untranslated_bounding_box(&self) -> Rectangle {
+        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
+            let (min, max) = ThickSegmentIter::new(
+                self.primitive.vertices,
+                self.style.stroke_width,
+                StrokeOffset::None,
+            )
+            .fold(
+                (
+                    Point::new_equal(core::i32::MAX),
+                    Point::new_equal(core::i32::MIN),
+                ),
+                |(min, max), segment| {
+                    let bb = segment.edges_bounding_box();
+
+                    (
+                        min.component_min(bb.top_left),
+                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
+                    )
+                },
+            );
+
+            Rectangle::with_corners(min, max)
+        } else {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        }
+    }
+
+    fn draw_thick<D>(&self, stroke_color: C, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        for line in ScanlineIterator::new(self) {
+            let rect = line.to_rectangle();
+
+            if !rect.is_zero_sized() {
+                target.fill_solid(&rect, stroke_color)?;
+            }
+        }
+
+        Ok(())
+    }
+}
 
 #[derive(Clone, Debug)]
 enum StyledIter<'a> {
@@ -18,6 +68,7 @@ enum StyledIter<'a> {
     Thick {
         scanline_iter: ScanlineIterator<'a>,
         line_iter: Scanline,
+        translate: Point,
     },
 }
 
@@ -45,6 +96,7 @@ where
             StyledIter::Thick {
                 scanline_iter,
                 line_iter,
+                translate: styled.primitive.translate,
             }
         };
 
@@ -70,6 +122,7 @@ where
             StyledIter::Thick {
                 ref mut scanline_iter,
                 ref mut line_iter,
+                translate,
             } => {
                 // We've got a line to iterate over, so get it's next pixel.
                 if let Some(p) = line_iter.next() {
@@ -81,6 +134,7 @@ where
 
                     line_iter.next()
                 }
+                .map(|p| p + translate)
             }
         }
         .map(|point| Pixel(point, stroke_color))
@@ -119,15 +173,14 @@ where
                         .map(|point| Pixel(point, stroke_color)),
                 ),
                 _ => {
-                    for line in ScanlineIterator::new(self) {
-                        let rect = line.to_rectangle();
-
-                        if !rect.is_zero_sized() {
-                            display.fill_solid(&rect, stroke_color)?;
-                        }
+                    if self.primitive.translate != Point::zero() {
+                        self.draw_thick(
+                            stroke_color,
+                            &mut display.translated(self.primitive.translate),
+                        )
+                    } else {
+                        self.draw_thick(stroke_color, display)
                     }
-
-                    Ok(())
                 }
             }
         } else {
@@ -141,31 +194,8 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
-            let (min, max) = ThickSegmentIter::new(
-                self.primitive.vertices,
-                self.style.stroke_width,
-                StrokeOffset::None,
-            )
-            .fold(
-                (
-                    Point::new_equal(core::i32::MAX),
-                    Point::new_equal(core::i32::MIN),
-                ),
-                |(min, max), segment| {
-                    let bb = segment.edges_bounding_box();
-
-                    (
-                        min.component_min(bb.top_left),
-                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
-                    )
-                },
-            );
-
-            Rectangle::with_corners(min, max)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        }
+        self.untranslated_bounding_box()
+            .translate(self.primitive.translate)
     }
 }
 
@@ -192,7 +222,27 @@ mod tests {
 
     #[test]
     fn one_px_stroke() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let mut display = MockDisplay::new();
+
+        Polyline::new(&PATTERN)
+            .translate(Point::new(-5, -5))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "        #                #",
+            "      ## ##            ## ",
+            "     #     #         ##   ",
+            "   ##       #      ##     ",
+            " ##          ##  ##       ",
+            "#              ##         ",
+        ]);
+    }
+
+    #[test]
+    fn one_px_stroke_translated() {
+        let mut display = MockDisplay::new();
 
         Polyline::new(&PATTERN)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
@@ -219,7 +269,7 @@ mod tests {
 
     #[test]
     fn thick_stroke() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let mut display = MockDisplay::new();
 
         Polyline::new(&PATTERN)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
@@ -244,6 +294,51 @@ mod tests {
                 "                     ##         ",
             ])
         );
+    }
+
+    #[test]
+    fn thick_stroke_translated() {
+        let mut display = MockDisplay::new();
+
+        let styled = Polyline::new(&PATTERN)
+            .translate(Point::new(-4, -3))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4));
+
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(28, 10))
+        );
+
+        styled.draw(&mut display).unwrap();
+
+        display.assert_pattern(&[
+            "         #                  ",
+            "       #####            ##  ",
+            "      #######         ##### ",
+            "    ##########      ####### ",
+            "   #############  ##########",
+            " ######## ################# ",
+            "#######     #############   ",
+            " ####         #########     ",
+            "  #            ######       ",
+            "                 ##         ",
+        ]);
+    }
+
+    #[test]
+    fn thick_stroke_points() {
+        let mut d1 = MockDisplay::new();
+        let mut d2 = MockDisplay::new();
+
+        let pl = Polyline::new(&PATTERN)
+            .translate(Point::new(2, 3))
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4));
+
+        pl.draw(&mut d1).unwrap();
+
+        pl.into_pixels().draw(&mut d2).unwrap();
+
+        d1.assert_eq(&d2);
     }
 
     #[test]
@@ -313,7 +408,7 @@ mod tests {
         ];
 
         for (case, points, expected) in cases.iter() {
-            let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+            let mut display = MockDisplay::new();
 
             Polyline::new(points)
                 .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4))
@@ -331,7 +426,7 @@ mod tests {
 
     #[test]
     fn degenerate_joint() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let mut display = MockDisplay::new();
 
         Polyline::new(&[Point::new(2, 5), Point::new(25, 5), Point::new(5, 2)])
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 5))
@@ -411,7 +506,11 @@ mod tests {
 
         // No stroke color = no pixels
         assert!(Polyline::new(&points)
-            .into_styled::<Rgb565>(PrimitiveStyleBuilder::new().stroke_width(1).build())
+            .into_styled(
+                PrimitiveStyleBuilder::<Rgb565>::new()
+                    .stroke_width(1)
+                    .build()
+            )
             .into_pixels()
             .eq(core::iter::empty()));
     }
@@ -427,14 +526,14 @@ mod tests {
         assert_eq!(display.affected_area(), styled.bounding_box());
 
         assert_eq!(
-            pl.into_styled::<Rgb565>(PrimitiveStyle::new())
+            pl.into_styled(PrimitiveStyle::<Rgb565>::new())
                 .bounding_box(),
             Rectangle::new(pl.bounding_box().center(), Size::zero()),
             "transparent"
         );
 
         assert_eq!(
-            pl.into_styled::<Rgb565>(PrimitiveStyle::with_fill(Rgb565::RED))
+            pl.into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
                 .bounding_box(),
             Rectangle::new(pl.bounding_box().center(), Size::zero()),
             "filled"
@@ -442,7 +541,7 @@ mod tests {
 
         assert_eq!(
             Polyline::new(&PATTERN[0..2])
-                .into_styled::<Rgb565>(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
                 .bounding_box(),
             Rectangle::new(Point::new(4, 3), Size::new(11, 9)),
             "two points"
@@ -450,10 +549,48 @@ mod tests {
 
         assert_eq!(
             Polyline::new(&PATTERN[0..1])
-                .into_styled::<Rgb565>(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
                 .bounding_box(),
             Rectangle::new(Point::new(5, 10), Size::zero()),
             "one point"
+        );
+    }
+
+    #[test]
+    fn translated_bounding_box() {
+        let by = Point::new(10, 12);
+        let pl = Polyline::new(&PATTERN).translate(by);
+
+        assert_eq!(
+            pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
+                .bounding_box(),
+            Rectangle::new(Point::new(15, 17), Size::new(26, 6)),
+            "thin translated"
+        );
+
+        assert_eq!(
+            pl.into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .bounding_box(),
+            Rectangle::new(Point::new(14, 14), Size::new(28, 11)),
+            "thick translated"
+        );
+
+        assert_eq!(
+            Polyline::new(&PATTERN[0..2])
+                .translate(by)
+                .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .bounding_box(),
+            Rectangle::new(Point::new(14, 15), Size::new(11, 9)),
+            "two points translated"
+        );
+
+        assert_eq!(
+            Polyline::new(&PATTERN[0..1])
+                .translate(by)
+                .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+                .bounding_box(),
+            Rectangle::new(Point::new(15, 22), Size::zero()),
+            "one point translated"
         );
     }
 

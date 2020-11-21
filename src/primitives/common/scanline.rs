@@ -1,10 +1,9 @@
-use core::ops::Range;
-
 use crate::{
     geometry::{Point, Size},
     prelude::Primitive,
     primitives::{Line, Rectangle},
 };
+use core::ops::Range;
 
 /// Scanline.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
