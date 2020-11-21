@@ -13,12 +13,47 @@ use crate::{
     transform::Transform,
 };
 
+impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>
+where
+    C: PixelColor,
+{
+    /// Compute the bounding box of the non-translated polyline.
+    pub(in crate::primitives::polyline) fn original_bounding_box(&self) -> Rectangle {
+        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
+            let (min, max) = ThickSegmentIter::new(
+                self.primitive.vertices,
+                self.style.stroke_width,
+                StrokeOffset::None,
+            )
+            .fold(
+                (
+                    Point::new_equal(core::i32::MAX),
+                    Point::new_equal(core::i32::MIN),
+                ),
+                |(min, max), segment| {
+                    let bb = segment.edges_bounding_box();
+
+                    (
+                        min.component_min(bb.top_left),
+                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
+                    )
+                },
+            );
+
+            Rectangle::with_corners(min, max)
+        } else {
+            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 enum StyledIter<'a> {
     Thin(polyline::Points<'a>),
     Thick {
         scanline_iter: ScanlineIterator<'a>,
         line_iter: Scanline,
+        translate: Point,
     },
 }
 
@@ -46,6 +81,7 @@ where
             StyledIter::Thick {
                 scanline_iter,
                 line_iter,
+                translate: styled.primitive.translate,
             }
         };
 
@@ -71,6 +107,7 @@ where
             StyledIter::Thick {
                 ref mut scanline_iter,
                 ref mut line_iter,
+                translate,
             } => {
                 // We've got a line to iterate over, so get it's next pixel.
                 if let Some(p) = line_iter.next() {
@@ -82,6 +119,7 @@ where
 
                     line_iter.next()
                 }
+                .map(|p| p + translate)
             }
         }
         .map(|point| Pixel(point, stroke_color))
@@ -120,6 +158,8 @@ where
                         .map(|point| Pixel(point, stroke_color)),
                 ),
                 _ => {
+                    let mut display = display.translated(self.primitive.translate);
+
                     for line in ScanlineIterator::new(self) {
                         let rect = line.to_rectangle();
 
@@ -142,34 +182,8 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
-            let (min, max) = ThickSegmentIter::new(
-                self.primitive.vertices,
-                self.style.stroke_width,
-                StrokeOffset::None,
-            )
-            .fold(
-                (
-                    Point::new_equal(core::i32::MAX),
-                    Point::new_equal(core::i32::MIN),
-                ),
-                |(min, max), segment| {
-                    let bb = segment.edges_bounding_box();
-
-                    (
-                        min.component_min(bb.top_left),
-                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
-                    )
-                },
-            );
-
-            Rectangle::with_corners(min, max).translate(self.primitive.translate)
-        } else {
-            Rectangle::new(
-                self.primitive.bounding_box().center() + self.primitive.translate,
-                Size::zero(),
-            )
-        }
+        self.original_bounding_box()
+            .translate(self.primitive.translate)
     }
 }
 

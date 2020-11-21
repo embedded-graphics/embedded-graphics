@@ -3,13 +3,11 @@
 use core::ops::Range;
 
 use crate::{
-    geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
     primitives::{
         common::Scanline, polyline::scanline_intersections::ScanlineIntersections, Polyline,
     },
     style::{PrimitiveStyle, Styled},
-    transform::Transform,
 };
 
 /// Iterate over every scanline in the polyline's bounding box.
@@ -20,7 +18,6 @@ pub struct ScanlineIterator<'a> {
     rows: Range<i32>,
     scanline_y: i32,
     intersections: ScanlineIntersections<'a>,
-    translate: Point,
 }
 
 impl<'a> ScanlineIterator<'a> {
@@ -34,10 +31,7 @@ impl<'a> ScanlineIterator<'a> {
             "Polyline ScanlineIterator should only be used for stroke widths greater than 1"
         );
 
-        let mut rows = styled
-            .bounding_box()
-            .translate(-styled.primitive.translate)
-            .rows();
+        let mut rows = styled.original_bounding_box().rows();
 
         if let Some(scanline_y) = rows.next() {
             let intersections = ScanlineIntersections::new(
@@ -50,7 +44,6 @@ impl<'a> ScanlineIterator<'a> {
                 rows,
                 scanline_y,
                 intersections,
-                translate: styled.primitive.translate,
             }
         } else {
             Self::empty()
@@ -62,7 +55,6 @@ impl<'a> ScanlineIterator<'a> {
             rows: 0i32..0,
             scanline_y: 0,
             intersections: ScanlineIntersections::empty(),
-            translate: Point::zero(),
         }
     }
 }
@@ -74,7 +66,7 @@ impl<'a> Iterator for ScanlineIterator<'a> {
         loop {
             if let Some(next) = self.intersections.next() {
                 if !next.is_empty() {
-                    break Some(next.translated(self.translate));
+                    break Some(next);
                 }
             } else {
                 self.scanline_y = self.rows.next()?;
