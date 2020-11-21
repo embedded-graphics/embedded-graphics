@@ -162,7 +162,6 @@ impl Triangle {
     /// This method will panic if the given slice is not exactly 3 items long.
     ///
     /// [`Point`]: ../../geometry/struct.Point.html
-    // MSRV: Consider subslice patterns for rust >= 1.42.0
     pub fn from_slice(vertices: &[Point]) -> Self {
         match vertices {
             [p1, p2, p3] => Self::new(*p1, *p2, *p3),
@@ -319,9 +318,7 @@ impl Transform for Triangle {
     /// )
     /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.vertices[0] += by;
-        self.vertices[1] += by;
-        self.vertices[2] += by;
+        self.vertices.iter_mut().for_each(|v| *v += by);
 
         self
     }

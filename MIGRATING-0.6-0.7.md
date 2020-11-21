@@ -245,12 +245,12 @@ use embedded_graphics::{geometry::{Point}, primitives::Rectangle};
 
 ### Triangle
 
-Triangles now store their vertices in a `[Point; 3]`. Previously, they were stores in the separate fields `p1`, `p2` and `p3`.
+The vertices of a triangle are now stored in a single `vertices` field with the type `[Point; 3]`. Previously, they were stored in three separate fields `p1`, `p2` and `p3`.
 
-To get an individual vertex of a triangle, use `triangle.vertices[]`.
+To access an individual vertex of a triangle, use `triangle.vertices[]`.
 
 ```diff
-use embedded_graphics::{geometry::{Point}, primitives::Triangle};
+use embedded_graphics::{prelude::*, primitives::Triangle};
 
 let triangle = Triangle::new(Point::new(20, 30), Point::new(40, 50), Point::new(60, 70));
 
