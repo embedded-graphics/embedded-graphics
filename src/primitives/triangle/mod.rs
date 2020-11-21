@@ -67,14 +67,8 @@ pub use styled::StyledPixels;
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Triangle {
-    /// First point of the triangle
-    pub p1: Point,
-
-    /// Second point of the triangle
-    pub p2: Point,
-
-    /// Third point of the triangle
-    pub p3: Point,
+    /// The vertices of the triangle.
+    pub vertices: [Point; 3],
 }
 
 impl Primitive for Triangle {
@@ -93,7 +87,7 @@ impl ContainsPoint for Triangle {
         }
 
         let p = point;
-        let Self { p1, p2, p3 } = *self;
+        let [p1, p2, p3] = self.vertices;
 
         // Check if point is inside triangle using https://stackoverflow.com/a/20861130/383609.
         // Works for any point ordering.
@@ -129,7 +123,7 @@ impl ContainsPoint for Triangle {
 
         // Sort points into same order as `ScanlineIterator` so this check produces the same results
         // as a rendered triangle would.
-        let Triangle { p1, p2, p3 } = self.sorted_yx();
+        let [p1, p2, p3] = self.sorted_yx().vertices;
 
         // Special case: due to the Bresenham algorithm being used to render triangles, some pixel
         // centers on a Styled<Triangle> lie outside the mathematical triangle. This check
@@ -144,20 +138,24 @@ impl ContainsPoint for Triangle {
 
 impl Dimensions for Triangle {
     fn bounding_box(&self) -> Rectangle {
-        let x_min = min(min(self.p1.x, self.p2.x), self.p3.x);
-        let y_min = min(min(self.p1.y, self.p2.y), self.p3.y);
+        let [p1, p2, p3] = self.vertices;
 
-        let x_max = max(max(self.p1.x, self.p2.x), self.p3.x);
-        let y_max = max(max(self.p1.y, self.p2.y), self.p3.y);
+        let x_min = min(min(p1.x, p2.x), p3.x);
+        let y_min = min(min(p1.y, p2.y), p3.y);
+
+        let x_max = max(max(p1.x, p2.x), p3.x);
+        let y_max = max(max(p1.y, p2.y), p3.y);
 
         Rectangle::with_corners(Point::new(x_min, y_min), Point::new(x_max, y_max))
     }
 }
 
 impl Triangle {
-    /// Create a new triangle with a given style
+    /// Create a new triangle with the given vertices.
     pub const fn new(p1: Point, p2: Point, p3: Point) -> Self {
-        Triangle { p1, p2, p3 }
+        Triangle {
+            vertices: [p1, p2, p3],
+        }
     }
 
     /// Creates a new triangle from an array of points.
@@ -174,9 +172,7 @@ impl Triangle {
         let points = points.borrow();
 
         Triangle {
-            p1: points[0].into(),
-            p2: points[1].into(),
-            p3: points[2].into(),
+            vertices: [points[0].into(), points[1].into(), points[2].into()],
         }
     }
 
@@ -185,25 +181,25 @@ impl Triangle {
     /// This method can be used to determine if the triangle is colinear by checking if the returned
     /// value is equal to zero.
     pub(in crate::primitives) fn area_doubled(&self) -> i32 {
-        let Self { p1, p2, p3 } = self;
+        let [p1, p2, p3] = self.vertices;
 
         -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y
     }
 
     /// Create a new triangle with points sorted in a clockwise direction.
     pub(in crate::primitives::triangle) fn sorted_clockwise(&self) -> Self {
-        let Self { p1, p2, p3 } = self;
+        let [p1, p2, p3] = self.vertices;
 
         let determinant = -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y;
 
         match determinant.cmp(&0) {
             // Triangle is wound CCW. Swap two points to make it CW.
-            Ordering::Less => Self::new(*p2, *p1, *p3),
+            Ordering::Less => Self::new(p2, p1, p3),
             // Triangle is already CW, do nothing.
             Ordering::Greater => *self,
             // Triangle is colinear. Sort points so they lie sequentially along the line.
             Ordering::Equal => {
-                let (p1, p2, p3) = sort_yx(*p1, *p2, *p3);
+                let (p1, p2, p3) = sort_yx(p1, p2, p3);
 
                 Self::new(p1, p2, p3)
             }
@@ -211,7 +207,9 @@ impl Triangle {
     }
 
     fn sorted_yx(&self) -> Self {
-        let (p1, p2, p3) = sort_yx(self.p1, self.p2, self.p3);
+        let [p1, p2, p3] = self.vertices;
+
+        let (p1, p2, p3) = sort_yx(p1, p2, p3);
 
         Self::new(p1, p2, p3)
     }
@@ -220,7 +218,7 @@ impl Triangle {
         &self,
         scanline_y: i32,
     ) -> Scanline {
-        let Triangle { p1, p2, p3 } = self.sorted_yx();
+        let [p1, p2, p3] = self.sorted_yx().vertices;
 
         let mut scanline = Scanline::new(scanline_y);
 
@@ -240,10 +238,12 @@ impl Triangle {
 
     /// Generate a line join for each corner of the triangle.
     fn joins(&self, stroke_width: u32, stroke_offset: StrokeOffset) -> [LineJoin; 3] {
+        let [p1, p2, p3] = self.vertices;
+
         [
-            LineJoin::from_points(self.p3, self.p1, self.p2, stroke_width, stroke_offset),
-            LineJoin::from_points(self.p1, self.p2, self.p3, stroke_width, stroke_offset),
-            LineJoin::from_points(self.p2, self.p3, self.p1, stroke_width, stroke_offset),
+            LineJoin::from_points(p3, p1, p2, stroke_width, stroke_offset),
+            LineJoin::from_points(p1, p2, p3, stroke_width, stroke_offset),
+            LineJoin::from_points(p2, p3, p1, stroke_width, stroke_offset),
         ]
     }
 
@@ -272,8 +272,8 @@ impl Triangle {
 
             // Find opposite edge to the given point.
             let opposite = {
-                let start = self.vertex(i + 1);
-                let end = self.vertex(i + 2);
+                let start = self.vertices[(i + 1) % 3];
+                let end = self.vertices[(i + 2) % 3];
 
                 // Get right side extent (triangle is sorted clockwise, remember)
                 Line::new(start, end).extents(stroke_width, stroke_offset).1
@@ -283,20 +283,6 @@ impl Triangle {
             // intersect, so the triangle is collapsed.
             opposite.check_side(inner_point, LineSide::Left)
         })
-    }
-
-    /// Get a vertex at a given index.
-    ///
-    /// The given index will always wrap in the range 0..=2.
-    pub(in crate::primitives::triangle) fn vertex(&self, idx: usize) -> Point {
-        let idx = idx % 3;
-
-        match idx {
-            0 => self.p1,
-            1 => self.p2,
-            2 => self.p3,
-            _ => unreachable!(),
-        }
     }
 }
 
@@ -310,15 +296,18 @@ impl Transform for Triangle {
     /// let tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(8, 15));
     /// let moved = tri.translate(Point::new(10, 10));
     ///
-    /// assert_eq!(moved.p1, Point::new(15, 20));
-    /// assert_eq!(moved.p2, Point::new(25, 30));
-    /// assert_eq!(moved.p3, Point::new(18, 25));
+    /// assert_eq!(
+    ///     moved,
+    ///     Triangle::new(Point::new(15, 20), Point::new(25, 30), Point::new(18, 25))
+    /// );
     /// ```
     fn translate(&self, by: Point) -> Self {
         Self {
-            p1: self.p1 + by,
-            p2: self.p2 + by,
-            p3: self.p3 + by,
+            vertices: [
+                self.vertices[0] + by,
+                self.vertices[1] + by,
+                self.vertices[2] + by,
+            ],
         }
     }
 
@@ -330,14 +319,15 @@ impl Transform for Triangle {
     /// let mut tri = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
     /// tri.translate_mut(Point::new(10, 10));
     ///
-    /// assert_eq!(tri.p1, Point::new(15, 20));
-    /// assert_eq!(tri.p2, Point::new(25, 30));
-    /// assert_eq!(tri.p3, Point::new(20, 25));
+    /// assert_eq!(
+    ///     tri,
+    ///     Triangle::new(Point::new(15, 20), Point::new(25, 30), Point::new(20, 25))
+    /// )
     /// ```
     fn translate_mut(&mut self, by: Point) -> &mut Self {
-        self.p1 += by;
-        self.p2 += by;
-        self.p3 += by;
+        self.vertices[0] += by;
+        self.vertices[1] += by;
+        self.vertices[2] += by;
 
         self
     }
@@ -373,14 +363,12 @@ mod tests {
         let tri = Triangle::new(Point::new(5, 10), Point::new(15, 25), Point::new(5, 25));
         let moved = tri.translate(Point::new(-10, -11));
 
-        assert_eq!(tri.p1, Point::new(5, 10));
-        assert_eq!(tri.p2, Point::new(15, 25));
-        assert_eq!(tri.p3, Point::new(5, 25));
         assert_eq!(tri.bounding_box().size, Size::new(11, 16));
 
-        assert_eq!(moved.p1, Point::new(-5, -1));
-        assert_eq!(moved.p2, Point::new(5, 14));
-        assert_eq!(moved.p3, Point::new(-5, 14));
+        assert_eq!(
+            moved,
+            Triangle::new(Point::new(-5, -1), Point::new(5, 14), Point::new(-5, 14))
+        );
         assert_eq!(moved.bounding_box().size, Size::new(11, 16));
     }
 
