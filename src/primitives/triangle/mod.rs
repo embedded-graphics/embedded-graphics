@@ -57,10 +57,10 @@ pub use styled::StyledPixels;
 /// let p3 = Point::new(5, 25);
 ///
 /// // Owned
-/// let tri = Triangle::from_points([p1, p2, p3]);
+/// let tri = Triangle::with_vertices([p1, p2, p3]);
 ///
 /// // Or borrowed
-/// let tri_ref = Triangle::from_points(&[p1, p2, p3]);
+/// let tri_ref = Triangle::with_vertices(&[p1, p2, p3]);
 /// #
 /// # assert_eq!(tri, Triangle::new(p1, p2, p3));
 /// # assert_eq!(tri_ref, Triangle::new(p1, p2, p3));
@@ -158,21 +158,15 @@ impl Triangle {
         }
     }
 
-    /// Creates a new triangle from an array of points.
-    ///
-    /// This supports both [`Point`]s, as well as anything that implements `Into<Point>` like
-    /// `(i32, i32)`.
+    /// Creates a new triangle from an array of [`Point`]s.
     ///
     /// [`Point`]: ../../geometry/struct.Point.html
-    pub fn from_points<P, I>(points: P) -> Self
+    pub fn with_vertices<V>(vertices: V) -> Self
     where
-        I: Into<Point> + Copy,
-        P: Borrow<[I; 3]>,
+        V: Borrow<[Point; 3]>,
     {
-        let points = points.borrow();
-
         Triangle {
-            vertices: [points[0].into(), points[1].into(), points[2].into()],
+            vertices: *vertices.borrow(),
         }
     }
 
