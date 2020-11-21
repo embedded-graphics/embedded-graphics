@@ -22,6 +22,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** [#466](https://github.com/embedded-graphics/embedded-graphics/pull/466) Upgrade Nalgebra from 0.19.0 to 0.23.0.
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Renamed `Font`, `TextStyle` and `TextStyleBuilder` to `MonoFont`, `MonoTextStyle` and `MonoTextStyleBuilder`.
+- **(breaking)** [#494](https://github.com/embedded-graphics/embedded-graphics/pull/494) Triangle vertices are now stored in an array of 3 points, under the `vertices` field.
 
 ### Removed
 
