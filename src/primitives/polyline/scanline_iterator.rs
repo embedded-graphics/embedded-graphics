@@ -31,7 +31,7 @@ impl<'a> ScanlineIterator<'a> {
             "Polyline ScanlineIterator should only be used for stroke widths greater than 1"
         );
 
-        let mut rows = styled.original_bounding_box().rows();
+        let mut rows = styled.untranslated_bounding_box().rows();
 
         if let Some(scanline_y) = rows.next() {
             let intersections = ScanlineIntersections::new(

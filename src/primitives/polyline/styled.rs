@@ -18,7 +18,7 @@ where
     C: PixelColor,
 {
     /// Compute the bounding box of the non-translated polyline.
-    pub(in crate::primitives::polyline) fn original_bounding_box(&self) -> Rectangle {
+    pub(in crate::primitives::polyline) fn untranslated_bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
             let (min, max) = ThickSegmentIter::new(
                 self.primitive.vertices,
@@ -158,13 +158,23 @@ where
                         .map(|point| Pixel(point, stroke_color)),
                 ),
                 _ => {
-                    let mut display = display.translated(self.primitive.translate);
+                    if self.primitive.translate != Point::zero() {
+                        let mut display = display.translated(self.primitive.translate);
 
-                    for line in ScanlineIterator::new(self) {
-                        let rect = line.to_rectangle();
+                        for line in ScanlineIterator::new(self) {
+                            let rect = line.to_rectangle();
 
-                        if !rect.is_zero_sized() {
-                            display.fill_solid(&rect, stroke_color)?;
+                            if !rect.is_zero_sized() {
+                                display.fill_solid(&rect, stroke_color)?;
+                            }
+                        }
+                    } else {
+                        for line in ScanlineIterator::new(self) {
+                            let rect = line.to_rectangle();
+
+                            if !rect.is_zero_sized() {
+                                display.fill_solid(&rect, stroke_color)?;
+                            }
                         }
                     }
 
@@ -182,7 +192,7 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        self.original_bounding_box()
+        self.untranslated_bounding_box()
             .translate(self.primitive.translate)
     }
 }
