@@ -13,10 +13,7 @@ use crate::{
     },
     transform::Transform,
 };
-use core::{
-    borrow::Borrow,
-    cmp::{max, min, Ordering},
-};
+use core::cmp::{max, min, Ordering};
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -47,7 +44,10 @@ pub use styled::StyledPixels;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// ## Create a triangle from an array of points
+/// ## Create a triangle from a slice
+///
+/// A triangle can be created from the first 3 items of a `&[Point]` slice. If the slice is less
+/// than 3 elements long, the [`from_slice`] method will panic.
 ///
 /// ```rust
 /// use embedded_graphics::{geometry::Point, primitives::Triangle};
@@ -56,15 +56,12 @@ pub use styled::StyledPixels;
 /// let p2 = Point::new(15, 25);
 /// let p3 = Point::new(5, 25);
 ///
-/// // Owned
-/// let tri = Triangle::with_vertices([p1, p2, p3]);
-///
-/// // Or borrowed
-/// let tri_ref = Triangle::with_vertices(&[p1, p2, p3]);
+/// let tri = Triangle::from_slice(&[p1, p2, p3]);
 /// #
 /// # assert_eq!(tri, Triangle::new(p1, p2, p3));
-/// # assert_eq!(tri_ref, Triangle::new(p1, p2, p3));
 /// ```
+///
+/// [`from_slice`]: #method.from_slice
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Triangle {
     /// The vertices of the triangle.
