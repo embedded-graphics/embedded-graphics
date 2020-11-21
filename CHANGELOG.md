@@ -28,6 +28,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Support for fonts with variable character width was removed from the internal text renderer.
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) `Font6x6` was removed.
+- **(breaking)** [#494](https://github.com/embedded-graphics/embedded-graphics/pull/494) `Triangle::from_points` is removed. To create a triangle from a slice of `Point`s, use the new `Triangle::from_slice` method.
 
 ### Fixed
 
@@ -65,6 +66,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#429](https://github.com/embedded-graphics/embedded-graphics/pull/429) Added `ToBytes` trait to convert colors into byte arrays.
 - [#431](https://github.com/embedded-graphics/embedded-graphics/pull/431) Added `MockDisplay::affected_area` to get the area affected by previous drawing operations.
 - [#439](https://github.com/embedded-graphics/embedded-graphics/pull/439) Added support to render transparent characters with a colored background.
+- [#494](https://github.com/embedded-graphics/embedded-graphics/pull/494) Add `Triangle::from_slice` to create a triangle from the first three elements in a slice of `Point`s.
 
 ### Changed
 

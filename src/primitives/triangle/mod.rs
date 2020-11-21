@@ -158,15 +158,17 @@ impl Triangle {
         }
     }
 
-    /// Creates a new triangle from an array of [`Point`]s.
+    /// Creates a new triangle from the first three elements of a [`Point`] slice.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the given slice is less than 3 items long.
     ///
     /// [`Point`]: ../../geometry/struct.Point.html
-    pub fn with_vertices<V>(vertices: V) -> Self
-    where
-        V: Borrow<[Point; 3]>,
-    {
+    // MSRV: Consider subslice patterns for rust >= 1.42.0
+    pub fn from_slice(vertices: &[Point]) -> Self {
         Triangle {
-            vertices: *vertices.borrow(),
+            vertices: [vertices[0], vertices[1], vertices[2]],
         }
     }
 

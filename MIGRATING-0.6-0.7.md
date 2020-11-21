@@ -262,6 +262,18 @@ let triangle = Triangle::new(Point::new(20, 30), Point::new(40, 50), Point::new(
 + let p3 = triangle.vertices[2];
 ```
 
+To create a triangle from a slice, use the new `Triangle::from_slice` method:
+
+```rust
+use embedded_graphics::{geometry::{Point}, primitives::Triangle};
+
+let points = [Point::new(20, 30), Point::new(40, 50), Point::new(60, 70)];
+
+let triangle = Triangle::from_slice(&points);
+```
+
+It is no longer possible to create a triangle from an array of `Point`s. Instead, pass a reference to `Triangle::from_slice`.
+
 ## Geometry
 
 Implementations of the `Dimensions` trait now only require the `bounding_box` method to be implemented. This should return a rectangle encompasing the entire shape.
