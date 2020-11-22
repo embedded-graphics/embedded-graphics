@@ -394,8 +394,8 @@ pub trait DrawTarget: Dimensions {
     /// ```
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
-    /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
-    /// [`Points::points`]: ../primitives/trait.Primitive.html#tymethod.points
+    /// [`Rectangle::intersection`]: ../rectangle/struct.Rectangle.html#method.intersection
+    /// [`Points::points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,

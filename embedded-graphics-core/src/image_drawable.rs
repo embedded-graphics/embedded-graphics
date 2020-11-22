@@ -18,7 +18,7 @@ use crate::{
 /// All image drawables are positioned at the origin and need to implement [`OriginDimensions`], in
 /// addition to this trait, to define their dimensions.
 ///
-/// [`Image`]: struct.Image.html
+/// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 /// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
 pub trait ImageDrawable: OriginDimensions {
     /// The color type.
@@ -34,7 +34,7 @@ pub trait ImageDrawable: OriginDimensions {
     /// the [`OriginDimensions`] trait implementation. This means that the top left corner is at the
     /// origin and no drawing operations outside the bounding box are allowed.
     ///
-    /// [`Image`]: struct.Image.html
+    /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
     /// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
@@ -49,8 +49,8 @@ pub trait ImageDrawable: OriginDimensions {
     /// The implementation of this method must draw the image inside the given `area`.
     /// It must be ensured that no drawing operation outside this [`Rectangle`] occur.
     ///
-    /// [`SubImage`]: struct.SubImage.html
-    /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
+    /// [`SubImage`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.SubImage.html
+    /// [`Rectangle`]: ../rectangle/struct.Rectangle.html
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>,

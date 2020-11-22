@@ -359,7 +359,7 @@ impl Rectangle {
     /// ```
     ///
     /// [`columns`]: #method.columns
-    /// [`points`]: ../trait.Primitive.html#tymethod.points
+    /// [`points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
     pub fn rows(&self) -> Range<i32> {
         self.top_left.y
             ..self
@@ -398,7 +398,7 @@ impl Rectangle {
     /// ```
     ///
     /// [`rows`]: #method.rows
-    /// [`points`]: ../trait.Primitive.html#tymethod.points
+    /// [`points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
     pub fn columns(&self) -> Range<i32> {
         self.top_left.x
             ..self
