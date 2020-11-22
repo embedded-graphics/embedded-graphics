@@ -1,3 +1,5 @@
+//! Image drawable.
+
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
     geometry::OriginDimensions,

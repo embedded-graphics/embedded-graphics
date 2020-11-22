@@ -1,3 +1,5 @@
+//! Iterator over all points inside the rectangle.
+
 use crate::{geometry::Point, rectangle::Rectangle};
 
 /// Iterator over all points inside the rectangle.
@@ -22,6 +24,7 @@ impl Points {
         }
     }
 
+    /// Create a points iterator that returns no items.
     pub const fn empty() -> Self {
         Self {
             left: 0,
