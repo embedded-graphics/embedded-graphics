@@ -7,6 +7,7 @@ use float_cmp::{ApproxEq, F32Margin};
 #[allow(unused_imports)]
 use micromath::F32Ext;
 
+#[allow(dead_code)]
 pub(crate) mod angle_consts {
     use super::{real, Angle};
 
@@ -62,12 +63,6 @@ impl Angle {
     /// Normalize the angle to less than one full rotation (ie. in the range 0..360).
     pub fn normalize(self) -> Self {
         Angle(self.0.rem_euclid((2.0 * PI).into()))
-    }
-
-    /// Normalize the angle to less than one full rotation, starting from angle.
-    /// (ie. in the range angle..(angle+360)).
-    pub(crate) fn normalize_from(self, angle: Self) -> Self {
-        Angle((self.0 - angle.0).rem_euclid((2.0 * PI).into()) + angle.0)
     }
 
     /// Return numerical value of the angle in degree

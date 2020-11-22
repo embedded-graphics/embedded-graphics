@@ -15,6 +15,7 @@ pub(crate) use real_impl::{Real, FRAC_PI_2, PI, TAU};
 mod real_impl {
     use core::f32;
 
+    #[allow(dead_code)]
     pub(crate) const FRAC_PI_2: Real = Real(f32::consts::FRAC_PI_2);
     pub(crate) const PI: Real = Real(f32::consts::PI);
     pub(crate) const TAU: Real = Real(2.0 * f32::consts::PI);
@@ -63,6 +64,7 @@ mod real_impl {
 mod real_impl {
     use fixed::types::I16F16;
 
+    #[allow(dead_code)]
     pub(crate) const FRAC_PI_2: Real = Real(I16F16::from_bits(102944));
     pub(crate) const PI: Real = Real(I16F16::from_bits(205887));
     pub(crate) const TAU: Real = Real(I16F16::from_bits(411775));

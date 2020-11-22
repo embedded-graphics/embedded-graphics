@@ -232,6 +232,27 @@ impl Point {
     pub fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
     }
+
+    /// Returns a point that is rotated by 90° relative to the origin.
+    pub(crate) const fn rotate_90(self) -> Self {
+        Self::new(self.y, -self.x)
+    }
+
+    /// Calculates the dot product of two points.
+    pub(crate) const fn dot_product(self, other: Point) -> i32 {
+        self.x * other.x + self.y * other.y
+    }
+
+    /// Calculates the determinant of a 2x2 matrix formed by this and another point.
+    ///
+    /// ```text
+    ///          | self.x  self.y  |
+    /// result = |                 |
+    ///          | other.x other.y |
+    ///
+    pub(crate) const fn determinant(self, other: Point) -> i32 {
+        self.x * other.y - self.y * other.x
+    }
 }
 
 impl Add for Point {
@@ -756,5 +777,13 @@ mod tests {
 
         assert_eq!(a.component_min(b), Point::new(15, 30));
         assert_eq!(a.component_max(b), Point::new(20, 50));
+    }
+
+    #[test]
+    fn rotate_90() {
+        assert_eq!(Point::new(1, 0).rotate_90(), Point::new(0, -1));
+        assert_eq!(Point::new(0, -2).rotate_90(), Point::new(-2, 0));
+        assert_eq!(Point::new(-3, 0).rotate_90(), Point::new(0, 3));
+        assert_eq!(Point::new(0, 4).rotate_90(), Point::new(4, 0));
     }
 }
