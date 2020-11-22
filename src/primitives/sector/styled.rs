@@ -327,4 +327,74 @@ mod tests {
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());
     }
+
+    #[test]
+    fn stroke_center_semicircle() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Sector::new(Point::new_equal(1), 15, 0.0.deg(), 180.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(BinaryColor::On)
+                    .stroke_color(BinaryColor::Off)
+                    .stroke_width(2)
+                    .stroke_alignment(StrokeAlignment::Center)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        display.assert_pattern(&[
+            "      .....      ",
+            "    .........    ",
+            "  ....#####....  ",
+            "  ..#########..  ",
+            " ..###########.. ",
+            " ..###########.. ",
+            "..#############..",
+            ".................",
+            ".................",
+        ]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn stroke_center_semicircle_vertical() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Sector::new(Point::new_equal(1), 15, 90.0.deg(), 180.0.deg())
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(BinaryColor::On)
+                    .stroke_color(BinaryColor::Off)
+                    .stroke_width(2)
+                    .stroke_alignment(StrokeAlignment::Center)
+                    .build(),
+            )
+            .draw(&mut display)?;
+
+        display.assert_pattern(&[
+            "      ...",
+            "    .....",
+            "  ....#..",
+            "  ..###..",
+            " ..####..",
+            " ..####..",
+            "..#####..",
+            "..#####..",
+            "..#####..",
+            "..#####..",
+            "..#####..",
+            " ..####..",
+            " ..####..",
+            "  ..###..",
+            "  ....#..",
+            "    .....",
+            "      ...",
+        ]);
+
+        Ok(())
+    }
 }
