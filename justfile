@@ -16,19 +16,19 @@ build: check-formatting test test-all build-benches check-readme check-links
 
 # Build the benches
 build-benches:
-    cargo bench --features "criterion" --no-run
+    cargo bench --workspace --features "criterion" --no-run
 
 # Run the benches
 bench *args:
-    cargo bench --features "criterion" {{args}}
+    cargo bench --workspace --features "criterion" {{args}}
 
 # Run cargo test in release mode
 test:
-    cargo test --release
+    cargo test --workspace --release
 
 # Run cargo test in release mode with all features enabled
 test-all:
-    cargo test --release --features "{{all_features}}"
+    cargo test --workspace --release --features "{{all_features}}"
 
 # Check the formatting
 check-formatting:
@@ -36,8 +36,8 @@ check-formatting:
 
 # Cross compiles embedded-graphics for a target
 build-target target *args:
-    cargo build --target {{target}} {{args}}
-    cargo build --target {{target}} --features "{{all_features}}" {{args}}
+    cargo build --workspace --target {{target}} {{args}}
+    cargo build --workspace --target {{target}} --features "{{all_features}}" {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:
@@ -68,7 +68,7 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --features "{{all_features}}"
+    cargo doc --workspace --features "{{all_features}}"
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
