@@ -7,7 +7,6 @@ use crate::{
     primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
-use core::ops::RangeInclusive;
 pub use embedded_graphics_core::rectangle::{AnchorPoint, Points, Rectangle};
 pub use styled::StyledPixels;
 
@@ -29,13 +28,6 @@ impl ContainsPoint for Rectangle {
             false
         }
     }
-}
-
-/// Checks if the two ranges overlap.
-fn overlaps(first: RangeInclusive<i32>, second: RangeInclusive<i32>) -> bool {
-    second.contains(first.start())
-        || second.contains(first.end())
-        || first.start() < second.start() && first.end() > second.end()
 }
 
 impl OffsetOutline for Rectangle {
@@ -92,10 +84,7 @@ impl Transform for Rectangle {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        geometry::{Dimensions, Point, Size},
-        primitives::{ContainsPoint, Primitive},
-    };
+    use crate::geometry::{Dimensions, Point, Size};
 
     #[test]
     fn dimensions() {

@@ -4,10 +4,7 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::{
-        rectangle::{Points, Rectangle},
-        ContainsPoint, OffsetOutline, Primitive,
-    },
+    primitives::rectangle::{Points, Rectangle},
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     transform::Transform,
     SaturatingCast,

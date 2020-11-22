@@ -4,7 +4,7 @@ use crate::{
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::{circle::Circle, common::DistanceIterator, rectangle::Rectangle, OffsetOutline},
+    primitives::{circle::Circle, common::DistanceIterator, rectangle::Rectangle},
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     SaturatingCast,
 };

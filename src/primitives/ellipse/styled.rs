@@ -6,7 +6,7 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
-        OffsetOutline, Rectangle,
+        Rectangle,
     },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     SaturatingCast,

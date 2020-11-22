@@ -6,7 +6,7 @@ use crate::{
             ellipse_quadrant::{self, Quadrant},
             RoundedRectangle,
         },
-        ContainsPoint, Primitive,
+        Primitive,
     },
 };
 

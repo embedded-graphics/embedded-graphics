@@ -3,7 +3,6 @@ use crate::{
     primitives::{
         ellipse::{compute_threshold, is_point_inside_ellipse, Ellipse},
         rectangle::{self, Rectangle},
-        Primitive,
     },
 };
 
@@ -55,7 +54,7 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitives::Circle;
+    use crate::primitives::{Circle, Primitive};
 
     #[test]
     fn matches_circles_points() {

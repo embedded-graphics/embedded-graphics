@@ -6,7 +6,7 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         rounded_rectangle::{Points, RoundedRectangle},
-        ContainsPoint, OffsetOutline, Rectangle,
+        ContainsPoint, Rectangle,
     },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     SaturatingCast,
@@ -118,7 +118,7 @@ mod tests {
         iterator::IntoPixels,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::{rectangle::Rectangle, CornerRadii, OffsetOutline, Primitive},
+        primitives::{rectangle::Rectangle, CornerRadii, Primitive},
         style::{PrimitiveStyleBuilder, StrokeAlignment},
     };
 

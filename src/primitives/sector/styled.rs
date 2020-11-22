@@ -9,7 +9,7 @@ use crate::{
         common::{
             DistanceIterator, OriginLinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        OffsetOutline, Rectangle, Sector, Styled,
+        Rectangle, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
     SaturatingCast,
