@@ -87,7 +87,7 @@ generate-readme: (_build-readmes)
     cp {{target_dir}}/README.md README.md
 
 # Generate all READMEs
-generate-readmes: (_build-readmes)
+generate-readmes: generate-core-readme generate-readme
 
 # Check READMEs
 @check-readmes: (_build-readmes)
@@ -107,7 +107,6 @@ generate-readmes: (_build-readmes)
 _build-readmes:
     #!/usr/bin/env bash
     set -e -o pipefail
-    mkdir -p {{target_dir}}/readme
     echo "Building README.md"
     cargo readme | sed -E -f filter_readme.sed > {{target_dir}}/README.md
 
