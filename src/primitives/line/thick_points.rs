@@ -75,14 +75,14 @@ pub(in crate::primitives::line) struct ParallelsIterator {
 }
 
 impl ParallelsIterator {
-    /// Creates a new parallels iterator, biased to the left for centered strokes with odd
+    /// Creates a new parallels iterator, biased to the left for centered strokes with even
     /// thickness.
     pub fn new(line: &Line, thickness: i32, stroke_offset: StrokeOffset) -> Self {
         Self::new_biased(line, thickness, stroke_offset, LineSide::Left)
     }
 
-    /// Create a parallels iterator with a given side bias if the stroke is centered and has an odd
-    /// width.
+    /// Create a parallels iterator with a given side bias if the stroke is centered and has an even
+    /// thickness.
     pub fn new_biased(
         mut line: &Line,
         thickness: i32,
@@ -111,7 +111,6 @@ impl ParallelsIterator {
         let flip = perpendicular_parameters.position_step.minor
             == -parallel_parameters.position_step.major;
 
-        // Next side, right-biased for center alignment.
         let next_side = match stroke_offset {
             StrokeOffset::None => center_bias.swap(),
             StrokeOffset::Left => LineSide::Left,
@@ -224,8 +223,8 @@ pub struct ThickPoints {
 impl ThickPoints {
     /// Creates a new iterator over the points in the stroke of a thick line.
     ///
-    /// A bias can be provided for centered lines with odd-numbered stroke widths. For consistency,
-    /// this should default to `LineSide::Left` under normal usage.
+    /// A bias can be provided for centered lines with even thickness. For consistency, this should
+    /// default to `LineSide::Left` under normal usage.
     pub(in crate::primitives) fn new(line: &Line, thickness: i32, center_bias: LineSide) -> Self {
         Self {
             parallel: Bresenham::new(line.start),
