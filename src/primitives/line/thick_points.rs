@@ -75,8 +75,20 @@ pub(in crate::primitives::line) struct ParallelsIterator {
 }
 
 impl ParallelsIterator {
-    /// Creates a new parallels iterator.
-    pub fn new(mut line: &Line, thickness: i32, stroke_offset: StrokeOffset) -> Self {
+    /// Creates a new parallels iterator, biased to the left for centered strokes with odd
+    /// thickness.
+    pub fn new(line: &Line, thickness: i32, stroke_offset: StrokeOffset) -> Self {
+        Self::new_biased(line, thickness, stroke_offset, LineSide::Left)
+    }
+
+    /// Create a parallels iterator with a given side bias if the stroke is centered and has an odd
+    /// width.
+    pub fn new_biased(
+        mut line: &Line,
+        thickness: i32,
+        stroke_offset: StrokeOffset,
+        center_bias: LineSide,
+    ) -> Self {
         let start_point = line.start;
 
         // The lines orientation is undefined if start and end point are equal.
@@ -99,8 +111,9 @@ impl ParallelsIterator {
         let flip = perpendicular_parameters.position_step.minor
             == -parallel_parameters.position_step.major;
 
+        // Next side, right-biased for center alignment.
         let next_side = match stroke_offset {
-            StrokeOffset::None => LineSide::Right,
+            StrokeOffset::None => center_bias.swap(),
             StrokeOffset::Left => LineSide::Left,
             StrokeOffset::Right => LineSide::Right,
         };
@@ -210,12 +223,15 @@ pub struct ThickPoints {
 
 impl ThickPoints {
     /// Creates a new iterator over the points in the stroke of a thick line.
-    pub(in crate::primitives) fn new(line: &Line, thickness: i32) -> Self {
+    ///
+    /// A bias can be provided for centered lines with odd-numbered stroke widths. For consistency,
+    /// this should default to `LineSide::Left` under normal usage.
+    pub(in crate::primitives) fn new(line: &Line, thickness: i32, center_bias: LineSide) -> Self {
         Self {
             parallel: Bresenham::new(line.start),
             parallel_length: bresenham::major_length(line),
             parallel_points_remaining: 0,
-            iter: ParallelsIterator::new(line, thickness, StrokeOffset::None),
+            iter: ParallelsIterator::new_biased(line, thickness, StrokeOffset::None, center_bias),
         }
     }
 }

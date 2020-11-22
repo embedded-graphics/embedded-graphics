@@ -5,6 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
+        common::LineSide,
         line::{thick_points::ThickPoints, Line, StrokeOffset},
         Rectangle,
     },
@@ -35,7 +36,7 @@ where
 
         Self {
             stroke_color,
-            line_iter: ThickPoints::new(&primitive, stroke_width),
+            line_iter: ThickPoints::new(&primitive, stroke_width, LineSide::Left),
         }
     }
 }
