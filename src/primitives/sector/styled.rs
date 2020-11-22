@@ -5,8 +5,8 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        circle::DistanceIterator, common::PlaneSectorIterator, line::ThickPoints, OffsetOutline,
-        Rectangle, Sector, Styled,
+        circle::DistanceIterator, common::LineSide, common::PlaneSectorIterator, line::ThickPoints,
+        OffsetOutline, Rectangle, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
     SaturatingCast,
@@ -50,8 +50,16 @@ where
         let line_a = stroke_area.line_from_angle(styled.primitive.angle_start);
         let line_b = stroke_area.line_from_angle(styled.primitive.angle_end());
 
-        let line_a_iter = ThickPoints::new(&line_a, styled.style.stroke_width.saturating_cast());
-        let line_b_iter = ThickPoints::new(&line_b, styled.style.stroke_width.saturating_cast());
+        let line_a_iter = ThickPoints::new(
+            &line_a,
+            styled.style.stroke_width.saturating_cast(),
+            LineSide::Left,
+        );
+        let line_b_iter = ThickPoints::new(
+            &line_b,
+            styled.style.stroke_width.saturating_cast(),
+            LineSide::Right,
+        );
 
         let points = if !styled.style.is_transparent() {
             PlaneSectorIterator::new(
