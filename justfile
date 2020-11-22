@@ -12,7 +12,7 @@ all_features := "nalgebra_support fixed"
 # Building
 #----------
 
-build: check-formatting test test-all build-benches check-readme check-links
+build: check-formatting test test-all build-benches check-readmes check-links
 
 # Build the benches
 build-benches:
@@ -79,24 +79,40 @@ check-links: generate-docs
 # ---------------------
 
 # Generate README.md for a single crate
-generate-readme: (_build-readme)
+generate-core-readme: (_build-readmes)
+    cp {{target_dir}}/README-core.md embedded-graphics-core/README.md
+
+# Generate README.md for a single crate
+generate-readme: (_build-readmes)
     cp {{target_dir}}/README.md README.md
 
-# Check README.md for a single crate
-@check-readme: (_build-readme)
+# Generate all READMEs
+generate-readmes: (_build-readmes)
+
+# Check READMEs
+@check-readmes: (_build-readmes)
     diff -q {{target_dir}}/README.md README.md || ( \
         echo -e "\033[1;31mError:\033[0m README.md needs to be regenerated."; \
         echo -e "       Run 'just generate-readme' to regenerate.\n"; \
         exit 1 \
     )
 
+    diff -q {{target_dir}}/README-core.md embedded-graphics-core/README.md || ( \
+        echo -e "\033[1;31mError:\033[0m Core README.md needs to be regenerated."; \
+        echo -e "       Run 'just generate-core-readme' to regenerate.\n"; \
+        exit 1 \
+    )
+
 # Builds README.md for a single crate
-_build-readme:
+_build-readmes:
     #!/usr/bin/env bash
     set -e -o pipefail
     mkdir -p {{target_dir}}/readme
     echo "Building README.md"
     cargo readme | sed -E -f filter_readme.sed > {{target_dir}}/README.md
+
+    echo "Building core README.md"
+    cargo readme -r embedded-graphics-core | sed -E -f filter_readme.sed > {{target_dir}}/README-core.md
 
 #--------
 # Docker
