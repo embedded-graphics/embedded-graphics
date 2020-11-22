@@ -3,7 +3,7 @@
 use crate::{
     geometry::Point,
     primitives::{
-        common::{LineSide, StrokeOffset},
+        common::{LineSide, LinearEquation, StrokeOffset},
         line::Intersection,
         Line,
     },
@@ -144,12 +144,10 @@ impl LineJoin {
         ) {
             // Check if the inside end point of the second line lies inside the first segment.
             let self_intersection = match outer_side {
-                LineSide::Right => {
-                    first_edge_left.check_side(second_edge_left.end, LineSide::Right)
-                }
-                LineSide::Left => {
-                    first_edge_right.check_side(second_edge_right.end, LineSide::Left)
-                }
+                LineSide::Right => LinearEquation::from_line(&first_edge_left)
+                    .check_side(second_edge_left.end, LineSide::Right),
+                LineSide::Left => LinearEquation::from_line(&first_edge_right)
+                    .check_side(second_edge_right.end, LineSide::Left),
             };
 
             // Normal line: non-overlapping line end caps

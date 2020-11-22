@@ -191,24 +191,6 @@ impl Line {
         self.end - self.start
     }
 
-    /// Checks if the point lies on the given side of the line.
-    ///
-    /// Returns `true` if the point lies on the correct side or on the line.
-    pub(in crate::primitives) fn check_side(&self, point: Point, side: LineSide) -> bool {
-        let Point { x: x1, y: y1 } = self.start;
-        let Point { x: x2, y: y2 } = self.end;
-
-        let Point { x, y } = point;
-
-        // https://math.stackexchange.com/a/274728/4506
-        let t = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
-
-        match side {
-            LineSide::Left => t >= 0,
-            LineSide::Right => t <= 0,
-        }
-    }
-
     /// Integer-only line intersection
     ///
     /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to

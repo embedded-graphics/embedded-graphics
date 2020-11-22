@@ -8,7 +8,7 @@ mod styled;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::{LineJoin, LineSide, Scanline, StrokeOffset},
+        common::{LineJoin, LineSide, LinearEquation, Scanline, StrokeOffset},
         ContainsPoint, Line, Primitive, Rectangle,
     },
     transform::Transform,
@@ -271,7 +271,7 @@ impl Triangle {
 
             // If the inner point is to the left of the opposite side line, the triangle edges self-
             // intersect, so the triangle is collapsed.
-            opposite.check_side(inner_point, LineSide::Left)
+            LinearEquation::from_line(&opposite).check_side(inner_point, LineSide::Left)
         })
     }
 }
