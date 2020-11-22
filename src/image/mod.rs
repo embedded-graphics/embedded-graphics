@@ -99,11 +99,12 @@
 //! [`SubImage`]: struct.SubImage.html
 //! [`prelude`]: ../prelude/index.html
 
-mod image_drawable;
+mod image_drawable_ext;
 mod image_raw;
 mod sub_image;
 
-pub use image_drawable::{ImageDrawable, ImageDrawableExt};
+pub use embedded_graphics_core::image_drawable::ImageDrawable;
+pub use image_drawable_ext::ImageDrawableExt;
 pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
 pub use sub_image::SubImage;
 
