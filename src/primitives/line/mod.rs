@@ -202,7 +202,7 @@ impl Line {
         // Calculate the determinant to solve the system of linear equations using Cramer's rule.
         let denominator = line1.normal_vector.determinant(line2.normal_vector);
 
-        // The system of linear equations has no solutions if the determinant is zero. In this case, 
+        // The system of linear equations has no solutions if the determinant is zero. In this case,
         // the lines must be colinear.
         if denominator == 0 {
             return Intersection::Colinear;

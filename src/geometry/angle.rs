@@ -7,10 +7,10 @@ use float_cmp::{ApproxEq, F32Margin};
 #[allow(unused_imports)]
 use micromath::F32Ext;
 
-#[allow(dead_code)]
 pub(crate) mod angle_consts {
     use super::{real, Angle};
 
+    #[allow(dead_code)]
     pub(crate) const ANGLE_90DEG: Angle = Angle(real::FRAC_PI_2);
     pub(crate) const ANGLE_180DEG: Angle = Angle(real::PI);
     pub(crate) const ANGLE_360DEG: Angle = Angle(real::TAU);

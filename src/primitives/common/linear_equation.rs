@@ -59,7 +59,7 @@ impl LinearEquation {
     /// Creates a horizontal line equation.
     pub fn new_horizontal() -> Self {
         LinearEquation {
-            normal_vector: Point::new(0, -16384),
+            normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
             origin_distance: 0,
         }
     }

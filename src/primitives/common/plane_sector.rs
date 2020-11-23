@@ -34,6 +34,21 @@ pub struct PlaneSector {
 
 impl PlaneSector {
     pub fn new(center_2x: Point, mut angle_start: Angle, angle_sweep: Angle) -> Self {
+        let angle_sweep_abs = angle_sweep.abs();
+
+        let operation = if angle_sweep_abs >= ANGLE_360DEG {
+            // Skip calculation of half planes if the absolute value of the sweep angle is >= 360°.
+            return Self {
+                half_plane_left: LinearEquation::new_horizontal(),
+                half_plane_right: LinearEquation::new_horizontal(),
+                operation: Operation::EntirePlane,
+            };
+        } else if angle_sweep_abs >= ANGLE_180DEG {
+            Operation::Union
+        } else {
+            Operation::Intersection
+        };
+
         let mut angle_end = angle_start + angle_sweep;
 
         // Swap angles for negative sweeps to use the correct sides of the half planes.
@@ -41,28 +56,10 @@ impl PlaneSector {
             core::mem::swap(&mut angle_start, &mut angle_end)
         }
 
-        let angle_sweep_abs = angle_sweep.abs();
-        let operation = if angle_sweep_abs < ANGLE_180DEG {
-            Operation::Intersection
-        } else if angle_sweep_abs < ANGLE_360DEG {
-            Operation::Union
-        } else {
-            Operation::EntirePlane
-        };
-
         Self {
             half_plane_left: LinearEquation::from_point_angle(center_2x, angle_start),
             half_plane_right: LinearEquation::from_point_angle(center_2x, angle_end),
             operation,
-        }
-    }
-
-    /// TODO: This method doesn't really return an empty plane sector. Does this matter?
-    fn empty() -> Self {
-        Self {
-            half_plane_left: LinearEquation::new_horizontal(),
-            half_plane_right: LinearEquation::new_horizontal(),
-            operation: Operation::Union,
         }
     }
 
@@ -103,7 +100,7 @@ impl PlaneSectorIterator {
 
     pub fn empty() -> Self {
         Self {
-            plane_sector: PlaneSector::empty(),
+            plane_sector: PlaneSector::new(Point::zero(), Angle::zero(), ANGLE_360DEG),
             points: Rectangle::zero().points(),
         }
     }
