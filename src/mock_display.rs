@@ -149,7 +149,7 @@
 //!
 //! let data = [
 //!     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
-//!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF,
+//!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
 //! ];
 //!
 //! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 2);
@@ -161,9 +161,9 @@
 //! image.draw(&mut display);
 //!
 //! display.assert_pattern(&[
-    "KRGY", //
-    "BCMW", //
-]);
+//!     "KRGY", //
+//!     "BCMW", //
+//! ]);
 //! ```
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs
