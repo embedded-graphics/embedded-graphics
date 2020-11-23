@@ -249,7 +249,7 @@ impl Point {
     ///          | self.x  self.y  |
     /// result = |                 |
     ///          | other.x other.y |
-    ///
+    /// ```
     pub(crate) const fn determinant(self, other: Point) -> i32 {
         self.x * other.y - self.y * other.x
     }
