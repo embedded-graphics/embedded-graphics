@@ -59,6 +59,14 @@ impl Dimensions for Rectangle {
     }
 }
 
+/// Returns the center offset.
+///
+/// The center offset is defined as the offset between the top left corner and
+/// the center point of a rectangle with size `self`.
+fn center_offset(size: Size) -> Size {
+    size.saturating_sub(Size::new(1, 1)) / 2
+}
+
 impl Rectangle {
     /// Creates a new rectangle from the top left point and the size.
     pub const fn new(top_left: Point, size: Size) -> Self {
@@ -83,7 +91,7 @@ impl Rectangle {
     /// corner will be rounded up to the nearest integer coordinate.
     pub fn with_center(center: Point, size: Size) -> Self {
         Rectangle {
-            top_left: center - size.center_offset(),
+            top_left: center - center_offset(size),
             size,
         }
     }
@@ -98,7 +106,7 @@ impl Rectangle {
     /// For rectangles with even width and/or height the returned value is rounded down
     /// to the nearest integer coordinate.
     pub fn center(&self) -> Point {
-        self.top_left + self.size.center_offset()
+        self.top_left + center_offset(self.size)
     }
 
     /// Returns the bottom right corner of this rectangle.

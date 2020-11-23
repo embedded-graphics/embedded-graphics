@@ -69,7 +69,7 @@ impl Ellipse {
 
     /// Create a new ellipse centered around a given point with a specific size
     pub fn with_center(center: Point, size: Size) -> Self {
-        let top_left = center - size.center_offset();
+        let top_left = Rectangle::with_center(center, size).top_left;
 
         Ellipse { top_left, size }
     }

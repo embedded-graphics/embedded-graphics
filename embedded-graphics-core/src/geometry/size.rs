@@ -179,14 +179,6 @@ impl Size {
         Self { width, height }
     }
 
-    /// Returns the center offset.
-    ///
-    /// The center offset is defined as the offset between the top left corner and
-    /// the center point of a rectangle with size `self`.
-    pub fn center_offset(self) -> Self {
-        self.saturating_sub(Size::new(1, 1)) / 2
-    }
-
     /// Returns the componentwise minimum of two `Size`s.
     ///
     /// ```rust
