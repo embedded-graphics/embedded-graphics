@@ -191,24 +191,6 @@ impl Line {
         self.end - self.start
     }
 
-    /// Checks if the point lies on the given side of the line.
-    ///
-    /// Returns `true` if the point lies on the correct side or on the line.
-    pub(in crate::primitives) fn check_side(&self, point: Point, side: LineSide) -> bool {
-        let Point { x: x1, y: y1 } = self.start;
-        let Point { x: x2, y: y2 } = self.end;
-
-        let Point { x, y } = point;
-
-        // https://math.stackexchange.com/a/274728/4506
-        let t = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
-
-        match side {
-            LineSide::Left => t >= 0,
-            LineSide::Right => t <= 0,
-        }
-    }
-
     /// Integer-only line intersection
     ///
     /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
@@ -217,28 +199,42 @@ impl Line {
         let line1 = LinearEquation::from_line(self);
         let line2 = LinearEquation::from_line(other);
 
-        let denom = line1.a * line2.b - line2.a * line1.b;
+        // Calculate the determinant to solve the system of linear equations using Cramer's rule.
+        let denominator = line1.normal_vector.determinant(line2.normal_vector);
 
-        // Lines are colinear or parallel
-        if denom == 0 {
+        // The system of linear equations has no solutions if the determinant is zero. In this case,
+        // the lines must be colinear.
+        if denominator == 0 {
             return Intersection::Colinear;
         }
 
         // If we got here, line segments intersect. Compute intersection point using method similar
         // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
 
-        // The denom/2 is to get rounding instead of truncating.
-        let offset = denom.abs() / 2;
+        // The denominator/2 is to get rounding instead of truncating.
+        let offset = denominator.abs() / 2;
 
-        let num = line1.b * line2.c - line2.b * line1.c;
-        let x = if num < 0 { num - offset } else { num + offset } / denom;
+        let origin_distances = Point::new(line1.origin_distance, line2.origin_distance);
 
-        let num = line2.a * line1.c - line1.a * line2.c;
-        let y = if num < 0 { num - offset } else { num + offset } / denom;
+        let numerator =
+            origin_distances.determinant(Point::new(line1.normal_vector.y, line2.normal_vector.y));
+        let x_numerator = if numerator < 0 {
+            numerator - offset
+        } else {
+            numerator + offset
+        };
+
+        let numerator =
+            Point::new(line1.normal_vector.x, line2.normal_vector.x).determinant(origin_distances);
+        let y_numerator = if numerator < 0 {
+            numerator - offset
+        } else {
+            numerator + offset
+        };
 
         Intersection::Point {
-            point: Point::new(x, y),
-            outer_side: if denom > 0 {
+            point: Point::new(x_numerator, y_numerator) / denominator,
+            outer_side: if denominator > 0 {
                 LineSide::Right
             } else {
                 LineSide::Left

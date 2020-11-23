@@ -1,10 +1,20 @@
 use crate::{
-    geometry::{angle_consts::*, Angle, Dimensions, Point, Real},
+    geometry::{angle_consts::*, Angle, Dimensions, Point},
     primitives::{
         common::{LineSide, LinearEquation},
         rectangle, Primitive, Rectangle,
     },
 };
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+enum Operation {
+    /// Return the intersection of both half planes.
+    Intersection,
+    /// Return the union of both half planes.
+    Union,
+    /// Return the entire plane.
+    EntirePlane,
+}
 
 /// Sector shaped part of a plane.
 ///
@@ -14,49 +24,42 @@ use crate::{
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct PlaneSector {
-    line_a: LinearEquation<Real>,
-    line_b: LinearEquation<Real>,
-    side_a: LineSide,
-    side_b: LineSide,
-    sweep: Angle,
+    /// Half plane on the left side of a line.
+    half_plane_left: LinearEquation,
+    /// Half plane on the right side of a line.
+    half_plane_right: LinearEquation,
+    /// The operation used to combine the two half planes.
+    operation: Operation,
 }
 
 impl PlaneSector {
-    pub fn new(center_2x: Point, angle_start: Angle, angle_sweep: Angle) -> Self {
-        let angle_end = angle_start + angle_sweep;
+    pub fn new(center_2x: Point, mut angle_start: Angle, angle_sweep: Angle) -> Self {
+        let angle_sweep_abs = angle_sweep.abs();
 
-        let angle_start_norm = angle_start.normalize_from(-ANGLE_90DEG);
-        let angle_end_norm = angle_end.normalize_from(-ANGLE_90DEG);
-        let negative_sweep = angle_sweep < Angle::zero();
-
-        let side_a = if (angle_start_norm < ANGLE_90DEG) ^ negative_sweep {
-            LineSide::Left
+        let operation = if angle_sweep_abs >= ANGLE_360DEG {
+            // Skip calculation of half planes if the absolute value of the sweep angle is >= 360°.
+            return Self {
+                half_plane_left: LinearEquation::new_horizontal(),
+                half_plane_right: LinearEquation::new_horizontal(),
+                operation: Operation::EntirePlane,
+            };
+        } else if angle_sweep_abs >= ANGLE_180DEG {
+            Operation::Union
         } else {
-            LineSide::Right
+            Operation::Intersection
         };
 
-        let side_b = if (angle_end_norm >= ANGLE_90DEG) ^ negative_sweep {
-            LineSide::Left
-        } else {
-            LineSide::Right
-        };
+        let mut angle_end = angle_start + angle_sweep;
 
-        Self {
-            line_a: LinearEquation::from_point_angle(center_2x, angle_start),
-            line_b: LinearEquation::from_point_angle(center_2x, angle_end),
-            side_a,
-            side_b,
-            sweep: angle_sweep.abs(),
+        // Swap angles for negative sweeps to use the correct sides of the half planes.
+        if angle_sweep < Angle::zero() {
+            core::mem::swap(&mut angle_start, &mut angle_end)
         }
-    }
 
-    fn empty() -> Self {
         Self {
-            line_a: LinearEquation::new_horizontal(),
-            line_b: LinearEquation::new_horizontal(),
-            side_a: LineSide::Left,
-            side_b: LineSide::Left,
-            sweep: Angle::zero(),
+            half_plane_left: LinearEquation::from_point_angle(center_2x, angle_start),
+            half_plane_right: LinearEquation::from_point_angle(center_2x, angle_end),
+            operation,
         }
     }
 
@@ -64,15 +67,13 @@ impl PlaneSector {
         // `PlaneSector` uses scaled coordinates for an increased resolution.
         let point = point * 2;
 
-        let correct_side_a = self.line_a.check_side(point, self.side_a);
-        let correct_side_b = self.line_b.check_side(point, self.side_b);
+        let correct_side_1 = self.half_plane_left.check_side(point, LineSide::Left);
+        let correct_side_2 = self.half_plane_right.check_side(point, LineSide::Right);
 
-        if self.sweep < ANGLE_180DEG {
-            correct_side_a && correct_side_b
-        } else if self.sweep < ANGLE_360DEG {
-            correct_side_a || correct_side_b
-        } else {
-            true
+        match self.operation {
+            Operation::Intersection => correct_side_1 && correct_side_2,
+            Operation::Union => correct_side_1 || correct_side_2,
+            Operation::EntirePlane => true,
         }
     }
 }
@@ -99,7 +100,7 @@ impl PlaneSectorIterator {
 
     pub fn empty() -> Self {
         Self {
-            plane_sector: PlaneSector::empty(),
+            plane_sector: PlaneSector::new(Point::zero(), Angle::zero(), ANGLE_360DEG),
             points: Rectangle::zero().points(),
         }
     }

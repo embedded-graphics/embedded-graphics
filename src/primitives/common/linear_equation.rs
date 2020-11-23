@@ -3,62 +3,194 @@ use crate::{
     primitives::{common::LineSide, Line},
 };
 
-/// Linear equation representation
+/// Scaling factor for unit length normal vectors.
+const NORMAL_VECTOR_SCALE: i32 = 1 << 10;
+
+/// Linear equation.
 ///
-/// The equation is stored as the a, b and c coefficients of the ax + by + c = 0 equation
+/// The equation is stored as a normal vector and the distance to the origin.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub struct LinearEquation<T> {
-    pub a: T,
-    pub b: T,
-    pub c: T,
+pub struct LinearEquation {
+    /// Normal vector, perpendicular to the line.
+    ///
+    /// The unit vector is scaled up to increase the resolution.
+    pub normal_vector: Point,
+
+    /// Distance from the origin.
+    ///
+    /// The distance doesn't directly correlate to the distance in pixels, but is
+    /// scaled up by the length of the normal vector.
+    pub origin_distance: i32,
 }
 
-impl LinearEquation<i32> {
-    pub const fn from_line(line: &Line) -> Self {
+impl LinearEquation {
+    /// Creates a new linear equation from a line.
+    pub fn from_line(line: &Line) -> Self {
+        let normal_vector = line.delta().rotate_90();
+        let origin_distance = line.start.dot_product(normal_vector);
+
         Self {
-            a: line.end.y - line.start.y,
-            b: line.start.x - line.end.x,
-            c: line.end.x * line.start.y - line.start.x * line.end.y,
+            normal_vector,
+            origin_distance,
         }
     }
-}
 
-impl LinearEquation<Real> {
-    /// Create a new linear equation based on one point and one angle
+    /// Creates a new linear equation based on one point and one angle.
     pub fn from_point_angle(point: Point, angle: Angle) -> Self {
         // FIXME: angle.tan() for 180.0 degrees isn't exactly 0 which causes problems when drawing
         //        a single quadrant. Is there a better solution to fix this?
-        let (a, b) = if angle == Angle::from_degrees(180.0) {
-            (Real::from(0.0), Real::from(-1.0))
+        let normal_vector = if angle == Angle::from_degrees(180.0) {
+            Point::new(0, NORMAL_VECTOR_SCALE)
         } else {
-            match angle.tan() {
-                None => (Real::from(1.0), Real::from(0.0)),
-                Some(a) => (-a, Real::from(-1.0)),
-            }
+            -Point::new(
+                i32::from(angle.sin() * Real::from(NORMAL_VECTOR_SCALE)),
+                i32::from(angle.cos() * Real::from(NORMAL_VECTOR_SCALE)),
+            )
         };
 
-        let c = -(a * point.x.into() + b * point.y.into());
-        LinearEquation { a, b, c }
+        let origin_distance = point.dot_product(normal_vector);
+
+        LinearEquation {
+            normal_vector,
+            origin_distance,
+        }
     }
 
-    /// Create a horizontal line equation
+    /// Creates a horizontal line equation.
     pub fn new_horizontal() -> Self {
         LinearEquation {
-            a: Real::from(0.0),
-            b: Real::from(1.0),
-            c: Real::from(0.0),
+            normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
+            origin_distance: 0,
         }
+    }
+
+    /// Returns the distance between the line and a point.
+    ///
+    /// The scaling of the returned value depends on the length of the normal vector.
+    /// Positive values will be returned for points on the left side of the line and negative
+    /// values for points on the right.
+    pub fn distance(&self, point: Point) -> i32 {
+        point.dot_product(self.normal_vector) - self.origin_distance
     }
 
     /// Checks if a point is on the given side of the line.
     ///
     /// Always returns `true` if the point is on the line.
     pub fn check_side(&self, point: Point, side: LineSide) -> bool {
-        let t = self.a * point.x.into() + self.b * point.y.into() + self.c;
+        let distance = self.distance(point);
 
         match side {
-            LineSide::Right => t <= Real::from(0.0),
-            LineSide::Left => t >= Real::from(0.0),
+            LineSide::Right => distance <= 0,
+            LineSide::Left => distance >= 0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::geometry::AngleUnit;
+
+    #[test]
+    fn from_line() {
+        assert_eq!(
+            LinearEquation::from_line(&Line::new(Point::zero(), Point::new(1, 0))),
+            LinearEquation {
+                normal_vector: Point::new(0, -1),
+                origin_distance: 0, // line goes through the origin
+            }
+        );
+
+        assert_eq!(
+            LinearEquation::from_line(&Line::new(Point::zero(), Point::new(0, 1))),
+            LinearEquation {
+                normal_vector: Point::new(1, 0),
+                origin_distance: 0, // line goes through the origin
+            }
+        );
+
+        assert_eq!(
+            LinearEquation::from_line(&Line::new(Point::new(2, 3), Point::new(-2, 3))),
+            LinearEquation {
+                normal_vector: Point::new(0, 4),
+                // origin_distance = min. distance between line and origin * length of unit vector
+                //                 = 3 * 4
+                origin_distance: 12,
+            }
+        );
+    }
+
+    #[test]
+    fn from_point_angle() {
+        assert_eq!(
+            LinearEquation::from_point_angle(Point::zero(), 0.0.deg()),
+            LinearEquation {
+                normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
+                origin_distance: 0, // line goes through the origin
+            }
+        );
+
+        assert_eq!(
+            LinearEquation::from_point_angle(Point::zero(), 90.0.deg()),
+            LinearEquation {
+                normal_vector: Point::new(-NORMAL_VECTOR_SCALE, 0),
+                origin_distance: 0, // line goes through the origin
+            }
+        );
+
+        let point = Point::new(3, 4);
+        assert_eq!(
+            LinearEquation::from_point_angle(point, 180.0.deg()),
+            LinearEquation {
+                normal_vector: Point::new(0, NORMAL_VECTOR_SCALE),
+                // (0, 4) is the closest point to the origin that lies on the line
+                origin_distance: 4 * NORMAL_VECTOR_SCALE,
+            }
+        );
+    }
+
+    #[test]
+    fn distance() {
+        let line = LinearEquation::from_point_angle(Point::zero(), 90.0.deg());
+        assert_eq!(line.distance(Point::new(-1, 0)), NORMAL_VECTOR_SCALE);
+        assert_eq!(line.distance(Point::new(1, 0)), -NORMAL_VECTOR_SCALE);
+    }
+
+    #[test]
+    fn check_side_horizontal() {
+        let line = LinearEquation::from_point_angle(Point::zero(), 0.0.deg());
+        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
+        assert!(line.check_side(Point::new(1, 0), LineSide::Right));
+        assert!(!line.check_side(Point::new(-2, 1), LineSide::Left));
+        assert!(line.check_side(Point::new(3, 1), LineSide::Right));
+        assert!(line.check_side(Point::new(-4, -1), LineSide::Left));
+        assert!(!line.check_side(Point::new(5, -1), LineSide::Right));
+
+        let line = LinearEquation::from_point_angle(Point::zero(), 180.0.deg());
+        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
+        assert!(line.check_side(Point::new(1, 0), LineSide::Right));
+        assert!(line.check_side(Point::new(-2, 1), LineSide::Left));
+        assert!(!line.check_side(Point::new(3, 1), LineSide::Right));
+        assert!(!line.check_side(Point::new(-4, -1), LineSide::Left));
+        assert!(line.check_side(Point::new(5, -1), LineSide::Right));
+    }
+
+    #[test]
+    fn check_side_vertical() {
+        let line = LinearEquation::from_point_angle(Point::zero(), 90.0.deg());
+        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
+        assert!(line.check_side(Point::new(0, -1), LineSide::Right));
+        assert!(line.check_side(Point::new(-1, 2), LineSide::Left));
+        assert!(!line.check_side(Point::new(-1, -3), LineSide::Right));
+        assert!(!line.check_side(Point::new(1, 4), LineSide::Left));
+        assert!(line.check_side(Point::new(1, -5), LineSide::Right));
+
+        let line = LinearEquation::from_point_angle(Point::zero(), 270.0.deg());
+        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
+        assert!(line.check_side(Point::new(0, 1), LineSide::Right));
+        assert!(!line.check_side(Point::new(-1, -2), LineSide::Left));
+        assert!(line.check_side(Point::new(-1, 3), LineSide::Right));
+        assert!(line.check_side(Point::new(1, -4), LineSide::Left));
+        assert!(!line.check_side(Point::new(1, 5), LineSide::Right));
     }
 }
