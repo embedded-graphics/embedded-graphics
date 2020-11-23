@@ -4,7 +4,7 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point, PointExt, Size},
     primitives::{common::DistanceIterator, ContainsPoint, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };

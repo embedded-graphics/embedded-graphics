@@ -6,7 +6,7 @@ mod styled;
 mod thick_points;
 
 use crate::{
-    geometry::{Dimensions, Point},
+    geometry::{Dimensions, Point, PointExt},
     primitives::{
         common::{LineSide, LinearEquation, StrokeOffset},
         line::thick_points::{ParallelLineType, ParallelsIterator},

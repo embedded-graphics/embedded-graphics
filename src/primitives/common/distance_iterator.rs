@@ -1,9 +1,6 @@
 use crate::{
-    geometry::Point,
-    primitives::{
-        rectangle::{self, Rectangle},
-        Primitive,
-    },
+    geometry::{Point, PointExt},
+    primitives::rectangle::{self, Rectangle},
 };
 
 /// Iterator that returns the squared distance to the center for all points in the bounding box.

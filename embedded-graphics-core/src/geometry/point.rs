@@ -185,24 +185,6 @@ impl Point {
         Self::new(self.x.max(other.x), self.y.max(other.y))
     }
 
-    /// Returns the squared length.
-    ///
-    /// The returned value is the square of the length of a vector from `(0, 0)`
-    /// to `(self.x, self.y)`.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use embedded_graphics::geometry::Point;
-    ///
-    /// let p = Point::new(3, 4);
-    ///
-    /// assert_eq!(p.length_squared(), 25);
-    /// ```
-    pub fn length_squared(self) -> i32 {
-        self.x.pow(2) + self.y.pow(2)
-    }
-
     /// Returns the componentwise multiplication of two `Point`s.
     ///
     /// ```rust
@@ -231,27 +213,6 @@ impl Point {
     /// ```
     pub fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
-    }
-
-    /// Returns a point that is rotated by 90° relative to the origin.
-    pub const fn rotate_90(self) -> Self {
-        Self::new(self.y, -self.x)
-    }
-
-    /// Calculates the dot product of two points.
-    pub const fn dot_product(self, other: Point) -> i32 {
-        self.x * other.x + self.y * other.y
-    }
-
-    /// Calculates the determinant of a 2x2 matrix formed by this and another point.
-    ///
-    /// ```text
-    ///          | self.x  self.y  |
-    /// result = |                 |
-    ///          | other.x other.y |
-    /// ```
-    pub const fn determinant(self, other: Point) -> i32 {
-        self.x * other.y - self.y * other.x
     }
 }
 
@@ -777,13 +738,5 @@ mod tests {
 
         assert_eq!(a.component_min(b), Point::new(15, 30));
         assert_eq!(a.component_max(b), Point::new(20, 50));
-    }
-
-    #[test]
-    fn rotate_90() {
-        assert_eq!(Point::new(1, 0).rotate_90(), Point::new(0, -1));
-        assert_eq!(Point::new(0, -2).rotate_90(), Point::new(-2, 0));
-        assert_eq!(Point::new(-3, 0).rotate_90(), Point::new(0, 3));
-        assert_eq!(Point::new(0, 4).rotate_90(), Point::new(4, 0));
     }
 }
