@@ -14,10 +14,7 @@
 //! ## Load an RGB565 raw data imge and display it
 //!
 //! This example loads a small image from a raw data array and displays it. The image is RGB565
-//! encoded, so uses the `Rgb565` color type.
-//!
-//! The `graphics` feature of `tinytga` needs to be enabled in `Cargo.toml` to use the `Tga` object
-//! with embedded-graphics.
+//! encoded, so it uses the `Rgb565` color type.
 //!
 //! ```rust
 //! use embedded_graphics::{
@@ -37,7 +34,7 @@
 //! ];
 //!
 //! // Load the image file.
-//! // Note that the color type is set explicitly to match the format used in the image file,
+//! // Note that the color type must be set explicitly to match the format used in the image file,
 //! // otherwise the compiler might infer an incorrect type.
 //! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 2);
 //!

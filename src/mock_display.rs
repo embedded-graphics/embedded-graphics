@@ -160,7 +160,10 @@
 //!
 //! image.draw(&mut display);
 //!
-//! display.assert_pattern(&["KRGY", "BCMW"]);
+//! display.assert_pattern(&[
+    "KRGY", //
+    "BCMW", //
+]);
 //! ```
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs

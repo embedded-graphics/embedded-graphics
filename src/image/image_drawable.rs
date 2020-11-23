@@ -80,16 +80,11 @@ pub trait ImageDrawableExt: Sized {
     /// # use embedded_graphics::mock_display::MockDisplay as Display;
     /// let mut display: Display<Rgb565> = Display::default();
     ///
-    /// let data = [
-    ///     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
-    ///     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
-    ///     // .
-    ///     // .
-    ///     // .
-    ///     0xFF, 0xFF, 0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F,
-    /// ];
+    /// let data = [ 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, /* ... */ ];
+    /// // or: let data = include_bytes!("sprite_atlas.raw");
     ///
-    /// let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4, 3);
+    /// # let data = [0u8; 64 * 32 * 2];
+    /// let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 64, 32);
     ///
     /// let sprite_1 = sprite_atlas.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(32, 32)));
     /// let sprite_2 = sprite_atlas.sub_image(&Rectangle::new(Point::new(32, 0), Size::new(32, 32)));
