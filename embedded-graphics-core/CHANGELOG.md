@@ -8,7 +8,7 @@
 
 ### Added
 
-- [#000](https://github.com/embedded-graphics/embedded-graphics/pull/000) Split common functionality out of `embedded-graphics` into `embedded-graphics-core`.
+- [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Split common functionality out of `embedded-graphics` into `embedded-graphics-core`.
 
 
 <!-- next-url -->
