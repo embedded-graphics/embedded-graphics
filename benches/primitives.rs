@@ -131,23 +131,121 @@ fn arc(c: &mut Criterion) {
 }
 
 fn sector(c: &mut Criterion) {
-    c.bench_function("sector", |b| {
-        let object = Sector::new(Point::new(100, 100), 100, -30.0.deg(), 150.0.deg())
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
+    let mut group = c.benchmark_group("sector");
+
+    let sector = Sector::with_center(Point::new_equal(32), 30, -30.0.deg(), 150.0.deg());
+
+    group.bench_function("1px stroke", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 1);
 
         let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
+
+    group.bench_function("10px stroke", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("1px stroke and fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(1)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("10px stroke and fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(10)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("fill", |b| {
+        let style = PrimitiveStyle::with_fill(Gray8::WHITE);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.finish();
 }
 
-fn filled_sector(c: &mut Criterion) {
-    c.bench_function("filled_sector", |b| {
-        let object = Sector::new(Point::new(100, 100), 100, -30.0.deg(), 150.0.deg())
-            .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
+fn sector_360(c: &mut Criterion) {
+    let mut group = c.benchmark_group("360° sector");
+
+    let sector = Sector::with_center(Point::new_equal(32), 30, 0.0.deg(), 360.0.deg());
+
+    group.bench_function("1px stroke", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 1);
 
         let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
+
+    group.bench_function("10px stroke", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("1px stroke and fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(1)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("10px stroke and fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(10)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("fill", |b| {
+        let style = PrimitiveStyle::with_fill(Gray8::WHITE);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.finish();
 }
 
 fn polyline(c: &mut Criterion) {
@@ -247,6 +345,6 @@ criterion_group!(
     rounded_rectangle_corners,
     arc,
     sector,
-    filled_sector
+    sector_360,
 );
 criterion_main!(primitives);
