@@ -153,7 +153,7 @@ fn sector(c: &mut Criterion) {
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
 
-    group.bench_function("1px stroke & fill", |b| {
+    group.bench_function("1px stroke and fill", |b| {
         let style = PrimitiveStyleBuilder::new()
             .stroke_color(Gray8::WHITE)
             .stroke_width(1)
@@ -164,7 +164,7 @@ fn sector(c: &mut Criterion) {
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
 
-    group.bench_function("10px stroke & fill", |b| {
+    group.bench_function("10px stroke and fill", |b| {
         let style = PrimitiveStyleBuilder::new()
             .stroke_color(Gray8::WHITE)
             .stroke_width(10)
@@ -212,7 +212,7 @@ fn sector_360(c: &mut Criterion) {
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
 
-    group.bench_function("1px stroke & fill", |b| {
+    group.bench_function("1px stroke and fill", |b| {
         let style = PrimitiveStyleBuilder::new()
             .stroke_color(Gray8::WHITE)
             .stroke_width(1)
@@ -223,7 +223,7 @@ fn sector_360(c: &mut Criterion) {
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
 
-    group.bench_function("10px stroke & fill", |b| {
+    group.bench_function("10px stroke and fill", |b| {
         let style = PrimitiveStyleBuilder::new()
             .stroke_color(Gray8::WHITE)
             .stroke_width(10)
