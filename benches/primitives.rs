@@ -145,6 +145,10 @@ fn sector(c: &mut Criterion) {
     group.bench_function("10px stroke", |b| {
         let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
 
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
         let mut framebuffer = Framebuffer::new();
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
@@ -173,6 +177,10 @@ fn sector_360(c: &mut Criterion) {
 
     group.bench_function("10px stroke", |b| {
         let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
