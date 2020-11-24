@@ -153,6 +153,32 @@ fn sector(c: &mut Criterion) {
         b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
     });
 
+    group.bench_function("1px stroke & fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(1)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("10px stroke & fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(10)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
     group.bench_function("fill", |b| {
         let style = PrimitiveStyle::with_fill(Gray8::WHITE);
 
@@ -177,6 +203,32 @@ fn sector_360(c: &mut Criterion) {
 
     group.bench_function("10px stroke", |b| {
         let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
+
+        // Reduce sector radius by half the stoke width to make the bounding box
+        // equal to the other benches.
+        let sector = sector.offset(-(style.stroke_width as i32 / 2));
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("1px stroke & fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(1)
+            .fill_color(Gray8::new(128))
+            .build();
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
+    });
+
+    group.bench_function("10px stroke & fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::WHITE)
+            .stroke_width(10)
+            .fill_color(Gray8::new(128))
+            .build();
 
         // Reduce sector radius by half the stoke width to make the bounding box
         // equal to the other benches.
