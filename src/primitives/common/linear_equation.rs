@@ -86,6 +86,59 @@ impl LinearEquation {
     }
 }
 
+/// Linear equation though the origin.
+///
+/// TODO: docs
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+pub struct OriginLinearEquation {
+    pub normal_vector: Point,
+}
+
+impl OriginLinearEquation {
+    pub fn with_angle(angle: Angle) -> Self {
+        // FIXME: angle.tan() for 180.0 degrees isn't exactly 0 which causes problems when drawing
+        //        a single quadrant. Is there a better solution to fix this?
+        let normal_vector = if angle == Angle::from_degrees(180.0) {
+            Point::new(0, NORMAL_VECTOR_SCALE)
+        } else {
+            -Point::new(
+                i32::from(angle.sin() * Real::from(NORMAL_VECTOR_SCALE)),
+                i32::from(angle.cos() * Real::from(NORMAL_VECTOR_SCALE)),
+            )
+        };
+
+        Self { normal_vector }
+    }
+
+    /// Creates a new horizontal linear equation.
+    pub fn new_horizontal() -> Self {
+        Self {
+            normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
+        }
+    }
+
+    /// Returns the distance between the line and a point.
+    ///
+    /// The scaling of the returned value depends on the length of the normal vector.
+    /// Positive values will be returned for points on the left side of the line and negative
+    /// values for points on the right.
+    pub fn distance(&self, point: Point) -> i32 {
+        point.dot_product(self.normal_vector)
+    }
+
+    /// Checks if a point is on the given side of the line.
+    ///
+    /// Always returns `true` if the point is on the line.
+    pub fn check_side(&self, point: Point, side: LineSide) -> bool {
+        let distance = self.distance(point);
+
+        match side {
+            LineSide::Right => distance <= 0,
+            LineSide::Left => distance >= 0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

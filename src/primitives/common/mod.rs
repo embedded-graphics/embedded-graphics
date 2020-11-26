@@ -8,7 +8,7 @@ mod thick_segment_iter;
 
 pub use closed_thick_segment_iter::ClosedThickSegmentIter;
 pub use line_join::{JoinKind, LineJoin};
-pub use linear_equation::LinearEquation;
+pub use linear_equation::{LinearEquation, OriginLinearEquation};
 pub use plane_sector::{PlaneSector, PlaneSectorIterator};
 pub use scanline::Scanline;
 pub use thick_segment::ThickSegment;

@@ -179,73 +179,63 @@ mod tests {
     };
 
     #[test]
-    fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
+    fn stroke_width_doesnt_affect_fill() {
         let mut expected = MockDisplay::new();
         let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
         Sector::new(Point::new(5, 5), 4, 30.0.deg(), 120.0.deg())
             .into_styled(style)
-            .draw(&mut expected)?;
+            .draw(&mut expected)
+            .unwrap();
 
         let mut with_stroke_width = MockDisplay::new();
         style.stroke_width = 1;
         Sector::new(Point::new(5, 5), 4, 30.0.deg(), 120.0.deg())
             .into_styled(style)
-            .draw(&mut with_stroke_width)?;
+            .draw(&mut with_stroke_width)
+            .unwrap();
 
-        assert_eq!(expected, with_stroke_width);
-
-        Ok(())
+        with_stroke_width.assert_eq(&expected);
     }
 
     // Check the rendering of a simple sector
     #[test]
-    fn tiny_sector() -> Result<(), core::convert::Infallible> {
+    fn tiny_sector() {
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
 
         Sector::new(Point::zero(), 9, 30.0.deg(), 120.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .draw(&mut display)?;
+            .draw(&mut display)
+            .unwrap();
 
-        #[rustfmt::skip]
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "  #####  ",
-                " ##   ## ",
-                " #     # ",
-                "  ## ##  ",
-                "    #    ",
-            ])
-        );
-
-        Ok(())
+        display.assert_pattern(&[
+            "  #####  ", //
+            " ##   ## ", //
+            " #     # ", //
+            "  ## ##  ", //
+            "    #    ", //
+        ]);
     }
 
     // Check the rendering of a filled sector with negative sweep
     #[test]
-    fn tiny_sector_filled() -> Result<(), core::convert::Infallible> {
+    fn tiny_sector_filled() {
         let mut display = MockDisplay::new();
 
         Sector::new(Point::zero(), 7, -30.0.deg(), -300.0.deg())
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)?;
+            .draw(&mut display)
+            .unwrap();
 
-        #[rustfmt::skip]
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "  ###  ",
-                " ##### ",
-                "#####  ",
-                "####   ",
-                "#####  ",
-                " ##### ",
-                "  ###  ",
-            ])
-        );
-
-        Ok(())
+        display.assert_pattern(&[
+            "  ###  ", //
+            " ##### ", //
+            "#####  ", //
+            "####   ", //
+            "#####  ", //
+            " ##### ", //
+            "  ###  ", //
+        ]);
     }
 
     #[test]
@@ -293,8 +283,8 @@ mod tests {
             .draw(&mut display_outside)
             .unwrap();
 
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
+        display_inside.assert_eq(&display_center);
+        display_outside.assert_eq(&display_center);
     }
 
     #[test]
@@ -331,7 +321,6 @@ mod tests {
 
     /// The radial lines should be connected using a line join.
     #[test]
-    #[ignore]
     fn issue_484_line_join_90_deg() {
         let mut display = MockDisplay::<Rgb888>::new();
         // TODO: sectors shouldn't overdraw
@@ -367,7 +356,6 @@ mod tests {
     /// The stroke for the radial lines shouldn't overlap the outer edge of the stroke on the
     /// circular part of the sector.
     #[test]
-    #[ignore]
     fn issue_484_stroke_should_not_overlap_outer_edge() {
         let mut display = MockDisplay::<Rgb888>::new();
         // TODO: sectors shouldn't overdraw
@@ -416,7 +404,6 @@ mod tests {
 
     /// Both radial lines should be perfectly aligned for 180° sweep angle.
     #[test]
-    #[ignore]
     fn issue_484_stroke_center_semicircle() {
         let mut display = MockDisplay::new();
         // TODO: sectors shouldn't overdraw
@@ -449,7 +436,6 @@ mod tests {
 
     /// Both radial lines should be perfectly aligned for 180° sweep angle.
     #[test]
-    #[ignore]
     fn issue_484_stroke_center_semicircle_vertical() {
         let mut display = MockDisplay::new();
         // TODO: sectors shouldn't overdraw
@@ -490,7 +476,6 @@ mod tests {
 
     /// The fill shouldn't overlap the stroke and there should be no gaps between stroke and fill.
     #[test]
-    #[ignore]
     fn issue_484_gaps_and_overlap() {
         let mut display = MockDisplay::new();
         // TODO: sectors shouldn't overdraw
@@ -514,7 +499,6 @@ mod tests {
 
     /// No radial lines should be drawn if the sweep angle is 360°.
     #[test]
-    #[ignore]
     fn issue_484_no_radial_lines_for_360_degree_sweep_angle() {
         let style = PrimitiveStyleBuilder::new()
             .fill_color(Rgb888::GREEN)
@@ -541,7 +525,6 @@ mod tests {
 
     /// No radial lines should be drawn for sweep angles larger than 360°.
     #[test]
-    #[ignore]
     fn issue_484_no_radial_lines_for_sweep_angles_larger_than_360_degree() {
         let style = PrimitiveStyleBuilder::new()
             .fill_color(Rgb888::GREEN)

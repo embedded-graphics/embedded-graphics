@@ -1,7 +1,7 @@
 use crate::{
     geometry::{angle_consts::*, Angle, Dimensions, Point},
     primitives::{
-        common::{LineSide, LinearEquation},
+        common::{LineSide, OriginLinearEquation},
         rectangle, Primitive, Rectangle,
     },
 };
@@ -24,10 +24,15 @@ enum Operation {
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct PlaneSector {
+    /// Origin of the two half planes.
+    ///
+    /// The origin of the half planes is equal to the center point of the arc or circle scaled
+    /// up by a factor of 2.
+    origin: Point,
     /// Half plane on the left side of a line.
-    half_plane_left: LinearEquation,
+    half_plane_left: OriginLinearEquation,
     /// Half plane on the right side of a line.
-    half_plane_right: LinearEquation,
+    half_plane_right: OriginLinearEquation,
     /// The operation used to combine the two half planes.
     operation: Operation,
 }
@@ -39,8 +44,9 @@ impl PlaneSector {
         let operation = if angle_sweep_abs >= ANGLE_360DEG {
             // Skip calculation of half planes if the absolute value of the sweep angle is >= 360°.
             return Self {
-                half_plane_left: LinearEquation::new_horizontal(),
-                half_plane_right: LinearEquation::new_horizontal(),
+                origin: center_2x,
+                half_plane_left: OriginLinearEquation::new_horizontal(),
+                half_plane_right: OriginLinearEquation::new_horizontal(),
                 operation: Operation::EntirePlane,
             };
         } else if angle_sweep_abs >= ANGLE_180DEG {
@@ -57,15 +63,16 @@ impl PlaneSector {
         }
 
         Self {
-            half_plane_left: LinearEquation::from_point_angle(center_2x, angle_start),
-            half_plane_right: LinearEquation::from_point_angle(center_2x, angle_end),
+            origin: center_2x,
+            half_plane_left: OriginLinearEquation::with_angle(angle_start),
+            half_plane_right: OriginLinearEquation::with_angle(angle_end),
             operation,
         }
     }
 
     pub fn contains(&self, point: Point) -> bool {
         // `PlaneSector` uses scaled coordinates for an increased resolution.
-        let point = point * 2;
+        let point = point * 2 - self.origin;
 
         let correct_side_1 = self.half_plane_left.check_side(point, LineSide::Left);
         let correct_side_2 = self.half_plane_right.check_side(point, LineSide::Right);

@@ -140,14 +140,10 @@ mod tests {
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut display)?;
 
-        #[rustfmt::skip]
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "  ###  ",
-                " #   # ",
-            ])
-        );
+        display.assert_pattern(&[
+            "  ###  ", //
+            " #   # ", //
+        ]);
 
         Ok(())
     }
@@ -231,8 +227,8 @@ mod tests {
             .draw(&mut display_outside)
             .unwrap();
 
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
+        display_inside.assert_eq(&display_center);
+        display_outside.assert_eq(&display_center);
     }
 
     #[test]
