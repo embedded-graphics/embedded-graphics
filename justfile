@@ -72,7 +72,8 @@ generate-docs:
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
-    cargo deadlinks
+    cargo deadlinks --dir target/doc/embedded_graphics
+    cargo deadlinks --dir target/doc/embedded_graphics_core
 
 #----------------------
 # README.md generation
