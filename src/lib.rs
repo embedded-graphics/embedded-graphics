@@ -42,8 +42,8 @@
 //! # Display drivers
 //!
 //! To support many different kinds of display, embedded-graphics doesn't include any drivers
-//! directly but provides the [`DrawTarget`] API that can be implemented by external crates. In
-//! addition to the drivers for real displays, the
+//! directly but provides the [`DrawTarget`] API in [`embedded-graphics-core`] that can be
+//! implemented by external crates. In addition to the drivers for real displays, the
 //! [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
 //! development.
 //!
@@ -112,9 +112,9 @@
 //!
 //! # Implementing `embedded_graphics` support for a display driver
 //!
-//! To add support for embedded-graphics to a display driver, [`DrawTarget`] must be implemented.
-//! This allows all embedded-graphics items to be rendered by the display. See the [`DrawTarget`]
-//! documentation for implementation details.
+//! To add support for embedded-graphics to a display driver, [`DrawTarget`] from
+//! [`embedded-graphics-core`] must be implemented. This allows all embedded-graphics items to be
+//! rendered by the display. See the [`DrawTarget`] documentation for implementation details.
 //!
 //! # Examples
 //!
@@ -238,7 +238,8 @@
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`Font6x8`]: ./fonts/struct.Font6x8.html
-//! [`DrawTarget`]: draw_target/trait.DrawTarget.html
+//! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
+//! [embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 
 #![doc(
