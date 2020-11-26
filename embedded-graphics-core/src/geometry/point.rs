@@ -59,7 +59,7 @@ use core::{
 /// ```
 ///
 /// [`Size`]: struct.Size.html
-/// [`Rectangle`]: ../rectangle/struct.Rectangle.html
+/// [`Rectangle`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/rectangle/struct.Rectangle.html
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
