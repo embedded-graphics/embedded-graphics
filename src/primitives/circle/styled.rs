@@ -4,10 +4,9 @@ use crate::{
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::rectangle::{self, Rectangle},
-    primitives::Primitive,
     primitives::{
         circle::{distance_iterator::DistanceIterator, Circle},
+        rectangle::Rectangle,
         OffsetOutline,
     },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
@@ -20,7 +19,7 @@ pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: DistanceIterator<rectangle::Points>,
+    iter: DistanceIterator,
 
     outer_threshold: u32,
     outer_color: Option<C>,
@@ -37,14 +36,14 @@ where
         let stroke_area = styled.stroke_area();
         let fill_area = styled.fill_area();
 
-        let points = if !styled.style.is_transparent() {
-            stroke_area.bounding_box().points()
+        let iter = if !styled.style.is_transparent() {
+            stroke_area.distances()
         } else {
-            Rectangle::zero().points()
+            DistanceIterator::empty()
         };
 
         Self {
-            iter: stroke_area.distances(points),
+            iter,
             outer_threshold: stroke_area.threshold(),
             outer_color: styled.style.stroke_color,
             inner_threshold: fill_area.threshold(),

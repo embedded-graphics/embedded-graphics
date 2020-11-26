@@ -1,8 +1,8 @@
 //! Scanline iterator.
 
 use crate::primitives::{
-    common::{Scanline, StrokeOffset},
-    triangle::scanline_intersections::{PointType, ScanlineIntersections},
+    common::{PointType, Scanline, StrokeOffset},
+    triangle::scanline_intersections::ScanlineIntersections,
     Rectangle, Triangle,
 };
 use core::ops::Range;

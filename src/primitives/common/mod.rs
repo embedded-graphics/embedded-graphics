@@ -8,8 +8,8 @@ mod thick_segment_iter;
 
 pub use closed_thick_segment_iter::ClosedThickSegmentIter;
 pub use line_join::{JoinKind, LineJoin};
-pub use linear_equation::{LinearEquation, OriginLinearEquation};
-pub use plane_sector::{PlaneSector, PlaneSectorIterator};
+pub use linear_equation::{LinearEquation, OriginLinearEquation, NORMAL_VECTOR_SCALE};
+pub use plane_sector::PlaneSector;
 pub use scanline::Scanline;
 pub use thick_segment::ThickSegment;
 pub use thick_segment_iter::ThickSegmentIter;
@@ -59,4 +59,14 @@ impl LineSide {
             Self::Right => Self::Left,
         }
     }
+}
+
+/// Point type.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub enum PointType {
+    /// Represents part of the stroke.
+    Stroke,
+
+    /// Represents the interior of the shape.
+    Fill,
 }

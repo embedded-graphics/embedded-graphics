@@ -1,27 +1,28 @@
 use crate::{
     geometry::Point,
-    primitives::{circle::DistanceIterator, common::PlaneSectorIterator, sector::Sector},
+    primitives::{circle::DistanceIterator, common::PlaneSector, sector::Sector},
 };
 
 /// Iterator over all points inside the sector.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct Points {
-    iter: DistanceIterator<PlaneSectorIterator>,
+    iter: DistanceIterator,
+
+    plane_sector: PlaneSector,
+
     threshold: u32,
 }
 
 impl Points {
     pub(in crate::primitives) fn new(sector: &Sector) -> Self {
         let circle = sector.to_circle();
-        let points = PlaneSectorIterator::new(
-            sector,
-            sector.center_2x(),
-            sector.angle_start,
-            sector.angle_sweep,
-        );
+
+        let plane_sector =
+            PlaneSector::new(sector.center_2x(), sector.angle_start, sector.angle_sweep);
 
         Self {
-            iter: circle.distances(points),
+            iter: circle.distances(),
+            plane_sector,
             threshold: circle.threshold(),
         }
     }
@@ -32,8 +33,10 @@ impl Iterator for Points {
 
     fn next(&mut self) -> Option<Self::Item> {
         let threshold = self.threshold;
+        let plane_sector = self.plane_sector;
+
         self.iter
-            .find(|(_, distance)| *distance < threshold)
+            .find(|(point, distance)| *distance < threshold && plane_sector.contains(*point))
             .map(|(point, _)| point)
     }
 }

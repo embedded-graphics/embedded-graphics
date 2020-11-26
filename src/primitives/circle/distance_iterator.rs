@@ -1,25 +1,35 @@
-use crate::geometry::Point;
+use crate::{
+    geometry::Point,
+    primitives::{
+        rectangle::{self, Rectangle},
+        Primitive,
+    },
+};
 
 /// Iterator that returns the squared distance to the center for all points in the bounding box.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct DistanceIterator<I> {
+pub struct DistanceIterator {
     center_2x: Point,
-    points: I,
+    points: rectangle::Points,
 }
 
-impl<I> DistanceIterator<I>
-where
-    I: Iterator<Item = Point>,
-{
-    pub(super) fn new(center_2x: Point, points: I) -> Self {
-        Self { center_2x, points }
+impl DistanceIterator {
+    pub fn new(center_2x: Point, bounding_box: &Rectangle) -> Self {
+        Self {
+            center_2x,
+            points: bounding_box.points(),
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            center_2x: Point::zero(),
+            points: rectangle::Points::empty(),
+        }
     }
 }
 
-impl<I> Iterator for DistanceIterator<I>
-where
-    I: Iterator<Item = Point>,
-{
+impl Iterator for DistanceIterator {
     type Item = (Point, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -40,7 +50,7 @@ mod tests {
     fn distance_iter() {
         let circle = Circle::new(Point::zero(), 3);
 
-        let mut iter = DistanceIterator::new(circle.center_2x(), circle.bounding_box().points());
+        let mut iter = DistanceIterator::new(circle.center_2x(), &circle.bounding_box());
         assert_eq!(iter.next(), Some((Point::new(0, 0), 8)));
         assert_eq!(iter.next(), Some((Point::new(1, 0), 4)));
         assert_eq!(iter.next(), Some((Point::new(2, 0), 8)));
@@ -55,7 +65,7 @@ mod tests {
 
     #[test]
     fn distance_iter_empty() {
-        let mut iter = DistanceIterator::new(Point::zero(), Rectangle::zero().points());
+        let mut iter = DistanceIterator::empty();
         assert_eq!(iter.next(), None);
     }
 }

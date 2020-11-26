@@ -97,12 +97,9 @@ impl Circle {
         diameter_to_threshold(self.diameter)
     }
 
-    /// Returns the squared distance for every point returned by the iterator.
-    pub(in crate::primitives) fn distances<I>(&self, points: I) -> DistanceIterator<I>
-    where
-        I: Iterator<Item = Point>,
-    {
-        DistanceIterator::new(self.center_2x(), points)
+    /// Returns the squared distance for every point in the bounding box.
+    pub(in crate::primitives) fn distances(&self) -> DistanceIterator {
+        DistanceIterator::new(self.center_2x(), &self.bounding_box())
     }
 }
 

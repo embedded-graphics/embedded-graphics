@@ -5,8 +5,7 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        arc::Arc, circle::DistanceIterator, common::PlaneSectorIterator, OffsetOutline, Rectangle,
-        Styled,
+        arc::Arc, circle::DistanceIterator, common::PlaneSector, OffsetOutline, Rectangle, Styled,
     },
     style::PrimitiveStyle,
     SaturatingCast,
@@ -18,7 +17,9 @@ pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: DistanceIterator<PlaneSectorIterator>,
+    iter: DistanceIterator,
+
+    plane_sector: PlaneSector,
 
     outer_threshold: u32,
     inner_threshold: u32,
@@ -38,19 +39,21 @@ where
         let outside_edge = circle.offset(style.outside_stroke_width().saturating_cast());
         let inside_edge = circle.offset(style.inside_stroke_width().saturating_cast_neg());
 
-        let points = if !styled.style.is_transparent() {
-            PlaneSectorIterator::new(
-                &outside_edge,
-                primitive.center_2x(),
-                primitive.angle_start,
-                primitive.angle_sweep,
-            )
+        let iter = if !styled.style.is_transparent() {
+            outside_edge.distances()
         } else {
-            PlaneSectorIterator::empty()
+            DistanceIterator::empty()
         };
 
+        let plane_sector = PlaneSector::new(
+            primitive.center_2x(),
+            primitive.angle_start,
+            primitive.angle_sweep,
+        );
+
         Self {
-            iter: outside_edge.distances(points),
+            iter,
+            plane_sector,
             outer_threshold: outside_edge.threshold(),
             inner_threshold: inside_edge.threshold(),
             stroke_color: styled.style.stroke_color,
@@ -68,9 +71,14 @@ where
         let stroke_color = self.stroke_color?;
         let outer_threshold = self.outer_threshold;
         let inner_threshold = self.inner_threshold;
+        let plane_sector = self.plane_sector;
 
         self.iter
-            .find(|(_, distance)| *distance < outer_threshold && *distance >= inner_threshold)
+            .find(|(point, distance)| {
+                *distance < outer_threshold
+                    && *distance >= inner_threshold
+                    && plane_sector.contains(*point)
+            })
             .map(|(point, _)| Pixel(point, stroke_color))
     }
 }
