@@ -97,7 +97,7 @@ Please search for `DrawTargetExt` on <https://docs.rs/embedded-graphics> for usa
 
 ## For display driver authors
 
-TODO: Driver authors should use the `embedded-graphics-core` crate to integrate with e-g.
+Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
 
