@@ -81,7 +81,7 @@ check-links: generate-docs
 
 # Generate README.md for a single crate
 generate-core-readme: (_build-readmes)
-    cp {{target_dir}}/README-core.md embedded-graphics-core/README.md
+    cp {{target_dir}}/README-core.md core/README.md
 
 # Generate README.md for a single crate
 generate-readme: (_build-readmes)
@@ -98,7 +98,7 @@ generate-readmes: generate-core-readme generate-readme
         exit 1 \
     )
 
-    diff -q {{target_dir}}/README-core.md embedded-graphics-core/README.md || ( \
+    diff -q {{target_dir}}/README-core.md core/README.md || ( \
         echo -e "\033[1;31mError:\033[0m Core README.md needs to be regenerated."; \
         echo -e "       Run 'just generate-core-readme' to regenerate.\n"; \
         exit 1 \
@@ -112,7 +112,7 @@ _build-readmes:
     cargo readme | sed -E -f filter_readme.sed > {{target_dir}}/README.md
 
     echo "Building core README.md"
-    cargo readme -r embedded-graphics-core | sed -E -f filter_readme.sed > {{target_dir}}/README-core.md
+    cargo readme -r core | sed -E -f filter_readme.sed > {{target_dir}}/README-core.md
 
 #--------
 # Docker
