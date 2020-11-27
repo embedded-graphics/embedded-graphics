@@ -265,5 +265,35 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-use embedded_graphics_core::SaturatingCast;
 pub use embedded_graphics_core::{draw_target, iterator, pixelcolor, Drawable, Pixel};
+
+/// Trait to convert unsigned into signed integer.
+trait SaturatingCast<T> {
+    /// Casts a unsigned integer into a positive value.
+    ///
+    /// If the value is too large the maximum positive value is returned instead.
+    fn saturating_cast(self) -> T;
+
+    /// Casts a unsigned integer into a negative value.
+    ///
+    /// If the value is too large the minimum negative value is returned instead.
+    fn saturating_cast_neg(self) -> T;
+}
+
+impl SaturatingCast<i32> for u32 {
+    fn saturating_cast(self) -> i32 {
+        if self < 0x8000_0000 {
+            self as i32
+        } else {
+            i32::max_value()
+        }
+    }
+
+    fn saturating_cast_neg(self) -> i32 {
+        if self < 0x8000_0000 {
+            -(self as i32)
+        } else {
+            i32::min_value()
+        }
+    }
+}

@@ -78,8 +78,7 @@ pub mod primitives;
 pub use drawable::{Drawable, Pixel};
 
 /// Trait to convert unsigned into signed integer.
-#[doc(hidden)]
-pub trait SaturatingCast<T> {
+trait SaturatingCast<T> {
     /// Casts a unsigned integer into a positive value.
     ///
     /// If the value is too large the maximum positive value is returned instead.
