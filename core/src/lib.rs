@@ -1,5 +1,3 @@
-//! # Embedded Graphics Core
-//!
 //! embedded-graphics-core contains the common components of [embedded-graphics] that can be used to
 //! integrate embedded-graphics into display drivers, image libraries and other third party crates.
 //!
