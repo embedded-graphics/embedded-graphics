@@ -9,6 +9,7 @@
 ### Added
 
 - [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Split common functionality out of `embedded-graphics` into `embedded-graphics-core`.
+- [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 
 <!-- next-url -->
