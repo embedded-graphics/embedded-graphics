@@ -14,16 +14,12 @@
 
 ## Minimum supported Rust version
 
-The minimum supported Rust version for embedded-graphics is `1.40.0` or greater.
+The minimum supported Rust version for embedded-graphics-core is `1.40.0` or greater.
 Ensure you have the latest stable version of Rust installed, preferably through <https://rustup.rs>.
 
 ## Development setup
 
-Please see the [development setup guide](./doc/development-setup.md).
-
-## Attribution
-
-All source font PNGs are taken from the excellent [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps).
+Please see the [development setup guide](../doc/development-setup.md).
 
 ## License
 
