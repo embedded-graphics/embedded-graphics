@@ -3,7 +3,7 @@
 mod points;
 
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{AnchorPoint, Dimensions, Point, Size},
     primitives::PointsIter,
     SaturatingCast,
 };
@@ -257,7 +257,8 @@ impl Rectangle {
     /// ```
     /// use embedded_graphics::{
     ///     prelude::*,
-    ///     primitives::rectangle::{AnchorPoint, Rectangle},
+    ///     primitives::rectangle::Rectangle,
+    ///     geometry::AnchorPoint,
     /// };
     ///
     /// let rect = Rectangle::new(Point::new(20, 20), Size::new(10, 20));
@@ -317,7 +318,8 @@ impl Rectangle {
     /// ```
     /// use embedded_graphics::{
     ///     prelude::*,
-    ///     primitives::rectangle::{AnchorPoint, Rectangle},
+    ///     primitives::rectangle::Rectangle,
+    ///     geometry::AnchorPoint,
     /// };
     ///
     /// let mut rect = Rectangle::new(Point::new(20, 20), Size::new(11, 21));
@@ -454,29 +456,6 @@ fn overlaps(first: RangeInclusive<i32>, second: RangeInclusive<i32>) -> bool {
     second.contains(first.start())
         || second.contains(first.end())
         || first.start() < second.start() && first.end() > second.end()
-}
-
-/// Anchor point.
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Copy, Clone)]
-pub enum AnchorPoint {
-    /// Top left.
-    TopLeft,
-    /// Top center.
-    TopCenter,
-    /// Top right.
-    TopRight,
-    /// Center left.
-    CenterLeft,
-    /// Center.
-    Center,
-    /// Center right.
-    CenterRight,
-    /// Bottom left.
-    BottomLeft,
-    /// Bottom center.
-    BottomCenter,
-    /// Bottom right.
-    BottomRight,
 }
 
 #[cfg(test)]

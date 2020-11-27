@@ -369,7 +369,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
-        primitives::{CornerRadiiBuilder, Primitive},
+        primitives::CornerRadiiBuilder,
     };
 
     #[test]

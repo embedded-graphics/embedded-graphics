@@ -189,7 +189,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Dimensions, Point, Size},
-        primitives::{ContainsPoint, Primitive},
+        primitives::ContainsPoint,
     };
 
     #[test]

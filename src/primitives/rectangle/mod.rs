@@ -7,10 +7,7 @@ use crate::{
     primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
-pub use embedded_graphics_core::primitives::{
-    rectangle::{AnchorPoint, Points},
-    Rectangle,
-};
+pub use embedded_graphics_core::primitives::{rectangle::Points, Rectangle};
 pub use styled::StyledPixels;
 
 impl Primitive for Rectangle {}
@@ -81,7 +78,7 @@ impl Transform for Rectangle {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::{Dimensions, Point, Size};
+    use crate::geometry::{AnchorPoint, Dimensions, Point, Size};
 
     #[test]
     fn dimensions() {

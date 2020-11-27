@@ -34,3 +34,26 @@ where
         Rectangle::new(Point::zero(), self.size())
     }
 }
+
+/// Anchor point.
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Copy, Clone)]
+pub enum AnchorPoint {
+    /// Top left.
+    TopLeft,
+    /// Top center.
+    TopCenter,
+    /// Top right.
+    TopRight,
+    /// Center left.
+    CenterLeft,
+    /// Center.
+    Center,
+    /// Center right.
+    CenterRight,
+    /// Bottom left.
+    BottomLeft,
+    /// Bottom center.
+    BottomCenter,
+    /// Bottom right.
+    BottomRight,
+}
