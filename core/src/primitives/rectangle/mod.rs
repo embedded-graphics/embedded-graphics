@@ -4,6 +4,7 @@ mod points;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
+    primitives::PointsIter,
     SaturatingCast,
 };
 use core::{
@@ -56,6 +57,14 @@ pub struct Rectangle {
 impl Dimensions for Rectangle {
     fn bounding_box(&self) -> Rectangle {
         *self
+    }
+}
+
+impl PointsIter for Rectangle {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
+        self::Points::new(self)
     }
 }
 
@@ -367,7 +376,7 @@ impl Rectangle {
     /// ```
     ///
     /// [`columns`]: #method.columns
-    /// [`points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
+    /// [`points`]: ../trait.PointsIter.html#tymethod.points
     pub fn rows(&self) -> Range<i32> {
         self.top_left.y
             ..self
@@ -406,7 +415,7 @@ impl Rectangle {
     /// ```
     ///
     /// [`rows`]: #method.rows
-    /// [`points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
+    /// [`points`]: ../trait.PointsIter.html#tymethod.points
     pub fn columns(&self) -> Range<i32> {
         self.top_left.x
             ..self

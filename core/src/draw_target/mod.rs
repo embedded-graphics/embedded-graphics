@@ -321,7 +321,7 @@ pub trait DrawTarget: Dimensions {
     /// row-first order. The provided iterator must provide pixel color values based on this
     /// ordering to produce correct output.
     ///
-    /// As seen in the example below, the [`Points::points`] method can be used to get an
+    /// As seen in the example below, the [`PointsIter::points`] method can be used to get an
     /// iterator over all points in the provided area.
     ///
     /// The provided iterator is not required to provide `width * height` pixels to completely fill
@@ -395,7 +395,7 @@ pub trait DrawTarget: Dimensions {
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
     /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
-    /// [`Points::points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
+    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,

@@ -10,4 +10,5 @@ pub use crate::{
         raw::{RawData, ToBytes as _},
         GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,
     },
+    primitives::PointsIter,
 };

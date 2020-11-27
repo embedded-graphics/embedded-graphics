@@ -5,7 +5,9 @@ mod styled;
 
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
-    primitives::{common::PlaneSector, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle},
+    primitives::{
+        common::PlaneSector, Circle, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle,
+    },
     transform::Transform,
 };
 pub use points::Points;
@@ -141,10 +143,12 @@ impl OffsetOutline for Sector {
     }
 }
 
-impl Primitive for Sector {
-    type PointsIter = Points;
+impl Primitive for Sector {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Sector {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

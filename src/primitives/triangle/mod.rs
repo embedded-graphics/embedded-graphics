@@ -9,7 +9,7 @@ use crate::{
     geometry::{Dimensions, Point},
     primitives::{
         common::{LineJoin, LineSide, LinearEquation, Scanline, StrokeOffset},
-        ContainsPoint, Line, Primitive, Rectangle,
+        ContainsPoint, Line, PointsIter, Primitive, Rectangle,
     },
     transform::Transform,
 };
@@ -68,10 +68,12 @@ pub struct Triangle {
     pub vertices: [Point; 3],
 }
 
-impl Primitive for Triangle {
-    type PointsIter = Points;
+impl Primitive for Triangle {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Triangle {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

@@ -6,7 +6,7 @@ use crate::{
     primitives::{
         common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
-        Primitive, Rectangle,
+        PointsIter, Rectangle,
     },
     style::{PrimitiveStyle, Styled},
     transform::Transform,

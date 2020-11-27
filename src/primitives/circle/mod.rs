@@ -5,7 +5,9 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, PointExt, Size},
-    primitives::{common::DistanceIterator, ContainsPoint, OffsetOutline, Primitive, Rectangle},
+    primitives::{
+        common::DistanceIterator, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle,
+    },
     transform::Transform,
 };
 pub use points::Points;
@@ -113,10 +115,12 @@ impl OffsetOutline for Circle {
     }
 }
 
-impl Primitive for Circle {
-    type PointsIter = Points;
+impl Primitive for Circle {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Circle {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

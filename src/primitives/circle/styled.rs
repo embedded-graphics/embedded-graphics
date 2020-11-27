@@ -121,7 +121,7 @@ mod tests {
         geometry::{Dimensions, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::Primitive,
+        primitives::{PointsIter, Primitive},
         style::{PrimitiveStyleBuilder, StrokeAlignment},
         Drawable,
     };

@@ -7,7 +7,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{Primitive, Rectangle},
+    primitives::{PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -73,10 +73,12 @@ impl<'a> Polyline<'a> {
     }
 }
 
-impl<'a> Primitive for Polyline<'a> {
-    type PointsIter = Points<'a>;
+impl<'a> Primitive for Polyline<'a> {}
 
-    fn points(&self) -> Self::PointsIter {
+impl<'a> PointsIter for Polyline<'a> {
+    type Iter = Points<'a>;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

@@ -13,13 +13,7 @@ pub use embedded_graphics_core::primitives::{
 };
 pub use styled::StyledPixels;
 
-impl Primitive for Rectangle {
-    type PointsIter = Points;
-
-    fn points(&self) -> Self::PointsIter {
-        self.points()
-    }
-}
+impl Primitive for Rectangle {}
 
 impl ContainsPoint for Rectangle {
     fn contains(&self, point: Point) -> bool {

@@ -54,7 +54,7 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitives::{Circle, Primitive};
+    use crate::primitives::{Circle, PointsIter};
 
     #[test]
     fn matches_circles_points() {
