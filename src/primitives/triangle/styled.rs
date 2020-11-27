@@ -5,10 +5,8 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        common::{ClosedThickSegmentIter, Scanline, StrokeOffset},
-        triangle::{
-            scanline_intersections::PointType, scanline_iterator::ScanlineIterator, Triangle,
-        },
+        common::{ClosedThickSegmentIter, PointType, Scanline, StrokeOffset},
+        triangle::{scanline_iterator::ScanlineIterator, Triangle},
         Rectangle,
     },
     style::{PrimitiveStyle, StrokeAlignment, Styled},

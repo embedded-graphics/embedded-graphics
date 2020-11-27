@@ -1,12 +1,14 @@
 use crate::{
     geometry::Point,
-    primitives::{arc::Arc, circle::DistanceIterator, common::PlaneSectorIterator, OffsetOutline},
+    primitives::{arc::Arc, circle::DistanceIterator, common::PlaneSector, OffsetOutline},
 };
 
 /// Iterator over all points on the arc line.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct Points {
-    iter: DistanceIterator<PlaneSectorIterator>,
+    iter: DistanceIterator,
+
+    plane_sector: PlaneSector,
 
     outer_threshold: u32,
     inner_threshold: u32,
@@ -17,11 +19,11 @@ impl Points {
         let outer_circle = arc.to_circle();
         let inner_circle = outer_circle.offset(-1);
 
-        let points =
-            PlaneSectorIterator::new(arc, arc.center_2x(), arc.angle_start, arc.angle_sweep);
+        let plane_sector = PlaneSector::new(arc.center_2x(), arc.angle_start, arc.angle_sweep);
 
         Self {
-            iter: outer_circle.distances(points),
+            iter: outer_circle.distances(),
+            plane_sector,
             outer_threshold: outer_circle.threshold(),
             inner_threshold: inner_circle.threshold(),
         }
@@ -34,9 +36,14 @@ impl Iterator for Points {
     fn next(&mut self) -> Option<Self::Item> {
         let outer_threshold = self.outer_threshold;
         let inner_threshold = self.inner_threshold;
+        let plane_sector = self.plane_sector;
 
         self.iter
-            .find(|(_, distance)| *distance < outer_threshold && *distance >= inner_threshold)
+            .find(|(point, distance)| {
+                *distance < outer_threshold
+                    && *distance >= inner_threshold
+                    && plane_sector.contains(*point)
+            })
             .map(|(point, _)| point)
     }
 }

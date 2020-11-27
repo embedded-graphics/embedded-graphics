@@ -1,21 +1,19 @@
 use crate::{
-    geometry::{Dimensions, Point},
+    geometry::Point,
     primitives::circle::{distance_iterator::DistanceIterator, Circle},
-    primitives::rectangle,
-    primitives::Primitive,
 };
 
 /// Iterator over all points inside the circle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Points {
-    iter: DistanceIterator<rectangle::Points>,
+    iter: DistanceIterator,
     threshold: u32,
 }
 
 impl Points {
     pub(in crate::primitives) fn new(circle: &Circle) -> Self {
         Self {
-            iter: circle.distances(circle.bounding_box().points()),
+            iter: circle.distances(),
             threshold: circle.threshold(),
         }
     }

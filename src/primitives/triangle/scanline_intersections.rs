@@ -3,21 +3,10 @@
 use crate::{
     geometry::Point,
     primitives::{
-        common::ThickSegment,
-        common::{LineJoin, Scanline, StrokeOffset},
+        common::{LineJoin, PointType, Scanline, StrokeOffset, ThickSegment},
         Triangle,
     },
 };
-
-/// Type of scanline.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum PointType {
-    /// Represents part of the stroke.
-    Stroke,
-
-    /// Represents the interior of the shape.
-    Fill,
-}
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 struct LineConfig {

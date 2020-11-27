@@ -4,10 +4,8 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
-    primitives::{
-        common::PlaneSector, line::Line, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle,
-    },
+    geometry::{Angle, Dimensions, Point, Size},
+    primitives::{common::PlaneSector, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -132,24 +130,6 @@ impl Sector {
         let radius = self.diameter.saturating_sub(1);
 
         self.top_left * 2 + Size::new(radius, radius)
-    }
-
-    /// Return the end angle of the sector
-    fn angle_end(&self) -> Angle {
-        self.angle_start + self.angle_sweep
-    }
-
-    /// Return a `Line` between the sector center and a point on the circumference following a given angle
-    fn line_from_angle(&self, angle: Angle) -> Line {
-        let center = self.center();
-        let radius = Real::from(self.diameter.saturating_sub(1)) / 2.into();
-
-        let point = Point::new(
-            center.x + i32::from(angle.cos() * radius),
-            center.y - i32::from(angle.sin() * radius),
-        );
-
-        Line::new(center, point)
     }
 }
 
