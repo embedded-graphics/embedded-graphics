@@ -71,9 +71,9 @@ impl PointsIter for Rectangle {
 /// Returns the center offset.
 ///
 /// The center offset is defined as the offset between the top left corner and
-/// the center point of a rectangle with size `self`.
+/// the center point of a rectangle with the given size.
 fn center_offset(size: Size) -> Size {
-    size.saturating_sub(Size::new(1, 1)) / 2
+    size.saturating_sub(Size::new_equal(1)) / 2
 }
 
 impl Rectangle {

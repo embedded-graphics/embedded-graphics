@@ -1,44 +1,41 @@
-//! embedded-graphics-core contains the common components of [embedded-graphics] that can be used to
-//! integrate embedded-graphics into display drivers, image libraries and other third party crates.
+//! embedded-graphics-core contains the core components of [embedded-graphics] that are required to
+//! add embedded-graphics support to display drivers, image libraries, text renderers and other
+//! third party crates.
 //!
-//! Display driver crates, image decoding crates and other crates that wish to integrate
-//! embedded-graphics should use embedded-graphics-core to provid embedded-graphics integration for
-//! their crate. Conversely, consumers of embedded-graphics and these crates should use
-//! [embedded-graphics] itself.
+//! This crate should only be used by crates that extend embedded-graphics.
+//! Applications should instead depend on [embedded-graphics] itself.
 //!
 //! Like any other crate, embedded-graphics-core will change over time, however it will change at a
 //! much slower rate than embedded-graphics itself, and will likely release fewer breaking changes.
 //! This will provide more stability and compatability for the weider embedded-graphics ecosystem,
-//! whilst allowing non-core features of embedded-graphics to evolve at a faster pace.
+//! whilst allowing non-core features of embedded-graphics to evolve at a faster pace. The same
+//! version of embedded-graphics-core may be used for multiple major versions of embedded-graphics.
 //!
-//! It is strongly recommended to use as much of embedded-graphics-core as possible when
-//! implementing an integration.
+//! ## Core functionality
 //!
-//! ## Common functionality
-//!
-//! * [`Pixel`] - A simple struct containing a [`Point`] and color defining a single pixel.
+//! * [`Pixel`] - A struct that defines the position and color of a single pixel.
 //! * [`Drawable`] - A trait that should be implemented for anything that is drawable to a
 //!   [`DrawTarget`]. Examples include shapes, text, UI elements, etc.
 //! * Geometry - [`Point`], [`Size`] and [`Rectangle`] provide ways of defining positions,
-//!   dimensions and areas respectively.
+//!   dimensions and rectangular areas respectively.
 //! * Dimensions - the [`Dimensions`] and [`OriginDimensions`] traits allow sizing of objects.
 //! * The [`prelude`] reexports useful items to reduce boilerplate.
 //!
 //! # Colors
 //!
-//! The [`pixelcolor`] module provides various standard colors, from [`BinaryColor`] to [`Rgb888`].
-//! See the [`pixelcolor`] module documentation for the complete list of color depths and formats
-//! available.
+//! The [`pixelcolor`] module provides various standard color types, from [`BinaryColor`] to
+//! [`Rgb888`]. See the [`pixelcolor`] module documentation for the complete list of color depths
+//! and formats available.
 //!
-//! # Display driver authors
+//! # Display drivers
 //!
 //! See the [`DrawTarget`] documentation for examples on how to integrate embedded-graphics with a
 //! display driver using the [`DrawTarget`] trait.
 //!
 //! # Images
 //!
-//! The [`ImageDrawable`] trait should be implemented for any image or image-like item, like a font
-//! bitmap or spritemap.
+//! The [`ImageDrawable`] trait should be implemented for any image or image-like item, for example
+//! a spritemap.
 //!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Pixel`]: ./drawable/struct.Pixel.html
