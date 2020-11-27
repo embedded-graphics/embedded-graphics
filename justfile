@@ -80,39 +80,30 @@ check-links: generate-docs
 # ---------------------
 
 # Generate README.md for a single crate
-generate-core-readme: (_build-readmes)
-    cp {{target_dir}}/README-core.md core/README.md
+generate-readme crate: (_build-readme crate)
+    cp {{target_dir}}/{{crate}}_README.md {{crate}}/README.md
 
-# Generate README.md for a single crate
-generate-readme: (_build-readmes)
-    cp {{target_dir}}/README.md README.md
-
-# Generate all READMEs
-generate-readmes: generate-core-readme generate-readme
-
-# Check READMEs
-@check-readmes: (_build-readmes)
-    diff -q {{target_dir}}/README.md README.md || ( \
-        echo -e "\033[1;31mError:\033[0m README.md needs to be regenerated."; \
-        echo -e "       Run 'just generate-readme' to regenerate.\n"; \
+# Check README.md for a single crate
+@check-readme crate: (_build-readme crate)
+    diff -q {{target_dir}}/{{crate}}_README.md ./{{crate}}/README.md || ( \
+        echo -e "\033[1;31mError:\033[0m README.md for {{crate}} needs to be regenerated."; \
+        echo -e "       Run 'just generate-readmes' to regenerate.\n"; \
         exit 1 \
     )
 
-    diff -q {{target_dir}}/README-core.md core/README.md || ( \
-        echo -e "\033[1;31mError:\033[0m Core README.md needs to be regenerated."; \
-        echo -e "       Run 'just generate-core-readme' to regenerate.\n"; \
-        exit 1 \
-    )
+# Generate README.md for all crates
+generate-readmes: (generate-readme ".") (generate-readme "./core")
+
+# Checks README.md for all crates
+check-readmes: (check-readme ".") (check-readme "./core")
 
 # Builds README.md for a single crate
-_build-readmes:
+_build-readme crate:
     #!/usr/bin/env bash
     set -e -o pipefail
-    echo "Building README.md"
-    cargo readme | sed -E -f filter_readme.sed > {{target_dir}}/README.md
-
-    echo "Building core README.md"
-    cargo readme -r core | sed -E -f filter_readme.sed > {{target_dir}}/README-core.md
+    mkdir -p {{target_dir}}/readme
+    echo "Building README.md for {{crate}}"
+    cargo readme -r {{crate}} | sed -E -f filter_readme.sed > {{target_dir}}/{{crate}}_README.md
 
 #--------
 # Docker
