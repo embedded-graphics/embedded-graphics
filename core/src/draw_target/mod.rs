@@ -6,10 +6,10 @@ mod cropped;
 mod translated;
 
 use crate::{
-    drawable::Pixel,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    rectangle::Rectangle,
+    primitives::Rectangle,
+    Pixel,
 };
 
 pub use clipped::Clipped;
@@ -394,7 +394,7 @@ pub trait DrawTarget: Dimensions {
     /// ```
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
-    /// [`Rectangle::intersection`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/rectangle/struct.Rectangle.html#method.intersection
+    /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
     /// [`Points::points`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.Primitive.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where

@@ -1,6 +1,5 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -9,7 +8,7 @@ use crate::{
         Rectangle,
     },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
-    SaturatingCast,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the ellipse border
@@ -126,13 +125,12 @@ where
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
         geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{Circle, Primitive},
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
-        SaturatingCast,
+        Drawable, SaturatingCast,
     };
 
     fn test_circles(style: PrimitiveStyle<BinaryColor>) {

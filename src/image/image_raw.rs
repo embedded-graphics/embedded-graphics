@@ -239,12 +239,12 @@ mod tests {
     use super::*;
     use crate::{
         draw_target::DrawTarget,
-        drawable::{Drawable, Pixel},
         geometry::Point,
         image::Image,
         iterator::PixelIteratorExt,
         mock_display::{ColorMapping, MockDisplay},
         pixelcolor::{raw::RawU32, *},
+        Drawable, Pixel,
     };
 
     #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]

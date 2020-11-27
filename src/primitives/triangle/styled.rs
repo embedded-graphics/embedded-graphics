@@ -1,6 +1,5 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -10,6 +9,7 @@ use crate::{
         Rectangle,
     },
     style::{PrimitiveStyle, StrokeAlignment, Styled},
+    Drawable, Pixel,
 };
 
 /// Pixel iterator for each pixel in the triangle border
@@ -178,7 +178,6 @@ where
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
         geometry::Point,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, Rgb888, RgbColor},
@@ -186,6 +185,7 @@ mod tests {
         style::PrimitiveStyleBuilder,
         style::StrokeAlignment,
         transform::Transform,
+        Drawable,
     };
 
     #[test]

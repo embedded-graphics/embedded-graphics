@@ -7,7 +7,10 @@ use crate::{
     primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
-pub use embedded_graphics_core::rectangle::{AnchorPoint, Points, Rectangle};
+pub use embedded_graphics_core::primitives::{
+    rectangle::{AnchorPoint, Points},
+    Rectangle,
+};
 pub use styled::StyledPixels;
 
 impl Primitive for Rectangle {

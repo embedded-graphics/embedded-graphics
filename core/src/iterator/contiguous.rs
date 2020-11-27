@@ -1,10 +1,10 @@
 //! Contiguous iterator.
 
 use crate::{
-    drawable::Pixel,
     geometry::{Point, Size},
     pixelcolor::PixelColor,
-    rectangle::{Points, Rectangle},
+    primitives::{rectangle, Rectangle},
+    Pixel,
 };
 use core::iter::Zip;
 
@@ -15,7 +15,7 @@ where
     I: Iterator,
     I::Item: PixelColor,
 {
-    iter: Zip<Points, I>,
+    iter: Zip<rectangle::Points, I>,
 }
 
 impl<I> IntoPixels<I>

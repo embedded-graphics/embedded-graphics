@@ -1,6 +1,6 @@
 //! Pixel iterator.
 
-use crate::{drawable::Pixel, geometry::Point, pixelcolor::PixelColor};
+use crate::{geometry::Point, pixelcolor::PixelColor, Pixel};
 
 /// Translated pixel iterator.
 #[derive(Debug, PartialEq)]

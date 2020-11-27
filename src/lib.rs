@@ -265,5 +265,5 @@ pub mod primitives;
 pub mod style;
 pub mod transform;
 
-pub use embedded_graphics_core::{draw_target, drawable::*, iterator, pixelcolor};
-use embedded_graphics_core::{drawable, SaturatingCast};
+use embedded_graphics_core::SaturatingCast;
+pub use embedded_graphics_core::{draw_target, iterator, pixelcolor, Drawable, Pixel};

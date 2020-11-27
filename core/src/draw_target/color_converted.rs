@@ -1,6 +1,6 @@
 use crate::{
-    draw_target::DrawTarget, drawable::Pixel, geometry::Dimensions, pixelcolor::PixelColor,
-    rectangle::Rectangle,
+    draw_target::DrawTarget, geometry::Dimensions, pixelcolor::PixelColor, primitives::Rectangle,
+    Pixel,
 };
 use core::marker::PhantomData;
 

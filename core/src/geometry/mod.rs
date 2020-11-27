@@ -6,7 +6,7 @@ mod size;
 pub use point::Point;
 pub use size::Size;
 
-use crate::rectangle::Rectangle;
+use crate::primitives::Rectangle;
 
 /// Adds the ability to get the dimensions/position of a graphics object
 ///

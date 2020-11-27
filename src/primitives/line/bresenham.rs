@@ -217,11 +217,7 @@ pub fn major_length(line: &Line) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        drawable::{Drawable, Pixel},
-        mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-    };
+    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor, Drawable, Pixel};
 
     #[test]
     fn bresenham() {

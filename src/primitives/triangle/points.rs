@@ -48,8 +48,8 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel, iterator::IntoPixels, pixelcolor::BinaryColor, primitives::Primitive,
-        style::PrimitiveStyle, transform::Transform,
+        iterator::IntoPixels, pixelcolor::BinaryColor, primitives::Primitive,
+        style::PrimitiveStyle, transform::Transform, Pixel,
     };
 
     #[test]

@@ -1,6 +1,6 @@
 use crate::{
-    draw_target::DrawTarget, drawable::Pixel, geometry::Dimensions, iterator::contiguous::Crop,
-    rectangle::Rectangle,
+    draw_target::DrawTarget, geometry::Dimensions, iterator::contiguous::Crop,
+    primitives::Rectangle, Pixel,
 };
 
 /// Clipped draw target.

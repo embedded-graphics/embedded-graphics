@@ -286,12 +286,8 @@ impl Transform for Line {
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
-        geometry::Size,
-        iterator::IntoPixels,
-        mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        style::PrimitiveStyle,
+        geometry::Size, iterator::IntoPixels, mock_display::MockDisplay, pixelcolor::BinaryColor,
+        style::PrimitiveStyle, Drawable, Pixel,
     };
     use arrayvec::ArrayVec;
 

@@ -1,6 +1,6 @@
 //! Iterator over all points inside the rectangle.
 
-use crate::{geometry::Point, rectangle::Rectangle};
+use crate::{geometry::Point, primitives::Rectangle};
 
 /// Iterator over all points inside the rectangle.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -11,7 +11,7 @@ pub struct Points {
 }
 
 impl Points {
-    pub(in crate::rectangle) fn new(rectangle: &Rectangle) -> Self {
+    pub(in crate::primitives::rectangle) fn new(rectangle: &Rectangle) -> Self {
         // This doesn't use rectangle.bottom_right() to intentionally set bottom_right
         // to an coordinate outside the rectangle if the width or height is zero, which
         // stops the iterator.
@@ -62,7 +62,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
-        rectangle::Rectangle,
+        primitives::Rectangle,
     };
 
     #[test]

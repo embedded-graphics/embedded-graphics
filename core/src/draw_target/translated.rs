@@ -1,9 +1,9 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::Pixel,
     geometry::{Dimensions, Point},
     iterator::PixelIteratorExt,
-    rectangle::Rectangle,
+    primitives::Rectangle,
+    Pixel,
 };
 
 /// Translated draw target.

@@ -46,14 +46,14 @@
 //! [`Size`]:  ./geometry/struct.Size.html
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 //! [`DrawTarget`]: ./draw_target/trait.DrawTarget.html
-//! [`Rectangle`]: ./rectangle/struct.Rectangle.html
+//! [`Rectangle`]: ./primitives/rectangle/struct.Rectangle.html
 //! [`Dimensions`]:  ./geometry/trait.Dimensions.html
 //! [`OriginDimensions`]: ./geometry/trait.OriginDimensions.html
 //! [`prelude`]: ./prelude/index.html
 //! [`pixelcolor`]: ./pixelcolor/index.html
 //! [`BinaryColor`]: ./pixelcolor/enum.BinaryColor.html
 //! [`Rgb888`]: ./pixelcolor/struct.Rgb888.html
-//! [`ImageDrawable`]: ./image_drawable/trait.ImageDrawable.html
+//! [`ImageDrawable`]: ./image/image_drawable/trait.ImageDrawable.html
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"
@@ -70,13 +70,15 @@
 #![deny(unused_qualifications)]
 
 pub mod draw_target;
-pub mod drawable;
+mod drawable;
 pub mod geometry;
-pub mod image_drawable;
+pub mod image;
 pub mod iterator;
 pub mod pixelcolor;
 pub mod prelude;
-pub mod rectangle;
+pub mod primitives;
+
+pub use drawable::{Drawable, Pixel};
 
 /// Trait to convert unsigned into signed integer.
 #[doc(hidden)]
@@ -109,9 +111,6 @@ impl SaturatingCast<i32> for u32 {
         }
     }
 }
-
-pub use drawable::{Drawable, Pixel};
-pub use rectangle::Rectangle;
 
 #[cfg(test)]
 mod tests {

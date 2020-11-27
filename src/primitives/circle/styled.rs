@@ -1,12 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{circle::Circle, common::DistanceIterator, rectangle::Rectangle},
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
-    SaturatingCast,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the circle border
@@ -119,12 +118,12 @@ where
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
         geometry::{Dimensions, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::Primitive,
         style::{PrimitiveStyleBuilder, StrokeAlignment},
+        Drawable,
     };
 
     #[test]

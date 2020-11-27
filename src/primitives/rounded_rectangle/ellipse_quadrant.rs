@@ -114,12 +114,12 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel,
         geometry::{Point, Size},
         iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::Primitive,
+        Pixel,
     };
 
     #[test]

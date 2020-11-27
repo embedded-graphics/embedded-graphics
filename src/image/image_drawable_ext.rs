@@ -1,5 +1,5 @@
 use crate::image::SubImage;
-use embedded_graphics_core::{image_drawable::ImageDrawable, Rectangle};
+use embedded_graphics_core::{image::ImageDrawable, primitives::Rectangle};
 
 /// Extension trait for image drawables.
 pub trait ImageDrawableExt: Sized {

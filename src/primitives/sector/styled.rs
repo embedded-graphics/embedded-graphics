@@ -1,6 +1,5 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::angle_consts::ANGLE_90DEG,
     geometry::{Angle, Dimensions, Size},
     iterator::IntoPixels,
@@ -12,7 +11,7 @@ use crate::{
         Rectangle, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
-    SaturatingCast,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the sector border

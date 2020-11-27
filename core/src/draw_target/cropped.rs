@@ -1,8 +1,8 @@
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt, Translated},
-    drawable::Pixel,
     geometry::{Dimensions, Point, Size},
-    rectangle::Rectangle,
+    primitives::Rectangle,
+    Pixel,
 };
 
 /// Cropped draw target.

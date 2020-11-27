@@ -107,7 +107,7 @@
 //!
 //! [`PixelColor`]: ../trait.PixelColor.html
 //! [`Raw`]: ../trait.PixelColor.html#associatedtype.Raw
-//! [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.ImageRaw.html
+//! [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 //! [`into_storage`]: ../trait.IntoStorage.html#tymethod.into_storage
 //! [`ToBytes`]: trait.ToBytes.html
 //! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_bytes

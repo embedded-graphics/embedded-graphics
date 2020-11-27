@@ -4,8 +4,7 @@ pub mod contiguous;
 pub mod pixel;
 
 use crate::{
-    draw_target::DrawTarget, drawable::Pixel, geometry::Point, pixelcolor::PixelColor,
-    rectangle::Rectangle,
+    draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
 };
 
 /// Produce an iterator over all pixels in an object.
