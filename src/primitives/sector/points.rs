@@ -1,6 +1,9 @@
 use crate::{
     geometry::Point,
-    primitives::{circle::DistanceIterator, common::PlaneSector, sector::Sector},
+    primitives::{
+        common::{DistanceIterator, PlaneSector},
+        sector::Sector,
+    },
 };
 
 /// Iterator over all points inside the sector.
@@ -17,10 +20,10 @@ impl Points {
     pub(in crate::primitives) fn new(sector: &Sector) -> Self {
         let circle = sector.to_circle();
 
-        let plane_sector =
-            PlaneSector::new(sector.center_2x(), sector.angle_start, sector.angle_sweep);
+        let plane_sector = PlaneSector::new(sector.angle_start, sector.angle_sweep);
 
         Self {
+            // PERF: The distance iterator should use the smaller sector bounding box
             iter: circle.distances(),
             plane_sector,
             threshold: circle.threshold(),
@@ -36,8 +39,8 @@ impl Iterator for Points {
         let plane_sector = self.plane_sector;
 
         self.iter
-            .find(|(point, distance)| *distance < threshold && plane_sector.contains(*point))
-            .map(|(point, _)| point)
+            .find(|(_, delta, distance)| *distance < threshold && plane_sector.contains(*delta))
+            .map(|(point, ..)| point)
     }
 }
 

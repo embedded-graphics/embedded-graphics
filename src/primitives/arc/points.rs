@@ -1,6 +1,10 @@
 use crate::{
     geometry::Point,
-    primitives::{arc::Arc, circle::DistanceIterator, common::PlaneSector, OffsetOutline},
+    primitives::{
+        arc::Arc,
+        common::{DistanceIterator, PlaneSector},
+        OffsetOutline,
+    },
 };
 
 /// Iterator over all points on the arc line.
@@ -19,9 +23,10 @@ impl Points {
         let outer_circle = arc.to_circle();
         let inner_circle = outer_circle.offset(-1);
 
-        let plane_sector = PlaneSector::new(arc.center_2x(), arc.angle_start, arc.angle_sweep);
+        let plane_sector = PlaneSector::new(arc.angle_start, arc.angle_sweep);
 
         Self {
+            // PERF: The distance iterator should use the smaller arc bounding box
             iter: outer_circle.distances(),
             plane_sector,
             outer_threshold: outer_circle.threshold(),
@@ -39,12 +44,12 @@ impl Iterator for Points {
         let plane_sector = self.plane_sector;
 
         self.iter
-            .find(|(point, distance)| {
+            .find(|(_, delta, distance)| {
                 *distance < outer_threshold
                     && *distance >= inner_threshold
-                    && plane_sector.contains(*point)
+                    && plane_sector.contains(*delta)
             })
-            .map(|(point, _)| point)
+            .map(|(point, ..)| point)
     }
 }
 

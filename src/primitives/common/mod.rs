@@ -1,4 +1,5 @@
 mod closed_thick_segment_iter;
+mod distance_iterator;
 mod line_join;
 mod linear_equation;
 mod plane_sector;
@@ -7,6 +8,7 @@ mod thick_segment;
 mod thick_segment_iter;
 
 pub use closed_thick_segment_iter::ClosedThickSegmentIter;
+pub use distance_iterator::DistanceIterator;
 pub use line_join::{JoinKind, LineJoin};
 pub use linear_equation::{LinearEquation, OriginLinearEquation, NORMAL_VECTOR_SCALE};
 pub use plane_sector::PlaneSector;

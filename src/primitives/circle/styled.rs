@@ -4,11 +4,7 @@ use crate::{
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::{
-        circle::{distance_iterator::DistanceIterator, Circle},
-        rectangle::Rectangle,
-        OffsetOutline,
-    },
+    primitives::{circle::Circle, common::DistanceIterator, rectangle::Rectangle, OffsetOutline},
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     SaturatingCast,
 };
@@ -59,7 +55,7 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for (point, distance) in &mut self.iter {
+        for (point, _, distance) in &mut self.iter {
             let color = if distance < self.inner_threshold {
                 self.inner_color
             } else if distance < self.outer_threshold {
