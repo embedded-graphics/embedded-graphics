@@ -8,11 +8,16 @@ pub use size::Size;
 
 use crate::primitives::Rectangle;
 
-/// Adds the ability to get the dimensions/position of a graphics object
+/// Adds the ability to get the dimensions/position of an item.
 ///
-/// This **should** be implemented for all builtin embedded-graphics primitives and fonts. Third party
-/// implementations do not have to implement this trait as an object may not have a known size. If
-/// the object _does_ have a known size, this trait **should** be implemented.
+/// TODO
+///
+/// # Implementation notes
+///
+/// This trait must be implemented for any item that has a known size and position. For items where
+/// only the size is known, see the [`OriginDimensions`] trait.
+///
+/// [`OriginDimensions`]: trait.OriginDimensions.html
 pub trait Dimensions {
     /// Returns the bounding box.
     fn bounding_box(&self) -> Rectangle;
