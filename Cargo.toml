@@ -30,7 +30,6 @@ circle-ci = { repository = "embedded-graphics/embedded-graphics", branch = "mast
 fixed = { version = "0.5.7", optional = true, default-features = false }
 float-cmp = "0.8.0"
 micromath = { version = "1.1.0", default-features = false }
-nalgebra = { version = "0.23.0", optional = true, default-features = false }
 embedded-graphics-core = { path = "core", version = "0.1.0" }
 
 # criterion is not listed as a dev-dependency to work around a problem with no_std compatibility
@@ -42,7 +41,7 @@ arrayvec = { version = "0.5.2", default-features = false }
 
 [features]
 default = []
-nalgebra_support = [ "nalgebra", "embedded-graphics-core/nalgebra_support" ]
+nalgebra_support = [ "embedded-graphics-core/nalgebra_support" ]
 fixed_point = [ "fixed" ]
 
 [[bench]]

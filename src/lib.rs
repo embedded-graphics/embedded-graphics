@@ -256,9 +256,6 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
-#[cfg(feature = "nalgebra_support")]
-extern crate nalgebra;
-
 pub mod fonts;
 pub mod geometry;
 pub mod image;
