@@ -229,7 +229,6 @@ mod tests {
     #[test]
     fn tiny_sector() {
         let mut display = MockDisplay::new();
-        display.set_allow_overdraw(true);
 
         Sector::new(Point::zero(), 9, 30.0.deg(), 120.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
@@ -287,7 +286,6 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        display.set_allow_out_of_bounds_drawing(true);
 
         Sector::with_center(Point::new(3, 10), diameter, 0.0.deg(), 90.0.deg())
             .into_styled(style)
