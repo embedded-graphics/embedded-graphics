@@ -18,7 +18,8 @@
 //!   [`DrawTarget`]. Examples include shapes, text, UI elements, etc.
 //! * Geometry - [`Point`], [`Size`] and [`Rectangle`] provide ways of defining positions,
 //!   dimensions and rectangular areas respectively.
-//! * Dimensions - the [`Dimensions`] and [`OriginDimensions`] traits allow sizing of objects.
+//! * Dimensions - the [`Dimensions`] and [`OriginDimensions`] traits allow the size and position of
+//!   an object to be defined.
 //! * The [`prelude`] reexports useful items to reduce boilerplate.
 //!
 //! # Colors
