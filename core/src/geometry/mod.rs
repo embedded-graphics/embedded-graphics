@@ -43,7 +43,7 @@ use crate::primitives::Rectangle;
 /// When testing `Dimensions` implementations for [`Drawable`] items, [`MockDisplay::affected_area`]
 /// can be a useful method of checking that the bounding box is the correct size.
 ///
-/// [`Drawable`]: ../drawable/trait.Drawable.html
+/// [`Drawable`]: ../trait.Drawable.html
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 /// [`OriginDimensions`]: trait.OriginDimensions.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
