@@ -210,7 +210,7 @@ impl Rectangle {
     ///
     /// let intersection = rect1.intersection(&rect2);
     ///
-    /// assert_eq!(intersection.size, Size::zero());
+    /// assert!(intersection.is_zero_sized());
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
     pub fn intersection(&self, other: &Rectangle) -> Rectangle {
