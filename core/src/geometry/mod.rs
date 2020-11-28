@@ -21,6 +21,9 @@ use crate::primitives::Rectangle;
 /// * [`Text`] - returns a rectangle containing all pixels required to draw the given text with the
 ///   chosen font.
 ///
+/// Dimensions are defined as [`Rectangle`]s. This allows, for example, iterating over all points
+/// in an item's bounding box with the [`points`] method.
+///
 /// # Implementation notes
 ///
 /// An implementation of `Dimensions` must produce a rectangle encompassing the entire item. For
@@ -44,6 +47,7 @@ use crate::primitives::Rectangle;
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 /// [`OriginDimensions`]: trait.OriginDimensions.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
+/// [`points`]: ../primitives/trait.PointsIter.html
 /// [`MockDisplay::affected_area`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html#method.affected_area
 /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 /// [`Text`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/fonts/struct.Text.html
