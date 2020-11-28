@@ -5,7 +5,9 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        arc::Arc, circle::DistanceIterator, common::PlaneSector, OffsetOutline, Rectangle, Styled,
+        arc::Arc,
+        common::{DistanceIterator, PlaneSector},
+        OffsetOutline, Rectangle, Styled,
     },
     style::PrimitiveStyle,
     SaturatingCast,
@@ -40,16 +42,13 @@ where
         let inside_edge = circle.offset(style.inside_stroke_width().saturating_cast_neg());
 
         let iter = if !styled.style.is_transparent() {
+            // PERF: The distance iterator should use the smaller arc bounding box
             outside_edge.distances()
         } else {
             DistanceIterator::empty()
         };
 
-        let plane_sector = PlaneSector::new(
-            primitive.center_2x(),
-            primitive.angle_start,
-            primitive.angle_sweep,
-        );
+        let plane_sector = PlaneSector::new(primitive.angle_start, primitive.angle_sweep);
 
         Self {
             iter,
@@ -74,12 +73,12 @@ where
         let plane_sector = self.plane_sector;
 
         self.iter
-            .find(|(point, distance)| {
+            .find(|(_, delta, distance)| {
                 *distance < outer_threshold
                     && *distance >= inner_threshold
-                    && plane_sector.contains(*point)
+                    && plane_sector.contains(*delta)
             })
-            .map(|(point, _)| Pixel(point, stroke_color))
+            .map(|(point, ..)| Pixel(point, stroke_color))
     }
 }
 

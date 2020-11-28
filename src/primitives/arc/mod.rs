@@ -109,17 +109,6 @@ impl Arc {
     pub fn center(&self) -> Point {
         self.bounding_box().center()
     }
-
-    /// Returns the center point of the arc scaled by a factor of 2.
-    ///
-    /// This method is used to accurately calculate the outside edge of the arc.
-    /// The result is not equivalent to `self.center() * 2` because of rounding.
-    pub(in crate::primitives) fn center_2x(&self) -> Point {
-        // The radius scaled up by a factor of 2 is equal to the diameter
-        let radius = self.diameter.saturating_sub(1);
-
-        self.top_left * 2 + Size::new(radius, radius)
-    }
 }
 
 impl Primitive for Arc {

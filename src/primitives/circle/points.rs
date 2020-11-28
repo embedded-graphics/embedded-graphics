@@ -1,6 +1,6 @@
 use crate::{
     geometry::Point,
-    primitives::circle::{distance_iterator::DistanceIterator, Circle},
+    primitives::{circle::Circle, common::DistanceIterator},
 };
 
 /// Iterator over all points inside the circle.
@@ -25,8 +25,8 @@ impl Iterator for Points {
     fn next(&mut self) -> Option<Self::Item> {
         let threshold = self.threshold;
         self.iter
-            .find(|(_, distance)| *distance < threshold)
-            .map(|(point, _)| point)
+            .find(|(_, _, distance)| *distance < threshold)
+            .map(|(point, ..)| point)
     }
 }
 

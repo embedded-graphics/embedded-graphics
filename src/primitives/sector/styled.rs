@@ -6,8 +6,9 @@ use crate::{
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        circle::DistanceIterator,
-        common::{OriginLinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE},
+        common::{
+            DistanceIterator, OriginLinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
+        },
         OffsetOutline, Rectangle, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
@@ -50,6 +51,7 @@ where
         let stroke_area_circle = stroke_area.to_circle();
 
         let iter = if !style.is_transparent() {
+            // PERF: The distance iterator should use the smaller sector bounding box
             stroke_area_circle.distances()
         } else {
             DistanceIterator::empty()
@@ -58,11 +60,7 @@ where
         let outer_threshold = stroke_area_circle.threshold();
         let inner_threshold = fill_area.to_circle().threshold();
 
-        let plane_sector = PlaneSector::new(
-            stroke_area.center_2x(),
-            stroke_area.angle_start,
-            stroke_area.angle_sweep,
-        );
+        let plane_sector = PlaneSector::new(stroke_area.angle_start, stroke_area.angle_sweep);
 
         let stroke_threshold_inside =
             style.inside_stroke_width().saturating_cast() * NORMAL_VECTOR_SCALE * 2
@@ -113,21 +111,18 @@ where
         let outer_threshold = self.outer_threshold;
 
         loop {
-            let (point, distance) = self
+            let (point, delta, distance) = self
                 .iter
-                .find(|(_, distance)| *distance < outer_threshold)?;
-
-            // TODO: only scale point once
-            let point_2x = point * 2 - self.plane_sector.origin;
+                .find(|(_, _, distance)| *distance < outer_threshold)?;
 
             let color = match self.plane_sector.point_type(
-                point,
+                delta,
                 self.stroke_threshold_inside,
                 self.stroke_threshold_outside,
             ) {
                 Some(PointType::Stroke) => {
                     if let Some(bevel) = &self.bevel {
-                        if bevel.distance(point_2x) >= self.bevel_threshold {
+                        if bevel.distance(delta) >= self.bevel_threshold {
                             continue;
                         }
                     }

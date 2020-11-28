@@ -152,7 +152,8 @@ impl Primitive for Sector {
 impl ContainsPoint for Sector {
     fn contains(&self, point: Point) -> bool {
         if self.to_circle().contains(point) {
-            PlaneSector::new(self.center_2x(), self.angle_start, self.angle_sweep).contains(point)
+            let delta = point * 2 - self.center_2x();
+            PlaneSector::new(self.angle_start, self.angle_sweep).contains(delta)
         } else {
             false
         }

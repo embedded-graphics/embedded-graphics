@@ -1,15 +1,13 @@
 //! The circle primitive
 
-mod distance_iterator;
 mod points;
 mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{ContainsPoint, OffsetOutline, Primitive, Rectangle},
+    primitives::{common::DistanceIterator, ContainsPoint, OffsetOutline, Primitive, Rectangle},
     transform::Transform,
 };
-pub(in crate::primitives) use distance_iterator::DistanceIterator;
 pub use points::Points;
 pub use styled::StyledPixels;
 
@@ -85,7 +83,7 @@ impl Circle {
     ///
     /// This method is used to accurately calculate the outside edge of the circle.
     /// The result is not equivalent to `self.center() * 2` because of rounding.
-    fn center_2x(&self) -> Point {
+    pub(in crate::primitives) fn center_2x(&self) -> Point {
         // The radius scaled up by a factor of 2 is equal to the diameter
         let radius = self.diameter.saturating_sub(1);
 

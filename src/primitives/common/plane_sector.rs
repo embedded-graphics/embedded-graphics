@@ -32,13 +32,6 @@ impl Operation {
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct PlaneSector {
-    /// Origin of the two half planes.
-    ///
-    /// The origin of the half planes is equal to the center point of the arc or circle scaled
-    /// up by a factor of 2.
-    // TODO: make private
-    pub(crate) origin: Point,
-
     /// Half plane on the left side of a line.
     half_plane_left: OriginLinearEquation,
 
@@ -50,13 +43,12 @@ pub struct PlaneSector {
 }
 
 impl PlaneSector {
-    pub fn new(center_2x: Point, mut angle_start: Angle, angle_sweep: Angle) -> Self {
+    pub fn new(mut angle_start: Angle, angle_sweep: Angle) -> Self {
         let angle_sweep_abs = angle_sweep.abs();
 
         let operation = if angle_sweep_abs >= ANGLE_360DEG {
             // Skip calculation of half planes if the absolute value of the sweep angle is >= 360°.
             return Self {
-                origin: center_2x,
                 half_plane_left: OriginLinearEquation::new_horizontal(),
                 half_plane_right: OriginLinearEquation::new_horizontal(),
                 operation: Operation::EntirePlane,
@@ -75,7 +67,6 @@ impl PlaneSector {
         }
 
         Self {
-            origin: center_2x,
             half_plane_left: OriginLinearEquation::with_angle(angle_start),
             half_plane_right: OriginLinearEquation::with_angle(angle_end),
             operation,
@@ -83,9 +74,6 @@ impl PlaneSector {
     }
 
     pub fn contains(&self, point: Point) -> bool {
-        // `PlaneSector` uses scaled coordinates for an increased resolution.
-        let point = point * 2 - self.origin;
-
         let correct_side_1 = self.half_plane_left.check_side(point, LineSide::Left);
         let correct_side_2 = self.half_plane_right.check_side(point, LineSide::Right);
 
@@ -99,9 +87,6 @@ impl PlaneSector {
         inside_threshold: i32,
         outside_threshold: i32,
     ) -> Option<PointType> {
-        // `PlaneSector` uses scaled coordinates for an increased resolution.
-        let point = point * 2 - self.origin;
-
         let distance_left = self.half_plane_left.distance(point);
         let distance_right = self.half_plane_right.distance(point);
 
@@ -145,25 +130,25 @@ mod tests {
 
     #[test]
     fn plane_sector_quadrants_positive_sweep() {
-        let plane_sector = PlaneSector::new(Point::zero(), 0.0.deg(), 90.0.deg());
+        let plane_sector = PlaneSector::new(0.0.deg(), 90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [true, true, true, false, false, false, false, false]
         );
 
-        let plane_sector = PlaneSector::new(Point::zero(), 90.0.deg(), 90.0.deg());
+        let plane_sector = PlaneSector::new(90.0.deg(), 90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [false, false, true, true, true, false, false, false]
         );
 
-        let plane_sector = PlaneSector::new(Point::zero(), 180.0.deg(), 90.0.deg());
+        let plane_sector = PlaneSector::new(180.0.deg(), 90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [false, false, false, false, true, true, true, false]
         );
 
-        let plane_sector = PlaneSector::new(Point::zero(), 270.0.deg(), 90.0.deg());
+        let plane_sector = PlaneSector::new(270.0.deg(), 90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [true, false, false, false, false, false, true, true]
@@ -172,25 +157,25 @@ mod tests {
 
     #[test]
     fn plane_sector_quadrants_negative_sweep() {
-        let plane_sector = PlaneSector::new(Point::zero(), 0.0.deg(), -90.0.deg());
+        let plane_sector = PlaneSector::new(0.0.deg(), -90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [true, false, false, false, false, false, true, true]
         );
 
-        let plane_sector = PlaneSector::new(Point::zero(), 90.0.deg(), -90.0.deg());
+        let plane_sector = PlaneSector::new(90.0.deg(), -90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [true, true, true, false, false, false, false, false]
         );
 
-        let plane_sector = PlaneSector::new(Point::zero(), 180.0.deg(), -90.0.deg());
+        let plane_sector = PlaneSector::new(180.0.deg(), -90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [false, false, true, true, true, false, false, false]
         );
 
-        let plane_sector = PlaneSector::new(Point::zero(), 270.0.deg(), -90.0.deg());
+        let plane_sector = PlaneSector::new(270.0.deg(), -90.0.deg());
         assert_eq!(
             contains(&plane_sector),
             [false, false, false, false, true, true, true, false]
