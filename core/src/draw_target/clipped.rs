@@ -83,6 +83,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
     use embedded_graphics::{
         draw_target::{DrawTarget, DrawTargetExt},
         geometry::Dimensions,

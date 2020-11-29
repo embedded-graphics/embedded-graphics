@@ -83,6 +83,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
     use embedded_graphics::{
         geometry::Point, iterator::PixelIteratorExt, mock_display::MockDisplay,
         pixelcolor::BinaryColor, Pixel,
