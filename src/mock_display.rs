@@ -187,6 +187,7 @@ use crate::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
         Rgb565, Rgb888, RgbColor, WebColors,
     },
+    primitives::PointsIter,
     primitives::Rectangle,
     Pixel,
 };

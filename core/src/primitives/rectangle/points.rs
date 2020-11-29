@@ -62,7 +62,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
-        primitives::Rectangle,
+        primitives::{PointsIter, Rectangle},
     };
 
     #[test]

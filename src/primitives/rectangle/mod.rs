@@ -78,7 +78,10 @@ impl Transform for Rectangle {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::{AnchorPoint, Dimensions, Point, Size};
+    use crate::{
+        geometry::{AnchorPoint, Dimensions, Point, Size},
+        primitives::PointsIter,
+    };
 
     #[test]
     fn dimensions() {

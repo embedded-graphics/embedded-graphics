@@ -8,7 +8,7 @@ mod translated;
 use crate::{
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::Rectangle,
+    primitives::{PointsIter, Rectangle},
     Pixel,
 };
 

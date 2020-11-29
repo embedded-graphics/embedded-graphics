@@ -3,7 +3,7 @@
 use crate::{
     geometry::{Point, Size},
     pixelcolor::PixelColor,
-    primitives::{rectangle, Rectangle},
+    primitives::{rectangle, PointsIter, Rectangle},
     Pixel,
 };
 use core::iter::Zip;

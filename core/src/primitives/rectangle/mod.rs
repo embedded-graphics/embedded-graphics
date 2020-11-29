@@ -426,11 +426,6 @@ impl Rectangle {
                 .saturating_add(self.size.width.saturating_cast())
     }
 
-    /// Create a row-first, top-down iterator over all points in the rectangle.
-    pub fn points(&self) -> Points {
-        Points::new(self)
-    }
-
     /// Returns `true` is the rectangle is zero sized.
     ///
     /// A rectangle is zero sized if the width or height are zero.

@@ -3,6 +3,7 @@ use crate::{
     primitives::{
         ellipse::{compute_threshold, is_point_inside_ellipse, Ellipse},
         rectangle::{self, Rectangle},
+        PointsIter,
     },
 };
 

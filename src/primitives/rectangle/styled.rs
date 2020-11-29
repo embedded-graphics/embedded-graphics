@@ -3,7 +3,10 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::rectangle::{Points, Rectangle},
+    primitives::{
+        rectangle::{Points, Rectangle},
+        PointsIter,
+    },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
     transform::Transform,
     Drawable, Pixel, SaturatingCast,
