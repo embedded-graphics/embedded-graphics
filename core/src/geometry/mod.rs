@@ -50,7 +50,7 @@ use crate::primitives::Rectangle;
 /// [`Drawable`]: ../trait.Drawable.html
 /// [`Drawable::draw`]: ../trait.Drawable.html#tymethod.draw
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-/// [`Translated`]: ../draw_target/trait.Translated.html
+/// [`Translated`]: ../draw_target/struct.Translated.html
 /// [`ImageDrawable`]: ../image/trait.ImageDrawable.html
 /// [`OriginDimensions`]: trait.OriginDimensions.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
