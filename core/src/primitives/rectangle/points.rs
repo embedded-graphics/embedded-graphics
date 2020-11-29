@@ -1,5 +1,3 @@
-//! Iterator over all points inside the rectangle.
-
 use crate::{geometry::Point, primitives::Rectangle};
 
 /// Iterator over all points inside the rectangle.

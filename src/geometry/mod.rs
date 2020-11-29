@@ -12,25 +12,11 @@ pub use embedded_graphics_core::geometry::{
 pub(crate) use real::Real;
 
 pub(crate) trait PointExt {
+    /// Returns a point that is rotated by 90° relative to the origin.
     fn rotate_90(self) -> Self;
 
-    fn dot_product(self, other: Point) -> i32;
-
-    fn determinant(self, other: Point) -> i32;
-
-    fn length_squared(self) -> i32;
-}
-
-impl PointExt for Point {
-    /// Returns a point that is rotated by 90° relative to the origin.
-    fn rotate_90(self) -> Self {
-        Self::new(self.y, -self.x)
-    }
-
     /// Calculates the dot product of two points.
-    fn dot_product(self, other: Point) -> i32 {
-        self.x * other.x + self.y * other.y
-    }
+    fn dot_product(self, other: Point) -> i32;
 
     /// Calculates the determinant of a 2x2 matrix formed by this and another point.
     ///
@@ -39,14 +25,28 @@ impl PointExt for Point {
     /// result = |                 |
     ///          | other.x other.y |
     /// ```
-    fn determinant(self, other: Point) -> i32 {
-        self.x * other.y - self.y * other.x
-    }
+    fn determinant(self, other: Point) -> i32;
 
     /// Returns the squared length.
     ///
     /// The returned value is the square of the length of a vector from `(0, 0)`
     /// to `(self.x, self.y)`.
+    fn length_squared(self) -> i32;
+}
+
+impl PointExt for Point {
+    fn rotate_90(self) -> Self {
+        Self::new(self.y, -self.x)
+    }
+
+    fn dot_product(self, other: Point) -> i32 {
+        self.x * other.x + self.y * other.y
+    }
+
+    fn determinant(self, other: Point) -> i32 {
+        self.x * other.y - self.y * other.x
+    }
+
     fn length_squared(self) -> i32 {
         self.x.pow(2) + self.y.pow(2)
     }
