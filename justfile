@@ -116,3 +116,14 @@ build-ci-image:
 # Push the generated CI build environment image to Docker Hub
 push-ci-image:
     docker push "{{ci_build_image}}"
+
+# -------
+# Release
+# -------
+# Release embedded-graphics-core
+release-core *args:
+    cargo release --workspace --exclude embedded-graphics {{args}}
+
+# Release embedded-graphics
+release-e-g *args:
+    cargo release --package embedded-graphics {{args}}
