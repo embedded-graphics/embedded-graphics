@@ -121,3 +121,31 @@ where
         display.draw_iter(core::iter::once(*self))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    use embedded_graphics::{
+        geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor, Drawable, Pixel,
+    };
+
+    #[test]
+    fn draw_pixel() -> Result<(), core::convert::Infallible> {
+        let mut display = MockDisplay::new();
+        Pixel(Point::new(0, 0), BinaryColor::On).draw(&mut display)?;
+        Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display)?;
+        Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display)?;
+
+        #[rustfmt::skip]
+        assert_eq!(
+            MockDisplay::from_pattern(&[
+                "#  ",
+                "  #",
+                " # ",
+            ]),
+            display
+        );
+
+        Ok(())
+    }
+}
