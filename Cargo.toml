@@ -30,7 +30,7 @@ circle-ci = { repository = "embedded-graphics/embedded-graphics", branch = "mast
 fixed = { version = "0.5.7", optional = true, default-features = false }
 float-cmp = "0.8.0"
 micromath = { version = "1.1.0", default-features = false }
-embedded-graphics-core = { path = "core", version = "0.1.0" }
+embedded-graphics-core = { path = "core", version = "^0.1.0" }
 
 # criterion is not listed as a dev-dependency to work around a problem with no_std compatibility
 # and because dev-dependencies can't be optional
