@@ -3,7 +3,7 @@ use crate::{
     primitives::{
         line::{self, Line},
         polyline::Polyline,
-        Primitive,
+        PointsIter,
     },
 };
 

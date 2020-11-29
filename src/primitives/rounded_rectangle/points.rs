@@ -6,7 +6,7 @@ use crate::{
             ellipse_quadrant::{self, Quadrant},
             RoundedRectangle,
         },
-        ContainsPoint, Primitive,
+        PointsIter,
     },
 };
 
@@ -93,7 +93,8 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Size, iterator::IntoPixels, pixelcolor::BinaryColor, style::PrimitiveStyle,
+        geometry::Size, iterator::IntoPixels, pixelcolor::BinaryColor, primitives::Primitive,
+        style::PrimitiveStyle,
     };
 
     #[test]

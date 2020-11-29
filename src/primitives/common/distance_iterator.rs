@@ -1,8 +1,8 @@
 use crate::{
-    geometry::Point,
+    geometry::{Point, PointExt},
     primitives::{
         rectangle::{self, Rectangle},
-        Primitive,
+        PointsIter,
     },
 };
 

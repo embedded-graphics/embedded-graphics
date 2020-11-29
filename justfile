@@ -12,23 +12,23 @@ all_features := "nalgebra_support fixed"
 # Building
 #----------
 
-build: check-formatting test test-all build-benches check-readme check-links
+build: check-formatting test test-all build-benches check-readmes check-links
 
 # Build the benches
 build-benches:
-    cargo bench --features "criterion" --no-run
+    cargo bench --workspace --features "criterion" --no-run
 
 # Run the benches
 bench *args:
-    cargo bench --features "criterion" {{args}}
+    cargo bench --workspace --features "criterion" {{args}}
 
 # Run cargo test in release mode
 test:
-    cargo test --release
+    cargo test --workspace --release
 
 # Run cargo test in release mode with all features enabled
 test-all:
-    cargo test --release --features "{{all_features}}"
+    cargo test --workspace --release --features "{{all_features}}"
 
 # Check the formatting
 check-formatting:
@@ -36,8 +36,8 @@ check-formatting:
 
 # Cross compiles embedded-graphics for a target
 build-target target *args:
-    cargo build --target {{target}} {{args}}
-    cargo build --target {{target}} --features "{{all_features}}" {{args}}
+    cargo build --workspace --target {{target}} {{args}}
+    cargo build --workspace --target {{target}} --features "{{all_features}}" {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:
@@ -68,35 +68,42 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --features "{{all_features}}"
+    cargo doc --workspace --features "{{all_features}}"
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
-    cargo deadlinks
+    cargo deadlinks --dir target/doc/embedded_graphics
+    cargo deadlinks --dir target/doc/embedded_graphics_core
 
 #----------------------
 # README.md generation
 # ---------------------
 
 # Generate README.md for a single crate
-generate-readme: (_build-readme)
-    cp {{target_dir}}/README.md README.md
+generate-readme crate: (_build-readme crate)
+    cp {{target_dir}}/{{crate}}_README.md {{crate}}/README.md
 
 # Check README.md for a single crate
-@check-readme: (_build-readme)
-    diff -q {{target_dir}}/README.md README.md || ( \
-        echo -e "\033[1;31mError:\033[0m README.md needs to be regenerated."; \
-        echo -e "       Run 'just generate-readme' to regenerate.\n"; \
+@check-readme crate: (_build-readme crate)
+    diff -q {{target_dir}}/{{crate}}_README.md ./{{crate}}/README.md || ( \
+        echo -e "\033[1;31mError:\033[0m README.md for {{crate}} needs to be regenerated."; \
+        echo -e "       Run 'just generate-readmes' to regenerate.\n"; \
         exit 1 \
     )
 
+# Generate README.md for all crates
+generate-readmes: (generate-readme ".") (generate-readme "./core")
+
+# Checks README.md for all crates
+check-readmes: (check-readme ".") (check-readme "./core")
+
 # Builds README.md for a single crate
-_build-readme:
+_build-readme crate:
     #!/usr/bin/env bash
     set -e -o pipefail
     mkdir -p {{target_dir}}/readme
-    echo "Building README.md"
-    cargo readme | sed -E -f filter_readme.sed > {{target_dir}}/README.md
+    echo "Building README.md for {{crate}}"
+    cargo readme -r {{crate}} | sed -E -f filter_readme.sed > {{target_dir}}/{{crate}}_README.md
 
 #--------
 # Docker

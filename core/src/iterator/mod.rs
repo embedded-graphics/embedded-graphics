@@ -1,11 +1,11 @@
 //! Iterators.
 
+pub mod contiguous;
+pub mod pixel;
+
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
 };
-
-pub mod contiguous;
-pub mod pixel;
 
 /// Produce an iterator over all pixels in an object.
 ///
@@ -45,7 +45,7 @@ where
     I::Item: PixelColor,
 {
     fn into_pixels(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self> {
-        contiguous::IntoPixels::new(self, bounding_box.clone())
+        contiguous::IntoPixels::new(self, *bounding_box)
     }
 }
 
@@ -83,8 +83,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    use embedded_graphics::{
+        geometry::Point, iterator::PixelIteratorExt, mock_display::MockDisplay,
+        pixelcolor::BinaryColor, Pixel,
+    };
 
     #[test]
     fn draw_pixel_iterator() {

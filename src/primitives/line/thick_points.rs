@@ -1,5 +1,5 @@
 use crate::{
-    geometry::Point,
+    geometry::{Point, PointExt},
     primitives::{
         common::LineSide,
         line::{

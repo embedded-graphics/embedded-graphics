@@ -1,7 +1,6 @@
 use crate::{
     geometry::{Point, Size},
-    prelude::Primitive,
-    primitives::{Line, Rectangle},
+    primitives::{Line, PointsIter, Rectangle},
 };
 use core::ops::Range;
 

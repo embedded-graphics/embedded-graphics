@@ -1,16 +1,16 @@
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
-        Primitive, Rectangle,
+        PointsIter, Rectangle,
     },
     style::{PrimitiveStyle, Styled},
     transform::Transform,
+    Drawable, Pixel,
 };
 
 impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>
@@ -203,13 +203,13 @@ where
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
         geometry::Point,
         iterator::{IntoPixels, PixelIteratorExt},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::Primitive,
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        Drawable,
     };
 
     // Smaller test pattern for mock display

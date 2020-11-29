@@ -1,7 +1,7 @@
 //! Thick line join.
 
 use crate::{
-    geometry::Point,
+    geometry::{Point, PointExt},
     primitives::{
         common::{LineSide, LinearEquation, StrokeOffset},
         line::Intersection,

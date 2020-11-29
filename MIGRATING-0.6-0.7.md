@@ -11,6 +11,8 @@
     - [Color](#color)
     - [Sub draw targets](#sub-draw-targets)
   - [For display driver authors](#for-display-driver-authors)
+  - [For crates that handle images](#for-crates-that-handle-images)
+  - [For text rendering crates](#for-text-rendering-crates)
     - [Method changes](#method-changes)
   - [General](#general)
     - [`Drawable`](#drawable)
@@ -97,9 +99,25 @@ Please search for `DrawTargetExt` on <https://docs.rs/embedded-graphics> for usa
 
 ## For display driver authors
 
+Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
 
 `DrawTarget`s must also implement the `Dimensions` trait.
+
+## For crates that handle images
+
+Crates that handle images should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+
+The `ImageDrawable` trait has moved there, as well as common use items like the `Dimensions` trait and `Rectangle` primitive.
+
+TODO: Improve this section before release.
+
+## For text rendering crates
+
+Crates that handle text rendering should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+
+TODO: Improve this section before release.
 
 ### Method changes
 

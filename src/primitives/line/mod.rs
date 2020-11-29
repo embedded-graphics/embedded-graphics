@@ -6,11 +6,11 @@ mod styled;
 mod thick_points;
 
 use crate::{
-    geometry::{Dimensions, Point},
+    geometry::{Dimensions, Point, PointExt},
     primitives::{
         common::{LineSide, LinearEquation, StrokeOffset},
         line::thick_points::{ParallelLineType, ParallelsIterator},
-        Primitive, Rectangle,
+        PointsIter, Primitive, Rectangle,
     },
     transform::Transform,
     SaturatingCast,
@@ -52,10 +52,12 @@ pub struct Line {
     pub end: Point,
 }
 
-impl Primitive for Line {
-    type PointsIter = Points;
+impl Primitive for Line {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Line {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }
@@ -286,12 +288,8 @@ impl Transform for Line {
 mod tests {
     use super::*;
     use crate::{
-        drawable::{Drawable, Pixel},
-        geometry::Size,
-        iterator::IntoPixels,
-        mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        style::PrimitiveStyle,
+        geometry::Size, iterator::IntoPixels, mock_display::MockDisplay, pixelcolor::BinaryColor,
+        style::PrimitiveStyle, Drawable, Pixel,
     };
     use arrayvec::ArrayVec;
 

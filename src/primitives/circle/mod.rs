@@ -4,8 +4,10 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Dimensions, Point, Size},
-    primitives::{common::DistanceIterator, ContainsPoint, OffsetOutline, Primitive, Rectangle},
+    geometry::{Dimensions, Point, PointExt, Size},
+    primitives::{
+        common::DistanceIterator, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle,
+    },
     transform::Transform,
 };
 pub use points::Points;
@@ -69,7 +71,7 @@ impl Circle {
 
     /// Create a new circle centered around a given point with a specific diameter
     pub fn with_center(center: Point, diameter: u32) -> Self {
-        let top_left = center - Size::new_equal(diameter).center_offset();
+        let top_left = Rectangle::with_center(center, Size::new_equal(diameter)).top_left;
 
         Circle { top_left, diameter }
     }
@@ -113,10 +115,12 @@ impl OffsetOutline for Circle {
     }
 }
 
-impl Primitive for Circle {
-    type PointsIter = Points;
+impl Primitive for Circle {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Circle {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }
@@ -185,7 +189,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Dimensions, Point, Size},
-        primitives::{ContainsPoint, Primitive},
+        primitives::ContainsPoint,
     };
 
     #[test]

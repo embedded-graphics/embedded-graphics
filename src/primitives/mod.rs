@@ -11,13 +11,14 @@ pub mod rounded_rectangle;
 pub mod sector;
 pub mod triangle;
 
+#[doc(no_inline)]
+pub use self::rectangle::Rectangle;
 pub use self::{
     arc::Arc,
     circle::Circle,
     ellipse::Ellipse,
     line::Line,
     polyline::Polyline,
-    rectangle::Rectangle,
     rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
     sector::Sector,
     triangle::Triangle,
@@ -27,12 +28,10 @@ use crate::{
     pixelcolor::PixelColor,
     style::{PrimitiveStyle, Styled},
 };
+pub use embedded_graphics_core::primitives::PointsIter;
 
 /// Primitive trait
-pub trait Primitive: Dimensions {
-    /// Iterator over all points inside the primitive.
-    type PointsIter: Iterator<Item = Point>;
-
+pub trait Primitive: Dimensions + PointsIter {
     /// Converts this primitive into a `Styled`.
     fn into_styled<C>(self, style: PrimitiveStyle<C>) -> Styled<Self, PrimitiveStyle<C>>
     where
@@ -41,9 +40,6 @@ pub trait Primitive: Dimensions {
     {
         Styled::new(self, style)
     }
-
-    /// Returns an iterator over all points inside the primitive.
-    fn points(&self) -> Self::PointsIter;
 }
 
 /// Trait to check if a point is inside a closed shape.

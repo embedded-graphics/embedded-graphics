@@ -72,10 +72,16 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{
-        draw_target::DrawTargetExt, drawable::Drawable, mock_display::MockDisplay,
-        pixelcolor::BinaryColor, primitives::Primitive, style::PrimitiveStyle,
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    use embedded_graphics::{
+        draw_target::{DrawTarget, DrawTargetExt},
+        geometry::Dimensions,
+        geometry::{Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::{Primitive, Rectangle},
+        style::PrimitiveStyle,
+        Drawable, Pixel,
     };
 
     #[test]

@@ -7,7 +7,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{rectangle::Rectangle, ContainsPoint, OffsetOutline, Primitive},
+    primitives::{rectangle::Rectangle, ContainsPoint, OffsetOutline, PointsIter, Primitive},
     transform::Transform,
 };
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
@@ -267,10 +267,12 @@ impl OffsetOutline for RoundedRectangle {
     }
 }
 
-impl Primitive for RoundedRectangle {
-    type PointsIter = Points;
+impl Primitive for RoundedRectangle {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for RoundedRectangle {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }
@@ -367,7 +369,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
-        primitives::{CornerRadiiBuilder, Primitive},
+        primitives::CornerRadiiBuilder,
     };
 
     #[test]

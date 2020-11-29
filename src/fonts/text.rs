@@ -1,12 +1,12 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::Drawable,
     geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::Rectangle,
     style::{Styled, TextStyle, TextStylePixels},
     transform::Transform,
+    Drawable,
 };
 
 /// A text object.

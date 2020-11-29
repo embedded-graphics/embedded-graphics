@@ -3,7 +3,6 @@ use crate::{
     geometry::{Dimensions, Point},
     iterator::PixelIteratorExt,
     primitives::Rectangle,
-    transform::Transform,
     Pixel,
 };
 
@@ -51,12 +50,12 @@ where
     where
         I: IntoIterator<Item = Self::Color>,
     {
-        let area = area.translate(self.offset);
+        let area = area.translated(self.offset);
         self.parent.fill_contiguous(&area, colors)
     }
 
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-        let area = area.translate(self.offset);
+        let area = area.translated(self.offset);
         self.parent.fill_solid(&area, color)
     }
 
@@ -70,16 +69,22 @@ where
     T: DrawTarget,
 {
     fn bounding_box(&self) -> Rectangle {
-        self.parent.bounding_box().translate(-self.offset)
+        self.parent.bounding_box().translated(-self.offset)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{
-        draw_target::DrawTargetExt, geometry::Size, mock_display::MockDisplay,
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    use embedded_graphics::{
+        draw_target::{DrawTarget, DrawTargetExt},
+        geometry::Dimensions,
+        geometry::{Point, Size},
+        mock_display::MockDisplay,
         pixelcolor::BinaryColor,
+        primitives::Rectangle,
+        transform::Transform,
+        Pixel,
     };
 
     #[test]

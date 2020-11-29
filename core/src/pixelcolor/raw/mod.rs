@@ -15,7 +15,7 @@
 //! color components will have the same order in memory as in the name of the type.
 //!
 //! ```
-//! use embedded_graphics::{prelude::*, pixelcolor::Rgb888};
+//! use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 //!
 //! let color = Rgb888::new(0x11, 0x22, 0x33);
 //!
@@ -107,7 +107,7 @@
 //!
 //! [`PixelColor`]: ../trait.PixelColor.html
 //! [`Raw`]: ../trait.PixelColor.html#associatedtype.Raw
-//! [`Image`]: ../../image/struct.Image.html
+//! [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 //! [`into_storage`]: ../trait.IntoStorage.html#tymethod.into_storage
 //! [`ToBytes`]: trait.ToBytes.html
 //! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_bytes
@@ -115,7 +115,8 @@
 mod iter;
 mod to_bytes;
 
-pub(crate) use iter::{RawDataIter, RawDataIterNext};
+pub use iter::RawDataIter;
+pub(crate) use iter::RawDataIterNext;
 pub use to_bytes::ToBytes;
 
 /// Trait implemented by all `RawUx` types.

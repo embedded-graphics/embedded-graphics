@@ -5,7 +5,7 @@ mod styled;
 
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
-    primitives::{Circle, Primitive, Rectangle},
+    primitives::{Circle, PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -111,10 +111,12 @@ impl Arc {
     }
 }
 
-impl Primitive for Arc {
-    type PointsIter = Points;
+impl Primitive for Arc {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Arc {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

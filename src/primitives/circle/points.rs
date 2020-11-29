@@ -33,7 +33,7 @@ impl Iterator for Points {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{geometry::Point, mock_display::MockDisplay, primitives::Primitive};
+    use crate::{geometry::Point, mock_display::MockDisplay, primitives::PointsIter};
 
     fn test_circle(diameter: u32, pattern: &[&str]) {
         let display = MockDisplay::from_points(Circle::new(Point::new(0, 0), diameter).points());

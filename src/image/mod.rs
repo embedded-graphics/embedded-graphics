@@ -99,20 +99,21 @@
 //! [`SubImage`]: struct.SubImage.html
 //! [`prelude`]: ../prelude/index.html
 
-mod image_drawable;
+mod image_drawable_ext;
 mod image_raw;
 mod sub_image;
 
-pub use image_drawable::{ImageDrawable, ImageDrawableExt};
+pub use embedded_graphics_core::image::ImageDrawable;
+pub use image_drawable_ext::ImageDrawableExt;
 pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
 pub use sub_image::SubImage;
 
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
-    drawable::Drawable,
     geometry::{Dimensions, OriginDimensions, Point},
     primitives::Rectangle,
     transform::Transform,
+    Drawable,
 };
 use core::fmt::Debug;
 

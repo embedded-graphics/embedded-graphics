@@ -8,7 +8,7 @@ mod translated;
 use crate::{
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    primitives::{rectangle::Rectangle, Primitive},
+    primitives::{PointsIter, Rectangle},
     Pixel,
 };
 
@@ -96,7 +96,8 @@ pub use translated::Translated;
 ///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
-///         I: IntoIterator<Item = Pixel<Self::Color>> {
+///         I: IntoIterator<Item = Pixel<Self::Color>>,
+///     {
 ///         for Pixel(coord, color) in pixels.into_iter() {
 ///             // Check if the pixel coordinates are out of bounds (negative or greater than
 ///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
@@ -152,7 +153,7 @@ pub use translated::Translated;
 /// use embedded_graphics::{
 ///     pixelcolor::{raw::RawU16, Rgb565, RgbColor},
 ///     prelude::*,
-///     primitives::{Rectangle, Circle},
+///     primitives::{Circle, Rectangle},
 ///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// #
@@ -196,7 +197,8 @@ pub use translated::Translated;
 ///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
 ///     where
-///         I: IntoIterator<Item = Pixel<Self::Color>> {
+///         I: IntoIterator<Item = Pixel<Self::Color>>,
+///     {
 ///         for Pixel(coord, color) in pixels.into_iter() {
 ///             // Check if the pixel coordinates are out of bounds (negative or greater than
 ///             // (63,63)). `DrawTarget` implementation are required to discard any out of bounds
@@ -221,7 +223,7 @@ pub use translated::Translated;
 ///         let bottom_right = if let Some(bottom_right) = area.bottom_right() {
 ///             bottom_right
 ///         } else {
-///             return Ok(())
+///             return Ok(());
 ///         };
 ///
 ///         self.send_commands(&[
@@ -251,9 +253,7 @@ pub use translated::Translated;
 ///     }
 /// }
 ///
-/// let mut display = ExampleDisplay {
-///     iface: SPI1,
-/// };
+/// let mut display = ExampleDisplay { iface: SPI1 };
 ///
 /// // Draw a rectangle with 5px red stroke and green fill.
 /// // The stroke and fill can be broken down into multiple individual rectangles,
@@ -321,7 +321,7 @@ pub trait DrawTarget: Dimensions {
     /// row-first order. The provided iterator must provide pixel color values based on this
     /// ordering to produce correct output.
     ///
-    /// As seen in the example below, the [`Points::points`] method can be used to get an
+    /// As seen in the example below, the [`PointsIter::points`] method can be used to get an
     /// iterator over all points in the provided area.
     ///
     /// The provided iterator is not required to provide `width * height` pixels to completely fill
@@ -391,12 +391,11 @@ pub trait DrawTarget: Dimensions {
     ///         Size::new(64, 64)
     ///     }
     /// }
-    ///
     /// ```
     ///
     /// [`draw_iter`]: #tymethod.draw_iter
     /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
-    /// [`Points::points`]: ../primitives/trait.Primitive.html#tymethod.points
+    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
@@ -446,10 +445,10 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     prelude::*,
+    ///     fonts::{Font6x8, Text},
     ///     mock_display::MockDisplay,
     ///     pixelcolor::BinaryColor,
-    ///     fonts::{Text, Font6x8},
+    ///     prelude::*,
     ///     style::MonoTextStyle,
     /// };
     ///
@@ -489,12 +488,12 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     prelude::*,
+    ///     fonts::{Font6x8, Text},
     ///     mock_display::MockDisplay,
     ///     pixelcolor::Rgb565,
-    ///     fonts::{Text, Font6x8},
-    ///     style::MonoTextStyle,
+    ///     prelude::*,
     ///     primitives::Rectangle,
+    ///     style::MonoTextStyle,
     /// };
     ///
     /// /// Fills a draw target with a blue background and prints centered yellow text.
@@ -513,7 +512,6 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///         .into_styled(MonoTextStyle::new(Font6x8, Rgb565::YELLOW))
     ///         .draw(target)
     /// }
-    ///
     ///
     /// let mut display = MockDisplay::new();
     /// display.set_allow_overdraw(true);
@@ -541,12 +539,12 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     prelude::*,
+    ///     fonts::{Font12x16, Text},
     ///     mock_display::MockDisplay,
     ///     pixelcolor::BinaryColor,
-    ///     fonts::{Text, Font12x16},
-    ///     style::MonoTextStyle,
+    ///     prelude::*,
     ///     primitives::Rectangle,
+    ///     style::MonoTextStyle,
     /// };
     ///
     /// let mut display = MockDisplay::new();
@@ -591,10 +589,10 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     prelude::*,
+    ///     image::{Image, ImageRaw},
     ///     mock_display::MockDisplay,
     ///     pixelcolor::{BinaryColor, Rgb888},
-    ///     image::{Image, ImageRaw},
+    ///     prelude::*,
     /// };
     ///
     /// /// The image data.
@@ -656,5 +654,147 @@ where
         C: PixelColor + Into<Self::Color>,
     {
         ColorConverted::new(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    use embedded_graphics::{
+        draw_target::{DrawTarget, DrawTargetExt},
+        geometry::{Dimensions, Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        primitives::{Primitive, Rectangle},
+        style::PrimitiveStyle,
+        Drawable, Pixel,
+    };
+
+    #[test]
+    fn draw_iter() {
+        let mut display = MockDisplay::new();
+
+        let area = Rectangle::new(Point::new(2, 1), Size::new(2, 4));
+        let mut clipped = display.clipped(&area);
+
+        let pixels = [
+            Pixel(Point::new(0, 1), BinaryColor::On),
+            Pixel(Point::new(1, 1), BinaryColor::On),
+            Pixel(Point::new(2, 1), BinaryColor::On),
+            Pixel(Point::new(3, 1), BinaryColor::On),
+            Pixel(Point::new(4, 1), BinaryColor::On),
+            Pixel(Point::new(2, 0), BinaryColor::Off),
+            Pixel(Point::new(2, 2), BinaryColor::Off),
+            Pixel(Point::new(2, 3), BinaryColor::Off),
+            Pixel(Point::new(2, 4), BinaryColor::Off),
+            Pixel(Point::new(2, 5), BinaryColor::Off),
+        ];
+        clipped.draw_iter(pixels.iter().copied()).unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "    ", //
+                "  ##", //
+                "  . ", //
+                "  . ", //
+                "  . ", //
+            ])
+        );
+    }
+
+    #[test]
+    fn fill_contiguous() {
+        let mut display = MockDisplay::new();
+
+        let area = Rectangle::new(Point::new(3, 2), Size::new(2, 3));
+        let mut clipped = display.clipped(&area);
+
+        let colors = [
+            1, 1, 1, 1, 1, //
+            0, 0, 0, 0, 1, //
+            0, 1, 0, 1, 1, //
+            1, 0, 1, 0, 1, //
+        ];
+        let area = Rectangle::new(Point::new(1, 2), Size::new(5, 4));
+        clipped
+            .fill_contiguous(&area, colors.iter().map(|c| BinaryColor::from(*c != 0)))
+            .unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "     ", //
+                "     ", //
+                "   ##", //
+                "   ..", //
+                "   .#", //
+            ])
+        );
+    }
+
+    #[test]
+    fn fill_solid() {
+        let mut display = MockDisplay::new();
+
+        let area = Rectangle::new(Point::new(3, 2), Size::new(4, 2));
+        let mut clipped = display.clipped(&area);
+
+        let area = Rectangle::new(Point::new(2, 1), Size::new(6, 4));
+        clipped.fill_solid(&area, BinaryColor::On).unwrap();
+
+        assert_eq!(
+            display,
+            MockDisplay::from_pattern(&[
+                "       ", //
+                "       ", //
+                "   ####", //
+                "   ####", //
+            ])
+        );
+    }
+
+    #[test]
+    fn clear() {
+        let mut display = MockDisplay::new();
+
+        let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
+        let mut clipped = display.clipped(&area);
+        clipped.clear(BinaryColor::On).unwrap();
+
+        let mut expected = MockDisplay::new();
+        area.into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut expected)
+            .unwrap();
+
+        assert_eq!(display, expected);
+    }
+
+    #[test]
+    fn bounding_box() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        let area = Rectangle::new(Point::new(1, 3), Size::new(2, 4));
+        let clipped = display.clipped(&area);
+
+        assert_eq!(clipped.bounding_box(), area);
+    }
+
+    #[test]
+    fn bounding_box_is_clipped() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display_bb = display.bounding_box();
+
+        let top_left = Point::new(10, 20);
+        let size = Size::new(1000, 1000);
+        let area = Rectangle::new(top_left, size);
+        let clipped = display.clipped(&area);
+
+        let expected_size = display_bb.size - Size::new(top_left.x as u32, top_left.y as u32);
+
+        assert_eq!(
+            clipped.bounding_box(),
+            Rectangle::new(top_left, expected_size),
+        );
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    geometry::{Angle, Point, Real, Trigonometry},
+    geometry::{Angle, Point, PointExt, Real, Trigonometry},
     primitives::{common::LineSide, Line},
 };
 

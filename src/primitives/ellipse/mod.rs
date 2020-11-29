@@ -5,7 +5,7 @@ mod styled;
 
 use crate::{
     geometry::{Dimensions, Point, Size},
-    primitives::{circle, ContainsPoint, OffsetOutline, Primitive, Rectangle},
+    primitives::{circle, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -69,7 +69,7 @@ impl Ellipse {
 
     /// Create a new ellipse centered around a given point with a specific size
     pub fn with_center(center: Point, size: Size) -> Self {
-        let top_left = center - size.center_offset();
+        let top_left = Rectangle::with_center(center, size).top_left;
 
         Ellipse { top_left, size }
     }
@@ -111,10 +111,12 @@ pub(in crate::primitives) fn center_2x(top_left: Point, size: Size) -> Point {
     top_left * 2 + radius
 }
 
-impl Primitive for Ellipse {
-    type PointsIter = Points;
+impl Primitive for Ellipse {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Ellipse {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

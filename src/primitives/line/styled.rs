@@ -1,6 +1,5 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -9,7 +8,7 @@ use crate::{
         Rectangle,
     },
     style::{PrimitiveStyle, Styled},
-    SaturatingCast,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Styled line iterator.

@@ -17,6 +17,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#475](https://github.com/embedded-graphics/embedded-graphics/pull/475) `Triangle`s can now be drawn with stroke widths greater than 1.
 - [#478](https://github.com/embedded-graphics/embedded-graphics/pull/478) Added `resized`, `anchor_point`, `rows`, `columns` and `is_zero_sized` methods to `Rectangle`.
 - [#493](https://github.com/embedded-graphics/embedded-graphics/pull/493) Added `assert_eq`, `assert_pattern` and `diff` methods to `MockDisplay`. Improved error messages for failing assertions can be enabled by setting the `EG_FANCY_PANIC` environment variable to `1` at compile time.
+- [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 ### Changed
 
@@ -29,6 +30,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Support for fonts with variable character width was removed from the internal text renderer.
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) `Font6x6` was removed.
 - **(breaking)** [#494](https://github.com/embedded-graphics/embedded-graphics/pull/494) `Triangle::from_points` is removed. To create a triangle from a slice of `Point`s, use the new `Triangle::from_slice` method.
+- **(breaking)** [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) `Primitive::from_points` is removed. The `points` method is now available on the `PointsIter` trait, which must be implemented for all `Primitive`s.
 
 ### Fixed
 

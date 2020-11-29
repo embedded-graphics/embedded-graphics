@@ -13,7 +13,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
 ///     primitives::Rectangle,
-///     style::{PrimitiveStyle, MonoTextStyle},
+///     style::{MonoTextStyle, PrimitiveStyle},
 /// };
 ///
 /// struct Button<'a, C: PixelColor> {
@@ -124,8 +124,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{mock_display::MockDisplay, pixelcolor::BinaryColor};
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    use embedded_graphics::{
+        geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor, Drawable, Pixel,
+    };
 
     #[test]
     fn draw_pixel() -> Result<(), core::convert::Infallible> {

@@ -1,15 +1,14 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         rounded_rectangle::{Points, RoundedRectangle},
-        ContainsPoint, OffsetOutline, Rectangle,
+        ContainsPoint, Rectangle,
     },
     style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
-    SaturatingCast,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the rect border
@@ -113,13 +112,13 @@ where
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable,
         geometry::{Dimensions, Point, Size},
         iterator::IntoPixels,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::{rectangle::Rectangle, CornerRadii, OffsetOutline, Primitive},
+        primitives::{rectangle::Rectangle, CornerRadii, Primitive},
         style::{PrimitiveStyleBuilder, StrokeAlignment},
+        Drawable,
     };
 
     #[test]

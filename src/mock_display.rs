@@ -182,14 +182,14 @@
 
 use crate::{
     draw_target::DrawTarget,
-    drawable::Pixel,
     geometry::{Dimensions, OriginDimensions, Point, Size},
     pixelcolor::{
         Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, PixelColor, Rgb555,
         Rgb565, Rgb888, RgbColor, WebColors,
     },
-    prelude::Primitive,
-    primitives::{ContainsPoint, Rectangle},
+    primitives::PointsIter,
+    primitives::Rectangle,
+    Pixel,
 };
 use core::{
     cmp::PartialEq,
@@ -949,7 +949,7 @@ impl_rgb_color_mapping!(Bgr888);
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::drawable::Drawable;
+    use crate::Drawable;
 
     #[test]
     #[should_panic(expected = "tried to draw pixel outside the display area (x: 65, y: 0)")]

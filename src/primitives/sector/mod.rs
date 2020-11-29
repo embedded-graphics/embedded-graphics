@@ -5,7 +5,9 @@ mod styled;
 
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
-    primitives::{common::PlaneSector, Circle, ContainsPoint, OffsetOutline, Primitive, Rectangle},
+    primitives::{
+        common::PlaneSector, Circle, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle,
+    },
     transform::Transform,
 };
 pub use points::Points;
@@ -89,7 +91,7 @@ impl Sector {
         angle_start: Angle,
         angle_sweep: Angle,
     ) -> Self {
-        let top_left = center - Size::new(diameter, diameter).center_offset();
+        let top_left = Rectangle::with_center(center, Size::new_equal(diameter)).top_left;
 
         Sector {
             top_left,
@@ -141,10 +143,12 @@ impl OffsetOutline for Sector {
     }
 }
 
-impl Primitive for Sector {
-    type PointsIter = Points;
+impl Primitive for Sector {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for Sector {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }

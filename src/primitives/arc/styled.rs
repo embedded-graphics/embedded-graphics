@@ -1,6 +1,5 @@
 use crate::{
     draw_target::DrawTarget,
-    drawable::{Drawable, Pixel},
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
@@ -10,7 +9,7 @@ use crate::{
         OffsetOutline, Rectangle, Styled,
     },
     style::PrimitiveStyle,
-    SaturatingCast,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the arc border
@@ -130,10 +129,9 @@ mod tests {
     use super::*;
     use crate::{
         draw_target::DrawTargetExt,
-        geometry::{AngleUnit, Point},
+        geometry::{AnchorPoint, AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::rectangle::AnchorPoint,
         primitives::{Circle, Primitive},
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };

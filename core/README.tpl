@@ -3,27 +3,23 @@
 </p>
 <p align="center">
     <a href="https://circleci.com/gh/embedded-graphics/embedded-graphics/tree/master"><img src="https://circleci.com/gh/embedded-graphics/embedded-graphics/tree/master.svg?style=shield" alt="Build Status"></a>
-    <a href="https://crates.io/crates/embedded-graphics"><img src="https://img.shields.io/crates/v/embedded-graphics.svg" alt="Crates.io"></a>
-    <a href="https://docs.rs/embedded-graphics"><img src="https://docs.rs/embedded-graphics/badge.svg" alt="Docs.rs"></a>
+    <a href="https://crates.io/crates/embedded-graphics-core"><img src="https://img.shields.io/crates/v/embedded-graphics-core.svg" alt="Crates.io"></a>
+    <a href="https://docs.rs/embedded-graphics-core"><img src="https://docs.rs/embedded-graphics-core/badge.svg" alt="Docs.rs"></a>
     <a href="https://matrix.to/#/#rust-embedded-graphics:matrix.org"><img src="https://img.shields.io/matrix/rust-embedded-graphics:matrix.org" alt="embedded-graphics on Matrix"></a>
 </p>
 
-# Embedded graphics
+# Embedded graphics core
 
 {{readme}}
 
 ## Minimum supported Rust version
 
-The minimum supported Rust version for embedded-graphics is `1.40.0` or greater.
+The minimum supported Rust version for embedded-graphics-core is `1.40.0` or greater.
 Ensure you have the correct version of Rust installed, preferably through <https://rustup.rs>.
 
 ## Development setup
 
-Please see the [development setup guide](./doc/development-setup.md).
-
-## Attribution
-
-All source font PNGs are taken from the excellent [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps).
+Please see the [development setup guide](../doc/development-setup.md).
 
 ## License
 

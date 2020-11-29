@@ -3,7 +3,7 @@ use crate::{
     primitives::{
         ellipse,
         rectangle::{self, Rectangle},
-        ContainsPoint, Primitive,
+        ContainsPoint, PointsIter, Primitive,
     },
 };
 
@@ -50,10 +50,12 @@ impl Dimensions for EllipseQuadrant {
     }
 }
 
-impl Primitive for EllipseQuadrant {
-    type PointsIter = Points;
+impl Primitive for EllipseQuadrant {}
 
-    fn points(&self) -> Self::PointsIter {
+impl PointsIter for EllipseQuadrant {
+    type Iter = Points;
+
+    fn points(&self) -> Self::Iter {
         Points::new(self)
     }
 }
@@ -114,12 +116,11 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Pixel,
         geometry::{Point, Size},
         iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::Primitive,
+        Pixel,
     };
 
     #[test]

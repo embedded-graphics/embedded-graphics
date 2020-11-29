@@ -201,8 +201,8 @@ pub trait MonoFont: Copy {
 mod tests {
     use super::*;
     use crate::{
-        drawable::Drawable, geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor,
-        style::MonoTextStyle,
+        geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor, style::MonoTextStyle,
+        Drawable,
     };
 
     /// Draws a text using the given font and checks it against the expected pattern.
