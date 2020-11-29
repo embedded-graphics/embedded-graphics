@@ -8,41 +8,40 @@ pub use size::Size;
 
 use crate::primitives::Rectangle;
 
-/// Adds the ability to get the dimensions/position of an item.
+/// Adds the ability to get the bounding box of an item.
 ///
-/// This trait is implemented for many builtin items in embedded-graphics:
+/// The exact definition of the bounding box depends on the item:
 ///
-/// * Primitives - returns a rectangle that contains the mathematical representation of the shape.
-/// * Styled primitives - returns a rectangle encompassing all drawn pixels, including stroke
-///   thickness/offset.
-/// * [`DrawTarget`]s (displays, simulator, etc) - returns a rectangle encompassing the drawable
-///   display area with the origin at the top left (`0, 0`).
-/// * [`Image`]s - returns a rectangle with the exact width and height of the image.
-/// * [`Text`] - returns a rectangle containing all pixels required to draw the given text with the
-///   chosen font.
+/// * Primitives ([`Rectangle`], [`Circle`], ...)
+///    For unstyled [primitives] the bounding box is defined as the smallest rectangle that surrounds the entire primitive.
+/// * Styled primitives and other [`Drawable`]s ([`Image`], [`Text`], ...)
+///    The bounding box of a drawable is defined as the smallest rectangle that contains all drawn pixels.
+///    While all builtin [`Drawable`]s in embedded-graphics provide an implementation of this trait this might
+///    not be true for third party drawables.
+///    Note a styled primitive can have a different bounding box than the underlying unstyled primitive.
+///    Depending on the stroke width and alignment the bounding box of the styled primitive will be larger.
+/// * [`DrawTarget`]s (displays, simulator, ...)
+///    The bounding box of a draw target is defines as the area that should be used for drawing operations.
+///    For most display drivers the top left corner of the bounding box will be in the origin, but other draw targets,
+///    like [`Translated`] can have different positions of the top left corner.
 ///
-/// Dimensions are defined as [`Rectangle`]s. This allows, for example, iterating over all points
-/// in an item's bounding box with the [`points`] method.
+/// The bounding box will be returned as a [`Rectangle`]. The methods provided by [`Rectangle`] make
+/// it easy to implement additional functions like hit testing (by using [`contains`]) or drawing a focus
+/// rectangle around a drawable (by converting the rectangle into a styled).
 ///
 /// # Implementation notes
 ///
-/// An implementation of `Dimensions` must produce a rectangle encompassing the entire item. For
-/// shapes, images and other drawable items, this means the rectangle must contain all pixels
-/// required to draw the item.
+/// `Dimensions` should be implemented for `Drawable`, if the bounding box is known before [`Drawable::draw`] is
+/// executed. The implementation must return a rectangle that contains all drawn pixels.
+/// [`MockDisplay::affected_area`] can be a used in unit tests to make sure a drawable returns a bounding box with
+/// the correct dimensions.
 ///
-/// [`DrawTarget`]s  (display drivers, etc) require that `Dimensions` is also implemented. The
-/// implementation must return the a rectangle representing the entire visible area of the display
-/// with the top left coordinate at the origin (`0, 0`). It is recommended that [`OriginDimensions`]
-/// is also implemented for draw targets.
+/// [`DrawTarget`]s  (display drivers, etc) are required to implement `Dimensions`. The
+/// implementation must return the a rectangle representing the drawing area. For display
+/// drivers it's recommended to implement [`OriginDimensions`] instead of implementing [`Dimensions`] directly,
+/// if the top left corner of the display area is at the origin `(0, 0)`.
 ///
-/// Some traits in embedded-graphics-core require `Dimensions` to be implemented as well:
-///
-/// * [`DrawTarget`]: The implementation should return the drawable display area with the top left
-///   coordinate at the origin (`0, 0`).
-///
-/// When testing `Dimensions` implementations for [`Drawable`] items, [`MockDisplay::affected_area`]
-/// can be a useful method of checking that the bounding box is the correct size.
-///
+/// The bounding box of [`ImageDrawable`]s must always start at the origin, so that [`OriginDimensions`] must be implemented instead of this trait.
 /// [`Drawable`]: ../trait.Drawable.html
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 /// [`OriginDimensions`]: trait.OriginDimensions.html
@@ -59,10 +58,13 @@ pub trait Dimensions {
 /// Dimensions with `top_left` of the bounding box at `(0, 0)`.
 ///
 /// A blanket implementation of `Dimensions` is provided for all types that implement this trait.
+/// See the [`Dimensions`] trait documentation for more information about bounding boxes.
 ///
 /// # Implementation notes
 ///
-/// `OriginDimensions` must be implemented for [`ImageDrawable`]s.
+/// This trait should be implemented instead of [`Dimensions`] if the top left corner of the bounding box
+/// will always be at the origin, which will be the case for most display drivers. Some types, like [`ImageDrawable`],
+/// require a bounding box that starts at the origin and can only be used if [`OriginDimensions`] is implemented.
 ///
 /// [`ImageDrawable`]: ../image/trait.ImageDrawable.html
 pub trait OriginDimensions {
