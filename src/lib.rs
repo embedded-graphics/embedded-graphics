@@ -297,3 +297,26 @@ impl SaturatingCast<i32> for u32 {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn saturating_cast() {
+        assert_eq!(0u32.saturating_cast(), 0i32);
+        assert_eq!(0u32.saturating_cast_neg(), 0i32);
+
+        assert_eq!(1u32.saturating_cast(), 1i32);
+        assert_eq!(1u32.saturating_cast_neg(), -1i32);
+
+        assert_eq!(0x7FFF_FFFFu32.saturating_cast(), 0x7FFF_FFFFi32);
+        assert_eq!(0x7FFF_FFFFu32.saturating_cast_neg(), -0x7FFF_FFFFi32);
+
+        assert_eq!(0x8000_0000u32.saturating_cast(), 0x7FFF_FFFFi32);
+        assert_eq!(0x8000_0000u32.saturating_cast_neg(), -0x8000_0000i32);
+
+        assert_eq!(u32::max_value().saturating_cast(), 0x7FFF_FFFFi32);
+        assert_eq!(u32::max_value().saturating_cast_neg(), -0x8000_0000i32);
+    }
+}
