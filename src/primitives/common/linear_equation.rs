@@ -24,6 +24,14 @@ pub struct LinearEquation {
 }
 
 impl LinearEquation {
+    /// Creates a new linear equation with the given angle and distance to the origin.
+    pub fn with_angle_and_distance(angle: Angle, origin_distance: i32) -> Self {
+        Self {
+            normal_vector: OriginLinearEquation::with_angle(angle).normal_vector,
+            origin_distance,
+        }
+    }
+
     /// Creates a new linear equation from a line.
     pub fn from_line(line: &Line) -> Self {
         let normal_vector = line.delta().rotate_90();
