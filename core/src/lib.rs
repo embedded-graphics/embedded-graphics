@@ -51,7 +51,7 @@
 //! [`ImageDrawable`]: ./image/image_drawable/trait.ImageDrawable.html
 
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"
+    html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/b225511f390c0ed9bc065eb67d05125845312148/assets/logo_core.svg?sanitize=true"
 )]
 #![no_std]
 #![deny(missing_docs)]
