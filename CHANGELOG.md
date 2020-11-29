@@ -30,6 +30,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) Support for fonts with variable character width was removed from the internal text renderer.
 - **(breaking)** [#470](https://github.com/embedded-graphics/embedded-graphics/pull/470) `Font6x6` was removed.
 - **(breaking)** [#494](https://github.com/embedded-graphics/embedded-graphics/pull/494) `Triangle::from_points` is removed. To create a triangle from a slice of `Point`s, use the new `Triangle::from_slice` method.
+- **(breaking)** [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) `Primitive::from_points` is removed. The `points` method is now available on the `PointsIter` trait, which must be implemented for all `Primitive`s.
 
 ### Fixed
 
