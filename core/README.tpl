@@ -15,7 +15,7 @@
 ## Minimum supported Rust version
 
 The minimum supported Rust version for embedded-graphics-core is `1.40.0` or greater.
-Ensure you have the latest stable version of Rust installed, preferably through <https://rustup.rs>.
+Ensure you have the correct version of Rust installed, preferably through <https://rustup.rs>.
 
 ## Development setup
 
