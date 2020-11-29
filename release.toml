@@ -8,3 +8,4 @@ pre-release-replacements = [
 ]
 tag-message = "Release {{crate_name}} {{version}}"
 tag-prefix = "{{crate_name}}-"
+pre-release-commit-message = "Release {{crate_name}} {{version}}"
