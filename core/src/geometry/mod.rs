@@ -13,43 +13,55 @@ use crate::primitives::Rectangle;
 /// The exact definition of the bounding box depends on the item:
 ///
 /// * Primitives ([`Rectangle`], [`Circle`], ...)
+///
 ///    For unstyled [primitives] the bounding box is defined as the smallest rectangle that surrounds the entire primitive.
 /// * Styled primitives and other [`Drawable`]s ([`Image`], [`Text`], ...)
+///
 ///    The bounding box of a drawable is defined as the smallest rectangle that contains all drawn pixels.
-///    While all builtin [`Drawable`]s in embedded-graphics provide an implementation of this trait this might
+///    While all builtin [`Drawable`]s in embedded-graphics provide an implementation of this trait, this might
 ///    not be true for third party drawables.
-///    Note a styled primitive can have a different bounding box than the underlying unstyled primitive.
-///    Depending on the stroke width and alignment the bounding box of the styled primitive will be larger.
+///
+///    Note that a styled primitive can have a different bounding box than the underlying unstyled primitive;
+///    depending on the stroke width and alignment the bounding box of the styled primitive may be larger.
 /// * [`DrawTarget`]s (displays, simulator, ...)
-///    The bounding box of a draw target is defines as the area that should be used for drawing operations.
-///    For most display drivers the top left corner of the bounding box will be in the origin, but other draw targets,
-///    like [`Translated`] can have different positions of the top left corner.
+///
+///    The bounding box of a draw target is defined as the area that should be used for drawing operations.
+///    For most display drivers the top left corner of the bounding box will be at the origin but other draw targets,
+///    like [`Translated`], can have different positions of the top left corner.
 ///
 /// The bounding box will be returned as a [`Rectangle`]. The methods provided by [`Rectangle`] make
 /// it easy to implement additional functions like hit testing (by using [`contains`]) or drawing a focus
-/// rectangle around a drawable (by converting the rectangle into a styled).
+/// rectangle around a drawable (by converting the rectangle into a [`Styled`]).
 ///
 /// # Implementation notes
 ///
-/// `Dimensions` should be implemented for `Drawable`, if the bounding box is known before [`Drawable::draw`] is
+/// `Dimensions` should be implemented for `Drawable`s if the bounding box is known before [`Drawable::draw`] is
 /// executed. The implementation must return a rectangle that contains all drawn pixels.
 /// [`MockDisplay::affected_area`] can be a used in unit tests to make sure a drawable returns a bounding box with
 /// the correct dimensions.
 ///
 /// [`DrawTarget`]s  (display drivers, etc) are required to implement `Dimensions`. The
-/// implementation must return the a rectangle representing the drawing area. For display
-/// drivers it's recommended to implement [`OriginDimensions`] instead of implementing [`Dimensions`] directly,
+/// implementation must return a rectangle representing the drawing area. For display
+/// drivers it is recommended to implement [`OriginDimensions`] instead of implementing `Dimensions` directly,
 /// if the top left corner of the display area is at the origin `(0, 0)`.
 ///
-/// The bounding box of [`ImageDrawable`]s must always start at the origin, so that [`OriginDimensions`] must be implemented instead of this trait.
+/// The bounding box of [`ImageDrawable`]s must always start at the origin, therefore [`OriginDimensions`] must be implemented instead of this trait.
+///
 /// [`Drawable`]: ../trait.Drawable.html
+/// [`Drawable::draw`]: ../trait.Drawable.html#tymethod.draw
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
+/// [`Translated`]: ../draw_target/trait.Translated.html
+/// [`ImageDrawable`]: ../image/trait.ImageDrawable.html
 /// [`OriginDimensions`]: trait.OriginDimensions.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
 /// [`points`]: ../primitives/trait.PointsIter.html
 /// [`MockDisplay::affected_area`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html#method.affected_area
+/// [`contains`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.ContainsPoint.html#tymethod.contains
+/// [primitives]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html
+/// [`Circle`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
 /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 /// [`Text`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/fonts/struct.Text.html
+/// [`Styled`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/style/styled/struct.Styled.html
 pub trait Dimensions {
     /// Returns the bounding box.
     fn bounding_box(&self) -> Rectangle;

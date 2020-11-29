@@ -13,10 +13,10 @@
 //!
 //! ## Core functionality
 //!
-//! * [`DrawTarget`] - By implementing a draw target for a display driver all embedded-graphics drawable can be drawn to that display.
+//! * [`DrawTarget`] - By implementing a draw target for a display driver, all embedded-graphics drawables can be drawn to that display.
 //! * [`Drawable`] - This trait can be implemented to make an object drawable to any [`DrawTarget`]. Examples include shapes, text, UI elements, etc.
 //! * [`ImageDrawable`]
-//! * Color types
+//! * Color types - see below.
 //! * Geometry - [`Point`], [`Size`] and [`Rectangle`] provide ways of defining positions, dimensions and rectangular areas respectively.
 //!
 //! # Colors
