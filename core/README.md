@@ -25,14 +25,11 @@ version of embedded-graphics-core may be used for multiple major versions of emb
 
 ### Core functionality
 
-* `Pixel` - A struct that defines the position and color of a single pixel.
-* `Drawable` - A trait that should be implemented for anything that is drawable to a
-  `DrawTarget`. Examples include shapes, text, UI elements, etc.
-* Geometry - `Point`, `Size` and `Rectangle` provide ways of defining positions,
-  dimensions and rectangular areas respectively.
-* Dimensions - the `Dimensions` and `OriginDimensions` traits allow the size and position of
-  an object to be defined.
-* The `prelude` reexports useful items to reduce boilerplate.
+* `DrawTarget` - By implementing a draw target for a display driver, all embedded-graphics drawables can be drawn to that display.
+* `Drawable` - This trait can be implemented to make an object drawable to any `DrawTarget`. Examples include shapes, text, UI elements, etc.
+* `ImageDrawable`
+* Color types - see below.
+* Geometry - `Point`, `Size` and `Rectangle` provide ways of defining positions, dimensions and rectangular areas respectively.
 
 ## Colors
 
