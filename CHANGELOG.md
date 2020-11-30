@@ -8,7 +8,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Fixed
 
-- [#507](https://github.com/embedded-graphics/embedded-graphics/pull/507) Fixed drawing of the line join between the sector radial lines for sweep angles close to 360°.
+- [#507](https://github.com/embedded-graphics/embedded-graphics/pull/507) Fixed drawing of the join between the radial lines for sectors with a sweep angle close to 360°.
 
 ## [0.7.0-alpha.2] - 2020-11-29
 
