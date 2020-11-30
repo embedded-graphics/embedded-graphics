@@ -6,6 +6,14 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) Added `MockDisplay::assert_eq_with_message` and `MockDisplay::assert_pattern_with_message`.
+
+### Removed
+
+- **(breaking)** [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) `MockDisplay` no longer implements `PartialEq`, use `MockDisplay::assert_eq` instead.
+
 ### Fixed
 
 - [#507](https://github.com/embedded-graphics/embedded-graphics/pull/507) Fixed drawing of the join between the radial lines for sectors with a sweep angle close to 360°.
