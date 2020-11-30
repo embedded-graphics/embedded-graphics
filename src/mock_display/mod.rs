@@ -552,7 +552,7 @@ where
     pub fn assert_eq(&self, other: &MockDisplay<C>) {
         if !self.eq(other) {
             if option_env!("EG_FANCY_PANIC") == Some("1") {
-                let fancy_panic = FancyPanic::new(self, other);
+                let fancy_panic = FancyPanic::new(self, other, 30);
                 panic!("{}", fancy_panic);
             } else {
                 panic!("display\n\n{:?}expected\n{:?}", self, other);

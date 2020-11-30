@@ -1,131 +1,30 @@
 use crate::{
     geometry::Point,
     mock_display::{ColorMapping, MockDisplay},
-    pixelcolor::{PixelColor, RgbColor},
+    pixelcolor::{PixelColor, Rgb888, RgbColor},
     primitives::Rectangle,
 };
-use core::fmt::{self, Write};
+use core::fmt::{self, Display, Write};
 
 pub struct FancyPanic<'a, C>
 where
-    C: PixelColor,
+    C: PixelColor + ColorMapping,
 {
-    display: &'a MockDisplay<C>,
-    expected: &'a MockDisplay<C>,
+    display: FancyDisplay<'a, C>,
+    expected: FancyDisplay<'a, C>,
 }
 
 impl<'a, C> FancyPanic<'a, C>
 where
-    C: PixelColor,
-{
-    pub fn new(display: &'a MockDisplay<C>, expected: &'a MockDisplay<C>) -> Self {
-        Self { display, expected }
-    }
-}
-
-fn write_display<C>(
-    f: &mut fmt::Formatter<'_>,
-    display: &MockDisplay<C>,
-    bounding_box: &Rectangle,
-) -> fmt::Result
-where
     C: PixelColor + ColorMapping,
 {
-    // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
-    for y in bounding_box.rows().step_by(2) {
-        write_row(f, display, bounding_box, y, 0)?;
-        f.write_char('\n')?
-    }
-
-    Ok(())
-}
-
-fn write_row<C>(
-    f: &mut fmt::Formatter<'_>,
-    display: &MockDisplay<C>,
-    bounding_box: &Rectangle,
-    y: i32,
-    column_width: usize,
-) -> fmt::Result
-where
-    C: PixelColor + ColorMapping,
-{
-    for x in bounding_box.columns() {
-        let point_top = Point::new(x, y);
-        let point_bottom = Point::new(x, y + 1);
-
-        // Set foreground color.
-        if bounding_box.contains(point_top) {
-            let color = display
-                .get_pixel(point_top)
-                .map(|c| c.into())
-                .unwrap_or(C::NONE_COLOR);
-
-            write!(f, "\x1b[38;2;{};{};{}m", color.r(), color.g(), color.b())?;
-        } else {
-            write!(f, "\x1b[39m")?;
-        };
-
-        // Set background color.
-        if bounding_box.contains(point_bottom) {
-            let color = display
-                .get_pixel(point_bottom)
-                .map(|c| c.into())
-                .unwrap_or(C::NONE_COLOR);
-
-            write!(f, "\x1b[48;2;{};{};{}m", color.r(), color.g(), color.b())?;
-        } else {
-            write!(f, "\x1b[49m")?;
-        };
-
-        // Write "upper half block" character.
-        f.write_char('\u{2580}')?;
-    }
-
-    // Reset colors.
-    f.write_str("\x1b[0;m")?;
-
-    // Pad output with spaces if column width is larger than the width of the bounding box.
-    for _ in bounding_box.size.width as usize..column_width {
-        f.write_char(' ')?
-    }
-
-    Ok(())
-}
-
-fn write_vertical_border(f: &mut fmt::Formatter<'_>, column_width: usize) -> fmt::Result {
-    write!(
-        f,
-        "+-{:-<width$}-+-{:-<width$}-+-{:-<width$}-+\n",
-        "",
-        "",
-        "",
-        width = column_width
-    )
-}
-
-fn write_header(f: &mut fmt::Formatter<'_>, column_width: usize) -> fmt::Result {
-    write_vertical_border(f, column_width)?;
-    write!(
-        f,
-        "| {:^width$} | {:^width$} | {:^width$} |\n",
-        "display",
-        "expected",
-        "diff",
-        width = column_width
-    )?;
-    write_vertical_border(f, column_width)
-}
-
-impl<C> fmt::Display for FancyPanic<'_, C>
-where
-    C: PixelColor + ColorMapping,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let diff = self.display.diff(self.expected);
-
-        let bounding_box_display = self.display.affected_area_origin();
-        let bounding_box_expected = self.expected.affected_area_origin();
+    pub fn new(
+        display: &'a MockDisplay<C>,
+        expected: &'a MockDisplay<C>,
+        max_column_width: usize,
+    ) -> Self {
+        let bounding_box_display = display.affected_area_origin();
+        let bounding_box_expected = expected.affected_area_origin();
 
         let bounding_box = Rectangle::new(
             Point::zero(),
@@ -134,41 +33,245 @@ where
                 .component_max(bounding_box_expected.size),
         );
 
+        // Output the 3 displays in columns if they are less than max_column_width pixels wide.
+        let column_width = if bounding_box.size.width as usize <= max_column_width {
+            // Set the width of the output columns to the width of the bounding box,
+            // but at least 10 characters to ensure the column labels fit.
+            (bounding_box.size.width as usize).max(10)
+        } else {
+            0
+        };
+
+        Self {
+            display: FancyDisplay::new(display, bounding_box, column_width),
+            expected: FancyDisplay::new(expected, bounding_box, column_width),
+        }
+    }
+
+    fn write_vertical_border(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "+-{:-<width$}-+-{:-<width$}-+-{:-<width$}-+\n",
+            "",
+            "",
+            "",
+            width = self.display.column_width
+        )
+    }
+
+    fn write_header(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "| {:^width$} | {:^width$} | {:^width$} |\n",
+            "display",
+            "expected",
+            "diff",
+            width = self.display.column_width
+        )
+    }
+}
+
+impl<C> Display for FancyPanic<'_, C>
+where
+    C: PixelColor + ColorMapping,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let diff = self.display.display.diff(self.expected.display);
+        let diff = FancyDisplay::new(&diff, self.display.bounding_box, self.display.column_width);
+
         f.write_char('\n')?;
 
         // Output the 3 displays in columns if they are less than 30 pixels wide.
-        if bounding_box.size.width <= 30 {
-            // Set the width of the output columns to the width of the bounding box,
-            // but at least 10 characters to ensure the column labels fit.
-            let column_width = (bounding_box.size.width as usize).max(10);
-
-            write_header(f, column_width)?;
+        if self.display.column_width > 0 {
+            self.write_vertical_border(f)?;
+            self.write_header(f)?;
+            self.write_vertical_border(f)?;
 
             // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
-            for y in bounding_box.rows().step_by(2) {
+            for y in self.display.bounding_box.rows().step_by(2) {
                 f.write_str("| ")?;
-                write_row(f, self.display, &bounding_box, y, column_width)?;
+                self.display.write_row(f, y)?;
                 f.write_str(" | ")?;
-                write_row(f, self.expected, &bounding_box, y, column_width)?;
+                self.expected.write_row(f, y)?;
                 f.write_str(" | ")?;
-                write_row(f, &diff, &bounding_box, y, column_width)?;
+                diff.write_row(f, y)?;
                 f.write_str(" |\n")?;
             }
 
-            write_vertical_border(f, column_width)?;
+            self.write_vertical_border(f)?;
         } else {
-            let width = bounding_box.size.width as usize;
+            let width = self.display.bounding_box.size.width as usize;
 
-            write!(f, "display\n{:-<width$}\n", "", width = width)?;
-            write_display(f, self.display, &bounding_box)?;
-
-            write!(f, "\nexpected\n{:-<width$}\n", "", width = width)?;
-            write_display(f, &self.expected, &bounding_box)?;
-
-            write!(f, "\ndiff\n{:-<width$}\n", "", width = width)?;
-            write_display(f, &diff, &bounding_box)?;
+            write!(f, "display\n{:-<w$}\n{}", "", self.display, w = width)?;
+            write!(f, "\nexpected\n{:-<w$}\n{}", "", self.expected, w = width)?;
+            write!(f, "\ndiff\n{:-<width$}\n{}", "", diff, width = width)?;
         }
 
         Ok(())
+    }
+}
+
+struct FancyDisplay<'a, C>
+where
+    C: PixelColor + ColorMapping,
+{
+    display: &'a MockDisplay<C>,
+    bounding_box: Rectangle,
+    column_width: usize,
+}
+
+impl<'a, C> FancyDisplay<'a, C>
+where
+    C: PixelColor + ColorMapping,
+{
+    fn new(display: &'a MockDisplay<C>, bounding_box: Rectangle, column_width: usize) -> Self {
+        Self {
+            display,
+            bounding_box,
+            column_width,
+        }
+    }
+
+    fn write_row(&self, f: &mut fmt::Formatter<'_>, y: i32) -> fmt::Result {
+        for x in self.bounding_box.columns() {
+            let point_top = Point::new(x, y);
+            let point_bottom = Point::new(x, y + 1);
+
+            let foreground = if self.bounding_box.contains(point_top) {
+                self.display
+                    .get_pixel(point_top)
+                    .map(|c| Some(c.into()))
+                    .unwrap_or(Some(C::NONE_COLOR))
+            } else {
+                None
+            };
+
+            let background = if self.bounding_box.contains(point_bottom) {
+                self.display
+                    .get_pixel(point_bottom)
+                    .map(|c| Some(c.into()))
+                    .unwrap_or(Some(C::NONE_COLOR))
+            } else {
+                None
+            };
+
+            // Write "upper half block" character.
+            write!(
+                f,
+                "{}{}\u{2580}",
+                Ansi::Foreground(foreground),
+                Ansi::Background(background)
+            )?;
+        }
+
+        // Reset colors.
+        Ansi::Reset.fmt(f)?;
+
+        // Pad output with spaces if column width is larger than the width of the bounding box.
+        for _ in self.bounding_box.size.width as usize..self.column_width {
+            f.write_char(' ')?
+        }
+
+        Ok(())
+    }
+}
+
+impl<C> Display for FancyDisplay<'_, C>
+where
+    C: PixelColor + ColorMapping,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Skip all odd y coordinates, because `write_row` outputs two rows of pixels.
+        for y in self.bounding_box.rows().step_by(2) {
+            self.write_row(f, y)?;
+            f.write_char('\n')?
+        }
+
+        Ok(())
+    }
+}
+
+enum Ansi {
+    Foreground(Option<Rgb888>),
+    Background(Option<Rgb888>),
+    Reset,
+}
+impl Display for Ansi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Foreground(Some(color)) => {
+                write!(f, "\x1b[38;2;{};{};{}m", color.r(), color.g(), color.b())
+            }
+            Self::Foreground(None) => write!(f, "\x1b[39m"),
+            Self::Background(Some(color)) => {
+                write!(f, "\x1b[48;2;{};{};{}m", color.r(), color.g(), color.b())
+            }
+            Self::Background(None) => write!(f, "\x1b[49m"),
+            Self::Reset => write!(f, "\x1b[0m"),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::pixelcolor::BinaryColor;
+
+    #[test]
+    fn fancy_panic_columns() {
+        let display = MockDisplay::<BinaryColor>::from_pattern(&[
+            "   ", //
+            ".##", //
+        ]);
+
+        let expected = MockDisplay::<BinaryColor>::from_pattern(&[
+            ".# ", //
+            "  #", //
+        ]);
+
+        let mut out = arrayvec::ArrayString::<[_; 1024]>::new();
+        write!(&mut out, "{}", FancyPanic::new(&display, &expected, 30)).unwrap();
+
+        assert_eq!(&out, concat!(
+            "\n",
+            "+------------+------------+------------+\n",
+            "|  display   |  expected  |    diff    |\n",
+            "+------------+------------+------------+\n",
+            "| \x1b[38;2;128;128;128m\x1b[48;2;0;0;0m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m        ",
+            "| \x1b[38;2;0;0;0m\x1b[48;2;128;128;128m▀\x1b[38;2;255;255;255m\x1b[48;2;128;128;128m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m        ",
+            "| \x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;128;128;128m\x1b[48;2;128;128;128m▀\x1b[0m        |\n",
+            "+------------+------------+------------+\n"
+        ));
+    }
+
+    #[test]
+    fn fancy_panic_no_columns() {
+        let display = MockDisplay::<BinaryColor>::from_pattern(&[
+            "   ", //
+            ".##", //
+        ]);
+
+        let expected = MockDisplay::<BinaryColor>::from_pattern(&[
+            ".# ", //
+            "  #", //
+        ]);
+
+        let mut out = arrayvec::ArrayString::<[_; 1024]>::new();
+        write!(&mut out, "{}", FancyPanic::new(&display, &expected, 0)).unwrap();
+
+        assert_eq!(&out, concat!(
+            "\n",
+            "display\n",
+            "---\n",
+            "\x1b[38;2;128;128;128m\x1b[48;2;0;0;0m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m\n",
+            "\n",
+            "expected\n",
+            "---\n",
+            "\x1b[38;2;0;0;0m\x1b[48;2;128;128;128m▀\x1b[38;2;255;255;255m\x1b[48;2;128;128;128m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m\n",
+            "\n",
+            "diff\n",
+            "---\n",
+            "\x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;128;128;128m\x1b[48;2;128;128;128m▀\x1b[0m\n",
+        ));
     }
 }
