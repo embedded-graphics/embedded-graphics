@@ -6,7 +6,7 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         common::{
-            DistanceIterator, OriginLinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
+            DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
         Rectangle, Sector, Styled,
     },
@@ -30,11 +30,10 @@ where
     stroke_threshold_inside: i32,
     stroke_threshold_outside: i32,
 
-    bevel: Option<OriginLinearEquation>,
-    bevel_threshold: i32,
+    bevel: Option<(BevelKind, LinearEquation)>,
 
-    outer_color: Option<C>,
-    inner_color: Option<C>,
+    stroke_color: Option<C>,
+    fill_color: Option<C>,
 }
 
 impl<C> StyledPixels<C>
@@ -69,20 +68,30 @@ where
                 + NORMAL_VECTOR_SCALE;
 
         // TODO: Polylines and sectors should use the same miter limit.
-        let (bevel, bevel_threshold) = if primitive.angle_sweep.abs() < Angle::from_degrees(55.0) {
-            let half_sweep = Angle::from_radians(primitive.angle_sweep.to_radians() / 2.0);
+        let angle_sweep_abs = primitive.angle_sweep.abs();
+        let exterior_bevel = angle_sweep_abs < Angle::from_degrees(55.0);
+        let interior_bevel = angle_sweep_abs > Angle::from_degrees(360.0 - 55.0)
+            && angle_sweep_abs < Angle::from_degrees(360.0);
 
+        let bevel = if exterior_bevel || interior_bevel {
+            let half_sweep = primitive.angle_start
+                + Angle::from_radians(primitive.angle_sweep.to_radians() / 2.0);
             let threshold =
                 style.outside_stroke_width().saturating_cast() * NORMAL_VECTOR_SCALE * 4;
 
-            (
-                Some(OriginLinearEquation::with_angle(
-                    primitive.angle_start + half_sweep + ANGLE_90DEG,
-                )),
-                threshold,
-            )
+            if interior_bevel {
+                Some((
+                    BevelKind::Interior,
+                    LinearEquation::with_angle_and_distance(half_sweep - ANGLE_90DEG, threshold),
+                ))
+            } else {
+                Some((
+                    BevelKind::Exterior,
+                    LinearEquation::with_angle_and_distance(half_sweep + ANGLE_90DEG, threshold),
+                ))
+            }
         } else {
-            (None, 0)
+            None
         };
 
         Self {
@@ -93,9 +102,8 @@ where
             stroke_threshold_inside,
             stroke_threshold_outside,
             bevel,
-            bevel_threshold,
-            outer_color: styled.style.stroke_color,
-            inner_color: styled.style.fill_color,
+            stroke_color: styled.style.stroke_color,
+            fill_color: styled.style.fill_color,
         }
     }
 }
@@ -114,28 +122,36 @@ where
                 .iter
                 .find(|(_, _, distance)| *distance < outer_threshold)?;
 
-            let color = match self.plane_sector.point_type(
+            // Check if point is inside the radial stroke lines or the fill.
+            let mut point_type = match self.plane_sector.point_type(
                 delta,
                 self.stroke_threshold_inside,
                 self.stroke_threshold_outside,
             ) {
-                Some(PointType::Stroke) => {
-                    if let Some(bevel) = &self.bevel {
-                        if bevel.distance(delta) >= self.bevel_threshold {
-                            continue;
+                Some(point_type) => point_type,
+                None => continue,
+            };
+
+            // Bevel the line join.
+            if point_type == PointType::Stroke {
+                if let Some((kind, equation)) = self.bevel {
+                    if equation.check_side(delta, LineSide::Left) {
+                        match kind {
+                            BevelKind::Interior => point_type = PointType::Fill,
+                            BevelKind::Exterior => continue,
                         }
                     }
+                }
+            }
 
-                    self.outer_color
-                }
-                Some(PointType::Fill) => {
-                    if distance < self.inner_threshold {
-                        self.inner_color
-                    } else {
-                        self.outer_color
-                    }
-                }
-                None => continue,
+            // Add the outer circular stroke.
+            if point_type == PointType::Fill && distance >= self.inner_threshold {
+                point_type = PointType::Stroke;
+            }
+
+            let color = match point_type {
+                PointType::Stroke => self.stroke_color,
+                PointType::Fill => self.fill_color,
             };
 
             if let Some(color) = color {
@@ -186,6 +202,12 @@ where
             Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
         }
     }
+}
+
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+enum BevelKind {
+    Interior,
+    Exterior,
 }
 
 #[cfg(test)]
@@ -445,9 +467,7 @@ mod tests {
     }
 
     /// The radial lines should be connected using a line join.
-    // TODO: This test currently fails because a miter join is drawn instead of a bevel join
     #[test]
-    #[ignore]
     fn issue_484_line_join_340_deg() {
         let mut display = MockDisplay::<Rgb888>::new();
 
@@ -463,7 +483,24 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            // TODO: update pattern
+            "                  ",
+            "       RRRRR      ",
+            "     RRRRRRRRR    ",
+            "   RRRRRRRRRRRRR  ",
+            "   RRRRGGGGGRRRR  ",
+            "  RRRRGGGGGGGRRRR ",
+            "  RRRGGGGGGGGGRRR ",
+            " RRRGGGGGGGGGGGRRR",
+            " RRRGGGGRRRRRRRRRR",
+            " RRRGGGRRRRRRRRRRR",
+            " RRRGGGGRRRRRRRRRR",
+            " RRRGGGGGGGRRRRRRR",
+            "  RRRGGGGGGGGRRRR ",
+            "  RRRRGGGGGGGRRRR ",
+            "   RRRRGGGGGRRRR  ",
+            "   RRRRRRRRRRRRR  ",
+            "     RRRRRRRRR    ",
+            "       RRRRR      ",
         ]);
     }
 
