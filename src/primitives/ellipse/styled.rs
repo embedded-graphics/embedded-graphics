@@ -149,9 +149,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            // TODO: add message
-            //assert_eq!(display, expected, "diameter = {}", diameter);
-            display.assert_eq(&expected);
+            display.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
         }
     }
 

@@ -409,14 +409,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            // TODO: add message
-            // assert_eq!(
-            //     display,
-            //     MockDisplay::from_pattern(expected),
-            //     "Joint {}",
-            //     case
-            // );
-            display.assert_pattern(expected);
+            display.assert_pattern_with_message(expected, |f| write!(f, "Join {}", case));
         }
     }
 
@@ -462,9 +455,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            // TODO: add message
-            //assert_eq!(display, expected_display, "{:?}", alignment);
-            display.assert_eq(&expected_display);
+            display.assert_eq_with_message(&expected_display, |f| write!(f, "{:?}", alignment));
         }
     }
 

@@ -553,9 +553,42 @@ where
         if !self.eq(other) {
             if option_env!("EG_FANCY_PANIC") == Some("1") {
                 let fancy_panic = FancyPanic::new(self, other, 30);
-                panic!("{}", fancy_panic);
+                panic!("\n{}", fancy_panic);
             } else {
-                panic!("display\n\n{:?}expected\n{:?}", self, other);
+                panic!("\ndisplay\n{:?}\nexpected\n{:?}", self, other);
+            }
+        }
+    }
+
+    /// Checks if the displays are equal.
+    ///
+    /// An advanced output for failing tests can be enabled by setting the environment variable
+    /// `EG_FANCY_PANIC=1`. See the [module-level documentation] for more details.
+    ///
+    /// The output of the `msg` function will be prepended to the output if the assertion fails.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the displays aren't equal.
+    ///
+    /// [module-level documentation]: index.html#assertions
+    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
+    // #[track_caller]
+    pub fn assert_eq_with_message<F>(&self, other: &MockDisplay<C>, msg: F)
+    where
+        F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+        if !self.eq(other) {
+            if option_env!("EG_FANCY_PANIC") == Some("1") {
+                let fancy_panic = FancyPanic::new(self, other, 30);
+                panic!("\n{}\n\n{}", MessageWrapper(msg), fancy_panic);
+            } else {
+                panic!(
+                    "\n{}\n\ndisplay:\n{:?}\nexpected:\n{:?}",
+                    MessageWrapper(msg),
+                    self,
+                    other
+                );
             }
         }
     }
@@ -576,6 +609,29 @@ where
         let other = MockDisplay::<C>::from_pattern(pattern);
 
         self.assert_eq(&other);
+    }
+
+    /// Checks if the display is equal to the given pattern.
+    ///
+    /// An advanced output for failing tests can be enabled, see the [module-level documentation]
+    /// for more details.
+    ///
+    /// The output of the `msg` function will be prepended to the output if the assertion fails.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the display content isn't equal to the pattern.
+    ///
+    /// [module-level documentation]: index.html#assertions
+    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
+    // #[track_caller]
+    pub fn assert_pattern_with_message<F>(&self, pattern: &[&str], msg: F)
+    where
+        F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+        let other = MockDisplay::<C>::from_pattern(pattern);
+
+        self.assert_eq_with_message(&other, msg);
     }
 }
 
@@ -646,6 +702,18 @@ where
 {
     fn size(&self) -> Size {
         DISPLAY_AREA.size
+    }
+}
+
+/// Wrapper to implement `Display` for formatting function.
+struct MessageWrapper<F>(F);
+
+impl<F> fmt::Display for MessageWrapper<F>
+where
+    F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0(f)
     }
 }
 

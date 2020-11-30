@@ -360,13 +360,13 @@ mod tests {
                     .draw(&mut display_iter)
                     .unwrap();
 
-                // TODO: add message
-                // assert_eq!(
-                //     display_drawable, display_iter,
-                //     "{} x {} rectangle with style '{}' and alignment {:?} does not match iterator",
-                //     rect.size.width, rect.size.height, name, alignment
-                // );
-                display_drawable.assert_eq(&display_iter);
+                display_drawable.assert_eq_with_message(
+                    &display_iter,
+                    |f| write!(f,
+                        "{} x {} rectangle with style '{}' and alignment {:?} does not match iterator",
+                        rect.size.width, rect.size.height, name, alignment
+                    )
+                );
             }
         }
     }

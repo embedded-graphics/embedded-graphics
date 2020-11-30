@@ -102,8 +102,6 @@ where
         let diff = self.display.display.diff(self.expected.display);
         let diff = FancyDisplay::new(&diff, self.display.bounding_box, self.display.column_width);
 
-        f.write_char('\n')?;
-
         // Output the 3 displays in columns if they are less than 30 pixels wide.
         if self.display.column_width > 0 {
             self.write_vertical_border(f)?;
@@ -220,6 +218,7 @@ enum Ansi {
     Background(Option<Rgb888>),
     Reset,
 }
+
 impl Display for Ansi {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -257,7 +256,6 @@ mod tests {
         write!(&mut out, "{}", FancyPanic::new(&display, &expected, 30)).unwrap();
 
         assert_eq!(&out, concat!(
-            "\n",
             "+------------+------------+------------+\n",
             "|  display   |  expected  |    diff    |\n",
             "+------------+------------+------------+\n",
@@ -285,7 +283,6 @@ mod tests {
         write!(&mut out, "{}", FancyPanic::new(&display, &expected, 0)).unwrap();
 
         assert_eq!(&out, concat!(
-            "\n",
             "display\n",
             "---\n",
             "\x1b[38;2;128;128;128m\x1b[48;2;0;0;0m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m\n",
