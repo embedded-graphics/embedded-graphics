@@ -219,17 +219,13 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        #[rustfmt::skip]
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "     ",
-                "     ",
-                "  ###",
-                "  ## ",
-                "  #  ",
-            ])
-        );
+        display.assert_pattern(&[
+            "     ", //
+            "     ", //
+            "  ###", //
+            "  ## ", //
+            "  #  ", //
+        ]);
     }
 
     #[test]
@@ -248,20 +244,17 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "          ",
-                "          ",
-                "  RRRRRRR ",
-                "  RGGGGR  ",
-                "  RGGGR   ",
-                "  RGGR    ",
-                "  RGR     ",
-                "  RR      ",
-                "  R       ",
-            ])
-        );
+        display.assert_pattern(&[
+            "          ",
+            "          ",
+            "  RRRRRRR ",
+            "  RGGGGR  ",
+            "  RGGGR   ",
+            "  RGGR    ",
+            "  RGR     ",
+            "  RR      ",
+            "  R       ",
+        ]);
     }
 
     #[test]
@@ -275,27 +268,24 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "          #####",
-                "         ######",
-                "        ###### ",
-                "       ####### ",
-                "      ######## ",
-                "     ######### ",
-                "     ########  ",
-                "      #######  ",
-                "      #######  ",
-                "       ######  ",
-                "       #####   ",
-                "        ####   ",
-                "        ####   ",
-                "         ###   ",
-                "         ##    ",
-                "          #    ",
-            ])
-        );
+        display.assert_pattern(&[
+            "          #####",
+            "         ######",
+            "        ###### ",
+            "       ####### ",
+            "      ######## ",
+            "     ######### ",
+            "     ########  ",
+            "      #######  ",
+            "      #######  ",
+            "       ######  ",
+            "       #####   ",
+            "        ####   ",
+            "        ####   ",
+            "         ###   ",
+            "         ##    ",
+            "          #    ",
+        ]);
     }
 
     #[test]
@@ -336,7 +326,7 @@ mod tests {
             .draw(&mut lines_display)
             .unwrap();
 
-        assert_eq!(tri_display, lines_display);
+        tri_display.assert_eq(&lines_display);
     }
 
     #[test]
@@ -396,28 +386,25 @@ mod tests {
 
         styled.draw(&mut display).unwrap();
 
-        assert_eq!(
-            display,
-            // Believe it or not, this is actually a triangle.
-            MockDisplay::from_pattern(&[
-                "          R            ",
-                "         RRRR          ",
-                "        RRRRRRR        ",
-                "       RRRRRRRRR       ",
-                "     RRRRRRRRRRRRR     ",
-                "    RRRRRRRRRRRRRRRR   ",
-                "    RRRRRRGRRRRRRRRRRR ",
-                "     RRRRRGGGRRRRRRRRRR",
-                "     RRRRRGGGGGRRRRRRRR",
-                "     RRRRRGGGGGGRRRRRRR",
-                "     RRRRRRGGGGGGGRRRR ",
-                "      RRRRRRRRRRRRRRRR ",
-                "      RRRRRRRRRRRRRRRR ",
-                "      RRRRRRRRRRRRRRR  ",
-                "       RRRRRRRRRRRRRR  ",
-                "       RRRRRRRRRRRRRR  ",
-            ])
-        );
+        // Believe it or not, this is actually a triangle.
+        display.assert_pattern(&[
+            "          R            ",
+            "         RRRR          ",
+            "        RRRRRRR        ",
+            "       RRRRRRRRR       ",
+            "     RRRRRRRRRRRRR     ",
+            "    RRRRRRRRRRRRRRRR   ",
+            "    RRRRRRGRRRRRRRRRRR ",
+            "     RRRRRGGGRRRRRRRRRR",
+            "     RRRRRGGGGGRRRRRRRR",
+            "     RRRRRGGGGGGRRRRRRR",
+            "     RRRRRRGGGGGGGRRRR ",
+            "      RRRRRRRRRRRRRRRR ",
+            "      RRRRRRRRRRRRRRRR ",
+            "      RRRRRRRRRRRRRRR  ",
+            "       RRRRRRRRRRRRRR  ",
+            "       RRRRRRRRRRRRRR  ",
+        ]);
     }
 
     #[test]
@@ -458,38 +445,35 @@ mod tests {
 
         styled.draw(&mut display).unwrap();
 
-        assert_eq!(
-            display,
-            // In the failing case, there are some `G`s sitting on the end of each line that
-            // shouldn't be there.
-            MockDisplay::from_pattern(&[
-                "                    R",
-                "                   RR",
-                "                  RR ",
-                "                 RRR ",
-                "                RRRR ",
-                "               RRRRR ",
-                "              RRRRR  ",
-                "             RRRRRR  ",
-                "            RRRRRRR  ",
-                "           RRRRRRRR  ",
-                "          RRRRRRRR   ",
-                "         RRRRRRRRR   ",
-                "        RRRRRRRRRR   ",
-                "       RRRRRRRRRRR   ",
-                "      RRRRRRRRRRR    ",
-                "     RRRRRRRRRRRR    ",
-                "    RRRRRRRGRRRRR    ",
-                "   RRRRRRRGRRRRRR    ",
-                "  RRRRRRRRGRRRRR     ",
-                " RRRRRRRRRRRRRRR     ",
-                "RRRRRRRRRRRRRRRR     ",
-                "  RRRRRRRRRRRRRR     ",
-                "      RRRRRRRRR      ",
-                "         RRRRRR      ",
-                "             RR      ",
-            ])
-        );
+        // In the failing case, there are some `G`s sitting on the end of each line that
+        // shouldn't be there.
+        display.assert_pattern(&[
+            "                    R",
+            "                   RR",
+            "                  RR ",
+            "                 RRR ",
+            "                RRRR ",
+            "               RRRRR ",
+            "              RRRRR  ",
+            "             RRRRRR  ",
+            "            RRRRRRR  ",
+            "           RRRRRRRR  ",
+            "          RRRRRRRR   ",
+            "         RRRRRRRRR   ",
+            "        RRRRRRRRRR   ",
+            "       RRRRRRRRRRR   ",
+            "      RRRRRRRRRRR    ",
+            "     RRRRRRRRRRRR    ",
+            "    RRRRRRRGRRRRR    ",
+            "   RRRRRRRGRRRRRR    ",
+            "  RRRRRRRRGRRRRR     ",
+            " RRRRRRRRRRRRRRR     ",
+            "RRRRRRRRRRRRRRRR     ",
+            "  RRRRRRRRRRRRRR     ",
+            "      RRRRRRRRR      ",
+            "         RRRRRR      ",
+            "             RR      ",
+        ]);
     }
 
     #[test]
@@ -513,22 +497,19 @@ mod tests {
 
         styled.draw(&mut display).unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "               R",
-                "              R ",
-                "             R  ",
-                "            R   ",
-                "           R    ",
-                "          R     ",
-                "         R      ",
-                "        R       ",
-                "       R        ",
-                "      R         ",
-                "     R          ",
-            ])
-        );
+        display.assert_pattern(&[
+            "               R",
+            "              R ",
+            "             R  ",
+            "            R   ",
+            "           R    ",
+            "          R     ",
+            "         R      ",
+            "        R       ",
+            "       R        ",
+            "      R         ",
+            "     R          ",
+        ]);
     }
 
     // Original bug has a weird "lump" drawn at one end of a colinear triangle.
@@ -553,22 +534,19 @@ mod tests {
 
         styled.draw(&mut display).unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "          R  ",
-                "         RRR ",
-                "        RRRR ",
-                "       RRRRRR",
-                "      RRRRRR ",
-                "     RRRRR   ",
-                "    RRRR     ",
-                "   RRR       ",
-                "  RRR        ",
-                " RR          ",
-                "R            ",
-            ])
-        );
+        display.assert_pattern(&[
+            "          R  ",
+            "         RRR ",
+            "        RRRR ",
+            "       RRRRRR",
+            "      RRRRRR ",
+            "     RRRRR   ",
+            "    RRRR     ",
+            "   RRR       ",
+            "  RRR        ",
+            " RR          ",
+            "R            ",
+        ]);
     }
 
     #[test]
@@ -592,21 +570,18 @@ mod tests {
 
         styled.draw(&mut display).unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "          R  ",
-                "         RRR ",
-                "        RRRR ",
-                "       RRRRRR",
-                "      RRRRRR ",
-                "     RRRRR   ",
-                "    RRRR     ",
-                "   RRR       ",
-                "  RRR        ",
-                " RR          ",
-                "R            ",
-            ])
-        );
+        display.assert_pattern(&[
+            "          R  ",
+            "         RRR ",
+            "        RRRR ",
+            "       RRRRRR",
+            "      RRRRRR ",
+            "     RRRRR   ",
+            "    RRRR     ",
+            "   RRR       ",
+            "  RRR        ",
+            " RR          ",
+            "R            ",
+        ]);
     }
 }

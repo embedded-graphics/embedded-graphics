@@ -293,14 +293,13 @@ mod tests {
         let line = Line::new(Point::new(3, 3), Point::new(3, 3));
         let display = draw_parallels(line, 3);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "        ", //
             "   1    ", //
             "   0    ", //
             "   2    ", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -308,14 +307,13 @@ mod tests {
         let line = Line::new(Point::new(1, 3), Point::new(4, 3));
         let display = draw_parallels(line, 3);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "        ", //
             " 1111   ", //
             " 0000   ", //
             " 2222   ", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -323,14 +321,13 @@ mod tests {
         let line = Line::new(Point::new(4, 3), Point::new(1, 3));
         let display = draw_parallels(line, 3);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "        ", //
             " 2222   ", //
             " 0000   ", //
             " 1111   ", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -338,13 +335,12 @@ mod tests {
         let line = Line::new(Point::new(3, 3), Point::new(3, 0));
         let display = draw_parallels(line, 3);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "  102   ", //
             "  102   ", //
             "  102   ", //
             "  102   ", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -352,13 +348,12 @@ mod tests {
         let line = Line::new(Point::new(3, 0), Point::new(3, 3));
         let display = draw_parallels(line, 3);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "  201   ", //
             "  201   ", //
             "  201   ", //
             "  201   ", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -366,7 +361,7 @@ mod tests {
         let line = Line::new(Point::new(2, 4), Point::new(5, 1));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "    3   ", //
             "   310  ", //
             "  31024 ", //
@@ -375,7 +370,6 @@ mod tests {
             "   4    ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -383,7 +377,7 @@ mod tests {
         let line = Line::new(Point::new(5, 1), Point::new(2, 4));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "    4   ", //
             "   420  ", //
             "  42013 ", //
@@ -392,7 +386,6 @@ mod tests {
             "   3    ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -400,7 +393,7 @@ mod tests {
         let line = Line::new(Point::new(2, 2), Point::new(5, 5));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "   3    ", //
             "  013   ", //
@@ -409,7 +402,6 @@ mod tests {
             "   420  ", //
             "    4   ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -417,7 +409,7 @@ mod tests {
         let line = Line::new(Point::new(5, 5), Point::new(2, 2));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "   4    ", //
             "  024   ", //
@@ -426,7 +418,6 @@ mod tests {
             "   310  ", //
             "    3   ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -434,7 +425,7 @@ mod tests {
         let line = Line::new(Point::new(2, 2), Point::new(5, 4));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "   33   ", //
             "  0113  ", //
@@ -443,7 +434,6 @@ mod tests {
             "   44   ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -451,7 +441,7 @@ mod tests {
         let line = Line::new(Point::new(5, 4), Point::new(2, 2));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "   44   ", //
             "  0224  ", //
@@ -460,7 +450,6 @@ mod tests {
             "   33   ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -468,7 +457,7 @@ mod tests {
         let line = Line::new(Point::new(2, 4), Point::new(5, 2));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "   33   ", //
             "  3110  ", //
@@ -477,7 +466,6 @@ mod tests {
             "   44   ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -485,7 +473,7 @@ mod tests {
         let line = Line::new(Point::new(5, 2), Point::new(2, 4));
         let display = draw_parallels(line, 5);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "   44   ", //
             "  4220  ", //
@@ -494,7 +482,6 @@ mod tests {
             "   33   ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -502,7 +489,7 @@ mod tests {
         let line = Line::new(Point::new(3, 3), Point::new(5, 2));
         let display = draw_parallels(line, 3);
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "        ", //
             "     1  ", //
             "   110  ", //
@@ -511,6 +498,5 @@ mod tests {
             "        ", //
             "        ",
         ]);
-        assert_eq!(display, expected);
     }
 }

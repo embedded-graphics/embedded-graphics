@@ -83,7 +83,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behavior.
     use embedded_graphics::{
         geometry::Point, iterator::PixelIteratorExt, mock_display::MockDisplay,
         pixelcolor::BinaryColor, Pixel,
@@ -101,12 +101,9 @@ mod tests {
         let mut display = MockDisplay::new();
         pixels.iter().copied().draw(&mut display).unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "#.#", //
-                "  .", //
-            ])
-        );
+        display.assert_pattern(&[
+            "#.#", //
+            "  .", //
+        ]);
     }
 }

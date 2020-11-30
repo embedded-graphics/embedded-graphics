@@ -192,7 +192,6 @@ use crate::{
     Pixel,
 };
 use core::{
-    cmp::PartialEq,
     fmt::{self, Display, Write},
     iter,
 };
@@ -286,11 +285,11 @@ where
     /// # Panics
     ///
     /// If out of bounds draw checking is enabled (default), this method will panic if the point
-    /// lies outside the display area. This behaviour can be disabled by calling
+    /// lies outside the display area. This behavior can be disabled by calling
     /// [`set_allow_out_of_bounds_drawing(true)`].
     ///
     /// Similarly, overdraw is checked by default and will panic if a point is drawn to the same
-    /// coordinate twice. This behaviour can be disabled by calling [`set_allow_overdraw(true)`].
+    /// coordinate twice. This behavior can be disabled by calling [`set_allow_overdraw(true)`].
     ///
     /// [`set_allow_out_of_bounds_drawing(true)`]: #method.set_allow_out_of_bounds_drawing
     /// [`set_allow_overdraw(true)`]: #method.set_allow_overdraw
@@ -419,6 +418,14 @@ where
 
         display
     }
+
+    /// Returns `true` if `self` and `other` are equal.
+    ///
+    /// `MockDisplay` doesn't implement the `PartialEq` to make sure that the `assert_eq` and
+    /// `assert_pattern` methods are used instead of the `assert_eq!` macro.
+    pub fn eq(&self, other: &MockDisplay<C>) -> bool {
+        self.pixels.iter().eq(other.pixels.iter())
+    }
 }
 
 impl MockDisplay<BinaryColor> {
@@ -542,14 +549,13 @@ where
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_eq(&self, other: &MockDisplay<C>) {
-        if option_env!("EG_FANCY_PANIC") != Some("1") {
-            assert_eq!(self, other);
-            return;
-        }
-
-        if self != other {
-            let fancy_panic = FancyPanic::new(self, other);
-            panic!("{}", fancy_panic);
+        if !self.eq(other) {
+            if option_env!("EG_FANCY_PANIC") == Some("1") {
+                let fancy_panic = FancyPanic::new(self, other);
+                panic!("{}", fancy_panic);
+            } else {
+                panic!("display\n\n{:?}expected\n{:?}", self, other);
+            }
         }
     }
 
@@ -609,15 +615,6 @@ where
         writeln!(f, "]")?;
 
         Ok(())
-    }
-}
-
-impl<C> PartialEq for MockDisplay<C>
-where
-    C: PixelColor,
-{
-    fn eq(&self, other: &MockDisplay<C>) -> bool {
-        self.pixels.iter().eq(other.pixels.iter())
     }
 }
 
@@ -1058,6 +1055,6 @@ mod tests {
         let display2 = MockDisplay::<Rgb565>::from_pattern(&[" RR B"]);
         let expected = MockDisplay::<Rgb888>::from_pattern(&["  RGB"]);
 
-        assert_eq!(display1.diff(&display2), expected);
+        display1.diff(&display2).assert_eq(&expected);
     }
 }

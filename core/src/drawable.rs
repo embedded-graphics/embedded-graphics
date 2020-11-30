@@ -124,28 +124,28 @@ where
 
 #[cfg(test)]
 mod tests {
-    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behavior.
     use embedded_graphics::{
         geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor, Drawable, Pixel,
     };
 
     #[test]
-    fn draw_pixel() -> Result<(), core::convert::Infallible> {
+    fn draw_pixel() {
         let mut display = MockDisplay::new();
-        Pixel(Point::new(0, 0), BinaryColor::On).draw(&mut display)?;
-        Pixel(Point::new(2, 1), BinaryColor::On).draw(&mut display)?;
-        Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display)?;
+        Pixel(Point::new(0, 0), BinaryColor::On)
+            .draw(&mut display)
+            .unwrap();
+        Pixel(Point::new(2, 1), BinaryColor::On)
+            .draw(&mut display)
+            .unwrap();
+        Pixel(Point::new(1, 2), BinaryColor::On)
+            .draw(&mut display)
+            .unwrap();
 
-        #[rustfmt::skip]
-        assert_eq!(
-            MockDisplay::from_pattern(&[
-                "#  ",
-                "  #",
-                " # ",
-            ]),
-            display
-        );
-
-        Ok(())
+        display.assert_pattern(&[
+            "#  ", //
+            "  #", //
+            " # ", //
+        ]);
     }
 }

@@ -112,11 +112,12 @@ mod tests {
             " ##         ## ",
             "#             #",
         ]);
-        assert_eq!(draw_lines(delta), expected);
+
+        draw_lines(delta).assert_eq(&expected);
 
         let expected = expected.swap_xy();
         let delta = Point::new(delta.y, delta.x);
-        assert_eq!(draw_lines(delta), expected);
+        draw_lines(delta).assert_eq(&expected);
     }
 
     #[test]
@@ -134,11 +135,11 @@ mod tests {
             "  ###           ###  ",
             "##                 ##",
         ]);
-        assert_eq!(draw_lines(delta), expected);
+        draw_lines(delta).assert_eq(&expected);
 
         let expected = expected.swap_xy();
         let delta = Point::new(delta.y, delta.x);
-        assert_eq!(draw_lines(delta), expected);
+        draw_lines(delta).assert_eq(&expected);
     }
 
     #[test]

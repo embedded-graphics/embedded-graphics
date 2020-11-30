@@ -140,66 +140,56 @@ mod tests {
     }
 
     #[test]
-    fn stroke_width_doesnt_affect_fill() -> Result<(), core::convert::Infallible> {
+    fn stroke_width_doesnt_affect_fill() {
         let mut expected = MockDisplay::new();
         let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
         Circle::new(Point::new(5, 5), 4)
             .into_styled(style)
-            .draw(&mut expected)?;
+            .draw(&mut expected)
+            .unwrap();
 
         let mut with_stroke_width = MockDisplay::new();
         style.stroke_width = 1;
         Circle::new(Point::new(5, 5), 4)
             .into_styled(style)
-            .draw(&mut with_stroke_width)?;
+            .draw(&mut with_stroke_width)
+            .unwrap();
 
-        assert_eq!(expected, with_stroke_width);
-
-        Ok(())
+        with_stroke_width.assert_eq(&expected);
     }
 
     // Check that tiny circles render as a "+" shape with a hole in the center
     #[test]
-    fn tiny_circle() -> Result<(), core::convert::Infallible> {
+    fn tiny_circle() {
         let mut display = MockDisplay::new();
 
         Circle::new(Point::new(0, 0), 3)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .draw(&mut display)?;
+            .draw(&mut display)
+            .unwrap();
 
-        #[rustfmt::skip]
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                " # ",
-                "# #",
-                " # "
-            ])
-        );
-
-        Ok(())
+        display.assert_pattern(&[
+            " # ", //
+            "# #", //
+            " # ", //
+        ]);
     }
 
     // Check that tiny filled circle render as a "+" shape with NO hole in the center
     #[test]
-    fn tiny_circle_filled() -> Result<(), core::convert::Infallible> {
+    fn tiny_circle_filled() {
         let mut display = MockDisplay::new();
 
         Circle::new(Point::new(0, 0), 3)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .draw(&mut display)?;
+            .draw(&mut display)
+            .unwrap();
 
-        #[rustfmt::skip]
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                " # ",
-                "###",
-                " # "
-            ])
-        );
-
-        Ok(())
+        display.assert_pattern(&[
+            " # ", //
+            "###", //
+            " # ", //
+        ]);
     }
 
     #[test]
@@ -257,8 +247,8 @@ mod tests {
             .draw(&mut display_outside)
             .unwrap();
 
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
+        display_inside.assert_eq(&display_center);
+        display_outside.assert_eq(&display_center);
     }
 
     /// Test for issue #143

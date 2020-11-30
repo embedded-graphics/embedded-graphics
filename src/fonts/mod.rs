@@ -218,6 +218,6 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(display, MockDisplay::from_pattern(pattern));
+        display.assert_pattern(pattern);
     }
 }

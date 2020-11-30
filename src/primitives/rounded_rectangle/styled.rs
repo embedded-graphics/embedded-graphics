@@ -174,35 +174,32 @@ mod tests {
         .draw(&mut display)
         .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "   GGGGGGGGGGGGGGGG     ",
-                "  GGGGGGGGGGGGGGGGGGG   ",
-                " GGGGGGGGGGGGGGGGGGGGG  ",
-                "GGGGGGGGGGGGGGGGGGGGGGG ",
-                "GGGGGGGGGGGGGGGGGGGGGGG ",
-                "GGGGGRRRRRRRRRRRRRGGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGRRRRRRRRRRRRRRGGGGG",
-                "GGGGGGRRRRRRRRRRRRRGGGGG",
-                " GGGGGRRRRRRRRRRRRGGGGGG",
-                " GGGGGGRRRRRRRRRRRGGGGG ",
-                "  GGGGGGGRRRRRRRRGGGGGG ",
-                "  GGGGGGGGGGGGGGGGGGGGG ",
-                "   GGGGGGGGGGGGGGGGGGG  ",
-                "    GGGGGGGGGGGGGGGGG   ",
-                "      GGGGGGGGGGGGGG    ",
-                "        GGGGGGGGGG      ",
-            ])
-        );
+        display.assert_pattern(&[
+            "   GGGGGGGGGGGGGGGG     ",
+            "  GGGGGGGGGGGGGGGGGGG   ",
+            " GGGGGGGGGGGGGGGGGGGGG  ",
+            "GGGGGGGGGGGGGGGGGGGGGGG ",
+            "GGGGGGGGGGGGGGGGGGGGGGG ",
+            "GGGGGRRRRRRRRRRRRRGGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGRRRRRRRRRRRRRRGGGGG",
+            "GGGGGGRRRRRRRRRRRRRGGGGG",
+            " GGGGGRRRRRRRRRRRRGGGGGG",
+            " GGGGGGRRRRRRRRRRRGGGGG ",
+            "  GGGGGGGRRRRRRRRGGGGGG ",
+            "  GGGGGGGGGGGGGGGGGGGGG ",
+            "   GGGGGGGGGGGGGGGGGGG  ",
+            "    GGGGGGGGGGGGGGGGG   ",
+            "      GGGGGGGGGGGGGG    ",
+            "        GGGGGGGGGG      ",
+        ]);
     }
 
     #[test]
@@ -227,31 +224,28 @@ mod tests {
         .draw(&mut display)
         .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "  BBBBBBBBBBBBBBB   ",
-                " B               B  ",
-                "B                 B ",
-                "B                 BB",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                "B                  B",
-                " B                 B",
-                " B                 B",
-                " BB               B ",
-                "  B               B ",
-                "   BB            B  ",
-                "    BB         BB   ",
-                "      BBBBBBBBB     ",
-            ])
-        );
+        display.assert_pattern(&[
+            "  BBBBBBBBBBBBBBB   ",
+            " B               B  ",
+            "B                 B ",
+            "B                 BB",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            "B                  B",
+            " B                 B",
+            " B                 B",
+            " BB               B ",
+            "  B               B ",
+            "   BB            B  ",
+            "    BB         BB   ",
+            "      BBBBBBBBB     ",
+        ]);
     }
 
     #[test]
@@ -271,31 +265,28 @@ mod tests {
         .draw(&mut display)
         .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "                RRRRRRRR                ",
-                "            RRRRRRRRRRRRRRRR            ",
-                "          RRRRRRRRRRRRRRRRRRRR          ",
-                "         RRRRRRRRRRRRRRRRRRRRRR         ",
-                "       RRRRRRRRRRRRRRRRRRRRRRRRRR       ",
-                "      RRRRRRRRRRRRRRRRRRRRRRRRRRRR      ",
-                "     RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR     ",
-                "    RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR    ",
-                "    RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR    ",
-                "   RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR   ",
-                "  RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR  ",
-                "  RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR  ",
-                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
-                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
-                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
-                " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
-                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
-                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
-                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
-                "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
-            ])
-        );
+        display.assert_pattern(&[
+            "                RRRRRRRR                ",
+            "            RRRRRRRRRRRRRRRR            ",
+            "          RRRRRRRRRRRRRRRRRRRR          ",
+            "         RRRRRRRRRRRRRRRRRRRRRR         ",
+            "       RRRRRRRRRRRRRRRRRRRRRRRRRR       ",
+            "      RRRRRRRRRRRRRRRRRRRRRRRRRRRR      ",
+            "     RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR     ",
+            "    RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR    ",
+            "    RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR    ",
+            "   RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR   ",
+            "  RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR  ",
+            "  RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR  ",
+            " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+            " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+            " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+            " RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+            "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+        ]);
     }
 
     #[test]
