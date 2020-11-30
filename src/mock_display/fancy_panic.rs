@@ -69,6 +69,29 @@ where
             width = self.display.column_width
         )
     }
+
+    fn write_footer(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "diff colors: {}\u{25FC}{} additional pixel",
+            Ansi::Foreground(Some(Rgb888::GREEN)),
+            Ansi::Foreground(None)
+        )?;
+
+        write!(
+            f,
+            ", {}\u{25FC}{} missing pixel",
+            Ansi::Foreground(Some(Rgb888::RED)),
+            Ansi::Foreground(None)
+        )?;
+
+        write!(
+            f,
+            ", {}\u{25FC}{} wrong color\n",
+            Ansi::Foreground(Some(Rgb888::BLUE)),
+            Ansi::Foreground(None)
+        )
+    }
 }
 
 impl<C> Display for FancyPanic<'_, C>
@@ -106,6 +129,7 @@ where
             write!(f, "\nexpected\n{:-<w$}\n{}", "", self.expected, w = width)?;
             write!(f, "\ndiff\n{:-<width$}\n{}", "", diff, width = width)?;
         }
+        self.write_footer(f)?;
 
         Ok(())
     }
@@ -240,7 +264,8 @@ mod tests {
             "| \x1b[38;2;128;128;128m\x1b[48;2;0;0;0m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m        ",
             "| \x1b[38;2;0;0;0m\x1b[48;2;128;128;128m▀\x1b[38;2;255;255;255m\x1b[48;2;128;128;128m▀\x1b[38;2;128;128;128m\x1b[48;2;255;255;255m▀\x1b[0m        ",
             "| \x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;128;128;128m\x1b[48;2;128;128;128m▀\x1b[0m        |\n",
-            "+------------+------------+------------+\n"
+            "+------------+------------+------------+\n",
+            "diff colors: \x1b[38;2;0;255;0m◼\x1b[39m additional pixel, \x1b[38;2;255;0;0m◼\x1b[39m missing pixel, \x1b[38;2;0;0;255m◼\x1b[39m wrong color\n",
         ));
     }
 
@@ -272,6 +297,7 @@ mod tests {
             "diff\n",
             "---\n",
             "\x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;255;0;0m\x1b[48;2;0;255;0m▀\x1b[38;2;128;128;128m\x1b[48;2;128;128;128m▀\x1b[0m\n",
+            "diff colors: \x1b[38;2;0;255;0m◼\x1b[39m additional pixel, \x1b[38;2;255;0;0m◼\x1b[39m missing pixel, \x1b[38;2;0;0;255m◼\x1b[39m wrong color\n",
         ));
     }
 }
