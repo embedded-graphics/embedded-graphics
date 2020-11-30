@@ -249,22 +249,19 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "                               ",
-                "                               ",
-                "                               ",
-                "                               ",
-                "                               ",
-                "             #                #",
-                "           ## ##            ## ",
-                "          #     #         ##   ",
-                "        ##       #      ##     ",
-                "      ##          ##  ##       ",
-                "     #              ##         ",
-            ])
-        );
+        display.assert_pattern(&[
+            "                               ",
+            "                               ",
+            "                               ",
+            "                               ",
+            "                               ",
+            "             #                #",
+            "           ## ##            ## ",
+            "          #     #         ##   ",
+            "        ##       #      ##     ",
+            "      ##          ##  ##       ",
+            "     #              ##         ",
+        ]);
     }
 
     #[test]
@@ -276,24 +273,21 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "                                ",
-                "                                ",
-                "                                ",
-                "             #                  ",
-                "           #####            ##  ",
-                "          #######         ##### ",
-                "        ##########      ####### ",
-                "       #############  ##########",
-                "     ######## ################# ",
-                "    #######     #############   ",
-                "     ####         #########     ",
-                "      #            ######       ",
-                "                     ##         ",
-            ])
-        );
+        display.assert_pattern(&[
+            "                                ",
+            "                                ",
+            "                                ",
+            "             #                  ",
+            "           #####            ##  ",
+            "          #######         ##### ",
+            "        ##########      ####### ",
+            "       #############  ##########",
+            "     ######## ################# ",
+            "    #######     #############   ",
+            "     ####         #########     ",
+            "      #            ######       ",
+            "                     ##         ",
+        ]);
     }
 
     #[test]
@@ -415,12 +409,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            assert_eq!(
-                display,
-                MockDisplay::from_pattern(expected),
-                "Joint {}",
-                case
-            );
+            display.assert_pattern_with_message(expected, |f| write!(f, "Join {}", case));
         }
     }
 
@@ -433,19 +422,16 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "     ####                 ",
-                "     ##########           ",
-                "     #################    ",
-                "  ########################",
-                "  ########################",
-                "  ########################",
-                "  ########################",
-                "  ########################",
-            ])
-        );
+        display.assert_pattern(&[
+            "     ####                 ",
+            "     ##########           ",
+            "     #################    ",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+        ]);
     }
 
     #[test]
@@ -469,7 +455,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            assert_eq!(display, expected_display, "{:?}", alignment);
+            display.assert_eq_with_message(&expected_display, |f| write!(f, "{:?}", alignment));
         }
     }
 
@@ -491,7 +477,7 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(display, expected_display);
+        display.assert_eq(&expected_display);
     }
 
     #[test]
@@ -604,6 +590,6 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(display, MockDisplay::new());
+        display.assert_eq(&MockDisplay::new());
     }
 }

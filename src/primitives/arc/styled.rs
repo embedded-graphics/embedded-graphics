@@ -187,14 +187,15 @@ mod tests {
                     .draw(&mut display)
                     .unwrap();
 
-                assert_eq!(
-                    display,
-                    expected,
-                    "diameter: {}, angle_start: {}, angle_sweep: {}",
-                    diameter,
-                    angle_start.to_degrees(),
-                    angle_sweep.to_degrees()
-                );
+                display.assert_eq_with_message(&expected, |f| {
+                    write!(
+                        f,
+                        "diameter: {}, angle_start: {}, angle_sweep: {}",
+                        diameter,
+                        angle_start.to_degrees(),
+                        angle_sweep.to_degrees()
+                    )
+                });
             }
         }
     }

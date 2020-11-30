@@ -83,7 +83,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    // NOTE: `crate` cannot be used here due to circular dependency resolution behaviour.
+    // NOTE: `crate` cannot be used here due to circular dependency resolution behavior.
     use embedded_graphics::{
         draw_target::{DrawTarget, DrawTargetExt},
         geometry::Dimensions,
@@ -116,16 +116,13 @@ mod tests {
         ];
         clipped.draw_iter(pixels.iter().copied()).unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "    ", //
-                "  ##", //
-                "  . ", //
-                "  . ", //
-                "  . ", //
-            ])
-        );
+        display.assert_pattern(&[
+            "    ", //
+            "  ##", //
+            "  . ", //
+            "  . ", //
+            "  . ", //
+        ]);
     }
 
     #[test]
@@ -146,16 +143,13 @@ mod tests {
             .fill_contiguous(&area, colors.iter().map(|c| BinaryColor::from(*c != 0)))
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "     ", //
-                "     ", //
-                "   ##", //
-                "   ..", //
-                "   .#", //
-            ])
-        );
+        display.assert_pattern(&[
+            "     ", //
+            "     ", //
+            "   ##", //
+            "   ..", //
+            "   .#", //
+        ]);
     }
 
     #[test]
@@ -168,15 +162,12 @@ mod tests {
         let area = Rectangle::new(Point::new(2, 1), Size::new(6, 4));
         clipped.fill_solid(&area, BinaryColor::On).unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "       ", //
-                "       ", //
-                "   ####", //
-                "   ####", //
-            ])
-        );
+        display.assert_pattern(&[
+            "       ", //
+            "       ", //
+            "   ####", //
+            "   ####", //
+        ]);
     }
 
     #[test]
@@ -192,7 +183,7 @@ mod tests {
             .draw(&mut expected)
             .unwrap();
 
-        assert_eq!(display, expected);
+        display.assert_eq(&expected);
     }
 
     #[test]

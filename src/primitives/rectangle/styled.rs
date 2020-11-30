@@ -246,8 +246,8 @@ mod tests {
             .draw(&mut display_outside)
             .unwrap();
 
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
+        display_inside.assert_eq(&display_center);
+        display_outside.assert_eq(&display_center);
     }
 
     #[test]
@@ -266,7 +266,7 @@ mod tests {
             .into_pixels()
             .draw(&mut iter_center)
             .unwrap();
-        assert_eq!(drawn_center, iter_center);
+        drawn_center.assert_eq(&iter_center);
 
         let rectangle_inside = Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
             .into_styled(
@@ -282,7 +282,7 @@ mod tests {
             .into_pixels()
             .draw(&mut iter_inside)
             .unwrap();
-        assert_eq!(drawn_inside, iter_inside);
+        drawn_inside.assert_eq(&iter_inside);
 
         let rectangle_outside = Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
             .into_styled(
@@ -298,7 +298,7 @@ mod tests {
             .into_pixels()
             .draw(&mut iter_outside)
             .unwrap();
-        assert_eq!(drawn_outside, iter_outside);
+        drawn_outside.assert_eq(&iter_outside);
     }
 
     #[test]
@@ -314,7 +314,7 @@ mod tests {
         let mut iter = MockDisplay::new();
         rectangle.draw(&mut drawn).unwrap();
         rectangle.into_pixels().draw(&mut iter).unwrap();
-        assert_eq!(drawn, iter);
+        drawn.assert_eq(&iter);
     }
 
     /// Compare the output of the draw() call vs iterators across multiple styles and stroke
@@ -360,10 +360,12 @@ mod tests {
                     .draw(&mut display_iter)
                     .unwrap();
 
-                assert_eq!(
-                    display_drawable, display_iter,
-                    "{} x {} rectangle with style '{}' and alignment {:?} does not match iterator",
-                    rect.size.width, rect.size.height, name, alignment
+                display_drawable.assert_eq_with_message(
+                    &display_iter,
+                    |f| write!(f,
+                        "{} x {} rectangle with style '{}' and alignment {:?} does not match iterator",
+                        rect.size.width, rect.size.height, name, alignment
+                    )
                 );
             }
         }

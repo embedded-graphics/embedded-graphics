@@ -149,7 +149,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            assert_eq!(display, expected, "diameter = {}", diameter);
+            display.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
         }
     }
 
@@ -161,7 +161,7 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(display, MockDisplay::from_pattern(pattern));
+        display.assert_pattern(pattern);
     }
 
     #[test]
@@ -307,8 +307,8 @@ mod tests {
             .draw(&mut display_outside)
             .unwrap();
 
-        assert_eq!(display_center, display_inside);
-        assert_eq!(display_center, display_outside);
+        display_inside.assert_eq(&display_center);
+        display_outside.assert_eq(&display_center);
     }
 
     #[test]

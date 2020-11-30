@@ -268,7 +268,7 @@ mod tests {
             .draw(&mut display_normal)
             .unwrap();
 
-        assert_eq!(display_inverse, display_normal.map(|c| c.invert()));
+        display_inverse.assert_eq(&display_normal.map(|c| c.invert()));
     }
 
     #[test]
@@ -279,7 +279,7 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(display, MockDisplay::new());
+        display.assert_eq(&MockDisplay::new());
     }
 
     #[test]
@@ -332,19 +332,16 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        assert_eq!(
-            display,
-            MockDisplay::from_pattern(&[
-                "#...###   ##",
-                ".###.# ### #",
-                ".###.# ### #",
-                ".....#     #",
-                ".###.# ### #",
-                ".###.# ### #",
-                ".###.# ### #",
-                "############",
-            ])
-        );
+        display.assert_pattern(&[
+            "#...###   ##",
+            ".###.# ### #",
+            ".###.# ### #",
+            ".....#     #",
+            ".###.# ### #",
+            ".###.# ### #",
+            ".###.# ### #",
+            "############",
+        ]);
     }
 
     #[test]

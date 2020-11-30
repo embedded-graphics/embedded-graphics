@@ -235,7 +235,7 @@ mod tests {
 
         let expected = MockDisplay::from_points(ellipse.points());
 
-        assert_eq!(display, expected);
+        display.assert_eq(&expected);
     }
 
     #[test]

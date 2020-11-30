@@ -271,8 +271,7 @@ mod tests {
         let mut display = MockDisplay::new();
         image.draw(&mut display).unwrap();
 
-        let expected = MockDisplay::from_pattern(expected_pattern);
-        assert_eq!(display, expected);
+        display.assert_pattern(expected_pattern);
     }
 
     #[test]
@@ -383,7 +382,7 @@ mod tests {
             )
             .unwrap();
 
-        assert_eq!(display, expected);
+        display.assert_eq(&expected);
     }
 
     #[test]
@@ -490,7 +489,7 @@ mod tests {
             .unwrap();
 
         // assert_eq can't be used here because ColorMapping isn't implemented for TestColorU32
-        assert!(display == expected_display);
+        assert!(display.eq(&expected_display));
     }
 
     #[test]
@@ -523,7 +522,7 @@ mod tests {
             .unwrap();
 
         // assert_eq can't be used here because ColorMapping isn't implemented for TestColorU32
-        assert!(display == expected_display);
+        assert!(display.eq(&expected_display));
     }
 
     #[test]

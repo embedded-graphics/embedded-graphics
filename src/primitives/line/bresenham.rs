@@ -264,7 +264,7 @@ mod tests {
             }
         }
 
-        assert_eq!(display_next, display_previous);
+        display_next.assert_eq(&display_previous);
 
         display_next
     }
@@ -279,7 +279,7 @@ mod tests {
         ];
         let display = draw_with_extras(lines.iter());
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "#.        #", //
             " ##.    ##.", //
             "   ## ##.  ", //
@@ -288,7 +288,6 @@ mod tests {
             ".##    .## ", //
             "#        .#", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -301,7 +300,7 @@ mod tests {
         ];
         let display = draw_with_extras(lines.iter());
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "#.    #", //
             " #   #.", //
             " #.  # ", //
@@ -314,7 +313,6 @@ mod tests {
             ".#   # ", //
             "#    .#", //
         ]);
-        assert_eq!(display, expected);
     }
 
     #[test]
@@ -327,7 +325,7 @@ mod tests {
         ];
         let display = draw_with_extras(lines.iter());
 
-        let expected = MockDisplay::from_pattern(&[
+        display.assert_pattern(&[
             "#.      #", //
             " #.    #.", //
             "  #.  #. ", //
@@ -338,6 +336,5 @@ mod tests {
             ".#    .# ", //
             "#      .#", //
         ]);
-        assert_eq!(display, expected);
     }
 }

@@ -102,7 +102,7 @@
 //! # expected_pixels.iter().copied().draw(&mut expected_display).unwrap();
 //! #
 //! # // assert_eq can't be used because ColorMapping isn't implemented for RGBI
-//! # assert!(display == expected_display);
+//! # assert!(display.eq(&expected_display));
 //! ```
 //!
 //! [`PixelColor`]: ../trait.PixelColor.html
