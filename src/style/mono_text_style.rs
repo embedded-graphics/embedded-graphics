@@ -60,7 +60,7 @@ where
 {
     type Color = C;
 
-    fn render_text<D>(
+    fn render_line<D>(
         &self,
         text: &str,
         mut position: Point,
@@ -75,7 +75,7 @@ where
             if first {
                 first = false;
             } else if F::CHARACTER_SPACING > 0 {
-                // File space between characters if background color is set.
+                // Fill space between characters if background color is set.
                 if let Some(background_color) = self.background_color {
                     target.fill_solid(
                         &Rectangle::new(
@@ -127,7 +127,7 @@ where
         Ok(Point::zero() + F::CHARACTER_SIZE.y_axis())
     }
 
-    fn bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
+    fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
         let position_delta = Point::zero() + F::CHARACTER_SIZE.y_axis();
 
         // If a piece of text is completely transparent, return an empty bounding box

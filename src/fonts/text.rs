@@ -77,7 +77,7 @@ where
         let mut position = self.primitive.position;
 
         for line in self.primitive.text.lines() {
-            position += self.style.render_text(line, position, target)?;
+            position += self.style.render_line(line, position, target)?;
         }
 
         Ok(())
@@ -95,7 +95,7 @@ where
         let mut min_max: Option<(Point, Point)> = None;
 
         for line in self.primitive.text.lines() {
-            let (bounding_box, position_delta) = self.style.bounding_box(line, position);
+            let (bounding_box, position_delta) = self.style.line_bounding_box(line, position);
 
             if let Some(bottom_right) = bounding_box.bottom_right() {
                 if let Some((min, max)) = &mut min_max {

@@ -15,7 +15,9 @@ pub trait TextStyle {
     /// Renders a single line of text using this style.
     ///
     /// Returns the offset from the current position to the start of the next line.
-    fn render_text<D>(
+    ///
+    /// TODO: document how `position` should be used
+    fn render_line<D>(
         &self,
         text: &str,
         position: Point,
@@ -25,5 +27,7 @@ pub trait TextStyle {
         D: DrawTarget<Color = Self::Color>;
 
     /// Returns the bounding box of a single line of text rendered using this style.
-    fn bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
+    ///
+    /// TODO: document how `position` should be used and the second return value
+    fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
 }
