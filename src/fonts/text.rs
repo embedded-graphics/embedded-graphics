@@ -1,10 +1,9 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Point},
-    iterator::IntoPixels,
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    style::{Styled, TextStyle, TextStylePixels},
+    style::{Styled, TextStyle},
     transform::Transform,
     Drawable,
 };
@@ -75,21 +74,13 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        self.style.render_text(&self.primitive, target)
-    }
-}
+        let mut position = self.primitive.position;
 
-impl<'a, C, S> IntoPixels for &Styled<Text<'a>, S>
-where
-    C: PixelColor,
-    S: TextStyle<Color = C> + TextStylePixels<'a>,
-{
-    type Color = C;
+        for line in self.primitive.text.lines() {
+            position += self.style.render_text(line, position, target)?;
+        }
 
-    type Iter = S::Iter;
-
-    fn into_pixels(self) -> Self::Iter {
-        self.style.pixels(&self.primitive)
+        Ok(())
     }
 }
 
@@ -99,7 +90,32 @@ where
     S: TextStyle<Color = C>,
 {
     fn bounding_box(&self) -> Rectangle {
-        self.style.bounding_box(&self.primitive)
+        let mut position = self.primitive.position;
+
+        let mut min_max: Option<(Point, Point)> = None;
+
+        for line in self.primitive.text.lines() {
+            let (bounding_box, position_delta) = self.style.bounding_box(line, position);
+
+            if let Some(bottom_right) = bounding_box.bottom_right() {
+                if let Some((min, max)) = &mut min_max {
+                    min.x = min.x.min(bounding_box.top_left.x);
+                    min.y = min.y.min(bounding_box.top_left.y);
+                    max.x = max.x.max(bottom_right.x);
+                    max.y = max.y.max(bottom_right.y);
+                } else {
+                    min_max = Some((bounding_box.top_left, bottom_right));
+                }
+            }
+
+            position += position_delta;
+        }
+
+        if let Some((min, max)) = min_max {
+            Rectangle::with_corners(min, max)
+        } else {
+            Rectangle::new(self.primitive.position, Size::zero())
+        }
     }
 }
 
@@ -107,13 +123,13 @@ where
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, Font6x12, Font6x8, MonoFont},
+        fonts::{tests::assert_text_from_pattern, Font6x8, MonoFont},
         geometry::Size,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         prelude::*,
         style::MonoTextStyle,
-        style::PrimitiveStyle,
+        style::{MonoTextStyleBuilder, PrimitiveStyle},
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -164,6 +180,31 @@ mod tests {
     }
 
     #[test]
+    fn character_spacing_with_background() {
+        let mut display = MockDisplay::new();
+        Text::new("##", Point::zero())
+            .into_styled(
+                MonoTextStyleBuilder::new(SpacedFont)
+                    .text_color(BinaryColor::On)
+                    .background_color(BinaryColor::Off)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            ".#.#........#.#..",
+            ".#.#........#.#..",
+            "#####......#####.",
+            ".#.#........#.#..",
+            "#####......#####.",
+            ".#.#........#.#..",
+            ".#.#........#.#..",
+            ".................",
+        ]);
+    }
+
+    #[test]
     fn character_spacing_dimensions() {
         let style = MonoTextStyle::new(SpacedFont, BinaryColor::On);
 
@@ -209,6 +250,40 @@ mod tests {
                 "#           ",
                 "#   #       ",
                 " ###        ",
+                "            ",
+            ],
+        );
+    }
+
+    #[test]
+    fn multiline_empty_line() {
+        assert_text_from_pattern(
+            "A\n\nBC",
+            Font6x8,
+            &[
+                " ###        ",
+                "#   #       ",
+                "#   #       ",
+                "#####       ",
+                "#   #       ",
+                "#   #       ",
+                "#   #       ",
+                "            ",
+                "            ",
+                "            ",
+                "            ",
+                "            ",
+                "            ",
+                "            ",
+                "            ",
+                "            ",
+                "####   ###  ",
+                "#   # #   # ",
+                "#   # #     ",
+                "####  #     ",
+                "#   # #     ",
+                "#   # #   # ",
+                "####   ###  ",
                 "            ",
             ],
         );
@@ -280,34 +355,6 @@ mod tests {
             .unwrap();
 
         display.assert_eq(&MockDisplay::new());
-    }
-
-    #[test]
-    fn negative_y_no_infinite_loop() {
-        let style = MonoTextStyle {
-            font: Font6x12,
-            text_color: Some(BinaryColor::On),
-            background_color: Some(BinaryColor::Off),
-        };
-
-        let mut text = Text::new("Testing string", Point::zero()).into_styled(style);
-        text.translate_mut(Point::new(0, -12));
-
-        assert_eq!(text.into_pixels().count(), 6 * 12 * "Testing string".len());
-    }
-
-    #[test]
-    fn negative_x_no_infinite_loop() {
-        let style = MonoTextStyle {
-            font: Font6x12,
-            text_color: Some(BinaryColor::On),
-            background_color: Some(BinaryColor::Off),
-        };
-
-        let mut text = Text::new("A", Point::zero()).into_styled(style);
-        text.translate_mut(Point::new(-6, 0));
-
-        assert_eq!(text.into_pixels().count(), 6 * 12);
     }
 
     #[test]

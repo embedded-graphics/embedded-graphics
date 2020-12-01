@@ -208,39 +208,6 @@ can be run using `cargo run --example hello-world`. It produces this output:
 
 Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
 
-### Chaining
-
-Items can be chained to build more complex graphics objects.
-
-```rust
-use embedded_graphics::{
-    fonts::{Font6x8, Text},
-    mock_display::MockDisplay,
-    pixelcolor::Rgb565,
-    prelude::*,
-    primitives::{Circle, Rectangle},
-    style::{PrimitiveStyle, MonoTextStyle},
-};
-
-fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
-    Rectangle::new(Point::new(0, 0), Size::new(40, 40))
-        .into_styled(PrimitiveStyle::with_stroke(Rgb565::CYAN, 1))
-        .into_pixels()
-        .chain(
-            Circle::new(Point::new(12, 12), 17)
-                .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
-                .into_pixels(),
-        )
-        .chain(
-            Text::new(text, Point::new(20, 16))
-                .into_styled(MonoTextStyle::new(Font6x8, Rgb565::GREEN))
-                .into_pixels(),
-        )
-}
-
-build_thing("Hello Rust!").draw(&mut display)?;
-```
-
 [embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
 
 ## Minimum supported Rust version

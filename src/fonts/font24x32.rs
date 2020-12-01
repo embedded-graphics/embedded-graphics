@@ -237,7 +237,6 @@ mod tests {
             "        ####                    ####         ",
         ];
 
-        assert_text_from_pattern("\0\r", Font24x32, two_question_marks);
         assert_text_from_pattern("\x7F\u{A0}", Font24x32, two_question_marks);
         assert_text_from_pattern("Ā💣", Font24x32, two_question_marks);
     }

@@ -183,7 +183,6 @@ mod tests {
             "                ",
         ];
 
-        assert_text_from_pattern("\0\r", Font8x16, two_question_marks);
         assert_text_from_pattern("\x7F\u{A0}", Font8x16, two_question_marks);
         assert_text_from_pattern("Ā💣", Font8x16, two_question_marks);
     }
