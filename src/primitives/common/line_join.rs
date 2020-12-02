@@ -129,12 +129,12 @@ impl LineJoin {
         stroke_offset: StrokeOffset,
     ) -> Self {
         let first_line = Line::new(start, mid);
-        let second_line = Line::new(mid, end);
+        let second_line = Line::new(end, mid);
 
         // Left and right edges of thick first segment
         let (first_edge_left, first_edge_right) = first_line.extents(width, stroke_offset);
         // Left and right edges of thick second segment
-        let (second_edge_left, second_edge_right) = second_line.extents(width, stroke_offset);
+        let (second_edge_right, second_edge_left) = second_line.extents(width, stroke_offset);
 
         if let Some((l_intersection, outer_side, r_intersection)) = intersections(
             &first_edge_left,
@@ -142,18 +142,18 @@ impl LineJoin {
             &second_edge_left,
             &second_edge_right,
         ) {
-            let (l_intersection, r_intersection) = match outer_side {
-                LineSide::Left => {
-                    let delta = r_intersection - mid;
+            // let (l_intersection, r_intersection) = match outer_side {
+            //     LineSide::Left => {
+            //         let delta = r_intersection - mid;
 
-                    (mid - delta, r_intersection)
-                }
-                LineSide::Right => {
-                    let delta = l_intersection - mid;
+            //         (mid - delta, r_intersection)
+            //     }
+            //     LineSide::Right => {
+            //         let delta = l_intersection - mid;
 
-                    (l_intersection, mid - delta)
-                }
-            };
+            //         (l_intersection, mid - delta)
+            //     }
+            // };
 
             // Check if the inside end point of the second line lies inside the first segment.
             let self_intersection = match outer_side {
@@ -334,6 +334,31 @@ fn intersections(
     } else {
         return None;
     };
+
+    {
+        let (l1, l2) = match outer_side {
+            LineSide::Right => (first_edge_right, second_edge_right),
+            LineSide::Left => (first_edge_left, second_edge_left),
+        };
+
+        let Line {
+            start: Point { x: x1, y: y1 },
+            end: Point { x: x2, y: y2 },
+        } = *l1;
+        let Line {
+            start: Point { x: x3, y: y3 },
+            end: Point { x: x4, y: y4 },
+        } = *l2;
+
+        let ua_top = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+        let ub_top = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
+
+        dbg!(ua_top, ub_top);
+
+        if ua_top.signum() != ub_top.signum() {
+            return None;
+        }
+    }
 
     Some((l_intersection, outer_side, r_intersection))
 }

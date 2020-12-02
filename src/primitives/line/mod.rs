@@ -238,6 +238,40 @@ impl Line {
             },
         }
     }
+
+    pub fn new_intersection(l1: &Line, l2: &Line) -> (i32, i32) {
+        let Line {
+            start: Point { x: x1, y: y1 },
+            end: Point { x: x2, y: y2 },
+        } = *l1;
+        let Line {
+            start: Point { x: x3, y: y3 },
+            end: Point { x: x4, y: y4 },
+        } = *l2;
+
+        let denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+
+        let ua_top = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+        let ub_top = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
+
+        // dbg!(ua_top, ub_top, denom);
+
+        // if denom == 0 {
+        //     return;
+        // }
+
+        // let ua = ua_top / denom;
+        // let ub = ub_top / denom;
+
+        // let x = x1 + ua * (x2 - x1);
+        // let y = y1 + ua * (y2 - y1);
+
+        // dbg!(x, y);
+
+        // dbg!(ua, ub);
+
+        (ua_top, ub_top)
+    }
 }
 
 impl Transform for Line {
