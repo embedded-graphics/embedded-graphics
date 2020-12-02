@@ -142,6 +142,19 @@ impl LineJoin {
             &second_edge_left,
             &second_edge_right,
         ) {
+            let (l_intersection, r_intersection) = match outer_side {
+                LineSide::Left => {
+                    let delta = r_intersection - mid;
+
+                    (mid - delta, r_intersection)
+                }
+                LineSide::Right => {
+                    let delta = l_intersection - mid;
+
+                    (l_intersection, mid - delta)
+                }
+            };
+
             // Check if the inside end point of the second line lies inside the first segment.
             let self_intersection = match outer_side {
                 LineSide::Right => LinearEquation::from_line(&first_edge_left)
