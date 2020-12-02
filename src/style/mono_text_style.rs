@@ -52,6 +52,11 @@ where
             .text_color(text_color)
             .build()
     }
+
+    fn line_width(&self, text: &str) -> u32 {
+        (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
+            .saturating_sub(F::CHARACTER_SPACING)
+    }
 }
 
 impl<C, F> TextStyle for MonoTextStyle<C, F>
@@ -71,6 +76,16 @@ where
         D: DrawTarget<Color = Self::Color>,
     {
         let mut first = true;
+
+        match self.horizontal_alignment {
+            HorizontalAlignment::Left => {}
+            HorizontalAlignment::Right => {
+                position -= Size::new(self.line_width(text), 0);
+            }
+            HorizontalAlignment::Center => {
+                position -= Size::new(self.line_width(text).saturating_sub(1) / 2, 0);
+            }
+        }
 
         for c in text.chars() {
             if first {
@@ -136,10 +151,7 @@ where
             return (Rectangle::new(position, Size::zero()), position_delta);
         }
 
-        let width = (text.len() as u32 * (F::CHARACTER_SPACING + F::CHARACTER_SIZE.width))
-            .saturating_sub(F::CHARACTER_SPACING);
-
-        let size = Size::new(width, F::CHARACTER_SIZE.height);
+        let size = Size::new(self.line_width(text), F::CHARACTER_SIZE.height);
 
         (Rectangle::new(position, size), position_delta)
     }

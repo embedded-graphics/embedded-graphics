@@ -129,7 +129,7 @@ mod tests {
         pixelcolor::BinaryColor,
         prelude::*,
         style::MonoTextStyle,
-        style::{MonoTextStyleBuilder, PrimitiveStyle},
+        style::{HorizontalAlignment, MonoTextStyleBuilder, PrimitiveStyle},
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -404,5 +404,107 @@ mod tests {
             Rectangle::new(Point::new(7, 11), Size::zero()),
             "Transparent text is expected to have a zero sized bounding box with the top left corner at the text position",
         );
+    }
+
+    #[test]
+    fn horizontal_alignment_left() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .horizontal_alignment(HorizontalAlignment::Left)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::zero())
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " ###        ",
+            "#   #       ",
+            "#   #       ",
+            "#####       ",
+            "#   #       ",
+            "#   #       ",
+            "#   #       ",
+            "            ",
+            "####   ###  ",
+            "#   # #   # ",
+            "#   # #     ",
+            "####  #     ",
+            "#   # #     ",
+            "#   # #   # ",
+            "####   ###  ",
+            "            ",
+        ]);
+    }
+
+    #[test]
+    fn horizontal_alignment_center() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .horizontal_alignment(HorizontalAlignment::Center)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::new(5, 0))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "    ###     ",
+            "   #   #    ",
+            "   #   #    ",
+            "   #####    ",
+            "   #   #    ",
+            "   #   #    ",
+            "   #   #    ",
+            "            ",
+            "####   ###  ",
+            "#   # #   # ",
+            "#   # #     ",
+            "####  #     ",
+            "#   # #     ",
+            "#   # #   # ",
+            "####   ###  ",
+            "            ",
+        ]);
+    }
+
+    #[test]
+    fn horizontal_alignment_right() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .horizontal_alignment(HorizontalAlignment::Right)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::new(12, 0))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "       ###  ",
+            "      #   # ",
+            "      #   # ",
+            "      ##### ",
+            "      #   # ",
+            "      #   # ",
+            "      #   # ",
+            "            ",
+            "####   ###  ",
+            "#   # #   # ",
+            "#   # #     ",
+            "####  #     ",
+            "#   # #     ",
+            "#   # #   # ",
+            "####   ###  ",
+            "            ",
+        ]);
     }
 }

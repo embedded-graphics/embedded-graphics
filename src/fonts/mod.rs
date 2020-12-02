@@ -169,6 +169,11 @@ pub trait MonoFont: Copy {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
+    /// The baseline.
+    ///
+    /// TODO: add description how this value is used and what the default value is
+    const BASELINE: Option<i32> = None;
+
     /// Returns the position of a character in the font.
     fn char_offset(_: char) -> u32;
 }
