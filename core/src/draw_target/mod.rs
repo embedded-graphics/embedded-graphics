@@ -556,13 +556,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// // Only the first 4 characters will be drawn, because the others are outside
     /// // the clipping area
-    /// Text::new("Clipped", Point::new(0, 15))
+    /// Text::new("Clipped", Point::new(0, 13))
     ///     .into_styled(MonoTextStyle::new(Font12x16, BinaryColor::On))
     ///     .draw(&mut clipped_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
-    /// # Text::new("Clip", Point::new(0, 15))
+    /// # Text::new("Clip", Point::new(0, 13))
     /// #     .into_styled(MonoTextStyle::new(Font12x16, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #

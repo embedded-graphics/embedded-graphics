@@ -417,7 +417,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(0, 7))
+        Text::new("A\nBC", Point::new(0, 6))
             .into_styled(style)
             .draw(&mut display)
             .unwrap();
@@ -451,7 +451,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(5, 7))
+        Text::new("A\nBC", Point::new(5, 6))
             .into_styled(style)
             .draw(&mut display)
             .unwrap();
@@ -485,7 +485,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(11, 7))
+        Text::new("A\nBC", Point::new(11, 6))
             .into_styled(style)
             .draw(&mut display)
             .unwrap();

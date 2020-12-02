@@ -96,11 +96,10 @@ where
                 position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1)) / 2;
             }
             VerticalAlignment::Baseline => {
-                if let Some(baseline) = F::BASELINE {
-                    unimplemented!()
-                } else {
-                    position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1));
-                }
+                let baseline = F::BASELINE
+                    .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1) as i32);
+
+                position.y -= baseline;
             }
         }
 

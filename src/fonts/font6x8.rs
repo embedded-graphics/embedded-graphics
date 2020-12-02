@@ -15,6 +15,7 @@ impl MonoFont for Font6x8 {
     const FONT_IMAGE_WIDTH: u32 = 240;
 
     const CHARACTER_SIZE: Size = Size::new(6, 8);
+    const BASELINE: Option<i32> = Some(6);
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -35,7 +36,7 @@ impl MonoFont for Font6x8 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, MonoFont, Text},
+        fonts::{tests::*, MonoFont, Text},
         geometry::{Dimensions, Point, Size},
         pixelcolor::BinaryColor,
         style::MonoTextStyle,
@@ -145,5 +146,10 @@ mod tests {
 
         assert_text_from_pattern("\x7F\u{A0}", Font6x8, two_question_marks);
         assert_text_from_pattern("Ā💣", Font6x8, two_question_marks);
+    }
+
+    #[test]
+    fn baseline() {
+        test_baseline(Font6x8);
     }
 }
