@@ -184,7 +184,8 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new("##", Point::zero())
             .into_styled(
-                MonoTextStyleBuilder::new(SpacedFont)
+                MonoTextStyleBuilder::new()
+                    .font(SpacedFont)
                     .text_color(BinaryColor::On)
                     .background_color(BinaryColor::Off)
                     .build(),
@@ -322,7 +323,8 @@ mod tests {
     #[test]
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
-        let style_inverse = MonoTextStyleBuilder::new(Font6x8)
+        let style_inverse = MonoTextStyleBuilder::new()
+            .font(Font6x8)
             .text_color(BinaryColor::Off)
             .background_color(BinaryColor::On)
             .build();
@@ -332,7 +334,8 @@ mod tests {
             .unwrap();
 
         let mut display_normal = MockDisplay::new();
-        let style_normal = MonoTextStyleBuilder::new(Font6x8)
+        let style_normal = MonoTextStyleBuilder::new()
+            .font(Font6x8)
             .text_color(BinaryColor::On)
             .background_color(BinaryColor::Off)
             .build();
@@ -357,7 +360,8 @@ mod tests {
 
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
-        let style = MonoTextStyleBuilder::new(Font6x8)
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
             .background_color(BinaryColor::On)
             .build();
 
@@ -389,7 +393,9 @@ mod tests {
 
     #[test]
     fn transparent_text_has_zero_size_but_retains_position() {
-        let style = MonoTextStyleBuilder::<BinaryColor, _>::new(Font6x8).build();
+        let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
+            .font(Font6x8)
+            .build();
 
         let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
 

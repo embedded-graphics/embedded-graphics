@@ -97,6 +97,16 @@ The `DrawTargetExt` trait is introduced to allow a translated, cropped or clippe
 
 Please search for `DrawTargetExt` on <https://docs.rs/embedded-graphics> for usage examples.
 
+### Text rendering
+
+TODO: Improve this section before release.
+
+- `TextStyle` -> `MonoTextStyle`
+- Added support for external renderers
+- `MonoTextStyleBuilder::new(Font)` -> `MonoTextStyle::new().font(Font)`
+- Added horizontal and vertical alignment to `MonoTextStyle`
+- New default vertical alignment is baseline
+
 ## For display driver authors
 
 Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.

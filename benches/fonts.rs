@@ -18,7 +18,8 @@ fn font_6x8(c: &mut Criterion) {
     let mut group = c.benchmark_group("font 6x8");
 
     let style = MonoTextStyle::new(Font6x8, Gray8::WHITE);
-    let style_with_bg = MonoTextStyleBuilder::new(Font6x8)
+    let style_with_bg = MonoTextStyleBuilder::new()
+        .font(Font6x8)
         .text_color(Gray8::WHITE)
         .background_color(Gray8::BLACK)
         .build();
@@ -58,7 +59,8 @@ fn font_12x16(c: &mut Criterion) {
     let mut group = c.benchmark_group("font 12x16");
 
     let style = MonoTextStyle::new(Font12x16, Gray8::WHITE);
-    let style_with_bg = MonoTextStyleBuilder::new(Font12x16)
+    let style_with_bg = MonoTextStyleBuilder::new()
+        .font(Font12x16)
         .text_color(Gray8::WHITE)
         .background_color(Gray8::BLACK)
         .build();

@@ -29,7 +29,8 @@
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! // Create a new text style
-//! let style = MonoTextStyleBuilder::new(Font6x8)
+//! let style = MonoTextStyleBuilder::new()
+//!     .font(Font6x8)
 //!     .text_color(Rgb565::YELLOW)
 //!     .background_color(Rgb565::BLUE)
 //!     .build();
@@ -98,7 +99,8 @@
 //!
 //! Text::new(&buf, Point::zero())
 //!     .into_styled(
-//!         MonoTextStyleBuilder::new(Font6x8)
+//!         MonoTextStyleBuilder::new()
+//!             .font(Font6x8)
 //!             .text_color(Rgb565::YELLOW)
 //!             .background_color(Rgb565::BLUE)
 //!             .build(),

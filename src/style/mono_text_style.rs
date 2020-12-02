@@ -23,11 +23,7 @@ use crate::{
 /// [`new`]: #method.new
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
-pub struct MonoTextStyle<C, F>
-where
-    C: PixelColor,
-    F: MonoFont,
-{
+pub struct MonoTextStyle<C, F> {
     /// Text color.
     pub text_color: Option<C>,
 
@@ -51,7 +47,8 @@ where
 {
     /// Creates a text style with transparent background.
     pub fn new(font: F, text_color: C) -> Self {
-        MonoTextStyleBuilder::new(font)
+        MonoTextStyleBuilder::new()
+            .font(font)
             .text_color(text_color)
             .build()
     }
@@ -166,7 +163,8 @@ where
 ///     style::{MonoTextStyle, MonoTextStyleBuilder},
 /// };
 ///
-/// let style: MonoTextStyle<Rgb565, Font6x8> = MonoTextStyleBuilder::new(Font6x8)
+/// let style = MonoTextStyleBuilder::new()
+///     .font(Font6x8)
 ///     .text_color(Rgb565::YELLOW)
 ///     .background_color(Rgb565::BLUE)
 ///     .build();
@@ -188,11 +186,31 @@ where
 ///     style::{MonoTextStyle, MonoTextStyleBuilder},
 /// };
 ///
-/// let style: MonoTextStyle<Rgb565, Font6x8> = MonoTextStyleBuilder::new(Font6x8)
+/// let style = MonoTextStyleBuilder::new()
+///     .font(Font6x8)
 ///     .text_color(Rgb565::WHITE)
 ///     .build();
 ///
 /// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
+/// ```
+///
+/// ## Modifying an existing style
+///
+/// The builder can also be used to modify an existing style.
+///
+/// ```
+/// use embedded_graphics::{
+///     fonts::{Font6x8, Font12x16, Text},
+///     pixelcolor::Rgb565,
+///     prelude::*,
+///     style::{MonoTextStyle, MonoTextStyleBuilder},
+/// };
+///
+/// let style = MonoTextStyle::new(Font6x8, Rgb565::YELLOW);
+///
+/// let style_larger = MonoTextStyleBuilder::from(&style)
+///     .font(Font12x16)
+///     .build();
 /// ```
 ///
 /// [`Font`]: ../fonts/trait.Font.html
@@ -202,24 +220,16 @@ where
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`MonoTextStyle`]: ./struct.MonoTextStyle.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct MonoTextStyleBuilder<C, F>
-where
-    C: PixelColor,
-    F: MonoFont,
-{
+pub struct MonoTextStyleBuilder<C, F> {
     style: MonoTextStyle<C, F>,
 }
 
-impl<C, F> MonoTextStyleBuilder<C, F>
-where
-    C: PixelColor,
-    F: MonoFont,
-{
-    /// Creates a new text style builder with a given font.
-    pub fn new(font: F) -> Self {
+impl<C> MonoTextStyleBuilder<C, UndefinedFont> {
+    /// Creates a new text style builder.
+    pub fn new() -> Self {
         Self {
             style: MonoTextStyle {
-                font,
+                font: UndefinedFont,
                 background_color: None,
                 text_color: None,
                 horizontal_alignment: HorizontalAlignment::Left,
@@ -227,19 +237,20 @@ where
             },
         }
     }
+}
 
-    /// Sets the text color.
-    pub fn text_color(mut self, text_color: C) -> Self {
-        self.style.text_color = Some(text_color);
+impl<C, F> MonoTextStyleBuilder<C, F> {
+    /// Sets the font.
+    pub fn font<Font>(self, font: Font) -> MonoTextStyleBuilder<C, Font> {
+        let style = MonoTextStyle {
+            font,
+            background_color: self.style.background_color,
+            text_color: self.style.text_color,
+            vertical_alignment: self.style.vertical_alignment,
+            horizontal_alignment: self.style.horizontal_alignment,
+        };
 
-        self
-    }
-
-    /// Sets the background color.
-    pub fn background_color(mut self, background_color: C) -> Self {
-        self.style.background_color = Some(background_color);
-
-        self
+        MonoTextStyleBuilder { style }
     }
 
     /// Sets the horizontal alignment.
@@ -255,10 +266,50 @@ where
 
         self
     }
+}
 
+impl<C, F> MonoTextStyleBuilder<C, F>
+where
+    C: PixelColor,
+{
+    /// Sets the text color.
+    pub fn text_color(mut self, text_color: C) -> Self {
+        self.style.text_color = Some(text_color);
+
+        self
+    }
+
+    /// Sets the background color.
+    pub fn background_color(mut self, background_color: C) -> Self {
+        self.style.background_color = Some(background_color);
+
+        self
+    }
+}
+
+impl<C, F> MonoTextStyleBuilder<C, F>
+where
+    C: PixelColor,
+    F: MonoFont,
+{
     /// Builds the text style.
+    ///
+    /// This method can only be called after a font was set by using the [`font`] method. All other
+    /// settings are optional and they will be set to their default value if they are missing.
+    ///
+    /// [`font`]: #method.font
     pub fn build(self) -> MonoTextStyle<C, F> {
         self.style
+    }
+}
+
+impl<C, F> From<&MonoTextStyle<C, F>> for MonoTextStyleBuilder<C, F>
+where
+    C: PixelColor,
+    F: MonoFont,
+{
+    fn from(style: &MonoTextStyle<C, F>) -> Self {
+        Self { style: *style }
     }
 }
 
@@ -286,6 +337,10 @@ pub enum HorizontalAlignment {
     Right,
 }
 
+/// Marker type to improve compiler errors if no font was set in builder.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub struct UndefinedFont;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -294,7 +349,9 @@ mod tests {
     #[test]
     fn builder_default() {
         assert_eq!(
-            MonoTextStyleBuilder::<BinaryColor, _>::new(Font12x16).build(),
+            MonoTextStyleBuilder::<BinaryColor, _>::new()
+                .font(Font12x16)
+                .build(),
             MonoTextStyle {
                 font: Font12x16,
                 text_color: None,
@@ -308,7 +365,8 @@ mod tests {
     #[test]
     fn builder_text_color() {
         assert_eq!(
-            MonoTextStyleBuilder::new(Font12x16)
+            MonoTextStyleBuilder::new()
+                .font(Font12x16)
                 .text_color(BinaryColor::On)
                 .build(),
             MonoTextStyle::new(Font12x16, BinaryColor::On)
@@ -318,11 +376,12 @@ mod tests {
     #[test]
     fn builder_background_color() {
         assert_eq!(
-            MonoTextStyleBuilder::new(Font12x16)
+            MonoTextStyleBuilder::new()
+                .font(Font12x16)
                 .background_color(BinaryColor::On)
                 .build(),
             {
-                let mut style = MonoTextStyleBuilder::new(Font12x16).build();
+                let mut style = MonoTextStyleBuilder::new().font(Font12x16).build();
 
                 style.text_color = None;
                 style.background_color = Some(BinaryColor::On);
@@ -334,7 +393,8 @@ mod tests {
 
     #[test]
     fn builder_alignments() {
-        let style = MonoTextStyleBuilder::<BinaryColor, _>::new(Font12x16)
+        let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
+            .font(Font12x16)
             .horizontal_alignment(HorizontalAlignment::Right)
             .vertical_alignment(VerticalAlignment::Top)
             .build();

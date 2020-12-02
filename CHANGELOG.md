@@ -9,11 +9,14 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Added
 
 - [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) Added `MockDisplay::assert_eq_with_message` and `MockDisplay::assert_pattern_with_message`.
+- [#XXX](https://github.com/embedded-graphics/embedded-graphics/pull/XXX) Added `vertical_alignment` and `horizontal_alignment` to `MonoTextStyle`.
+- [#XXX](https://github.com/embedded-graphics/embedded-graphics/pull/XXX) Added `From` impl to convert an existing `MonoTextStyle` into a `MonoTextStyleBuilder`.
 
 ### Removed
 
 - **(breaking)** [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) `MockDisplay` no longer implements `PartialEq`, use `MockDisplay::assert_eq` instead.
 - **(breaking)** [#509](https://github.com/embedded-graphics/embedded-graphics/pull/509) Styled text can no longer be converted into a pixel iterator, because `IntoPixels` is no longer implemented for `Styled<Text<'_>, S>`.
+- **(breaking)** [#XXX](https://github.com/embedded-graphics/embedded-graphics/pull/XXX) `MonoTextStyleBuilder::new` no longer takes a font as an argument, use `MonoTextStyleBuilder::new().font(SomeFont)` instead.
 
 ### Fixed
 
