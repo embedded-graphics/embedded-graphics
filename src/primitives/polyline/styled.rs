@@ -434,6 +434,51 @@ mod tests {
         ]);
     }
 
+    // See green case 19 at <https://github.com/embedded-graphics/embedded-graphics/issues/471#issuecomment-731580741>.
+    #[test]
+    fn issue_471_nearly_colinear_joins_outer_right() {
+        let mut display = MockDisplay::new();
+
+        Polyline::new(&[Point::new(9, 24), Point::new(14, 14), Point::new(18, 4)])
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 19))
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "     ####                 ",
+            "     ##########           ",
+            "     #################    ",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+        ]);
+    }
+
+    // There was a spike off the back of the first starting line. See the green 5 case in the image
+    // at <https://github.com/embedded-graphics/embedded-graphics/issues/471#issuecomment-731580858>.
+    #[test]
+    fn issue_471_nearly_colinear_joins_outer_left() {
+        let mut display = MockDisplay::new();
+
+        Polyline::new(&[Point::new(9, 24), Point::new(14, 14), Point::new(20, 4)])
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 10))
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "     ####                 ",
+            "     ##########           ",
+            "     #################    ",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+            "  ########################",
+        ]);
+    }
+
     #[test]
     fn alignment_has_no_effect() {
         let base_style = PrimitiveStyleBuilder::new()
