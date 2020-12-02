@@ -13,6 +13,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Removed
 
 - **(breaking)** [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) `MockDisplay` no longer implements `PartialEq`, use `MockDisplay::assert_eq` instead.
+- **(breaking)** [#509](https://github.com/embedded-graphics/embedded-graphics/pull/509) Styled text can no longer be converted into a pixel iterator, because `IntoPixels` is no longer implemented for `Styled<Text<'_>, S>`.
 
 ### Fixed
 

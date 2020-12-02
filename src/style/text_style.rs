@@ -1,5 +1,5 @@
 use crate::{
-    draw_target::DrawTarget, fonts::Text, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
+    draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
 };
 
 /// Text style.
@@ -12,20 +12,22 @@ pub trait TextStyle {
     /// Color type.
     type Color: PixelColor;
 
-    /// Render a text object using this style.
-    fn render_text<D>(&self, text: &Text<'_>, target: &mut D) -> Result<(), D::Error>
+    /// Renders a single line of text using this style.
+    ///
+    /// Returns the offset from the current position to the start of the next line.
+    ///
+    /// TODO: document how `position` should be used
+    fn render_line<D>(
+        &self,
+        text: &str,
+        position: Point,
+        target: &mut D,
+    ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
 
-    /// Returns the bounding box of a text object rendered using this style.
-    fn bounding_box(&self, text: &Text<'_>) -> Rectangle;
-}
-
-/// Pixels iterator.
-pub trait TextStylePixels<'a>: TextStyle {
-    /// Iterator type.
-    type Iter: Iterator<Item = Pixel<Self::Color>> + 'a;
-
-    /// Returns an iterator over the drawn pixels.
-    fn pixels(&self, text: &Text<'a>) -> Self::Iter;
+    /// Returns the bounding box of a single line of text rendered using this style.
+    ///
+    /// TODO: document how `position` should be used and the second return value
+    fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
 }

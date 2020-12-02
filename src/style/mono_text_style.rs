@@ -1,10 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
-    fonts::{MonoFont, MonoPixels, Text},
-    geometry::Size,
-    pixelcolor::PixelColor,
+    fonts::{MonoCharPixels, MonoFont},
+    geometry::{Point, Size},
+    pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    style::{TextStyle, TextStylePixels},
+    style::TextStyle,
+    Pixel,
 };
 
 /// Style properties for text using a monospaced font.
@@ -59,50 +60,87 @@ where
 {
     type Color = C;
 
-    fn render_text<D>(&self, text: &Text<'_>, target: &mut D) -> Result<(), D::Error>
+    fn render_line<D>(
+        &self,
+        text: &str,
+        mut position: Point,
+        target: &mut D,
+    ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        target.draw_iter(MonoPixels::new(text, *self))
-    }
+        let mut first = true;
 
-    fn bounding_box(&self, text: &Text<'_>) -> Rectangle {
-        // If a piece of text is completely transparent, return an empty bounding box
-        if self.text_color.is_none() && self.background_color.is_none() {
-            return Rectangle::new(text.position, Size::zero());
+        for c in text.chars() {
+            if first {
+                first = false;
+            } else if F::CHARACTER_SPACING > 0 {
+                // Fill space between characters if background color is set.
+                if let Some(background_color) = self.background_color {
+                    target.fill_solid(
+                        &Rectangle::new(
+                            position,
+                            Size::new(F::CHARACTER_SPACING, F::CHARACTER_SIZE.height),
+                        ),
+                        background_color,
+                    )?;
+                }
+
+                position += Size::new(F::CHARACTER_SPACING, 0);
+            }
+
+            let pixels = MonoCharPixels::<F>::new(c);
+
+            match (self.text_color, self.background_color) {
+                (Some(text_color), Some(background_color)) => {
+                    let bounding_box = Rectangle::new(position, F::CHARACTER_SIZE);
+
+                    // The glyph is opaque if both colors are set and `fill_contiguous` can be used.
+                    target.fill_contiguous(
+                        &bounding_box,
+                        pixels.map(|Pixel(_, c)| match c {
+                            BinaryColor::Off => background_color,
+                            BinaryColor::On => text_color,
+                        }),
+                    )?;
+                }
+                (Some(text_color), None) => {
+                    target.draw_iter(
+                        pixels
+                            .filter(|Pixel(_, c)| *c == BinaryColor::On)
+                            .map(|Pixel(p, _)| Pixel(p + position, text_color)),
+                    )?;
+                }
+                (None, Some(background_color)) => {
+                    target.draw_iter(
+                        pixels
+                            .filter(|Pixel(_, c)| *c == BinaryColor::Off)
+                            .map(|Pixel(p, _)| Pixel(p + position, background_color)),
+                    )?;
+                }
+                (None, None) => {}
+            }
+
+            position += F::CHARACTER_SIZE.x_axis();
         }
 
-        let width = text
-            .text
-            .lines()
-            .map(|line| {
-                (line.len() as u32 * (F::CHARACTER_SPACING + F::CHARACTER_SIZE.width))
-                    .saturating_sub(F::CHARACTER_SPACING)
-            })
-            .max()
-            .unwrap_or(0);
-
-        let height = if width > 0 {
-            F::CHARACTER_SIZE.height * text.text.lines().count() as u32
-        } else {
-            0
-        };
-
-        let size = Size::new(width, height);
-
-        Rectangle::new(text.position, size)
+        Ok(Point::zero() + F::CHARACTER_SIZE.y_axis())
     }
-}
 
-impl<'a, C, F> TextStylePixels<'a> for MonoTextStyle<C, F>
-where
-    C: PixelColor + 'a,
-    F: MonoFont + 'a,
-{
-    type Iter = MonoPixels<'a, C, F>;
+    fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
+        let position_delta = Point::zero() + F::CHARACTER_SIZE.y_axis();
 
-    fn pixels(&self, text: &Text<'a>) -> Self::Iter {
-        MonoPixels::new(&text, *self)
+        // If a piece of text is completely transparent, return an empty bounding box
+        if self.text_color.is_none() && self.background_color.is_none() {
+            return (Rectangle::new(position, Size::zero()), position_delta);
+        }
+
+        let width = (text.len() as u32 * (F::CHARACTER_SPACING + F::CHARACTER_SIZE.width))
+            .saturating_sub(F::CHARACTER_SPACING);
+
+        let size = Size::new(width, F::CHARACTER_SIZE.height);
+
+        (Rectangle::new(position, size), position_delta)
     }
 }
 

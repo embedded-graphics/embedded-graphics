@@ -196,48 +196,10 @@
 //!
 //! Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
 //!
-//! ## Chaining
-//!
-//! Items can be chained to build more complex graphics objects.
-//!
-//! ```rust
-//! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
-//!     mock_display::MockDisplay,
-//!     pixelcolor::Rgb565,
-//!     prelude::*,
-//!     primitives::{Circle, Rectangle},
-//!     style::{PrimitiveStyle, MonoTextStyle},
-//! };
-//!
-//! fn build_thing(text: &'static str) -> impl Iterator<Item = Pixel<Rgb565>> {
-//!     Rectangle::new(Point::new(0, 0), Size::new(40, 40))
-//!         .into_styled(PrimitiveStyle::with_stroke(Rgb565::CYAN, 1))
-//!         .into_pixels()
-//!         .chain(
-//!             Circle::new(Point::new(12, 12), 17)
-//!                 .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
-//!                 .into_pixels(),
-//!         )
-//!         .chain(
-//!             Text::new(text, Point::new(20, 16))
-//!                 .into_styled(MonoTextStyle::new(Font6x8, Rgb565::GREEN))
-//!                 .into_pixels(),
-//!         )
-//! }
-//!
-//! # let mut display = MockDisplay::default();
-//! # display.set_allow_overdraw(true);
-//! # display.set_allow_out_of_bounds_drawing(true);
-//! build_thing("Hello Rust!").draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
-//! ```
-//!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`MockDisplay`]: ./mock_display/struct.MockDisplay.html
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
-//! [`Font6x8`]: ./fonts/struct.Font6x8.html
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 //! [embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
 //! [`Drawable`]: ./drawable/trait.Drawable.html

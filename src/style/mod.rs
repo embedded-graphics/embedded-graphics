@@ -8,4 +8,4 @@ mod text_style;
 pub use mono_text_style::{MonoTextStyle, MonoTextStyleBuilder};
 pub use primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment};
 pub use styled::{Styled, StyledPrimitiveAreas};
-pub use text_style::{TextStyle, TextStylePixels};
+pub use text_style::TextStyle;
