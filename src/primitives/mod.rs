@@ -2,7 +2,7 @@
 
 pub mod arc;
 pub mod circle;
-mod common;
+pub mod common;
 pub mod ellipse;
 pub mod line;
 pub mod polyline;

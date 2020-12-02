@@ -245,8 +245,8 @@
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"
 )]
-#![no_std]
-#![deny(missing_docs)]
+// #![no_std]
+// #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_copy_implementations)]
 #![deny(trivial_casts)]

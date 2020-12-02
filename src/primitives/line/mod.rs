@@ -119,11 +119,7 @@ impl Line {
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
-    pub(in crate::primitives) fn extents(
-        &self,
-        thickness: u32,
-        stroke_offset: StrokeOffset,
-    ) -> (Line, Line) {
+    pub fn extents(&self, thickness: u32, stroke_offset: StrokeOffset) -> (Line, Line) {
         let mut it = ParallelsIterator::new(self, thickness.saturating_cast(), stroke_offset);
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
@@ -196,7 +192,7 @@ impl Line {
     ///
     /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
     /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
-    pub(in crate::primitives) fn intersection(&self, other: &Line) -> Intersection {
+    pub fn intersection(&self, other: &Line) -> Intersection {
         let line1 = LinearEquation::from_line(self);
         let line2 = LinearEquation::from_line(other);
 
