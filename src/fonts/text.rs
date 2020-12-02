@@ -129,7 +129,7 @@ mod tests {
         pixelcolor::BinaryColor,
         prelude::*,
         style::MonoTextStyle,
-        style::{HorizontalAlignment, MonoTextStyleBuilder, PrimitiveStyle, VerticalAlignment},
+        style::{MonoTextStyleBuilder, PrimitiveStyle, VerticalAlignment},
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -208,7 +208,11 @@ mod tests {
 
     #[test]
     fn character_spacing_dimensions() {
-        let style = MonoTextStyle::new(SpacedFont, BinaryColor::On);
+        let style = MonoTextStyleBuilder::new()
+            .font(SpacedFont)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
 
         assert_eq!(
             Text::new("#", Point::zero())
@@ -293,7 +297,11 @@ mod tests {
 
     #[test]
     fn multiline_dimensions() {
-        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
         let text = Text::new("AB\nC", Point::zero()).into_styled(style);
 
         assert_eq!(
@@ -406,107 +414,5 @@ mod tests {
             Rectangle::new(Point::new(7, 11), Size::zero()),
             "Transparent text is expected to have a zero sized bounding box with the top left corner at the text position",
         );
-    }
-
-    #[test]
-    fn horizontal_alignment_left() {
-        let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .horizontal_alignment(HorizontalAlignment::Left)
-            .build();
-
-        let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(0, 6))
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            " ###        ",
-            "#   #       ",
-            "#   #       ",
-            "#####       ",
-            "#   #       ",
-            "#   #       ",
-            "#   #       ",
-            "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
-            "            ",
-        ]);
-    }
-
-    #[test]
-    fn horizontal_alignment_center() {
-        let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .horizontal_alignment(HorizontalAlignment::Center)
-            .build();
-
-        let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(5, 6))
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            "    ###     ",
-            "   #   #    ",
-            "   #   #    ",
-            "   #####    ",
-            "   #   #    ",
-            "   #   #    ",
-            "   #   #    ",
-            "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
-            "            ",
-        ]);
-    }
-
-    #[test]
-    fn horizontal_alignment_right() {
-        let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .horizontal_alignment(HorizontalAlignment::Right)
-            .build();
-
-        let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(11, 6))
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            "       ###  ",
-            "      #   # ",
-            "      #   # ",
-            "      ##### ",
-            "      #   # ",
-            "      #   # ",
-            "      #   # ",
-            "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
-            "            ",
-        ]);
     }
 }

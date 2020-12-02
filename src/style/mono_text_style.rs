@@ -5,7 +5,7 @@ use crate::{
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
     style::TextStyle,
-    Pixel,
+    Pixel, SaturatingCast,
 };
 
 /// Style properties for text using a monospaced font.
@@ -53,9 +53,35 @@ where
             .build()
     }
 
+    /// Calculates the line width in pixels.
     fn line_width(&self, text: &str) -> u32 {
         (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
             .saturating_sub(F::CHARACTER_SPACING)
+    }
+
+    /// Calculates the offset between the line position and the top left corner of the bounding
+    /// box.
+    fn position_offset(&self, text: &str) -> Point {
+        let x = match self.horizontal_alignment {
+            HorizontalAlignment::Left => 0,
+            HorizontalAlignment::Right => self.line_width(text).saturating_sub(1),
+            HorizontalAlignment::Center => self.line_width(text).saturating_sub(1) / 2,
+        }
+        .saturating_cast();
+
+        let y = match self.vertical_alignment {
+            VerticalAlignment::Top => 0,
+            VerticalAlignment::Bottom => {
+                F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()
+            }
+            VerticalAlignment::Center => {
+                (F::CHARACTER_SIZE.height.saturating_sub(1) / 2).saturating_cast()
+            }
+            VerticalAlignment::Baseline => F::BASELINE
+                .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
+        };
+
+        Point::new(x, y)
     }
 }
 
@@ -66,42 +92,13 @@ where
 {
     type Color = C;
 
-    fn render_line<D>(
-        &self,
-        text: &str,
-        mut position: Point,
-        target: &mut D,
-    ) -> Result<Point, D::Error>
+    fn render_line<D>(&self, text: &str, position: Point, target: &mut D) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
         let mut first = true;
 
-        match self.horizontal_alignment {
-            HorizontalAlignment::Left => {}
-            HorizontalAlignment::Right => {
-                position -= Size::new(self.line_width(text).saturating_sub(1), 0);
-            }
-            HorizontalAlignment::Center => {
-                position -= Size::new(self.line_width(text).saturating_sub(1) / 2, 0);
-            }
-        }
-
-        match self.vertical_alignment {
-            VerticalAlignment::Top => {}
-            VerticalAlignment::Bottom => {
-                position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1));
-            }
-            VerticalAlignment::Center => {
-                position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1)) / 2;
-            }
-            VerticalAlignment::Baseline => {
-                let baseline = F::BASELINE
-                    .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1) as i32);
-
-                position.y -= baseline;
-            }
-        }
+        let mut position = position - self.position_offset(text);
 
         for c in text.chars() {
             if first {
@@ -160,16 +157,18 @@ where
     }
 
     fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
-        let position_delta = Point::zero() + F::CHARACTER_SIZE.y_axis();
+        let next_line_delta = Point::zero() + F::CHARACTER_SIZE.y_axis();
+
+        let position = position - self.position_offset(text);
 
         // If a piece of text is completely transparent, return an empty bounding box
         if self.text_color.is_none() && self.background_color.is_none() {
-            return (Rectangle::new(position, Size::zero()), position_delta);
+            return (Rectangle::new(position, Size::zero()), next_line_delta);
         }
 
         let size = Size::new(self.line_width(text), F::CHARACTER_SIZE.height);
 
-        (Rectangle::new(position, size), position_delta)
+        (Rectangle::new(position, size), next_line_delta)
     }
 }
 
@@ -372,7 +371,10 @@ pub struct UndefinedFont;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{fonts::Font12x16, pixelcolor::BinaryColor};
+    use crate::{
+        fonts::Font12x16, fonts::Font6x8, fonts::Text, geometry::Dimensions,
+        mock_display::MockDisplay, pixelcolor::BinaryColor, Drawable,
+    };
 
     #[test]
     fn builder_default() {
@@ -429,5 +431,193 @@ mod tests {
 
         assert_eq!(style.horizontal_alignment, HorizontalAlignment::Right);
         assert_eq!(style.vertical_alignment, VerticalAlignment::Top);
+    }
+
+    #[test]
+    fn horizontal_alignment_left() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .horizontal_alignment(HorizontalAlignment::Left)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::new(0, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " ###        ",
+            "#   #       ",
+            "#   #       ",
+            "#####       ",
+            "#   #       ",
+            "#   #       ",
+            "#   #       ",
+            "            ",
+            "####   ###  ",
+            "#   # #   # ",
+            "#   # #     ",
+            "####  #     ",
+            "#   # #     ",
+            "#   # #   # ",
+            "####   ###  ",
+            "            ",
+        ]);
+    }
+
+    #[test]
+    fn horizontal_alignment_center() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .horizontal_alignment(HorizontalAlignment::Center)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::new(5, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "    ###     ",
+            "   #   #    ",
+            "   #   #    ",
+            "   #####    ",
+            "   #   #    ",
+            "   #   #    ",
+            "   #   #    ",
+            "            ",
+            "####   ###  ",
+            "#   # #   # ",
+            "#   # #     ",
+            "####  #     ",
+            "#   # #     ",
+            "#   # #   # ",
+            "####   ###  ",
+            "            ",
+        ]);
+    }
+
+    #[test]
+    fn horizontal_alignment_right() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .horizontal_alignment(HorizontalAlignment::Right)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::new(11, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "       ###  ",
+            "      #   # ",
+            "      #   # ",
+            "      ##### ",
+            "      #   # ",
+            "      #   # ",
+            "      #   # ",
+            "            ",
+            "####   ###  ",
+            "#   # #   # ",
+            "#   # #     ",
+            "####  #     ",
+            "#   # #     ",
+            "#   # #   # ",
+            "####   ###  ",
+            "            ",
+        ]);
+    }
+
+    #[test]
+    fn vertical_alignment() {
+        let mut display = MockDisplay::new();
+
+        let style_top = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+        let style_center = MonoTextStyleBuilder::from(&style_top)
+            .vertical_alignment(VerticalAlignment::Center)
+            .build();
+        let style_bottom = MonoTextStyleBuilder::from(&style_top)
+            .vertical_alignment(VerticalAlignment::Bottom)
+            .build();
+        let style_baseline = MonoTextStyleBuilder::from(&style_top)
+            .vertical_alignment(VerticalAlignment::Baseline)
+            .build();
+
+        Text::new("t", Point::new(0, 8))
+            .into_styled(style_top)
+            .draw(&mut display)
+            .unwrap();
+        Text::new("c", Point::new(6, 8))
+            .into_styled(style_center)
+            .draw(&mut display)
+            .unwrap();
+        Text::new("b", Point::new(12, 8))
+            .into_styled(style_bottom)
+            .draw(&mut display)
+            .unwrap();
+        Text::new("B", Point::new(18, 8))
+            .into_styled(style_baseline)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "                       ",
+            "            #          ",
+            "            #     #### ",
+            "            # ##  #   #",
+            "            ##  # #   #",
+            "            #   # #### ",
+            "            #   # #   #",
+            "       ###  ####  #   #",
+            " #    #           #### ",
+            " #    #                ",
+            "###   #   #            ",
+            " #     ###             ",
+            " #                     ",
+            " #  #                  ",
+            "  ##                   ",
+        ]);
+    }
+
+    #[test]
+    fn bounding_box() {
+        for &vertical_alignment in &[
+            VerticalAlignment::Top,
+            VerticalAlignment::Center,
+            VerticalAlignment::Bottom,
+            VerticalAlignment::Baseline,
+        ] {
+            for &horizontal_alignment in &[
+                HorizontalAlignment::Left,
+                HorizontalAlignment::Center,
+                HorizontalAlignment::Right,
+            ] {
+                let style = MonoTextStyleBuilder::new()
+                    .font(Font6x8)
+                    .text_color(BinaryColor::On)
+                    .background_color(BinaryColor::Off)
+                    .horizontal_alignment(horizontal_alignment)
+                    .vertical_alignment(vertical_alignment)
+                    .build();
+
+                let text = Text::new("1\n23", Point::new_equal(20)).into_styled(style);
+
+                let mut display = MockDisplay::new();
+                text.draw(&mut display).unwrap();
+
+                assert_eq!(display.affected_area(), text.bounding_box());
+            }
+        }
     }
 }
