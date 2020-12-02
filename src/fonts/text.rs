@@ -129,7 +129,7 @@ mod tests {
         pixelcolor::BinaryColor,
         prelude::*,
         style::MonoTextStyle,
-        style::{HorizontalAlignment, MonoTextStyleBuilder, PrimitiveStyle},
+        style::{HorizontalAlignment, MonoTextStyleBuilder, PrimitiveStyle, VerticalAlignment},
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -188,6 +188,7 @@ mod tests {
                     .font(SpacedFont)
                     .text_color(BinaryColor::On)
                     .background_color(BinaryColor::Off)
+                    .vertical_alignment(VerticalAlignment::Top)
                     .build(),
             )
             .draw(&mut display)
@@ -328,7 +329,7 @@ mod tests {
             .text_color(BinaryColor::Off)
             .background_color(BinaryColor::On)
             .build();
-        Text::new("Mm", Point::zero())
+        Text::new("Mm", Point::new(0, 7))
             .into_styled(style_inverse)
             .draw(&mut display_inverse)
             .unwrap();
@@ -339,7 +340,7 @@ mod tests {
             .text_color(BinaryColor::On)
             .background_color(BinaryColor::Off)
             .build();
-        Text::new("Mm", Point::zero())
+        Text::new("Mm", Point::new(0, 7))
             .into_styled(style_normal)
             .draw(&mut display_normal)
             .unwrap();
@@ -363,6 +364,7 @@ mod tests {
         let style = MonoTextStyleBuilder::new()
             .font(Font6x8)
             .background_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
             .build();
 
         let mut display = MockDisplay::new();
@@ -415,7 +417,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::zero())
+        Text::new("A\nBC", Point::new(0, 7))
             .into_styled(style)
             .draw(&mut display)
             .unwrap();
@@ -449,7 +451,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(5, 0))
+        Text::new("A\nBC", Point::new(5, 7))
             .into_styled(style)
             .draw(&mut display)
             .unwrap();
@@ -483,7 +485,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(12, 0))
+        Text::new("A\nBC", Point::new(11, 7))
             .into_styled(style)
             .draw(&mut display)
             .unwrap();

@@ -80,10 +80,27 @@ where
         match self.horizontal_alignment {
             HorizontalAlignment::Left => {}
             HorizontalAlignment::Right => {
-                position -= Size::new(self.line_width(text), 0);
+                position -= Size::new(self.line_width(text).saturating_sub(1), 0);
             }
             HorizontalAlignment::Center => {
                 position -= Size::new(self.line_width(text).saturating_sub(1) / 2, 0);
+            }
+        }
+
+        match self.vertical_alignment {
+            VerticalAlignment::Top => {}
+            VerticalAlignment::Bottom => {
+                position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1));
+            }
+            VerticalAlignment::Center => {
+                position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1)) / 2;
+            }
+            VerticalAlignment::Baseline => {
+                if let Some(baseline) = F::BASELINE {
+                    unimplemented!()
+                } else {
+                    position -= F::CHARACTER_SIZE.y_axis().saturating_sub(Size::new(0, 1));
+                }
             }
         }
 

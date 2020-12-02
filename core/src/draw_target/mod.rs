@@ -455,16 +455,16 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// };
     ///
     /// let mut display = MockDisplay::new();
-    /// let mut translated_display = display.translated(Point::new(10, 5));
+    /// let mut translated_display = display.translated(Point::new(5, 10));
     ///
-    /// // Draws text at position (10, 5) in the display coordinate system
+    /// // Draws text at position (5, 10) in the display coordinate system
     /// Text::new("Text", Point::zero())
     ///     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
     ///     .draw(&mut translated_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
-    /// # Text::new("Text", Point::new(10, 5))
+    /// # Text::new("Text", Point::new(5, 10))
     /// #     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #
@@ -556,13 +556,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// // Only the first 4 characters will be drawn, because the others are outside
     /// // the clipping area
-    /// Text::new("Clipped", Point::zero())
+    /// Text::new("Clipped", Point::new(0, 15))
     ///     .into_styled(MonoTextStyle::new(Font12x16, BinaryColor::On))
     ///     .draw(&mut clipped_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
-    /// # Text::new("Clip", Point::zero())
+    /// # Text::new("Clip", Point::new(0, 15))
     /// #     .into_styled(MonoTextStyle::new(Font12x16, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #

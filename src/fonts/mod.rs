@@ -194,7 +194,7 @@ mod tests {
         F: MonoFont,
     {
         let mut display = MockDisplay::new();
-        Text::new(text, Point::zero())
+        Text::new(text, Point::new(0, F::CHARACTER_SIZE.height as i32 - 1))
             .into_styled(MonoTextStyle::new(font, BinaryColor::On))
             .draw(&mut display)
             .unwrap();

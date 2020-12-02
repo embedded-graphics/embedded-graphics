@@ -48,8 +48,8 @@ mod tests {
     #[test]
     fn text_dimensions() {
         let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
-        let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
-        let empty = Text::new("", Point::zero()).into_styled(style);
+        let hello = Text::new(HELLO_WORLD, Point::new(0, 7)).into_styled(style);
+        let empty = Text::new("", Point::new(0, 7)).into_styled(style);
 
         assert_eq!(
             hello.bounding_box().size,
