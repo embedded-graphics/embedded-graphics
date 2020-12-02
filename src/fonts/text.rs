@@ -322,22 +322,20 @@ mod tests {
     #[test]
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
-        let style_inverse = MonoTextStyle {
-            font: Font6x8,
-            text_color: Some(BinaryColor::Off),
-            background_color: Some(BinaryColor::On),
-        };
+        let style_inverse = MonoTextStyleBuilder::new(Font6x8)
+            .text_color(BinaryColor::Off)
+            .background_color(BinaryColor::On)
+            .build();
         Text::new("Mm", Point::zero())
             .into_styled(style_inverse)
             .draw(&mut display_inverse)
             .unwrap();
 
         let mut display_normal = MockDisplay::new();
-        let style_normal = MonoTextStyle {
-            font: Font6x8,
-            text_color: Some(BinaryColor::On),
-            background_color: Some(BinaryColor::Off),
-        };
+        let style_normal = MonoTextStyleBuilder::new(Font6x8)
+            .text_color(BinaryColor::On)
+            .background_color(BinaryColor::Off)
+            .build();
         Text::new("Mm", Point::zero())
             .into_styled(style_normal)
             .draw(&mut display_normal)
@@ -359,11 +357,9 @@ mod tests {
 
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
-        let style = MonoTextStyle {
-            font: Font6x8,
-            text_color: None,
-            background_color: Some(BinaryColor::On),
-        };
+        let style = MonoTextStyleBuilder::new(Font6x8)
+            .background_color(BinaryColor::On)
+            .build();
 
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
@@ -393,11 +389,7 @@ mod tests {
 
     #[test]
     fn transparent_text_has_zero_size_but_retains_position() {
-        let style: MonoTextStyle<BinaryColor, _> = MonoTextStyle {
-            font: Font6x8,
-            text_color: None,
-            background_color: None,
-        };
+        let style = MonoTextStyleBuilder::<BinaryColor, _>::new(Font6x8).build();
 
         let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
 

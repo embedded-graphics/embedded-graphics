@@ -21,7 +21,7 @@ use crate::{
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 /// [`MonoTextStyleBuilder`]: ./struct.MonoTextStyleBuilder.html
 /// [`new`]: #method.new
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
 pub struct MonoTextStyle<C, F>
 where
@@ -34,6 +34,12 @@ where
     /// Background color.
     pub background_color: Option<C>,
 
+    /// Horizontal alignment.
+    pub horizontal_alignment: HorizontalAlignment,
+
+    /// Vertical alignment.
+    pub vertical_alignment: VerticalAlignment,
+
     /// Font.
     pub font: F,
 }
@@ -45,11 +51,9 @@ where
 {
     /// Creates a text style with transparent background.
     pub fn new(font: F, text_color: C) -> Self {
-        Self {
-            font,
-            text_color: Some(text_color),
-            background_color: None,
-        }
+        MonoTextStyleBuilder::new(font)
+            .text_color(text_color)
+            .build()
     }
 }
 
@@ -197,7 +201,7 @@ where
 /// [other fonts]: ../fonts/index.html
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`MonoTextStyle`]: ./struct.MonoTextStyle.html
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct MonoTextStyleBuilder<C, F>
 where
     C: PixelColor,
@@ -218,6 +222,8 @@ where
                 font,
                 background_color: None,
                 text_color: None,
+                horizontal_alignment: HorizontalAlignment::Left,
+                vertical_alignment: VerticalAlignment::Baseline,
             },
         }
     }
@@ -236,10 +242,48 @@ where
         self
     }
 
+    /// Sets the horizontal alignment.
+    pub fn horizontal_alignment(mut self, horizontal_alignment: HorizontalAlignment) -> Self {
+        self.style.horizontal_alignment = horizontal_alignment;
+
+        self
+    }
+
+    /// Sets the vertical alignment.
+    pub fn vertical_alignment(mut self, vertical_alignment: VerticalAlignment) -> Self {
+        self.style.vertical_alignment = vertical_alignment;
+
+        self
+    }
+
     /// Builds the text style.
     pub fn build(self) -> MonoTextStyle<C, F> {
         self.style
     }
+}
+
+/// Vertical text alignment.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum VerticalAlignment {
+    /// Top.
+    Top,
+    /// Bottom.
+    Bottom,
+    /// Center.
+    Center,
+    /// Baseline.
+    Baseline,
+}
+
+/// Horizontal text alignment.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum HorizontalAlignment {
+    /// Left.
+    Left,
+    /// Center.
+    Center,
+    /// Right.
+    Right,
 }
 
 #[cfg(test)]
@@ -254,7 +298,9 @@ mod tests {
             MonoTextStyle {
                 font: Font12x16,
                 text_color: None,
-                background_color: None
+                background_color: None,
+                horizontal_alignment: HorizontalAlignment::Left,
+                vertical_alignment: VerticalAlignment::Baseline,
             }
         );
     }
@@ -284,5 +330,16 @@ mod tests {
                 style
             }
         );
+    }
+
+    #[test]
+    fn builder_alignments() {
+        let style = MonoTextStyleBuilder::<BinaryColor, _>::new(Font12x16)
+            .horizontal_alignment(HorizontalAlignment::Right)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        assert_eq!(style.horizontal_alignment, HorizontalAlignment::Right);
+        assert_eq!(style.vertical_alignment, VerticalAlignment::Top);
     }
 }
