@@ -68,7 +68,7 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --workspace --features "{{all_features}}"
+    cargo doc --workspace --features "{{all_features}}" --no-deps
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
@@ -77,7 +77,7 @@ check-links: generate-docs
 
 #----------------------
 # README.md generation
-# ---------------------
+#----------------------
 
 # Generate README.md for a single crate
 generate-readme crate: (_build-readme crate)

@@ -21,8 +21,8 @@ pub use translated::Translated;
 ///
 /// The `DrawTarget` trait is used to add embedded-graphics support to a display
 /// driver or similar targets like framebuffers or image files.
-/// Targets are required to at least implement the [`size`] and [`draw_iter`] methods. All other
-/// methods provide default implementations which use these methods internally.
+/// Targets are required to at least implement the [`draw_iter`] method and the [`Dimensions`]
+/// trait. All other methods provide default implementations which use these methods internally.
 ///
 /// Because the default implementations cannot use features specific to the target hardware they
 /// can be overridden to improve performance. These target specific implementations might, for
@@ -287,7 +287,7 @@ pub use translated::Translated;
 ///
 /// [`fill_solid`]: #method.fill_solid
 /// [`draw_iter`]: #tymethod.draw_iter
-/// [`size`]: #tymethod.size
+/// [`Dimensions`]: ../geometry/trait.Dimensions.html
 /// [`Error` type]: #associatedtype.Error
 pub trait DrawTarget: Dimensions {
     /// The pixel color type the targetted display supports.
@@ -424,10 +424,11 @@ pub trait DrawTarget: Dimensions {
     /// If the target hardware supports a more optimized way of filling the entire display with a
     /// solid color, this method should be overridden to use those commands.
     ///
-    /// The default implementation of this method delegates to [`fill_solid`] where the fill area
-    /// is specified as `(0, 0)` with size `(width, height)` as returned from the [`size`] method.
+    /// The default implementation of this method delegates to [`fill_solid`] to fill the
+    /// [`bounding_box`] returned by the [`Dimensions`] implementation.
     ///
-    /// [`size`]: #method.size
+    /// [`Dimensions`]: ../geometry/trait.Dimensions.html
+    /// [`bounding_box`]: ../geometry/trait.Dimensions.html#tymethod.bounding_box
     /// [`fill_solid`]: #method.fill_solid
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_solid(&self.bounding_box(), color)

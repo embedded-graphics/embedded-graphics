@@ -110,7 +110,7 @@
 //! [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 //! [`into_storage`]: ../trait.IntoStorage.html#tymethod.into_storage
 //! [`ToBytes`]: trait.ToBytes.html
-//! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_bytes
+//! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_be_bytes
 
 mod iter;
 mod to_bytes;
