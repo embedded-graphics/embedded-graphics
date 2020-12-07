@@ -1,9 +1,7 @@
 targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
 target_dir := "target"
-# FIXME: `-cimg` suffix is temporary while moving to new CircleCI base images. Remove this suffix
-# when upgrading the tag next time.
-ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-cimg"
+ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-2"
 
 # list of all features except criterion
 all_features := "nalgebra_support fixed"
@@ -68,7 +66,7 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --workspace --features "{{all_features}}"
+    cargo doc --workspace --features "{{all_features}}" --no-deps
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
@@ -77,7 +75,7 @@ check-links: generate-docs
 
 #----------------------
 # README.md generation
-# ---------------------
+#----------------------
 
 # Generate README.md for a single crate
 generate-readme crate: (_build-readme crate)

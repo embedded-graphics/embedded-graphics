@@ -1,12 +1,26 @@
+FROM cimg/rust:1.40.0 AS tools-builder
+
+# Update rust using rustup.
+#
+# We cannot use a newer cimg/rust version to build the tools,
+# because newer images use an incompatible version of libc.
+RUN rustup default 1.48.0
+
+RUN cargo install --root /home/circleci/project just --version ^0.8
+RUN cargo install --root /home/circleci/project cargo-readme --version ^3.2
+RUN cargo install --root /home/circleci/project cargo-deadlinks --version ^0.6
+
 FROM cimg/rust:1.40.0
 
-RUN sudo apt update && sudo apt install -y libsdl2-dev libssl-dev && sudo apt clean
+USER root
 
-RUN cargo install just --version ^0.6
-RUN cargo install cargo-readme --version ^3.2
+RUN apt-get update && apt-get install -y \
+    libsdl2-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# MSRV: Upgrade to 0.6 when >= 1.45.0
-RUN cargo install cargo-deadlinks --version ^0.4
+USER circleci
 
-RUN rustup toolchain add nightly -c rustfmt
+RUN rustup toolchain add nightly --profile minimal --component rustfmt
 
+COPY --from=tools-builder /home/circleci/project/* /home/circleci/.cargo/bin/

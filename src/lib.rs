@@ -19,7 +19,7 @@
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //!     * [Polylines](./primitives/polyline/struct.Polyline.html)
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
-//! * [Text with multiple fonts](./fonts/index.html#types)
+//! * [Text with multiple fonts](./fonts/index.html)
 //!
 //! # Additional functions provided by external crates
 //!

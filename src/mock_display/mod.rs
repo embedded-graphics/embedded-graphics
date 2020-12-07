@@ -168,6 +168,8 @@
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs
 //! [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
+//! [`Gray2`]: ../pixelcolor/struct.Gray2.html
+//! [`Gray4`]: ../pixelcolor/struct.Gray4.html
 //! [`Gray8`]: ../pixelcolor/struct.Gray8.html
 //! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
@@ -433,7 +435,7 @@ impl MockDisplay<BinaryColor> {
     /// Create a mock display from an iterator of [`Point`]s.
     ///
     /// This method can be used to create a mock display from the iterator produced by the
-    /// [`Primitive::points`] method.
+    /// [`PointsIter::points`] method.
     ///
     /// The color type used in the returned display is [`BinaryColor`], which can be mapped to
     /// another color type using the [`map`] method.
@@ -456,7 +458,7 @@ impl MockDisplay<BinaryColor> {
     /// ```
     ///
     /// [`Point`]: ../geometry/struct.Point.html
-    /// [`Primitive::points`]: ../primitives/trait.Primitive.html#tymethod.points
+    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
     /// [`map`]: #method.map
     /// [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
     pub fn from_points<I>(points: I) -> Self

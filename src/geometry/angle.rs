@@ -2,7 +2,6 @@ use super::real;
 use crate::geometry::Real;
 use core::f32::consts::PI;
 use core::ops::{Add, AddAssign, Neg, Sub, SubAssign};
-use float_cmp::{ApproxEq, F32Margin};
 #[cfg(not(feature = "fixed_point"))]
 #[allow(unused_imports)]
 use micromath::F32Ext;
@@ -312,18 +311,18 @@ impl Neg for Angle {
     }
 }
 
-impl ApproxEq for Angle {
-    type Margin = F32Margin;
-
-    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
-        self.0.approx_eq(other.0, margin.into())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use float_cmp::approx_eq;
+    use float_cmp::{approx_eq, ApproxEq, F32Margin};
+
+    impl ApproxEq for Angle {
+        type Margin = F32Margin;
+
+        fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+            self.0.approx_eq(other.0, margin.into())
+        }
+    }
 
     #[test]
     fn angles_can_be_added() {

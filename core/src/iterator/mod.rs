@@ -12,14 +12,10 @@ use crate::{
 /// This trait is implemented for _references_ to all styled items in embedded-graphics, therefore
 /// does not consume the original item.
 pub trait IntoPixels {
-    /// The type of color for each pixel produced by the iterator returned from [`into_pixels`].
-    ///
-    /// [`into_pixels`]: #tymethod.into_pixels
+    /// The type of color for each pixel produced by the iterator returned from `into_pixels`.
     type Color: PixelColor;
 
-    /// The iterator produced when calling [`into_pixels`].
-    ///
-    /// [`into_pixels`]: #tymethod.into_pixels
+    /// The iterator produced when calling `into_pixels`.
     type Iter: Iterator<Item = Pixel<Self::Color>>;
 
     /// Create an iterator over all pixels in the object.
