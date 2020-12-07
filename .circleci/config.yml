@@ -1,7 +1,7 @@
 # Check that everything (tests, benches, etc) builds in std environments
 precheck_steps: &precheck_steps
   docker:
-    - image: jamwaffles/circleci-embedded-graphics:1.40.0-cimg
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0-2
       auth:
         username: jamwaffles
         password: $DOCKERHUB_PASSWORD
@@ -22,7 +22,7 @@ precheck_steps: &precheck_steps
 # Build crates for embedded target
 target_steps: &target_steps
   docker:
-    - image: jamwaffles/circleci-embedded-graphics:1.40.0-cimg
+    - image: jamwaffles/circleci-embedded-graphics:1.40.0-2
       auth:
         username: jamwaffles
         password: $DOCKERHUB_PASSWORD
