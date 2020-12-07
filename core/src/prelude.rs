@@ -5,6 +5,7 @@ pub use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
     drawable::{Drawable, Pixel},
     geometry::{Dimensions, OriginDimensions, Point, Size},
+    image::ImageDrawable,
     iterator::{ContiguousIteratorExt, IntoPixels, PixelIteratorExt},
     pixelcolor::{
         raw::{RawData, ToBytes as _},

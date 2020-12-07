@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#514](https://github.com/embedded-graphics/embedded-graphics/pull/514) Add `ImageDrawable` to the `prelude`.
+
 ## [0.1.0] - 2020-11-29
 
 ### Added
