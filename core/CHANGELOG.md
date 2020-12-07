@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.1.1] - 2020-12-07
+
 ### Added
 
 - [#514](https://github.com/embedded-graphics/embedded-graphics/pull/514) Add `ImageDrawable` to the `prelude`.
@@ -19,6 +21,7 @@
 
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.1.0...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.1.1...HEAD
+[0.1.1]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.1.0...embedded-graphics-core-v0.1.1
 
 [0.1.0]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.1...embedded-graphics-core-v0.1.0
