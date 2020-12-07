@@ -39,7 +39,7 @@ pub use translated::Translated;
 ///
 /// In this example `DrawTarget` is implemented for an an imaginary 64px x 64px 8-bit grayscale display
 /// that is connected using a simplified SPI interface. Because the hardware doesn't support any
-/// acceleration only the two required methods [`size`] and [`draw_iter`] need to be implemented.
+/// acceleration only the [`draw_iter`] method and [`OriginDimensions`] trait need to be implemented.
 ///
 /// To reduce the overhead caused by communicating with the display for each drawing operation
 /// the display driver uses and framebuffer to store the pixel data in memory. This way all drawing
@@ -288,6 +288,7 @@ pub use translated::Translated;
 /// [`fill_solid`]: #method.fill_solid
 /// [`draw_iter`]: #tymethod.draw_iter
 /// [`Dimensions`]: ../geometry/trait.Dimensions.html
+/// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
 /// [`Error` type]: #associatedtype.Error
 pub trait DrawTarget: Dimensions {
     /// The pixel color type the targetted display supports.

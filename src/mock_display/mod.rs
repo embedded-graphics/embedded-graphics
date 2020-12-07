@@ -168,6 +168,8 @@
 //!
 //! [`pixelcolor`]: ../pixelcolor/index.html#structs
 //! [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
+//! [`Gray2`]: ../pixelcolor/struct.Gray2.html
+//! [`Gray4`]: ../pixelcolor/struct.Gray4.html
 //! [`Gray8`]: ../pixelcolor/struct.Gray8.html
 //! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
 //! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
