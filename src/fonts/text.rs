@@ -129,7 +129,7 @@ mod tests {
         pixelcolor::BinaryColor,
         prelude::*,
         style::MonoTextStyle,
-        style::{MonoTextStyleBuilder, PrimitiveStyle},
+        style::{MonoTextStyleBuilder, PrimitiveStyle, VerticalAlignment},
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -184,9 +184,11 @@ mod tests {
         let mut display = MockDisplay::new();
         Text::new("##", Point::zero())
             .into_styled(
-                MonoTextStyleBuilder::new(SpacedFont)
+                MonoTextStyleBuilder::new()
+                    .font(SpacedFont)
                     .text_color(BinaryColor::On)
                     .background_color(BinaryColor::Off)
+                    .vertical_alignment(VerticalAlignment::Top)
                     .build(),
             )
             .draw(&mut display)
@@ -206,7 +208,11 @@ mod tests {
 
     #[test]
     fn character_spacing_dimensions() {
-        let style = MonoTextStyle::new(SpacedFont, BinaryColor::On);
+        let style = MonoTextStyleBuilder::new()
+            .font(SpacedFont)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
 
         assert_eq!(
             Text::new("#", Point::zero())
@@ -291,7 +297,11 @@ mod tests {
 
     #[test]
     fn multiline_dimensions() {
-        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
         let text = Text::new("AB\nC", Point::zero()).into_styled(style);
 
         assert_eq!(
@@ -322,23 +332,23 @@ mod tests {
     #[test]
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
-        let style_inverse = MonoTextStyle {
-            font: Font6x8,
-            text_color: Some(BinaryColor::Off),
-            background_color: Some(BinaryColor::On),
-        };
-        Text::new("Mm", Point::zero())
+        let style_inverse = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::Off)
+            .background_color(BinaryColor::On)
+            .build();
+        Text::new("Mm", Point::new(0, 7))
             .into_styled(style_inverse)
             .draw(&mut display_inverse)
             .unwrap();
 
         let mut display_normal = MockDisplay::new();
-        let style_normal = MonoTextStyle {
-            font: Font6x8,
-            text_color: Some(BinaryColor::On),
-            background_color: Some(BinaryColor::Off),
-        };
-        Text::new("Mm", Point::zero())
+        let style_normal = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(BinaryColor::On)
+            .background_color(BinaryColor::Off)
+            .build();
+        Text::new("Mm", Point::new(0, 7))
             .into_styled(style_normal)
             .draw(&mut display_normal)
             .unwrap();
@@ -359,11 +369,11 @@ mod tests {
 
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
-        let style = MonoTextStyle {
-            font: Font6x8,
-            text_color: None,
-            background_color: Some(BinaryColor::On),
-        };
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .background_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
 
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
@@ -393,11 +403,9 @@ mod tests {
 
     #[test]
     fn transparent_text_has_zero_size_but_retains_position() {
-        let style: MonoTextStyle<BinaryColor, _> = MonoTextStyle {
-            font: Font6x8,
-            text_color: None,
-            background_color: None,
-        };
+        let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
+            .font(Font6x8)
+            .build();
 
         let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
 

@@ -29,7 +29,8 @@
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! // Create a new text style
-//! let style = MonoTextStyleBuilder::new(Font6x8)
+//! let style = MonoTextStyleBuilder::new()
+//!     .font(Font6x8)
 //!     .text_color(Rgb565::YELLOW)
 //!     .background_color(Rgb565::BLUE)
 //!     .build();
@@ -98,7 +99,8 @@
 //!
 //! Text::new(&buf, Point::zero())
 //!     .into_styled(
-//!         MonoTextStyleBuilder::new(Font6x8)
+//!         MonoTextStyleBuilder::new()
+//!             .font(Font6x8)
 //!             .text_color(Rgb565::YELLOW)
 //!             .background_color(Rgb565::BLUE)
 //!             .build(),
@@ -167,6 +169,11 @@ pub trait MonoFont: Copy {
     /// on a single line of text.
     const CHARACTER_SPACING: u32 = 0;
 
+    /// The baseline.
+    ///
+    /// TODO: add description how this value is used and what the default value is
+    const BASELINE: Option<i32> = None;
+
     /// Returns the position of a character in the font.
     fn char_offset(_: char) -> u32;
 }
@@ -175,7 +182,10 @@ pub trait MonoFont: Copy {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Point, mock_display::MockDisplay, pixelcolor::BinaryColor, style::MonoTextStyle,
+        geometry::Point,
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
+        style::{MonoTextStyleBuilder, VerticalAlignment},
         Drawable,
     };
 
@@ -186,12 +196,43 @@ mod tests {
     where
         F: MonoFont,
     {
+        let style = MonoTextStyleBuilder::new()
+            .font(font)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
-            .into_styled(MonoTextStyle::new(font, BinaryColor::On))
+            .into_styled(style)
             .draw(&mut display)
             .unwrap();
 
         display.assert_pattern(pattern);
+    }
+
+    /// Test if the baseline constant is set correctly.
+    ///
+    /// This test assumes that the character `A` is on the baseline.
+    pub(super) fn test_baseline<F>(font: F)
+    where
+        F: MonoFont,
+    {
+        let style = MonoTextStyleBuilder::new()
+            .font(font)
+            .text_color(BinaryColor::On)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        // Draw 'A' character to determine it's baseline
+        let mut display = MockDisplay::new();
+        Text::new("A", Point::zero())
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        let baseline = display.affected_area().bottom_right().unwrap().y;
+
+        assert_eq!(F::BASELINE, Some(baseline));
     }
 }
