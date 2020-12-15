@@ -6,7 +6,7 @@ mod styled;
 mod text_style;
 
 pub use mono_text_style::{
-    HorizontalAlignment, MonoTextStyle, MonoTextStyleBuilder, VerticalAlignment,
+    HorizontalAlignment, MonoTextStyle, MonoTextStyleBuilder, UndefinedFont, VerticalAlignment,
 };
 pub use primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment};
 pub use styled::{Styled, StyledPrimitiveAreas};
