@@ -16,9 +16,7 @@ where
 {
     points: rectangle::Points,
 
-    char_x: u32,
-    char_y: u32,
-
+    char_px_offset: u32,
     byte_index: usize,
     bit_mask: u8,
 
@@ -43,8 +41,7 @@ where
 
         Self {
             points: Rectangle::new(Point::zero(), F::CHARACTER_SIZE).points(),
-            char_x,
-            char_y,
+            char_px_offset: char_x + char_y * F::FONT_IMAGE_WIDTH,
             byte_index: 0,
             bit_mask: 0,
             font: PhantomData,
@@ -57,7 +54,7 @@ where
         // + Character row offset (row 0 = 0, row 1 = (192 * 8) = 1536)
         // + X offset for the pixel block that comprises this char
         // + Y offset for pixel block
-        let index = self.char_x + (self.char_y + y as u32) * F::FONT_IMAGE_WIDTH;
+        let index = self.char_px_offset + y as u32 * F::FONT_IMAGE_WIDTH;
 
         self.byte_index = (index / 8) as usize;
         self.bit_mask = 0x80 >> (index % 8);
