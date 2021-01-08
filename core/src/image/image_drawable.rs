@@ -1,9 +1,7 @@
 //! Image drawable.
 
 use crate::{
-    draw_target::{DrawTarget, DrawTargetExt},
-    geometry::OriginDimensions,
-    pixelcolor::PixelColor,
+    draw_target::DrawTarget, geometry::OriginDimensions, pixelcolor::PixelColor,
     primitives::Rectangle,
 };
 
@@ -55,8 +53,5 @@ pub trait ImageDrawable: OriginDimensions {
     /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        self.draw(&mut target.translated(-area.top_left).clipped(area))
-    }
+        D: DrawTarget<Color = Self::Color>;
 }

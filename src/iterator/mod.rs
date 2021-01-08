@@ -79,8 +79,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    // NOTE: `crate` cannot be used here due to circular dependency resolution behavior.
-    use embedded_graphics::{
+    use crate::{
         geometry::Point, iterator::PixelIteratorExt, mock_display::MockDisplay,
         pixelcolor::BinaryColor, Pixel,
     };

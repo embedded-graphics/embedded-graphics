@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget, geometry::Dimensions, iterator::contiguous::Crop,
-    primitives::Rectangle, Pixel,
+    primitives::Rectangle, transform::Transform, Pixel,
 };
 
 /// Clipped draw target.
@@ -59,7 +59,7 @@ where
         if &intersection == area {
             self.parent.fill_contiguous(area, colors)
         } else {
-            let crop_area = intersection.translated(-area.top_left);
+            let crop_area = intersection.translate(-area.top_left);
             let cropped = Crop::new(colors.into_iter(), area.size, &crop_area);
             self.parent.fill_contiguous(&intersection, cropped)
         }
@@ -83,8 +83,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    // NOTE: `crate` cannot be used here due to circular dependency resolution behavior.
-    use embedded_graphics::{
+    use crate::{
         draw_target::{DrawTarget, DrawTargetExt},
         geometry::Dimensions,
         geometry::{Point, Size},

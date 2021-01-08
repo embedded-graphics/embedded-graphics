@@ -68,7 +68,6 @@ pub mod draw_target;
 mod drawable;
 pub mod geometry;
 pub mod image;
-pub mod iterator;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
