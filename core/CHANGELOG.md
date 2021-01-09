@@ -6,6 +6,11 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Removed
+
+- [#522](https://github.com/embedded-graphics/embedded-graphics/pull/522) The `draw_target` module, expect the `DrawTarget` trait, was moved to `embedded-graphics`.
+- [#522](https://github.com/embedded-graphics/embedded-graphics/pull/522) The `iterator` module was moved to `embedded-graphics`.
+
 ## [0.1.1] - 2020-12-07
 
 ### Added
