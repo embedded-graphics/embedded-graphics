@@ -30,6 +30,12 @@ pub struct MonoTextStyle<C, F> {
     /// Background color.
     pub background_color: Option<C>,
 
+    /// Underline color.
+    pub underline_color: DecorationColor<C>,
+
+    /// Strikethrough color.
+    pub strikethrough_color: DecorationColor<C>,
+
     /// Horizontal alignment.
     pub horizontal_alignment: HorizontalAlignment,
 
@@ -83,6 +89,15 @@ where
 
         Point::new(x, y)
     }
+
+    /// Resolves a decoration color.
+    fn resolve_decoration_color(&self, color: DecorationColor<C>) -> Option<C> {
+        match color {
+            DecorationColor::None => None,
+            DecorationColor::TextColor => self.text_color,
+            DecorationColor::Custom(c) => Some(c),
+        }
+    }
 }
 
 impl<C, F> TextRenderer for MonoTextStyle<C, F>
@@ -98,7 +113,7 @@ where
     {
         let mut first = true;
 
-        let mut position = position - self.position_offset(text);
+        let mut p = position - self.position_offset(text);
 
         for c in text.chars() {
             if first {
@@ -108,21 +123,21 @@ where
                 if let Some(background_color) = self.background_color {
                     target.fill_solid(
                         &Rectangle::new(
-                            position,
+                            p,
                             Size::new(F::CHARACTER_SPACING, F::CHARACTER_SIZE.height),
                         ),
                         background_color,
                     )?;
                 }
 
-                position += Size::new(F::CHARACTER_SPACING, 0);
+                p += Size::new(F::CHARACTER_SPACING, 0);
             }
 
             let pixels = MonoCharPixels::<F>::new(c);
 
             match (self.text_color, self.background_color) {
                 (Some(text_color), Some(background_color)) => {
-                    let bounding_box = Rectangle::new(position, F::CHARACTER_SIZE);
+                    let bounding_box = Rectangle::new(p, F::CHARACTER_SIZE);
 
                     // The glyph is opaque if both colors are set and `fill_contiguous` can be used.
                     target.fill_contiguous(
@@ -137,23 +152,41 @@ where
                     target.draw_iter(
                         pixels
                             .filter(|Pixel(_, c)| *c == BinaryColor::On)
-                            .map(|Pixel(p, _)| Pixel(p + position, text_color)),
+                            .map(|Pixel(delta_p, _)| Pixel(p + delta_p, text_color)),
                     )?;
                 }
                 (None, Some(background_color)) => {
                     target.draw_iter(
                         pixels
                             .filter(|Pixel(_, c)| *c == BinaryColor::Off)
-                            .map(|Pixel(p, _)| Pixel(p + position, background_color)),
+                            .map(|Pixel(delta_p, _)| Pixel(p + delta_p, background_color)),
                     )?;
                 }
                 (None, None) => {}
             }
 
-            position += F::CHARACTER_SIZE.x_axis();
+            p += F::CHARACTER_SIZE.x_axis();
         }
 
-        Ok(position)
+        if let Some(strikethrough_color) = self.resolve_decoration_color(self.strikethrough_color) {
+            let (mut bounding_box, _) = self.string_bounding_box(text, position);
+
+            bounding_box.top_left.y += F::STRIKETHROUGH_OFFSET;
+            bounding_box.size.height = F::STRIKETHROUGH_HEIGHT;
+
+            target.fill_solid(&bounding_box, strikethrough_color)?;
+        }
+
+        if let Some(underline_color) = self.resolve_decoration_color(self.underline_color) {
+            let (mut bounding_box, _) = self.string_bounding_box(text, position);
+
+            bounding_box.top_left.y += F::UNDERLINE_OFFSET;
+            bounding_box.size.height = F::UNDERLINE_HEIGHT;
+
+            target.fill_solid(&bounding_box, underline_color)?;
+        }
+
+        Ok(p)
     }
 
     fn draw_whitespace<D>(
@@ -275,6 +308,8 @@ impl<C> MonoTextStyleBuilder<C, UndefinedFont> {
                 font: UndefinedFont,
                 background_color: None,
                 text_color: None,
+                underline_color: DecorationColor::None,
+                strikethrough_color: DecorationColor::None,
                 horizontal_alignment: HorizontalAlignment::Left,
                 vertical_alignment: VerticalAlignment::Baseline,
             },
@@ -289,6 +324,8 @@ impl<C, F> MonoTextStyleBuilder<C, F> {
             font,
             background_color: self.style.background_color,
             text_color: self.style.text_color,
+            underline_color: self.style.underline_color,
+            strikethrough_color: self.style.strikethrough_color,
             vertical_alignment: self.style.vertical_alignment,
             horizontal_alignment: self.style.horizontal_alignment,
         };
@@ -309,6 +346,20 @@ impl<C, F> MonoTextStyleBuilder<C, F> {
 
         self
     }
+
+    /// Enables underline using the text color.
+    pub fn underline(mut self) -> Self {
+        self.style.underline_color = DecorationColor::TextColor;
+
+        self
+    }
+
+    /// Enables strikethrough using the text color.
+    pub fn strikethrough(mut self) -> Self {
+        self.style.strikethrough_color = DecorationColor::TextColor;
+
+        self
+    }
 }
 
 impl<C, F> MonoTextStyleBuilder<C, F>
@@ -325,6 +376,20 @@ where
     /// Sets the background color.
     pub fn background_color(mut self, background_color: C) -> Self {
         self.style.background_color = Some(background_color);
+
+        self
+    }
+
+    /// Enables underline with a custom color.
+    pub fn underline_with_color(mut self, underline_color: C) -> Self {
+        self.style.underline_color = DecorationColor::Custom(underline_color);
+
+        self
+    }
+
+    /// Enables strikethrough with a custom color.
+    pub fn strikethrough_with_color(mut self, strikethrough_color: C) -> Self {
+        self.style.strikethrough_color = DecorationColor::Custom(strikethrough_color);
 
         self
     }
@@ -360,6 +425,14 @@ where
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct UndefinedFont;
 
+/// Text decoration color.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum DecorationColor<C> {
+    None,
+    TextColor,
+    Custom(C),
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -367,7 +440,7 @@ mod tests {
         geometry::Dimensions,
         mock_display::MockDisplay,
         mono_font::{Font12x16, Font6x8},
-        pixelcolor::BinaryColor,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
         text::Text,
         Drawable,
     };
@@ -382,6 +455,8 @@ mod tests {
                 font: Font12x16,
                 text_color: None,
                 background_color: None,
+                underline_color: DecorationColor::None,
+                strikethrough_color: DecorationColor::None,
                 horizontal_alignment: HorizontalAlignment::Left,
                 vertical_alignment: VerticalAlignment::Baseline,
             }
@@ -583,6 +658,114 @@ mod tests {
             " #                     ",
             " #  #                  ",
             "  ##                   ",
+        ]);
+    }
+
+    #[test]
+    fn underline_text_color() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::WHITE)
+            .underline()
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("ABC", Point::new(0, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " WWW  WWWW   WWW  ",
+            "W   W W   W W   W ",
+            "W   W W   W W     ",
+            "WWWWW WWWW  W     ",
+            "W   W W   W W     ",
+            "W   W W   W W   W ",
+            "W   W WWWW   WWW  ",
+            "                  ",
+            "WWWWWWWWWWWWWWWWWW",
+        ]);
+    }
+
+    #[test]
+    fn underline_custom_color() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::WHITE)
+            .underline_with_color(Rgb888::RED)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("ABC", Point::new(0, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " WWW  WWWW   WWW  ",
+            "W   W W   W W   W ",
+            "W   W W   W W     ",
+            "WWWWW WWWW  W     ",
+            "W   W W   W W     ",
+            "W   W W   W W   W ",
+            "W   W WWWW   WWW  ",
+            "                  ",
+            "RRRRRRRRRRRRRRRRRR",
+        ]);
+    }
+
+    #[test]
+    fn strikethrough_text_color() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::WHITE)
+            .strikethrough()
+            .build();
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Text::new("ABC", Point::new(0, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " WWW  WWWW   WWW  ",
+            "W   W W   W W   W ",
+            "W   W W   W W     ",
+            "WWWWWWWWWWWWWWWWWW",
+            "W   W W   W W     ",
+            "W   W W   W W   W ",
+            "W   W WWWW   WWW  ",
+        ]);
+    }
+
+    #[test]
+    fn strikethrough_custom_color() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::WHITE)
+            .strikethrough_with_color(Rgb888::RED)
+            .build();
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Text::new("ABC", Point::new(0, 6))
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " WWW  WWWW   WWW  ",
+            "W   W W   W W   W ",
+            "W   W W   W W     ",
+            "RRRRRRRRRRRRRRRRRR",
+            "W   W W   W W     ",
+            "W   W W   W W   W ",
+            "W   W WWWW   WWW  ",
         ]);
     }
 

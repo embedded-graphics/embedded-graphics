@@ -17,6 +17,9 @@ impl MonoFont for Font12x16 {
 
     const CHARACTER_SIZE: Size = Size::new(12, 16);
     const BASELINE: Option<i32> = Some(13);
+    const STRIKETHROUGH_OFFSET: i32 = 6;
+    const STRIKETHROUGH_HEIGHT: u32 = 2;
+    const UNDERLINE_HEIGHT: u32 = 2;
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -192,5 +195,32 @@ mod tests {
     #[test]
     fn baseline() {
         test_baseline(Font12x16);
+    }
+
+    #[test]
+    fn decoration() {
+        test_text_decoration(
+            Font12x16,
+            &[
+                "  WWWWWW    ",
+                "  WWWWWW    ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "RRRRRRRRRRRR",
+                "RRRRRRRRRRRR",
+                "WW      WW  ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "WW      WW  ",
+                "            ",
+                "            ",
+                "GGGGGGGGGGGG",
+                "GGGGGGGGGGGG",
+            ],
+        );
     }
 }

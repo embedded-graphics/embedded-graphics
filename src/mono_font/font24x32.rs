@@ -22,6 +22,9 @@ impl MonoFont for Font24x32 {
 
     const CHARACTER_SIZE: Size = Size::new(24, 32);
     const BASELINE: Option<i32> = Some(27);
+    const STRIKETHROUGH_OFFSET: i32 = 12;
+    const STRIKETHROUGH_HEIGHT: u32 = 4;
+    const UNDERLINE_HEIGHT: u32 = 4;
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -245,5 +248,50 @@ mod tests {
     #[test]
     fn baseline() {
         test_baseline(Font24x32);
+    }
+
+    #[test]
+    fn decoration() {
+        test_text_decoration(
+            Font24x32,
+            &[
+                "    WWWWWWWWWWWW        ",
+                "    WWWWWWWWWWWW        ",
+                "    WWWWWWWWWWWW        ",
+                "    WWWWWWWWWWWW        ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "                        ",
+                "                        ",
+                "                        ",
+                "                        ",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+            ],
+        );
     }
 }

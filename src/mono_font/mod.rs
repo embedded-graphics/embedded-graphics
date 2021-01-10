@@ -174,6 +174,18 @@ pub trait MonoFont: Copy {
     /// TODO: add description how this value is used and what the default value is
     const BASELINE: Option<i32> = None;
 
+    /// Offset from top of a character to the top of the strikethrough.
+    const STRIKETHROUGH_OFFSET: i32 = Self::CHARACTER_SIZE.height as i32 / 2;
+
+    /// Height of the strikethrough.
+    const STRIKETHROUGH_HEIGHT: u32 = 1;
+
+    /// Offset from top of a character to the top of the underline.
+    const UNDERLINE_OFFSET: i32 = Self::CHARACTER_SIZE.height as i32;
+
+    /// Height of the underline.
+    const UNDERLINE_HEIGHT: u32 = 1;
+
     /// Returns the position of a character in the font.
     fn char_offset(_: char) -> u32;
 }
@@ -185,7 +197,7 @@ pub(crate) mod tests {
         geometry::Point,
         mock_display::MockDisplay,
         mono_font::MonoTextStyleBuilder,
-        pixelcolor::BinaryColor,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
         text::{Text, VerticalAlignment},
         Drawable,
     };
@@ -205,6 +217,32 @@ pub(crate) mod tests {
 
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
+            .into_styled(style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(pattern);
+    }
+
+    /// Draws a white 'A' with green underline and red strikethrough.
+    // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
+    // #[track_caller]
+    pub fn test_text_decoration<F>(font: F, pattern: &[&str])
+    where
+        F: MonoFont,
+    {
+        let style = MonoTextStyleBuilder::new()
+            .font(font)
+            .text_color(Rgb888::WHITE)
+            .underline_with_color(Rgb888::GREEN)
+            .strikethrough_with_color(Rgb888::RED)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Text::new("A", Point::zero())
             .into_styled(style)
             .draw(&mut display)
             .unwrap();
