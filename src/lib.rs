@@ -219,16 +219,18 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+pub mod draw_target;
 pub mod fonts;
 pub mod geometry;
 pub mod image;
+pub mod iterator;
 pub mod mock_display;
 pub mod prelude;
 pub mod primitives;
 pub mod style;
 pub mod transform;
 
-pub use embedded_graphics_core::{draw_target, iterator, pixelcolor, Drawable, Pixel};
+pub use embedded_graphics_core::{pixelcolor, Drawable, Pixel};
 
 /// Trait to convert unsigned into signed integer.
 trait SaturatingCast<T> {

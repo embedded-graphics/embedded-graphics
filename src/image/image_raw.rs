@@ -1,11 +1,13 @@
+use embedded_graphics_core::primitives::Rectangle;
+
 use crate::{
-    geometry::{OriginDimensions, Size},
+    draw_target::{DrawTarget, DrawTargetExt},
+    geometry::{Dimensions, OriginDimensions, Size},
     image::ImageDrawable,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
         PixelColor,
     },
-    prelude::Dimensions,
 };
 use core::marker::PhantomData;
 
@@ -161,9 +163,16 @@ where
 
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
-        D: crate::draw_target::DrawTarget<Color = C>,
+        D: DrawTarget<Color = C>,
     {
         target.fill_contiguous(&self.bounding_box(), ContiguousPixels::new(self))
+    }
+
+    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        self.draw(&mut target.translated(-area.top_left).clipped(area))
     }
 }
 

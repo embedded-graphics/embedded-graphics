@@ -287,14 +287,6 @@ impl Rectangle {
         Self::new(top_left, size)
     }
 
-    /// Create a translated copy of the rectangle.
-    pub(crate) fn translated(&self, by: Point) -> Self {
-        Self {
-            top_left: self.top_left + by,
-            ..*self
-        }
-    }
-
     /// Offset the rectangle by a given value.
     ///
     /// Negative values will shrink the rectangle.

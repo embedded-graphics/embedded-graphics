@@ -26,8 +26,8 @@ use crate::primitives::Rectangle;
 /// * [`DrawTarget`]s (displays, simulator, ...)
 ///
 ///    The bounding box of a draw target is defined as the area that should be used for drawing operations.
-///    For most display drivers the top left corner of the bounding box will be at the origin but other draw targets,
-///    like [`Translated`], can have different positions of the top left corner.
+///    For most display drivers the top left corner of the bounding box will be at the origin but other draw targets
+///    can have different positions of the top left corner.
 ///
 /// The bounding box will be returned as a [`Rectangle`]. The methods provided by [`Rectangle`] make
 /// it easy to implement additional functions like hit testing (by using [`contains`]) or drawing a focus
@@ -50,7 +50,6 @@ use crate::primitives::Rectangle;
 /// [`Drawable`]: ../trait.Drawable.html
 /// [`Drawable::draw`]: ../trait.Drawable.html#tymethod.draw
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-/// [`Translated`]: ../draw_target/struct.Translated.html
 /// [`ImageDrawable`]: ../image/trait.ImageDrawable.html
 /// [`OriginDimensions`]: trait.OriginDimensions.html
 /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
