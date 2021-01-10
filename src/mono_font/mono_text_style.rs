@@ -53,21 +53,6 @@ where
             .build()
     }
 
-    /// Calculates the offset between the line position and the top edge of the bounding box.
-    fn vertical_offset(&self, vertical_alignment: VerticalAlignment) -> i32 {
-        match vertical_alignment {
-            VerticalAlignment::Top => 0,
-            VerticalAlignment::Bottom => {
-                F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()
-            }
-            VerticalAlignment::Center => {
-                (F::CHARACTER_SIZE.height.saturating_sub(1) / 2).saturating_cast()
-            }
-            VerticalAlignment::Baseline => F::BASELINE
-                .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
-        }
-    }
-
     /// Resolves a decoration color.
     fn resolve_decoration_color(&self, color: DecorationColor<C>) -> Option<C> {
         match color {
@@ -77,22 +62,40 @@ where
         }
     }
 
+    fn draw_background<D>(
+        &self,
+        width: u32,
+        position: Point,
+        target: &mut D,
+    ) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        if width == 0 {
+            return Ok(());
+        }
+
+        if let Some(background_color) = self.background_color {
+            target.fill_solid(
+                &Rectangle::new(position, Size::new(width, F::CHARACTER_SIZE.height)),
+                background_color,
+            )?;
+        }
+
+        Ok(())
+    }
+
     fn draw_strikethrough<D>(
         &self,
         width: u32,
         position: Point,
-        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,
     {
         if let Some(strikethrough_color) = self.resolve_decoration_color(self.strikethrough_color) {
-            let top_left = position
-                + Point::new(
-                    0,
-                    F::STRIKETHROUGH_OFFSET - self.vertical_offset(vertical_alignment),
-                );
+            let top_left = position + Point::new(0, F::STRIKETHROUGH_OFFSET);
             let size = Size::new(width, F::STRIKETHROUGH_HEIGHT);
 
             target.fill_solid(&Rectangle::new(top_left, size), strikethrough_color)?;
@@ -101,22 +104,12 @@ where
         Ok(())
     }
 
-    fn draw_underline<D>(
-        &self,
-        width: u32,
-        position: Point,
-        vertical_alignment: VerticalAlignment,
-        target: &mut D,
-    ) -> Result<(), D::Error>
+    fn draw_underline<D>(&self, width: u32, position: Point, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,
     {
         if let Some(underline_color) = self.resolve_decoration_color(self.underline_color) {
-            let top_left = position
-                + Point::new(
-                    0,
-                    F::UNDERLINE_OFFSET - self.vertical_offset(vertical_alignment),
-                );
+            let top_left = position + Point::new(0, F::UNDERLINE_OFFSET);
             let size = Size::new(width, F::UNDERLINE_HEIGHT);
 
             target.fill_solid(&Rectangle::new(top_left, size), underline_color)?;
@@ -133,35 +126,19 @@ where
 {
     type Color = C;
 
-    fn draw_string<D>(
-        &self,
-        text: &str,
-        position: Point,
-        vertical_alignment: VerticalAlignment,
-        target: &mut D,
-    ) -> Result<Point, D::Error>
+    fn draw_string<D>(&self, text: &str, position: Point, target: &mut D) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
         let mut first = true;
-
-        let mut p = position - Point::new(0, self.vertical_offset(vertical_alignment));
+        let mut p = position;
 
         for c in text.chars() {
             if first {
                 first = false;
             } else if F::CHARACTER_SPACING > 0 {
                 // Fill space between characters if background color is set.
-                if let Some(background_color) = self.background_color {
-                    target.fill_solid(
-                        &Rectangle::new(
-                            p,
-                            Size::new(F::CHARACTER_SPACING, F::CHARACTER_SIZE.height),
-                        ),
-                        background_color,
-                    )?;
-                }
-
+                self.draw_background(F::CHARACTER_SPACING, p, target)?;
                 p += Size::new(F::CHARACTER_SPACING, 0);
             }
 
@@ -201,8 +178,8 @@ where
         }
 
         let width = self.string_width(text);
-        self.draw_strikethrough(width, position, vertical_alignment, target)?;
-        self.draw_underline(width, position, vertical_alignment, target)?;
+        self.draw_strikethrough(width, position, target)?;
+        self.draw_underline(width, position, target)?;
 
         Ok(p)
     }
@@ -211,21 +188,14 @@ where
         &self,
         width: u32,
         position: Point,
-        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        if let Some(background_color) = self.background_color {
-            let p = position - Point::new(0, self.vertical_offset(vertical_alignment));
-            target.fill_solid(
-                &Rectangle::new(p, Size::new(width, F::CHARACTER_SIZE.height)),
-                background_color,
-            )?;
-        }
-        self.draw_strikethrough(width, position, vertical_alignment, target)?;
-        self.draw_underline(width, position, vertical_alignment, target)?;
+        self.draw_background(width, position, target)?;
+        self.draw_strikethrough(width, position, target)?;
+        self.draw_underline(width, position, target)?;
 
         Ok(position + Size::new(width, 0))
     }
@@ -238,15 +208,8 @@ where
             .saturating_sub(F::CHARACTER_SPACING)
     }
 
-    fn string_bounding_box(
-        &self,
-        text: &str,
-        position: Point,
-        vertical_alignment: VerticalAlignment,
-    ) -> (Rectangle, Point) {
+    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
         // TODO: ignore control characters in `text`
-
-        let position = position - Point::new(0, self.vertical_offset(vertical_alignment));
 
         // If a piece of text is completely transparent, return an empty bounding box
         if self.text_color.is_none() && self.background_color.is_none() {
@@ -256,6 +219,23 @@ where
         let size = Size::new(self.string_width(text), F::CHARACTER_SIZE.height);
 
         (Rectangle::new(position, size), position + size.x_axis())
+    }
+
+    /// Calculates the offset between the line position and the top edge of the bounding box.
+    fn vertical_offset(&self, position: Point, vertical_alignment: VerticalAlignment) -> Point {
+        let dy = match vertical_alignment {
+            VerticalAlignment::Top => 0,
+            VerticalAlignment::Bottom => {
+                F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()
+            }
+            VerticalAlignment::Center => {
+                (F::CHARACTER_SIZE.height.saturating_sub(1) / 2).saturating_cast()
+            }
+            VerticalAlignment::Baseline => F::BASELINE
+                .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
+        };
+
+        position - Point::new(0, dy)
     }
 
     fn line_height(&self) -> u32 {
@@ -646,7 +626,7 @@ mod tests {
 
         let mut display = MockDisplay::new();
         style
-            .draw_whitespace(4, Point::zero(), VerticalAlignment::Top, &mut display)
+            .draw_whitespace(4, Point::zero(), &mut display)
             .unwrap();
 
         display.assert_pattern(&[
@@ -672,7 +652,7 @@ mod tests {
 
         let mut display = MockDisplay::new();
         style
-            .draw_whitespace(3, Point::zero(), VerticalAlignment::Top, &mut display)
+            .draw_whitespace(3, Point::zero(), &mut display)
             .unwrap();
 
         display.assert_pattern(&[
@@ -702,7 +682,7 @@ mod tests {
         display.set_allow_overdraw(true);
 
         style
-            .draw_whitespace(8, Point::zero(), VerticalAlignment::Top, &mut display)
+            .draw_whitespace(8, Point::zero(), &mut display)
             .unwrap();
 
         display.assert_pattern(&[

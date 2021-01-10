@@ -202,9 +202,22 @@ mod tests {
         test_text_decoration(
             Font8x16,
             &[
-                "        ", "        ", "   W    ", "  WWW   ", " WW WW  ", "WW   WW ", "RRRRRRRR",
-                "RRRRRRRR", "WW   WW ", "WW   WW ", "WW   WW ", "WW   WW ", "        ", "        ",
-                "GGGGGGGG", "GGGGGGGG",
+                "        ", //
+                "        ", //
+                "   W    ", //
+                "  WWW   ", //
+                " WW WW  ", //
+                "WW   WW ", //
+                "RRRRRRRR", //
+                "RRRRRRRR", //
+                "WW   WW ", //
+                "WW   WW ", //
+                "WW   WW ", //
+                "WW   WW ", //
+                "        ", //
+                "        ", //
+                "GGGGGGGG", //
+                "GGGGGGGG", //
             ],
         );
     }

@@ -14,14 +14,20 @@ pub trait TextRenderer {
 
     /// Draws a string.
     ///
-    /// The text should not contain any control characters. Implementations of this trait need to
-    /// ignore all control characters. The method returns the point at which the next character
-    /// in the same row starts.
+    /// The interpretation of the y coordinate of `position` is dependent on the implementation and
+    /// can, for example, be the top edge of the bounding box or a point on the baseline. The
+    /// caller must ensure that the coordinate is first converted with the `vertical_offset` method.
+    ///
+    /// The method returns the start position of the next character to allow chaining of multiple
+    /// draw calls.
+    ///
+    /// # Implementation notes
+    ///
+    /// This method must ignore all control characters and only draw a single line of text.
     fn draw_string<D>(
         &self,
         text: &str,
         position: Point,
-        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
@@ -29,12 +35,16 @@ pub trait TextRenderer {
 
     /// Draws whitespace of the given width.
     ///
-    /// The method returns the point at which the next character in the same row starts.
+    /// The interpretation of the y coordinate of `position` is dependent on the implementation and
+    /// can, for example, be the top edge of the bounding box or a point on the baseline. The
+    /// caller must ensure that the coordinate is first converted with the `vertical_offset` method.
+    ///
+    /// The method returns the start position of the next character to allow chaining of multiple
+    /// draw calls.
     fn draw_whitespace<D>(
         &self,
         width: u32,
         position: Point,
-        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
@@ -45,15 +55,18 @@ pub trait TextRenderer {
 
     /// Returns the bounding box of a string.
     ///
-    /// The text should not contain any control characters. Implementations of this trait need to
-    /// ignore all control characters. The method returns the bounding box and the point at which
-    /// the next character in the same row starts.
-    fn string_bounding_box(
-        &self,
-        text: &str,
-        position: Point,
-        vertical_alignment: VerticalAlignment,
-    ) -> (Rectangle, Point);
+    /// The interpretation of the y coordinate of `position` is dependent on the implementation and
+    /// can, for example, be the top edge of the bounding box or a point on the baseline. The
+    /// caller must ensure that the coordinate is first converted with the `vertical_offset` method.
+    ///
+    /// # Implementation notes
+    ///
+    /// This method must ignore all control characters and only return the bounding box of a single
+    /// row of text.
+    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
+
+    /// Offsets the point to apply the vertical alignment.
+    fn vertical_offset(&self, position: Point, vertical_alignment: VerticalAlignment) -> Point;
 
     /// Returns the line height.
     fn line_height(&self) -> u32;

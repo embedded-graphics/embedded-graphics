@@ -71,11 +71,12 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        let mut position = self.primitive.position;
+        let mut position = self
+            .style
+            .vertical_offset(self.primitive.position, VerticalAlignment::Baseline);
 
         for line in self.primitive.text.lines() {
-            self.style
-                .draw_string(line, position, VerticalAlignment::Baseline, target)?;
+            self.style.draw_string(line, position, target)?;
 
             position.y += self.style.line_height().saturating_cast();
         }
@@ -111,7 +112,10 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        let mut position = self.primitive.position;
+        let mut position = self
+            .style
+            .character_style
+            .vertical_offset(self.primitive.position, self.style.vertical_alignment);
 
         for line in self.primitive.text.lines() {
             let dx = horizontal_offset(
@@ -120,12 +124,9 @@ where
                 self.style.horizontal_alignment,
             );
 
-            self.style.character_style.draw_string(
-                line,
-                position - Point::new(dx, 0),
-                self.style.vertical_alignment,
-                target,
-            )?;
+            self.style
+                .character_style
+                .draw_string(line, position - Point::new(dx, 0), target)?;
 
             position.y += self.style.character_style.line_height().saturating_cast();
         }
@@ -140,14 +141,14 @@ where
     S: TextRenderer<Color = C>,
 {
     fn bounding_box(&self) -> Rectangle {
-        let mut position = self.primitive.position;
+        let mut position = self
+            .style
+            .vertical_offset(self.primitive.position, VerticalAlignment::Baseline);
 
         let mut min_max: Option<(Point, Point)> = None;
 
         for line in self.primitive.text.lines() {
-            let (bounding_box, _) =
-                self.style
-                    .string_bounding_box(line, position, VerticalAlignment::Baseline);
+            let (bounding_box, _) = self.style.string_bounding_box(line, position);
 
             if let Some(bottom_right) = bounding_box.bottom_right() {
                 if let Some((min, max)) = &mut min_max {
@@ -177,7 +178,10 @@ where
     S: TextRenderer<Color = C>,
 {
     fn bounding_box(&self) -> Rectangle {
-        let mut position = self.primitive.position;
+        let mut position = self
+            .style
+            .character_style
+            .vertical_offset(self.primitive.position, self.style.vertical_alignment);
 
         let mut min_max: Option<(Point, Point)> = None;
 
@@ -188,11 +192,10 @@ where
                 self.style.horizontal_alignment,
             );
 
-            let (bounding_box, _) = self.style.character_style.string_bounding_box(
-                line,
-                position - Point::new(dx, 0),
-                self.style.vertical_alignment,
-            );
+            let (bounding_box, _) = self
+                .style
+                .character_style
+                .string_bounding_box(line, position - Point::new(dx, 0));
 
             if let Some(bottom_right) = bounding_box.bottom_right() {
                 if let Some((min, max)) = &mut min_max {
