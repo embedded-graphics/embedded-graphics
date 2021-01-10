@@ -4,9 +4,9 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::Rectangle,
     style::Styled,
-    text::TextStyle,
+    text::TextRenderer,
     transform::Transform,
-    Drawable,
+    Drawable, SaturatingCast,
 };
 
 /// A text object.
@@ -43,7 +43,7 @@ impl<'a> Text<'a> {
     pub fn into_styled<C, S>(self, style: S) -> Styled<Self, S>
     where
         C: PixelColor,
-        S: TextStyle<Color = C>,
+        S: TextRenderer<Color = C>,
     {
         Styled::new(self, style)
     }
@@ -67,7 +67,7 @@ impl Transform for Text<'_> {
 impl<C, S> Drawable for Styled<Text<'_>, S>
 where
     C: PixelColor,
-    S: TextStyle<Color = C>,
+    S: TextRenderer<Color = C>,
 {
     type Color = C;
 
@@ -78,7 +78,9 @@ where
         let mut position = self.primitive.position;
 
         for line in self.primitive.text.lines() {
-            position += self.style.render_line(line, position, target)?;
+            self.style.draw_string(line, position, target)?;
+
+            position.y += self.style.line_height().saturating_cast();
         }
 
         Ok(())
@@ -88,7 +90,7 @@ where
 impl<C, S> Dimensions for Styled<Text<'_>, S>
 where
     C: PixelColor,
-    S: TextStyle<Color = C>,
+    S: TextRenderer<Color = C>,
 {
     fn bounding_box(&self) -> Rectangle {
         let mut position = self.primitive.position;
@@ -96,7 +98,7 @@ where
         let mut min_max: Option<(Point, Point)> = None;
 
         for line in self.primitive.text.lines() {
-            let (bounding_box, position_delta) = self.style.line_bounding_box(line, position);
+            let (bounding_box, _) = self.style.string_bounding_box(line, position);
 
             if let Some(bottom_right) = bounding_box.bottom_right() {
                 if let Some((min, max)) = &mut min_max {
@@ -109,7 +111,7 @@ where
                 }
             }
 
-            position += position_delta;
+            position.y += self.style.line_height().saturating_cast();
         }
 
         if let Some((min, max)) = min_max {

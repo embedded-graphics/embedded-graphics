@@ -4,7 +4,7 @@ use crate::{
     mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    text::{HorizontalAlignment, TextStyle, VerticalAlignment},
+    text::{HorizontalAlignment, TextRenderer, VerticalAlignment},
     Pixel, SaturatingCast,
 };
 
@@ -85,14 +85,14 @@ where
     }
 }
 
-impl<C, F> TextStyle for MonoTextStyle<C, F>
+impl<C, F> TextRenderer for MonoTextStyle<C, F>
 where
     C: PixelColor,
     F: MonoFont,
 {
     type Color = C;
 
-    fn render_line<D>(&self, text: &str, position: Point, target: &mut D) -> Result<Point, D::Error>
+    fn draw_string<D>(&self, text: &str, position: Point, target: &mut D) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
@@ -153,22 +153,39 @@ where
             position += F::CHARACTER_SIZE.x_axis();
         }
 
-        Ok(Point::zero() + F::CHARACTER_SIZE.y_axis())
+        Ok(position)
     }
 
-    fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
-        let next_line_delta = Point::zero() + F::CHARACTER_SIZE.y_axis();
+    fn draw_whitespace<D>(
+        &self,
+        width: u32,
+        position: Point,
+        target: &mut D,
+    ) -> Result<Point, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        // TODO: actually draw whitespace
+        Ok(position)
+    }
+
+    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
+        // TODO: ignore control characters in `text`
 
         let position = position - self.position_offset(text);
 
         // If a piece of text is completely transparent, return an empty bounding box
         if self.text_color.is_none() && self.background_color.is_none() {
-            return (Rectangle::new(position, Size::zero()), next_line_delta);
+            return (Rectangle::new(position, Size::zero()), position);
         }
 
         let size = Size::new(self.line_width(text), F::CHARACTER_SIZE.height);
 
-        (Rectangle::new(position, size), next_line_delta)
+        (Rectangle::new(position, size), position + size.x_axis())
+    }
+
+    fn line_height(&self) -> u32 {
+        F::CHARACTER_SIZE.height
     }
 }
 

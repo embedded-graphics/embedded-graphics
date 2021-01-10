@@ -4,20 +4,20 @@ use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
 };
 
-/// Text style.
+/// Text renderer.
 ///
 /// The `TextStyle` trait is used to integrate text renderers into embedded-graphics. Users should
 /// not call it directly and instead use the functions provided by the `Text` type.
-pub trait TextStyle {
+pub trait TextRenderer {
     /// Color type.
     type Color: PixelColor;
 
-    /// Renders a single line of text using this style.
+    /// Draws a string.
     ///
-    /// Returns the offset from the current position to the start of the next line.
-    ///
-    /// TODO: document how `position` should be used
-    fn render_line<D>(
+    /// The text should not contain any control characters. Implementations of this trait need to
+    /// ignore all control characters. The method returns the point at which the next character
+    /// in the same row starts.
+    fn draw_string<D>(
         &self,
         text: &str,
         position: Point,
@@ -26,8 +26,49 @@ pub trait TextStyle {
     where
         D: DrawTarget<Color = Self::Color>;
 
-    /// Returns the bounding box of a single line of text rendered using this style.
+    /// Draws whitespace of the given width.
     ///
-    /// TODO: document how `position` should be used and the second return value
-    fn line_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
+    /// The method returns the point at which the next character in the same row starts.
+    fn draw_whitespace<D>(
+        &self,
+        width: u32,
+        position: Point,
+        target: &mut D,
+    ) -> Result<Point, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>;
+
+    /// Returns the bounding box of a string.
+    ///
+    /// The text should not contain any control characters. Implementations of this trait need to
+    /// ignore all control characters. The method returns the bounding box and the point at which
+    /// the next character in the same row starts.
+    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
+
+    /// Returns the line height.
+    fn line_height(&self) -> u32;
+}
+
+/// Vertical text alignment.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum VerticalAlignment {
+    /// Top.
+    Top,
+    /// Bottom.
+    Bottom,
+    /// Center.
+    Center,
+    /// Baseline.
+    Baseline,
+}
+
+/// Horizontal text alignment.
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum HorizontalAlignment {
+    /// Left.
+    Left,
+    /// Center.
+    Center,
+    /// Right.
+    Right,
 }
