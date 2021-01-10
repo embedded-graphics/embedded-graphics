@@ -4,7 +4,7 @@ use crate::{
     mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    text::{HorizontalAlignment, TextRenderer, VerticalAlignment},
+    text::{TextRenderer, VerticalAlignment},
     Pixel, SaturatingCast,
 };
 
@@ -36,12 +36,6 @@ pub struct MonoTextStyle<C, F> {
     /// Strikethrough color.
     pub strikethrough_color: DecorationColor<C>,
 
-    /// Horizontal alignment.
-    pub horizontal_alignment: HorizontalAlignment,
-
-    /// Vertical alignment.
-    pub vertical_alignment: VerticalAlignment,
-
     /// Font.
     pub font: F,
 }
@@ -59,23 +53,9 @@ where
             .build()
     }
 
-    /// Calculates the line width in pixels.
-    fn line_width(&self, text: &str) -> u32 {
-        (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
-            .saturating_sub(F::CHARACTER_SPACING)
-    }
-
-    /// Calculates the offset between the line position and the top left corner of the bounding
-    /// box.
-    fn position_offset(&self, text: &str) -> Point {
-        let x = match self.horizontal_alignment {
-            HorizontalAlignment::Left => 0,
-            HorizontalAlignment::Right => self.line_width(text).saturating_sub(1),
-            HorizontalAlignment::Center => self.line_width(text).saturating_sub(1) / 2,
-        }
-        .saturating_cast();
-
-        let y = match self.vertical_alignment {
+    /// Calculates the offset between the line position and the top edge of the bounding box.
+    fn vertical_offset(&self, vertical_alignment: VerticalAlignment) -> i32 {
+        match vertical_alignment {
             VerticalAlignment::Top => 0,
             VerticalAlignment::Bottom => {
                 F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()
@@ -85,9 +65,7 @@ where
             }
             VerticalAlignment::Baseline => F::BASELINE
                 .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
-        };
-
-        Point::new(x, y)
+        }
     }
 
     /// Resolves a decoration color.
@@ -98,6 +76,54 @@ where
             DecorationColor::Custom(c) => Some(c),
         }
     }
+
+    fn draw_strikethrough<D>(
+        &self,
+        width: u32,
+        position: Point,
+        vertical_alignment: VerticalAlignment,
+        target: &mut D,
+    ) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        if let Some(strikethrough_color) = self.resolve_decoration_color(self.strikethrough_color) {
+            let top_left = position
+                + Point::new(
+                    0,
+                    F::STRIKETHROUGH_OFFSET - self.vertical_offset(vertical_alignment),
+                );
+            let size = Size::new(width, F::STRIKETHROUGH_HEIGHT);
+
+            target.fill_solid(&Rectangle::new(top_left, size), strikethrough_color)?;
+        }
+
+        Ok(())
+    }
+
+    fn draw_underline<D>(
+        &self,
+        width: u32,
+        position: Point,
+        vertical_alignment: VerticalAlignment,
+        target: &mut D,
+    ) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        if let Some(underline_color) = self.resolve_decoration_color(self.underline_color) {
+            let top_left = position
+                + Point::new(
+                    0,
+                    F::UNDERLINE_OFFSET - self.vertical_offset(vertical_alignment),
+                );
+            let size = Size::new(width, F::UNDERLINE_HEIGHT);
+
+            target.fill_solid(&Rectangle::new(top_left, size), underline_color)?;
+        }
+
+        Ok(())
+    }
 }
 
 impl<C, F> TextRenderer for MonoTextStyle<C, F>
@@ -107,13 +133,19 @@ where
 {
     type Color = C;
 
-    fn draw_string<D>(&self, text: &str, position: Point, target: &mut D) -> Result<Point, D::Error>
+    fn draw_string<D>(
+        &self,
+        text: &str,
+        position: Point,
+        vertical_alignment: VerticalAlignment,
+        target: &mut D,
+    ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
         let mut first = true;
 
-        let mut p = position - self.position_offset(text);
+        let mut p = position - Point::new(0, self.vertical_offset(vertical_alignment));
 
         for c in text.chars() {
             if first {
@@ -168,23 +200,9 @@ where
             p += F::CHARACTER_SIZE.x_axis();
         }
 
-        if let Some(strikethrough_color) = self.resolve_decoration_color(self.strikethrough_color) {
-            let (mut bounding_box, _) = self.string_bounding_box(text, position);
-
-            bounding_box.top_left.y += F::STRIKETHROUGH_OFFSET;
-            bounding_box.size.height = F::STRIKETHROUGH_HEIGHT;
-
-            target.fill_solid(&bounding_box, strikethrough_color)?;
-        }
-
-        if let Some(underline_color) = self.resolve_decoration_color(self.underline_color) {
-            let (mut bounding_box, _) = self.string_bounding_box(text, position);
-
-            bounding_box.top_left.y += F::UNDERLINE_OFFSET;
-            bounding_box.size.height = F::UNDERLINE_HEIGHT;
-
-            target.fill_solid(&bounding_box, underline_color)?;
-        }
+        let width = self.string_width(text);
+        self.draw_strikethrough(width, position, vertical_alignment, target)?;
+        self.draw_underline(width, position, vertical_alignment, target)?;
 
         Ok(p)
     }
@@ -193,26 +211,49 @@ where
         &self,
         width: u32,
         position: Point,
+        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        // TODO: actually draw whitespace
-        Ok(position)
+        if let Some(background_color) = self.background_color {
+            let p = position - Point::new(0, self.vertical_offset(vertical_alignment));
+            target.fill_solid(
+                &Rectangle::new(p, Size::new(width, F::CHARACTER_SIZE.height)),
+                background_color,
+            )?;
+        }
+        self.draw_strikethrough(width, position, vertical_alignment, target)?;
+        self.draw_underline(width, position, vertical_alignment, target)?;
+
+        Ok(position + Size::new(width, 0))
     }
 
-    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
+    fn string_width(&self, text: &str) -> u32 {
+        // TODO: ignore control characters in `text`
+        // TODO: how should completely transparent text be handled?
+
+        (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
+            .saturating_sub(F::CHARACTER_SPACING)
+    }
+
+    fn string_bounding_box(
+        &self,
+        text: &str,
+        position: Point,
+        vertical_alignment: VerticalAlignment,
+    ) -> (Rectangle, Point) {
         // TODO: ignore control characters in `text`
 
-        let position = position - self.position_offset(text);
+        let position = position - Point::new(0, self.vertical_offset(vertical_alignment));
 
         // If a piece of text is completely transparent, return an empty bounding box
         if self.text_color.is_none() && self.background_color.is_none() {
             return (Rectangle::new(position, Size::zero()), position);
         }
 
-        let size = Size::new(self.line_width(text), F::CHARACTER_SIZE.height);
+        let size = Size::new(self.string_width(text), F::CHARACTER_SIZE.height);
 
         (Rectangle::new(position, size), position + size.x_axis())
     }
@@ -310,8 +351,6 @@ impl<C> MonoTextStyleBuilder<C, UndefinedFont> {
                 text_color: None,
                 underline_color: DecorationColor::None,
                 strikethrough_color: DecorationColor::None,
-                horizontal_alignment: HorizontalAlignment::Left,
-                vertical_alignment: VerticalAlignment::Baseline,
             },
         }
     }
@@ -326,25 +365,9 @@ impl<C, F> MonoTextStyleBuilder<C, F> {
             text_color: self.style.text_color,
             underline_color: self.style.underline_color,
             strikethrough_color: self.style.strikethrough_color,
-            vertical_alignment: self.style.vertical_alignment,
-            horizontal_alignment: self.style.horizontal_alignment,
         };
 
         MonoTextStyleBuilder { style }
-    }
-
-    /// Sets the horizontal alignment.
-    pub fn horizontal_alignment(mut self, horizontal_alignment: HorizontalAlignment) -> Self {
-        self.style.horizontal_alignment = horizontal_alignment;
-
-        self
-    }
-
-    /// Sets the vertical alignment.
-    pub fn vertical_alignment(mut self, vertical_alignment: VerticalAlignment) -> Self {
-        self.style.vertical_alignment = vertical_alignment;
-
-        self
     }
 
     /// Enables underline using the text color.
@@ -439,11 +462,26 @@ mod tests {
     use crate::{
         geometry::Dimensions,
         mock_display::MockDisplay,
-        mono_font::{Font12x16, Font6x8},
+        mono_font::{tests::*, Font12x16, Font6x8},
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        text::Text,
+        text::{Text, TextStyleBuilder},
         Drawable,
     };
+
+    #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+    struct SpacedFont;
+
+    impl MonoFont for SpacedFont {
+        const FONT_IMAGE: &'static [u8] = Font6x8::FONT_IMAGE;
+        const FONT_IMAGE_WIDTH: u32 = Font6x8::FONT_IMAGE_WIDTH;
+        const CHARACTER_SIZE: Size = Font6x8::CHARACTER_SIZE;
+        const CHARACTER_SPACING: u32 = 5;
+        const STRIKETHROUGH_OFFSET: i32 = Font6x8::STRIKETHROUGH_OFFSET;
+
+        fn char_offset(c: char) -> u32 {
+            Font6x8::char_offset(c)
+        }
+    }
 
     #[test]
     fn builder_default() {
@@ -457,8 +495,6 @@ mod tests {
                 background_color: None,
                 underline_color: DecorationColor::None,
                 strikethrough_color: DecorationColor::None,
-                horizontal_alignment: HorizontalAlignment::Left,
-                vertical_alignment: VerticalAlignment::Baseline,
             }
         );
     }
@@ -490,175 +526,6 @@ mod tests {
                 style
             }
         );
-    }
-
-    #[test]
-    fn builder_alignments() {
-        let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-            .font(Font12x16)
-            .horizontal_alignment(HorizontalAlignment::Right)
-            .vertical_alignment(VerticalAlignment::Top)
-            .build();
-
-        assert_eq!(style.horizontal_alignment, HorizontalAlignment::Right);
-        assert_eq!(style.vertical_alignment, VerticalAlignment::Top);
-    }
-
-    #[test]
-    fn horizontal_alignment_left() {
-        let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .horizontal_alignment(HorizontalAlignment::Left)
-            .build();
-
-        let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(0, 6))
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            " ###        ",
-            "#   #       ",
-            "#   #       ",
-            "#####       ",
-            "#   #       ",
-            "#   #       ",
-            "#   #       ",
-            "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
-            "            ",
-        ]);
-    }
-
-    #[test]
-    fn horizontal_alignment_center() {
-        let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .horizontal_alignment(HorizontalAlignment::Center)
-            .build();
-
-        let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(5, 6))
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            "    ###     ",
-            "   #   #    ",
-            "   #   #    ",
-            "   #####    ",
-            "   #   #    ",
-            "   #   #    ",
-            "   #   #    ",
-            "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
-            "            ",
-        ]);
-    }
-
-    #[test]
-    fn horizontal_alignment_right() {
-        let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .horizontal_alignment(HorizontalAlignment::Right)
-            .build();
-
-        let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(11, 6))
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            "       ###  ",
-            "      #   # ",
-            "      #   # ",
-            "      ##### ",
-            "      #   # ",
-            "      #   # ",
-            "      #   # ",
-            "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
-            "            ",
-        ]);
-    }
-
-    #[test]
-    fn vertical_alignment() {
-        let mut display = MockDisplay::new();
-
-        let style_top = MonoTextStyleBuilder::new()
-            .font(Font6x8)
-            .text_color(BinaryColor::On)
-            .vertical_alignment(VerticalAlignment::Top)
-            .build();
-        let style_center = MonoTextStyleBuilder::from(&style_top)
-            .vertical_alignment(VerticalAlignment::Center)
-            .build();
-        let style_bottom = MonoTextStyleBuilder::from(&style_top)
-            .vertical_alignment(VerticalAlignment::Bottom)
-            .build();
-        let style_baseline = MonoTextStyleBuilder::from(&style_top)
-            .vertical_alignment(VerticalAlignment::Baseline)
-            .build();
-
-        Text::new("t", Point::new(0, 8))
-            .into_styled(style_top)
-            .draw(&mut display)
-            .unwrap();
-        Text::new("c", Point::new(6, 8))
-            .into_styled(style_center)
-            .draw(&mut display)
-            .unwrap();
-        Text::new("b", Point::new(12, 8))
-            .into_styled(style_bottom)
-            .draw(&mut display)
-            .unwrap();
-        Text::new("B", Point::new(18, 8))
-            .into_styled(style_baseline)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(&[
-            "                       ",
-            "            #          ",
-            "            #     #### ",
-            "            # ##  #   #",
-            "            ##  # #   #",
-            "            #   # #### ",
-            "            #   # #   #",
-            "       ###  ####  #   #",
-            " #    #           #### ",
-            " #    #                ",
-            "###   #   #            ",
-            " #     ###             ",
-            " #                     ",
-            " #  #                  ",
-            "  ##                   ",
-        ]);
     }
 
     #[test]
@@ -770,33 +637,201 @@ mod tests {
     }
 
     #[test]
-    fn bounding_box() {
-        for &vertical_alignment in &[
-            VerticalAlignment::Top,
-            VerticalAlignment::Center,
-            VerticalAlignment::Bottom,
-            VerticalAlignment::Baseline,
-        ] {
-            for &horizontal_alignment in &[
-                HorizontalAlignment::Left,
-                HorizontalAlignment::Center,
-                HorizontalAlignment::Right,
-            ] {
-                let style = MonoTextStyleBuilder::new()
-                    .font(Font6x8)
-                    .text_color(BinaryColor::On)
-                    .background_color(BinaryColor::Off)
-                    .horizontal_alignment(horizontal_alignment)
-                    .vertical_alignment(vertical_alignment)
-                    .build();
+    fn whitespace_background() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::YELLOW)
+            .background_color(Rgb888::WHITE)
+            .build();
 
-                let text = Text::new("1\n23", Point::new_equal(20)).into_styled(style);
+        let mut display = MockDisplay::new();
+        style
+            .draw_whitespace(4, Point::zero(), VerticalAlignment::Top, &mut display)
+            .unwrap();
 
-                let mut display = MockDisplay::new();
-                text.draw(&mut display).unwrap();
+        display.assert_pattern(&[
+            "WWWW", //
+            "WWWW", //
+            "WWWW", //
+            "WWWW", //
+            "WWWW", //
+            "WWWW", //
+            "WWWW", //
+            "WWWW", //
+        ]);
+    }
 
-                assert_eq!(display.affected_area(), text.bounding_box());
-            }
-        }
+    #[test]
+    fn whitespace_decorations() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::YELLOW)
+            .underline_with_color(Rgb888::GREEN)
+            .strikethrough_with_color(Rgb888::RED)
+            .build();
+
+        let mut display = MockDisplay::new();
+        style
+            .draw_whitespace(3, Point::zero(), VerticalAlignment::Top, &mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "   ", //
+            "   ", //
+            "   ", //
+            "RRR", //
+            "   ", //
+            "   ", //
+            "   ", //
+            "   ", //
+            "GGG", //
+        ]);
+    }
+
+    #[test]
+    fn whitespace_background_and_decorations() {
+        let style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::YELLOW)
+            .background_color(Rgb888::WHITE)
+            .underline_with_color(Rgb888::GREEN)
+            .strikethrough_with_color(Rgb888::RED)
+            .build();
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        style
+            .draw_whitespace(8, Point::zero(), VerticalAlignment::Top, &mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "WWWWWWWW", //
+            "WWWWWWWW", //
+            "WWWWWWWW", //
+            "RRRRRRRR", //
+            "WWWWWWWW", //
+            "WWWWWWWW", //
+            "WWWWWWWW", //
+            "WWWWWWWW", //
+            "GGGGGGGG", //
+        ]);
+    }
+
+    #[test]
+    fn character_spacing() {
+        assert_text_from_pattern(
+            "##",
+            SpacedFont,
+            &[
+                " # #        # #  ",
+                " # #        # #  ",
+                "#####      ##### ",
+                " # #        # #  ",
+                "#####      ##### ",
+                " # #        # #  ",
+                " # #        # #  ",
+                "                 ",
+            ],
+        );
+    }
+
+    #[test]
+    fn character_spacing_with_background() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(SpacedFont)
+            .text_color(BinaryColor::On)
+            .background_color(BinaryColor::Off)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("##", Point::zero())
+            .into_styled(text_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            ".#.#........#.#..",
+            ".#.#........#.#..",
+            "#####......#####.",
+            ".#.#........#.#..",
+            "#####......#####.",
+            ".#.#........#.#..",
+            ".#.#........#.#..",
+            ".................",
+        ]);
+    }
+
+    #[test]
+    fn character_spacing_decorations() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(SpacedFont)
+            .text_color(Rgb888::WHITE)
+            .underline_with_color(Rgb888::GREEN)
+            .strikethrough_with_color(Rgb888::RED)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Text::new("##", Point::zero())
+            .into_styled(text_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            " W W        W W  ",
+            " W W        W W  ",
+            "WWWWW      WWWWW ",
+            "RRRRRRRRRRRRRRRRR",
+            "WWWWW      WWWWW ",
+            " W W        W W  ",
+            " W W        W W  ",
+            "                 ",
+            "GGGGGGGGGGGGGGGGG",
+        ]);
+    }
+
+    #[test]
+    fn character_spacing_dimensions() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(SpacedFont)
+            .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        assert_eq!(
+            Text::new("#", Point::zero())
+                .into_styled(text_style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6, 8)),
+        );
+
+        assert_eq!(
+            Text::new("##", Point::zero())
+                .into_styled(text_style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6 * 2 + 5, 8)),
+        );
+        assert_eq!(
+            Text::new("###", Point::zero())
+                .into_styled(text_style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 8)),
+        );
     }
 }

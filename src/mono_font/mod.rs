@@ -198,7 +198,7 @@ pub(crate) mod tests {
         mock_display::MockDisplay,
         mono_font::MonoTextStyleBuilder,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        text::{Text, VerticalAlignment},
+        text::{Text, TextStyleBuilder, VerticalAlignment},
         Drawable,
     };
 
@@ -209,15 +209,19 @@ pub(crate) mod tests {
     where
         F: MonoFont,
     {
-        let style = MonoTextStyleBuilder::new()
+        let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
             .vertical_alignment(VerticalAlignment::Top)
             .build();
 
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
-            .into_styled(style)
+            .into_styled(text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -231,11 +235,15 @@ pub(crate) mod tests {
     where
         F: MonoFont,
     {
-        let style = MonoTextStyleBuilder::new()
+        let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(Rgb888::WHITE)
             .underline_with_color(Rgb888::GREEN)
             .strikethrough_with_color(Rgb888::RED)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
             .vertical_alignment(VerticalAlignment::Top)
             .build();
 
@@ -243,7 +251,7 @@ pub(crate) mod tests {
         display.set_allow_overdraw(true);
 
         Text::new("A", Point::zero())
-            .into_styled(style)
+            .into_styled(text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -257,16 +265,20 @@ pub(crate) mod tests {
     where
         F: MonoFont,
     {
-        let style = MonoTextStyleBuilder::new()
+        let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
             .vertical_alignment(VerticalAlignment::Top)
             .build();
 
         // Draw 'A' character to determine it's baseline
         let mut display = MockDisplay::new();
         Text::new("A", Point::zero())
-            .into_styled(style)
+            .into_styled(text_style)
             .draw(&mut display)
             .unwrap();
 

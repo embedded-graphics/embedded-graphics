@@ -21,6 +21,7 @@ pub trait TextRenderer {
         &self,
         text: &str,
         position: Point,
+        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
@@ -33,17 +34,26 @@ pub trait TextRenderer {
         &self,
         width: u32,
         position: Point,
+        vertical_alignment: VerticalAlignment,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
+
+    /// Returns the width of the text in pixels.
+    fn string_width(&self, text: &str) -> u32;
 
     /// Returns the bounding box of a string.
     ///
     /// The text should not contain any control characters. Implementations of this trait need to
     /// ignore all control characters. The method returns the bounding box and the point at which
     /// the next character in the same row starts.
-    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
+    fn string_bounding_box(
+        &self,
+        text: &str,
+        position: Point,
+        vertical_alignment: VerticalAlignment,
+    ) -> (Rectangle, Point);
 
     /// Returns the line height.
     fn line_height(&self) -> u32;
