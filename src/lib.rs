@@ -19,7 +19,8 @@
 //!     * [Triangles](./primitives/triangle/struct.Triangle.html)
 //!     * [Polylines](./primitives/polyline/struct.Polyline.html)
 //!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
-//! * [Text with multiple fonts](./fonts/index.html)
+//! * [Text](./text/index.html)
+//! * [Monospaced fonts](./mono_font/index.html)
 //!
 //! # Additional functions provided by external crates
 //!
@@ -133,11 +134,12 @@
 //!
 //! ```rust,no_run
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     mono_font::{Font6x8, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //!     primitives::{Circle, Rectangle, Triangle},
-//!     style::{PrimitiveStyle, MonoTextStyle},
+//!     style::PrimitiveStyle,
+//!     text::Text,
 //!     mock_display::MockDisplay,
 //! };
 //!
@@ -220,14 +222,15 @@
 #![deny(unused_qualifications)]
 
 pub mod draw_target;
-pub mod fonts;
 pub mod geometry;
 pub mod image;
 pub mod iterator;
 pub mod mock_display;
+pub mod mono_font;
 pub mod prelude;
 pub mod primitives;
 pub mod style;
+pub mod text;
 pub mod transform;
 
 pub use embedded_graphics_core::{pixelcolor, Drawable, Pixel};

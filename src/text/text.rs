@@ -3,7 +3,8 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    style::{Styled, TextStyle},
+    style::Styled,
+    text::TextStyle,
     transform::Transform,
     Drawable,
 };
@@ -123,13 +124,15 @@ where
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::assert_text_from_pattern, Font6x8, MonoFont},
         geometry::Size,
         mock_display::MockDisplay,
+        mono_font::{
+            tests::assert_text_from_pattern, Font6x8, MonoFont, MonoTextStyle, MonoTextStyleBuilder,
+        },
         pixelcolor::BinaryColor,
         prelude::*,
-        style::MonoTextStyle,
-        style::{MonoTextStyleBuilder, PrimitiveStyle, VerticalAlignment},
+        style::PrimitiveStyle,
+        text::VerticalAlignment,
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";

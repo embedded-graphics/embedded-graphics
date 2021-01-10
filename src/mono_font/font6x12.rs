@@ -1,4 +1,4 @@
-use crate::{fonts::MonoFont, geometry::Size};
+use crate::{geometry::Size, mono_font::MonoFont};
 
 /// 6x12 pixel monospace font.
 ///
@@ -33,10 +33,10 @@ impl MonoFont for Font6x12 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::*, MonoFont, Text},
         geometry::{Dimensions, Point, Size},
+        mono_font::{tests::*, MonoFont, MonoTextStyle},
         pixelcolor::BinaryColor,
-        style::MonoTextStyle,
+        text::Text,
     };
 
     const WIDTH: usize = Font6x12::CHARACTER_SIZE.width as usize;

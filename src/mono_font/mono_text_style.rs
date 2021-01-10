@@ -1,10 +1,10 @@
 use crate::{
     draw_target::DrawTarget,
-    fonts::{MonoCharPixels, MonoFont},
     geometry::{Point, Size},
+    mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    style::TextStyle,
+    text::{HorizontalAlignment, TextStyle, VerticalAlignment},
     Pixel, SaturatingCast,
 };
 
@@ -17,7 +17,7 @@ use crate::{
 /// background, use the [`new`] method. For more complex text styles, use the
 /// [`MonoTextStyleBuilder`].
 ///
-/// [`Text`]: ../fonts/struct.Text.html
+/// [`Text`]: ../text/struct.Text.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 /// [`MonoTextStyleBuilder`]: ./struct.MonoTextStyleBuilder.html
 /// [`new`]: #method.new
@@ -184,10 +184,10 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     fonts::{Font6x8, Text},
+///     mono_font::{Font6x8, MonoTextStyle, MonoTextStyleBuilder},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     style::{MonoTextStyle, MonoTextStyleBuilder},
+///     text::Text,
 /// };
 ///
 /// let style = MonoTextStyleBuilder::new()
@@ -207,10 +207,10 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     fonts::{Font6x8, Text},
+///     mono_font::{Font6x8, MonoTextStyle, MonoTextStyleBuilder},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     style::{MonoTextStyle, MonoTextStyleBuilder},
+///     text::Text,
 /// };
 ///
 /// let style = MonoTextStyleBuilder::new()
@@ -227,10 +227,10 @@ where
 ///
 /// ```
 /// use embedded_graphics::{
-///     fonts::{Font6x8, Font12x16, Text},
+///     mono_font::{Font6x8, Font12x16, MonoTextStyle, MonoTextStyleBuilder},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     style::{MonoTextStyle, MonoTextStyleBuilder},
+///     text::Text,
 /// };
 ///
 /// let style = MonoTextStyle::new(Font6x8, Rgb565::YELLOW);
@@ -240,12 +240,11 @@ where
 ///     .build();
 /// ```
 ///
-/// [`Font`]: ../fonts/trait.Font.html
-/// [`Font6x8`]: ../fonts/struct.Font6x8.html
-/// [`Font8x16`]: ../fonts/struct.Font8x16.html
-/// [other fonts]: ../fonts/index.html
-/// [`Text`]: ../fonts/struct.Text.html
-/// [`MonoTextStyle`]: ./struct.MonoTextStyle.html
+/// [`Font6x8`]: struct.Font6x8.html
+/// [`Font8x16`]: struct.Font8x16.html
+/// [other fonts]: index.html
+/// [`Text`]: ../text/struct.Text.html
+/// [`MonoTextStyle`]: struct.MonoTextStyle.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct MonoTextStyleBuilder<C, F> {
     style: MonoTextStyle<C, F>,
@@ -340,30 +339,6 @@ where
     }
 }
 
-/// Vertical text alignment.
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum VerticalAlignment {
-    /// Top.
-    Top,
-    /// Bottom.
-    Bottom,
-    /// Center.
-    Center,
-    /// Baseline.
-    Baseline,
-}
-
-/// Horizontal text alignment.
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum HorizontalAlignment {
-    /// Left.
-    Left,
-    /// Center.
-    Center,
-    /// Right.
-    Right,
-}
-
 /// Marker type to improve compiler errors if no font was set in builder.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct UndefinedFont;
@@ -372,8 +347,12 @@ pub struct UndefinedFont;
 mod tests {
     use super::*;
     use crate::{
-        fonts::Font12x16, fonts::Font6x8, fonts::Text, geometry::Dimensions,
-        mock_display::MockDisplay, pixelcolor::BinaryColor, Drawable,
+        geometry::Dimensions,
+        mock_display::MockDisplay,
+        mono_font::{Font12x16, Font6x8},
+        pixelcolor::BinaryColor,
+        text::Text,
+        Drawable,
     };
 
     #[test]

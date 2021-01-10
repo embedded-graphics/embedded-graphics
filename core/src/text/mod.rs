@@ -1,3 +1,5 @@
+//! Text.
+
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
 };
@@ -5,9 +7,7 @@ use crate::{
 /// Text style.
 ///
 /// The `TextStyle` trait is used to integrate text renderers into embedded-graphics. Users should
-/// not call it directly and instead use the functions provided by the [`Text`] type.
-///
-/// [`Text`]: ../fonts/struct.Text.html
+/// not call it directly and instead use the functions provided by the `Text` type.
 pub trait TextStyle {
     /// Color type.
     type Color: PixelColor;
