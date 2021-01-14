@@ -112,14 +112,27 @@ impl<C> Dimensions for Styled<Arc, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
         if self.style.effective_stroke_color().is_some() {
             let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
+            let bb = self.primitive.offset(offset).bounding_box();
+
+            // Handle cases where inner stroke corners expand the bounding box
+            if self.style.stroke_width > 1 {
+                let inner_offset = self.style.inside_stroke_width().saturating_cast();
+
+                let inner_bb = self.primitive.offset(-inner_offset).bounding_box();
+
+                Rectangle::new(
+                    bb.top_left.component_min(inner_bb.top_left),
+                    bb.size.component_max(inner_bb.size),
+                )
+            } else {
+                bb
+            }
         } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+            Rectangle::new(self.primitive.center(), Size::zero())
         }
     }
 }
@@ -259,10 +272,9 @@ mod tests {
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());
 
-        // TODO: Uncomment when arc bounding box is fixed in #405
-        // let mut display = MockDisplay::new();
-        // center.draw(&mut display).unwrap();
-        // assert_eq!(display.affected_area(), center.bounding_box());
+        let mut display = MockDisplay::new();
+        center.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area(), center.bounding_box());
     }
 
     #[test]
@@ -284,7 +296,7 @@ mod tests {
             empty
                 .into_styled::<BinaryColor>(PrimitiveStyle::with_fill(BinaryColor::On))
                 .bounding_box(),
-            Rectangle::new(empty.bounding_box().center(), Size::zero()),
+            Rectangle::new(CENTER, Size::zero()),
             "filled"
         );
     }
