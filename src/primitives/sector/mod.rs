@@ -4,7 +4,7 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Size},
+    geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
     primitives::{
         common::PlaneSector, Circle, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle,
     },
@@ -120,7 +120,7 @@ impl Sector {
 
     /// Return the center point of the sector
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
     }
 
     /// Returns the center point of the sector scaled by a factor of 2.
@@ -132,6 +132,23 @@ impl Sector {
         let radius = self.diameter.saturating_sub(1);
 
         self.top_left * 2 + Size::new(radius, radius)
+    }
+
+    /// Return the end angle of the arc
+    fn angle_end(&self) -> Angle {
+        self.angle_start + self.angle_sweep
+    }
+
+    /// Return the delta between a point on the arc at a given angle and the center point.
+    pub(in crate::primitives) fn delta_from_angle(&self, angle: Angle) -> Point {
+        let diameter = Real::from(self.diameter);
+
+        Point::new(
+            i32::from(angle.cos() * diameter),
+            // NOTE: Y coordinate is top-down in e-g, but sine function is only in correct phase
+            // with cosine with bottom-up Y axis, hence negation here.
+            -i32::from(angle.sin() * diameter),
+        ) / 2
     }
 }
 
@@ -164,9 +181,50 @@ impl ContainsPoint for Sector {
     }
 }
 
+// TODO: Dedupe with Arc impl
 impl Dimensions for Sector {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new_equal(self.diameter))
+        let quadrants = [
+            Angle::from_degrees(0.0),
+            Angle::from_degrees(90.0),
+            Angle::from_degrees(180.0),
+            Angle::from_degrees(270.0),
+            Angle::from_degrees(360.0),
+        ];
+
+        let start = self.delta_from_angle(self.angle_start);
+        let end = self.delta_from_angle(self.angle_end());
+        let center = self.center();
+
+        let plane_sector = PlaneSector::new(self.angle_start, self.angle_sweep);
+
+        let (mut min, max) = quadrants
+            .iter()
+            .filter_map(|q| {
+                if *q > self.angle_start && *q < self.angle_end() {
+                    Some(self.delta_from_angle(*q))
+                } else {
+                    None
+                }
+            })
+            .filter(|quadrant| plane_sector.contains(*quadrant))
+            .chain([start, end, Point::zero()].iter().cloned())
+            .fold(
+                (start.component_min(end), start.component_max(end)),
+                |acc, point| (acc.0.component_min(point), acc.1.component_max(point)),
+            );
+
+        if min != max {
+            if min.x < center.x {
+                min.x += 1;
+            }
+
+            if min.y < center.y {
+                min.y += 1;
+            }
+        }
+
+        Rectangle::with_corners(min, max).translate(center)
     }
 }
 
@@ -217,7 +275,7 @@ mod tests {
 
         assert_eq!(
             sector.bounding_box(),
-            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+            Rectangle::new(Point::new(-11, -16), Size::new(6, 6))
         );
     }
 
@@ -227,7 +285,7 @@ mod tests {
 
         assert_eq!(
             sector.bounding_box(),
-            Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+            Rectangle::new(Point::new(10, 15), Size::new(5, 5))
         );
     }
 
