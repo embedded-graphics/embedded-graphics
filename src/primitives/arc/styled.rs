@@ -124,6 +124,16 @@ where
 
                 let inner_bb = self.primitive.offset(-inner_offset).bounding_box();
 
+                dbg!(
+                    self.primitive,
+                    self.primitive.center(),
+                    self.primitive.to_circle().center(),
+                    self.primitive.to_circle().bounding_box().center(),
+                    offset,
+                    self.primitive.offset(offset),
+                    self.primitive.offset(offset).bounding_box(),
+                );
+
                 Rectangle::new(
                     bb.top_left.component_min(inner_bb.top_left),
                     bb.size.component_max(inner_bb.size),
@@ -143,9 +153,10 @@ mod tests {
     use crate::{
         draw_target::DrawTargetExt,
         geometry::{AnchorPoint, AngleUnit, Point},
+        iterator::PixelIteratorExt,
         mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        primitives::{Circle, Primitive},
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        primitives::{Circle, PointsIter, Primitive},
         style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
@@ -251,7 +262,7 @@ mod tests {
     }
 
     #[test]
-    fn bounding_boxes() {
+    fn bounding_box_stroke_offset() {
         const CENTER: Point = Point::new(15, 15);
         const SIZE: u32 = 10;
 
@@ -271,10 +282,6 @@ mod tests {
 
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());
-
-        let mut display = MockDisplay::new();
-        center.draw(&mut display).unwrap();
-        assert_eq!(display.affected_area(), center.bounding_box());
     }
 
     #[test]
@@ -299,5 +306,74 @@ mod tests {
             Rectangle::new(CENTER, Size::zero()),
             "filled"
         );
+    }
+
+    #[test]
+    fn styled_bounding_box() {
+        let cases = [
+            (0.0, 90.0),
+            (0.0, 180.0),
+            (0.0, 270.0),
+            (45.0, 155.0),
+            (160.0, 360.0),
+            (100.0, -200.0),
+            (-100.0, -90.0),
+        ];
+
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb888::RED)
+            .stroke_width(6)
+            .build();
+
+        for (start, sweep) in cases.iter() {
+            let start = start.deg();
+            let sweep = sweep.deg();
+
+            let mut display = MockDisplay::new();
+
+            display.set_allow_overdraw(true);
+
+            let s = Arc::new(Point::new(5, 5), 15, start, sweep).into_styled(style);
+
+            s.draw(&mut display).unwrap();
+
+            s.bounding_box()
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
+                .draw(&mut display)
+                .unwrap();
+
+            assert_eq!(
+                display.affected_area(),
+                s.bounding_box(),
+                "start {}, sweep {}:\n\n{:?}",
+                start.to_degrees(),
+                sweep.to_degrees(),
+                display
+            );
+        }
+    }
+
+    #[test]
+    fn points_bounding_box() {
+        let arc = Arc::new(Point::new(1, 1), 10, 0.0.deg(), 90.0.deg());
+
+        let mut display = MockDisplay::new();
+
+        display.set_allow_overdraw(true);
+
+        arc.bounding_box()
+            .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 1))
+            .draw(&mut display)
+            .unwrap();
+
+        arc.points()
+            .map(|pos| Pixel(pos, BinaryColor::On))
+            .draw(&mut display)
+            .unwrap();
+
+        dbg!(display);
+
+        // assert_eq!(display.affected_area(), arc.bounding_box());
+        panic!();
     }
 }

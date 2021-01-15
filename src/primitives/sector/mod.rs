@@ -4,7 +4,7 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Real, Size, Trigonometry},
+    geometry::{Angle, AngleUnit, Dimensions, Point, Real, Size, Trigonometry},
     primitives::{
         common::PlaneSector, Circle, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle,
     },
@@ -192,6 +192,10 @@ impl Dimensions for Sector {
             Angle::from_degrees(360.0),
         ];
 
+        if self.angle_sweep >= 270.0.deg() {
+            return self.to_circle().bounding_box();
+        }
+
         let start = self.delta_from_angle(self.angle_start);
         let end = self.delta_from_angle(self.angle_end());
         let center = self.center();
@@ -200,29 +204,26 @@ impl Dimensions for Sector {
 
         let (mut min, max) = quadrants
             .iter()
-            .filter_map(|q| {
-                if *q > self.angle_start && *q < self.angle_end() {
-                    Some(self.delta_from_angle(*q))
-                } else {
-                    None
-                }
-            })
+            .map(|q| self.delta_from_angle(*q))
             .filter(|quadrant| plane_sector.contains(*quadrant))
             .chain([start, end, Point::zero()].iter().cloned())
             .fold(
-                (start.component_min(end), start.component_max(end)),
+                (
+                    Point::new_equal(core::i32::MAX),
+                    Point::new_equal(core::i32::MIN),
+                ),
                 |acc, point| (acc.0.component_min(point), acc.1.component_max(point)),
             );
 
-        if min != max {
-            if min.x < center.x {
-                min.x += 1;
-            }
+        // if min != max {
+        //     if min.x < center.x {
+        //         min.x += 1;
+        //     }
 
-            if min.y < center.y {
-                min.y += 1;
-            }
-        }
+        //     if min.y < center.y {
+        //         min.y += 1;
+        //     }
+        // }
 
         Rectangle::with_corners(min, max).translate(center)
     }
@@ -286,6 +287,27 @@ mod tests {
         assert_eq!(
             sector.bounding_box(),
             Rectangle::new(Point::new(10, 15), Size::new(5, 5))
+        );
+    }
+
+    #[test]
+    fn full_circle() {
+        // Full circle
+        assert_eq!(
+            Sector::new(Point::new(10, 10), 10, 0.0.deg(), 360.0.deg()).bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(10, 10))
+        );
+
+        // Greater than full circle
+        assert_eq!(
+            Sector::new(Point::new(10, 10), 10, 0.0.deg(), 380.0.deg()).bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(10, 10))
+        );
+
+        // Two rotations
+        assert_eq!(
+            Sector::new(Point::new(10, 10), 10, 0.0.deg(), 720.0.deg()).bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(10, 10))
         );
     }
 
