@@ -240,12 +240,21 @@ where
 ///     .build();
 /// ```
 ///
+/// # Setting the font
+///
+/// The default font set in `MonoTextStyleBuilder` is [`UndefinedFont`]. You will need to set a
+/// valid [`MonoFont`] by calling the [`font()`] builder method, otherwise you will not be able
+/// to create a style object using the builder.
+///
 /// [`Font`]: ../fonts/trait.Font.html
 /// [`Font6x8`]: ../fonts/struct.Font6x8.html
 /// [`Font8x16`]: ../fonts/struct.Font8x16.html
 /// [other fonts]: ../fonts/index.html
 /// [`Text`]: ../fonts/struct.Text.html
 /// [`MonoTextStyle`]: ./struct.MonoTextStyle.html
+/// [`UndefinedFont`]: ./struct.UndefinedFont.html
+/// [`MonoFont`]: ../fonts/trait.MonoFont.html
+/// [`font()`]: #method.font
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct MonoTextStyleBuilder<C, F> {
     style: MonoTextStyle<C, F>,
@@ -268,6 +277,12 @@ impl<C> MonoTextStyleBuilder<C, UndefinedFont> {
 
 impl<C, F> MonoTextStyleBuilder<C, F> {
     /// Sets the font.
+    ///
+    /// Setting the font is required to build a `MonoTextStyle`. On construction, the
+    /// builder's font is set to [`UndefinedFont`] and the [`build()`] method is not
+    /// implemented for `UndefinedFont`.
+    ///
+    /// [`build()`]: #method.build
     pub fn font<Font>(self, font: Font) -> MonoTextStyleBuilder<C, Font> {
         let style = MonoTextStyle {
             font,
