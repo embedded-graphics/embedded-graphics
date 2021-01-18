@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{AnchorPoint, Dimensions, Point, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
     style::Styled,
@@ -95,16 +95,18 @@ where
             let p = match self.style.horizontal_alignment {
                 HorizontalAlignment::Left => position,
                 HorizontalAlignment::Right => {
-                    let metrics = self.style.character_style.measure_text(line, Point::zero());
-                    position
-                        - Point::new(
-                            metrics.bounding_box.anchor_point(AnchorPoint::TopRight).x,
-                            0,
-                        )
+                    let metrics = self
+                        .style
+                        .character_style
+                        .measure_string(line, Point::zero());
+                    position - (metrics.next_position - Point::new(1, 0))
                 }
                 HorizontalAlignment::Center => {
-                    let metrics = self.style.character_style.measure_text(line, Point::zero());
-                    position - Point::new(metrics.bounding_box.center().x, 0)
+                    let metrics = self
+                        .style
+                        .character_style
+                        .measure_string(line, Point::zero());
+                    position - (metrics.next_position - Point::new(1, 0)) / 2
                 }
             };
 
@@ -177,7 +179,7 @@ where
         let mut min_max: Option<(Point, Point)> = None;
 
         for (line, position) in self.lines() {
-            let metrics = self.style.measure_text(line, position);
+            let metrics = self.style.measure_string(line, position);
             update_min_max(&mut min_max, &metrics);
         }
 
@@ -198,7 +200,7 @@ where
         let mut min_max: Option<(Point, Point)> = None;
 
         for (line, position) in self.lines() {
-            let metrics = self.style.character_style.measure_text(line, position);
+            let metrics = self.style.character_style.measure_string(line, position);
             update_min_max(&mut min_max, &metrics);
         }
 
@@ -417,20 +419,20 @@ mod tests {
         ]);
     }
 
-    // #[test]
-    // fn transparent_text_has_zero_size_but_retains_position() {
-    //     let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-    //         .font(Font6x8)
-    //         .build();
+    #[test]
+    fn transparent_text_has_zero_size_but_retains_position() {
+        let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
+            .font(Font6x8)
+            .build();
 
-    //     let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
+        let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
 
-    //     assert_eq!(
-    //         styled.bounding_box(),
-    //         Rectangle::new(Point::new(7, 11), Size::zero()),
-    //         "Transparent text is expected to have a zero sized bounding box with the top left corner at the text position",
-    //     );
-    // }
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(Point::new(7, 11), Size::zero()),
+            "Transparent text is expected to have a zero sized bounding box with the top left corner at the text position",
+        );
+    }
 
     #[test]
     fn horizontal_alignment_left() {

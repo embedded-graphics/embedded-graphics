@@ -203,13 +203,20 @@ where
         Ok(position + Size::new(width, 0))
     }
 
-    fn measure_text(&self, text: &str, position: Point) -> TextMetrics {
+    fn measure_string(&self, text: &str, position: Point) -> TextMetrics {
         let width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
             .saturating_sub(F::CHARACTER_SPACING);
         let size = Size::new(width, F::CHARACTER_SIZE.height);
 
+        // Return a zero sized bounding box is the text is completely transparent.
+        let bb_size = if self.text_color.is_some() || self.background_color.is_some() {
+            size
+        } else {
+            Size::zero()
+        };
+
         TextMetrics {
-            bounding_box: Rectangle::new(position, size),
+            bounding_box: Rectangle::new(position, bb_size),
             next_position: position + size.x_axis(),
         }
     }
