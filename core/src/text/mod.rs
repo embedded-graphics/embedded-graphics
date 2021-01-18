@@ -23,7 +23,9 @@ pub trait TextRenderer {
     ///
     /// # Implementation notes
     ///
-    /// This method must ignore all control characters and only draw a single line of text.
+    /// This method must not interpret any control characters and only render a single line of text.
+    /// Any control character in the `text` should be handled the same way as any other character
+    /// that isn't included in the font.
     fn draw_string<D>(
         &self,
         text: &str,
@@ -58,8 +60,9 @@ pub trait TextRenderer {
     ///
     /// # Implementation notes
     ///
-    /// This method must ignore all control characters and only return the bounding box of a single
-    /// row of text.
+    /// This method must not interpret any control characters and only render a single line of text.
+    /// Any control character in the `text` should be handled the same way as any other character
+    /// that isn't included in the font.
     fn measure_text(&self, text: &str, position: Point) -> TextMetrics;
 
     /// Offsets the point to apply the vertical alignment.

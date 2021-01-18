@@ -204,8 +204,6 @@ where
     }
 
     fn measure_text(&self, text: &str, position: Point) -> TextMetrics {
-        // TODO: ignore control characters in `text`
-
         let width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
             .saturating_sub(F::CHARACTER_SPACING);
         let size = Size::new(width, F::CHARACTER_SIZE.height);
@@ -808,5 +806,22 @@ mod tests {
                 .bounding_box(),
             Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 8)),
         );
+    }
+
+    #[test]
+    fn control_characters() {
+        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+
+        let mut display = MockDisplay::new();
+        style
+            .draw_string("A\t\n\rB", Point::zero(), &mut display)
+            .unwrap();
+
+        let mut expected = MockDisplay::new();
+        style
+            .draw_string("A???B", Point::zero(), &mut expected)
+            .unwrap();
+
+        display.assert_eq(&expected);
     }
 }
