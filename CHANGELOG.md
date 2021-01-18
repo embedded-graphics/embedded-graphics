@@ -11,6 +11,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) Added `MockDisplay::assert_eq_with_message` and `MockDisplay::assert_pattern_with_message`.
 - [#510](https://github.com/embedded-graphics/embedded-graphics/pull/510) Added `vertical_alignment` and `horizontal_alignment` to `MonoTextStyle`.
 - [#510](https://github.com/embedded-graphics/embedded-graphics/pull/510) Added `From` impl to convert an existing `MonoTextStyle` into a `MonoTextStyleBuilder`.
+- [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) Added support for underline and strikethrough attributes for `MonoTextStyle`.
+
+### Changed
+
+- **(breaking)** [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) The external text renderer API was rewritten and the `TextStyle` trait was renamed to `TextRenderer`.
+- **(breaking)** [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) The `fonts` module was split into `text` and `mono_font` modules.
+- **(breaking)** [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) The vertical and horizontal alignment of `Text` objects must now be set using the new `TextStyle` struct.
 
 ### Removed
 

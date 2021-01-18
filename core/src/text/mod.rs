@@ -79,9 +79,9 @@ pub trait TextRenderer {
 
 /// Text metrics.
 ///
-/// See [`TextRenderer::measure_text`] for more information.
+/// See [`TextRenderer::measure_string`] for more information.
 ///
-/// [`TextRenderer::measure_text`]: trait.TextRenderer.html#tymethod.measure_text
+/// [`TextRenderer::measure_string`]: trait.TextRenderer.html#tymethod.measure_string
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct TextMetrics {
     /// Bounding box.

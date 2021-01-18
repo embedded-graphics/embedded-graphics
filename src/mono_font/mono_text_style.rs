@@ -208,7 +208,7 @@ where
             .saturating_sub(F::CHARACTER_SPACING);
         let size = Size::new(width, F::CHARACTER_SIZE.height);
 
-        // Return a zero sized bounding box is the text is completely transparent.
+        // Return a zero sized bounding box if the text is completely transparent.
         let bb_size = if self.text_color.is_some() || self.background_color.is_some() {
             size
         } else {
