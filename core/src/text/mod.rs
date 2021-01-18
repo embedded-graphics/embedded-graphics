@@ -6,7 +6,7 @@ use crate::{
 
 /// Text renderer.
 ///
-/// The `TextStyle` trait is used to integrate text renderers into embedded-graphics. Users should
+/// The `TextRenderer` trait is used to integrate text renderers into embedded-graphics. Users should
 /// not call it directly and instead use the functions provided by the `Text` type.
 pub trait TextRenderer {
     /// Color type.
@@ -50,10 +50,7 @@ pub trait TextRenderer {
     where
         D: DrawTarget<Color = Self::Color>;
 
-    /// Returns the width of the text in pixels.
-    fn string_width(&self, text: &str) -> u32;
-
-    /// Returns the bounding box of a string.
+    /// Returns the text metrics for a string.
     ///
     /// The interpretation of the y coordinate of `position` is dependent on the implementation and
     /// can, for example, be the top edge of the bounding box or a point on the baseline. The
@@ -63,13 +60,30 @@ pub trait TextRenderer {
     ///
     /// This method must ignore all control characters and only return the bounding box of a single
     /// row of text.
-    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point);
+    fn measure_text(&self, text: &str, position: Point) -> TextMetrics;
 
     /// Offsets the point to apply the vertical alignment.
     fn vertical_offset(&self, position: Point, vertical_alignment: VerticalAlignment) -> Point;
 
     /// Returns the line height.
+    ///
+    /// The line height is defined as the vertical distance between the baseline of two adjacent
+    /// lines in pixels.
     fn line_height(&self) -> u32;
+}
+
+/// Text metrics.
+///
+/// See [`TextRenderer::measure_text`] for more information.
+///
+/// [`TextRenderer::measure_text`]: trait.TextRenderer.html#tymethod.measure_text
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub struct TextMetrics {
+    /// Bounding box.
+    pub bounding_box: Rectangle,
+
+    /// The position of the next text.
+    pub next_position: Point,
 }
 
 /// Vertical text alignment.

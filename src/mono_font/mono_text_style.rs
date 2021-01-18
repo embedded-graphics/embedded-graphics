@@ -4,7 +4,7 @@ use crate::{
     mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    text::{TextRenderer, VerticalAlignment},
+    text::{TextMetrics, TextRenderer, VerticalAlignment},
     Pixel, SaturatingCast,
 };
 
@@ -133,6 +133,8 @@ where
         let mut first = true;
         let mut p = position;
 
+        let mut width = 0;
+
         for c in text.chars() {
             if first {
                 first = false;
@@ -140,6 +142,7 @@ where
                 // Fill space between characters if background color is set.
                 self.draw_background(F::CHARACTER_SPACING, p, target)?;
                 p += Size::new(F::CHARACTER_SPACING, 0);
+                width += F::CHARACTER_SPACING;
             }
 
             let pixels = MonoCharPixels::<F>::new(c);
@@ -175,9 +178,9 @@ where
             }
 
             p += F::CHARACTER_SIZE.x_axis();
+            width += F::CHARACTER_SIZE.width;
         }
 
-        let width = self.string_width(text);
         self.draw_strikethrough(width, position, target)?;
         self.draw_underline(width, position, target)?;
 
@@ -200,25 +203,17 @@ where
         Ok(position + Size::new(width, 0))
     }
 
-    fn string_width(&self, text: &str) -> u32 {
-        // TODO: ignore control characters in `text`
-        // TODO: how should completely transparent text be handled?
-
-        (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
-            .saturating_sub(F::CHARACTER_SPACING)
-    }
-
-    fn string_bounding_box(&self, text: &str, position: Point) -> (Rectangle, Point) {
+    fn measure_text(&self, text: &str, position: Point) -> TextMetrics {
         // TODO: ignore control characters in `text`
 
-        // If a piece of text is completely transparent, return an empty bounding box
-        if self.text_color.is_none() && self.background_color.is_none() {
-            return (Rectangle::new(position, Size::zero()), position);
+        let width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
+            .saturating_sub(F::CHARACTER_SPACING);
+        let size = Size::new(width, F::CHARACTER_SIZE.height);
+
+        TextMetrics {
+            bounding_box: Rectangle::new(position, size),
+            next_position: position + size.x_axis(),
         }
-
-        let size = Size::new(self.string_width(text), F::CHARACTER_SIZE.height);
-
-        (Rectangle::new(position, size), position + size.x_axis())
     }
 
     /// Calculates the offset between the line position and the top edge of the bounding box.
