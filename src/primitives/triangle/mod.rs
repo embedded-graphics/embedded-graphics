@@ -432,4 +432,11 @@ mod tests {
             )
         );
     }
+
+    #[test]
+    fn check_collapsed() {
+        let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
+
+        assert_eq!(triangle.is_collapsed(20, StrokeOffset::None), true);
+    }
 }
