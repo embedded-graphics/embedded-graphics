@@ -592,4 +592,15 @@ mod tests {
 
         display.assert_eq(&MockDisplay::new());
     }
+
+    #[test]
+    fn issue_489_overdraw() {
+        let mut display = MockDisplay::new();
+
+        // Panics if pixel is drawn twice.
+        Polyline::new(&[Point::new(10, 5), Point::new(5, 10), Point::new(10, 10)])
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 5))
+            .draw(&mut display)
+            .unwrap();
+    }
 }
