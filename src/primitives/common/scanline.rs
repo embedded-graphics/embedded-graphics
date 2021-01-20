@@ -75,8 +75,14 @@ impl Scanline {
             return false;
         }
 
-        let range = self.x.start - 1..self.x.end + 1;
-        range.contains(&(other.x.start)) || range.contains(&(other.x.end - 1))
+        let range = self.x.start - 1..=self.x.end;
+
+        range.contains(&(other.x.start)) || range.contains(&(other.x.end - 1)) || {
+            // PERF: If the other conditions short circuit, this won't be computed.
+            let range = other.x.start - 1..=other.x.end;
+
+            range.contains(&(self.x.start)) || range.contains(&(self.x.end - 1))
+        }
     }
 
     /// Tries to extend this line by another line.
@@ -165,5 +171,18 @@ mod tests {
         run_touches_test(80, 83, 83, 94, true, "Overlapping lines 2");
         run_touches_test(83, 94, 80, 83, true, "Overlapping lines 2, reversed");
         run_touches_test(83, 94, 94, 100, true, "Adjacent");
+    }
+
+    #[test]
+    fn issue_489_filled_triangle_bug() {
+        let mut l1 = Scanline { y: 5, x: 18..20 };
+        let l2 = Scanline { y: 5, x: 11..26 };
+
+        assert_eq!(l1.touches(&l2), true, "l1 touches l2");
+
+        let result = l1.try_extend(&l2);
+
+        assert_eq!(result, true);
+        assert_eq!(l1, Scanline { y: 5, x: 11..26 });
     }
 }

@@ -344,8 +344,6 @@ mod tests {
 
         let mut display = MockDisplay::new();
 
-        display.set_allow_overdraw(true);
-
         styled.draw(&mut display).unwrap();
         assert_eq!(display.affected_area(), styled.bounding_box());
     }
