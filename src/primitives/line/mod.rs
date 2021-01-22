@@ -209,6 +209,21 @@ impl Line {
             return Intersection::Colinear;
         }
 
+        let outer_side = if denominator > 0 {
+            LineSide::Right
+        } else {
+            LineSide::Left
+        };
+
+        // Special case: If the two lines are almost parallel, return the average point between
+        // them.
+        if denominator.pow(2) < self.delta().dot_product(other.delta()) {
+            return Intersection::Point {
+                point: (self.end + other.start) / 2,
+                outer_side,
+            };
+        }
+
         // If we got here, line segments intersect. Compute intersection point using method similar
         // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
 
@@ -235,11 +250,7 @@ impl Line {
 
         Intersection::Point {
             point: Point::new(x_numerator, y_numerator) / denominator,
-            outer_side: if denominator > 0 {
-                LineSide::Right
-            } else {
-                LineSide::Left
-            },
+            outer_side,
         }
     }
 }
