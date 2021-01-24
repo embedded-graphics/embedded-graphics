@@ -1,15 +1,19 @@
 //! The line primitive
 
 mod bresenham;
+pub(in crate::primitives) mod intersection_params;
 mod points;
 mod styled;
 mod thick_points;
 
 use crate::{
-    geometry::{Dimensions, Point, PointExt},
+    geometry::{Dimensions, Point},
     primitives::{
-        common::{LineSide, LinearEquation, StrokeOffset},
-        line::thick_points::{ParallelLineType, ParallelsIterator},
+        common::{LineSide, StrokeOffset},
+        line::{
+            intersection_params::IntersectionParams,
+            thick_points::{ParallelLineType, ParallelsIterator},
+        },
         PointsIter, Primitive, Rectangle,
     },
     transform::Transform,
@@ -196,62 +200,9 @@ impl Line {
     ///
     /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
     /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
+    #[allow(unused)]
     pub(in crate::primitives) fn intersection(&self, other: &Line) -> Intersection {
-        let line1 = LinearEquation::from_line(self);
-        let line2 = LinearEquation::from_line(other);
-
-        // Calculate the determinant to solve the system of linear equations using Cramer's rule.
-        let denominator = line1.normal_vector.determinant(line2.normal_vector);
-
-        // The system of linear equations has no solutions if the determinant is zero. In this case,
-        // the lines must be colinear.
-        if denominator == 0 {
-            return Intersection::Colinear;
-        }
-
-        let outer_side = if denominator > 0 {
-            LineSide::Right
-        } else {
-            LineSide::Left
-        };
-
-        // Special case: If the two lines are almost parallel, return the average point between
-        // them.
-        if denominator.pow(2) < self.delta().dot_product(other.delta()) {
-            return Intersection::Point {
-                point: (self.end + other.start) / 2,
-                outer_side,
-            };
-        }
-
-        // If we got here, line segments intersect. Compute intersection point using method similar
-        // to that described here: http://paulbourke.net/geometry/pointlineplane/#i2l
-
-        // The denominator/2 is to get rounding instead of truncating.
-        let offset = denominator.abs() / 2;
-
-        let origin_distances = Point::new(line1.origin_distance, line2.origin_distance);
-
-        let numerator =
-            origin_distances.determinant(Point::new(line1.normal_vector.y, line2.normal_vector.y));
-        let x_numerator = if numerator < 0 {
-            numerator - offset
-        } else {
-            numerator + offset
-        };
-
-        let numerator =
-            Point::new(line1.normal_vector.x, line2.normal_vector.x).determinant(origin_distances);
-        let y_numerator = if numerator < 0 {
-            numerator - offset
-        } else {
-            numerator + offset
-        };
-
-        Intersection::Point {
-            point: Point::new(x_numerator, y_numerator) / denominator,
-            outer_side,
-        }
+        IntersectionParams::from_lines(self, other).intersection()
     }
 }
 
