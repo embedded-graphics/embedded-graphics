@@ -11,7 +11,7 @@ use crate::{
 
 /// Line intersection parameters.
 #[derive(Debug, Copy, Clone)]
-pub struct IntersectionParams<'a> {
+pub(in crate::primitives) struct IntersectionParams<'a> {
     line1: &'a Line,
     line2: &'a Line,
     le1: LinearEquation,

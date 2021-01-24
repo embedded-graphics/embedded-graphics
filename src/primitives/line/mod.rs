@@ -74,7 +74,7 @@ impl Dimensions for Line {
 
 /// Intersection test result.
 #[derive(Copy, Clone, Debug)]
-pub enum Intersection {
+pub(in crate::primitives) enum Intersection {
     /// Intersection at point
     Point {
         /// Intersection point.
