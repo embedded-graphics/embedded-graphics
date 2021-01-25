@@ -4,7 +4,7 @@ use crate::{
     geometry::{Point, PointExt},
     primitives::{
         common::{LineSide, LinearEquation, StrokeOffset},
-        line::{intersection_params::IntersectionParams, Intersection},
+        line::intersection_params::{Intersection, IntersectionParams},
         Line,
     },
 };

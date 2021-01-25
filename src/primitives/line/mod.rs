@@ -9,11 +9,8 @@ mod thick_points;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::{LineSide, StrokeOffset},
-        line::{
-            intersection_params::IntersectionParams,
-            thick_points::{ParallelLineType, ParallelsIterator},
-        },
+        common::StrokeOffset,
+        line::thick_points::{ParallelLineType, ParallelsIterator},
         PointsIter, Primitive, Rectangle,
     },
     transform::Transform,
@@ -70,37 +67,6 @@ impl Dimensions for Line {
     fn bounding_box(&self) -> Rectangle {
         Rectangle::with_corners(self.start, self.end)
     }
-}
-
-/// Intersection test result.
-#[derive(Copy, Clone, Debug)]
-pub(in crate::primitives) enum Intersection {
-    /// Intersection at point
-    Point {
-        /// Intersection point.
-        point: Point,
-
-        /// The "outer" side of the intersection, i.e. the side that has the joint's reflex angle.
-        ///
-        /// For example:
-        ///
-        /// ```text
-        /// # Left outer side:
-        ///
-        ///  ⎯
-        /// ╱
-        ///
-        /// # Right outer side:
-        ///  │
-        /// ╱
-        /// ```
-        ///
-        /// This is used to find the outside edge of a corner.
-        outer_side: LineSide,
-    },
-
-    /// No intersection: lines are colinear or parallel.
-    Colinear,
 }
 
 impl Line {
@@ -194,15 +160,6 @@ impl Line {
     /// Compute the delta (`end - start`) of the line.
     pub fn delta(&self) -> Point {
         self.end - self.start
-    }
-
-    /// Integer-only line intersection
-    ///
-    /// Inspired from https://stackoverflow.com/a/61485959/383609, which links to
-    /// https://webdocs.cs.ualberta.ca/~graphics/books/GraphicsGems/gemsii/xlines.c
-    #[allow(unused)]
-    pub(in crate::primitives) fn intersection(&self, other: &Line) -> Intersection {
-        IntersectionParams::from_lines(self, other).intersection()
     }
 }
 

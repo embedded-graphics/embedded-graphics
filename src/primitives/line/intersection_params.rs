@@ -4,21 +4,50 @@ use crate::{
     geometry::{Point, PointExt},
     primitives::{
         common::{LineSide, LinearEquation},
-        line::Intersection,
         Line,
     },
 };
 
+/// Intersection test result.
+#[derive(Copy, Clone, Debug)]
+pub enum Intersection {
+    /// Intersection at point
+    Point {
+        /// Intersection point.
+        point: Point,
+
+        /// The "outer" side of the intersection, i.e. the side that has the joint's reflex angle.
+        ///
+        /// For example:
+        ///
+        /// ```text
+        /// # Left outer side:
+        ///
+        ///  ⎯
+        /// ╱
+        ///
+        /// # Right outer side:
+        ///  │
+        /// ╱
+        /// ```
+        ///
+        /// This is used to find the outside edge of a corner.
+        outer_side: LineSide,
+    },
+
+    /// No intersection: lines are colinear or parallel.
+    Colinear,
+}
 /// Line intersection parameters.
 #[derive(Debug, Copy, Clone)]
-pub(in crate::primitives) struct IntersectionParams<'a> {
+pub struct IntersectionParams<'a> {
     line1: &'a Line,
     line2: &'a Line,
     le1: LinearEquation,
     le2: LinearEquation,
 
     /// Determinant, used to solve linear equations using Cramer's rule.
-    pub denominator: i32,
+    denominator: i32,
 }
 
 impl<'a> IntersectionParams<'a> {
