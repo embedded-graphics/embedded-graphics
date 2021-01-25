@@ -29,7 +29,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#507](https://github.com/embedded-graphics/embedded-graphics/pull/507) Fixed drawing of the join between the radial lines for sectors with a sweep angle close to 360°.
 - [#525](https://github.com/embedded-graphics/embedded-graphics/pull/525) `Triangle`s and `Polyline`s with thick strokes would overdraw in some cases.
-- [#527](https://github.com/embedded-graphics/embedded-graphics/pull/527) Some `Polyline`s occasionally drew spurs between joints. This is now fixed.
+- [#527](https://github.com/embedded-graphics/embedded-graphics/pull/527) Some cases where the ends of `Polyline`s would draw unwanted "spurs" are now fixed.
 
 ## [0.7.0-alpha.2] - 2020-11-29
 
