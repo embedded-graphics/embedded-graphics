@@ -4,7 +4,7 @@ use crate::{
     geometry::{Point, PointExt},
     primitives::{
         common::{LineSide, LinearEquation, StrokeOffset},
-        line::Intersection,
+        line::intersection_params::{Intersection, IntersectionParams},
         Line,
     },
 };
@@ -305,19 +305,29 @@ fn intersections(
     second_edge_left: &Line,
     second_edge_right: &Line,
 ) -> Option<(Point, LineSide, Point)> {
+    let params = IntersectionParams::from_lines(second_edge_left, first_edge_left);
+
     let (l_intersection, outer_side) = if let Intersection::Point {
         point, outer_side, ..
-    } = second_edge_left.intersection(&first_edge_left)
+    } = params.intersection()
     {
-        (point, outer_side)
+        if !params.nearly_colinear_has_error() {
+            (point, outer_side)
+        } else {
+            (first_edge_left.end, outer_side)
+        }
     } else {
         return None;
     };
 
-    let r_intersection = if let Intersection::Point { point, .. } =
-        second_edge_right.intersection(&first_edge_right)
-    {
-        point
+    let params = IntersectionParams::from_lines(second_edge_right, first_edge_right);
+
+    let r_intersection = if let Intersection::Point { point, .. } = params.intersection() {
+        if !params.nearly_colinear_has_error() {
+            point
+        } else {
+            first_edge_right.end
+        }
     } else {
         return None;
     };

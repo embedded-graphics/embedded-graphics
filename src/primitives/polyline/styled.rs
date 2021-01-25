@@ -603,4 +603,47 @@ mod tests {
             .draw(&mut display)
             .unwrap();
     }
+
+    #[test]
+    fn issue_471_spurs() {
+        let points = [Point::new(10, 70), Point::new(20, 50), Point::new(31, 30)];
+
+        let line = Polyline::new(&points)
+            .translate(Point::new(0, -15))
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 18));
+
+        let bb = line.bounding_box();
+
+        // Check bounding box is correct
+        assert_eq!(bb, Rectangle::new(Point::new(1, 11), Size::new(39, 49)));
+
+        let mut display = MockDisplay::new();
+        line.draw(&mut display).unwrap();
+
+        // Check no pixels are drawn outside bounding box
+        assert_eq!(display.affected_area(), bb);
+    }
+
+    #[test]
+    // FIXME: Un-ignore when more polyline spur fixes are made. This test checks for a smaller
+    // spur created from a different set of points than `issue_471_spurs`.
+    #[ignore]
+    fn issue_471_spurs_2() {
+        let points = [Point::new(13, 65), Point::new(20, 50), Point::new(31, 30)];
+
+        let line = Polyline::new(&points)
+            .translate(Point::new(0, -15))
+            .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 18));
+
+        let bb = line.bounding_box();
+
+        // Check bounding box is correct
+        assert_eq!(bb, Rectangle::new(Point::new(4, 26), Size::new(36, 44)));
+
+        let mut display = MockDisplay::new();
+        line.draw(&mut display).unwrap();
+
+        // Check no pixels are drawn outside bounding box
+        assert_eq!(display.affected_area(), bb);
+    }
 }
