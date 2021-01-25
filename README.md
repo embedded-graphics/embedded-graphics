@@ -31,7 +31,8 @@ It contains built in items that make it easy to draw 2D graphics primitives:
     * Triangles
     * Polylines
     * Rounded rectangles
-* Text with multiple fonts
+* Text
+* Monospaced fonts
 
 ## Additional functions provided by external crates
 
@@ -145,11 +146,12 @@ debugging, development or if hardware is not available.
 
 ```rust
 use embedded_graphics::{
-    fonts::{Font6x8, Text},
+    mono_font::{Font6x8, MonoTextStyle},
     pixelcolor::BinaryColor,
     prelude::*,
     primitives::{Circle, Rectangle, Triangle},
-    style::{PrimitiveStyle, MonoTextStyle},
+    style::PrimitiveStyle,
+    text::Text,
     mock_display::MockDisplay,
 };
 

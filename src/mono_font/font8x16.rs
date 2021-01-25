@@ -1,4 +1,4 @@
-use crate::{fonts::MonoFont, geometry::Size};
+use crate::{geometry::Size, mono_font::MonoFont};
 
 /// 8x16 pixel monospace font.
 ///
@@ -16,6 +16,10 @@ impl MonoFont for Font8x16 {
 
     const CHARACTER_SIZE: Size = Size::new(8, 16);
     const BASELINE: Option<i32> = Some(11);
+    const UNDERLINE_OFFSET: i32 = 14;
+    const UNDERLINE_HEIGHT: u32 = 2;
+    const STRIKETHROUGH_OFFSET: i32 = 6;
+    const STRIKETHROUGH_HEIGHT: u32 = 2;
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -36,10 +40,10 @@ impl MonoFont for Font8x16 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::*, MonoFont, Text},
         geometry::{Dimensions, Point, Size},
+        mono_font::{tests::*, MonoFont, MonoTextStyle},
         pixelcolor::BinaryColor,
-        style::MonoTextStyle,
+        text::Text,
     };
 
     const WIDTH: usize = Font8x16::CHARACTER_SIZE.width as usize;
@@ -191,5 +195,30 @@ mod tests {
     #[test]
     fn baseline() {
         test_baseline(Font8x16);
+    }
+
+    #[test]
+    fn decoration() {
+        test_text_decoration(
+            Font8x16,
+            &[
+                "        ", //
+                "        ", //
+                "   W    ", //
+                "  WWW   ", //
+                " WW WW  ", //
+                "WW   WW ", //
+                "RRRRRRRR", //
+                "RRRRRRRR", //
+                "WW   WW ", //
+                "WW   WW ", //
+                "WW   WW ", //
+                "WW   WW ", //
+                "        ", //
+                "        ", //
+                "GGGGGGGG", //
+                "GGGGGGGG", //
+            ],
+        );
     }
 }

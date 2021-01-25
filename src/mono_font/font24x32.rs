@@ -1,4 +1,4 @@
-use crate::{fonts::MonoFont, geometry::Size};
+use crate::{geometry::Size, mono_font::MonoFont};
 
 /// 24x32 pixel monospace font.
 ///
@@ -22,6 +22,9 @@ impl MonoFont for Font24x32 {
 
     const CHARACTER_SIZE: Size = Size::new(24, 32);
     const BASELINE: Option<i32> = Some(27);
+    const STRIKETHROUGH_OFFSET: i32 = 12;
+    const STRIKETHROUGH_HEIGHT: u32 = 4;
+    const UNDERLINE_HEIGHT: u32 = 4;
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -42,10 +45,10 @@ impl MonoFont for Font24x32 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::*, MonoFont, Text},
         geometry::{Dimensions, Point, Size},
+        mono_font::{tests::*, MonoFont, MonoTextStyle},
         pixelcolor::BinaryColor,
-        style::MonoTextStyle,
+        text::Text,
     };
 
     const WIDTH: usize = Font24x32::CHARACTER_SIZE.width as usize;
@@ -245,5 +248,50 @@ mod tests {
     #[test]
     fn baseline() {
         test_baseline(Font24x32);
+    }
+
+    #[test]
+    fn decoration() {
+        test_text_decoration(
+            Font24x32,
+            &[
+                "    WWWWWWWWWWWW        ",
+                "    WWWWWWWWWWWW        ",
+                "    WWWWWWWWWWWW        ",
+                "    WWWWWWWWWWWW        ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "RRRRRRRRRRRRRRRRRRRRRRRR",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "WWWW            WWWW    ",
+                "                        ",
+                "                        ",
+                "                        ",
+                "                        ",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+                "GGGGGGGGGGGGGGGGGGGGGGGG",
+            ],
+        );
     }
 }

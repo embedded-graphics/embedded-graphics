@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) Added the external text renderer API.
+
 ### Removed
 
 - [#522](https://github.com/embedded-graphics/embedded-graphics/pull/522) The `draw_target` module, expect the `DrawTarget` trait, was moved to `embedded-graphics`.

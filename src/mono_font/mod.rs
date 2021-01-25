@@ -19,10 +19,10 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     mono_font::{Font6x8, MonoTextStyle, MonoTextStyleBuilder},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
-//!     style::{MonoTextStyle, MonoTextStyleBuilder},
+//!     text::Text,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
@@ -46,10 +46,10 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     mono_font::{Font6x8, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     style::MonoTextStyle,
+//!     text::Text,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
@@ -80,10 +80,10 @@
 //! use arrayvec::ArrayString;
 //! use core::fmt::Write;
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     mono_font::{Font6x8, MonoTextStyleBuilder},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
-//!     style::MonoTextStyleBuilder,
+//!     text::Text,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay;
 //! # let mut display = MockDisplay::default();
@@ -125,9 +125,9 @@
 //! [`Font8x16`]: struct.Font8x16.html
 //! [`Font12x16`]: struct.Font12x16.html
 //! [`Font24x32`]: struct.Font24x32.html
-//! [`Text`]: struct.Text.html
+//! [`Text`]: ../text/struct.Text.html
 //! [`Styled`]: ../style/struct.Styled.html
-//! [`MonoTextStyle`]: ../style/struct.MonoTextStyle.html
+//! [`MonoTextStyle`]: struct.MonoTextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
@@ -137,16 +137,16 @@ mod font6x12;
 mod font6x8;
 mod font8x16;
 mod mono_char_pixels;
-mod text;
+mod mono_text_style;
 
 pub(crate) use mono_char_pixels::MonoCharPixels;
-pub use text::Text;
 
 pub use font12x16::Font12x16;
 pub use font24x32::Font24x32;
 pub use font6x12::Font6x12;
 pub use font6x8::Font6x8;
 pub use font8x16::Font8x16;
+pub use mono_text_style::{MonoTextStyle, MonoTextStyleBuilder};
 
 use crate::geometry::Size;
 
@@ -174,37 +174,84 @@ pub trait MonoFont: Copy {
     /// TODO: add description how this value is used and what the default value is
     const BASELINE: Option<i32> = None;
 
+    /// Offset from top of a character to the top of the strikethrough.
+    const STRIKETHROUGH_OFFSET: i32 = Self::CHARACTER_SIZE.height as i32 / 2;
+
+    /// Height of the strikethrough.
+    const STRIKETHROUGH_HEIGHT: u32 = 1;
+
+    /// Offset from top of a character to the top of the underline.
+    const UNDERLINE_OFFSET: i32 = Self::CHARACTER_SIZE.height as i32;
+
+    /// Height of the underline.
+    const UNDERLINE_HEIGHT: u32 = 1;
+
     /// Returns the position of a character in the font.
     fn char_offset(_: char) -> u32;
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     use crate::{
         geometry::Point,
         mock_display::MockDisplay,
-        pixelcolor::BinaryColor,
-        style::{MonoTextStyleBuilder, VerticalAlignment},
+        mono_font::MonoTextStyleBuilder,
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        text::{Text, TextStyleBuilder, VerticalAlignment},
         Drawable,
     };
 
     /// Draws a text using the given font and checks it against the expected pattern.
     // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
     // #[track_caller]
-    pub(super) fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
+    pub fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
     where
         F: MonoFont,
     {
-        let style = MonoTextStyleBuilder::new()
+        let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
             .vertical_alignment(VerticalAlignment::Top)
             .build();
 
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
-            .into_styled(style)
+            .into_styled(text_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(pattern);
+    }
+
+    /// Draws a white 'A' with green underline and red strikethrough.
+    // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
+    // #[track_caller]
+    pub fn test_text_decoration<F>(font: F, pattern: &[&str])
+    where
+        F: MonoFont,
+    {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(font)
+            .text_color(Rgb888::WHITE)
+            .underline_with_color(Rgb888::GREEN)
+            .strikethrough_with_color(Rgb888::RED)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        let mut display = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Text::new("A", Point::zero())
+            .into_styled(text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -214,20 +261,24 @@ mod tests {
     /// Test if the baseline constant is set correctly.
     ///
     /// This test assumes that the character `A` is on the baseline.
-    pub(super) fn test_baseline<F>(font: F)
+    pub fn test_baseline<F>(font: F)
     where
         F: MonoFont,
     {
-        let style = MonoTextStyleBuilder::new()
+        let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
             .vertical_alignment(VerticalAlignment::Top)
             .build();
 
         // Draw 'A' character to determine it's baseline
         let mut display = MockDisplay::new();
         Text::new("A", Point::zero())
-            .into_styled(style)
+            .into_styled(text_style)
             .draw(&mut display)
             .unwrap();
 

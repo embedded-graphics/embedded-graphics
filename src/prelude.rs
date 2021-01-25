@@ -3,10 +3,10 @@
 #[doc(no_inline)]
 pub use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
-    fonts::MonoFont,
     geometry::{Angle, AngleUnit, Dimensions, OriginDimensions, Point, Size},
     image::{ImageDrawable, ImageDrawableExt},
     iterator::{ContiguousIteratorExt, IntoPixels, PixelIteratorExt},
+    mono_font::MonoFont,
     pixelcolor::{
         raw::{RawData, ToBytes as _},
         GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,

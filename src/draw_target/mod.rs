@@ -25,11 +25,11 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     fonts::{Font6x8, Text},
     ///     mock_display::MockDisplay,
+    ///     mono_font::{Font6x8, MonoTextStyle},
     ///     pixelcolor::BinaryColor,
     ///     prelude::*,
-    ///     style::MonoTextStyle,
+    ///     text::Text,
     /// };
     ///
     /// let mut display = MockDisplay::new();
@@ -68,12 +68,12 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     fonts::{Font6x8, Text},
     ///     mock_display::MockDisplay,
+    ///     mono_font::{Font6x8, MonoTextStyle},
     ///     pixelcolor::Rgb565,
     ///     prelude::*,
     ///     primitives::Rectangle,
-    ///     style::MonoTextStyle,
+    ///     text::Text,
     /// };
     ///
     /// /// Fills a draw target with a blue background and prints centered yellow text.
@@ -119,12 +119,12 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// ```
     /// use embedded_graphics::{
-    ///     fonts::{Font12x16, Text},
     ///     mock_display::MockDisplay,
+    ///     mono_font::{Font12x16, MonoTextStyle},
     ///     pixelcolor::BinaryColor,
     ///     prelude::*,
     ///     primitives::Rectangle,
-    ///     style::MonoTextStyle,
+    ///     text::Text,
     /// };
     ///
     /// let mut display = MockDisplay::new();

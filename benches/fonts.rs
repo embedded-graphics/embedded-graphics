@@ -1,10 +1,10 @@
 use criterion::*;
 use embedded_graphics::{
-    fonts::{Font12x16, Font6x8, Text},
     geometry::Point,
+    mono_font::{Font12x16, Font6x8, MonoTextStyle, MonoTextStyleBuilder},
     pixelcolor::Gray8,
     prelude::*,
-    style::{MonoTextStyle, MonoTextStyleBuilder},
+    text::Text,
 };
 
 mod common;

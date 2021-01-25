@@ -1,4 +1,4 @@
-use crate::{fonts::MonoFont, geometry::Size};
+use crate::{geometry::Size, mono_font::MonoFont};
 
 /// 6x12 pixel monospace font.
 ///
@@ -16,6 +16,8 @@ impl MonoFont for Font6x12 {
 
     const CHARACTER_SIZE: Size = Size::new(6, 12);
     const BASELINE: Option<i32> = Some(9);
+    const UNDERLINE_OFFSET: i32 = 11;
+    const STRIKETHROUGH_OFFSET: i32 = 5;
 
     fn char_offset(c: char) -> u32 {
         let fallback = '?' as u32 - ' ' as u32;
@@ -33,10 +35,10 @@ impl MonoFont for Font6x12 {
 mod tests {
     use super::*;
     use crate::{
-        fonts::{tests::*, MonoFont, Text},
         geometry::{Dimensions, Point, Size},
+        mono_font::{tests::*, MonoFont, MonoTextStyle},
         pixelcolor::BinaryColor,
-        style::MonoTextStyle,
+        text::Text,
     };
 
     const WIDTH: usize = Font6x12::CHARACTER_SIZE.width as usize;
@@ -147,5 +149,26 @@ mod tests {
     #[test]
     fn baseline() {
         test_baseline(Font6x12);
+    }
+
+    #[test]
+    fn decoration() {
+        test_text_decoration(
+            Font6x12,
+            &[
+                "      ", //
+                "  WW  ", //
+                " W  W ", //
+                " W  W ", //
+                " W  W ", //
+                "RRRRRR", //
+                " W  W ", //
+                " W  W ", //
+                " W  W ", //
+                " W  W ", //
+                "      ", //
+                "GGGGGG", //
+            ],
+        );
     }
 }

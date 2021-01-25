@@ -1,9 +1,9 @@
 use crate::{
-    fonts::MonoFont,
     geometry::{Dimensions, Point},
+    mono_font::{MonoFont, MonoTextStyle},
     pixelcolor::PixelColor,
     primitives::{OffsetOutline, Primitive, Rectangle},
-    style::{MonoTextStyle, PrimitiveStyle},
+    style::PrimitiveStyle,
     transform::Transform,
     SaturatingCast,
 };

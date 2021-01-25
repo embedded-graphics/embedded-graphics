@@ -1,12 +1,12 @@
+use core::marker::PhantomData;
 use embedded_graphics_core::{pixelcolor::BinaryColor, primitives::Rectangle};
 
 use crate::{
-    fonts::MonoFont,
     geometry::Point,
+    mono_font::MonoFont,
     primitives::{rectangle, PointsIter},
     Pixel,
 };
-use core::marker::PhantomData;
 
 /// Pixel iterator for styled text with a monospaced font.
 #[derive(Debug)]

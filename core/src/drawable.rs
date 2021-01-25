@@ -9,11 +9,12 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     fonts::{Font6x8, Text},
+///     mono_font::{Font6x8, MonoTextStyle},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
 ///     primitives::Rectangle,
-///     style::{MonoTextStyle, PrimitiveStyle},
+///     style::PrimitiveStyle,
+///     text::Text,
 /// };
 ///
 /// struct Button<'a, C: PixelColor> {
