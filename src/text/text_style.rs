@@ -1,3 +1,5 @@
+use embedded_graphics_core::text::CharacterStyle;
+
 use crate::text::{HorizontalAlignment, TextRenderer, VerticalAlignment};
 
 /// Text style.
@@ -63,7 +65,7 @@ impl<S> TextStyleBuilder<S> {
 
 impl<S> TextStyleBuilder<S>
 where
-    S: TextRenderer,
+    S: CharacterStyle + TextRenderer,
 {
     /// Builds the text style.
     pub fn build(self) -> TextStyle<S> {
