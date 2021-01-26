@@ -103,6 +103,13 @@ _build-readme crate:
     echo "Building README.md for {{crate}}"
     cargo readme -r {{crate}} | sed -E -f filter_readme.sed > {{target_dir}}/{{crate}}_README.md
 
+#----------------
+# Font conversion
+#----------------
+
+convert-fonts:
+    cd tools/convert-fonts && cargo run
+
 #--------
 # Docker
 #--------
