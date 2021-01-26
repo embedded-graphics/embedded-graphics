@@ -4,17 +4,14 @@ use crate::pixelcolor::PixelColor;
 ///
 /// This trait is used to modify character styles programmatically, for example, to implement
 /// rendering of text with multiple colors. Applications shouldn't use this trait and instead use
-/// the character style types that are provided by the text renderer, like [`MonoTextStyle`] and
-/// [`MonoTextStyleBuilder`] for the integrated font support.
+/// the character style types that are provided by the text renderer, like `MonoTextStyle` and
+/// `MonoTextStyleBuilder` for the integrated font support.
 ///
 ///  # Implementation notes
 ///
 /// Text renderers don't need to support all settings in this trait. All calls to unsupported
 /// setters should be ignored by the implementation. The trait provided empty default
 /// implementations for all setters.
-///
-/// [`MonoTextStyle`]: ../mono_font/struct.MonoTextStyle.html
-/// [`MonoTextStyleBuilder`]: ../mono_font/struct.MonoTextStyleBuilder.html
 pub trait CharacterStyle {
     /// The color type.
     type Color: PixelColor;
