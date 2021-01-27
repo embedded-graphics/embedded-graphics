@@ -4,7 +4,7 @@ use crate::{
     mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    text::{TextMetrics, TextRenderer, VerticalAlignment},
+    text::{CharacterStyle, DecorationColor, TextMetrics, TextRenderer, VerticalAlignment},
     Pixel, SaturatingCast,
 };
 
@@ -243,6 +243,30 @@ where
     }
 }
 
+impl<C, F> CharacterStyle for MonoTextStyle<C, F>
+where
+    C: PixelColor,
+    F: MonoFont,
+{
+    type Color = C;
+
+    fn set_text_color(&mut self, text_color: Option<Self::Color>) {
+        self.text_color = text_color;
+    }
+
+    fn set_background_color(&mut self, background_color: Option<Self::Color>) {
+        self.background_color = background_color;
+    }
+
+    fn set_underline_color(&mut self, underline_color: DecorationColor<Self::Color>) {
+        self.underline_color = underline_color;
+    }
+
+    fn set_strikethrough_color(&mut self, strikethrough_color: DecorationColor<Self::Color>) {
+        self.strikethrough_color = strikethrough_color;
+    }
+}
+
 /// Text style builder for monospaced fonts.
 ///
 /// Use this builder to create [`MonoTextStyle`]s for [`Text`].
@@ -427,14 +451,6 @@ where
 /// Marker type to improve compiler errors if no font was set in builder.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct UndefinedFont;
-
-/// Text decoration color.
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum DecorationColor<C> {
-    None,
-    TextColor,
-    Custom(C),
-}
 
 #[cfg(test)]
 mod tests {
@@ -830,5 +846,28 @@ mod tests {
             .unwrap();
 
         display.assert_eq(&expected);
+    }
+
+    #[test]
+    fn character_style() {
+        let mut style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+        CharacterStyle::set_text_color(&mut style, None);
+        CharacterStyle::set_background_color(&mut style, Some(BinaryColor::On));
+        CharacterStyle::set_underline_color(&mut style, DecorationColor::TextColor);
+        CharacterStyle::set_strikethrough_color(
+            &mut style,
+            DecorationColor::Custom(BinaryColor::On),
+        );
+
+        assert_eq!(
+            style,
+            MonoTextStyle {
+                text_color: None,
+                background_color: Some(BinaryColor::On),
+                underline_color: DecorationColor::TextColor,
+                strikethrough_color: DecorationColor::Custom(BinaryColor::On),
+                font: Font6x8,
+            }
+        );
     }
 }

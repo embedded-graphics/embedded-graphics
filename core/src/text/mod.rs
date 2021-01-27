@@ -4,6 +4,10 @@ use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
 };
 
+mod character_style;
+
+pub use character_style::{CharacterStyle, DecorationColor};
+
 /// Text renderer.
 ///
 /// The `TextRenderer` trait is used to integrate text renderers into embedded-graphics. Users should
