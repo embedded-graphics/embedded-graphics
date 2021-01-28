@@ -6,7 +6,8 @@ edition = "2018"
 publish = false
 
 [dependencies]
+anyhow = "1.0.38"
 bdf-to-mono = { path = "../bdf-to-mono" }
-image = "0.23.12"
-
-[workspace]
+image = { version = "0.23.12", default-features = false, features = ["png"] }
+bdf-parser = { git = "https://github.com/embedded-graphics/embedded-bdf" }
+base64 = "0.13.0"

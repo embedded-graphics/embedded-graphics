@@ -146,7 +146,7 @@ debugging, development or if hardware is not available.
 
 ```rust
 use embedded_graphics::{
-    mono_font::{Font6x8, MonoTextStyle},
+    mono_font::{ascii::Font6x9, MonoTextStyle},
     pixelcolor::BinaryColor,
     prelude::*,
     primitives::{Circle, Rectangle, Triangle},
@@ -164,7 +164,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
-    let text_style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+    let text_style = MonoTextStyle::new(Font6x9, BinaryColor::On);
 
     let yoffset = 10;
 

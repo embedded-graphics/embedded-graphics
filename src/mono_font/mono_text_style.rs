@@ -286,14 +286,14 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     mono_font::{Font6x8, MonoTextStyle, MonoTextStyleBuilder},
+///     mono_font::{ascii::Font6x9, MonoTextStyle, MonoTextStyleBuilder},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     text::Text,
 /// };
 ///
 /// let style = MonoTextStyleBuilder::new()
-///     .font(Font6x8)
+///     .font(Font6x9)
 ///     .text_color(Rgb565::YELLOW)
 ///     .background_color(Rgb565::BLUE)
 ///     .build();
@@ -309,14 +309,14 @@ where
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     mono_font::{Font6x8, MonoTextStyle, MonoTextStyleBuilder},
+///     mono_font::{ascii::Font6x9, MonoTextStyle, MonoTextStyleBuilder},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     text::Text,
 /// };
 ///
 /// let style = MonoTextStyleBuilder::new()
-///     .font(Font6x8)
+///     .font(Font6x9)
 ///     .text_color(Rgb565::WHITE)
 ///     .build();
 ///
@@ -329,16 +329,16 @@ where
 ///
 /// ```
 /// use embedded_graphics::{
-///     mono_font::{Font6x8, Font12x16, MonoTextStyle, MonoTextStyleBuilder},
+///     mono_font::{ascii::{Font6x9, Font10x20}, MonoTextStyle, MonoTextStyleBuilder},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     text::Text,
 /// };
 ///
-/// let style = MonoTextStyle::new(Font6x8, Rgb565::YELLOW);
+/// let style = MonoTextStyle::new(Font6x9, Rgb565::YELLOW);
 ///
 /// let style_larger = MonoTextStyleBuilder::from(&style)
-///     .font(Font12x16)
+///     .font(Font10x20)
 ///     .build();
 /// ```
 ///
@@ -465,7 +465,10 @@ mod tests {
     use crate::{
         geometry::Dimensions,
         mock_display::MockDisplay,
-        mono_font::{tests::*, Font12x16, Font6x8},
+        mono_font::{
+            ascii::{Font10x20, Font6x9},
+            tests::*,
+        },
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         text::{Text, TextStyleBuilder},
         Drawable,
@@ -475,14 +478,14 @@ mod tests {
     struct SpacedFont;
 
     impl MonoFont for SpacedFont {
-        const FONT_IMAGE: &'static [u8] = Font6x8::FONT_IMAGE;
-        const FONT_IMAGE_WIDTH: u32 = Font6x8::FONT_IMAGE_WIDTH;
-        const CHARACTER_SIZE: Size = Font6x8::CHARACTER_SIZE;
+        const FONT_IMAGE: &'static [u8] = Font6x9::FONT_IMAGE;
+        const FONT_IMAGE_WIDTH: u32 = Font6x9::FONT_IMAGE_WIDTH;
+        const CHARACTER_SIZE: Size = Font6x9::CHARACTER_SIZE;
         const CHARACTER_SPACING: u32 = 5;
-        const STRIKETHROUGH_OFFSET: i32 = Font6x8::STRIKETHROUGH_OFFSET;
+        const STRIKETHROUGH_OFFSET: i32 = Font6x9::STRIKETHROUGH_OFFSET;
 
         fn char_offset(c: char) -> u32 {
-            Font6x8::char_offset(c)
+            Font6x9::char_offset(c)
         }
     }
 
@@ -490,10 +493,10 @@ mod tests {
     fn builder_default() {
         assert_eq!(
             MonoTextStyleBuilder::<BinaryColor, _>::new()
-                .font(Font12x16)
+                .font(Font10x20)
                 .build(),
             MonoTextStyle {
-                font: Font12x16,
+                font: Font10x20,
                 text_color: None,
                 background_color: None,
                 underline_color: DecorationColor::None,
@@ -506,10 +509,10 @@ mod tests {
     fn builder_text_color() {
         assert_eq!(
             MonoTextStyleBuilder::new()
-                .font(Font12x16)
+                .font(Font10x20)
                 .text_color(BinaryColor::On)
                 .build(),
-            MonoTextStyle::new(Font12x16, BinaryColor::On)
+            MonoTextStyle::new(Font10x20, BinaryColor::On)
         );
     }
 
@@ -517,11 +520,11 @@ mod tests {
     fn builder_background_color() {
         assert_eq!(
             MonoTextStyleBuilder::new()
-                .font(Font12x16)
+                .font(Font10x20)
                 .background_color(BinaryColor::On)
                 .build(),
             {
-                let mut style = MonoTextStyleBuilder::new().font(Font12x16).build();
+                let mut style = MonoTextStyleBuilder::new().font(Font10x20).build();
 
                 style.text_color = None;
                 style.background_color = Some(BinaryColor::On);
@@ -534,7 +537,7 @@ mod tests {
     #[test]
     fn underline_text_color() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::WHITE)
             .underline()
             .build();
@@ -546,13 +549,13 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            " WWW  WWWW   WWW  ",
-            "W   W W   W W   W ",
-            "W   W W   W W     ",
-            "WWWWW WWWW  W     ",
-            "W   W W   W W     ",
-            "W   W W   W W   W ",
-            "W   W WWWW   WWW  ",
+            "                  ",
+            "  W   WWWW    WW  ",
+            " W W  W   W  W  W ",
+            "W   W WWWW   W    ",
+            "WWWWW W   W  W    ",
+            "W   W W   W  W  W ",
+            "W   W WWWW    WW  ",
             "                  ",
             "WWWWWWWWWWWWWWWWWW",
         ]);
@@ -596,7 +599,7 @@ mod tests {
     #[test]
     fn underline_custom_color() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::WHITE)
             .underline_with_color(Rgb888::RED)
             .build();
@@ -608,13 +611,13 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            " WWW  WWWW   WWW  ",
-            "W   W W   W W   W ",
-            "W   W W   W W     ",
-            "WWWWW WWWW  W     ",
-            "W   W W   W W     ",
-            "W   W W   W W   W ",
-            "W   W WWWW   WWW  ",
+            "                  ",
+            "  W   WWWW    WW  ",
+            " W W  W   W  W  W ",
+            "W   W WWWW   W    ",
+            "WWWWW W   W  W    ",
+            "W   W W   W  W  W ",
+            "W   W WWWW    WW  ",
             "                  ",
             "RRRRRRRRRRRRRRRRRR",
         ]);
@@ -623,7 +626,7 @@ mod tests {
     #[test]
     fn strikethrough_text_color() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::WHITE)
             .strikethrough()
             .build();
@@ -637,20 +640,20 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            " WWW  WWWW   WWW  ",
-            "W   W W   W W   W ",
-            "W   W W   W W     ",
+            "                  ",
+            "  W   WWWW    WW  ",
+            " W W  W   W  W  W ",
+            "W   W WWWW   W    ",
             "WWWWWWWWWWWWWWWWWW",
-            "W   W W   W W     ",
-            "W   W W   W W   W ",
-            "W   W WWWW   WWW  ",
+            "W   W W   W  W  W ",
+            "W   W WWWW    WW  ",
         ]);
     }
 
     #[test]
     fn strikethrough_custom_color() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::WHITE)
             .strikethrough_with_color(Rgb888::RED)
             .build();
@@ -664,20 +667,20 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            " WWW  WWWW   WWW  ",
-            "W   W W   W W   W ",
-            "W   W W   W W     ",
+            "                  ",
+            "  W   WWWW    WW  ",
+            " W W  W   W  W  W ",
+            "W   W WWWW   W    ",
             "RRRRRRRRRRRRRRRRRR",
-            "W   W W   W W     ",
-            "W   W W   W W   W ",
-            "W   W WWWW   WWW  ",
+            "W   W W   W  W  W ",
+            "W   W WWWW    WW  ",
         ]);
     }
 
     #[test]
     fn whitespace_background() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::YELLOW)
             .background_color(Rgb888::WHITE)
             .build();
@@ -696,13 +699,14 @@ mod tests {
             "WWWW", //
             "WWWW", //
             "WWWW", //
+            "WWWW", //
         ]);
     }
 
     #[test]
     fn whitespace_decorations() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::YELLOW)
             .underline_with_color(Rgb888::GREEN)
             .strikethrough_with_color(Rgb888::RED)
@@ -717,8 +721,8 @@ mod tests {
             "   ", //
             "   ", //
             "   ", //
-            "RRR", //
             "   ", //
+            "RRR", //
             "   ", //
             "   ", //
             "   ", //
@@ -729,7 +733,7 @@ mod tests {
     #[test]
     fn whitespace_background_and_decorations() {
         let style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::YELLOW)
             .background_color(Rgb888::WHITE)
             .underline_with_color(Rgb888::GREEN)
@@ -747,8 +751,8 @@ mod tests {
             "WWWWWWWW", //
             "WWWWWWWW", //
             "WWWWWWWW", //
-            "RRRRRRRR", //
             "WWWWWWWW", //
+            "RRRRRRRR", //
             "WWWWWWWW", //
             "WWWWWWWW", //
             "WWWWWWWW", //
@@ -762,14 +766,14 @@ mod tests {
             "##",
             SpacedFont,
             &[
-                " # #        # #  ",
-                " # #        # #  ",
-                "#####      ##### ",
-                " # #        # #  ",
-                "#####      ##### ",
-                " # #        # #  ",
-                " # #        # #  ",
                 "                 ",
+                " # #        # #  ",
+                " # #        # #  ",
+                "#####      ##### ",
+                " # #        # #  ",
+                "#####      ##### ",
+                " # #        # #  ",
+                " # #        # #  ",
             ],
         );
     }
@@ -794,6 +798,7 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
+            ".................",
             ".#.#........#.#..",
             ".#.#........#.#..",
             "#####......#####.",
@@ -828,6 +833,7 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
+            "                 ",
             " W W        W W  ",
             " W W        W W  ",
             "WWWWW      WWWWW ",
@@ -856,20 +862,20 @@ mod tests {
             Text::new("#", Point::zero())
                 .into_styled(text_style)
                 .bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6, 8)),
+            Rectangle::new(Point::zero(), Size::new(6, 9)),
         );
 
         assert_eq!(
             Text::new("##", Point::zero())
                 .into_styled(text_style)
                 .bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6 * 2 + 5, 8)),
+            Rectangle::new(Point::zero(), Size::new(6 * 2 + 5, 9)),
         );
         assert_eq!(
             Text::new("###", Point::zero())
                 .into_styled(text_style)
                 .bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 8)),
+            Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 9)),
         );
     }
 
@@ -896,7 +902,7 @@ mod tests {
 
     #[test]
     fn control_characters() {
-        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonoTextStyle::new(Font6x9, BinaryColor::On);
 
         let mut display = MockDisplay::new();
         style
@@ -913,7 +919,7 @@ mod tests {
 
     #[test]
     fn character_style() {
-        let mut style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+        let mut style = MonoTextStyle::new(Font6x9, BinaryColor::On);
         CharacterStyle::set_text_color(&mut style, None);
         CharacterStyle::set_background_color(&mut style, Some(BinaryColor::On));
         CharacterStyle::set_underline_color(&mut style, DecorationColor::TextColor);
@@ -929,7 +935,7 @@ mod tests {
                 background_color: Some(BinaryColor::On),
                 underline_color: DecorationColor::TextColor,
                 strikethrough_color: DecorationColor::Custom(BinaryColor::On),
-                font: Font6x8,
+                font: Font6x9,
             }
         );
     }

@@ -108,7 +108,7 @@ _build-readme crate:
 #----------------
 
 convert-fonts:
-    cd tools/convert-fonts && cargo run
+    cd tools/convert-fonts && cargo run --release
 
 #--------
 # Docker

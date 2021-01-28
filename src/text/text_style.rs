@@ -81,7 +81,7 @@ pub struct UndefinedCharacterStyle;
 mod tests {
     use super::*;
     use crate::{
-        mono_font::{Font6x8, MonoTextStyleBuilder},
+        mono_font::{ascii::Font6x9, MonoTextStyleBuilder},
         pixelcolor::BinaryColor,
     };
 
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn builder_alignments() {
         let character_style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .build();
 
         let text_style = TextStyleBuilder::new()

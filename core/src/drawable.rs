@@ -9,7 +9,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     mono_font::{Font6x8, MonoTextStyle},
+///     mono_font::{ascii::Font6x9, MonoTextStyle},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
 ///     primitives::Rectangle,
@@ -40,7 +40,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///             .draw(display)?;
 ///
 ///         Text::new(self.text, Point::new(6, 13))
-///             .into_styled(MonoTextStyle::new(Font6x8, self.fg_color))
+///             .into_styled(MonoTextStyle::new(Font6x9, self.fg_color))
 ///             .draw(display)
 ///     }
 /// }

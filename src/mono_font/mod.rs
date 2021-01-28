@@ -19,7 +19,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     mono_font::{Font6x8, MonoTextStyle, MonoTextStyleBuilder},
+//!     mono_font::{ascii::Font6x9, MonoTextStyle, MonoTextStyleBuilder},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     text::Text,
@@ -30,7 +30,7 @@
 //!
 //! // Create a new text style
 //! let style = MonoTextStyleBuilder::new()
-//!     .font(Font6x8)
+//!     .font(Font6x9)
 //!     .text_color(Rgb565::YELLOW)
 //!     .background_color(Rgb565::BLUE)
 //!     .build();
@@ -46,7 +46,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     mono_font::{Font6x8, MonoTextStyle},
+//!     mono_font::{ascii::Font6x9, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //!     text::Text,
@@ -56,7 +56,7 @@
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display)?;
 //!
@@ -65,7 +65,7 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -80,7 +80,7 @@
 //! use arrayvec::ArrayString;
 //! use core::fmt::Write;
 //! use embedded_graphics::{
-//!     mono_font::{Font6x8, MonoTextStyleBuilder},
+//!     mono_font::{ascii::Font6x9, MonoTextStyleBuilder},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     text::Text,
@@ -100,7 +100,7 @@
 //! Text::new(&buf, Point::zero())
 //!     .into_styled(
 //!         MonoTextStyleBuilder::new()
-//!             .font(Font6x8)
+//!             .font(Font6x9)
 //!             .text_color(Rgb565::YELLOW)
 //!             .background_color(Rgb565::BLUE)
 //!             .build(),
@@ -131,21 +131,13 @@
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
-mod font12x16;
-mod font24x32;
-mod font6x12;
-mod font6x8;
-mod font8x16;
+pub mod ascii;
+pub mod latin1;
 mod mono_char_pixels;
 mod mono_text_style;
 
 pub(crate) use mono_char_pixels::MonoCharPixels;
 
-pub use font12x16::Font12x16;
-pub use font24x32::Font24x32;
-pub use font6x12::Font6x12;
-pub use font6x8::Font6x8;
-pub use font8x16::Font8x16;
 pub use mono_text_style::{MonoTextStyle, MonoTextStyleBuilder};
 
 use crate::geometry::Size;
