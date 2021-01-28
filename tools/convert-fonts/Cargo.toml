@@ -1,0 +1,12 @@
+[package]
+name = "convert-fonts"
+version = "0.1.0"
+authors = ["Ralf Fuest <mail@rfuest.de>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+bdf-to-mono = { path = "../bdf-to-mono" }
+image = "0.23.12"
+
+[workspace]

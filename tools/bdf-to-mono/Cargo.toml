@@ -1,0 +1,12 @@
+[package]
+name = "bdf-to-mono"
+version = "0.1.0"
+authors = ["Ralf Fuest <mail@rfuest.de>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+anyhow = "1.0.38"
+bdf-parser = { git = "https://github.com/embedded-graphics/embedded-bdf" }
+
+[workspace]
