@@ -563,7 +563,7 @@ mod tests {
     #[test]
     fn underline_text_color_with_alignment() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(Rgb888::WHITE)
             .underline()
             .build();
@@ -583,13 +583,12 @@ mod tests {
             "                  ",
             "                  ",
             "                  ",
-            " WWW  WWWW   WWW  ",
-            "W   W W   W W   W ",
-            "W   W W   W W     ",
-            "WWWWW WWWW  W     ",
-            "W   W W   W W     ",
-            "W   W W   W W   W ",
-            "W   W WWWW   WWW  ",
+            "  W   WWWW    WW  ",
+            " W W  W   W  W  W ",
+            "W   W WWWW   W    ",
+            "WWWWW W   W  W    ",
+            "W   W W   W  W  W ",
+            "W   W WWWW    WW  ",
             "                  ",
             "WWWWWWWWWWWWWWWWWW",
         ]);
@@ -895,7 +894,7 @@ mod tests {
             Text::new("#", Point::zero())
                 .into_styled(text_style)
                 .bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6, 9)),
+            Rectangle::new(Point::zero(), Size::new(6, 10)),
         );
     }
 
