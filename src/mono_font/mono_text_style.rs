@@ -282,7 +282,7 @@ where
 ///
 /// ## Render yellow text on a blue background
 ///
-/// This uses the [`Font6x8`] font, but [other fonts] can also be used.
+/// This uses the [`Font6x9`] font, but [other fonts] can also be used.
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -342,8 +342,7 @@ where
 ///     .build();
 /// ```
 ///
-/// [`Font6x8`]: struct.Font6x8.html
-/// [`Font8x16`]: struct.Font8x16.html
+/// [`Font6x9`]: ascii/struct.Font6x9.html
 /// [other fonts]: index.html
 /// [`Text`]: ../text/struct.Text.html
 /// [`MonoTextStyle`]: struct.MonoTextStyle.html

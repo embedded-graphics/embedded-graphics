@@ -8,7 +8,7 @@
 //!
 //! # Examples
 //!
-//! The examples below use the [`Font6x8`] font, however any of the [built-in fonts]
+//! The examples below use the `Font6x8` font, however any of the [built-in fonts]
 //! in this module or custom fonts can be substituted.
 //!
 //! ## Print styled "Hello Rust!"
@@ -113,18 +113,13 @@
 //!
 //! | Type | Screenshot |
 //! |------|------------|
-//! | [`Font6x8`] | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x8.png) |
-//! | [`Font6x12`] | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png) |
-//! | [`Font8x16`] | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font8x16.png) |
-//! | [`Font12x16`] | ![12x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font12x16.png) |
-//! | [`Font24x32`] | The 24x32 font is a pixel doubled version of the 12x16 font. |
+//! | `Font6x8` | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x8.png) |
+//! | `Font6x12` | ![6x12 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x12.png) |
+//! | `Font8x16` | ![8x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font8x16.png) |
+//! | `Font12x16` | ![12x16 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font12x16.png) |
+//! | `Font24x32` | The 24x32 font is a pixel doubled version of the 12x16 font. |
 //!
 //! [built-in fonts]: #built-in-fonts
-//! [`Font6x8`]: struct.Font6x8.html
-//! [`Font6x12`]: struct.Font6x12.html
-//! [`Font8x16`]: struct.Font8x16.html
-//! [`Font12x16`]: struct.Font12x16.html
-//! [`Font24x32`]: struct.Font24x32.html
 //! [`Text`]: ../text/struct.Text.html
 //! [`Styled`]: ../style/struct.Styled.html
 //! [`MonoTextStyle`]: struct.MonoTextStyle.html
