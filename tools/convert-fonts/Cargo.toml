@@ -9,5 +9,5 @@ publish = false
 anyhow = "1.0.38"
 bdf-to-mono = { path = "../bdf-to-mono" }
 image = { version = "0.23.12", default-features = false, features = ["png"] }
-bdf-parser = { git = "https://github.com/embedded-graphics/embedded-bdf" }
+bdf-parser = { git = "https://github.com/embedded-graphics/embedded-bdf", rev = "49c099da885c5c7f7148937e6abe7a5ede72adb5" }
 base64 = "0.13.0"

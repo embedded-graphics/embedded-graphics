@@ -17,8 +17,6 @@ impl MonoFont for Font6x13 {
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -37,8 +35,6 @@ impl MonoFont for Font7x14B {
     const BASELINE: Option<i32> = Some(11);
 
     const UNDERLINE_OFFSET: i32 = 11 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -59,8 +55,6 @@ impl MonoFont for Font8x13 {
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -79,8 +73,6 @@ impl MonoFont for Font9x18B {
     const BASELINE: Option<i32> = Some(13);
 
     const UNDERLINE_OFFSET: i32 = 13 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -101,8 +93,6 @@ impl MonoFont for Font6x13O {
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -121,8 +111,6 @@ impl MonoFont for Font9x18 {
     const BASELINE: Option<i32> = Some(13);
 
     const UNDERLINE_OFFSET: i32 = 13 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -143,8 +131,6 @@ impl MonoFont for Font7x14 {
 
     const UNDERLINE_OFFSET: i32 = 11 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -163,8 +149,6 @@ impl MonoFont for Font7x13 {
     const BASELINE: Option<i32> = Some(10);
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -185,8 +169,6 @@ impl MonoFont for Font6x9 {
 
     const UNDERLINE_OFFSET: i32 = 6 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -205,8 +187,6 @@ impl MonoFont for Font9x15 {
     const BASELINE: Option<i32> = Some(11);
 
     const UNDERLINE_OFFSET: i32 = 11 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -227,8 +207,6 @@ impl MonoFont for Font9x15B {
 
     const UNDERLINE_OFFSET: i32 = 11 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -247,8 +225,6 @@ impl MonoFont for Font6x13B {
     const BASELINE: Option<i32> = Some(10);
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -269,8 +245,6 @@ impl MonoFont for Font5x7 {
 
     const UNDERLINE_OFFSET: i32 = 5 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -289,8 +263,6 @@ impl MonoFont for Font7x13B {
     const BASELINE: Option<i32> = Some(10);
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -311,8 +283,6 @@ impl MonoFont for Font10x20 {
 
     const UNDERLINE_OFFSET: i32 = 15 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -331,8 +301,6 @@ impl MonoFont for Font4x6 {
     const BASELINE: Option<i32> = Some(4);
 
     const UNDERLINE_OFFSET: i32 = 4 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -353,8 +321,6 @@ impl MonoFont for Font8x13O {
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -373,8 +339,6 @@ impl MonoFont for Font6x12 {
     const BASELINE: Option<i32> = Some(9);
 
     const UNDERLINE_OFFSET: i32 = 9 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -395,8 +359,6 @@ impl MonoFont for Font7x13O {
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -415,8 +377,6 @@ impl MonoFont for Font5x8 {
     const BASELINE: Option<i32> = Some(6);
 
     const UNDERLINE_OFFSET: i32 = 6 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
@@ -437,8 +397,6 @@ impl MonoFont for Font6x10 {
 
     const UNDERLINE_OFFSET: i32 = 7 + 2;
 
-    // TODO: set decoration settings
-
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
     }
@@ -457,8 +415,6 @@ impl MonoFont for Font8x13B {
     const BASELINE: Option<i32> = Some(10);
 
     const UNDERLINE_OFFSET: i32 = 10 + 2;
-
-    // TODO: set decoration settings
 
     fn char_offset(c: char) -> u32 {
         super::char_offset(c)
