@@ -206,7 +206,14 @@ where
     fn measure_string(&self, text: &str, position: Point) -> TextMetrics {
         let width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
             .saturating_sub(F::CHARACTER_SPACING);
-        let size = Size::new(width, F::CHARACTER_SIZE.height);
+
+        let height = if self.underline_color != DecorationColor::None {
+            F::UNDERLINE_HEIGHT + F::UNDERLINE_OFFSET as u32
+        } else {
+            F::CHARACTER_SIZE.height
+        };
+
+        let size = Size::new(width, height);
 
         // Return a zero sized bounding box if the text is completely transparent.
         let bb_size = if self.text_color.is_some() || self.background_color.is_some() {
@@ -552,6 +559,41 @@ mod tests {
     }
 
     #[test]
+    fn underline_text_color_with_alignment() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(Font6x8)
+            .text_color(Rgb888::WHITE)
+            .underline()
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .vertical_alignment(VerticalAlignment::Center)
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("ABC", Point::new(0, 6))
+            .into_styled(text_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "                  ",
+            "                  ",
+            "                  ",
+            " WWW  WWWW   WWW  ",
+            "W   W W   W W   W ",
+            "W   W W   W W     ",
+            "WWWWW WWWW  W     ",
+            "W   W W   W W     ",
+            "W   W W   W W   W ",
+            "W   W WWWW   WWW  ",
+            "                  ",
+            "WWWWWWWWWWWWWWWWWW",
+        ]);
+    }
+
+    #[test]
     fn underline_custom_color() {
         let style = MonoTextStyleBuilder::new()
             .font(Font6x8)
@@ -828,6 +870,27 @@ mod tests {
                 .into_styled(text_style)
                 .bounding_box(),
             Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 8)),
+        );
+    }
+
+    #[test]
+    fn underlined_character_dimensions() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(SpacedFont)
+            .text_color(BinaryColor::On)
+            .underline()
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .vertical_alignment(VerticalAlignment::Top)
+            .build();
+
+        assert_eq!(
+            Text::new("#", Point::zero())
+                .into_styled(text_style)
+                .bounding_box(),
+            Rectangle::new(Point::zero(), Size::new(6, 9)),
         );
     }
 
