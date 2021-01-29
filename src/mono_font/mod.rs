@@ -111,6 +111,8 @@
 //!
 //! # Built-in fonts
 //!
+//! TODO: Replace with generated fonts table
+//!
 //! | Type | Screenshot |
 //! |------|------------|
 //! | `Font6x8` | ![6x8 font spritemap screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/data/font6x8.png) |

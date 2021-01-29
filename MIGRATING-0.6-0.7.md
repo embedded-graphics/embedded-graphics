@@ -104,8 +104,10 @@ TODO: Improve this section before release.
 - `TextStyle` -> `MonoTextStyle`
 - Added support for external renderers
 - `MonoTextStyleBuilder::new(Font)` -> `MonoTextStyle::new().font(Font)`
-- Added horizontal and vertical alignment to `MonoTextStyle`
+- Added support for underline and strikethrough to the internal text renderer
+- Added `TextStyle` to set the horizontal and vertical alignment for `Text` drawables
 - New default vertical alignment is baseline
+- New fonts with `ascii` and `latin1` glyph subsets
 
 ## For display driver authors
 
