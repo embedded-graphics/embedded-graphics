@@ -221,7 +221,7 @@ mod tests {
         geometry::Size,
         mock_display::MockDisplay,
         mono_font::{
-            tests::assert_text_from_pattern, Font6x8, MonoTextStyle, MonoTextStyleBuilder,
+            ascii::Font6x9, tests::assert_text_from_pattern, MonoTextStyle, MonoTextStyleBuilder,
         },
         pixelcolor::BinaryColor,
         prelude::*,
@@ -248,24 +248,24 @@ mod tests {
     fn multiline() {
         assert_text_from_pattern(
             "AB\nC",
-            Font6x8,
+            Font6x9,
             &[
-                " ###  ####  ",
-                "#   # #   # ",
-                "#   # #   # ",
-                "##### ####  ",
-                "#   # #   # ",
+                "            ",
+                "  #   ####  ",
+                " # #  #   # ",
+                "#   # ####  ",
+                "##### #   # ",
                 "#   # #   # ",
                 "#   # ####  ",
                 "            ",
-                " ###        ",
-                "#   #       ",
-                "#           ",
-                "#           ",
-                "#           ",
-                "#   #       ",
-                " ###        ",
                 "            ",
+                "            ",
+                "  ##        ",
+                " #  #       ",
+                " #          ",
+                " #          ",
+                " #  #       ",
+                "  ##        ",
             ],
         );
     }
@@ -274,15 +274,15 @@ mod tests {
     fn multiline_empty_line() {
         assert_text_from_pattern(
             "A\n\nBC",
-            Font6x8,
+            Font6x9,
             &[
-                " ###        ",
-                "#   #       ",
+                "            ",
+                "  #         ",
+                " # #        ",
                 "#   #       ",
                 "#####       ",
                 "#   #       ",
                 "#   #       ",
-                "#   #       ",
                 "            ",
                 "            ",
                 "            ",
@@ -292,13 +292,15 @@ mod tests {
                 "            ",
                 "            ",
                 "            ",
-                "####   ###  ",
-                "#   # #   # ",
-                "#   # #     ",
-                "####  #     ",
-                "#   # #     ",
-                "#   # #   # ",
-                "####   ###  ",
+                "            ",
+                "            ",
+                "            ",
+                "####    ##  ",
+                "#   #  #  # ",
+                "####   #    ",
+                "#   #  #    ",
+                "#   #  #  # ",
+                "####    ##  ",
                 "            ",
             ],
         );
@@ -307,7 +309,7 @@ mod tests {
     #[test]
     fn multiline_dimensions() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -320,13 +322,13 @@ mod tests {
 
         assert_eq!(
             text.bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(2 * 6, 2 * 8))
+            Rectangle::new(Point::zero(), Size::new(2 * 6, 2 * 9))
         );
     }
 
     #[test]
     fn position_and_translate() {
-        let style = MonoTextStyle::new(Font6x8, BinaryColor::On);
+        let style = MonoTextStyle::new(Font6x9, BinaryColor::On);
 
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
 
@@ -347,7 +349,7 @@ mod tests {
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
         let style_inverse = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::Off)
             .background_color(BinaryColor::On)
             .build();
@@ -358,7 +360,7 @@ mod tests {
 
         let mut display_normal = MockDisplay::new();
         let style_normal = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::On)
             .background_color(BinaryColor::Off)
             .build();
@@ -374,7 +376,7 @@ mod tests {
     fn no_fill_does_not_hang() {
         let mut display = MockDisplay::new();
         Text::new(" ", Point::zero())
-            .into_styled(MonoTextStyle::new(Font6x8, BinaryColor::On))
+            .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
 
@@ -384,7 +386,7 @@ mod tests {
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .background_color(BinaryColor::On)
             .build();
 
@@ -408,13 +410,14 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            "#...###   ##",
-            ".###.# ### #",
+            "############",
+            "##.##### ###",
+            "#.#.### # ##",
             ".###.# ### #",
             ".....#     #",
             ".###.# ### #",
             ".###.# ### #",
-            ".###.# ### #",
+            "############",
             "############",
         ]);
     }
@@ -422,7 +425,7 @@ mod tests {
     #[test]
     fn transparent_text_has_zero_size_but_retains_position() {
         let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .build();
 
         let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
@@ -437,7 +440,7 @@ mod tests {
     #[test]
     fn horizontal_alignment_left() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -453,21 +456,22 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            " ###        ",
-            "#   #       ",
+            "            ",
+            "  #         ",
+            " # #        ",
             "#   #       ",
             "#####       ",
             "#   #       ",
             "#   #       ",
-            "#   #       ",
             "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
+            "            ",
+            "            ",
+            "####    ##  ",
+            "#   #  #  # ",
+            "####   #    ",
+            "#   #  #    ",
+            "#   #  #  # ",
+            "####    ##  ",
             "            ",
         ]);
     }
@@ -475,7 +479,7 @@ mod tests {
     #[test]
     fn horizontal_alignment_center() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -491,21 +495,22 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            "    ###     ",
-            "   #   #    ",
+            "            ",
+            "     #      ",
+            "    # #     ",
             "   #   #    ",
             "   #####    ",
             "   #   #    ",
             "   #   #    ",
-            "   #   #    ",
             "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
+            "            ",
+            "            ",
+            "####    ##  ",
+            "#   #  #  # ",
+            "####   #    ",
+            "#   #  #    ",
+            "#   #  #  # ",
+            "####    ##  ",
             "            ",
         ]);
     }
@@ -513,7 +518,7 @@ mod tests {
     #[test]
     fn horizontal_alignment_right() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -529,21 +534,22 @@ mod tests {
             .unwrap();
 
         display.assert_pattern(&[
-            "       ###  ",
-            "      #   # ",
+            "            ",
+            "        #   ",
+            "       # #  ",
             "      #   # ",
             "      ##### ",
             "      #   # ",
             "      #   # ",
-            "      #   # ",
             "            ",
-            "####   ###  ",
-            "#   # #   # ",
-            "#   # #     ",
-            "####  #     ",
-            "#   # #     ",
-            "#   # #   # ",
-            "####   ###  ",
+            "            ",
+            "            ",
+            "####    ##  ",
+            "#   #  #  # ",
+            "####   #    ",
+            "#   #  #    ",
+            "#   #  #  # ",
+            "####    ##  ",
             "            ",
         ]);
     }
@@ -553,7 +559,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x8)
+            .font(Font6x9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -593,20 +599,20 @@ mod tests {
 
         display.assert_pattern(&[
             "                       ",
-            "            #          ",
-            "            #     #### ",
-            "            # ##  #   #",
-            "            ##  # #   #",
-            "            #   # #### ",
-            "            #   # #   #",
-            "       ###  ####  #   #",
-            " #    #           #### ",
-            " #    #                ",
-            "###   #   #            ",
-            " #     ###             ",
-            " #                     ",
-            " #  #                  ",
-            "  ##                   ",
+            "             #         ",
+            "             #         ",
+            "             ###  #### ",
+            "             #  # #   #",
+            "             #  # #### ",
+            "             ###  #   #",
+            "        ###       #   #",
+            "       #          #### ",
+            "  #    #               ",
+            "  #     ###            ",
+            " ###                   ",
+            "  #                    ",
+            "  # #                  ",
+            "   #                   ",
         ]);
     }
 
@@ -624,7 +630,7 @@ mod tests {
                 HorizontalAlignment::Right,
             ] {
                 let character_style = MonoTextStyleBuilder::new()
-                    .font(Font6x8)
+                    .font(Font6x9)
                     .text_color(BinaryColor::On)
                     .background_color(BinaryColor::Off)
                     .build();

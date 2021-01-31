@@ -1,7 +1,10 @@
 use criterion::*;
 use embedded_graphics::{
     geometry::Point,
-    mono_font::{Font12x16, Font6x8, MonoTextStyle, MonoTextStyleBuilder},
+    mono_font::{
+        ascii::{Font10x20, Font6x9},
+        MonoTextStyle, MonoTextStyleBuilder,
+    },
     pixelcolor::Gray8,
     prelude::*,
     text::Text,
@@ -14,12 +17,12 @@ use common::Framebuffer;
 const ONE_LINE: Text = Text::new("Hello world!", Point::new_equal(20));
 const THREE_LINES: Text = Text::new("line 1\nl2\nThis is line 3", Point::new_equal(20));
 
-fn font_6x8(c: &mut Criterion) {
-    let mut group = c.benchmark_group("font 6x8");
+fn font_6x9(c: &mut Criterion) {
+    let mut group = c.benchmark_group("font 6x9");
 
-    let style = MonoTextStyle::new(Font6x8, Gray8::WHITE);
+    let style = MonoTextStyle::new(Font6x9, Gray8::WHITE);
     let style_with_bg = MonoTextStyleBuilder::new()
-        .font(Font6x8)
+        .font(Font6x9)
         .text_color(Gray8::WHITE)
         .background_color(Gray8::BLACK)
         .build();
@@ -55,12 +58,12 @@ fn font_6x8(c: &mut Criterion) {
     group.finish();
 }
 
-fn font_12x16(c: &mut Criterion) {
-    let mut group = c.benchmark_group("font 12x16");
+fn font_10x20(c: &mut Criterion) {
+    let mut group = c.benchmark_group("font 10x20");
 
-    let style = MonoTextStyle::new(Font12x16, Gray8::WHITE);
+    let style = MonoTextStyle::new(Font10x20, Gray8::WHITE);
     let style_with_bg = MonoTextStyleBuilder::new()
-        .font(Font12x16)
+        .font(Font10x20)
         .text_color(Gray8::WHITE)
         .background_color(Gray8::BLACK)
         .build();
@@ -96,5 +99,5 @@ fn font_12x16(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(fonts, font_6x8, font_12x16);
+criterion_group!(fonts, font_6x9, font_10x20);
 criterion_main!(fonts);

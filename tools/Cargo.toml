@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "bdf-to-mono",
+    "convert-fonts",
+]
