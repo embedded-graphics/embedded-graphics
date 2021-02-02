@@ -25,7 +25,8 @@ fn main() -> Result<()> {
             .file_stem()
             .unwrap()
             .to_string_lossy()
-            .into_owned();
+            .replace("B", "Bold")
+            .replace("O", "Italic");
 
         let bdf = fs::read_to_string(&file.path())?;
         let font = BdfFont::from_str(&bdf).map_err(|_| anyhow!("couldn't parse BDF file"))?;
