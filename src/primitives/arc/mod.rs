@@ -4,8 +4,8 @@ mod points;
 mod styled;
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Size},
-    primitives::{Circle, PointsIter, Primitive, Rectangle},
+    geometry::{Angle, AngleUnit, Dimensions, Point, Real, Size, Trigonometry},
+    primitives::{common::PlaneSector, Circle, OffsetOutline, PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
 pub use points::Points;
@@ -107,7 +107,37 @@ impl Arc {
 
     /// Return the center point of the arc.
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
+    }
+
+    /// Return the end angle of the arc
+    fn angle_end(&self) -> Angle {
+        self.angle_start + self.angle_sweep
+    }
+
+    /// Return the delta between a point on the arc at a given angle and the center point.
+    pub(in crate::primitives) fn delta_from_angle(&self, angle: Angle) -> Point {
+        let diameter = Real::from(self.diameter);
+
+        Point::new(
+            i32::from(angle.cos() * diameter),
+            // NOTE: Y coordinate is top-down in e-g, but sine function is only in correct phase
+            // with cosine with bottom-up Y axis, hence negation here.
+            -i32::from(angle.sin() * diameter),
+        )
+    }
+
+    /// Whether or not the arc passes through a given angle.
+    fn passes_through(&self, angle: Angle) -> bool {
+        PlaneSector::new(self.angle_start, self.angle_sweep).contains(self.delta_from_angle(angle))
+    }
+}
+
+impl OffsetOutline for Arc {
+    fn offset(&self, offset: i32) -> Self {
+        let circle = self.to_circle().offset(offset);
+
+        Self::from_circle(circle, self.angle_start, self.angle_sweep)
     }
 }
 
@@ -123,7 +153,80 @@ impl PointsIter for Arc {
 
 impl Dimensions for Arc {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter))
+        let quadrants = [
+            Angle::from_degrees(0.0),
+            Angle::from_degrees(90.0),
+            Angle::from_degrees(180.0),
+            Angle::from_degrees(270.0),
+            Angle::from_degrees(360.0),
+        ];
+
+        let circle_bb = self.to_circle().bounding_box();
+
+        // 3 quadrants consumed. Bounding box is same as circle
+        if self.angle_sweep >= 270.0.deg() {
+            return circle_bb;
+        }
+
+        // let center = self.center();
+        let center = circle_bb.top_left + (circle_bb.size.saturating_sub(Size::new_equal(1)) / 2);
+
+        let start = center + (self.delta_from_angle(self.angle_start)) / 2;
+        let end = center + (self.delta_from_angle(self.angle_end())) / 2;
+
+        dbg!(center, start, end);
+
+        let mut tl = start.component_min(end);
+        let mut br = start.component_max(end);
+
+        for angle in quadrants.iter().copied() {
+            if self.passes_through(angle) {
+                tl = tl.component_min(center + self.delta_from_angle(angle) / 2);
+                br = br.component_max(center + self.delta_from_angle(angle) / 2);
+            }
+        }
+
+        dbg!(tl, br);
+
+        // if tl != br {
+        //     if tl.x < center.x {
+        //         tl.x += 1;
+        //     }
+
+        //     if tl.y < center.y {
+        //         tl.y += 1;
+        //     }
+        // }
+
+        Rectangle::with_corners(tl, br)
+
+        // let start = self.delta_from_angle(self.angle_start);
+        // let end = self.delta_from_angle(self.angle_end());
+        // let center = self.center();
+
+        // let plane_sector = PlaneSector::new(self.angle_start, self.angle_sweep);
+
+        // let (mut min, max) = quadrants
+        //     .iter()
+        //     .map(|q| self.delta_from_angle(*q))
+        //     .filter(|quadrant| plane_sector.contains(*quadrant))
+        //     .chain([start, end].iter().cloned())
+        //     .fold(
+        //         (start.component_min(end), start.component_max(end)),
+        //         |acc, point| (acc.0.component_min(point), acc.1.component_max(point)),
+        //     );
+
+        // // if min != max {
+        // //     if min.x < center.x {
+        // //         min.x += 1;
+        // //     }
+
+        // //     if min.y < center.y {
+        // //         min.y += 1;
+        // //     }
+        // // }
+
+        // Rectangle::with_corners(min, max).translate(center)
     }
 }
 
@@ -166,7 +269,7 @@ impl Transform for Arc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::AngleUnit;
+    use crate::geometry::{AngleUnit, Size};
 
     #[test]
     fn negative_dimensions() {
@@ -174,7 +277,7 @@ mod tests {
 
         assert_eq!(
             arc.bounding_box(),
-            Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
+            Rectangle::new(Point::new(-11, -16), Size::new(6, 6))
         );
     }
 
@@ -184,7 +287,7 @@ mod tests {
 
         assert_eq!(
             arc.bounding_box(),
-            Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+            Rectangle::new(Point::new(10, 15), Size::new(5, 5))
         );
     }
 
@@ -214,5 +317,26 @@ mod tests {
         // even diameter
         let arc = Arc::with_center(Point::new(10, 10), 6, 0.0.deg(), 90.0.deg());
         assert_eq!(arc.center(), Point::new(10, 10));
+    }
+
+    #[test]
+    fn full_circle() {
+        // Full circle
+        assert_eq!(
+            Arc::new(Point::new(10, 10), 10, 0.0.deg(), 360.0.deg()).bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(10, 10))
+        );
+
+        // Greater than full circle
+        assert_eq!(
+            Arc::new(Point::new(10, 10), 10, 0.0.deg(), 380.0.deg()).bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(10, 10))
+        );
+
+        // Two rotations
+        assert_eq!(
+            Arc::new(Point::new(10, 10), 10, 0.0.deg(), 720.0.deg()).bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(10, 10))
+        );
     }
 }

@@ -1,14 +1,14 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::angle_consts::ANGLE_90DEG,
-    geometry::{Angle, Dimensions, Size},
+    geometry::{Angle, Dimensions, Point, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{
             DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        Rectangle, Sector, Styled,
+        Line, OffsetOutline, Rectangle, Sector, Styled,
     },
     style::{PrimitiveStyle, StyledPrimitiveAreas},
     Drawable, Pixel, SaturatingCast,
@@ -192,14 +192,86 @@ impl<C> Dimensions for Styled<Sector, PrimitiveStyle<C>>
 where
     C: PixelColor,
 {
-    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
         if !self.style.is_transparent() {
             let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
+            let bb = self.primitive.offset(offset).bounding_box();
+
+            if self.style.stroke_width > 1 {
+                let sector = self.primitive;
+
+                dbg!(
+                    bb,
+                    self.primitive,
+                    self.primitive.center(),
+                    self.primitive.to_circle().center(),
+                    self.primitive.to_circle().bounding_box().center(),
+                    offset,
+                    self.primitive.offset(offset),
+                    self.primitive.offset(offset).bounding_box(),
+                );
+
+                let center = sector.center();
+
+                let start_edge_point = sector.delta_from_angle(sector.angle_start);
+                let end_edge_point =
+                    sector.delta_from_angle(sector.angle_start + sector.angle_sweep);
+
+                let start_line = Line::new(center + start_edge_point, center)
+                    .extents(self.style.stroke_width, self.style.stroke_alignment.into());
+
+                let end_line = Line::new(center, center + end_edge_point)
+                    .extents(self.style.stroke_width, self.style.stroke_alignment.into());
+
+                dbg!(start_line, end_line);
+
+                let (mut tl, br) = [
+                    start_line.0.start,
+                    start_line.0.end,
+                    end_line.0.start,
+                    end_line.0.end,
+                    start_line.1.start,
+                    start_line.1.end,
+                    end_line.1.start,
+                    end_line.1.end,
+                ]
+                .iter()
+                .fold(
+                    // MSRV: Use i32::MIN/i32::MAX at 1.43.0 or greater
+                    (
+                        Point::new_equal(core::i32::MAX),
+                        Point::new_equal(core::i32::MIN),
+                    ),
+                    |(current_min, current_max), point| {
+                        (
+                            current_min.component_min(*point),
+                            current_max.component_max(*point),
+                        )
+                    },
+                );
+
+                dbg!(tl, br);
+
+                // if tl != br {
+                //     if tl.x < center.x {
+                //         tl.x -= 1;
+                //     }
+
+                //     if tl.y < center.y {
+                //         tl.y -= 1;
+                //     }
+                // }
+
+                Rectangle::with_corners(
+                    dbg!(bb.top_left.component_min(tl)),
+                    dbg!(bb.bottom_right().unwrap_or(bb.top_left).component_max(br)),
+                )
+            } else {
+                bb
+            }
         } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+            Rectangle::new(self.primitive.center(), Size::zero())
         }
     }
 }
@@ -399,10 +471,9 @@ mod tests {
         let empty = Sector::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg())
             .into_styled::<BinaryColor>(PrimitiveStyle::new());
 
-        // TODO: Uncomment when arc bounding box is fixed in #405
-        // let mut display = MockDisplay::new();
-        // center.draw(&mut display).unwrap();
-        // assert_eq!(display.affected_area(), center.bounding_box());
+        let mut display = MockDisplay::new();
+        center.draw(&mut display).unwrap();
+        assert_eq!(display.affected_area(), center.bounding_box());
 
         assert_eq!(empty.bounding_box(), Rectangle::new(CENTER, Size::zero()));
 
@@ -727,5 +798,91 @@ mod tests {
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .draw(&mut display)
             .unwrap();
+    }
+
+    #[test]
+    fn full_circle() {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb888::RED)
+            .stroke_width(5)
+            .build();
+
+        // Full circle
+        assert_eq!(
+            Sector::new(Point::new(10, 10), 10, 0.0.deg(), 360.0.deg())
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::new(8, 8), Size::new(14, 14))
+        );
+
+        // Greater than full circle
+        assert_eq!(
+            Sector::new(Point::new(10, 10), 10, 0.0.deg(), 380.0.deg())
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::new(8, 8), Size::new(14, 14))
+        );
+
+        // Two rotations
+        assert_eq!(
+            Sector::new(Point::new(10, 10), 10, 0.0.deg(), 720.0.deg())
+                .into_styled(style)
+                .bounding_box(),
+            Rectangle::new(Point::new(8, 8), Size::new(14, 14))
+        );
+    }
+
+    #[test]
+    fn styled_bounding_box() {
+        let cases = [
+            (0.0, 90.0),
+            (0.0, 180.0),
+            (0.0, 270.0),
+            (45.0, 155.0),
+            (160.0, 360.0),
+            (100.0, -200.0),
+            (-100.0, -90.0),
+        ];
+
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb888::RED)
+            .stroke_width(6)
+            .build();
+
+        for (start, sweep) in cases.iter() {
+            let start = start.deg();
+            let sweep = sweep.deg();
+
+            let mut display = MockDisplay::new();
+
+            display.set_allow_overdraw(true);
+
+            let s = Sector::new(Point::new(5, 5), 15, start, sweep).into_styled(style);
+
+            s.draw(&mut display).unwrap();
+
+            s.bounding_box()
+                .into_styled(PrimitiveStyle::with_stroke(Rgb888::GREEN, 1))
+                .draw(&mut display)
+                .unwrap();
+
+            // dbg!(
+            //     start.to_degrees(),
+            //     sweep.to_degrees(),
+            //     display.affected_area(),
+            //     s.bounding_box()
+            // );
+
+            println!("---");
+
+            assert_eq!(
+                display.affected_area(),
+                s.bounding_box(),
+                "start {}, sweep {}:\n{:?}",
+                start.to_degrees(),
+                sweep.to_degrees(),
+                display
+            );
+        }
     }
 }
