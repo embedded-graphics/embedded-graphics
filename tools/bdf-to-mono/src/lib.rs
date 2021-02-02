@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, ensure, Result};
-use bdf_parser::{BdfFont, Glyph};
+use bdf_parser::BdfFont;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -17,18 +17,14 @@ impl fmt::Display for Encoding {
     }
 }
 
-// TODO: move to bdf-parser crate
-fn get_glyph(font: &BdfFont, c: char) -> Option<&Glyph> {
-    font.glyphs.iter().find(|glyph| glyph.encoding == Some(c))
-}
-
 pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
-    let glyph_bb = get_glyph(&font, 'A')
+    let glyph_bb = font
+        .glyphs
+        .get('A')
         .ok_or_else(|| anyhow!("font doesn't contain 'A' glyph"))?
         .bounding_box;
-    let glyph_width = glyph_bb.size.0 as usize;
-    let glyph_width_bytes = (glyph_width + 7) / 8;
-    let glyph_height = glyph_bb.size.1 as usize;
+    let glyph_width = glyph_bb.size.x as usize;
+    let glyph_height = glyph_bb.size.y as usize;
 
     let rows: Vec<u32> = match encoding {
         Encoding::Ascii => (0x20..=0x7F).step_by(16).collect(),
@@ -55,10 +51,7 @@ pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
 
             for y in 0..glyph_height {
                 for x in 0..glyph_width {
-                    let byte_index = y * glyph_width_bytes + x / 8;
-                    let bit_index = x % 8;
-
-                    if glyph.bitmap[byte_index] & (0x80 >> bit_index) != 0 {
+                    if glyph.pixel(x, y) {
                         bitmap[bitmap_x + x + (bitmap_y + y) * bitmap_width] = true;
                     }
                 }
@@ -81,8 +74,8 @@ pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(glyph_bb.offset.0, 0);
-    assert!(glyph_bb.offset.1 <= 0);
+    assert_eq!(glyph_bb.offset.x, 0);
+    assert!(glyph_bb.offset.y <= 0);
 
     Ok(Bitmap {
         data,
@@ -92,7 +85,7 @@ pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
         glyph_height,
         rows: rows.len(),
         columns: 16,
-        baseline: glyph_height - -glyph_bb.offset.1 as usize - 1,
+        baseline: glyph_height - -glyph_bb.offset.y as usize - 1,
     })
 }
 
