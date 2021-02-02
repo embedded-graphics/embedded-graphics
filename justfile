@@ -109,6 +109,7 @@ _build-readme crate:
 
 convert-fonts:
     cd tools/convert-fonts && cargo run --release
+    find src/mono_font/ -name generated.rs -exec rustfmt {} \;
 
 #--------
 # Docker
