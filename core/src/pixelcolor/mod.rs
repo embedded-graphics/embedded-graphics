@@ -12,7 +12,7 @@
 //!
 //! ```
 //! use embedded_graphics::{
-//!     geometry::Size, prelude::*, primitives::Rectangle, style::PrimitiveStyle,
+//!     geometry::Size, prelude::*, primitives::{Rectangle, PrimitiveStyle},
 //! };
 //!
 //! /// Color with 3 states.

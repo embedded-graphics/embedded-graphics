@@ -3,9 +3,11 @@ use crate::{
     geometry::{Dimensions, Size},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
-    primitives::{circle::Circle, common::DistanceIterator, rectangle::Rectangle},
-    style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
-    Drawable, Pixel, SaturatingCast,
+    primitives::{
+        circle::Circle, common::DistanceIterator, rectangle::Rectangle, PrimitiveStyle,
+        StyledPrimitiveAreas,
+    },
+    Drawable, Pixel, SaturatingCast, Styled,
 };
 
 /// Pixel iterator for each pixel in the circle border
@@ -121,8 +123,7 @@ mod tests {
         geometry::{Dimensions, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::{PointsIter, Primitive},
-        style::{PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{PointsIter, Primitive, PrimitiveStyleBuilder, StrokeAlignment},
         Drawable,
     };
 

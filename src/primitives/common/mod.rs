@@ -16,7 +16,7 @@ pub use scanline::Scanline;
 pub use thick_segment::ThickSegment;
 pub use thick_segment_iter::ThickSegmentIter;
 
-use crate::style::StrokeAlignment;
+use crate::primitives::StrokeAlignment;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum StrokeOffset {

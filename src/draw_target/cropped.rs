@@ -78,8 +78,7 @@ mod tests {
         geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::{Primitive, Rectangle},
-        style::PrimitiveStyle,
+        primitives::{Primitive, PrimitiveStyle, Rectangle},
         Drawable, Pixel,
     };
 

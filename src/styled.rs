@@ -2,10 +2,8 @@ use crate::{
     geometry::{Dimensions, Point},
     mono_font::{MonoFont, MonoTextStyle},
     pixelcolor::PixelColor,
-    primitives::{OffsetOutline, Primitive, Rectangle},
-    style::PrimitiveStyle,
+    primitives::Rectangle,
     transform::Transform,
-    SaturatingCast,
 };
 
 /// Styled.
@@ -51,39 +49,5 @@ where
 {
     fn bounding_box(&self) -> Rectangle {
         self.primitive.bounding_box()
-    }
-}
-
-/// Stroke and fill area trait.
-pub trait StyledPrimitiveAreas {
-    /// Type of primitive shape used for the stroke and fill areas.
-    type Primitive;
-
-    /// Returns the stroke area.
-    fn stroke_area(&self) -> Self::Primitive;
-
-    /// Returns the fill area.
-    fn fill_area(&self) -> Self::Primitive;
-}
-
-impl<T, C> StyledPrimitiveAreas for Styled<T, PrimitiveStyle<C>>
-where
-    T: Primitive + OffsetOutline,
-    C: PixelColor,
-{
-    type Primitive = T;
-
-    fn stroke_area(&self) -> Self::Primitive {
-        // saturate offset at i32::max_value() if stroke width is to large
-        let offset = self.style.outside_stroke_width().saturating_cast();
-
-        self.primitive.offset(offset)
-    }
-
-    fn fill_area(&self) -> Self::Primitive {
-        // saturate offset at i32::min_value() if stroke width is to large
-        let offset = self.style.inside_stroke_width().saturating_cast_neg();
-
-        self.primitive.offset(offset)
     }
 }

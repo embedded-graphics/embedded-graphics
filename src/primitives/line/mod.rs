@@ -27,7 +27,7 @@ pub use styled::StyledPixels;
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     pixelcolor::Rgb565, prelude::*, primitives::Line, style::PrimitiveStyle,
+///     pixelcolor::Rgb565, prelude::*, primitives::{Line, PrimitiveStyle},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
@@ -208,7 +208,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::Size, iterator::IntoPixels, mock_display::MockDisplay, pixelcolor::BinaryColor,
-        style::PrimitiveStyle, Drawable, Pixel,
+        primitives::PrimitiveStyle, Drawable, Pixel,
     };
     use arrayvec::ArrayVec;
 

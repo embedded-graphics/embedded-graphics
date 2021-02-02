@@ -6,10 +6,9 @@ use crate::{
     primitives::{
         common::{ClosedThickSegmentIter, PointType, Scanline, StrokeOffset},
         triangle::{scanline_iterator::ScanlineIterator, Triangle},
-        Rectangle,
+        PrimitiveStyle, Rectangle, StrokeAlignment,
     },
-    style::{PrimitiveStyle, StrokeAlignment, Styled},
-    Drawable, Pixel,
+    Drawable, Pixel, Styled,
 };
 
 /// Pixel iterator for each pixel in the triangle border
@@ -181,9 +180,7 @@ mod tests {
         geometry::Point,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, Rgb888, RgbColor},
-        primitives::{Line, Primitive},
-        style::PrimitiveStyleBuilder,
-        style::StrokeAlignment,
+        primitives::{Line, Primitive, PrimitiveStyleBuilder, StrokeAlignment},
         transform::Transform,
         Drawable,
     };

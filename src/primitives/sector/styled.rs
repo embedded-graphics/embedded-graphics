@@ -8,10 +8,9 @@ use crate::{
         common::{
             DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        Rectangle, Sector, Styled,
+        PrimitiveStyle, Rectangle, Sector, StyledPrimitiveAreas,
     },
-    style::{PrimitiveStyle, StyledPrimitiveAreas},
-    Drawable, Pixel, SaturatingCast,
+    Drawable, Pixel, SaturatingCast, Styled,
 };
 
 /// Pixel iterator for each pixel in the sector border
@@ -217,9 +216,7 @@ mod tests {
         geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::Circle,
-        primitives::Primitive,
-        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
     #[test]

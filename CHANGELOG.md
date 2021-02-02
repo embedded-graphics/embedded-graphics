@@ -19,6 +19,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) The `fonts` module was split into `text` and `mono_font` modules.
 - **(breaking)** [#523](https://github.com/embedded-graphics/embedded-graphics/pull/523) The vertical and horizontal alignment of `Text` objects must now be set using the new `TextStyle` struct.
 - **(breaking)** [#535](https://github.com/embedded-graphics/embedded-graphics/pull/535) Replaced the builtin fonts with new fonts, that are generated from BDF files.
+- **(breaking)** [#538](https://github.com/embedded-graphics/embedded-graphics/pull/538) The types inside the `style` module were moved to other locations and the module itself has been removed.
 
 ### Removed
 

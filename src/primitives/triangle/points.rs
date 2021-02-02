@@ -50,8 +50,7 @@ mod tests {
     use crate::{
         iterator::IntoPixels,
         pixelcolor::BinaryColor,
-        primitives::{PointsIter, Primitive},
-        style::PrimitiveStyle,
+        primitives::{PointsIter, Primitive, PrimitiveStyle},
         transform::Transform,
         Pixel,
     };

@@ -21,8 +21,7 @@ pub use styled::StyledPixels;
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::Ellipse,
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{Ellipse, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 ///

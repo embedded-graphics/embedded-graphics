@@ -149,8 +149,7 @@ use embedded_graphics::{
     mono_font::{ascii::Font6x9, MonoTextStyle},
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Rectangle, Triangle},
-    style::PrimitiveStyle,
+    primitives::{Circle, Rectangle, Triangle, PrimitiveStyle},
     text::Text,
     mock_display::MockDisplay,
 };

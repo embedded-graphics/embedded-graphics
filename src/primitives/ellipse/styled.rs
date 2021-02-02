@@ -5,10 +5,9 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
-        Rectangle,
+        PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
     },
-    style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
-    Drawable, Pixel, SaturatingCast,
+    Drawable, Pixel, SaturatingCast, Styled,
 };
 
 /// Pixel iterator for each pixel in the ellipse border
@@ -128,8 +127,7 @@ mod tests {
         geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::{Circle, Primitive},
-        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
         Drawable, SaturatingCast,
     };
 
