@@ -1,7 +1,5 @@
 use criterion::*;
-use embedded_graphics::{
-    geometry::AngleUnit, pixelcolor::Gray8, prelude::*, primitives::*, style::PrimitiveStyle,
-};
+use embedded_graphics::{geometry::AngleUnit, pixelcolor::Gray8, prelude::*, primitives::*};
 
 mod common;
 

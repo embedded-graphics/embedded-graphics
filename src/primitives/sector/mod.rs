@@ -23,8 +23,7 @@ pub use styled::StyledPixels;
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::Sector,
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{Sector, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();

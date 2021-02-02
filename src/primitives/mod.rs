@@ -6,6 +6,7 @@ mod common;
 pub mod ellipse;
 pub mod line;
 pub mod polyline;
+mod primitive_style;
 pub mod rectangle;
 pub mod rounded_rectangle;
 pub mod sector;
@@ -19,6 +20,9 @@ pub use self::{
     ellipse::Ellipse,
     line::Line,
     polyline::Polyline,
+    primitive_style::{
+        PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, StyledPrimitiveAreas,
+    },
     rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
     sector::Sector,
     triangle::Triangle,
@@ -26,7 +30,7 @@ pub use self::{
 use crate::{
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    style::{PrimitiveStyle, Styled},
+    Styled,
 };
 pub use embedded_graphics_core::primitives::PointsIter;
 

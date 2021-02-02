@@ -21,7 +21,7 @@ pub use points::Points;
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     pixelcolor::Rgb565, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+///     pixelcolor::Rgb565, prelude::*, primitives::{Rectangle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
@@ -155,8 +155,8 @@ impl Rectangle {
     ///
     /// ```rust
     /// use embedded_graphics::{
-    ///     mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
-    ///     style::PrimitiveStyle,
+    ///     mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*,
+    ///     primitives::{Rectangle, PrimitiveStyle},
     /// };
     ///
     /// let mut display = MockDisplay::new();
@@ -200,7 +200,7 @@ impl Rectangle {
     /// `intersection` returns a zero-sized rectangle.
     ///
     /// ```rust
-    /// use embedded_graphics::{prelude::*, primitives::Rectangle, style::PrimitiveStyle};
+    /// use embedded_graphics::{prelude::*, primitives::{Rectangle, PrimitiveStyle}};
     ///
     /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(10, 15), Size::new(10, 7));

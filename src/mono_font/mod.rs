@@ -123,7 +123,7 @@
 //!
 //! [built-in fonts]: #built-in-fonts
 //! [`Text`]: ../text/struct.Text.html
-//! [`Styled`]: ../style/struct.Styled.html
+//! [`Styled`]: ../struct.Styled.html
 //! [`MonoTextStyle`]: struct.MonoTextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html

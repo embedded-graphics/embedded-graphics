@@ -5,10 +5,9 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         line::{thick_points::ThickPoints, Line, StrokeOffset},
-        Rectangle,
+        PrimitiveStyle, Rectangle,
     },
-    style::{PrimitiveStyle, Styled},
-    Drawable, Pixel, SaturatingCast,
+    Drawable, Pixel, SaturatingCast, Styled,
 };
 
 /// Styled line iterator.

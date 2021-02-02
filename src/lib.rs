@@ -137,8 +137,7 @@
 //!     mono_font::{ascii::Font6x9, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::{Circle, Rectangle, Triangle},
-//!     style::PrimitiveStyle,
+//!     primitives::{Circle, Rectangle, Triangle, PrimitiveStyle},
 //!     text::Text,
 //!     mock_display::MockDisplay,
 //! };
@@ -229,11 +228,12 @@ pub mod mock_display;
 pub mod mono_font;
 pub mod prelude;
 pub mod primitives;
-pub mod style;
+mod styled;
 pub mod text;
 pub mod transform;
 
 pub use embedded_graphics_core::{pixelcolor, Drawable, Pixel};
+pub use styled::Styled;
 
 /// Trait to convert unsigned into signed integer.
 trait SaturatingCast<T> {

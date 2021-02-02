@@ -1,10 +1,5 @@
 use criterion::*;
-use embedded_graphics::{
-    pixelcolor::Gray8,
-    prelude::*,
-    primitives::*,
-    style::{PrimitiveStyle, PrimitiveStyleBuilder},
-};
+use embedded_graphics::{pixelcolor::Gray8, prelude::*, primitives::*};
 
 mod common;
 

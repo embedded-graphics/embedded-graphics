@@ -47,8 +47,7 @@ pub use styled::StyledPixels;
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::{Rectangle, RoundedRectangle},
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
@@ -78,8 +77,7 @@ pub use styled::StyledPixels;
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::{CornerRadiiBuilder, Rectangle, RoundedRectangle},
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{CornerRadiiBuilder, Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();
@@ -112,8 +110,7 @@ pub use styled::StyledPixels;
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::{CornerRadii, CornerRadiiBuilder, Rectangle, RoundedRectangle},
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{CornerRadii, CornerRadiiBuilder, Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();

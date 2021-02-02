@@ -2,8 +2,7 @@ extern crate embedded_graphics;
 
 use embedded_graphics::{
     prelude::*,
-    primitives::{Circle, Line, Primitive, Rectangle},
-    style::PrimitiveStyle,
+    primitives::{Circle, Line, Primitive, PrimitiveStyle, Rectangle},
 };
 
 struct FakeDisplay {}

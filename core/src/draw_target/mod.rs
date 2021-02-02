@@ -44,8 +44,7 @@ use crate::{
 /// use embedded_graphics::{
 ///     pixelcolor::{Gray8, GrayColor},
 ///     prelude::*,
-///     primitives::Circle,
-///     style::PrimitiveStyle,
+///     primitives::{Circle, PrimitiveStyle},
 /// };
 /// #
 /// # struct SPI1;
@@ -143,8 +142,7 @@ use crate::{
 /// use embedded_graphics::{
 ///     pixelcolor::{raw::RawU16, Rgb565, RgbColor},
 ///     prelude::*,
-///     primitives::{Circle, Rectangle},
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{Circle, Rectangle, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 /// #
 /// # struct SPI1;

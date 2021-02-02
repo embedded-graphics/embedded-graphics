@@ -12,8 +12,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///     mono_font::{ascii::Font6x9, MonoTextStyle},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
-///     primitives::Rectangle,
-///     style::PrimitiveStyle,
+///     primitives::{Rectangle, PrimitiveStyle},
 ///     text::Text,
 /// };
 ///

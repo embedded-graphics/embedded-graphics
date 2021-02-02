@@ -25,7 +25,7 @@ pub use styled::StyledPixels;
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     pixelcolor::Rgb565, prelude::*, primitives::Polyline, style::PrimitiveStyle,
+///     pixelcolor::Rgb565, prelude::*, primitives::{Polyline, PrimitiveStyle},
 /// };
 /// # use embedded_graphics::mock_display::MockDisplay;
 /// # let mut display = MockDisplay::default();

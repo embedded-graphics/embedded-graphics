@@ -51,8 +51,7 @@ mod tests {
         geometry::AngleUnit,
         iterator::IntoPixels,
         pixelcolor::BinaryColor,
-        primitives::{PointsIter, Primitive},
-        style::PrimitiveStyle,
+        primitives::{PointsIter, Primitive, PrimitiveStyle},
         Pixel,
     };
 

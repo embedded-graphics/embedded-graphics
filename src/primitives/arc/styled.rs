@@ -6,9 +6,8 @@ use crate::{
     primitives::{
         arc::Arc,
         common::{DistanceIterator, PlaneSector},
-        OffsetOutline, Rectangle, Styled,
+        OffsetOutline, PrimitiveStyle, Rectangle, Styled,
     },
-    style::PrimitiveStyle,
     Drawable, Pixel, SaturatingCast,
 };
 
@@ -132,8 +131,7 @@ mod tests {
         geometry::{AnchorPoint, AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::{Circle, Primitive},
-        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
 
     // Check the rendering of a simple arc

@@ -24,6 +24,7 @@
     - [Triangle](#triangle)
   - [Geometry](#geometry-1)
   - [Mock display](#mock-display-1)
+  - [style module](#style-module)
 
 ## New features
 
@@ -313,3 +314,13 @@ Implementations of the `Dimensions` trait now only require the `bounding_box` me
 The `MockDisplay`, used often for unit testing, now checks for pixel overdraw by default. To disable this behaviour, call `set_allow_overdraw(false)` on the `MockDisplay` instance.
 
 It now also disallows out of bounds drawing by default. This behaviour can be changed by calling `display.set_allow_out_of_bounds_drawing(true)`.
+
+## Style module
+
+The `style` module has been removed.
+
+TODO: Improve this section before release.
+
+- `PrimitiveStyle` & `PrimitiveStyleBuilder` -> `primitives` module
+- `TextStyle` & `TextStyleBuilder` -> `text` module + see text changes
+- `Styled` -> crate root

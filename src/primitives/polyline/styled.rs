@@ -6,11 +6,10 @@ use crate::{
     primitives::{
         common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
-        PointsIter, Rectangle,
+        PointsIter, PrimitiveStyle, Rectangle,
     },
-    style::{PrimitiveStyle, Styled},
     transform::Transform,
-    Drawable, Pixel,
+    Drawable, Pixel, Styled,
 };
 
 impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>
@@ -207,8 +206,7 @@ mod tests {
         iterator::{IntoPixels, PixelIteratorExt},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
-        primitives::Primitive,
-        style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
         Drawable,
     };
 

@@ -5,10 +5,9 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         rounded_rectangle::{Points, RoundedRectangle},
-        ContainsPoint, Rectangle,
+        ContainsPoint, PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
     },
-    style::{PrimitiveStyle, Styled, StyledPrimitiveAreas},
-    Drawable, Pixel, SaturatingCast,
+    Drawable, Pixel, SaturatingCast, Styled,
 };
 
 /// Pixel iterator for each pixel in the rect border
@@ -116,8 +115,9 @@ mod tests {
         iterator::IntoPixels,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::{rectangle::Rectangle, CornerRadii, Primitive},
-        style::{PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{
+            rectangle::Rectangle, CornerRadii, Primitive, PrimitiveStyleBuilder, StrokeAlignment,
+        },
         Drawable,
     };
 

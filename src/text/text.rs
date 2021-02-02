@@ -3,10 +3,9 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    style::Styled,
     text::{HorizontalAlignment, TextMetrics, TextRenderer, TextStyle, VerticalAlignment},
     transform::Transform,
-    Drawable, SaturatingCast,
+    Drawable, SaturatingCast, Styled,
 };
 
 /// A text object.
@@ -20,7 +19,7 @@ use crate::{
 /// See the [module-level documentation] for examples how to use text objects.
 ///
 /// [`into_styled`]: #method.into_styled
-/// [`Styled`]: ../style/struct.Styled.html
+/// [`Styled`]: ../struct.Styled.html
 /// [module-level documentation]: index.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Text<'a> {
@@ -224,8 +223,7 @@ mod tests {
             ascii::Font6x9, tests::assert_text_from_pattern, MonoTextStyle, MonoTextStyleBuilder,
         },
         pixelcolor::BinaryColor,
-        prelude::*,
-        style::PrimitiveStyle,
+        primitives::{Primitive, PrimitiveStyle},
         text::{TextStyleBuilder, VerticalAlignment},
     };
 

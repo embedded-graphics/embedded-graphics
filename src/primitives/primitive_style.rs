@@ -1,4 +1,8 @@
-use crate::pixelcolor::PixelColor;
+use crate::{
+    pixelcolor::PixelColor,
+    primitives::{OffsetOutline, Primitive},
+    SaturatingCast, Styled,
+};
 
 /// Style properties for primitives.
 ///
@@ -11,7 +15,7 @@ use crate::pixelcolor::PixelColor;
 /// fill respectively. For more complex styles, use the [`PrimitiveStyleBuilder`].
 ///
 /// [primitive]: ../primitives/index.html
-/// [`PrimitiveStyleBuilder`]: ../style/struct.PrimitiveStyleBuilder.html
+/// [`PrimitiveStyleBuilder`]: struct.PrimitiveStyleBuilder.html
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
@@ -147,8 +151,7 @@ where
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::Circle,
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{Circle, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 ///
 /// let style: PrimitiveStyle<Rgb565> = PrimitiveStyleBuilder::new()
@@ -169,8 +172,7 @@ where
 /// use embedded_graphics::{
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::Rectangle,
-///     style::{PrimitiveStyle, PrimitiveStyleBuilder},
+///     primitives::{Rectangle, PrimitiveStyle, PrimitiveStyleBuilder},
 /// };
 ///
 /// let style: PrimitiveStyle<Rgb565> = PrimitiveStyleBuilder::new()
@@ -258,6 +260,39 @@ pub enum StrokeAlignment {
 impl Default for StrokeAlignment {
     fn default() -> Self {
         Self::Center
+    }
+}
+/// Stroke and fill area trait.
+pub trait StyledPrimitiveAreas {
+    /// Type of primitive shape used for the stroke and fill areas.
+    type Primitive;
+
+    /// Returns the stroke area.
+    fn stroke_area(&self) -> Self::Primitive;
+
+    /// Returns the fill area.
+    fn fill_area(&self) -> Self::Primitive;
+}
+
+impl<T, C> StyledPrimitiveAreas for Styled<T, PrimitiveStyle<C>>
+where
+    T: Primitive + OffsetOutline,
+    C: PixelColor,
+{
+    type Primitive = T;
+
+    fn stroke_area(&self) -> Self::Primitive {
+        // saturate offset at i32::max_value() if stroke width is to large
+        let offset = self.style.outside_stroke_width().saturating_cast();
+
+        self.primitive.offset(offset)
+    }
+
+    fn fill_area(&self) -> Self::Primitive {
+        // saturate offset at i32::min_value() if stroke width is to large
+        let offset = self.style.inside_stroke_width().saturating_cast_neg();
+
+        self.primitive.offset(offset)
     }
 }
 
