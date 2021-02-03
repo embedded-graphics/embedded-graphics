@@ -6,6 +6,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+## [0.7.0-alpha.3] - 2021-02-03
+
 ### Added
 
 - [#508](https://github.com/embedded-graphics/embedded-graphics/pull/508) Added `MockDisplay::assert_eq_with_message` and `MockDisplay::assert_pattern_with_message`.
@@ -586,8 +588,9 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.3...HEAD
 
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.2...HEAD
+[0.7.0-alpha.3]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.2...embedded-graphics-v0.7.0-alpha.3
 [0.7.0-alpha.2]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.1...embedded-graphics-v0.7.0-alpha.2
 [0.7.0-alpha.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.6.2...embedded-graphics-v0.7.0-alpha.1
 [0.6.2]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.6.1...embedded-graphics-v0.6.2
