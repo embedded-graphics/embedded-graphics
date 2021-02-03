@@ -128,8 +128,8 @@ push-ci-image:
 # -------
 # Release embedded-graphics-core
 release-core *args:
-    cargo release --workspace --exclude embedded-graphics {{args}}
+    cargo release --workspace --exclude embedded-graphics --dependent-version fix {{args}}
 
 # Release embedded-graphics
 release-e-g *args:
-    cargo release --package embedded-graphics {{args}}
+    cargo release --package embedded-graphics --dependent-version fix {{args}}
