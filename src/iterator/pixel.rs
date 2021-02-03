@@ -4,12 +4,12 @@ use crate::{geometry::Point, pixelcolor::PixelColor, Pixel};
 
 /// Translated pixel iterator.
 #[derive(Debug, PartialEq)]
-pub struct Translate<I> {
+pub struct Translated<I> {
     iter: I,
     offset: Point,
 }
 
-impl<I, C> Translate<I>
+impl<I, C> Translated<I>
 where
     I: Iterator<Item = Pixel<C>>,
     C: PixelColor,
@@ -19,7 +19,7 @@ where
     }
 }
 
-impl<I, C> Iterator for Translate<I>
+impl<I, C> Iterator for Translated<I>
 where
     I: Iterator<Item = Pixel<C>>,
     C: PixelColor,
@@ -54,6 +54,6 @@ mod tests {
         ];
         let expected = expected.iter().copied();
 
-        assert!(pixels.translate(Point::new(4, 5)).eq(expected));
+        assert!(pixels.translated(Point::new(4, 5)).eq(expected));
     }
 }
