@@ -44,7 +44,7 @@ where
 
 /// Crops a part of the underlying iterator.
 #[derive(Debug)]
-pub(crate) struct Crop<I>
+pub(crate) struct Cropped<I>
 where
     I: Iterator,
     I::Item: PixelColor,
@@ -57,7 +57,7 @@ where
     row_skip: usize,
 }
 
-impl<I> Crop<I>
+impl<I> Cropped<I>
 where
     I: Iterator,
     I::Item: PixelColor,
@@ -82,7 +82,7 @@ where
     }
 }
 
-impl<I> Iterator for Crop<I>
+impl<I> Iterator for Cropped<I>
 where
     I: Iterator,
     I::Item: PixelColor,
@@ -117,13 +117,13 @@ mod tests {
     use crate::pixelcolor::Gray8;
 
     #[test]
-    fn crop() {
+    fn cropped() {
         let parent = (0..=255).map(Gray8::new);
         let parent_size = Size::new(16, 16);
 
         let crop_area = Rectangle::new(Point::new(2, 3), Size::new(4, 3));
 
-        let mut cropped_iter = Crop::new(parent, parent_size, &crop_area);
+        let mut cropped_iter = Cropped::new(parent, parent_size, &crop_area);
 
         let expected = &[
             50, 51, 52, 53, //
@@ -138,25 +138,25 @@ mod tests {
     }
 
     #[test]
-    fn crop_empty() {
+    fn cropped_empty() {
         let parent = (0..=255).map(Gray8::new);
         let parent_size = Size::new(16, 16);
 
         let crop_area = Rectangle::zero();
 
-        let mut cropped_iter = Crop::new(parent, parent_size, &crop_area);
+        let mut cropped_iter = Cropped::new(parent, parent_size, &crop_area);
 
         assert_eq!(cropped_iter.next(), None);
     }
 
     #[test]
-    fn crop_overlapping() {
+    fn cropped_overlapping() {
         let parent = (0..=255).map(Gray8::new);
         let parent_size = Size::new(16, 16);
 
         let crop_area = Rectangle::new(Point::new(14, 10), Size::new(4, 4));
 
-        let mut cropped_iter = Crop::new(parent, parent_size, &crop_area);
+        let mut cropped_iter = Cropped::new(parent, parent_size, &crop_area);
 
         let expected = &[
             174, 175, //

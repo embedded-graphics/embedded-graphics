@@ -57,7 +57,7 @@ where
         D: DrawTarget<Color = C>;
 
     /// Returns a translated version of the iterator.
-    fn translate(self, offset: Point) -> pixel::Translate<Self>;
+    fn translated(self, offset: Point) -> pixel::Translated<Self>;
 }
 
 impl<I, C> PixelIteratorExt<C> for I
@@ -72,8 +72,8 @@ where
         target.draw_iter(self)
     }
 
-    fn translate(self, offset: Point) -> pixel::Translate<Self> {
-        pixel::Translate::new(self, offset)
+    fn translated(self, offset: Point) -> pixel::Translated<Self> {
+        pixel::Translated::new(self, offset)
     }
 }
 

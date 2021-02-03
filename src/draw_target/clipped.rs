@@ -1,5 +1,5 @@
 use crate::{
-    draw_target::DrawTarget, geometry::Dimensions, iterator::contiguous::Crop,
+    draw_target::DrawTarget, geometry::Dimensions, iterator::contiguous::Cropped,
     primitives::Rectangle, transform::Transform, Pixel,
 };
 
@@ -60,7 +60,7 @@ where
             self.parent.fill_contiguous(area, colors)
         } else {
             let crop_area = intersection.translate(-area.top_left);
-            let cropped = Crop::new(colors.into_iter(), area.size, &crop_area);
+            let cropped = Cropped::new(colors.into_iter(), area.size, &crop_area);
             self.parent.fill_contiguous(&intersection, cropped)
         }
     }

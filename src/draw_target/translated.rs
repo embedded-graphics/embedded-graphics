@@ -44,7 +44,7 @@ where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
         self.parent
-            .draw_iter(pixels.into_iter().translate(self.offset))
+            .draw_iter(pixels.into_iter().translated(self.offset))
     }
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
