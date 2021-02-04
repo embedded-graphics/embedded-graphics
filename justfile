@@ -73,6 +73,10 @@ check-links: generate-docs
     cargo deadlinks --dir target/doc/embedded_graphics
     cargo deadlinks --dir target/doc/embedded_graphics_core
 
+# Generate drawing examples in the doc directory
+generate-drawing-examples:
+    cd tools/generate-drawing-examples && cargo run
+
 #----------------------
 # README.md generation
 #----------------------
