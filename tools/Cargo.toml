@@ -1,6 +1,6 @@
 [workspace]
-
 members = [
     "bdf-to-mono",
     "convert-fonts",
+    "generate-drawing-examples",
 ]

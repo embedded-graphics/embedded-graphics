@@ -6,6 +6,9 @@ ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-2"
 # list of all features except criterion
 all_features := "nalgebra_support fixed"
 
+doc_dir := "doc"
+doc_assets_dir := doc_dir + "/assets"
+
 #----------
 # Building
 #----------
@@ -72,6 +75,26 @@ generate-docs:
 check-links: generate-docs
     cargo deadlinks --dir target/doc/embedded_graphics
     cargo deadlinks --dir target/doc/embedded_graphics_core
+
+# Generate drawing examples in the doc directory
+generate-drawing-examples:
+    cd tools/generate-drawing-examples && cargo run
+
+# Checks if drawing examples are up to date
+check-drawing-examples: generate-drawing-examples
+    git diff --quiet doc/ || ( \
+        echo "doc/ folder is not up to date" \
+        echo "Try running 'just generate-drawing-examples'." \
+        echo "If any images have changed, run 'just generate-drawing-examples-montage' to update the collage image too" \
+    )
+
+# Generate a collage of all drawing example screenshots
+generate-drawing-examples-montage:
+    # `imagemagick` must be installed for this to work.
+    montage \
+        {{doc_assets_dir}}/draw*.png \
+        -tile 6x2 -background none -geometry 128x128+4+4 miff:- | \
+    convert - -trim {{doc_assets_dir}}/all_drawing_ops.png
 
 #----------------------
 # README.md generation

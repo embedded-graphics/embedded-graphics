@@ -1,0 +1,17 @@
+[package]
+name = "generate-drawing-examples"
+version = "0.1.0"
+authors = ["Ralf Fuest <mail@rfuest.de>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+# TODO: change to path dependency after next simulator release
+# embedded-graphics = { path = "../../" }
+embedded-graphics = { version = "=0.7.0-alpha.2" }
+tinytga = "0.4.0-alpha.1"
+
+# TODO: replace by non git dependency after next simulator release
+embedded-graphics-simulator = { git = "https://github.com/embedded-graphics/simulator" }
+regex = "1.4.3"
+unindent = "0.1.7"
