@@ -186,7 +186,7 @@ pub(crate) mod tests {
         geometry::Point,
         mock_display::MockDisplay,
         mono_font::MonoTextStyleBuilder,
-        pixelcolor::{BinaryColor, Rgb888, RgbColor},
+        pixelcolor::BinaryColor,
         text::{Text, TextStyleBuilder, VerticalAlignment},
         Drawable,
     };
@@ -210,36 +210,6 @@ pub(crate) mod tests {
 
         let mut display = MockDisplay::new();
         Text::new(text, Point::zero())
-            .into_styled(text_style)
-            .draw(&mut display)
-            .unwrap();
-
-        display.assert_pattern(pattern);
-    }
-
-    /// Draws a white 'A' with green underline and red strikethrough.
-    // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
-    // #[track_caller]
-    pub fn test_text_decoration<F>(font: F, pattern: &[&str])
-    where
-        F: MonoFont,
-    {
-        let character_style = MonoTextStyleBuilder::new()
-            .font(font)
-            .text_color(Rgb888::WHITE)
-            .underline_with_color(Rgb888::GREEN)
-            .strikethrough_with_color(Rgb888::RED)
-            .build();
-
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
-            .build();
-
-        let mut display = MockDisplay::new();
-        display.set_allow_overdraw(true);
-
-        Text::new("A", Point::zero())
             .into_styled(text_style)
             .draw(&mut display)
             .unwrap();
