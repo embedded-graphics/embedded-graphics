@@ -1,7 +1,7 @@
 targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
 target_dir := "target"
-ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-2"
+ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-3"
 
 # list of all features except criterion
 all_features := "nalgebra_support fixed"
