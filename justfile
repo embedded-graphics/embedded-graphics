@@ -84,7 +84,7 @@ generate-drawing-examples:
 check-drawing-examples: generate-drawing-examples
     git diff --quiet doc/ || ( \
         echo "doc/ folder is not up to date" \
-        echo "Try running 'just generate-drawing-examles'." \
+        echo "Try running 'just generate-drawing-examples'." \
         echo "If any images have changed, run 'just generate-drawing-examples-montage' to update the collage image too" \
     )
 
