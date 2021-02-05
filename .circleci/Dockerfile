@@ -8,7 +8,7 @@ RUN rustup default 1.48.0
 
 RUN cargo install --root /home/circleci/project just --version ^0.8
 RUN cargo install --root /home/circleci/project cargo-readme --version ^3.2
-RUN cargo install --root /home/circleci/project cargo-deadlinks --version ^0.6
+RUN cargo install --root /home/circleci/project cargo-deadlinks --version ^0.8
 
 FROM cimg/rust:1.40.0
 
