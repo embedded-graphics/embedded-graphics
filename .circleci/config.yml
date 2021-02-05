@@ -1,19 +1,19 @@
 # Check that everything (tests, benches, etc) builds in std environments
 precheck_steps: &precheck_steps
-  docker:
+  docker: &docker
     - image: jamwaffles/circleci-embedded-graphics:1.40.0-3
       auth:
         username: jamwaffles
         password: $DOCKERHUB_PASSWORD
   steps:
     - checkout
-    - restore_cache:
+    - restore_cache: &restore_cache
         key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update
     - run: just build
-    - save_cache:
+    - save_cache: &save_cache
         key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
         paths:
           - ./target
@@ -21,24 +21,14 @@ precheck_steps: &precheck_steps
 
 # Build crates for embedded target
 target_steps: &target_steps
-  docker:
-    - image: jamwaffles/circleci-embedded-graphics:1.40.0-2
-      auth:
-        username: jamwaffles
-        password: $DOCKERHUB_PASSWORD
+  docker: *docker
   steps:
     - checkout
-    - restore_cache:
-        keys:
-          - v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+    - restore_cache: *restore_cache
     - run: just install-targets
     - run: cargo update
     - run: just build-targets --release
-    - save_cache:
-        key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
-        paths:
-          - ./target
-          - /home/circleci/.cargo/registry
+    - save_cache: *save_cache
 
 version: 2
 jobs:
