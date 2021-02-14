@@ -1,54 +1,57 @@
-# Check that everything (tests, benches, etc) builds in std environments
-precheck_steps: &precheck_steps
-  docker: &docker
-    - image: jamwaffles/circleci-embedded-graphics:1.40.0-3
-      auth:
-        username: jamwaffles
-        password: $DOCKERHUB_PASSWORD
-  steps:
-    - checkout
-    - restore_cache: &restore_cache
-        key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
-    - run: rustup default ${RUST_VERSION:-stable}
-    - run: rustup component add rustfmt
-    - run: cargo update
-    - run: just build
-    - save_cache: &save_cache
-        key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
-        paths:
-          - ./target
-          - /home/circleci/.cargo/registry
+version: 2.1
 
-# Build crates for embedded target
-target_steps: &target_steps
-  docker: *docker
-  steps:
-    - checkout
-    - restore_cache: *restore_cache
-    - run: just install-targets
-    - run: cargo update
-    - run: just build-targets --release
-    - save_cache: *save_cache
+commands:
+  # Checkout repo, restore cache and update Cargo.lock
+  eg_init:
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+      - run: cargo update
 
-version: 2
+  # Save cache
+  eg_finish:
+    steps:
+      - save_cache:
+          key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+          paths:
+            - ./target
+            - /home/circleci/.cargo/registry
+
 jobs:
-  precheck-stable:
-    <<: *precheck_steps
+  # Check that everything (tests, benches, etc) builds using the MSRV
+  precheck-msrv:
+    docker: &docker
+      - image: jamwaffles/circleci-embedded-graphics:1.40.0-3
+        auth:
+          username: jamwaffles
+          password: $DOCKERHUB_PASSWORD
+    steps:
+      - eg_init
+      - run: just build
+      - eg_finish
+
+  # Check that everything (tests, benches, etc) builds using the latest Rust beta
   precheck-beta:
-    environment:
-      - RUST_VERSION: "beta"
-    <<: *precheck_steps
+    docker: *docker
+    steps:
+      - run: rustup default beta
+      - eg_init
+      - run: just build-without-fmt-check
+      - eg_finish
 
+  # Build crates for embedded target
   all-targets:
-    <<: *target_steps
-
-build_jobs: &build_jobs
-  jobs:
-    - precheck-stable
-    - precheck-beta
-    - all-targets
+    docker: *docker
+    steps:
+      - eg_init
+      - run: just install-targets
+      - run: just build-targets --release
+      - eg_finish
 
 workflows:
-  version: 2
   build_all:
-    <<: *build_jobs
+    jobs:
+      - precheck-msrv
+      - precheck-beta
+      - all-targets
