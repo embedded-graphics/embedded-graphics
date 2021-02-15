@@ -13,7 +13,9 @@ doc_assets_dir := doc_dir + "/assets"
 # Building
 #----------
 
-build: check-formatting test test-all build-benches check-readmes check-links
+build: check-formatting build-without-fmt-check
+
+build-without-fmt-check: test test-all build-benches check-readmes check-links
 
 # Build the benches
 build-benches:
