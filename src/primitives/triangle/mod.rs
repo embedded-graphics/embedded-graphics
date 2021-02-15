@@ -332,7 +332,7 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::Size;
+    use crate::{geometry::Size, mock_display::MockDisplay};
 
     #[test]
     fn dimensions() {
@@ -362,20 +362,23 @@ mod tests {
     #[test]
     fn contains() {
         let triangles = [
-            Triangle::new(Point::new(0, 0), Point::new(64, 10), Point::new(15, 64)),
-            Triangle::new(Point::new(5, 0), Point::new(30, 64), Point::new(64, 0)),
-            Triangle::new(Point::new(0, 0), Point::new(0, 64), Point::new(64, 30)),
-            Triangle::new(Point::new(22, 0), Point::new(0, 64), Point::new(64, 64)),
-            Triangle::new(Point::new(0, 22), Point::new(64, 0), Point::new(64, 64)),
+            Triangle::new(Point::new(0, 0), Point::new(63, 10), Point::new(15, 63)),
+            Triangle::new(Point::new(5, 0), Point::new(30, 63), Point::new(63, 0)),
+            Triangle::new(Point::new(0, 0), Point::new(0, 63), Point::new(63, 30)),
+            Triangle::new(Point::new(22, 0), Point::new(0, 63), Point::new(63, 63)),
+            Triangle::new(Point::new(0, 22), Point::new(63, 0), Point::new(63, 63)),
         ];
 
         for triangle in triangles.iter() {
+            let expected = MockDisplay::from_points(triangle.points());
+
             for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
-                let expected = triangle.points().any(|p| p == point);
+                let should_contain =
+                    expected.bounding_box().contains(point) && expected.get_pixel(point).is_some();
 
                 assert_eq!(
                     triangle.contains(point),
-                    expected,
+                    should_contain,
                     "{:?}, {:?}",
                     point,
                     triangle

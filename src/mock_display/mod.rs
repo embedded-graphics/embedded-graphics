@@ -440,6 +440,11 @@ impl MockDisplay<BinaryColor> {
     /// The color type used in the returned display is [`BinaryColor`], which can be mapped to
     /// another color type using the [`map`] method.
     ///
+    /// # Panics
+    ///
+    /// This method will panic if the iterator returns a point that is outside the display bounding
+    /// box.
+    ///
     /// # Examples
     ///
     /// ```rust
