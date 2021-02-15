@@ -33,7 +33,7 @@ jobs:
 
   # Check that everything (tests, benches, etc) builds using the latest stable Rust version
   precheck-stable:
-    docker: &docker
+    docker: *docker
     steps:
       - run: rustup default stable
       - eg_init
