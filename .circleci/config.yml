@@ -34,10 +34,6 @@ jobs:
   # Check that everything (tests, benches, etc) builds using the latest stable Rust version
   precheck-stable:
     docker: &docker
-      - image: jamwaffles/circleci-embedded-graphics:1.40.0-3
-        auth:
-          username: jamwaffles
-          password: $DOCKERHUB_PASSWORD
     steps:
       - run: rustup default stable
       - eg_init
