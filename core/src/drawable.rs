@@ -29,8 +29,9 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///     C: PixelColor + From<BinaryColor>,
 /// {
 ///     type Color = C;
+///     type Output = ();
 ///
-///     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+///     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
 ///     where
 ///         D: DrawTarget<Color = C>,
 ///     {
@@ -65,8 +66,25 @@ pub trait Drawable {
     /// The pixel color type.
     type Color: PixelColor;
 
+    /// The return type of the [`draw`] method.
+    ///
+    /// The `Output` type can be used to return results and values produced from the drawing of the
+    /// current item. For example, rendering two differently styled text items next to each other
+    /// can make use of a returned value, allowing the next text to be positioned after the first:
+    ///
+    /// ```rust,ignore
+    /// let next_point = Text::new("Label ", Point::new(10, 20))
+    ///     .into_styled(label_style)
+    ///    .draw(&mut display)?;
+    ///
+    /// Text::new("Value", next_point).into_styled(value_style).draw(&mut display)?;
+    /// ```
+    ///
+    /// Use `()` if no value should be returned.
+    type Output;
+
     /// Draw the graphics object using the supplied DrawTarget.
-    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
 }
@@ -113,8 +131,9 @@ where
     C: PixelColor,
 {
     type Color = C;
+    type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {

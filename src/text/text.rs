@@ -122,6 +122,7 @@ where
     S: TextRenderer<Color = C>,
 {
     type Color = C;
+    type Output = ();
 
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
@@ -141,6 +142,7 @@ where
     S: TextRenderer<Color = C>,
 {
     type Color = C;
+    type Output = ();
 
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where

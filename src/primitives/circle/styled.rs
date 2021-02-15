@@ -92,8 +92,9 @@ where
     C: PixelColor,
 {
     type Color = C;
+    type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
+    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
