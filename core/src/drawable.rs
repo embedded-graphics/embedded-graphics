@@ -66,6 +66,8 @@ pub trait Drawable {
     /// The pixel color type.
     type Color: PixelColor;
 
+    // TODO: Remove `ignore` from example code when the `Text` drawable is updated
+    // CC https://github.com/embedded-graphics/embedded-graphics/pull/552#discussion_r576955191
     /// The return type of the [`draw`] method.
     ///
     /// The `Output` type can be used to return results and values produced from the drawing of the
@@ -75,7 +77,7 @@ pub trait Drawable {
     /// ```rust,ignore
     /// let next_point = Text::new("Label ", Point::new(10, 20))
     ///     .into_styled(label_style)
-    ///    .draw(&mut display)?;
+    ///     .draw(&mut display)?;
     ///
     /// Text::new("Value", next_point).into_styled(value_style).draw(&mut display)?;
     /// ```

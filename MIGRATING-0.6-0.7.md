@@ -164,7 +164,8 @@ To reduce duplication, please search the `DrawTarget` documentation on <https://
 The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
 
 An associated type, `Output`, has also been added which can be used to return intermediate values
-from drawing operations. To maintain compatibility with 0.6, this can be set to `type Output = ();`
+from drawing operations. The nil type `()` can be used if the `draw` method doesn't need to return
+anything, e.g. `type Output = ();`
 
 ```diff
 - impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
