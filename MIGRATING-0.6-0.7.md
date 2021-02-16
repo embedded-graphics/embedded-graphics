@@ -163,8 +163,8 @@ To reduce duplication, please search the `DrawTarget` documentation on <https://
 
 The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
 
-An associated type, `Output`, has also been added which can be used to return intermediate values
-from drawing operations. The nil type `()` can be used if the `draw` method doesn't need to return
+An associated type, `Output`, has also been added which can be used to return values
+from drawing operations. The unit type `()` can be used if the `draw` method doesn't need to return
 anything, e.g. `type Output = ();`
 
 ```diff
