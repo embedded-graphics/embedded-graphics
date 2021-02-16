@@ -4,7 +4,7 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
 
 > Please take a cautious approach to this. If any step doesn't feel right or doesn't succeed smoothly, stop and rectify any issues before continuing.
 
-## On Github
+## On GitHub
 
 - Check that all desired PRs are merged and all desired issues are closed/resolved.
 - Check that the latest master build passed in CircleCI.
@@ -16,7 +16,7 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
 - Check that `just` and `cargo-release` are installed and available in `$PATH`.
   - `just --version`
   - `cargo release --version`
-- Ensure you have the latest changes with `git checkout master` and `git pull`
+- Ensure you have the latest changes with `git switch master` and `git pull`
 - Check that your local repository is clean (no uncommitted changes, no unpushed commits. Ideally, use `git reset --hard origin/master` to ensure your local state is up to date with `origin/master`.
 - Check that the crate version in `Cargo.toml` and `core/Cargo.toml` match the latest released versions on <https://crates.io/crates/embedded-graphics> and <https://crates.io/crates/embedded-graphics-core> respectively.
 - Run `just build` to ensure the build passes locally.
