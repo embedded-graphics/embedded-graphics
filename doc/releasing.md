@@ -33,10 +33,10 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
 ## Post release
 
 - Check that the release commands pushed a Git tag for each crate published, something like `embedded-graphics-v0.7.0` or `embedded-graphics-core-v0.2.0`.
-- For each crate's tag, go to its page at e.g. <https://github.com/embedded-graphics/embedded-graphics/releases/tag/embedded-graphics-v0.7.0-alpha.3>, click <kbd>Edit tag</kbd> and draft a release by:
+- For each crate's tag, go to its page at e.g. <https://github.com/embedded-graphics/embedded-graphics/releases/tag/embedded-graphics-v0.7.0-alpha.3>, click <kbd>Edit tag</kbd> and draft a release:
 
-  - Adding the crate name to the `Release title` field
-  - Copying and pasting the latest released section out of the crate's `CHANGELOG.md` file into the `Describe this release` field. Do not include the version header, e.g.:
+  - Add the crate name to the `Release title` field
+  - Copy and paste the latest released section out of the crate's `CHANGELOG.md` file into the `Describe this release` field. Do not include the version header, e.g.:
 
     ```markdown
     ### Added
@@ -48,6 +48,7 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
     - [#222](https://github.com/embedded-graphics/embedded-graphics/pull/222) Removed a thing
     ```
 
+  - Checkbox For `alpha` or `beta` releases, check the `This is a pre-release` checkbox.
   - Hit <kbd>Publish release</kbd>
   - Check that the release is displayed on the [repository homepage](https://github.com/embedded-graphics/embedded-graphics).
   - Post a link to the released tag (e.g. <https://github.com/embedded-graphics/embedded-graphics/releases/tag/embedded-graphics-v0.7.0-alpha.3>) to the embedded-graphics Matrix room at <https://matrix.to/#/!SfJCDXZbMHXkPovtKL:matrix.org>
