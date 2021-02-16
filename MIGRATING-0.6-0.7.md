@@ -10,6 +10,7 @@
     - [Geometry](#geometry)
     - [Color](#color)
     - [Sub draw targets](#sub-draw-targets)
+    - [Text rendering](#text-rendering)
   - [For display driver authors](#for-display-driver-authors)
   - [For crates that handle images](#for-crates-that-handle-images)
   - [For text rendering crates](#for-text-rendering-crates)
@@ -24,7 +25,7 @@
     - [Triangle](#triangle)
   - [Geometry](#geometry-1)
   - [Mock display](#mock-display-1)
-  - [style module](#style-module)
+  - [Style module](#style-module)
 
 ## New features
 
@@ -162,6 +163,10 @@ To reduce duplication, please search the `DrawTarget` documentation on <https://
 
 The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
 
+An associated type, `Output`, has also been added which can be used to return values
+from drawing operations. The unit type `()` can be used if the `draw` method doesn't need to return
+anything, e.g. `type Output = ();`
+
 ```diff
 - impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
 - where
@@ -177,7 +182,9 @@ The `Drawable` trait now uses an associated type for its pixel color instead of 
 + {
 +     type Color = C;
 +
-+     fn draw<D>(&self, display: &mut D) -> Result<(), D::Error>
++     type Output = ();
++
++     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
 +     where
 +         D: DrawTarget<Color = C>,
 +     {
