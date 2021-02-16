@@ -18,6 +18,7 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
   - `cargo release --version`
 - Ensure you have the latest changes with `git switch master` and `git pull --rebase`
 - Check that your local repository is clean with no uncommitted changes and no unpushed commits. Ideally, use `git reset --hard origin/master` to ensure your local state is up to date with `origin/master`. You may need to change `origin` to the name of the remote pointing to <https://github.com/embedded-graphics/embedded-graphics>.
+- Search the repository for any `TODO` or `FIXME` comments that need to be addressed before release.
 - Check that the crate version in `Cargo.toml` and `core/Cargo.toml` match the latest released versions on <https://crates.io/crates/embedded-graphics> and <https://crates.io/crates/embedded-graphics-core> respectively.
 - Run `just build` to ensure the build passes locally.
   - If the build fails for any reason, stop the release process and fix any issues by creating PRs. The upstream master branch must remain the source of truth. Restart this checklist once `just build` passes.
