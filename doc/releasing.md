@@ -18,7 +18,7 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
   - `cargo release --version`
 - Ensure you have the latest changes with `git switch master` and `git pull --rebase`
 - Check that your local repository is clean with no uncommitted changes and no unpushed commits. Ideally, use `git reset --hard origin/master` to ensure your local state is up to date with `origin/master`. You may need to change `origin` to the name of the remote pointing to <https://github.com/embedded-graphics/embedded-graphics>.
-- Search the repository for any `TODO` or `FIXME` comments that need to be addressed before release.
+- Before a **stable** release, search the repository for any `TODO` or `FIXME` comments. If any need resolving before release, stop this process and fix them with one or more PRs.
 - Check that the crate version in `Cargo.toml` and `core/Cargo.toml` match the latest released versions on <https://crates.io/crates/embedded-graphics> and <https://crates.io/crates/embedded-graphics-core> respectively.
 - Run `just build` to ensure the build passes locally.
   - If the build fails for any reason, stop the release process and fix any issues by creating PRs. The upstream master branch must remain the source of truth. Restart this checklist once `just build` passes.
@@ -52,3 +52,5 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
   - Check that the release is displayed on the [repository homepage](https://github.com/embedded-graphics/embedded-graphics).
   - Post a link to the released tag (e.g. <https://github.com/embedded-graphics/embedded-graphics/releases/tag/embedded-graphics-v0.7.0-alpha.3>) to the embedded-graphics Matrix room at <https://matrix.to/#/!SfJCDXZbMHXkPovtKL:matrix.org>
   - If you are @jamwaffles, post a Tweet tagging @rustembedded with a happy announcement message.
+
+- Check the other repositories in the [embedded-graphics organisation](https://github.com/embedded-graphics) for depenencies on `embedded-graphics` and `embedded-graphics-core`. The versions should be updated to the latest releases made whilst following this guide.
