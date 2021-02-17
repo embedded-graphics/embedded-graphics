@@ -57,4 +57,4 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
   - Post a link to the released tag (e.g. <https://github.com/embedded-graphics/embedded-graphics/releases/tag/embedded-graphics-v0.7.0-alpha.3>) to the embedded-graphics Matrix room at <https://matrix.to/#/!SfJCDXZbMHXkPovtKL:matrix.org>
   - If you are @jamwaffles, post a Tweet tagging @rustembedded with a happy announcement message.
 
-- Check the other repositories in the [embedded-graphics organisation](https://github.com/embedded-graphics) for depenencies on `embedded-graphics` and `embedded-graphics-core`. The versions should be updated to the latest releases made whilst following this guide.
+- Check the other repositories in the [embedded-graphics organization](https://github.com/embedded-graphics) for dependencies on `embedded-graphics` and `embedded-graphics-core`. The versions should be updated to the latest releases made whilst following this guide.
