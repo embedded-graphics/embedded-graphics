@@ -26,6 +26,9 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
 - Release the crates in the following order:
 
   1. For `embedded-graphics-core` **if there are changes to release**: `just release-core <level>`
+
+     a. When the above command completes, check the `embedded-graphics-core` version in `Cargo.toml` in the project root. It should have been updated automatically to the just-released core version.
+
   2. For `embedded-graphics`: `just release-e-g <level>`
 
   Where `<level>` is `major`, `minor`, `patch`, or a specific SemVer version number.
