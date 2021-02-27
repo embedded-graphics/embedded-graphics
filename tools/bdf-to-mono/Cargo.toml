@@ -7,4 +7,4 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.38"
-bdf-parser = { git = "https://github.com/embedded-graphics/embedded-bdf", rev = "ab27a8bcedcfbeb8125bea5d76b5038ba40d1f14" }
+bdf-parser = { version = "0.1.0" }

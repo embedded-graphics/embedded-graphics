@@ -8,7 +8,7 @@ publish = false
 [dependencies]
 # TODO: change to path dependency after next simulator release
 # embedded-graphics = { path = "../../" }
-embedded-graphics = { version = "=0.7.0-alpha.2" }
+embedded-graphics = { version = "=0.7.0-alpha.3" }
 tinytga = "0.4.0-alpha.1"
 
 # TODO: replace by non git dependency after next simulator release
