@@ -12,7 +12,7 @@ use crate::pixelcolor::PixelColor;
 /// Text renderers don't need to support all settings in this trait. All calls to unsupported
 /// setters should be ignored by the implementation. The trait provided empty default
 /// implementations for all setters.
-pub trait CharacterStyle {
+pub trait CharacterStyle: Clone {
     /// The color type.
     type Color: PixelColor;
 
