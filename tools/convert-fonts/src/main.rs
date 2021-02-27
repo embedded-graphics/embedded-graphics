@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use bdf_parser::BdfFont;
 use bdf_to_mono::{bdf_to_bitmap, Bitmap, Encoding};
 use image::{png::PngEncoder, ColorType, GrayImage, Luma};
-use std::{ffi::OsStr, fs, path::Path, str::FromStr};
+use std::{ffi::OsStr, fs, path::Path};
 
 fn main() -> Result<()> {
     let fonts_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fonts");
@@ -28,8 +28,8 @@ fn main() -> Result<()> {
             .replace("B", "Bold")
             .replace("O", "Italic");
 
-        let bdf = fs::read_to_string(&file.path())?;
-        let font = BdfFont::from_str(&bdf).map_err(|_| anyhow!("couldn't parse BDF file"))?;
+        let bdf = fs::read(&file.path())?;
+        let font = BdfFont::parse(&bdf).map_err(|_| anyhow!("couldn't parse BDF file"))?;
 
         let ascii_out = Output::new(&font_name, &font, Encoding::Ascii)?;
         let latin1_out = Output::new(&font_name, &font, Encoding::Latin1)?;
