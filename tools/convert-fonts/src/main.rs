@@ -103,6 +103,10 @@ impl Output {
         let output = output.replace("$CHAR_WIDTH$", &(self.bitmap.glyph_width).to_string());
         let output = output.replace("$CHAR_HEIGHT$", &(self.bitmap.glyph_height).to_string());
         let output = output.replace("$BASELINE$", &(self.bitmap.baseline).to_string());
+        let output = output.replace(
+            "$CHARACTER_SPACING$",
+            &self.bitmap.character_spacing.to_string(),
+        );
         let output = output.replace("$PNG_DATA$", &base64::encode(&self.png));
 
         output

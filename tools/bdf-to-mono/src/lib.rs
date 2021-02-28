@@ -38,6 +38,10 @@ pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
         .bounding_box;
     // used to optimize the glyph height in case all glyph offsets are e.g. -1
     let mut max_y_offset = i32::MIN;
+    // We should take the DWIDTH value into account. If all glyph bounding boxes are smaller than
+    // DWIDTH the CHARACTER_SPACING in the MonoFont impl should be set to DWIDTH - (width of the BB)
+    // to maintain the correct kerning.
+    let mut char_spacing = None;
 
     // find the maximum bounding box that can fit all glyphs taking offsets into account
     // glyph_bb.offset.y will contain the baseline
@@ -65,6 +69,12 @@ pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
             let gl_h = glyph.bounding_box.size.y + off_y.abs();
             if gl_h > glyph_bb.size.y {
                 glyph_bb.size.y = gl_h;
+            }
+            let x_size_diff = glyph.device_width.x - glyph.bounding_box.size.x;
+            if char_spacing.map_or(true, |char_spacing_compensation| {
+                x_size_diff < char_spacing_compensation
+            }) {
+                char_spacing = Some(x_size_diff);
             }
             (index, glyph)
         })
@@ -129,6 +139,7 @@ pub fn bdf_to_bitmap(font: &BdfFont, encoding: Encoding) -> Result<Bitmap> {
         rows: rows.len(),
         columns: 16,
         baseline: glyph_height - -glyph_bb.offset.y as usize - 1,
+        character_spacing: u32::try_from(char_spacing.unwrap_or(0).max(0))?,
     })
 }
 
@@ -141,6 +152,7 @@ pub struct Bitmap {
     pub rows: usize,
     pub columns: usize,
     pub baseline: usize,
+    pub character_spacing: u32,
 }
 
 impl Bitmap {
