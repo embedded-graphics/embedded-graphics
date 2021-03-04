@@ -1,7 +1,7 @@
 // GENERATED CODE DO NOT MODIFY!
 // Any manual changes to this file will be overwritten!
 
-use crate::{mono_font::MonoFont, geometry::Size};
+use crate::{geometry::Size, mono_font::MonoFont};
 /// 4x6 pixel monospace font.
 ///
 /// <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAkCAAAAAAcZ2NOAAAB90lEQVR4nKXQC1YbQQxE0bD/RZP7pB57jCEnJyn9SiW1xvDxK3x+8DUkH21Cqkzmr/j8WMWghU8UaDhToq/xgtuB0KPPfb8RqsJxs4baU9OXHBgQHKFuhso9bqjlEIMeOaIhoMjQYlo+EVTe8hekvmCePnDnYc+c6OutVzWP2uyJbcqNWrfYzkhyFrMlX4bWTuxhXPL42Yzr56Co36hZ1C4w7rbMJyZtrC0rGy7QPlINQxI2Ej2pplfwYhuxabNU+WvYf8OeN6lcdX/NEH8AixuuLSvn6Hc24xMyX5ZhDsYyzhJ8ZIbT48XwIXvg0LQJxgnyq6UVawi/7KlnJntJaVIr0vpolelndrjMmvsfKP8FF91waWu9+M7oM981SQDhbhQp9tXOID9UApe3qSITujVzzWhvcWCtfi22zpoVjJDPeBK/0PhozAcRfyNSTWPI0YRmysFhNv4BHXV1354CF9s6+aTK/etBR6ZyVJqIF0c/mBPjLB2Xq5fduOPy2qydauk+o6RddvhZtFnnBS5lCn9aEzOL80h6hF4a88U7l8dIDX5Gdy7c+R3vqqs/w3A92o/xc6TO601UavzN6B7Z3aAMUY41FzT+NA2Xyme+i4CPaMQI2Pqxx1eveosDa7KFqlJjGalQs7TnsRNBnfGwP6B7i93bvPgNgJ0bQ4gf6zQAAAAASUVORK5CYII=" alt="Font4x6 font">
