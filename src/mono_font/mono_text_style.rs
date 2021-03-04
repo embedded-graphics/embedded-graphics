@@ -4,7 +4,7 @@ use crate::{
     mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    text::{CharacterStyle, DecorationColor, TextMetrics, TextRenderer, VerticalAlignment},
+    text::{Baseline, CharacterStyle, DecorationColor, TextMetrics, TextRenderer},
     Pixel, SaturatingCast,
 };
 
@@ -117,6 +117,19 @@ where
 
         Ok(())
     }
+
+    /// Applies the vertical offset between the line position and the top edge of the bounding box.
+    fn apply_baseline_offset(&self, position: Point, baseline: Baseline) -> Point {
+        let dy = match baseline {
+            Baseline::Top => 0,
+            Baseline::Bottom => F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast(),
+            Baseline::Middle => (F::CHARACTER_SIZE.height.saturating_sub(1) / 2).saturating_cast(),
+            Baseline::Alphabetic => F::BASELINE
+                .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
+        };
+
+        position - Point::new(0, dy)
+    }
 }
 
 impl<C, F> TextRenderer for MonoTextStyle<C, F>
@@ -126,10 +139,18 @@ where
 {
     type Color = C;
 
-    fn draw_string<D>(&self, text: &str, position: Point, target: &mut D) -> Result<Point, D::Error>
+    fn draw_string<D>(
+        &self,
+        text: &str,
+        position: Point,
+        baseline: Baseline,
+        target: &mut D,
+    ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
+        let position = self.apply_baseline_offset(position, baseline);
+
         let mut first = true;
         let mut p = position;
 
@@ -191,11 +212,14 @@ where
         &self,
         width: u32,
         position: Point,
+        baseline: Baseline,
         target: &mut D,
     ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
+        let position = self.apply_baseline_offset(position, baseline);
+
         self.draw_background(width, position, target)?;
         self.draw_strikethrough(width, position, target)?;
         self.draw_underline(width, position, target)?;
@@ -203,7 +227,9 @@ where
         Ok(position + Size::new(width, 0))
     }
 
-    fn measure_string(&self, text: &str, position: Point) -> TextMetrics {
+    fn measure_string(&self, text: &str, position: Point, baseline: Baseline) -> TextMetrics {
+        let position = self.apply_baseline_offset(position, baseline);
+
         let width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
             .saturating_sub(F::CHARACTER_SPACING);
 
@@ -215,34 +241,10 @@ where
 
         let size = Size::new(width, height);
 
-        // Return a zero sized bounding box if the text is completely transparent.
-        let bb_size = if self.text_color.is_some() || self.background_color.is_some() {
-            size
-        } else {
-            Size::zero()
-        };
-
         TextMetrics {
-            bounding_box: Rectangle::new(position, bb_size),
+            bounding_box: Rectangle::new(position, size),
             next_position: position + size.x_axis(),
         }
-    }
-
-    /// Calculates the offset between the line position and the top edge of the bounding box.
-    fn vertical_offset(&self, position: Point, vertical_alignment: VerticalAlignment) -> Point {
-        let dy = match vertical_alignment {
-            VerticalAlignment::Top => 0,
-            VerticalAlignment::Bottom => {
-                F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()
-            }
-            VerticalAlignment::Center => {
-                (F::CHARACTER_SIZE.height.saturating_sub(1) / 2).saturating_cast()
-            }
-            VerticalAlignment::Baseline => F::BASELINE
-                .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
-        };
-
-        position - Point::new(0, dy)
     }
 
     fn line_height(&self) -> u32 {
@@ -570,7 +572,7 @@ mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Center)
+            .baseline(Baseline::Middle)
             .build();
 
         let mut display = MockDisplay::new();
@@ -685,7 +687,7 @@ mod tests {
 
         let mut display = MockDisplay::new();
         style
-            .draw_whitespace(4, Point::zero(), &mut display)
+            .draw_whitespace(4, Point::zero(), Baseline::Top, &mut display)
             .unwrap();
 
         display.assert_pattern(&[
@@ -712,7 +714,7 @@ mod tests {
 
         let mut display = MockDisplay::new();
         style
-            .draw_whitespace(3, Point::zero(), &mut display)
+            .draw_whitespace(3, Point::zero(), Baseline::Top, &mut display)
             .unwrap();
 
         display.assert_pattern(&[
@@ -742,7 +744,7 @@ mod tests {
         display.set_allow_overdraw(true);
 
         style
-            .draw_whitespace(8, Point::zero(), &mut display)
+            .draw_whitespace(8, Point::zero(), Baseline::Top, &mut display)
             .unwrap();
 
         display.assert_pattern(&[
@@ -786,7 +788,7 @@ mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
+            .baseline(Baseline::Top)
             .build();
 
         let mut display = MockDisplay::new();
@@ -819,7 +821,7 @@ mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
+            .baseline(Baseline::Top)
             .build();
 
         let mut display = MockDisplay::new();
@@ -853,7 +855,7 @@ mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
+            .baseline(Baseline::Top)
             .build();
 
         assert_eq!(
@@ -887,7 +889,7 @@ mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
+            .baseline(Baseline::Top)
             .build();
 
         assert_eq!(
@@ -904,12 +906,12 @@ mod tests {
 
         let mut display = MockDisplay::new();
         style
-            .draw_string("A\t\n\rB", Point::zero(), &mut display)
+            .draw_string("A\t\n\rB", Point::zero(), Baseline::Top, &mut display)
             .unwrap();
 
         let mut expected = MockDisplay::new();
         style
-            .draw_string("A???B", Point::zero(), &mut expected)
+            .draw_string("A???B", Point::zero(), Baseline::Top, &mut expected)
             .unwrap();
 
         display.assert_eq(&expected);

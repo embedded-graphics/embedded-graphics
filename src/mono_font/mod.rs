@@ -187,7 +187,7 @@ pub(crate) mod tests {
         mock_display::MockDisplay,
         mono_font::MonoTextStyleBuilder,
         pixelcolor::BinaryColor,
-        text::{Text, TextStyleBuilder, VerticalAlignment},
+        text::{Baseline, Text, TextStyleBuilder},
         Drawable,
     };
 
@@ -205,7 +205,7 @@ pub(crate) mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
+            .baseline(Baseline::Top)
             .build();
 
         let mut display = MockDisplay::new();
@@ -231,7 +231,7 @@ pub(crate) mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .vertical_alignment(VerticalAlignment::Top)
+            .baseline(Baseline::Top)
             .build();
 
         // Draw 'A' character to determine it's baseline
