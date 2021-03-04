@@ -6,6 +6,11 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#561](https://github.com/embedded-graphics/embedded-graphics/pull/561) Renamed `HorizontalAlignment` and `VerticalAlignment` to `Alignment` and `Baseline`.
+- **(breaking)** [#561](https://github.com/embedded-graphics/embedded-graphics/pull/561) Replaced `TextRenderer::vertical_offset` by `baseline` arguments for the other `TextRenderer` methods.
+
 ## [0.7.0-alpha.3] - 2021-02-03
 
 ### Added
