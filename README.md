@@ -46,6 +46,7 @@ this are adding support for different image formats or implementing custom fonts
 * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
 * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 * [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
+* [Heapless plotting library for small embedded targets - `embedded-plots`](https://crates.io/crates/embedded-plots)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
