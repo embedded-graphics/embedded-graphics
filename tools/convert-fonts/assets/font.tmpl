@@ -9,6 +9,7 @@ impl MonoFont for $TYPE$ {
     const FONT_IMAGE_WIDTH: u32 = $IMAGE_WIDTH$;
 
     const CHARACTER_SIZE: Size = Size::new($CHAR_WIDTH$, $CHAR_HEIGHT$);
+    const CHARACTER_SPACING: u32 = $CHARACTER_SPACING$;
     const BASELINE: Option<i32> = Some($BASELINE$);
 
     const UNDERLINE_OFFSET: i32 = $BASELINE$ + 2;
