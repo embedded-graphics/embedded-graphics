@@ -1,6 +1,6 @@
 use embedded_graphics_core::text::CharacterStyle;
 
-use crate::text::{HorizontalAlignment, TextRenderer, VerticalAlignment};
+use crate::text::{Alignment, Baseline, TextRenderer};
 
 /// Text style.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8,11 +8,11 @@ pub struct TextStyle<S> {
     /// Character style.
     pub character_style: S,
 
-    /// Horizontal alignment.
-    pub horizontal_alignment: HorizontalAlignment,
+    /// Horizontal text alignment.
+    pub alignment: Alignment,
 
-    /// Vertical alignment.
-    pub vertical_alignment: VerticalAlignment,
+    /// Text baseline.
+    pub baseline: Baseline,
 }
 
 impl<S> TextStyle<S> {}
@@ -29,24 +29,24 @@ impl TextStyleBuilder<UndefinedCharacterStyle> {
         Self {
             style: TextStyle {
                 character_style: UndefinedCharacterStyle,
-                horizontal_alignment: HorizontalAlignment::Left,
-                vertical_alignment: VerticalAlignment::Baseline,
+                alignment: Alignment::Left,
+                baseline: Baseline::Alphabetic,
             },
         }
     }
 }
 
 impl<S> TextStyleBuilder<S> {
-    /// Sets the horizontal alignment.
-    pub fn horizontal_alignment(mut self, horizontal_alignment: HorizontalAlignment) -> Self {
-        self.style.horizontal_alignment = horizontal_alignment;
+    /// Sets the horizontal text alignment.
+    pub fn alignment(mut self, alignment: Alignment) -> Self {
+        self.style.alignment = alignment;
 
         self
     }
 
-    /// Sets the vertical alignment.
-    pub fn vertical_alignment(mut self, vertical_alignment: VerticalAlignment) -> Self {
-        self.style.vertical_alignment = vertical_alignment;
+    /// Sets the text baseline.
+    pub fn baseline(mut self, baseline: Baseline) -> Self {
+        self.style.baseline = baseline;
 
         self
     }
@@ -56,8 +56,8 @@ impl<S> TextStyleBuilder<S> {
         TextStyleBuilder {
             style: TextStyle {
                 character_style,
-                horizontal_alignment: self.style.horizontal_alignment,
-                vertical_alignment: self.style.vertical_alignment,
+                alignment: self.style.alignment,
+                baseline: self.style.baseline,
             },
         }
     }
@@ -95,11 +95,11 @@ mod tests {
 
         let text_style = TextStyleBuilder::new()
             .character_style(character_style)
-            .horizontal_alignment(HorizontalAlignment::Right)
-            .vertical_alignment(VerticalAlignment::Top)
+            .alignment(Alignment::Right)
+            .baseline(Baseline::Top)
             .build();
 
-        assert_eq!(text_style.horizontal_alignment, HorizontalAlignment::Right);
-        assert_eq!(text_style.vertical_alignment, VerticalAlignment::Top);
+        assert_eq!(text_style.alignment, Alignment::Right);
+        assert_eq!(text_style.baseline, Baseline::Top);
     }
 }
