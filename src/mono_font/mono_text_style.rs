@@ -53,6 +53,18 @@ where
             .build()
     }
 
+    /// Returns `true` if the style is transparent.
+    ///
+    /// Drawing a `Text` with a transparent `MonoTextStyle` will not draw any pixels.
+    ///
+    /// [`Text`]: ../text/struct.Text.html
+    pub fn is_transparent(&self) -> bool {
+        self.text_color.is_none()
+            && self.background_color.is_none()
+            && self.underline_color.is_none()
+            && self.strikethrough_color.is_none()
+    }
+
     /// Resolves a decoration color.
     fn resolve_decoration_color(&self, color: DecorationColor<C>) -> Option<C> {
         match color {

@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Size},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -88,26 +88,22 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() {
-            let (l, r) = self
-                .primitive
-                .extents(self.style.stroke_width, StrokeOffset::None);
+        let (l, r) = self
+            .primitive
+            .extents(self.style.stroke_width, StrokeOffset::None);
 
-            let min = l
-                .start
-                .component_min(l.end)
-                .component_min(r.start)
-                .component_min(r.end);
-            let max = l
-                .start
-                .component_max(l.end)
-                .component_max(r.start)
-                .component_max(r.end);
+        let min = l
+            .start
+            .component_min(l.end)
+            .component_min(r.start)
+            .component_min(r.end);
+        let max = l
+            .start
+            .component_max(l.end)
+            .component_max(r.start)
+            .component_max(r.end);
 
-            Rectangle::with_corners(min, max)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        }
+        Rectangle::with_corners(min, max)
     }
 }
 
@@ -115,10 +111,10 @@ where
 mod tests {
     use super::*;
     use crate::{
-        geometry::{Point, Size},
+        geometry::Point,
         mock_display::MockDisplay,
         pixelcolor::{Rgb888, RgbColor},
-        primitives::{Primitive, Rectangle},
+        primitives::{Primitive, PrimitiveStyleBuilder},
     };
 
     #[test]
@@ -166,20 +162,13 @@ mod tests {
     }
 
     #[test]
-    fn transparent_bounding_box() {
+    fn bounding_box_is_independent_of_colors() {
         let line = Line::new(Point::new(5, 5), Point::new(11, 14));
 
-        assert_eq!(
-            line.into_styled::<Rgb888>(PrimitiveStyle::new())
-                .bounding_box(),
-            Rectangle::new(line.bounding_box().center(), Size::zero())
-        );
+        let transparent_line =
+            line.into_styled::<Rgb888>(PrimitiveStyleBuilder::new().stroke_width(10).build());
+        let stroked_line = line.into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 10));
 
-        assert_eq!(
-            line.into_styled::<Rgb888>(PrimitiveStyle::with_fill(Rgb888::RED))
-                .bounding_box(),
-            Rectangle::new(line.bounding_box().center(), Size::zero()),
-            "filled"
-        );
+        assert_eq!(transparent_line.bounding_box(), stroked_line.bounding_box(),);
     }
 }

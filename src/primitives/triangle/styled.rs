@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -138,39 +138,34 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if !self.style.is_transparent() {
-            // Short circuit special cases
-            if self.style.stroke_width < 2 || self.style.stroke_alignment == StrokeAlignment::Inside
-            {
-                return self.primitive.bounding_box();
-            }
-
-            let t = self.primitive.sorted_clockwise();
-
-            let (min, max) = ClosedThickSegmentIter::new(
-                &t.vertices,
-                self.style.stroke_width,
-                StrokeOffset::from(self.style.stroke_alignment),
-            )
-            .fold(
-                (
-                    Point::new_equal(core::i32::MAX),
-                    Point::new_equal(core::i32::MIN),
-                ),
-                |(min, max), segment| {
-                    let bb = segment.edges_bounding_box();
-
-                    (
-                        min.component_min(bb.top_left),
-                        max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
-                    )
-                },
-            );
-
-            Rectangle::with_corners(min, max)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        // Short circuit special cases
+        if self.style.stroke_width < 2 || self.style.stroke_alignment == StrokeAlignment::Inside {
+            return self.primitive.bounding_box();
         }
+
+        let t = self.primitive.sorted_clockwise();
+
+        let (min, max) = ClosedThickSegmentIter::new(
+            &t.vertices,
+            self.style.stroke_width,
+            StrokeOffset::from(self.style.stroke_alignment),
+        )
+        .fold(
+            (
+                Point::new_equal(core::i32::MAX),
+                Point::new_equal(core::i32::MIN),
+            ),
+            |(min, max), segment| {
+                let bb = segment.edges_bounding_box();
+
+                (
+                    min.component_min(bb.top_left),
+                    max.component_max(bb.bottom_right().unwrap_or(bb.top_left)),
+                )
+            },
+        );
+
+        Rectangle::with_corners(min, max)
     }
 }
 
@@ -347,15 +342,13 @@ mod tests {
     }
 
     #[test]
-    fn transparent_bounding_box() {
+    fn bounding_box_is_independent_of_colors() {
         let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
 
-        let styled = triangle.into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let transparent = triangle.into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let filled = triangle.into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        assert_eq!(
-            styled.bounding_box(),
-            Rectangle::new(triangle.bounding_box().center(), Size::zero())
-        );
+        assert_eq!(transparent.bounding_box(), filled.bounding_box(),);
     }
 
     #[test]

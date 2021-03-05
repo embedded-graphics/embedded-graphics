@@ -78,12 +78,7 @@ where
     /// Returns the stroke width on the outside of the shape.
     ///
     /// The outside stroke width is determined by `stroke_width` and `stroke_alignment`.
-    /// If `stroke_color` is `None` the outside stroke width is always `0`.
     pub(crate) fn outside_stroke_width(&self) -> u32 {
-        if self.stroke_color.is_none() {
-            return 0;
-        }
-
         match self.stroke_alignment {
             StrokeAlignment::Inside => 0,
             StrokeAlignment::Center => self.stroke_width / 2,
@@ -94,12 +89,7 @@ where
     /// Returns the stroke width on the inside of the shape.
     ///
     /// The inside stroke width is determined by `stroke_width` and `stroke_alignment`.
-    /// If `stroke_color` is `None` the inside stroke width is always `0`.
     pub(crate) fn inside_stroke_width(&self) -> u32 {
-        if self.stroke_color.is_none() {
-            return 0;
-        }
-
         match self.stroke_alignment {
             StrokeAlignment::Inside => self.stroke_width,
             StrokeAlignment::Center => self.stroke_width.saturating_add(1) / 2,
@@ -108,7 +98,7 @@ where
     }
 
     /// Returns if a primitive drawn with this style is completely transparent.
-    pub(crate) fn is_transparent(&self) -> bool {
+    pub fn is_transparent(&self) -> bool {
         (self.stroke_color.is_none() || self.stroke_width == 0) && self.fill_color.is_none()
     }
 
@@ -329,15 +319,6 @@ mod tests {
         assert_eq!(style.fill_color, None);
         assert_eq!(style.stroke_color, Some(Rgb888::GREEN));
         assert_eq!(style.stroke_width, 123);
-    }
-
-    #[test]
-    fn stroke_width_without_stroke_color() {
-        let style: PrimitiveStyle<BinaryColor> =
-            PrimitiveStyleBuilder::new().stroke_width(10).build();
-
-        assert_eq!(style.inside_stroke_width(), 0);
-        assert_eq!(style.outside_stroke_width(), 0);
     }
 
     #[test]

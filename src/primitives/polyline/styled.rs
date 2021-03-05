@@ -511,8 +511,12 @@ mod tests {
         assert_eq!(display.affected_area(), styled.bounding_box());
 
         assert_eq!(
-            pl.into_styled(PrimitiveStyle::<Rgb565>::new())
-                .bounding_box(),
+            pl.into_styled(
+                PrimitiveStyleBuilder::<Rgb565>::new()
+                    .stroke_width(5)
+                    .build()
+            )
+            .bounding_box(),
             Rectangle::new(pl.bounding_box().center(), Size::zero()),
             "transparent"
         );

@@ -111,13 +111,9 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if !self.style.is_transparent() {
-            let offset = self.style.outside_stroke_width().saturating_cast();
+        let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
-        } else {
-            Rectangle::new(self.primitive.center(), Size::zero())
-        }
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -343,13 +339,15 @@ mod tests {
     }
 
     #[test]
-    fn transparent_bounding_box() {
-        let ellipse = Ellipse::new(Point::new(5, 5), Size::new(11, 14))
+    fn bounding_box_is_independent_of_colors() {
+        let transparent_ellipse = Ellipse::new(Point::new(5, 5), Size::new(11, 14))
             .into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let filled_ellipse = Ellipse::new(Point::new(5, 5), Size::new(11, 14))
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         assert_eq!(
-            ellipse.bounding_box(),
-            Rectangle::new(ellipse.primitive.center(), Size::zero())
+            transparent_ellipse.bounding_box(),
+            filled_ellipse.bounding_box(),
         );
     }
 }

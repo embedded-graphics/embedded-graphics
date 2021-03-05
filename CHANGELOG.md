@@ -6,10 +6,18 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- **(breaking)** [#552](https://github.com/embedded-graphics/embedded-graphics/pull/552) Added the `Output` associated type to `Drawable` to allow returning non-`()` values from drawing operations.
+- [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Added `is_none`, `is_text_color` and `is_custom` methods to `DecorationColor`.
+- [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Added `is_transparent` methods to `PrimitiveStyle` and `MonoTextStyle`.
+
 ### Changed
 
 - **(breaking)** [#561](https://github.com/embedded-graphics/embedded-graphics/pull/561) Renamed `HorizontalAlignment` and `VerticalAlignment` to `Alignment` and `Baseline`.
 - **(breaking)** [#561](https://github.com/embedded-graphics/embedded-graphics/pull/561) Replaced `TextRenderer::vertical_offset` by `baseline` arguments for the other `TextRenderer` methods.
+- **(breaking)** [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) The bounding boxes returned by `Dimensions` implementations for styled primitives no longer depend on the fill and stroke color.
+- **(breaking)** [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Drawing a primitive with a transparent stroke (`stroke_color == None && stroke_width > 0`) will now reduce the filled area.
 
 ## [0.7.0-alpha.3] - 2021-02-03
 
