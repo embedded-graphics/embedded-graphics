@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Size},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -114,13 +114,9 @@ where
 {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() {
-            let offset = self.style.outside_stroke_width().saturating_cast();
+        let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        }
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -129,7 +125,7 @@ mod tests {
     use super::*;
     use crate::{
         draw_target::DrawTargetExt,
-        geometry::{AnchorPoint, AngleUnit, Point},
+        geometry::{AnchorPoint, AngleUnit, Point, Size},
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
@@ -265,26 +261,16 @@ mod tests {
     }
 
     #[test]
-    fn empty_bounding_box() {
+    fn bounding_box_is_independent_of_colors() {
         const CENTER: Point = Point::new(15, 15);
         const SIZE: u32 = 10;
 
-        let empty = Arc::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg());
+        let arc = Arc::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg());
 
-        assert_eq!(
-            empty
-                .into_styled::<BinaryColor>(PrimitiveStyle::new())
-                .bounding_box(),
-            Rectangle::new(CENTER, Size::zero()),
-            "empty"
-        );
+        let transparent_arc =
+            arc.into_styled::<BinaryColor>(PrimitiveStyleBuilder::new().stroke_width(5).build());
+        let stroked_arc = arc.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 5));
 
-        assert_eq!(
-            empty
-                .into_styled::<BinaryColor>(PrimitiveStyle::with_fill(BinaryColor::On))
-                .bounding_box(),
-            Rectangle::new(empty.bounding_box().center(), Size::zero()),
-            "filled"
-        );
+        assert_eq!(transparent_arc.bounding_box(), stroked_arc.bounding_box(),);
     }
 }

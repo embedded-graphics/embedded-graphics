@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Size},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -107,13 +107,9 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if !self.style.is_transparent() {
-            let offset = self.style.outside_stroke_width().saturating_cast();
+        let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
-        } else {
-            Rectangle::new(self.primitive.center(), Size::zero())
-        }
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -139,25 +135,6 @@ mod tests {
             .map(|Pixel(p, _)| p);
 
         assert!(circle.points().eq(styled_points));
-    }
-
-    #[test]
-    fn stroke_width_doesnt_affect_fill() {
-        let mut expected = MockDisplay::new();
-        let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
-        Circle::new(Point::new(5, 5), 4)
-            .into_styled(style)
-            .draw(&mut expected)
-            .unwrap();
-
-        let mut with_stroke_width = MockDisplay::new();
-        style.stroke_width = 1;
-        Circle::new(Point::new(5, 5), 4)
-            .into_styled(style)
-            .draw(&mut with_stroke_width)
-            .unwrap();
-
-        with_stroke_width.assert_eq(&expected);
     }
 
     // Check that tiny circles render as a "+" shape with a hole in the center
@@ -320,13 +297,15 @@ mod tests {
     }
 
     #[test]
-    fn transparent_bounding_box() {
-        let circle =
+    fn bounding_box_is_independent_of_colors() {
+        let transparent_circle =
             Circle::new(Point::new(5, 5), 11).into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let filled_circle = Circle::new(Point::new(5, 5), 11)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         assert_eq!(
-            circle.bounding_box(),
-            Rectangle::new(circle.primitive.center(), Size::zero())
+            transparent_circle.bounding_box(),
+            filled_circle.bounding_box(),
         );
     }
 }

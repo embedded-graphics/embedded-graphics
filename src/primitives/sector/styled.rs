@@ -1,7 +1,7 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::angle_consts::ANGLE_90DEG,
-    geometry::{Angle, Dimensions, Size},
+    geometry::{Angle, Dimensions},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -194,13 +194,9 @@ where
 {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn bounding_box(&self) -> Rectangle {
-        if !self.style.is_transparent() {
-            let offset = self.style.outside_stroke_width().saturating_cast();
+        let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        }
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -219,25 +215,6 @@ mod tests {
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     };
-
-    #[test]
-    fn stroke_width_doesnt_affect_fill() {
-        let mut expected = MockDisplay::new();
-        let mut style = PrimitiveStyle::with_fill(BinaryColor::On);
-        Sector::new(Point::new(5, 5), 4, 30.0.deg(), 120.0.deg())
-            .into_styled(style)
-            .draw(&mut expected)
-            .unwrap();
-
-        let mut with_stroke_width = MockDisplay::new();
-        style.stroke_width = 1;
-        Sector::new(Point::new(5, 5), 4, 30.0.deg(), 120.0.deg())
-            .into_styled(style)
-            .draw(&mut with_stroke_width)
-            .unwrap();
-
-        with_stroke_width.assert_eq(&expected);
-    }
 
     // Check the rendering of a simple sector
     #[test]
@@ -394,18 +371,17 @@ mod tests {
                 .stroke_alignment(StrokeAlignment::Outside)
                 .build(),
         );
-        let empty = Sector::with_center(CENTER, SIZE - 4, 0.0.deg(), 90.0.deg())
-            .into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let transparent = Sector::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg())
+            .into_styled::<BinaryColor>(PrimitiveStyleBuilder::new().stroke_width(3).build());
 
         // TODO: Uncomment when arc bounding box is fixed in #405
         // let mut display = MockDisplay::new();
         // center.draw(&mut display).unwrap();
         // assert_eq!(display.affected_area(), center.bounding_box());
 
-        assert_eq!(empty.bounding_box(), Rectangle::new(CENTER, Size::zero()));
-
         assert_eq!(center.bounding_box(), inside.bounding_box());
         assert_eq!(outside.bounding_box(), inside.bounding_box());
+        assert_eq!(transparent.bounding_box(), inside.bounding_box());
     }
 
     /// The radial lines should be connected using a line join.

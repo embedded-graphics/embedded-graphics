@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Size},
+    geometry::Dimensions,
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
@@ -98,13 +98,9 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        if !self.style.is_transparent() {
-            let offset = self.style.outside_stroke_width().saturating_cast();
+        let offset = self.style.outside_stroke_width().saturating_cast();
 
-            self.primitive.bounding_box().offset(offset)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
-        }
+        self.primitive.bounding_box().offset(offset)
     }
 }
 
@@ -330,7 +326,7 @@ mod tests {
     }
 
     #[test]
-    fn transparent_bounding_box() {
+    fn bounding_box_is_independent_of_colors() {
         let rect = RoundedRectangle::new(
             Rectangle::new(Point::new(5, 5), Size::new(11, 14)),
             CornerRadii {
@@ -341,11 +337,9 @@ mod tests {
             },
         );
 
-        let styled = rect.into_styled::<Rgb888>(PrimitiveStyle::new());
+        let transparent_rect = rect.into_styled::<Rgb888>(PrimitiveStyle::new());
+        let filled_rect = rect.into_styled(PrimitiveStyle::with_fill(Rgb888::RED));
 
-        assert_eq!(
-            styled.bounding_box(),
-            Rectangle::new(rect.bounding_box().center(), Size::zero())
-        );
+        assert_eq!(transparent_rect.bounding_box(), filled_rect.bounding_box(),);
     }
 }
