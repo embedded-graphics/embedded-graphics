@@ -237,6 +237,11 @@ For example, a styled rectangle is now built like this:
 
 ## Primitives
 
+### Styling
+
+TODO: Drawing primitives with transparent strokes will now affect the fill area.
+TODO: The behavior of the `Dimensions` impls has changed
+
 ### Circle
 
 A circle is now defined by it's top-left corner and diameter.
