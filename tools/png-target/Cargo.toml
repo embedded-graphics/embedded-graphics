@@ -1,0 +1,11 @@
+[package]
+name = "png-target"
+version = "0.1.0"
+authors = ["Ralf Fuest <mail@rfuest.de>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+embedded-graphics = { path = "../../" }
+image = { version= "0.23.14", default-features = false, features = ["png"] }
+base64 = "0.13.0"
