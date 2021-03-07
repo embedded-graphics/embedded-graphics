@@ -119,18 +119,21 @@ where
     S: TextRenderer<Color = C>,
 {
     type Color = C;
-    type Output = ();
+    type Output = Point;
 
-    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
+        let mut next_position = self.primitive.position;
+
         for (line, position) in self.lines() {
-            self.style
+            next_position = self
+                .style
                 .draw_string(line, position, Baseline::Alphabetic, target)?;
         }
 
-        Ok(())
+        Ok(next_position)
     }
 }
 
@@ -140,19 +143,24 @@ where
     S: TextRenderer<Color = C>,
 {
     type Color = C;
-    type Output = ();
+    type Output = Point;
 
-    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
+        let mut next_position = self.primitive.position;
+
         for (line, position) in self.lines() {
-            self.style
-                .character_style
-                .draw_string(line, position, self.style.baseline, target)?;
+            next_position = self.style.character_style.draw_string(
+                line,
+                position,
+                self.style.baseline,
+                target,
+            )?;
         }
 
-        Ok(())
+        Ok(next_position)
     }
 }
 
@@ -223,7 +231,9 @@ mod tests {
         geometry::Size,
         mock_display::MockDisplay,
         mono_font::{
-            ascii::Font6x9, tests::assert_text_from_pattern, MonoTextStyle, MonoTextStyleBuilder,
+            ascii::{Font6x13, Font6x9},
+            tests::assert_text_from_pattern,
+            MonoTextStyle, MonoTextStyleBuilder,
         },
         pixelcolor::BinaryColor,
         primitives::{Primitive, PrimitiveStyle},
@@ -656,5 +666,40 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn chained_text_drawing() {
+        let character_style1 = MonoTextStyleBuilder::new()
+            .font(Font6x9)
+            .text_color(BinaryColor::On)
+            .build();
+
+        let character_style2 = MonoTextStyleBuilder::new()
+            .font(Font6x13)
+            .text_color(BinaryColor::Off)
+            .build();
+
+        let mut display = MockDisplay::new();
+        let next = Text::new("AB", Point::new(0, 8))
+            .into_styled(character_style1)
+            .draw(&mut display)
+            .unwrap();
+        Text::new("C", next)
+            .into_styled(character_style2)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "             ...  ",
+            "            .   . ",
+            "            .     ",
+            "  #   ####  .     ",
+            " # #  #   # .     ",
+            "#   # ####  .     ",
+            "##### #   # .     ",
+            "#   # #   # .   . ",
+            "#   # ####   ...  ",
+        ]);
     }
 }
