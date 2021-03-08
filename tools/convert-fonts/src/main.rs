@@ -1,7 +1,8 @@
 use anyhow::{anyhow, Result};
 use bdf_parser::BdfFont;
 use bdf_to_mono::{bdf_to_bitmap, Bitmap, Encoding};
-use image::{png::PngEncoder, ColorType, GrayImage, Luma};
+use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
+use png_target::PngTarget;
 use std::{ffi::OsStr, fs, path::Path};
 
 fn main() -> Result<()> {
@@ -10,25 +11,30 @@ fn main() -> Result<()> {
     let mut ascii_rs = include_str!("../assets/header.tmpl").to_string();
     let mut latin1_rs = ascii_rs.clone();
 
+    let mut paths = Vec::new();
+
     for entry in fonts_dir.join("src").read_dir()? {
-        let file = entry?;
-        let path = file.path();
+        let path = entry?.path();
 
         // Ignore directories and non BDF files
-        if !path.is_file() || path.extension() != Some(OsStr::new("bdf")) {
-            continue;
+        if path.is_file() && path.extension() == Some(OsStr::new("bdf")) {
+            paths.push(path);
         }
+    }
 
-        println!("Converting {}", file.file_name().to_string_lossy());
+    // Sort paths to make sure the order of fonts in the generated files doesn't change.
+    paths.sort();
+
+    for file in paths {
+        println!("Converting {}", file.file_name().unwrap().to_string_lossy());
         let font_name = file
-            .path()
             .file_stem()
             .unwrap()
             .to_string_lossy()
             .replace("B", "Bold")
             .replace("O", "Italic");
 
-        let bdf = fs::read(&file.path())?;
+        let bdf = fs::read(file)?;
         let font = BdfFont::parse(&bdf).map_err(|_| anyhow!("couldn't parse BDF file"))?;
 
         let ascii_out = Output::new(&font_name, &font, Encoding::Ascii)?;
@@ -55,7 +61,7 @@ struct Output {
     name: String,
     encoding: Encoding,
     bitmap: Bitmap,
-    png: Vec<u8>,
+    png: PngTarget<BinaryColor>,
 }
 
 impl Output {
@@ -86,7 +92,7 @@ impl Output {
         fs::create_dir_all(&png_directory)?;
 
         let png_file = png_directory.join(&self.name).with_extension("png");
-        fs::write(&png_file, &self.png)?;
+        self.png.save(&png_file)?;
 
         Ok(())
     }
@@ -107,27 +113,22 @@ impl Output {
             "$CHARACTER_SPACING$",
             &self.bitmap.character_spacing.to_string(),
         );
-        let output = output.replace("$PNG_DATA$", &base64::encode(&self.png));
+        let output = output.replace("$PNG_DATA$", &self.png.to_base64());
 
         output
     }
 }
 
-fn bitmap_to_png(bitmap: &Bitmap) -> Result<Vec<u8>> {
-    let mut image = GrayImage::new(bitmap.width as u32, bitmap.height as u32);
+fn bitmap_to_png(bitmap: &Bitmap) -> Result<PngTarget<BinaryColor>> {
+    let mut image = PngTarget::new(Size::new(bitmap.width as u32, bitmap.height as u32), 1);
 
-    for y in 0..bitmap.height {
-        for x in 0..bitmap.width {
-            if bitmap.pixel(x, y) {
-                image.put_pixel(x as u32, y as u32, Luma([255]));
-            }
-        }
-    }
+    image
+        .bounding_box()
+        .points()
+        .filter(|p| bitmap.pixel(p.x as usize, p.y as usize))
+        .map(|p| Pixel(p, BinaryColor::On))
+        .draw(&mut image)
+        .unwrap();
 
-    let mut png = Vec::new();
-
-    let encoder = PngEncoder::new(&mut png);
-    encoder.encode(image.as_raw(), image.width(), image.height(), ColorType::L8)?;
-
-    Ok(png)
+    Ok(image)
 }

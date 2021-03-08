@@ -22,7 +22,9 @@ fn draw_pixel(mut display: Display) -> Result<Display, std::convert::Infallible>
 /// This example draws a red line with 8px stroke.
 fn draw_line(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{Line, PrimitiveStyle},
     };
 
     Line::new(Point::new(16, 24), Point::new(51, 34))
@@ -37,7 +39,9 @@ fn draw_line(mut display: Display) -> Result<Display, std::convert::Infallible> 
 /// This example draws a rectangle with a 2px thick red stroke and cyan fill color.
 fn draw_rectangle(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{PrimitiveStyleBuilder, Rectangle},
     };
 
     Rectangle::new(Point::new(16, 24), Size::new(32, 16))
@@ -58,7 +62,9 @@ fn draw_rectangle(mut display: Display) -> Result<Display, std::convert::Infalli
 /// This example draws a circle with no stroke and a solid blue fill.
 fn draw_circle(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{Circle, PrimitiveStyle},
     };
 
     Circle::new(Point::new(16, 16), 40)
@@ -73,7 +79,9 @@ fn draw_circle(mut display: Display) -> Result<Display, std::convert::Infallible
 /// This example draws an ellipse with a 2px green stroke.
 fn draw_ellipse(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Ellipse, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{Ellipse, PrimitiveStyle},
     };
 
     Ellipse::new(Point::new(8, 16), Size::new(48, 32))
@@ -88,7 +96,9 @@ fn draw_ellipse(mut display: Display) -> Result<Display, std::convert::Infallibl
 /// This example draws an arc with a 2px green stroke.
 fn draw_arc(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Arc, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{Arc, PrimitiveStyle},
     };
 
     Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
@@ -103,7 +113,9 @@ fn draw_arc(mut display: Display) -> Result<Display, std::convert::Infallible> {
 /// This example draws a sector with no stroke and a solid blue fill.
 fn draw_sector(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Sector, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{PrimitiveStyle, Sector},
     };
 
     Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
@@ -118,7 +130,9 @@ fn draw_sector(mut display: Display) -> Result<Display, std::convert::Infallible
 /// This example draws a triangle with a solid 1px magenta stroke and no fill.
 fn draw_triangle(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{PrimitiveStyle, Triangle},
     };
 
     Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
@@ -133,7 +147,9 @@ fn draw_triangle(mut display: Display) -> Result<Display, std::convert::Infallib
 /// This example draws a polyline with 1px cyan stroke.
 fn draw_polyline(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        pixelcolor::Rgb888, prelude::*, primitives::Polyline, style::PrimitiveStyle,
+        pixelcolor::Rgb888,
+        prelude::*,
+        primitives::{Polyline, PrimitiveStyle},
     };
 
     let points: [Point; 5] = [
@@ -158,8 +174,7 @@ fn draw_rounded_rectangle(mut display: Display) -> Result<Display, std::convert:
     use embedded_graphics::{
         pixelcolor::Rgb888,
         prelude::*,
-        primitives::{Rectangle, RoundedRectangle},
-        style::PrimitiveStyleBuilder,
+        primitives::{PrimitiveStyleBuilder, Rectangle, RoundedRectangle},
     };
 
     let style = PrimitiveStyleBuilder::new()
@@ -180,16 +195,16 @@ fn draw_rounded_rectangle(mut display: Display) -> Result<Display, std::convert:
 
 /// ## Draw some text
 ///
-/// This example draws the text \"Hello,\\nRust!\" with the `Font6x8` font in green.
+/// This example draws the text \"Hello,\\nRust!\" with the `Font6x10` font in green.
 fn draw_text(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        fonts::{Font6x8, Text},
+        mono_font::{ascii::Font6x10, MonoTextStyle},
         pixelcolor::Rgb888,
         prelude::*,
-        style::MonoTextStyle,
+        text::Text,
     };
     Text::new("Hello,\nRust!", Point::new(2, 28))
-        .into_styled(MonoTextStyle::new(Font6x8, Rgb888::GREEN))
+        .into_styled(MonoTextStyle::new(Font6x10, Rgb888::GREEN))
         .draw(&mut display)?;
 
     Ok(display)

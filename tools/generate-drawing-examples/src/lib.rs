@@ -1,36 +1,23 @@
-use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 use regex::Regex;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use unindent::unindent;
 
-pub type Display = SimulatorDisplay<Rgb888>;
-
-fn doc_path() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../doc")
-}
-
-pub fn write_png(name: &str, display: Display) {
-    let output_settings = OutputSettingsBuilder::new().scale(2).build();
-
-    let path = doc_path().join("assets").join(name).with_extension("png");
-
-    display
-        .to_image_buffer(&output_settings)
-        .save(&path)
-        .unwrap();
-}
+pub type Display = png_target::PngTarget<embedded_graphics::pixelcolor::Rgb888>;
 
 #[macro_export]
 macro_rules! example {
     ($name:ident) => {
-        write_png(
-            stringify!($name),
-            $name(crate::Display::new(
-                embedded_graphics::geometry::Size::new_equal(64),
-            ))
-            .unwrap(),
-        );
+        let display =
+            png_target::PngTarget::new(embedded_graphics::geometry::Size::new_equal(64), 2);
+
+        let display = $name(display).unwrap();
+
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../doc")
+            .join("assets")
+            .join(stringify!($name))
+            .with_extension("png");
+        display.save(&path).unwrap();
     };
 }
 
@@ -89,5 +76,9 @@ pub fn generate_markdown(input: &str) {
         output.push(String::new());
     }
 
-    std::fs::write(doc_path().join("drawing-examples.md"), output.join("\n")).unwrap();
+    std::fs::write(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../doc/drawing-examples.md"),
+        output.join("\n"),
+    )
+    .unwrap();
 }
