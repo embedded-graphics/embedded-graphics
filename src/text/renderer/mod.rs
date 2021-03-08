@@ -1,6 +1,6 @@
 //! Text renderer.
 //!
-//! TODO: Describe how this API can be implemented and add an example to the docs or link to an 
+//! TODO: Describe how this API can be implemented and add an example to the docs or link to an
 //!       external example.
 
 use crate::{

@@ -80,6 +80,45 @@ impl<C> DecorationColor<C> {
     }
 }
 
+/// Text line height.
+///
+/// The line height is defined as the vertical distance between the baseline of two adjacent lines
+/// of text.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+pub enum LineHeight {
+    /// Absolute line height in pixels.
+    Pixels(u32),
+
+    /// Relative line height in percent of the default line height.
+    Percent(u32),
+}
+
+impl LineHeight {
+    /// Converts the line height to an absolute pixel distance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::text::LineHeight;
+    ///
+    /// let relative_height = LineHeight::Percent(150);
+    /// assert_eq!(relative_height.to_absolute(20), 30);
+    /// ```
+    pub fn to_absolute(self, base_line_height: u32) -> u32 {
+        match self {
+            Self::Pixels(px) => px,
+            Self::Percent(100) => base_line_height,
+            Self::Percent(percent) => base_line_height * percent / 100,
+        }
+    }
+}
+
+impl Default for LineHeight {
+    fn default() -> Self {
+        Self::Percent(100)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -101,5 +140,12 @@ mod tests {
         assert!(!custom.is_none());
         assert!(!custom.is_text_color());
         assert!(custom.is_custom());
+    }
+
+    #[test]
+    fn line_height_to_absolute() {
+        assert_eq!(LineHeight::Pixels(100).to_absolute(20), 100);
+        assert_eq!(LineHeight::Percent(100).to_absolute(20), 20);
+        assert_eq!(LineHeight::Percent(150).to_absolute(20), 30);
     }
 }

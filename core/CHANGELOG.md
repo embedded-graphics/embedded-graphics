@@ -13,7 +13,7 @@
 
 ### Removed
 
-- **(breaking)** [#XXX](https://github.com/embedded-graphics/embedded-graphics/pull/XXX) Removed text renderer API. The text renderer API will be added back when it has stabilized.
+- **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Removed text renderer API. The text renderer API will be added back when it has stabilized.
 
 ## [0.2.0] - 2021-02-03
 
