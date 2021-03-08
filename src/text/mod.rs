@@ -107,7 +107,6 @@ impl LineHeight {
     pub fn to_absolute(self, base_line_height: u32) -> u32 {
         match self {
             Self::Pixels(px) => px,
-            Self::Percent(100) => base_line_height,
             Self::Percent(percent) => base_line_height * percent / 100,
         }
     }
