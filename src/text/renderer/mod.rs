@@ -1,12 +1,16 @@
-//! Text.
+//! Text renderer.
+//!
+//! TODO: Describe how this API can be implemented and add an example to the docs or link to an 
+//!       external example.
 
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
+    text::Baseline,
 };
 
 mod character_style;
 
-pub use character_style::{CharacterStyle, DecorationColor};
+pub use character_style::CharacterStyle;
 
 /// Text renderer.
 ///
@@ -83,28 +87,4 @@ pub struct TextMetrics {
 
     /// The position of the next text.
     pub next_position: Point,
-}
-
-/// Text baseline.
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum Baseline {
-    /// Top.
-    Top,
-    /// Bottom.
-    Bottom,
-    /// Middle.
-    Middle,
-    /// Alphabetic baseline.
-    Alphabetic,
-}
-
-/// Horizontal text alignment.
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum Alignment {
-    /// Left.
-    Left,
-    /// Center.
-    Center,
-    /// Right.
-    Right,
 }

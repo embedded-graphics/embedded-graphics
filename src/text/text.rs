@@ -3,7 +3,10 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    text::{Alignment, Baseline, TextMetrics, TextRenderer, TextStyle},
+    text::{
+        renderer::{TextMetrics, TextRenderer},
+        Alignment, Baseline, TextStyle,
+    },
     transform::Transform,
     Drawable, SaturatingCast, Styled,
 };

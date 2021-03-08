@@ -1,6 +1,7 @@
-use embedded_graphics_core::text::CharacterStyle;
-
-use crate::text::{Alignment, Baseline, TextRenderer};
+use crate::text::{
+    renderer::{CharacterStyle, TextRenderer},
+    Alignment, Baseline,
+};
 
 /// Text style.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
