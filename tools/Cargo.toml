@@ -3,4 +3,9 @@ members = [
     "bdf-to-mono",
     "convert-fonts",
     "generate-drawing-examples",
+    "png-target",
 ]
+
+[patch.crates-io]
+embedded-graphics = { path = "../" }
+embedded-graphics-core = { path = "../core" }

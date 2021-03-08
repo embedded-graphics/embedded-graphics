@@ -1,7 +1,6 @@
 targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
 target_dir := "target"
-ci_build_image := "jamwaffles/circleci-embedded-graphics:1.40.0-3"
 
 # list of all features except criterion
 all_features := "nalgebra_support fixed"
@@ -137,20 +136,9 @@ convert-fonts:
     find src/mono_font/ -name generated.rs -exec rustfmt {} \;
 
 #--------
-# Docker
+# Release
 #--------
 
-# Generate the Docker image used by the CI pipeline
-build-ci-image:
-    docker build -t "{{ci_build_image}}" -f ./.circleci/Dockerfile --compress .
-
-# Push the generated CI build environment image to Docker Hub
-push-ci-image:
-    docker push "{{ci_build_image}}"
-
-# -------
-# Release
-# -------
 # Release embedded-graphics-core
 release-core *args:
     cargo release --workspace --exclude embedded-graphics --dependent-version fix {{args}}

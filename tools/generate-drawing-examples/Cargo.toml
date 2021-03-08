@@ -6,12 +6,9 @@ edition = "2018"
 publish = false
 
 [dependencies]
-# TODO: change to path dependency after next simulator release
-# embedded-graphics = { path = "../../" }
-embedded-graphics = { version = "=0.7.0-alpha.3" }
-tinytga = "0.4.0-alpha.1"
-
-# TODO: replace by non git dependency after next simulator release
-embedded-graphics-simulator = { git = "https://github.com/embedded-graphics/simulator" }
+embedded-graphics = { path = "../../" }
+png-target = { path = "../png-target/" }
+# TODO: remove git dependency
+tinytga = { git = "https://github.com/embedded-graphics/tinytga.git", rev = "9e26fe986f0eae436f4f7fafd4e9c55ff1c09d00"}
 regex = "1.4.3"
 unindent = "0.1.7"

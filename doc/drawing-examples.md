@@ -24,7 +24,9 @@ This example draws a red line with 8px stroke.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Line, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{Line, PrimitiveStyle},
 };
 
 Line::new(Point::new(16, 24), Point::new(51, 34))
@@ -40,7 +42,9 @@ This example draws a rectangle with a 2px thick red stroke and cyan fill color.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Rectangle, style::PrimitiveStyleBuilder,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{PrimitiveStyleBuilder, Rectangle},
 };
 
 Rectangle::new(Point::new(16, 24), Size::new(32, 16))
@@ -62,7 +66,9 @@ This example draws a circle with no stroke and a solid blue fill.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Circle, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{Circle, PrimitiveStyle},
 };
 
 Circle::new(Point::new(16, 16), 40)
@@ -78,7 +84,9 @@ This example draws an ellipse with a 2px green stroke.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Ellipse, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{Ellipse, PrimitiveStyle},
 };
 
 Ellipse::new(Point::new(8, 16), Size::new(48, 32))
@@ -94,7 +102,9 @@ This example draws an arc with a 2px green stroke.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Arc, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{Arc, PrimitiveStyle},
 };
 
 Arc::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
@@ -110,7 +120,9 @@ This example draws a sector with no stroke and a solid blue fill.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Sector, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{PrimitiveStyle, Sector},
 };
 
 Sector::new(Point::new(12, 12), 40, -30.0.deg(), 150.0.deg())
@@ -126,7 +138,9 @@ This example draws a triangle with a solid 1px magenta stroke and no fill.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Triangle, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{PrimitiveStyle, Triangle},
 };
 
 Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
@@ -142,7 +156,9 @@ This example draws a polyline with 1px cyan stroke.
 
 ```rust
 use embedded_graphics::{
-    pixelcolor::Rgb888, prelude::*, primitives::Polyline, style::PrimitiveStyle,
+    pixelcolor::Rgb888,
+    prelude::*,
+    primitives::{Polyline, PrimitiveStyle},
 };
 
 let points: [Point; 5] = [
@@ -168,8 +184,7 @@ This example draws a rectangle with rounded corners, red stroke and green fill.
 use embedded_graphics::{
     pixelcolor::Rgb888,
     prelude::*,
-    primitives::{Rectangle, RoundedRectangle},
-    style::PrimitiveStyleBuilder,
+    primitives::{PrimitiveStyleBuilder, Rectangle, RoundedRectangle},
 };
 
 let style = PrimitiveStyleBuilder::new()
@@ -188,19 +203,19 @@ RoundedRectangle::with_equal_corners(
 
 ## Draw some text
 
-This example draws the text \"Hello,\\nRust!\" with the `Font6x8` font in green.
+This example draws the text \"Hello,\\nRust!\" with the `Font6x10` font in green.
 
 <img align="left" alt="draw_text example screenshot" src="assets/draw_text.png">
 
 ```rust
 use embedded_graphics::{
-    fonts::{Font6x8, Text},
+    mono_font::{ascii::Font6x10, MonoTextStyle},
     pixelcolor::Rgb888,
     prelude::*,
-    style::MonoTextStyle,
+    text::Text,
 };
 Text::new("Hello,\nRust!", Point::new(2, 28))
-    .into_styled(MonoTextStyle::new(Font6x8, Rgb888::GREEN))
+    .into_styled(MonoTextStyle::new(Font6x10, Rgb888::GREEN))
     .draw(&mut display)?;
 ```
 
