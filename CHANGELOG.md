@@ -18,6 +18,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#561](https://github.com/embedded-graphics/embedded-graphics/pull/561) Replaced `TextRenderer::vertical_offset` by `baseline` arguments for the other `TextRenderer` methods.
 - **(breaking)** [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) The bounding boxes returned by `Dimensions` implementations for styled primitives no longer depend on the fill and stroke color.
 - **(breaking)** [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Drawing a primitive with a transparent stroke (`stroke_color == None && stroke_width > 0`) will now reduce the filled area.
+- **(breaking)** [#566](https://github.com/embedded-graphics/embedded-graphics/pull/566) The `Drawable::Output` type was changed to `Point` for styled `Text` objects. The returned point can be used to chain texts with different styles.
 
 ## [0.7.0-alpha.3] - 2021-02-03
 

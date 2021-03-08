@@ -90,7 +90,9 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     ///     Text::new(text, text_position)
     ///         .into_styled(MonoTextStyle::new(Font6x9, Rgb565::YELLOW))
-    ///         .draw(target)
+    ///         .draw(target)?;
+    ///
+    ///     Ok(())
     /// }
     ///
     /// let mut display = MockDisplay::new();

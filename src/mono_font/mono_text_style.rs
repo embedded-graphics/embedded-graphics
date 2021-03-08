@@ -130,17 +130,15 @@ where
         Ok(())
     }
 
-    /// Applies the vertical offset between the line position and the top edge of the bounding box.
-    fn apply_baseline_offset(&self, position: Point, baseline: Baseline) -> Point {
-        let dy = match baseline {
+    /// Returns the vertical offset between the line position and the top edge of the bounding box.
+    fn baseline_offset(&self, baseline: Baseline) -> i32 {
+        match baseline {
             Baseline::Top => 0,
             Baseline::Bottom => F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast(),
             Baseline::Middle => (F::CHARACTER_SIZE.height.saturating_sub(1) / 2).saturating_cast(),
             Baseline::Alphabetic => F::BASELINE
                 .unwrap_or_else(|| F::CHARACTER_SIZE.height.saturating_sub(1).saturating_cast()),
-        };
-
-        position - Point::new(0, dy)
+        }
     }
 }
 
@@ -161,7 +159,7 @@ where
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        let position = self.apply_baseline_offset(position, baseline);
+        let position = position - Point::new(0, self.baseline_offset(baseline));
 
         let mut first = true;
         let mut p = position;
@@ -217,6 +215,8 @@ where
         self.draw_strikethrough(width, position, target)?;
         self.draw_underline(width, position, target)?;
 
+        p.y += self.baseline_offset(baseline);
+
         Ok(p)
     }
 
@@ -230,32 +230,32 @@ where
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        let position = self.apply_baseline_offset(position, baseline);
+        let position = position - Point::new(0, self.baseline_offset(baseline));
 
         self.draw_background(width, position, target)?;
         self.draw_strikethrough(width, position, target)?;
         self.draw_underline(width, position, target)?;
 
-        Ok(position + Size::new(width, 0))
+        Ok(position + Point::new(width.saturating_cast(), self.baseline_offset(baseline)))
     }
 
     fn measure_string(&self, text: &str, position: Point, baseline: Baseline) -> TextMetrics {
-        let position = self.apply_baseline_offset(position, baseline);
+        let bb_position = position - Point::new(0, self.baseline_offset(baseline));
 
-        let width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
+        let bb_width = (text.len() as u32 * (F::CHARACTER_SIZE.width + F::CHARACTER_SPACING))
             .saturating_sub(F::CHARACTER_SPACING);
 
-        let height = if self.underline_color != DecorationColor::None {
+        let bb_height = if self.underline_color != DecorationColor::None {
             F::UNDERLINE_HEIGHT + F::UNDERLINE_OFFSET as u32
         } else {
             F::CHARACTER_SIZE.height
         };
 
-        let size = Size::new(width, height);
+        let bb_size = Size::new(bb_width, bb_height);
 
         TextMetrics {
-            bounding_box: Rectangle::new(position, size),
-            next_position: position + size.x_axis(),
+            bounding_box: Rectangle::new(bb_position, bb_size),
+            next_position: position + bb_size.x_axis(),
         }
     }
 
@@ -950,5 +950,59 @@ mod tests {
                 font: Font6x9,
             }
         );
+    }
+
+    #[test]
+    fn draw_string_return_value() {
+        let style = MonoTextStyle::new(Font6x9, BinaryColor::On);
+        let start = Point::new(10, 20);
+        let expected_next = start + Point::new(2 * 6, 0);
+
+        for baseline in [
+            Baseline::Top,
+            Baseline::Middle,
+            Baseline::Alphabetic,
+            Baseline::Bottom,
+        ]
+        .iter()
+        {
+            let mut display = MockDisplay::new();
+            let next = style
+                .draw_string("AB", start, *baseline, &mut display)
+                .unwrap();
+
+            assert_eq!(
+                next, expected_next,
+                "Unexpected next point for {:?}: {:?} (expected {:?})",
+                baseline, next, expected_next
+            );
+        }
+    }
+
+    #[test]
+    fn draw_whitespace_return_value() {
+        let style = MonoTextStyle::new(Font6x9, BinaryColor::On);
+        let start = Point::new(10, 20);
+        let expected_next = start + Point::new(15, 0);
+
+        for baseline in [
+            Baseline::Top,
+            Baseline::Middle,
+            Baseline::Alphabetic,
+            Baseline::Bottom,
+        ]
+        .iter()
+        {
+            let mut display = MockDisplay::new();
+            let next = style
+                .draw_whitespace(15, start, *baseline, &mut display)
+                .unwrap();
+
+            assert_eq!(
+                next, expected_next,
+                "Unexpected next point for {:?}: {:?} (expected {:?})",
+                baseline, next, expected_next
+            );
+        }
     }
 }

@@ -41,7 +41,9 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///
 ///         Text::new(self.text, Point::new(6, 13))
 ///             .into_styled(MonoTextStyle::new(Font6x9, self.fg_color))
-///             .draw(display)
+///             .draw(display)?;
+///
+///         Ok(())
 ///     }
 /// }
 ///
