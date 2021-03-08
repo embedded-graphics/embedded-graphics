@@ -88,7 +88,7 @@ mod tests {
 
     #[test]
     fn convert_rgb565_to_rgb888_and_back() {
-        for r in 0..=63 {
+        for r in 0..=Rgb565::MAX_R {
             let c = Rgb565::new(r, 0, 0);
             let c2 = Rgb888::from(c);
             let c3 = Rgb565::from(c2);
@@ -96,7 +96,7 @@ mod tests {
             assert_eq!(c, c3);
         }
 
-        for g in 0..=63 {
+        for g in 0..=Rgb565::MAX_G {
             let c = Rgb565::new(0, g, 0);
             let c2 = Rgb888::from(c);
             let c3 = Rgb565::from(c2);
@@ -104,7 +104,7 @@ mod tests {
             assert_eq!(c, c3);
         }
 
-        for b in 0..=63 {
+        for b in 0..=Rgb565::MAX_B {
             let c = Rgb565::new(0, 0, b);
             let c2 = Rgb888::from(c);
             let c3 = Rgb565::from(c2);
