@@ -49,9 +49,9 @@ where
     }
 
     fn write_vertical_border(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
+        writeln!(
             f,
-            "+-{:-<width$}-+-{:-<width$}-+-{:-<width$}-+\n",
+            "+-{:-<width$}-+-{:-<width$}-+-{:-<width$}-+",
             "",
             "",
             "",
@@ -60,9 +60,9 @@ where
     }
 
     fn write_header(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
+        writeln!(
             f,
-            "| {:^width$} | {:^width$} | {:^width$} |\n",
+            "| {:^width$} | {:^width$} | {:^width$} |",
             "display",
             "expected",
             "diff",
@@ -85,9 +85,9 @@ where
             Ansi::Foreground(None)
         )?;
 
-        write!(
+        writeln!(
             f,
-            ", {}\u{25FC}{} wrong color\n",
+            ", {}\u{25FC}{} wrong color",
             Ansi::Foreground(Some(Rgb888::BLUE)),
             Ansi::Foreground(None)
         )

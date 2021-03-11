@@ -332,7 +332,7 @@ fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{geometry::Size, mock_display::MockDisplay};
+    use crate::{geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor};
 
     #[test]
     fn dimensions() {
@@ -370,7 +370,7 @@ mod tests {
         ];
 
         for triangle in triangles.iter() {
-            let expected = MockDisplay::from_points(triangle.points());
+            let expected = MockDisplay::from_points(triangle.points(), BinaryColor::On);
 
             for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
                 let should_contain =

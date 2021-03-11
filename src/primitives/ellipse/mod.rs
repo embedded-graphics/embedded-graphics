@@ -226,13 +226,14 @@ mod tests {
     fn contains() {
         let ellipse = Ellipse::new(Point::zero(), Size::new(40, 20));
 
-        let display = MockDisplay::<BinaryColor>::from_points(
+        let display = MockDisplay::from_points(
             Rectangle::new(Point::zero(), Size::new(40, 20))
                 .points()
                 .filter(|p| ellipse.contains(*p)),
+            BinaryColor::On,
         );
 
-        let expected = MockDisplay::from_points(ellipse.points());
+        let expected = MockDisplay::from_points(ellipse.points(), BinaryColor::On);
 
         display.assert_eq(&expected);
     }
