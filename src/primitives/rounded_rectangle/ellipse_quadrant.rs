@@ -66,7 +66,7 @@ impl ContainsPoint for EllipseQuadrant {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub(in crate::primitives) struct Points {
     iter: rectangle::Points,
     size_sq: Size,

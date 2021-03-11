@@ -12,7 +12,7 @@ use crate::{
 };
 
 /// Pixel iterator for each pixel in the arc border
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct StyledPixels<C>
 where
     C: PixelColor,

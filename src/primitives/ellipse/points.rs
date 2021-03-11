@@ -8,7 +8,7 @@ use crate::{
 };
 
 /// Iterator over all points inside the ellipse
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
     iter: rectangle::Points,
     center_2x: Point,

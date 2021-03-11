@@ -4,7 +4,7 @@ use crate::{
 };
 
 /// Iterator over all points inside the circle.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
     iter: DistanceIterator,
     threshold: u32,

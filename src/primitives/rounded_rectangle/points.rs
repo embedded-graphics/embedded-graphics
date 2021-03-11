@@ -11,7 +11,7 @@ use crate::{
 };
 
 /// Iterator over all points inside the rounded rectangle.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
     rect_iter: rectangle::Points,
 

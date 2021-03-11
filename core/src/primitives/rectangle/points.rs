@@ -1,33 +1,37 @@
+use core::ops::Range;
+
 use crate::{geometry::Point, primitives::Rectangle};
 
 /// Iterator over all points inside the rectangle.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
-    left: i32,
-    bottom_right: Point,
-    current_point: Point,
+    x: Range<i32>,
+    y: Range<i32>,
+    x_start: i32,
 }
 
 impl Points {
     pub(in crate::primitives::rectangle) fn new(rectangle: &Rectangle) -> Self {
-        // This doesn't use rectangle.bottom_right() to intentionally set bottom_right
-        // to an coordinate outside the rectangle if the width or height is zero, which
-        // stops the iterator.
-        let bottom_right = rectangle.top_left + rectangle.size - Point::new(1, 1);
-
-        Self {
-            left: rectangle.top_left.x,
-            bottom_right,
-            current_point: rectangle.top_left,
+        // Return `Self::empty` for all zero sized rectangles.
+        // The iterator would behave correctly without this check, but would loop unnecessarily for
+        // rectangles with zero width.
+        if rectangle.is_zero_sized() {
+            return Self::empty();
         }
+
+        let x = rectangle.columns();
+        let y = rectangle.rows();
+        let x_start = x.start;
+
+        Self { x, y, x_start }
     }
 
     /// Create a points iterator that returns no items.
     pub const fn empty() -> Self {
         Self {
-            left: 0,
-            bottom_right: Point::new(-1, -1),
-            current_point: Point::zero(),
+            x: 0..0,
+            y: 0..0,
+            x_start: 0,
         }
     }
 }
@@ -36,22 +40,17 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Finished, i.e. we're below the rect
-        if self.current_point.y > self.bottom_right.y {
-            return None;
+        // MSRV 1.47.0: use Range::is_empty
+        while self.y.end > self.y.start {
+            if let Some(x) = self.x.next() {
+                return Some(Point::new(x, self.y.start));
+            }
+
+            self.y.next();
+            self.x.start = self.x_start;
         }
 
-        let ret = self.current_point;
-
-        self.current_point.x += 1;
-
-        // Reached end of row? Jump down one line
-        if self.current_point.x > self.bottom_right.x {
-            self.current_point.x = self.left;
-            self.current_point.y += 1;
-        }
-
-        Some(ret)
+        None
     }
 }
 
@@ -80,6 +79,22 @@ mod tests {
     #[test]
     fn points_iter_zero_size() {
         let rectangle = Rectangle::new(Point::new(1, 2), Size::zero());
+
+        let mut points = rectangle.points();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_zero_size_x() {
+        let rectangle = Rectangle::new(Point::new(1, 2), Size::new(0, 1));
+
+        let mut points = rectangle.points();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_zero_size_y() {
+        let rectangle = Rectangle::new(Point::new(1, 2), Size::new(1, 0));
 
         let mut points = rectangle.points();
         assert_eq!(points.next(), None);
