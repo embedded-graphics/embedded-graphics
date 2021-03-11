@@ -1,307 +1,28 @@
 use criterion::*;
-use embedded_graphics::{pixelcolor::Gray8, prelude::*, primitives::*};
+use embedded_graphics::{
+    geometry::AnchorPoint, pixelcolor::Gray8, prelude::*, primitives::*, Styled,
+};
 
 mod common;
 
 use common::Framebuffer;
 
-fn filled_circle(c: &mut Criterion) {
-    c.bench_function("filled circle", |b| {
-        let style = PrimitiveStyleBuilder::new()
-            .fill_color(Gray8::new(1))
-            .stroke_color(Gray8::new(10))
-            .stroke_width(1)
-            .build();
+const BOUNDING_BOX: Rectangle = Rectangle::new(Point::new_equal(32), Size::new_equal(192));
 
-        let object = Circle::new(Point::new(100, 100), 100).into_styled(style);
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn filled_rect(c: &mut Criterion) {
-    c.bench_function("filled rectangle", |b| {
-        let style = PrimitiveStyleBuilder::new()
-            .fill_color(Gray8::new(1))
-            .stroke_color(Gray8::new(10))
-            .stroke_width(1)
-            .build();
-
-        let object = Rectangle::new(Point::new(100, 100), Size::new(100, 100)).into_styled(style);
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn empty_rect(c: &mut Criterion) {
-    c.bench_function("unfilled rectangle", |b| {
-        let object = Rectangle::new(Point::new(100, 100), Size::new(100, 100))
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn line(c: &mut Criterion) {
-    c.bench_function("line", |b| {
-        let object = Line::new(Point::new(100, 100), Point::new(200, 200))
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn thick_line(c: &mut Criterion) {
-    c.bench_function("thick line 10px wide", |b| {
-        let object = Line::new(Point::new(100, 100), Point::new(150, 200))
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 10));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn thicker_line(c: &mut Criterion) {
-    c.bench_function("thick line 50px wide", |b| {
-        let object = Line::new(Point::new(50, 50), Point::new(150, 200))
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 50));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn triangle(c: &mut Criterion) {
-    c.bench_function("triangle", |b| {
-        let object = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(10), 1));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn filled_triangle(c: &mut Criterion) {
-    c.bench_function("filled_triangle", |b| {
-        let object = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(5, 20))
-            .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn ellipse(c: &mut Criterion) {
-    c.bench_function("ellipse", |b| {
-        let object = Ellipse::new(Point::new(10, 10), Size::new(50, 30))
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn filled_ellipse(c: &mut Criterion) {
-    c.bench_function("filled_ellipse", |b| {
-        let object = Ellipse::new(Point::new(10, 10), Size::new(50, 30))
-            .into_styled(PrimitiveStyle::with_fill(Gray8::new(1)));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn arc(c: &mut Criterion) {
-    c.bench_function("arc", |b| {
-        let object = Arc::new(Point::new(100, 100), 100, -30.0.deg(), 150.0.deg())
-            .into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn sector(c: &mut Criterion) {
-    let mut group = c.benchmark_group("sector");
-
-    let sector = Sector::with_center(Point::new_equal(32), 30, -30.0.deg(), 150.0.deg());
-
-    group.bench_function("1px stroke", |b| {
-        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 1);
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("10px stroke", |b| {
-        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
-
-        // Reduce sector radius by half the stoke width to make the bounding box
-        // equal to the other benches.
-        let sector = sector.offset(-(style.stroke_width as i32 / 2));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("1px stroke and fill", |b| {
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_color(Gray8::WHITE)
-            .stroke_width(1)
-            .fill_color(Gray8::new(128))
-            .build();
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("10px stroke and fill", |b| {
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_color(Gray8::WHITE)
-            .stroke_width(10)
-            .fill_color(Gray8::new(128))
-            .build();
-
-        // Reduce sector radius by half the stoke width to make the bounding box
-        // equal to the other benches.
-        let sector = sector.offset(-(style.stroke_width as i32 / 2));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("fill", |b| {
-        let style = PrimitiveStyle::with_fill(Gray8::WHITE);
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.finish();
-}
-
-fn sector_360(c: &mut Criterion) {
-    let mut group = c.benchmark_group("360° sector");
-
-    let sector = Sector::with_center(Point::new_equal(32), 30, 0.0.deg(), 360.0.deg());
-
-    group.bench_function("1px stroke", |b| {
-        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 1);
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("10px stroke", |b| {
-        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
-
-        // Reduce sector radius by half the stoke width to make the bounding box
-        // equal to the other benches.
-        let sector = sector.offset(-(style.stroke_width as i32 / 2));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("1px stroke and fill", |b| {
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_color(Gray8::WHITE)
-            .stroke_width(1)
-            .fill_color(Gray8::new(128))
-            .build();
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("10px stroke and fill", |b| {
-        let style = PrimitiveStyleBuilder::new()
-            .stroke_color(Gray8::WHITE)
-            .stroke_width(10)
-            .fill_color(Gray8::new(128))
-            .build();
-
-        // Reduce sector radius by half the stoke width to make the bounding box
-        // equal to the other benches.
-        let sector = sector.offset(-(style.stroke_width as i32 / 2));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.bench_function("fill", |b| {
-        let style = PrimitiveStyle::with_fill(Gray8::WHITE);
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| sector.into_styled(style).draw(&mut framebuffer))
-    });
-
-    group.finish();
-}
-
-fn polyline(c: &mut Criterion) {
-    c.bench_function("polyline", |b| {
-        let points = [
-            Point::new(105, 110),
-            Point::new(115, 120),
-            Point::new(105, 120),
-            Point::new(130, 150),
-            Point::new(200, 200),
-        ];
-
-        let object =
-            Polyline::new(&points).into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 1));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
-}
-
-fn thick_polyline(c: &mut Criterion) {
-    c.bench_function("thick polyline", |b| {
-        let points = [
-            Point::new(105, 110),
-            Point::new(115, 120),
-            Point::new(105, 120),
-            Point::new(130, 150),
-            Point::new(200, 200),
-        ];
-
-        let object =
-            Polyline::new(&points).into_styled(PrimitiveStyle::with_stroke(Gray8::new(1), 10));
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
-    });
+fn rectangle(c: &mut Criterion) {
+    closed_shape_benches(c, "rectangle", || BOUNDING_BOX);
 }
 
 fn rounded_rectangle(c: &mut Criterion) {
-    c.bench_function("rounded_rectangle", |b| {
-        let object = RoundedRectangle::new(
-            Rectangle::new(Point::new(10, 10), Size::new(50, 40)),
-            CornerRadii::new(Size::new(10, 12)),
-        )
-        .into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(5)
-                .fill_color(Gray8::new(10))
-                .stroke_color(Gray8::new(60))
-                .build(),
-        );
-
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
+    closed_shape_benches(c, "rounded rectangle", || {
+        RoundedRectangle::new(BOUNDING_BOX, CornerRadii::new(Size::new(10, 12)))
     });
 }
 
 fn rounded_rectangle_corners(c: &mut Criterion) {
-    c.bench_function("rounded_rectangle_corners", |b| {
-        let object = &RoundedRectangle::new(
-            Rectangle::new(Point::new(10, 10), Size::new(50, 40)),
+    closed_shape_benches(c, "rounded rectangle corners", || {
+        RoundedRectangle::new(
+            BOUNDING_BOX,
             CornerRadii {
                 top_left: Size::new(10, 12),
                 top_right: Size::new(14, 16),
@@ -309,37 +30,212 @@ fn rounded_rectangle_corners(c: &mut Criterion) {
                 bottom_left: Size::new(22, 24),
             },
         )
-        .into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(5)
-                .fill_color(Gray8::new(10))
-                .stroke_color(Gray8::new(60))
-                .build(),
-        );
+    });
+}
 
-        let mut framebuffer = Framebuffer::new();
-        b.iter(|| object.draw(&mut framebuffer))
+fn triangle(c: &mut Criterion) {
+    closed_shape_benches(c, "triangle", || {
+        Triangle::new(
+            BOUNDING_BOX.anchor_point(AnchorPoint::BottomLeft),
+            BOUNDING_BOX.anchor_point(AnchorPoint::TopCenter),
+            BOUNDING_BOX.anchor_point(AnchorPoint::BottomRight),
+        )
+    });
+}
+
+fn circle(c: &mut Criterion) {
+    closed_shape_benches(c, "circle", || {
+        Circle::new(BOUNDING_BOX.top_left, BOUNDING_BOX.size.width)
+    });
+}
+
+fn ellipse(c: &mut Criterion) {
+    closed_shape_benches(c, "ellipse", || {
+        Ellipse::with_center(BOUNDING_BOX.center(), BOUNDING_BOX.size - Size::new(0, 20))
+    });
+}
+
+fn sector_150(c: &mut Criterion) {
+    closed_shape_benches(c, "sector 150°", || {
+        Sector::with_center(
+            BOUNDING_BOX.center(),
+            BOUNDING_BOX.size.width,
+            -30.0.deg(),
+            150.0.deg(),
+        )
+    });
+}
+
+fn sector_360(c: &mut Criterion) {
+    closed_shape_benches(c, "sector 360°", || {
+        Sector::with_center(
+            BOUNDING_BOX.center(),
+            BOUNDING_BOX.size.width,
+            -30.0.deg(),
+            150.0.deg(),
+        )
+    });
+}
+
+fn line(c: &mut Criterion) {
+    open_shape_benches(c, "line", || {
+        Line::new(
+            BOUNDING_BOX.anchor_point(AnchorPoint::TopLeft),
+            // move point up a bit, because non 45° lines might be slower
+            BOUNDING_BOX.anchor_point(AnchorPoint::BottomRight) - Point::new(0, 20),
+        )
+    });
+}
+
+fn polyline(c: &mut Criterion) {
+    let points = [
+        BOUNDING_BOX.anchor_point(AnchorPoint::BottomLeft),
+        BOUNDING_BOX.anchor_point(AnchorPoint::TopCenter) - Point::new(20, 0),
+        BOUNDING_BOX.anchor_point(AnchorPoint::BottomCenter),
+        BOUNDING_BOX.anchor_point(AnchorPoint::TopRight),
+        BOUNDING_BOX.anchor_point(AnchorPoint::BottomRight),
+    ];
+
+    open_shape_benches(c, "polyline", || Polyline::new(&points));
+}
+
+fn arc_150(c: &mut Criterion) {
+    open_shape_benches(c, "arc 150°", || {
+        Arc::with_center(
+            BOUNDING_BOX.center(),
+            BOUNDING_BOX.size.width,
+            -30.0.deg(),
+            150.0.deg(),
+        )
+    });
+}
+
+fn arc_360(c: &mut Criterion) {
+    open_shape_benches(c, "arc 360°", || {
+        Arc::with_center(
+            BOUNDING_BOX.center(),
+            BOUNDING_BOX.size.width,
+            0.0.deg(),
+            360.0.deg(),
+        )
     });
 }
 
 criterion_group!(
     primitives,
-    filled_circle,
-    filled_rect,
-    empty_rect,
-    line,
-    thick_line,
-    thicker_line,
-    triangle,
-    filled_triangle,
-    ellipse,
-    filled_ellipse,
-    polyline,
-    thick_polyline,
+    rectangle,
     rounded_rectangle,
     rounded_rectangle_corners,
-    arc,
-    sector,
+    triangle,
+    circle,
+    ellipse,
+    line,
+    polyline,
+    sector_150,
     sector_360,
+    arc_150,
+    arc_360,
 );
 criterion_main!(primitives);
+
+fn closed_shape_benches<P>(c: &mut Criterion, name: &str, build: impl Fn() -> P)
+where
+    P: Primitive,
+    Styled<P, PrimitiveStyle<Gray8>>: Drawable<Color = Gray8>,
+{
+    let mut group = c.benchmark_group(name);
+
+    group.bench_function("fill", |b| {
+        let style = PrimitiveStyle::with_fill(Gray8::WHITE);
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.bench_function("stroke 1px", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::BLACK)
+            .stroke_width(1)
+            .stroke_alignment(StrokeAlignment::Inside)
+            .build();
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.bench_function("stroke 10px", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .stroke_color(Gray8::BLACK)
+            .stroke_width(10)
+            .stroke_alignment(StrokeAlignment::Inside)
+            .build();
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.bench_function("stroke 1px and fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .fill_color(Gray8::WHITE)
+            .stroke_color(Gray8::BLACK)
+            .stroke_width(1)
+            .stroke_alignment(StrokeAlignment::Inside)
+            .build();
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.bench_function("stroke 10px and fill", |b| {
+        let style = PrimitiveStyleBuilder::new()
+            .fill_color(Gray8::WHITE)
+            .stroke_color(Gray8::BLACK)
+            .stroke_width(10)
+            .stroke_alignment(StrokeAlignment::Inside)
+            .build();
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.finish()
+}
+
+fn open_shape_benches<P>(c: &mut Criterion, name: &str, build: impl Fn() -> P)
+where
+    P: Primitive,
+    Styled<P, PrimitiveStyle<Gray8>>: Drawable<Color = Gray8>,
+{
+    let mut group = c.benchmark_group(name);
+
+    group.bench_function("stroke 1px", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 1);
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.bench_function("stroke 10px", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 10);
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.bench_function("stroke 50px", |b| {
+        let style = PrimitiveStyle::with_stroke(Gray8::WHITE, 50);
+        let object = build().into_styled(style);
+
+        let mut framebuffer = Framebuffer::new();
+        b.iter(|| object.draw(&mut framebuffer))
+    });
+
+    group.finish()
+}
