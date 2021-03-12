@@ -42,9 +42,11 @@ pub struct Scanlines {
 
 impl Scanlines {
     pub fn new(circle: &Circle) -> Self {
+        let bounding_box = circle.bounding_box();
+
         Self {
-            rows: circle.bounding_box().rows(),
-            columns: circle.bounding_box().columns(),
+            rows: bounding_box.rows(),
+            columns: bounding_box.columns(),
             center_2x: circle.center_2x(),
             threshold: circle.threshold(),
         }
