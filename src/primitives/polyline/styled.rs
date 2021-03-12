@@ -90,7 +90,9 @@ where
             StyledIter::Thin(styled.primitive.points())
         } else {
             let mut scanline_iter = ScanlineIterator::new(styled);
-            let line_iter = scanline_iter.next().unwrap_or_else(|| Scanline::new(0));
+            let line_iter = scanline_iter
+                .next()
+                .unwrap_or_else(|| Scanline::new_empty(0));
 
             StyledIter::Thick {
                 scanline_iter,

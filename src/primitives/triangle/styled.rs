@@ -41,7 +41,7 @@ where
 
         let (current_line, point_type) = lines_iter
             .next()
-            .unwrap_or_else(|| (Scanline::new(0), PointType::Stroke));
+            .unwrap_or_else(|| (Scanline::new_empty(0), PointType::Stroke));
 
         let current_color = match point_type {
             PointType::Stroke => styled.style.effective_stroke_color(),

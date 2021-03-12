@@ -23,7 +23,7 @@ impl Points {
             &triangle.bounding_box(),
         );
 
-        let current_line = Scanline::new(0);
+        let current_line = Scanline::new_empty(0);
 
         Self {
             scanline_iter,

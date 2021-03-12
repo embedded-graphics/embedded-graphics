@@ -212,7 +212,7 @@ impl Triangle {
     ) -> Scanline {
         let [p1, p2, p3] = self.sorted_yx().vertices;
 
-        let mut scanline = Scanline::new(scanline_y);
+        let mut scanline = Scanline::new_empty(scanline_y);
 
         // Triangle is colinear. We can get away with only intersecting the single line.
         if self.area_doubled() == 0 {
