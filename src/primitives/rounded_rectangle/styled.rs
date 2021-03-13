@@ -1,14 +1,17 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::Dimensions,
+    geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        rounded_rectangle::{Points, RoundedRectangle},
-        ContainsPoint, PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
+        common::{Scanline, StyledScanline},
+        rounded_rectangle::{points::Scanlines, RoundedRectangle},
+        PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
     },
     Drawable, Pixel, SaturatingCast, Styled,
 };
+
+use super::RoundedRectangleContains;
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -16,8 +19,12 @@ pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: Points,
-    fill_area: RoundedRectangle,
+    styled_scanlines: StyledScanlines,
+
+    stroke_left: Scanline,
+    fill: Scanline,
+    stroke_right: Scanline,
+
     stroke_color: Option<C>,
     fill_color: Option<C>,
 }
@@ -27,15 +34,14 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
-        let iter = if !styled.style.is_transparent() {
-            Points::new(&styled.stroke_area())
-        } else {
-            Points::empty()
-        };
+        let stroke_area = styled.stroke_area();
+        let fill_area = styled.fill_area();
 
         Self {
-            iter,
-            fill_area: styled.fill_area(),
+            styled_scanlines: StyledScanlines::new(&stroke_area, &fill_area),
+            stroke_left: Scanline::new_empty(0),
+            fill: Scanline::new_empty(0),
+            stroke_right: Scanline::new_empty(0),
             stroke_color: styled.style.stroke_color,
             fill_color: styled.style.fill_color,
         }
@@ -49,19 +55,47 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            let color = if self.fill_area.contains(point) {
-                self.fill_color
-            } else {
-                self.stroke_color
-            };
+        match (self.stroke_color, self.fill_color) {
+            (Some(stroke_color), None) => loop {
+                if let Some(pixel) = self
+                    .stroke_left
+                    .next()
+                    .or_else(|| self.stroke_right.next())
+                    .map(|p| Pixel(p, stroke_color))
+                {
+                    return Some(pixel);
+                }
 
-            if let Some(color) = color {
-                return Some(Pixel(point, color));
-            }
+                let scanline = self.styled_scanlines.next()?;
+                self.stroke_left = scanline.stroke_left();
+                self.stroke_right = scanline.stroke_right();
+            },
+            (Some(stroke_color), Some(fill_color)) => loop {
+                if let Some(pixel) = self
+                    .stroke_left
+                    .next()
+                    .map(|p| Pixel(p, stroke_color))
+                    .or_else(|| self.fill.next().map(|p| Pixel(p, fill_color)))
+                    .or_else(|| self.stroke_right.next().map(|p| Pixel(p, stroke_color)))
+                {
+                    return Some(pixel);
+                }
+
+                let scanline = self.styled_scanlines.next()?;
+                self.stroke_left = scanline.stroke_left();
+                self.fill = scanline.fill();
+                self.stroke_right = scanline.stroke_right();
+            },
+            (None, Some(fill_color)) => loop {
+                if let Some(pixel) = self.fill.next().map(|p| Pixel(p, fill_color)) {
+                    return Some(pixel);
+                }
+
+                let scanline = self.styled_scanlines.next()?;
+                self.fill = scanline.fill();
+            },
+            (None, None) => None,
         }
-
-        None
     }
 }
 
@@ -85,11 +119,30 @@ where
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        match (self.style.effective_stroke_color(), self.style.fill_color) {
+            (Some(stroke_color), None) => {
+                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                    scanline.draw_stroke(target, stroke_color)?;
+                }
+            }
+            (Some(stroke_color), Some(fill_color)) => {
+                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                    scanline.draw_stroke_and_fill(target, stroke_color, fill_color)?;
+                }
+            }
+            (None, Some(fill_color)) => {
+                for scanline in Scanlines::new(&self.fill_area()) {
+                    scanline.draw(target, fill_color)?;
+                }
+            }
+            (None, None) => {}
+        }
+
+        Ok(())
     }
 }
 
@@ -104,12 +157,54 @@ where
     }
 }
 
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+struct StyledScanlines {
+    scanlines: Scanlines,
+    fill_area: RoundedRectangleContains,
+}
+
+impl StyledScanlines {
+    pub fn new(stroke_area: &RoundedRectangle, fill_area: &RoundedRectangle) -> Self {
+        Self {
+            scanlines: Scanlines::new(stroke_area),
+            fill_area: RoundedRectangleContains::new(fill_area),
+        }
+    }
+}
+
+impl Iterator for StyledScanlines {
+    type Item = StyledScanline;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.scanlines.next().map(|scanline| {
+            if self.fill_area.rows.contains(&scanline.y) {
+                let fill_start = scanline
+                    .x
+                    .clone()
+                    .find(|x| self.fill_area.contains(Point::new(*x, scanline.y)))
+                    .unwrap_or(scanline.x.start);
+
+                let fill_end = scanline
+                    .x
+                    .clone()
+                    .rfind(|x| self.fill_area.contains(Point::new(*x, scanline.y)))
+                    .map(|x| x + 1)
+                    .unwrap_or(scanline.x.end);
+
+                StyledScanline::new(scanline.y, scanline.x, Some(fill_start..fill_end))
+            } else {
+                StyledScanline::new(scanline.y, scanline.x, None)
+            }
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
         geometry::{Dimensions, Point, Size},
-        iterator::IntoPixels,
+        iterator::{IntoPixels, PixelIteratorExt},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{
@@ -137,41 +232,30 @@ mod tests {
             .fill_color(Rgb888::RED)
             .build();
 
+        let mut expected = MockDisplay::new();
+        Rectangle::new(Point::zero(), Size::new(20, 30))
+            .into_styled(style)
+            .draw(&mut expected)
+            .unwrap();
+
         let rounded_rect = RoundedRectangle::with_equal_corners(
             Rectangle::new(Point::zero(), Size::new(20, 30)),
             Size::zero(),
         )
         .into_styled(style);
 
-        let rect = Rectangle::new(Point::zero(), Size::new(20, 30)).into_styled(style);
+        let mut drawable = MockDisplay::new();
+        rounded_rect.draw(&mut drawable).unwrap();
+        drawable.assert_eq(&expected);
 
-        assert!(rounded_rect.into_pixels().eq(rect.into_pixels()));
+        let mut into_pixels = MockDisplay::new();
+        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
+        into_pixels.assert_eq(&expected);
     }
 
     #[test]
     fn styled_unequal_corners() {
-        let mut display = MockDisplay::new();
-
-        RoundedRectangle::new(
-            Rectangle::new(Point::new_equal(2), Size::new(20, 20)),
-            CornerRadii {
-                top_left: Size::new(3, 4),
-                top_right: Size::new(5, 6),
-                bottom_right: Size::new(7, 8),
-                bottom_left: Size::new(9, 10),
-            },
-        )
-        .into_styled(
-            PrimitiveStyleBuilder::new()
-                .stroke_width(5)
-                .fill_color(Rgb888::RED)
-                .stroke_color(Rgb888::GREEN)
-                .build(),
-        )
-        .draw(&mut display)
-        .unwrap();
-
-        display.assert_pattern(&[
+        let expected_pattern = &[
             "   GGGGGGGGGGGGGGGG     ",
             "  GGGGGGGGGGGGGGGGGGG   ",
             " GGGGGGGGGGGGGGGGGGGGG  ",
@@ -196,15 +280,10 @@ mod tests {
             "    GGGGGGGGGGGGGGGGG   ",
             "      GGGGGGGGGGGGGG    ",
             "        GGGGGGGGGG      ",
-        ]);
-    }
+        ];
 
-    #[test]
-    fn styled_unfilled() {
-        let mut display = MockDisplay::new();
-
-        RoundedRectangle::new(
-            Rectangle::new(Point::zero(), Size::new(20, 20)),
+        let rounded_rect = RoundedRectangle::new(
+            Rectangle::new(Point::new_equal(2), Size::new(20, 20)),
             CornerRadii {
                 top_left: Size::new(3, 4),
                 top_right: Size::new(5, 6),
@@ -214,14 +293,24 @@ mod tests {
         )
         .into_styled(
             PrimitiveStyleBuilder::new()
-                .stroke_width(1)
-                .stroke_color(Rgb888::BLUE)
+                .stroke_width(5)
+                .fill_color(Rgb888::RED)
+                .stroke_color(Rgb888::GREEN)
                 .build(),
-        )
-        .draw(&mut display)
-        .unwrap();
+        );
 
-        display.assert_pattern(&[
+        let mut drawable = MockDisplay::new();
+        rounded_rect.draw(&mut drawable).unwrap();
+        drawable.assert_pattern(expected_pattern);
+
+        let mut into_pixels = MockDisplay::new();
+        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
+        into_pixels.assert_pattern(expected_pattern);
+    }
+
+    #[test]
+    fn styled_unfilled() {
+        let expected_pattern = &[
             "  BBBBBBBBBBBBBBB   ",
             " B               B  ",
             "B                 B ",
@@ -242,27 +331,36 @@ mod tests {
             "   BB            B  ",
             "    BB         BB   ",
             "      BBBBBBBBB     ",
-        ]);
+        ];
+
+        let rounded_rect = RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(20, 20)),
+            CornerRadii {
+                top_left: Size::new(3, 4),
+                top_right: Size::new(5, 6),
+                bottom_right: Size::new(7, 8),
+                bottom_left: Size::new(9, 10),
+            },
+        )
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_width(1)
+                .stroke_color(Rgb888::BLUE)
+                .build(),
+        );
+
+        let mut drawable = MockDisplay::new();
+        rounded_rect.draw(&mut drawable).unwrap();
+        drawable.assert_pattern(expected_pattern);
+
+        let mut into_pixels = MockDisplay::new();
+        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
+        into_pixels.assert_pattern(expected_pattern);
     }
 
     #[test]
     fn full_height_corners() {
-        let mut display = MockDisplay::new();
-
-        RoundedRectangle::new(
-            Rectangle::new(Point::zero(), Size::new(40, 20)),
-            CornerRadii {
-                top_left: Size::new(20, 20),
-                top_right: Size::new(20, 20),
-                bottom_right: Size::new(0, 0),
-                bottom_left: Size::new(0, 0),
-            },
-        )
-        .into_styled(PrimitiveStyleBuilder::new().fill_color(Rgb888::RED).build())
-        .draw(&mut display)
-        .unwrap();
-
-        display.assert_pattern(&[
+        let expected_pattern = &[
             "                RRRRRRRR                ",
             "            RRRRRRRRRRRRRRRR            ",
             "          RRRRRRRRRRRRRRRRRRRR          ",
@@ -283,7 +381,26 @@ mod tests {
             "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
             "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
             "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
-        ]);
+        ];
+
+        let rounded_rect = RoundedRectangle::new(
+            Rectangle::new(Point::zero(), Size::new(40, 20)),
+            CornerRadii {
+                top_left: Size::new(20, 20),
+                top_right: Size::new(20, 20),
+                bottom_right: Size::new(0, 0),
+                bottom_left: Size::new(0, 0),
+            },
+        )
+        .into_styled(PrimitiveStyleBuilder::new().fill_color(Rgb888::RED).build());
+
+        let mut drawable = MockDisplay::new();
+        rounded_rect.draw(&mut drawable).unwrap();
+        drawable.assert_pattern(expected_pattern);
+
+        let mut into_pixels = MockDisplay::new();
+        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
+        into_pixels.assert_pattern(expected_pattern);
     }
 
     #[test]

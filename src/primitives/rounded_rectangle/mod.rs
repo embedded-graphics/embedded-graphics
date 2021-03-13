@@ -5,6 +5,8 @@ mod ellipse_quadrant;
 mod points;
 mod styled;
 
+use core::ops::Range;
+
 use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{rectangle::Rectangle, ContainsPoint, OffsetOutline, PointsIter, Primitive},
@@ -276,36 +278,8 @@ impl PointsIter for RoundedRectangle {
 
 impl ContainsPoint for RoundedRectangle {
     fn contains(&self, point: Point) -> bool {
-        if !self.rectangle.contains(point) {
-            return false;
-        }
-
-        let tl = self.get_confined_corner_quadrant(Quadrant::TopLeft);
-
-        if tl.bounding_box().contains(point) {
-            return tl.contains(point);
-        }
-
-        let tr = self.get_confined_corner_quadrant(Quadrant::TopRight);
-
-        if tr.bounding_box().contains(point) {
-            return tr.contains(point);
-        }
-
-        let br = self.get_confined_corner_quadrant(Quadrant::BottomRight);
-
-        if br.bounding_box().contains(point) {
-            return br.contains(point);
-        }
-
-        let bl = self.get_confined_corner_quadrant(Quadrant::BottomLeft);
-
-        if bl.bounding_box().contains(point) {
-            return bl.contains(point);
-        }
-
-        // We're in the rest of the rectangle at this point
-        true
+        let rounded_rectangle_contains = RoundedRectangleContains::new(self);
+        rounded_rectangle_contains.contains(point)
     }
 }
 
@@ -361,11 +335,97 @@ impl Transform for RoundedRectangle {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub(in crate::primitives) struct RoundedRectangleContains {
+    /// Bounding box rows.
+    rows: Range<i32>,
+    /// Bounding box columns.
+    columns: Range<i32>,
+
+    /// Rows that don't belong to a corner radius on the left side.
+    straight_rows_left: Range<i32>,
+    /// Rows that don't belong to a corner radius on the right side.
+    straight_rows_right: Range<i32>,
+
+    /// Confined top left corner ellipse.
+    top_left: EllipseQuadrant,
+    /// Confined top right corner ellipse.
+    top_right: EllipseQuadrant,
+    /// Confined bottom left corner ellipse.
+    bottom_left: EllipseQuadrant,
+    /// Confined bottom right corner ellipse.
+    bottom_right: EllipseQuadrant,
+}
+
+impl RoundedRectangleContains {
+    pub fn new(rounded_rectangle: &RoundedRectangle) -> Self {
+        let top_left = rounded_rectangle.get_confined_corner_quadrant(Quadrant::TopLeft);
+        let top_right = rounded_rectangle.get_confined_corner_quadrant(Quadrant::TopRight);
+        let bottom_left = rounded_rectangle.get_confined_corner_quadrant(Quadrant::BottomLeft);
+        let bottom_right = rounded_rectangle.get_confined_corner_quadrant(Quadrant::BottomRight);
+
+        let rows = rounded_rectangle.rectangle.rows();
+        let columns = rounded_rectangle.rectangle.columns();
+
+        let straight_rows_left = (rows.start + top_left.bounding_box().size.height as i32)
+            ..(rows.end - bottom_left.bounding_box().size.height as i32);
+        let straight_rows_right = (rows.start + top_right.bounding_box().size.height as i32)
+            ..(rows.end - bottom_right.bounding_box().size.height as i32);
+
+        Self {
+            rows,
+            columns,
+
+            straight_rows_left,
+            straight_rows_right,
+
+            top_left,
+            top_right,
+            bottom_left,
+            bottom_right,
+        }
+    }
+
+    pub fn contains(&self, point: Point) -> bool {
+        if !(self.rows.contains(&point.y) && self.columns.contains(&point.x)) {
+            return false;
+        }
+
+        if point.y < self.straight_rows_left.start
+            && point.x < self.top_left.bounding_box().columns().end
+        {
+            return self.top_left.contains(point);
+        }
+
+        if point.y < self.straight_rows_right.start
+            && point.x >= self.top_right.bounding_box().columns().start
+        {
+            return self.top_right.contains(point);
+        }
+
+        if point.y >= self.straight_rows_left.end
+            && point.x < self.bottom_left.bounding_box().columns().end
+        {
+            return self.bottom_left.contains(point);
+        }
+
+        if point.y >= self.straight_rows_right.end
+            && point.x >= self.bottom_right.bounding_box().columns().start
+        {
+            return self.bottom_right.contains(point);
+        }
+
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
+        mock_display::MockDisplay,
+        pixelcolor::BinaryColor,
         primitives::CornerRadiiBuilder,
     };
 
@@ -457,5 +517,48 @@ mod tests {
                 Size::new(0, 0)
             ),
         );
+    }
+
+    #[test]
+    fn contains_equal_corners() {
+        let rounded_rectangle = RoundedRectangle::with_equal_corners(
+            Rectangle::new(Point::new(1, 2), Size::new(20, 10)),
+            Size::new(8, 4),
+        );
+
+        let expected = MockDisplay::from_points(rounded_rectangle.points(), BinaryColor::On);
+
+        let display = MockDisplay::from_points(
+            rounded_rectangle
+                .rectangle
+                .offset(10)
+                .points()
+                .filter(|p| rounded_rectangle.contains(*p)),
+            BinaryColor::On,
+        );
+        display.assert_eq(&expected);
+    }
+
+    #[test]
+    fn contains_different_corners() {
+        let rounded_rectangle = RoundedRectangle::new(
+            Rectangle::new(Point::new(1, 2), Size::new(25, 10)),
+            CornerRadiiBuilder::new()
+                .top_left(Size::new_equal(10))
+                .bottom_right(Size::new_equal(10))
+                .build(),
+        );
+
+        let expected = MockDisplay::from_points(rounded_rectangle.points(), BinaryColor::On);
+
+        let display = MockDisplay::from_points(
+            rounded_rectangle
+                .rectangle
+                .offset(10)
+                .points()
+                .filter(|p| rounded_rectangle.contains(*p)),
+            BinaryColor::On,
+        );
+        display.assert_eq(&expected);
     }
 }

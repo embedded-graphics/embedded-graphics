@@ -1,64 +1,24 @@
 use crate::{
-    geometry::{Dimensions, Point},
+    geometry::Point,
     primitives::{
-        rectangle::{self, Rectangle},
-        rounded_rectangle::{
-            ellipse_quadrant::{self, Quadrant},
-            RoundedRectangle,
-        },
-        PointsIter,
+        common::Scanline,
+        rounded_rectangle::{RoundedRectangle, RoundedRectangleContains},
+        ContainsPoint,
     },
 };
 
 /// Iterator over all points inside the rounded rectangle.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
-    rect_iter: rectangle::Points,
-
-    top_left_corner: Rectangle,
-    top_right_corner: Rectangle,
-    bottom_right_corner: Rectangle,
-    bottom_left_corner: Rectangle,
-
-    top_left_iter: ellipse_quadrant::Points,
-    top_right_iter: ellipse_quadrant::Points,
-    bottom_right_iter: ellipse_quadrant::Points,
-    bottom_left_iter: ellipse_quadrant::Points,
+    scanlines: Scanlines,
+    current_scanline: Scanline,
 }
 
 impl Points {
-    pub(in crate::primitives) fn new(shape: &RoundedRectangle) -> Self {
-        let top_left_ellipse = shape.get_confined_corner_quadrant(Quadrant::TopLeft);
-        let top_right_ellipse = shape.get_confined_corner_quadrant(Quadrant::TopRight);
-        let bottom_right_ellipse = shape.get_confined_corner_quadrant(Quadrant::BottomRight);
-        let bottom_left_ellipse = shape.get_confined_corner_quadrant(Quadrant::BottomLeft);
-
+    pub(in crate::primitives) fn new(rounded_rectangle: &RoundedRectangle) -> Self {
         Self {
-            rect_iter: shape.rectangle.points(),
-
-            top_left_iter: top_left_ellipse.points(),
-            top_right_iter: top_right_ellipse.points(),
-            bottom_right_iter: bottom_right_ellipse.points(),
-            bottom_left_iter: bottom_left_ellipse.points(),
-
-            top_left_corner: top_left_ellipse.bounding_box(),
-            top_right_corner: top_right_ellipse.bounding_box(),
-            bottom_right_corner: bottom_right_ellipse.bounding_box(),
-            bottom_left_corner: bottom_left_ellipse.bounding_box(),
-        }
-    }
-
-    pub(in crate::primitives) fn empty() -> Self {
-        Self {
-            rect_iter: rectangle::Points::empty(),
-            top_left_iter: ellipse_quadrant::Points::empty(),
-            top_right_iter: ellipse_quadrant::Points::empty(),
-            bottom_right_iter: ellipse_quadrant::Points::empty(),
-            bottom_left_iter: ellipse_quadrant::Points::empty(),
-            top_left_corner: Rectangle::zero(),
-            top_right_corner: Rectangle::zero(),
-            bottom_right_corner: Rectangle::zero(),
-            bottom_left_corner: Rectangle::zero(),
+            scanlines: Scanlines::new(rounded_rectangle),
+            current_scanline: Scanline::new_empty(0),
         }
     }
 }
@@ -67,25 +27,65 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Self {
-            top_left_corner,
-            top_right_corner,
-            bottom_right_corner,
-            bottom_left_corner,
-            ..
-        } = self;
+        self.current_scanline.next().or_else(|| {
+            self.current_scanline = self.scanlines.next()?;
+            self.current_scanline.next()
+        })
+    }
+}
 
-        self.rect_iter
-            .find(|p| {
-                !top_left_corner.contains(*p)
-                    && !top_right_corner.contains(*p)
-                    && !bottom_right_corner.contains(*p)
-                    && !bottom_left_corner.contains(*p)
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub struct Scanlines {
+    rounded_rectangle: RoundedRectangleContains,
+}
+
+impl Scanlines {
+    pub fn new(rounded_rectangle: &RoundedRectangle) -> Self {
+        Self {
+            rounded_rectangle: RoundedRectangleContains::new(rounded_rectangle),
+        }
+    }
+}
+
+impl Iterator for Scanlines {
+    type Item = Scanline;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let columns = self.rounded_rectangle.columns.clone();
+        let y = self.rounded_rectangle.rows.next()?;
+
+        let x_start = if y < self.rounded_rectangle.straight_rows_left.start {
+            columns
+                .clone()
+                .find(|x| self.rounded_rectangle.top_left.contains(Point::new(*x, y)))
+        } else if y >= self.rounded_rectangle.straight_rows_left.end {
+            columns.clone().find(|x| {
+                self.rounded_rectangle
+                    .bottom_left
+                    .contains(Point::new(*x, y))
             })
-            .or_else(|| self.top_left_iter.next())
-            .or_else(|| self.top_right_iter.next())
-            .or_else(|| self.bottom_right_iter.next())
-            .or_else(|| self.bottom_left_iter.next())
+        } else {
+            None
+        }
+        .unwrap_or(columns.start);
+
+        let x_end = if y < self.rounded_rectangle.straight_rows_right.start {
+            columns
+                .clone()
+                .rfind(|x| self.rounded_rectangle.top_right.contains(Point::new(*x, y)))
+        } else if y >= self.rounded_rectangle.straight_rows_right.end {
+            columns.clone().rfind(|x| {
+                self.rounded_rectangle
+                    .bottom_right
+                    .contains(Point::new(*x, y))
+            })
+        } else {
+            None
+        }
+        .map(|x| x + 1)
+        .unwrap_or(columns.end);
+
+        Some(Scanline::new(y, x_start..x_end))
     }
 }
 
@@ -94,9 +94,10 @@ mod tests {
     use super::*;
     use crate::{
         geometry::Size,
-        iterator::IntoPixels,
+        mock_display::MockDisplay,
         pixelcolor::BinaryColor,
-        primitives::{Primitive, PrimitiveStyle},
+        primitives::{PointsIter, Primitive, PrimitiveStyle, Rectangle},
+        Drawable,
     };
 
     #[test]
@@ -106,9 +107,12 @@ mod tests {
             Size::new(4, 8),
         );
 
-        assert!(rounded_rect.points().eq(rounded_rect
+        let mut expected = MockDisplay::new();
+        rounded_rect
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_pixels()
-            .map(|pixel| pixel.0)));
+            .draw(&mut expected)
+            .unwrap();
+
+        MockDisplay::from_points(rounded_rect.points(), BinaryColor::On).assert_eq(&expected);
     }
 }

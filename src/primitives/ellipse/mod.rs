@@ -198,14 +198,6 @@ impl EllipseContains {
         Self { a, b, threshold }
     }
 
-    pub const fn empty() -> Self {
-        Self {
-            a: 0,
-            b: 0,
-            threshold: 0,
-        }
-    }
-
     /// Returns `true` if the point is inside the ellipse.
     pub fn contains(&self, point: Point) -> bool {
         let x = point.x.pow(2) as u32;
