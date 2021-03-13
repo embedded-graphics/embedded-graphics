@@ -122,9 +122,8 @@ impl PointsIter for Ellipse {
 
 impl ContainsPoint for Ellipse {
     fn contains(&self, point: Point) -> bool {
-        let (size_sq, threshold) = compute_threshold(self.size);
-
-        is_point_inside_ellipse(size_sq, point * 2 - self.center_2x(), threshold)
+        let ellipse_contains = EllipseContains::new(self.size);
+        ellipse_contains.contains(point * 2 - self.center_2x())
     }
 }
 
@@ -170,45 +169,54 @@ impl Transform for Ellipse {
     }
 }
 
-pub(in crate::primitives) fn compute_threshold(size: Size) -> (Size, u32) {
-    let Size { width, height } = size;
-
-    let a = width.pow(2);
-    let b = height.pow(2);
-
-    // Special case for circles, where width and height are equal
-    let threshold = if width == height {
-        circle::diameter_to_threshold(width)
-    } else {
-        b * a
-    };
-
-    (Size::new(a, b), threshold)
+/// Determines if a point is inside an ellipse.
+// TODO: Make this available to the user as part of #343
+#[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Debug)]
+pub(in crate::primitives) struct EllipseContains {
+    a: u32,
+    b: u32,
+    threshold: u32,
 }
 
-/// Uses the ellipse equation b^2 * x^2 + a^2 * y^2 - a^2 * b^2 to return a value signifying whether
-/// a given point lies inside (`true`) or outside (`false`) an ellipse centered around `(0, 0)` with
-/// width and height defined by the `size` parameter.
-pub(in crate::primitives) fn is_point_inside_ellipse(
-    size: Size,
-    point: Point,
-    threshold: u32,
-) -> bool {
-    let Size {
-        width: a,
-        height: b,
-    } = size;
+impl EllipseContains {
+    /// Creates an object to determine if a point is inside an ellipse.
+    ///
+    /// The ellipse is always located in the origin.
+    pub fn new(size: Size) -> Self {
+        let Size { width, height } = size;
 
-    let Point { x, y } = point;
+        let a = width.pow(2);
+        let b = height.pow(2);
 
-    let x = x.pow(2) as u32;
-    let y = y.pow(2) as u32;
+        // Special case for circles, where width and height are equal
+        let threshold = if width == height {
+            circle::diameter_to_threshold(width)
+        } else {
+            b * a
+        };
 
-    // Special case for circles, where width and height are equal
-    if a == b {
-        x + y < threshold
-    } else {
-        b * x + a * y < threshold
+        Self { a, b, threshold }
+    }
+
+    pub const fn empty() -> Self {
+        Self {
+            a: 0,
+            b: 0,
+            threshold: 0,
+        }
+    }
+
+    /// Returns `true` if the point is inside the ellipse.
+    pub fn contains(&self, point: Point) -> bool {
+        let x = point.x.pow(2) as u32;
+        let y = point.y.pow(2) as u32;
+
+        // Special case for circles, where width and height are equal
+        if self.a == self.b {
+            x + y < self.threshold
+        } else {
+            self.b * x + self.a * y < self.threshold
+        }
     }
 }
 

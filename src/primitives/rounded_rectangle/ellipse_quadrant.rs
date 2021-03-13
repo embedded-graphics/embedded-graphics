@@ -1,7 +1,7 @@
 use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{
-        ellipse,
+        ellipse::{self, EllipseContains},
         rectangle::{self, Rectangle},
         ContainsPoint, PointsIter, Primitive,
     },
@@ -19,9 +19,8 @@ pub enum Quadrant {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct EllipseQuadrant {
     bounding_box: Rectangle,
-    size_sq: Size,
-    threshold: u32,
     center_2x: Point,
+    ellipse: EllipseContains,
 }
 
 impl EllipseQuadrant {
@@ -33,13 +32,10 @@ impl EllipseQuadrant {
             Quadrant::BottomLeft => top_left - radius.y_axis(),
         };
 
-        let (size_sq, threshold) = ellipse::compute_threshold(radius * 2);
-
         Self {
             bounding_box: Rectangle::new(top_left, radius),
-            size_sq,
-            threshold,
             center_2x: ellipse::center_2x(ellipse_top_left, radius * 2),
+            ellipse: EllipseContains::new(radius * 2),
         }
     }
 }
@@ -62,34 +58,31 @@ impl PointsIter for EllipseQuadrant {
 
 impl ContainsPoint for EllipseQuadrant {
     fn contains(&self, point: Point) -> bool {
-        ellipse::is_point_inside_ellipse(self.size_sq, point * 2 - self.center_2x, self.threshold)
+        self.ellipse.contains(point * 2 - self.center_2x)
     }
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub(in crate::primitives) struct Points {
     iter: rectangle::Points,
-    size_sq: Size,
-    threshold: u32,
     center_2x: Point,
+    ellipse: EllipseContains,
 }
 
 impl Points {
     pub fn new(ellipse_quadrant: &EllipseQuadrant) -> Self {
         Self {
             iter: ellipse_quadrant.bounding_box().points(),
-            size_sq: ellipse_quadrant.size_sq,
-            threshold: ellipse_quadrant.threshold,
             center_2x: ellipse_quadrant.center_2x,
+            ellipse: ellipse_quadrant.ellipse,
         }
     }
 
     pub(in crate::primitives) const fn empty() -> Self {
         Self {
             iter: rectangle::Points::empty(),
-            size_sq: Size::zero(),
-            threshold: 0,
             center_2x: Point::zero(),
+            ellipse: EllipseContains::empty(),
         }
     }
 }
@@ -99,11 +92,7 @@ impl Iterator for Points {
 
     fn next(&mut self) -> Option<Self::Item> {
         for point in &mut self.iter {
-            if ellipse::is_point_inside_ellipse(
-                self.size_sq,
-                point * 2 - self.center_2x,
-                self.threshold,
-            ) {
+            if self.ellipse.contains(point * 2 - self.center_2x) {
                 return Some(point);
             }
         }

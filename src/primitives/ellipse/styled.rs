@@ -1,11 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{Scanline, StyledScanline},
-        ellipse::{compute_threshold, is_point_inside_ellipse, points::Scanlines, Ellipse},
+        ellipse::{points::Scanlines, Ellipse, EllipseContains},
         PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
     },
     Drawable, Pixel, SaturatingCast, Styled,
@@ -158,18 +158,14 @@ where
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 struct StyledScanlines {
     scanlines: Scanlines,
-    fill_size_sq: Size,
-    fill_threshold: u32,
+    fill_area: EllipseContains,
 }
 
 impl StyledScanlines {
     pub fn new(stroke_area: &Ellipse, fill_area: &Ellipse) -> Self {
-        let (fill_size_sq, fill_threshold) = compute_threshold(fill_area.size);
-
         Self {
             scanlines: Scanlines::new(stroke_area),
-            fill_size_sq,
-            fill_threshold,
+            fill_area: EllipseContains::new(fill_area.size),
         }
     }
 }
@@ -179,15 +175,14 @@ impl Iterator for StyledScanlines {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.scanlines.next().map(|scanline| {
+            let scaled_y = scanline.y * 2 - self.scanlines.center_2x.y;
+
             let fill_range = scanline
                 .x
                 .clone()
                 .find(|x| {
-                    is_point_inside_ellipse(
-                        self.fill_size_sq,
-                        Point::new(*x, scanline.y) * 2 - self.scanlines.center_2x,
-                        self.fill_threshold,
-                    )
+                    self.fill_area
+                        .contains(Point::new(*x * 2 - self.scanlines.center_2x.x, scaled_y))
                 })
                 .map(|x| x..scanline.x.end - (x - scanline.x.start));
 

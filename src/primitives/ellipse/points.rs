@@ -1,10 +1,10 @@
 use core::ops::Range;
 
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     primitives::{
         common::Scanline,
-        ellipse::{compute_threshold, is_point_inside_ellipse, Ellipse},
+        ellipse::{Ellipse, EllipseContains},
     },
 };
 
@@ -40,21 +40,18 @@ pub struct Scanlines {
     rows: Range<i32>,
     columns: Range<i32>,
     pub(super) center_2x: Point,
-    size_sq: Size,
-    threshold: u32,
+    ellipse_contains: EllipseContains,
 }
 
 impl Scanlines {
     pub fn new(ellipse: &Ellipse) -> Self {
         let bounding_box = ellipse.bounding_box();
-        let (size_sq, threshold) = compute_threshold(ellipse.size);
 
         Self {
             rows: bounding_box.rows(),
             columns: bounding_box.columns(),
             center_2x: ellipse.center_2x(),
-            size_sq,
-            threshold,
+            ellipse_contains: EllipseContains::new(ellipse.size),
         }
     }
 }
@@ -65,17 +62,16 @@ impl Iterator for Scanlines {
     fn next(&mut self) -> Option<Self::Item> {
         let y = self.rows.next()?;
 
+        let scaled_y = y * 2 - self.center_2x.y;
+
         self.columns
             .clone()
-            // find first pixel that is inside the ellipse
+            // Find the first pixel that is inside the ellipse.
             .find(|x| {
-                is_point_inside_ellipse(
-                    self.size_sq,
-                    Point::new(*x, y) * 2 - self.center_2x,
-                    self.threshold,
-                )
+                self.ellipse_contains
+                    .contains(Point::new(*x * 2 - self.center_2x.x, scaled_y))
             })
-            // shorten the scanline by right side of the same amount as the left side
+            // Shorten the right side of the scanline by the same amount as the left side.
             .map(|x| Scanline::new(y, x..self.columns.end - (x - self.columns.start)))
     }
 }
@@ -83,7 +79,10 @@ impl Iterator for Scanlines {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitives::{Circle, PointsIter};
+    use crate::{
+        geometry::Size,
+        primitives::{Circle, PointsIter},
+    };
 
     #[test]
     fn matches_circles_points() {
