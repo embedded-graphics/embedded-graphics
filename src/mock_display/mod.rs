@@ -291,7 +291,23 @@ where
     /// # Panics
     ///
     /// This method will panic if `point` is outside the display bounding box.
-    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+    fn set_pixel(&mut self, point: Point, color: Option<C>) {
+        assert!(
+            point.x >= 0 && point.y >= 0 && point.x < SIZE as i32 && point.y < SIZE as i32,
+            "point must be inside display bounding box: {:?}",
+            point
+        );
+
+        let i = point.x + point.y * SIZE as i32;
+        self.pixels[i as usize] = color;
+    }
+
+    /// Changes the value of a pixel without bounds checking.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if `point` is outside the display bounding box.
+    fn set_pixel_unchecked(&mut self, point: Point, color: Option<C>) {
         let i = point.x + point.y * SIZE as i32;
         self.pixels[i as usize] = color;
     }
@@ -368,7 +384,7 @@ where
             panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
         }
 
-        self.set_pixel(point, Some(color));
+        self.set_pixel_unchecked(point, Some(color));
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -403,7 +419,7 @@ where
         let mut mirrored = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            mirrored.set_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
+            mirrored.set_pixel_unchecked(point, self.get_pixel(Point::new(point.y, point.x)));
         }
 
         mirrored
@@ -442,7 +458,7 @@ where
         let mut target = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            target.set_pixel(point, self.get_pixel(point).map(f))
+            target.set_pixel_unchecked(point, self.get_pixel(point).map(f))
         }
 
         target
@@ -472,7 +488,7 @@ where
                 _ => None,
             };
 
-            display.set_pixel(point, diff_color);
+            display.set_pixel_unchecked(point, diff_color);
         }
 
         display
