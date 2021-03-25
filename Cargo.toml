@@ -69,3 +69,8 @@ required-features = ["criterion"]
 harness = false
 name = "contains"
 required-features = ["criterion"]
+
+[[bench]]
+harness = false
+name = "raw_data_iter"
+required-features = ["criterion"]
