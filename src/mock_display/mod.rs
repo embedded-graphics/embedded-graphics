@@ -188,7 +188,7 @@ mod fancy_panic;
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
-    pixelcolor::{BinaryColor, PixelColor, Rgb888, RgbColor},
+    pixelcolor::{PixelColor, Rgb888, RgbColor},
     primitives::{PointsIter, Rectangle},
     Pixel,
 };
@@ -224,6 +224,47 @@ where
         Self::default()
     }
 
+    /// Create a mock display from an iterator of [`Point`]s.
+    ///
+    /// This method can be used to create a mock display from the iterator produced by the
+    /// [`PointsIter::points`] method.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the iterator returns a point that is outside the display bounding
+    /// box.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use embedded_graphics::{prelude::*, pixelcolor::BinaryColor, primitives::Circle, mock_display::MockDisplay};
+    ///
+    /// let circle = Circle::new(Point::new(0, 0), 4);
+    ///
+    /// let mut display = MockDisplay::from_points(circle.points(), BinaryColor::On);
+    ///
+    /// display.assert_pattern(&[
+    ///     " ## ",
+    ///     "####",
+    ///     "####",
+    ///     " ## ",
+    /// ]);
+    /// ```
+    ///
+    /// [`Point`]: ../geometry/struct.Point.html
+    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
+    /// [`map`]: #method.map
+    /// [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
+    pub fn from_points<I>(points: I, color: C) -> Self
+    where
+        I: IntoIterator<Item = Point>,
+    {
+        let mut display = Self::new();
+        display.set_pixels(points, Some(color));
+
+        display
+    }
+
     /// Sets if out of bounds drawing is allowed.
     ///
     /// If this is set to `true` the bounds checks during drawing are disabled.
@@ -246,9 +287,40 @@ where
     }
 
     /// Changes the value of a pixel without bounds checking.
-    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if `point` is outside the display bounding box.
+    fn set_pixel(&mut self, point: Point, color: Option<C>) {
+        assert!(
+            point.x >= 0 && point.y >= 0 && point.x < SIZE as i32 && point.y < SIZE as i32,
+            "point must be inside display bounding box: {:?}",
+            point
+        );
+
         let i = point.x + point.y * SIZE as i32;
         self.pixels[i as usize] = color;
+    }
+
+    /// Changes the value of a pixel without bounds checking.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if `point` is outside the display bounding box.
+    fn set_pixel_unchecked(&mut self, point: Point, color: Option<C>) {
+        let i = point.x + point.y * SIZE as i32;
+        self.pixels[i as usize] = color;
+    }
+
+    /// Sets the points in an iterator to the given color.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the iterator returns points outside the display bounding box.
+    pub fn set_pixels(&mut self, points: impl IntoIterator<Item = Point>, color: Option<C>) {
+        for point in points {
+            self.set_pixel(point, color);
+        }
     }
 
     /// Returns the area that was affected by drawing operations.
@@ -312,7 +384,7 @@ where
             panic!("tried to draw pixel twice (x: {}, y: {})", point.x, point.y);
         }
 
-        self.set_pixel(point, Some(color));
+        self.set_pixel_unchecked(point, Some(color));
     }
 
     /// Returns a copy of with the content mirrored by swapping x and y.
@@ -347,7 +419,7 @@ where
         let mut mirrored = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            mirrored.set_pixel(point, self.get_pixel(Point::new(point.y, point.x)));
+            mirrored.set_pixel_unchecked(point, self.get_pixel(Point::new(point.y, point.x)));
         }
 
         mirrored
@@ -386,7 +458,7 @@ where
         let mut target = MockDisplay::new();
 
         for point in Rectangle::new(Point::zero(), self.size()).points() {
-            target.set_pixel(point, self.get_pixel(point).map(f))
+            target.set_pixel_unchecked(point, self.get_pixel(point).map(f))
         }
 
         target
@@ -416,7 +488,7 @@ where
                 _ => None,
             };
 
-            display.set_pixel(point, diff_color);
+            display.set_pixel_unchecked(point, diff_color);
         }
 
         display
@@ -428,55 +500,6 @@ where
     /// `assert_pattern` methods are used instead of the `assert_eq!` macro.
     pub fn eq(&self, other: &MockDisplay<C>) -> bool {
         self.pixels.iter().eq(other.pixels.iter())
-    }
-}
-
-impl MockDisplay<BinaryColor> {
-    /// Create a mock display from an iterator of [`Point`]s.
-    ///
-    /// This method can be used to create a mock display from the iterator produced by the
-    /// [`PointsIter::points`] method.
-    ///
-    /// The color type used in the returned display is [`BinaryColor`], which can be mapped to
-    /// another color type using the [`map`] method.
-    ///
-    /// # Panics
-    ///
-    /// This method will panic if the iterator returns a point that is outside the display bounding
-    /// box.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use embedded_graphics::{prelude::*, primitives::Circle, mock_display::MockDisplay};
-    ///
-    /// let circle = Circle::new(Point::new(0, 0), 4);
-    ///
-    /// let mut display = MockDisplay::from_points(circle.points());
-    ///
-    /// display.assert_pattern(&[
-    ///     " ## ",
-    ///     "####",
-    ///     "####",
-    ///     " ## ",
-    /// ]);
-    /// ```
-    ///
-    /// [`Point`]: ../geometry/struct.Point.html
-    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
-    /// [`map`]: #method.map
-    /// [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
-    pub fn from_points<I>(points: I) -> Self
-    where
-        I: IntoIterator<Item = Point>,
-    {
-        let mut display = MockDisplay::new();
-
-        for point in points.into_iter() {
-            display.set_pixel(point, Some(BinaryColor::On));
-        }
-
-        display
     }
 }
 
@@ -727,7 +750,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{pixelcolor::Rgb565, Drawable};
+    use crate::{
+        pixelcolor::{BinaryColor, Rgb565},
+        Drawable,
+    };
 
     #[test]
     #[should_panic(expected = "tried to draw pixel outside the display area (x: 65, y: 0)")]

@@ -8,7 +8,7 @@ use crate::{
 };
 
 /// Iterator over all points on the arc line.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Points {
     iter: DistanceIterator,
 

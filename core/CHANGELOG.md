@@ -15,6 +15,10 @@
 
 - **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Removed text renderer API. The text renderer API will be added back when it has stabilized.
 
+### Fixed
+
+- [#571](https://github.com/embedded-graphics/embedded-graphics/pull/571) `Rectangle::points` did return a non empty iterator for rectangles with zero width.
+
 ## [0.2.0] - 2021-02-03
 
 ### Added

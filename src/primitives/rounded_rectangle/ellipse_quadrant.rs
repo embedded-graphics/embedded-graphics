@@ -1,9 +1,9 @@
 use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{
-        ellipse,
-        rectangle::{self, Rectangle},
-        ContainsPoint, PointsIter, Primitive,
+        ellipse::{self, EllipseContains},
+        rectangle::Rectangle,
+        ContainsPoint,
     },
 };
 
@@ -19,9 +19,8 @@ pub enum Quadrant {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub(in crate::primitives) struct EllipseQuadrant {
     bounding_box: Rectangle,
-    size_sq: Size,
-    threshold: u32,
     center_2x: Point,
+    ellipse: EllipseContains,
 }
 
 impl EllipseQuadrant {
@@ -33,13 +32,10 @@ impl EllipseQuadrant {
             Quadrant::BottomLeft => top_left - radius.y_axis(),
         };
 
-        let (size_sq, threshold) = ellipse::compute_threshold(radius * 2);
-
         Self {
             bounding_box: Rectangle::new(top_left, radius),
-            size_sq,
-            threshold,
             center_2x: ellipse::center_2x(ellipse_top_left, radius * 2),
+            ellipse: EllipseContains::new(radius * 2),
         }
     }
 }
@@ -50,65 +46,9 @@ impl Dimensions for EllipseQuadrant {
     }
 }
 
-impl Primitive for EllipseQuadrant {}
-
-impl PointsIter for EllipseQuadrant {
-    type Iter = Points;
-
-    fn points(&self) -> Self::Iter {
-        Points::new(self)
-    }
-}
-
 impl ContainsPoint for EllipseQuadrant {
     fn contains(&self, point: Point) -> bool {
-        ellipse::is_point_inside_ellipse(self.size_sq, point * 2 - self.center_2x, self.threshold)
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(in crate::primitives) struct Points {
-    iter: rectangle::Points,
-    size_sq: Size,
-    threshold: u32,
-    center_2x: Point,
-}
-
-impl Points {
-    pub fn new(ellipse_quadrant: &EllipseQuadrant) -> Self {
-        Self {
-            iter: ellipse_quadrant.bounding_box().points(),
-            size_sq: ellipse_quadrant.size_sq,
-            threshold: ellipse_quadrant.threshold,
-            center_2x: ellipse_quadrant.center_2x,
-        }
-    }
-
-    pub(in crate::primitives) const fn empty() -> Self {
-        Self {
-            iter: rectangle::Points::empty(),
-            size_sq: Size::zero(),
-            threshold: 0,
-            center_2x: Point::zero(),
-        }
-    }
-}
-
-impl Iterator for Points {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            if ellipse::is_point_inside_ellipse(
-                self.size_sq,
-                point * 2 - self.center_2x,
-                self.threshold,
-            ) {
-                return Some(point);
-            }
-        }
-
-        None
+        self.ellipse.contains(point * 2 - self.center_2x)
     }
 }
 
@@ -116,12 +56,26 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
+        draw_target::DrawTarget,
         geometry::{Point, Size},
         iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
+        primitives::PointsIter,
         Pixel,
     };
+
+    fn draw_quadrant<D: DrawTarget<Color = BinaryColor>>(
+        quadrant: &EllipseQuadrant,
+        target: &mut D,
+    ) -> Result<(), D::Error> {
+        quadrant
+            .bounding_box
+            .points()
+            .filter(|p| quadrant.contains(*p))
+            .map(|p| Pixel(p, BinaryColor::On))
+            .draw(target)
+    }
 
     #[test]
     fn quadrants_even_size() {
@@ -169,14 +123,11 @@ mod tests {
         ];
 
         for (quadrant, expected) in cases.iter() {
+            let ellipse_quadrant =
+                EllipseQuadrant::new(Point::new(0, 0), Size::new(10, 5), *quadrant);
+
             let mut display = MockDisplay::new();
-
-            EllipseQuadrant::new(Point::new(0, 0), Size::new(10, 5), *quadrant)
-                .points()
-                .map(|p| Pixel(p, BinaryColor::On))
-                .draw(&mut display)
-                .unwrap();
-
+            draw_quadrant(&ellipse_quadrant, &mut display).unwrap();
             display.assert_pattern(*expected);
         }
     }
@@ -188,20 +139,26 @@ mod tests {
         let radius = Size::new(10, 5);
         let top_left = Point::new(0, 0);
 
-        EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft)
-            .points()
-            .chain(
-                EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight)
-                    .points(),
-            )
-            .chain(EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight).points())
-            .chain(
-                EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft)
-                    .points(),
-            )
-            .map(|p| Pixel(p, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft),
+            &mut display,
+        )
+        .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight),
+            &mut display,
+        )
+        .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight),
+            &mut display,
+        )
+        .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft),
+            &mut display,
+        )
+        .unwrap();
 
         display.assert_pattern(&[
             "      ########      ",
@@ -224,20 +181,26 @@ mod tests {
         let radius = Size::new(7, 9);
         let top_left = Point::new(0, 0);
 
-        EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft)
-            .points()
-            .chain(
-                EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight)
-                    .points(),
-            )
-            .chain(EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight).points())
-            .chain(
-                EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft)
-                    .points(),
-            )
-            .map(|p| Pixel(p, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left, radius, Quadrant::TopLeft),
+            &mut display,
+        )
+        .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left + radius.x_axis(), radius, Quadrant::TopRight),
+            &mut display,
+        )
+        .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left + radius, radius, Quadrant::BottomRight),
+            &mut display,
+        )
+        .unwrap();
+        draw_quadrant(
+            &EllipseQuadrant::new(top_left + radius.y_axis(), radius, Quadrant::BottomLeft),
+            &mut display,
+        )
+        .unwrap();
 
         display.assert_pattern(&[
             "     ####     ",

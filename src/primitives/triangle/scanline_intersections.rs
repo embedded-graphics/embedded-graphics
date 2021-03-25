@@ -60,9 +60,9 @@ impl ScanlineIntersections {
     pub const fn empty() -> Self {
         Self {
             lines: LineConfig {
-                first: Scanline::new(0),
-                second: Scanline::new(0),
-                internal: Scanline::new(0),
+                first: Scanline::new_empty(0),
+                second: Scanline::new_empty(0),
+                internal: Scanline::new_empty(0),
                 internal_type: PointType::Fill,
             },
             has_fill: false,
@@ -82,8 +82,8 @@ impl ScanlineIntersections {
 
     fn edge_intersections(&self, scanline_y: i32) -> impl Iterator<Item = Scanline> + '_ {
         let mut idx = 0;
-        let mut left = Scanline::new(scanline_y);
-        let mut right = Scanline::new(scanline_y);
+        let mut left = Scanline::new_empty(scanline_y);
+        let mut right = Scanline::new_empty(scanline_y);
 
         core::iter::from_fn(move || {
             if self.stroke_width == 0 {
@@ -128,7 +128,7 @@ impl ScanlineIntersections {
 
             // Merge any overlap between final left/right results
             if left.try_extend(&right) {
-                right = Scanline::new(scanline_y);
+                right = Scanline::new_empty(scanline_y);
             }
 
             left.try_take().or_else(|| right.try_take())
@@ -142,8 +142,8 @@ impl ScanlineIntersections {
             Some(LineConfig {
                 internal: self.triangle.scanline_intersection(scanline_y),
                 internal_type: PointType::Stroke,
-                first: Scanline::new(0),
-                second: Scanline::new(0),
+                first: Scanline::new_empty(0),
+                second: Scanline::new_empty(0),
             })
         } else {
             let first = edge_intersections.next();
@@ -172,15 +172,15 @@ impl ScanlineIntersections {
                     // Because a triangle is a closed shape, a single intersection here likely means
                     // we're inside one of the borders, so no fill should be returned for this
                     // scanline.
-                    _ => Scanline::new(scanline_y),
+                    _ => Scanline::new_empty(scanline_y),
                 }
             } else {
-                Scanline::new(scanline_y)
+                Scanline::new_empty(scanline_y)
             };
 
             Some(LineConfig {
-                first: first.unwrap_or(Scanline::new(scanline_y)),
-                second: second.unwrap_or(Scanline::new(scanline_y)),
+                first: first.unwrap_or(Scanline::new_empty(scanline_y)),
+                second: second.unwrap_or(Scanline::new_empty(scanline_y)),
                 internal,
                 internal_type: PointType::Fill,
             })

@@ -4,6 +4,7 @@ mod line_join;
 mod linear_equation;
 mod plane_sector;
 mod scanline;
+mod styled_scanline;
 mod thick_segment;
 mod thick_segment_iter;
 
@@ -13,6 +14,7 @@ pub use line_join::{JoinKind, LineJoin};
 pub use linear_equation::{LinearEquation, OriginLinearEquation, NORMAL_VECTOR_SCALE};
 pub use plane_sector::PlaneSector;
 pub use scanline::Scanline;
+pub use styled_scanline::StyledScanline;
 pub use thick_segment::ThickSegment;
 pub use thick_segment_iter::ThickSegmentIter;
 

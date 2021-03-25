@@ -44,7 +44,7 @@ impl<'a> ScanlineIntersections<'a> {
             width,
             points,
             remaining_points: points,
-            scanline: Scanline::new(scanline_y),
+            scanline: Scanline::new_empty(scanline_y),
         }
     }
 
@@ -55,7 +55,7 @@ impl<'a> ScanlineIntersections<'a> {
             width: 0,
             points: EMPTY,
             remaining_points: EMPTY,
-            scanline: Scanline::new(0),
+            scanline: Scanline::new_empty(0),
         }
     }
 

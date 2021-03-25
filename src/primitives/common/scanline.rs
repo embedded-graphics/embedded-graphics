@@ -1,4 +1,5 @@
 use crate::{
+    draw_target::DrawTarget,
     geometry::{Point, Size},
     primitives::{Line, PointsIter, Rectangle},
 };
@@ -12,9 +13,14 @@ pub struct Scanline {
 }
 
 impl Scanline {
+    /// Creates a new scanline.
+    pub const fn new(y: i32, x: Range<i32>) -> Self {
+        Self { y, x }
+    }
+
     /// Creates a new empty scanline.
-    pub const fn new(y: i32) -> Self {
-        Self { y, x: 0..0 }
+    pub const fn new_empty(y: i32) -> Self {
+        Self::new(y, 0..0)
     }
 
     /// Returns `true` if the x range of the scanline is empty.
@@ -109,7 +115,7 @@ impl Scanline {
 
     /// Converts the scanline into a 1px high rectangle.
     pub fn to_rectangle(&self) -> Rectangle {
-        let width = if self.x.end >= self.x.start {
+        let width = if !self.is_empty() {
             (self.x.end - self.x.start) as u32
         } else {
             0
@@ -131,6 +137,23 @@ impl Scanline {
             None
         }
     }
+
+    /// Draws the scanline.
+    pub fn draw<T>(&self, target: &mut T, color: T::Color) -> Result<(), T::Error>
+    where
+        T: DrawTarget,
+    {
+        if self.is_empty() {
+            return Ok(());
+        }
+
+        let width = (self.x.end - self.x.start) as u32;
+
+        target.fill_solid(
+            &Rectangle::new(Point::new(self.x.start, self.y), Size::new(width, 1)),
+            color,
+        )
+    }
 }
 
 impl Iterator for Scanline {
@@ -146,11 +169,11 @@ mod tests {
     use super::*;
 
     fn run_touches_test(s1: i32, e1: i32, s2: i32, e2: i32, expected: bool, ident: &str) {
-        let mut l1 = Scanline::new(0);
+        let mut l1 = Scanline::new_empty(0);
         l1.extend(s1);
         l1.extend(e1);
 
-        let mut l2 = Scanline::new(0);
+        let mut l2 = Scanline::new_empty(0);
         l2.extend(s2);
         l2.extend(e2);
 

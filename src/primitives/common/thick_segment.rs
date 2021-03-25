@@ -69,7 +69,7 @@ impl ThickSegment {
     }
 
     pub fn intersection(&self, scanline_y: i32) -> Scanline {
-        let mut scanline = Scanline::new(scanline_y);
+        let mut scanline = Scanline::new_empty(scanline_y);
 
         // Single 1px line
         if self.is_skeleton() {

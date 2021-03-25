@@ -1,27 +1,30 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
-        ellipse::{compute_threshold, is_point_inside_ellipse, points::Points, Ellipse},
+        common::{Scanline, StyledScanline},
+        ellipse::{points::Scanlines, Ellipse, EllipseContains},
         PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
     },
     Drawable, Pixel, SaturatingCast, Styled,
 };
 
 /// Pixel iterator for each pixel in the ellipse border
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct StyledPixels<C>
 where
     C: PixelColor,
 {
-    iter: Points,
-    outer_color: Option<C>,
-    inner_size_sq: Size,
-    inner_color: Option<C>,
-    center: Point,
-    threshold: u32,
+    styled_scanlines: StyledScanlines,
+
+    stroke_left: Scanline,
+    fill: Scanline,
+    stroke_right: Scanline,
+
+    stroke_color: Option<C>,
+    fill_color: Option<C>,
 }
 
 impl<C> StyledPixels<C>
@@ -29,22 +32,16 @@ where
     C: PixelColor,
 {
     pub(in crate::primitives) fn new(styled: &Styled<Ellipse, PrimitiveStyle<C>>) -> Self {
-        let iter = if !styled.style.is_transparent() {
-            Points::new(&styled.stroke_area())
-        } else {
-            Points::empty()
-        };
-
+        let stroke_area = styled.stroke_area();
         let fill_area = styled.fill_area();
-        let (inner_size_sq, threshold) = compute_threshold(fill_area.size);
 
         Self {
-            iter,
-            outer_color: styled.style.stroke_color,
-            inner_size_sq,
-            inner_color: styled.style.fill_color,
-            center: styled.primitive.center_2x(),
-            threshold,
+            styled_scanlines: StyledScanlines::new(&stroke_area, &fill_area),
+            stroke_left: Scanline::new_empty(0),
+            fill: Scanline::new_empty(0),
+            stroke_right: Scanline::new_empty(0),
+            stroke_color: styled.style.stroke_color,
+            fill_color: styled.style.fill_color,
         }
     }
 }
@@ -56,25 +53,47 @@ where
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            let inside_border = is_point_inside_ellipse(
-                self.inner_size_sq,
-                point * 2 - self.center,
-                self.threshold,
-            );
+        match (self.stroke_color, self.fill_color) {
+            (Some(stroke_color), None) => loop {
+                if let Some(pixel) = self
+                    .stroke_left
+                    .next()
+                    .or_else(|| self.stroke_right.next())
+                    .map(|p| Pixel(p, stroke_color))
+                {
+                    return Some(pixel);
+                }
 
-            let color = if inside_border {
-                self.inner_color
-            } else {
-                self.outer_color
-            };
+                let scanline = self.styled_scanlines.next()?;
+                self.stroke_left = scanline.stroke_left();
+                self.stroke_right = scanline.stroke_right();
+            },
+            (Some(stroke_color), Some(fill_color)) => loop {
+                if let Some(pixel) = self
+                    .stroke_left
+                    .next()
+                    .map(|p| Pixel(p, stroke_color))
+                    .or_else(|| self.fill.next().map(|p| Pixel(p, fill_color)))
+                    .or_else(|| self.stroke_right.next().map(|p| Pixel(p, stroke_color)))
+                {
+                    return Some(pixel);
+                }
 
-            if let Some(color) = color {
-                return Some(Pixel(point, color));
-            }
+                let scanline = self.styled_scanlines.next()?;
+                self.stroke_left = scanline.stroke_left();
+                self.fill = scanline.fill();
+                self.stroke_right = scanline.stroke_right();
+            },
+            (None, Some(fill_color)) => loop {
+                if let Some(pixel) = self.fill.next().map(|p| Pixel(p, fill_color)) {
+                    return Some(pixel);
+                }
+
+                let scanline = self.styled_scanlines.next()?;
+                self.fill = scanline.fill();
+            },
+            (None, None) => None,
         }
-
-        None
     }
 }
 
@@ -98,11 +117,30 @@ where
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        match (self.style.effective_stroke_color(), self.style.fill_color) {
+            (Some(stroke_color), None) => {
+                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                    scanline.draw_stroke(target, stroke_color)?;
+                }
+            }
+            (Some(stroke_color), Some(fill_color)) => {
+                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                    scanline.draw_stroke_and_fill(target, stroke_color, fill_color)?;
+                }
+            }
+            (None, Some(fill_color)) => {
+                for scanline in Scanlines::new(&self.fill_area()) {
+                    scanline.draw(target, fill_color)?;
+                }
+            }
+            (None, None) => {}
+        }
+
+        Ok(())
     }
 }
 
@@ -117,11 +155,48 @@ where
     }
 }
 
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+struct StyledScanlines {
+    scanlines: Scanlines,
+    fill_area: EllipseContains,
+}
+
+impl StyledScanlines {
+    pub fn new(stroke_area: &Ellipse, fill_area: &Ellipse) -> Self {
+        Self {
+            scanlines: Scanlines::new(stroke_area),
+            fill_area: EllipseContains::new(fill_area.size),
+        }
+    }
+}
+
+impl Iterator for StyledScanlines {
+    type Item = StyledScanline;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.scanlines.next().map(|scanline| {
+            let scaled_y = scanline.y * 2 - self.scanlines.center_2x.y;
+
+            let fill_range = scanline
+                .x
+                .clone()
+                .find(|x| {
+                    self.fill_area
+                        .contains(Point::new(*x * 2 - self.scanlines.center_2x.x, scaled_y))
+                })
+                .map(|x| x..scanline.x.end - (x - scanline.x.start));
+
+            StyledScanline::new(scanline.y, scanline.x, fill_range)
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
+        iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
@@ -149,14 +224,15 @@ mod tests {
     }
 
     fn test_ellipse(size: Size, style: PrimitiveStyle<BinaryColor>, pattern: &[&str]) {
-        let mut display = MockDisplay::new();
+        let ellipse = Ellipse::new(Point::new(0, 0), size).into_styled(style);
 
-        Ellipse::new(Point::new(0, 0), size)
-            .into_styled(style)
-            .draw(&mut display)
-            .unwrap();
+        let mut drawable = MockDisplay::new();
+        ellipse.draw(&mut drawable).unwrap();
+        drawable.assert_pattern(pattern);
 
-        display.assert_pattern(pattern);
+        let mut into_pixels = MockDisplay::new();
+        ellipse.into_pixels().draw(&mut into_pixels).unwrap();
+        into_pixels.assert_pattern(pattern);
     }
 
     #[test]

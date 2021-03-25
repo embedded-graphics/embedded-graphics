@@ -1,39 +1,25 @@
+use core::ops::Range;
+
 use crate::{
-    geometry::{Dimensions, Point, Size},
+    geometry::{Dimensions, Point},
     primitives::{
-        ellipse::{compute_threshold, is_point_inside_ellipse, Ellipse},
-        rectangle::{self, Rectangle},
-        PointsIter,
+        common::Scanline,
+        ellipse::{Ellipse, EllipseContains},
     },
 };
 
 /// Iterator over all points inside the ellipse
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Points {
-    iter: rectangle::Points,
-    center_2x: Point,
-    size_sq: Size,
-    threshold: u32,
+    scanlines: Scanlines,
+    current_scanline: Scanline,
 }
 
 impl Points {
     pub(in crate::primitives) fn new(ellipse: &Ellipse) -> Self {
-        let (size_sq, threshold) = compute_threshold(ellipse.size);
-
         Self {
-            iter: ellipse.bounding_box().points(),
-            center_2x: ellipse.center_2x(),
-            size_sq,
-            threshold,
-        }
-    }
-
-    pub(in crate::primitives) fn empty() -> Self {
-        Self {
-            iter: Rectangle::zero().points(),
-            center_2x: Point::zero(),
-            size_sq: Size::zero(),
-            threshold: 0,
+            scanlines: Scanlines::new(ellipse),
+            current_scanline: Scanline::new_empty(0),
         }
     }
 }
@@ -42,20 +28,61 @@ impl Iterator for Points {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for point in &mut self.iter {
-            if is_point_inside_ellipse(self.size_sq, point * 2 - self.center_2x, self.threshold) {
-                return Some(point);
-            }
-        }
+        self.current_scanline.next().or_else(|| {
+            self.current_scanline = self.scanlines.next()?;
+            self.current_scanline.next()
+        })
+    }
+}
 
-        None
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub struct Scanlines {
+    rows: Range<i32>,
+    columns: Range<i32>,
+    pub(super) center_2x: Point,
+    ellipse_contains: EllipseContains,
+}
+
+impl Scanlines {
+    pub fn new(ellipse: &Ellipse) -> Self {
+        let bounding_box = ellipse.bounding_box();
+
+        Self {
+            rows: bounding_box.rows(),
+            columns: bounding_box.columns(),
+            center_2x: ellipse.center_2x(),
+            ellipse_contains: EllipseContains::new(ellipse.size),
+        }
+    }
+}
+
+impl Iterator for Scanlines {
+    type Item = Scanline;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let y = self.rows.next()?;
+
+        let scaled_y = y * 2 - self.center_2x.y;
+
+        self.columns
+            .clone()
+            // Find the first pixel that is inside the ellipse.
+            .find(|x| {
+                self.ellipse_contains
+                    .contains(Point::new(*x * 2 - self.center_2x.x, scaled_y))
+            })
+            // Shorten the right side of the scanline by the same amount as the left side.
+            .map(|x| Scanline::new(y, x..self.columns.end - (x - self.columns.start)))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitives::{Circle, PointsIter};
+    use crate::{
+        geometry::Size,
+        primitives::{Circle, PointsIter},
+    };
 
     #[test]
     fn matches_circles_points() {

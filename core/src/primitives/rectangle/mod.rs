@@ -106,7 +106,7 @@ impl Rectangle {
     }
 
     /// Returns a zero sized rectangle.
-    pub fn zero() -> Rectangle {
+    pub const fn zero() -> Rectangle {
         Rectangle::new(Point::zero(), Size::zero())
     }
 
