@@ -3,7 +3,10 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
-    text::{Alignment, Baseline, TextMetrics, TextRenderer, TextStyle},
+    text::{
+        renderer::{TextMetrics, TextRenderer},
+        Alignment, Baseline, TextStyle,
+    },
     transform::Transform,
     Drawable, SaturatingCast, Styled,
 };
@@ -106,7 +109,11 @@ where
                 }
             };
 
-            position.y += self.style.character_style.line_height().saturating_cast();
+            position.y += self
+                .style
+                .line_height
+                .to_absolute(self.style.character_style.line_height())
+                .saturating_cast();
 
             (line, p)
         })
@@ -237,7 +244,7 @@ mod tests {
         },
         pixelcolor::BinaryColor,
         primitives::{Primitive, PrimitiveStyle},
-        text::{Alignment, Baseline, TextStyleBuilder},
+        text::{Alignment, Baseline, LineHeight, TextStyleBuilder},
     };
 
     const HELLO_WORLD: &'static str = "Hello World!";
@@ -700,6 +707,89 @@ mod tests {
             "##### #   # .     ",
             "#   # #   # .   . ",
             "#   # ####   ...  ",
+        ]);
+    }
+
+    #[test]
+    fn line_height_pixels() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(Font6x9)
+            .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .line_height(LineHeight::Pixels(7))
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nB", Point::new(0, 5))
+            .into_styled(text_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "  #  ", //
+            " # # ", //
+            "#   #", //
+            "#####", //
+            "#   #", //
+            "#   #", //
+            "     ", //
+            "#### ", //
+            "#   #", //
+            "#### ", //
+            "#   #", //
+            "#   #", //
+            "#### ", //
+        ]);
+    }
+
+    #[test]
+    fn line_height_percent() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(Font6x9)
+            .text_color(BinaryColor::On)
+            .build();
+
+        let text_style = TextStyleBuilder::new()
+            .character_style(character_style)
+            .baseline(Baseline::Top)
+            .line_height(LineHeight::Percent(200))
+            .build();
+
+        let mut display = MockDisplay::new();
+        Text::new("A\nBC", Point::zero())
+            .into_styled(text_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "            ",
+            "  #         ",
+            " # #        ",
+            "#   #       ",
+            "#####       ",
+            "#   #       ",
+            "#   #       ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "            ",
+            "####    ##  ",
+            "#   #  #  # ",
+            "####   #    ",
+            "#   #  #    ",
+            "#   #  #  # ",
+            "####    ##  ",
         ]);
     }
 }

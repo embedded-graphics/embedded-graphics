@@ -71,7 +71,6 @@ pub mod image;
 pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
-pub mod text;
 
 pub use drawable::{Drawable, Pixel};
 

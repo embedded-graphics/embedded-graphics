@@ -4,7 +4,10 @@ use crate::{
     mono_font::{MonoCharPixels, MonoFont},
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
-    text::{Baseline, CharacterStyle, DecorationColor, TextMetrics, TextRenderer},
+    text::{
+        renderer::{CharacterStyle, TextMetrics, TextRenderer},
+        Baseline, DecorationColor,
+    },
     Pixel, SaturatingCast,
 };
 

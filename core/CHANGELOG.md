@@ -11,6 +11,10 @@
 - **(breaking)** [#552](https://github.com/embedded-graphics/embedded-graphics/pull/552) Added the `Output` associated type to `Drawable` to allow returning non-`()` values from drawing operations.
 - [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Added `is_none`, `is_text_color` and `is_custom` methods to `DecorationColor`.
 
+### Removed
+
+- **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Removed text renderer API. The text renderer API will be added back when it has stabilized.
+
 ## [0.2.0] - 2021-02-03
 
 ### Added

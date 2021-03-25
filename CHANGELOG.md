@@ -11,6 +11,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#552](https://github.com/embedded-graphics/embedded-graphics/pull/552) Added the `Output` associated type to `Drawable` to allow returning non-`()` values from drawing operations.
 - [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Added `is_none`, `is_text_color` and `is_custom` methods to `DecorationColor`.
 - [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Added `is_transparent` methods to `PrimitiveStyle` and `MonoTextStyle`.
+- [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Added a `line_height` field to `TextStyle`.
 
 ### Changed
 
@@ -19,6 +20,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) The bounding boxes returned by `Dimensions` implementations for styled primitives no longer depend on the fill and stroke color.
 - **(breaking)** [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Drawing a primitive with a transparent stroke (`stroke_color == None && stroke_width > 0`) will now reduce the filled area.
 - **(breaking)** [#566](https://github.com/embedded-graphics/embedded-graphics/pull/566) The `Drawable::Output` type was changed to `Point` for styled `Text` objects. The returned point can be used to chain texts with different styles.
+- **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Moved the text rendering API into a separate `text::renderer` submodule.
+- **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) The `non_exhaustive` attribute was added to the `TextStyle` struct.
 
 ## [0.7.0-alpha.3] - 2021-02-03
 
