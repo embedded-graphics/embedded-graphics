@@ -14,7 +14,7 @@
 ### Removed
 
 - **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Removed text renderer API. The text renderer API will be added back when it has stabilized.
-- **(breaking)** [#XXX](https://github.com/embedded-graphics/embedded-graphics/pull/XXX) Moved `pixelcolor::raw::RawDataIter` into `embedded-graphics` crate.
+- **(breaking)** [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Moved `pixelcolor::raw::RawDataIter` into `embedded-graphics` crate.
 
 ### Fixed
 
