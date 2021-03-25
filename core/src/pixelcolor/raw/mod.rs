@@ -81,7 +81,7 @@
 //! ];
 //!
 //! // Create new image with RGBI colors.
-//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
+//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2);
 //!
 //! // In a real application the image could now be drawn to a display:
 //! // display.draw(&image);
@@ -176,6 +176,7 @@ macro_rules! impl_raw_data {
             /// Creates a new color from the least significant
             #[doc = $bpp_str]
             /// of value.
+            #[inline]
             pub const fn new(value: $storage_type) -> Self {
                 $type(value & $mask)
             }

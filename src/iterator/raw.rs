@@ -1,163 +1,242 @@
 //! Raw data iterator.
+//!
+//! Raw data iterators are used to implement rendering of custom image formats. Most users
+//! won't need to use these types directly and should instead use [`ImageRaw`].
+//!
+//! The [`RawDataSlice`] is used to specify the raw data format for a byte slice. This slice can
+//! than be converted into an optimized iterator for that data format by using `into_iter()`.
+//!
+//! # Examples
+//!
+//! ```
+//! use embedded_graphics::{iterator::raw::RawDataSlice, pixelcolor::raw::{RawU16, BigEndian}};
+//!
+//! let data = [0xAA, 0xBB, 0x12, 0x34];
+//!
+//! // The data type and byte order needs to be specified explicitly to set the data format.
+//! let slice = RawDataSlice::<RawU16, BigEndian>::new(&data);
+//!
+//! let mut iter = slice.into_iter();
+//! assert_eq!(iter.next(), Some(RawU16::new(0xAABB)));
+//! assert_eq!(iter.next(), Some(RawU16::new(0x1234)));
+//! assert_eq!(iter.next(), None);
+//! ```
+//!
+//! [`ImageRaw`]: ../../image/struct.ImageRaw.html
+//! [`RawDataSlice`]: struct.RawDataSlice.html
+
+use core::{marker::PhantomData, slice};
+
+use byteorder::{ByteOrder, BE, LE};
 
 use crate::pixelcolor::raw::{
     BigEndian, LittleEndian, RawData, RawU1, RawU16, RawU2, RawU24, RawU32, RawU4, RawU8,
 };
-use byteorder::{ByteOrder, BE, LE};
-use core::marker::PhantomData;
 
-/// Iterator over a slice of raw pixel data.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct RawDataIter<'a, R, BO> {
-    /// Pixel data.
+/// Raw data slice.
+///
+/// This type is a wrapper around a byte array to specify the stored data format.
+///
+/// See the [module-level documentation] for more information.
+///
+/// [module-level documentation]: index.html
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RawDataSlice<'a, R, BO> {
     data: &'a [u8],
-
-    /// Index into `data` for next read.
-    byte_position: usize,
-
-    /// Remaining bits in the current byte (only used for bpp < 8).
-    bits_left: u8,
-
     raw_type: PhantomData<R>,
     byte_order: PhantomData<BO>,
 }
 
-impl<'a, R, BO> RawDataIter<'a, R, BO> {
-    /// Creates a new raw data iterator.
-    pub const fn new(data: &'a [u8]) -> Self {
+impl<'a, R, BO> RawDataSlice<'a, R, BO> {
+    /// Creates a new raw data slice.
+    pub fn new(data: &'a [u8]) -> Self {
         Self {
             data,
-            byte_position: 0,
-            bits_left: 8,
             raw_type: PhantomData,
             byte_order: PhantomData,
         }
     }
-
-    /// Sets the read position.
-    pub fn set_byte_position(&mut self, position: usize) {
-        self.byte_position = position;
-        self.bits_left = 8;
-    }
-
-    /// Align the read position to the next whole byte.
-    ///
-    /// If the read position is already at the beginning of a byte this is a noop.
-    pub fn align(&mut self) {
-        if self.bits_left == 8 {
-            return;
-        }
-
-        self.byte_position = self.data.len().min(self.byte_position + 1);
-        self.bits_left = 8;
-    }
-
-    /// Returns the next `bit_count` bits.
-    fn next_bits(&mut self, bit_count: u8) -> Option<u8> {
-        if self.bits_left == 0 || self.byte_position >= self.data.len() {
-            return None;
-        }
-
-        let current_byte = self.data[self.byte_position];
-        let ret = current_byte >> (self.bits_left - bit_count);
-
-        self.bits_left -= bit_count;
-
-        if self.bits_left == 0 && self.byte_position < self.data.len() {
-            self.byte_position += 1;
-            self.bits_left = 8;
-        }
-
-        Some(ret)
-    }
-
-    /// Returns the a slice of the next `byte_count` bytes.
-    fn next_bytes(&mut self, byte_count: usize) -> Option<&[u8]> {
-        if (self.data.len() - self.byte_position) >= byte_count {
-            let ret = &self.data[self.byte_position..];
-
-            self.byte_position += byte_count;
-
-            Some(ret)
-        } else {
-            None
-        }
-    }
 }
 
-impl<'a, R> Iterator for RawDataIter<'a, R, LittleEndian>
-where
-    R: RawData + RawDataIterNext<LittleEndian>,
-{
-    type Item = R;
+macro_rules! impl_bits_iterator {
+    ($type:ident, $bit_index_bits:expr) => {
+        impl<'a, BO> IntoIterator for RawDataSlice<'a, $type, BO> {
+            type Item = $type;
+            type IntoIter = BitsIterator<'a, $type>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        R::next(self)
-    }
-}
+            fn into_iter(self) -> Self::IntoIter {
+                BitsIterator::new(self.data)
+            }
+        }
 
-impl<'a, R> Iterator for RawDataIter<'a, R, BigEndian>
-where
-    R: RawData + RawDataIterNext<BigEndian>,
-{
-    type Item = R;
+        impl<'a> Iterator for BitsIterator<'a, $type> {
+            type Item = $type;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        R::next(self)
-    }
-}
+            #[inline]
+            fn next(&mut self) -> Option<Self::Item> {
+                self.data.get(self.index >> $bit_index_bits).map(|byte| {
+                    // Number of bits the value needs to be shifted to the right for the first pixel.
+                    let first_pixel_shift = 8 - $type::BITS_PER_PIXEL;
 
-/// Helper trait to implement the `next` method.
-pub trait RawDataIterNext<BO>: Sized {
-    /// Advances the iterator and returns the next raw value.
-    fn next<'a>(iter: &mut RawDataIter<'a, Self, BO>) -> Option<Self>;
-}
+                    // Index to one of the pixels inside this byte.
+                    let sub_index = self.index & (1 << $bit_index_bits) - 1;
 
-macro_rules! impl_next_for_bits {
-    ($raw_type:ident, $bit_count:expr) => {
-        impl<BO> RawDataIterNext<BO> for $raw_type {
-            fn next<'a>(iter: &mut RawDataIter<'a, $raw_type, BO>) -> Option<$raw_type> {
-                iter.next_bits($bit_count).map($raw_type::new)
+                    // Number of bits the value needs to be shifted.
+                    let shift = first_pixel_shift - (sub_index << 3 - $bit_index_bits);
+
+                    self.index += 1;
+
+                    $type::new(*byte >> shift)
+                })
+            }
+
+            #[inline]
+            fn nth(&mut self, n: usize) -> Option<Self::Item> {
+                self.index = self.index.saturating_add(n);
+                self.next()
+            }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                let size =
+                    (self.data.len() * (8 / $type::BITS_PER_PIXEL)).saturating_sub(self.index);
+
+                (size, Some(size))
             }
         }
     };
 }
 
-impl_next_for_bits!(RawU1, 1);
-impl_next_for_bits!(RawU2, 2);
-impl_next_for_bits!(RawU4, 4);
+impl_bits_iterator!(RawU1, 3);
+impl_bits_iterator!(RawU2, 2);
+impl_bits_iterator!(RawU4, 1);
 
-impl<BO> RawDataIterNext<BO> for RawU8 {
-    fn next<'a>(iter: &mut RawDataIter<'a, RawU8, BO>) -> Option<RawU8> {
-        iter.next_bytes(1).map(|data| RawU8::new(data[0]))
+impl<'a, BO> IntoIterator for RawDataSlice<'a, RawU8, BO> {
+    type Item = RawU8;
+    type IntoIter = ByteIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        ByteIterator::new(self.data)
     }
 }
 
-macro_rules! impl_next_for_bytes {
-    ($raw_type:ident, $byte_count:expr, $endian:ident, $read_function:path) => {
-        impl RawDataIterNext<$endian> for $raw_type {
-            fn next<'a>(iter: &mut RawDataIter<'a, $raw_type, $endian>) -> Option<$raw_type> {
-                iter.next_bytes($byte_count)
-                    .map(|data| $raw_type::new($read_function(data)))
+/// Iterator for raw data slices with less than 8 BPP.
+///
+/// See the [module-level documentation] for more information.
+///
+/// [module-level documentation]: index.html
+#[derive(Debug)]
+pub struct BitsIterator<'a, R> {
+    data: &'a [u8],
+    index: usize,
+    raw_type: PhantomData<R>,
+}
+
+impl<'a, R: RawData> BitsIterator<'a, R> {
+    fn new(data: &'a [u8]) -> Self {
+        Self {
+            data,
+            index: 0,
+            raw_type: PhantomData,
+        }
+    }
+}
+
+/// Iterator for raw data slices with 8 BPP.
+///
+/// See the [module-level documentation] for more information.
+///
+/// [module-level documentation]: index.html
+#[derive(Debug)]
+pub struct ByteIterator<'a> {
+    data: slice::Iter<'a, u8>,
+}
+
+impl<'a> ByteIterator<'a> {
+    fn new(data: &'a [u8]) -> Self {
+        Self { data: data.iter() }
+    }
+}
+
+impl<'a> Iterator for ByteIterator<'a> {
+    type Item = RawU8;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.data.next().copied().map(RawU8::new)
+    }
+
+    #[inline]
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        self.data.nth(n).copied().map(RawU8::new)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.data.size_hint()
+    }
+}
+
+/// Iterator for raw data slices more than 8 BPP.
+///
+/// See the [module-level documentation] for more information.
+///
+/// [module-level documentation]: index.html
+#[derive(Debug)]
+pub struct BytesIterator<'a, R, BO> {
+    // MSRV: replace by ArrayChunks when the feature is stabilized
+    data: slice::ChunksExact<'a, u8>,
+    raw_type: PhantomData<R>,
+    byte_order: PhantomData<BO>,
+}
+
+impl<'a, R: RawData, BO> BytesIterator<'a, R, BO> {
+    fn new(data: &'a [u8]) -> Self {
+        Self {
+            data: data.chunks_exact(R::BITS_PER_PIXEL / 8),
+            raw_type: PhantomData,
+            byte_order: PhantomData,
+        }
+    }
+}
+
+macro_rules! impl_bytes_iterator {
+    ($type:ident, $byte_order:ident, $read_function:path) => {
+        impl<'a> Iterator for BytesIterator<'a, $type, $byte_order> {
+            type Item = $type;
+
+            #[inline]
+            fn next(&mut self) -> Option<Self::Item> {
+                self.data.next().map(|raw| $read_function(raw).into())
+            }
+
+            #[inline]
+            fn nth(&mut self, n: usize) -> Option<Self::Item> {
+                self.data.nth(n).map(|raw| $read_function(raw).into())
+            }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                self.data.size_hint()
+            }
+        }
+
+        impl<'a> IntoIterator for RawDataSlice<'a, $type, $byte_order> {
+            type Item = $type;
+            type IntoIter = BytesIterator<'a, $type, $byte_order>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                BytesIterator::new(self.data)
             }
         }
     };
-    ($raw_type:ident, $byte_count:expr, $read_function:ident) => {
-        impl_next_for_bytes!($raw_type, $byte_count, BigEndian, BE::$read_function);
-        impl_next_for_bytes!($raw_type, $byte_count, LittleEndian, LE::$read_function);
+
+    ($type:ident, $read_function:ident) => {
+        impl_bytes_iterator!($type, LittleEndian, LE::$read_function);
+        impl_bytes_iterator!($type, BigEndian, BE::$read_function);
     };
 }
 
-impl_next_for_bytes!(RawU16, 2, read_u16);
-impl_next_for_bytes!(RawU24, 3, read_u24);
-impl_next_for_bytes!(RawU32, 4, read_u32);
-
-/// Dummy implementation to allow () as `PixelColor::Raw`.
-impl<BO> RawDataIterNext<BO> for () {
-    fn next<'a>(_iter: &mut RawDataIter<'a, (), BO>) -> Option<()> {
-        None
-    }
-}
+impl_bytes_iterator!(RawU16, read_u16);
+impl_bytes_iterator!(RawU24, read_u24);
+impl_bytes_iterator!(RawU32, read_u32);
 
 #[cfg(test)]
 mod tests {
@@ -166,41 +245,6 @@ mod tests {
     const BITS_DATA: &[u8] = &[0x12, 0x48, 0x5A, 0x0F];
     const BYTES_DATA_1: &[u8] = &[0x10, 0x20, 0x30, 0x40, 0x50, 0x60];
     const BYTES_DATA_2: &[u8] = &[0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80];
-
-    #[test]
-    fn align_advances_to_next_byte() {
-        let data = &[0x80, 0x80];
-
-        let mut iter: RawDataIter<RawU1, LittleEndian> = RawDataIter::new(data);
-        assert_eq!(iter.next(), Some(RawU1::new(1)));
-        assert_eq!(iter.next(), Some(RawU1::new(0)));
-
-        let mut iter: RawDataIter<RawU1, LittleEndian> = RawDataIter::new(data);
-        assert_eq!(iter.next(), Some(RawU1::new(1)));
-        iter.align();
-        assert_eq!(iter.next(), Some(RawU1::new(1)));
-    }
-
-    #[test]
-    fn calling_align_again_is_a_noop() {
-        let data = &[0x80, 0xFF, 0x00];
-
-        let mut iter: RawDataIter<RawU1, LittleEndian> = RawDataIter::new(data);
-        assert_eq!(iter.next(), Some(RawU1::new(1)));
-        iter.align();
-        iter.align();
-        assert_eq!(iter.next(), Some(RawU1::new(1)));
-    }
-
-    #[test]
-    fn set_byte_position_resets_bit_position() {
-        let data = &[0x0F, 0x0F];
-
-        let mut iter: RawDataIter<RawU4, LittleEndian> = RawDataIter::new(data);
-        assert_eq!(iter.next(), Some(RawU4::new(0)));
-        iter.set_byte_position(1);
-        assert_eq!(iter.next(), Some(RawU4::new(0)));
-    }
 
     #[test]
     fn raw_u1() {
@@ -219,8 +263,8 @@ mod tests {
         .copied()
         .map(RawU1::new);
 
-        let data: RawDataIter<RawU1, LittleEndian> = RawDataIter::new(BITS_DATA);
-        assert!(data.eq(expected));
+        let iter = RawDataSlice::<RawU1, LittleEndian>::new(BITS_DATA).into_iter();
+        assert!(iter.eq(expected));
     }
 
     #[test]
@@ -230,7 +274,7 @@ mod tests {
             .copied()
             .map(RawU2::new);
 
-        let iter: RawDataIter<RawU2, LittleEndian> = RawDataIter::new(BITS_DATA);
+        let iter = RawDataSlice::<RawU2, LittleEndian>::new(BITS_DATA).into_iter();
         assert!(iter.eq(expected));
     }
 
@@ -241,7 +285,7 @@ mod tests {
             .copied()
             .map(RawU4::new);
 
-        let iter: RawDataIter<RawU4, LittleEndian> = RawDataIter::new(BITS_DATA);
+        let iter = RawDataSlice::<RawU4, LittleEndian>::new(BITS_DATA).into_iter();
         assert!(iter.eq(expected));
     }
 
@@ -249,7 +293,7 @@ mod tests {
     fn raw_u8() {
         let expected = BYTES_DATA_1.iter().map(|&v| RawU8::new(v));
 
-        let iter: RawDataIter<RawU8, LittleEndian> = RawDataIter::new(BYTES_DATA_1);
+        let iter = RawDataSlice::<RawU8, LittleEndian>::new(BYTES_DATA_1).into_iter();
         assert!(iter.eq(expected));
     }
 
@@ -257,7 +301,7 @@ mod tests {
     fn raw_u16_le() {
         let expected = [0x2010, 0x4030, 0x6050].iter().copied().map(RawU16::new);
 
-        let iter: RawDataIter<RawU16, LittleEndian> = RawDataIter::new(BYTES_DATA_1);
+        let iter = RawDataSlice::<RawU16, LittleEndian>::new(BYTES_DATA_1).into_iter();
         assert!(iter.eq(expected));
     }
 
@@ -265,13 +309,13 @@ mod tests {
     fn raw_u16_be() {
         let expected = [0x1020, 0x3040, 0x5060].iter().copied().map(RawU16::new);
 
-        let iter: RawDataIter<RawU16, BigEndian> = RawDataIter::new(BYTES_DATA_1);
+        let iter = RawDataSlice::<RawU16, BigEndian>::new(BYTES_DATA_1).into_iter();
         assert!(iter.eq(expected));
     }
 
     #[test]
     fn raw_u16_excess_bytes_are_ignored() {
-        let iter: RawDataIter<RawU16, LittleEndian> = RawDataIter::new(&[0; 3]);
+        let iter = RawDataSlice::<RawU16, LittleEndian>::new(&[0; 3]).into_iter();
         assert_eq!(iter.count(), 1);
     }
 
@@ -279,7 +323,7 @@ mod tests {
     fn raw_u24_le() {
         let expected = [0x302010, 0x605040].iter().copied().map(RawU24::new);
 
-        let iter: RawDataIter<RawU24, LittleEndian> = RawDataIter::new(BYTES_DATA_1);
+        let iter = RawDataSlice::<RawU24, LittleEndian>::new(BYTES_DATA_1).into_iter();
         assert!(iter.into_iter().eq(expected));
     }
 
@@ -287,13 +331,13 @@ mod tests {
     fn raw_u24_be() {
         let expected = [0x102030, 0x405060].iter().copied().map(RawU24::new);
 
-        let iter: RawDataIter<RawU24, BigEndian> = RawDataIter::new(BYTES_DATA_1);
+        let iter = RawDataSlice::<RawU24, BigEndian>::new(BYTES_DATA_1).into_iter();
         assert!(iter.into_iter().eq(expected));
     }
 
     #[test]
     fn raw_u24_excess_bytes_are_ignored() {
-        let iter: RawDataIter<RawU24, LittleEndian> = RawDataIter::new(&[0; 7]);
+        let iter = RawDataSlice::<RawU24, LittleEndian>::new(&[0; 7]).into_iter();
         assert_eq!(iter.count(), 2);
     }
 
@@ -301,7 +345,7 @@ mod tests {
     fn raw_u32_le() {
         let expected = [0x40302010, 0x80706050].iter().copied().map(RawU32::new);
 
-        let iter: RawDataIter<RawU32, LittleEndian> = RawDataIter::new(BYTES_DATA_2);
+        let iter = RawDataSlice::<RawU32, LittleEndian>::new(BYTES_DATA_2).into_iter();
         assert!(iter.into_iter().eq(expected));
     }
 
@@ -309,13 +353,13 @@ mod tests {
     fn raw_u32_be() {
         let expected = [0x10203040, 0x50607080].iter().copied().map(RawU32::new);
 
-        let iter: RawDataIter<RawU32, BigEndian> = RawDataIter::new(BYTES_DATA_2);
+        let iter = RawDataSlice::<RawU32, BigEndian>::new(BYTES_DATA_2).into_iter();
         assert!(iter.into_iter().eq(expected));
     }
 
     #[test]
     fn raw_u32_excess_bytes_are_ignored() {
-        let iter: RawDataIter<RawU32, LittleEndian> = RawDataIter::new(&[0; 13]);
+        let iter = RawDataSlice::<RawU32, LittleEndian>::new(&[0; 13]).into_iter();
         assert_eq!(iter.count(), 3);
     }
 }

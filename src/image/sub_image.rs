@@ -28,7 +28,7 @@ where
     T: ImageDrawable,
 {
     pub(super) fn new(parent: &'a T, area: &Rectangle) -> Self {
-        let area = parent.bounding_box().intersection(area);
+        let area = parent.bounding_box.intersection(area);
 
         Self { parent, area }
     }

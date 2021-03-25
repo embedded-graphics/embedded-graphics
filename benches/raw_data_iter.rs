@@ -1,5 +1,5 @@
 use criterion::*;
-use embedded_graphics::{iterator::raw::RawDataIter, pixelcolor::raw::*};
+use embedded_graphics::{iterator::raw::RawDataSlice, pixelcolor::raw::*};
 
 const TEST_DATA: &[u8] = include_bytes!("../fonts/src/10x20.bdf");
 
@@ -7,15 +7,15 @@ macro_rules! impl_bench {
     ($fn:ident, $type:ident) => {
         fn $fn(c: &mut Criterion) {
             c.bench_function(stringify!($type), |b| {
-                let iter = RawDataIter::<$type, LittleEndian>::new(TEST_DATA);
+                let slice = RawDataSlice::<$type, LittleEndian>::new(TEST_DATA);
 
-                b.iter(|| iter.clone().collect::<Vec<_>>())
+                b.iter(|| slice.into_iter().collect::<Vec<_>>())
             });
 
             c.bench_function(concat!(stringify!($type), " step by 20"), |b| {
-                let iter = RawDataIter::<$type, LittleEndian>::new(TEST_DATA);
+                let slice = RawDataSlice::<$type, LittleEndian>::new(TEST_DATA);
 
-                b.iter(|| iter.clone().step_by(20).collect::<Vec<_>>())
+                b.iter(|| slice.into_iter().step_by(20).collect::<Vec<_>>())
             });
         }
     };
