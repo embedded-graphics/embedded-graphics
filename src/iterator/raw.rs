@@ -1,3 +1,5 @@
+//! Raw data iterator.
+
 use crate::pixelcolor::raw::{
     BigEndian, LittleEndian, RawData, RawU1, RawU16, RawU2, RawU24, RawU32, RawU4, RawU8,
 };
@@ -85,7 +87,7 @@ impl<'a, R, BO> RawDataIter<'a, R, BO> {
 
 impl<'a, R> Iterator for RawDataIter<'a, R, LittleEndian>
 where
-    R: RawData,
+    R: RawData + RawDataIterNext<LittleEndian>,
 {
     type Item = R;
 
@@ -96,7 +98,7 @@ where
 
 impl<'a, R> Iterator for RawDataIter<'a, R, BigEndian>
 where
-    R: RawData,
+    R: RawData + RawDataIterNext<BigEndian>,
 {
     type Item = R;
 

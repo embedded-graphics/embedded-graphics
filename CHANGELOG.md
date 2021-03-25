@@ -24,6 +24,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Moved the text rendering API into a separate `text::renderer` submodule.
 - **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) The `non_exhaustive` attribute was added to the `TextStyle` struct.
 - **(breaking)** [#571](https://github.com/embedded-graphics/embedded-graphics/pull/571) Added color argument to `MockDisplay::from_points` to make it usable for all color types.
+- **(breaking)** [#XXX](https://github.com/embedded-graphics/embedded-graphics/pull/XXX) Moved `RawDataIter` from `pixelcolor::raw` to `iterator::raw`.
 
 ### Fixed
 

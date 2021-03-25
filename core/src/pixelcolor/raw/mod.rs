@@ -112,22 +112,12 @@
 //! [`ToBytes`]: trait.ToBytes.html
 //! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_be_bytes
 
-mod iter;
 mod to_bytes;
 
-pub use iter::RawDataIter;
-pub(crate) use iter::RawDataIterNext;
 pub use to_bytes::ToBytes;
 
 /// Trait implemented by all `RawUx` types.
-pub trait RawData:
-    Sized
-    + private::Sealed
-    + RawDataIterNext<LittleEndian>
-    + RawDataIterNext<BigEndian>
-    + From<<Self as RawData>::Storage>
-    + ToBytes
-{
+pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + ToBytes {
     /// Storage type.
     ///
     /// A primitive unsigned integer storage type that contains at least `BITS_PER_PIXEL` bits.

@@ -4,8 +4,9 @@ use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
     geometry::{Dimensions, OriginDimensions, Size},
     image::ImageDrawable,
+    iterator::raw::RawDataIter,
     pixelcolor::{
-        raw::{BigEndian, ByteOrder, LittleEndian, RawData, RawDataIter},
+        raw::{BigEndian, ByteOrder, LittleEndian, RawData},
         PixelColor,
     },
 };
