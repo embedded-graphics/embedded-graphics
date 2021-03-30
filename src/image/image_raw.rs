@@ -136,7 +136,9 @@ where
     /// Creates a new image.
     ///
     /// Only the width of the image needs to be specified. The height of the image will be
-    /// calculated based on the length of the given image data.
+    /// calculated based on the length of the given image data. If the length of the image data
+    /// isn't an integer multiple of the data length for a single row the last partial row will
+    /// be ignored.
     pub fn new(data: &'a [u8], width: u32) -> Self {
         // Prevent panic for `width == 0` by returning a zero sized image.
         if width == 0 {
