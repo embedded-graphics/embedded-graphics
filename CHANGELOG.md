@@ -13,6 +13,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#563](https://github.com/embedded-graphics/embedded-graphics/pull/563) Added `is_transparent` methods to `PrimitiveStyle` and `MonoTextStyle`.
 - [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Added a `line_height` field to `TextStyle`.
 - [#571](https://github.com/embedded-graphics/embedded-graphics/pull/571) Added `MockDisplay::set_pixels` to set pixels from an iterator.
+- [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Added `ImageRaw::new_binary` to create `const` images with binary image data.
 
 ### Changed
 
@@ -24,6 +25,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Moved the text rendering API into a separate `text::renderer` submodule.
 - **(breaking)** [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) The `non_exhaustive` attribute was added to the `TextStyle` struct.
 - **(breaking)** [#571](https://github.com/embedded-graphics/embedded-graphics/pull/571) Added color argument to `MockDisplay::from_points` to make it usable for all color types.
+- **(breaking)** [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Removed the `height` argument from `ImageRaw::new`. The `height` is now calculated based on the width and data length.
+- **(breaking)** [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Replaced `pixelcolor::raw::RawDataIter` by the types in the `iterator::raw` module.
 
 ### Fixed
 

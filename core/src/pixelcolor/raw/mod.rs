@@ -81,7 +81,7 @@
 //! ];
 //!
 //! // Create new image with RGBI colors.
-//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2, 2);
+//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2);
 //!
 //! // In a real application the image could now be drawn to a display:
 //! // display.draw(&image);
@@ -112,22 +112,12 @@
 //! [`ToBytes`]: trait.ToBytes.html
 //! [`to_be_bytes`]: trait.ToBytes.html#tymethod.to_be_bytes
 
-mod iter;
 mod to_bytes;
 
-pub use iter::RawDataIter;
-pub(crate) use iter::RawDataIterNext;
 pub use to_bytes::ToBytes;
 
 /// Trait implemented by all `RawUx` types.
-pub trait RawData:
-    Sized
-    + private::Sealed
-    + RawDataIterNext<LittleEndian>
-    + RawDataIterNext<BigEndian>
-    + From<<Self as RawData>::Storage>
-    + ToBytes
-{
+pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + ToBytes {
     /// Storage type.
     ///
     /// A primitive unsigned integer storage type that contains at least `BITS_PER_PIXEL` bits.
@@ -186,6 +176,7 @@ macro_rules! impl_raw_data {
             /// Creates a new color from the least significant
             #[doc = $bpp_str]
             /// of value.
+            #[inline]
             pub const fn new(value: $storage_type) -> Self {
                 $type(value & $mask)
             }
