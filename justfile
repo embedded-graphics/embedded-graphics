@@ -12,7 +12,7 @@ doc_assets_dir := doc_dir + "/assets"
 # Building
 #----------
 
-build: check-formatting build-without-fmt-check
+build: check-formatting check-drawing-examples build-without-fmt-check
 
 build-without-fmt-check: test test-all build-benches check-readmes check-links
 
@@ -85,7 +85,7 @@ generate-drawing-examples:
 # Checks if drawing examples are up to date
 check-drawing-examples: generate-drawing-examples
     git diff --quiet doc/ || ( \
-        echo "doc/ folder is not up to date" \
+        echo "src/drawing_examples.rs is not up to date" \
         echo "Try running 'just generate-drawing-examples'." \
         echo "If any images have changed, run 'just generate-drawing-examples-montage' to update the collage image too" \
     )
