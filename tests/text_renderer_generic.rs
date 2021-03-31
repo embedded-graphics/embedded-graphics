@@ -4,13 +4,30 @@ use embedded_graphics::{
     prelude::*,
     primitives::Rectangle,
     text::{
-        renderer::{TextMetrics, TextRenderer},
+        renderer::{CharacterStyle, TextMetrics, TextRenderer},
         Baseline, Text,
     },
 };
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct GenericTextStyle<C>(C);
+
+impl<C: PixelColor> CharacterStyle for GenericTextStyle<C> {
+    fn measure_string(&self, text: &str, position: Point, _baseline: Baseline) -> TextMetrics {
+        // The `baseline` is ignored in this test, but must be used in a real impl.
+
+        let width = text.len() as u32 * 4;
+
+        TextMetrics {
+            bounding_box: Rectangle::new(position, Size::new(width, 4)),
+            next_position: position + Size::new(width, 0),
+        }
+    }
+
+    fn line_height(&self) -> u32 {
+        5
+    }
+}
 
 impl<C: PixelColor> TextRenderer for GenericTextStyle<C> {
     type Color = C;
@@ -43,21 +60,6 @@ impl<C: PixelColor> TextRenderer for GenericTextStyle<C> {
         D: DrawTarget<Color = Self::Color>,
     {
         todo!()
-    }
-
-    fn measure_string(&self, text: &str, position: Point, _baseline: Baseline) -> TextMetrics {
-        // TODO: use baseline
-
-        let width = text.len() as u32 * 4;
-
-        TextMetrics {
-            bounding_box: Rectangle::new(position, Size::new(width, 4)),
-            next_position: position + Size::new(width, 0),
-        }
-    }
-
-    fn line_height(&self) -> u32 {
-        5
     }
 }
 

@@ -10,11 +10,12 @@
 //!         - Draw text with multiple styles by using the result of `Text.draw(...)`
 //!       - Link to `renderer` module docs for users who want to implement custom renderers.
 
+use crate::pixelcolor::PixelColor;
+
 pub mod renderer;
 mod text;
 mod text_style;
 
-use embedded_graphics_core::prelude::PixelColor;
 pub use text::Text;
 pub use text_style::{TextStyle, TextStyleBuilder};
 

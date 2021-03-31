@@ -72,7 +72,7 @@ pub mod pixelcolor;
 pub mod prelude;
 pub mod primitives;
 
-pub use drawable::{Drawable, Pixel};
+pub use drawable::{Drawable, Pixel, TargetSpecificDrawable};
 
 /// Trait to convert unsigned into signed integer.
 trait SaturatingCast<T> {

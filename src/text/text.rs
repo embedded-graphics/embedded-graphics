@@ -3,11 +3,11 @@ use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::Rectangle,
     text::{
-        renderer::{TextMetrics, TextRenderer},
+        renderer::{CharacterStyle, TargetSpecificTextRenderer, TextMetrics, TextRenderer},
         Alignment, Baseline, TextStyle,
     },
     transform::Transform,
-    Drawable, SaturatingCast, Styled,
+    Drawable, SaturatingCast, Styled, TargetSpecificDrawable,
 };
 /// A text object.
 ///
@@ -60,7 +60,7 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<S: TextRenderer> Styled<Text<'_>, S> {
+impl<S: CharacterStyle> Styled<Text<'_>, S> {
     fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
         let mut position = self.primitive.position;
 
@@ -74,7 +74,7 @@ impl<S: TextRenderer> Styled<Text<'_>, S> {
     }
 }
 
-impl<S: TextRenderer> Styled<Text<'_>, TextStyle<S>> {
+impl<S: CharacterStyle> Styled<Text<'_>, TextStyle<S>> {
     fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
         let mut position = self.primitive.position;
 
@@ -110,7 +110,10 @@ impl<S: TextRenderer> Styled<Text<'_>, TextStyle<S>> {
     }
 }
 
-impl<S: TextRenderer> Drawable for Styled<Text<'_>, S> {
+impl<S> Drawable for Styled<Text<'_>, S>
+where
+    S: CharacterStyle + TextRenderer,
+{
     type Color = S::Color;
     type Output = Point;
 
@@ -130,7 +133,30 @@ impl<S: TextRenderer> Drawable for Styled<Text<'_>, S> {
     }
 }
 
-impl<S: TextRenderer> Drawable for Styled<Text<'_>, TextStyle<S>> {
+impl<D, S> TargetSpecificDrawable<D> for Styled<Text<'_>, S>
+where
+    D: DrawTarget,
+    S: CharacterStyle + TargetSpecificTextRenderer<D>,
+{
+    type Output = Point;
+
+    fn draw(&self, target: &mut D) -> Result<Point, D::Error> {
+        let mut next_position = self.primitive.position;
+
+        for (line, position) in self.lines() {
+            next_position = self
+                .style
+                .draw_string(line, position, Baseline::Alphabetic, target)?;
+        }
+
+        Ok(next_position)
+    }
+}
+
+impl<S> Drawable for Styled<Text<'_>, TextStyle<S>>
+where
+    S: CharacterStyle + TextRenderer,
+{
     type Color = S::Color;
     type Output = Point;
 
@@ -138,6 +164,29 @@ impl<S: TextRenderer> Drawable for Styled<Text<'_>, TextStyle<S>> {
     where
         D: DrawTarget<Color = Self::Color>,
     {
+        let mut next_position = self.primitive.position;
+
+        for (line, position) in self.lines() {
+            next_position = self.style.character_style.draw_string(
+                line,
+                position,
+                self.style.baseline,
+                target,
+            )?;
+        }
+
+        Ok(next_position)
+    }
+}
+
+impl<D, S> TargetSpecificDrawable<D> for Styled<Text<'_>, TextStyle<S>>
+where
+    D: DrawTarget,
+    S: CharacterStyle + TargetSpecificTextRenderer<D>,
+{
+    type Output = Point;
+
+    fn draw(&self, target: &mut D) -> Result<Point, D::Error> {
         let mut next_position = self.primitive.position;
 
         for (line, position) in self.lines() {
@@ -166,7 +215,7 @@ fn update_min_max(min_max: &mut Option<(Point, Point)>, metrics: &TextMetrics) {
     }
 }
 
-impl<S: TextRenderer> Dimensions for Styled<Text<'_>, S> {
+impl<S: CharacterStyle> Dimensions for Styled<Text<'_>, S> {
     fn bounding_box(&self) -> Rectangle {
         let mut min_max: Option<(Point, Point)> = None;
 
@@ -185,7 +234,7 @@ impl<S: TextRenderer> Dimensions for Styled<Text<'_>, S> {
     }
 }
 
-impl<S: TextRenderer> Dimensions for Styled<Text<'_>, TextStyle<S>> {
+impl<S: CharacterStyle> Dimensions for Styled<Text<'_>, TextStyle<S>> {
     fn bounding_box(&self) -> Rectangle {
         let mut min_max: Option<(Point, Point)> = None;
 

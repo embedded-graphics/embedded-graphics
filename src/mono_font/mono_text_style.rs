@@ -9,7 +9,7 @@ use crate::{
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
     text::{
-        renderer::{CharacterStyle, TextMetrics, TextRenderer},
+        renderer::{CharacterStyle, ModifyCharacterStyle, TextMetrics, TextRenderer},
         Baseline, DecorationColor,
     },
     Drawable, SaturatingCast,
@@ -255,7 +255,9 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, '_, '_, C> {
 
         Ok(position + Point::new(width.saturating_cast(), self.baseline_offset(baseline)))
     }
+}
 
+impl<C: PixelColor> CharacterStyle for MonoTextStyle<'_, '_, '_, C> {
     fn measure_string(&self, text: &str, position: Point, baseline: Baseline) -> TextMetrics {
         let bb_position = position - Point::new(0, self.baseline_offset(baseline));
 
@@ -282,7 +284,7 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, '_, '_, C> {
     }
 }
 
-impl<C> CharacterStyle for MonoTextStyle<'_, '_, '_, C>
+impl<C: PixelColor> ModifyCharacterStyle for MonoTextStyle<'_, '_, '_, C>
 where
     C: PixelColor,
 {
@@ -1021,12 +1023,12 @@ mod tests {
     }
 
     #[test]
-    fn character_style() {
+    fn modify_character_style() {
         let mut style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
-        CharacterStyle::set_text_color(&mut style, None);
-        CharacterStyle::set_background_color(&mut style, Some(BinaryColor::On));
-        CharacterStyle::set_underline_color(&mut style, DecorationColor::TextColor);
-        CharacterStyle::set_strikethrough_color(
+        ModifyCharacterStyle::set_text_color(&mut style, None);
+        ModifyCharacterStyle::set_background_color(&mut style, Some(BinaryColor::On));
+        ModifyCharacterStyle::set_underline_color(&mut style, DecorationColor::TextColor);
+        ModifyCharacterStyle::set_strikethrough_color(
             &mut style,
             DecorationColor::Custom(BinaryColor::On),
         );

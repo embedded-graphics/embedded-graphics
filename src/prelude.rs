@@ -12,5 +12,5 @@ pub use crate::{
     },
     primitives::{ContainsPoint, OffsetOutline, PointsIter, Primitive, StyledPrimitiveAreas},
     transform::Transform,
-    Drawable, Pixel,
+    Drawable, Pixel, TargetSpecificDrawable,
 };

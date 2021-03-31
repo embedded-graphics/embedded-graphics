@@ -3,14 +3,11 @@
 //! TODO: Describe how this API can be implemented and add an example to the docs or link to an
 //!       external example.
 
-use crate::{
-    draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
-    text::Baseline,
-};
+use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, text::Baseline};
 
 mod character_style;
 
-pub use character_style::CharacterStyle;
+pub use character_style::{CharacterStyle, ModifyCharacterStyle, TextMetrics};
 
 /// Text renderer.
 ///
@@ -53,38 +50,41 @@ pub trait TextRenderer {
     ) -> Result<Point, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
+}
 
-    /// Returns the text metrics for a string.
+/// Target specific text renderer.
+///
+/// This trait is a target specific version of the [`TextRenderer`] trait.
+/// 
+/// [`TextRenderer`]: trait.TextRenderer.html
+pub trait TargetSpecificTextRenderer<D: DrawTarget> {
+    /// Draws a string.
+    ///
+    /// The method returns the start position of the next character to allow chaining of multiple
+    /// draw calls.
     ///
     /// # Implementation notes
-    ///
-    /// The returned bounding box must be independent of the text color. This is different to the
-    /// `Dimensions` trait, which should return a zero sized bounding box for completely transparent
-    /// drawables. But this behavior would make it impossible to correctly layout text which
-    /// contains a mixture of transparent and non transparent words.
     ///
     /// This method must not interpret any control characters and only render a single line of text.
     /// Any control character in the `text` should be handled the same way as any other character
     /// that isn't included in the font.
-    fn measure_string(&self, text: &str, position: Point, baseline: Baseline) -> TextMetrics;
+    fn draw_string(
+        &self,
+        text: &str,
+        position: Point,
+        baseline: Baseline,
+        target: &mut D,
+    ) -> Result<Point, D::Error>;
 
-    /// Returns the default line height.
+    /// Draws whitespace of the given width.
     ///
-    /// The line height is defined as the vertical distance between the baseline of two adjacent
-    /// lines in pixels.
-    fn line_height(&self) -> u32;
-}
-
-/// Text metrics.
-///
-/// See [`TextRenderer::measure_string`] for more information.
-///
-/// [`TextRenderer::measure_string`]: trait.TextRenderer.html#tymethod.measure_string
-#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct TextMetrics {
-    /// Bounding box.
-    pub bounding_box: Rectangle,
-
-    /// The position of the next text.
-    pub next_position: Point,
+    /// The method returns the start position of the next character to allow chaining of multiple
+    /// draw calls.
+    fn draw_whitespace(
+        &self,
+        width: u32,
+        position: Point,
+        baseline: Baseline,
+        target: &mut D,
+    ) -> Result<Point, D::Error>;
 }

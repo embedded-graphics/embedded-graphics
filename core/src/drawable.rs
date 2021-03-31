@@ -68,31 +68,69 @@ pub trait Drawable {
     /// The pixel color type.
     type Color: PixelColor;
 
-    // TODO: Remove `ignore` from example code when the `Text` drawable is updated
-    // CC https://github.com/embedded-graphics/embedded-graphics/pull/552#discussion_r576955191
     /// The return type of the [`draw`] method.
     ///
     /// The `Output` type can be used to return results and values produced from the drawing of the
     /// current item. For example, rendering two differently styled text items next to each other
     /// can make use of a returned value, allowing the next text to be positioned after the first:
     ///
-    /// ```rust,ignore
+    /// ```
+    /// use embedded_graphics::{
+    ///     mono_font::{
+    ///         ascii::{FONT_10X20, FONT_6X10},
+    ///         MonoTextStyle,
+    ///     },
+    ///     pixelcolor::BinaryColor,
+    ///     prelude::*,
+    ///     text::Text,
+    /// };
+    ///
+    /// # let mut display = embedded_graphics::mock_display::MockDisplay::new();
+    /// # display.set_allow_out_of_bounds_drawing(true);
+    /// let label_style = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
+    /// let value_style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
+    ///
     /// let next_point = Text::new("Label ", Point::new(10, 20))
     ///     .into_styled(label_style)
     ///     .draw(&mut display)?;
     ///
-    /// Text::new("Value", next_point).into_styled(value_style).draw(&mut display)?;
+    /// Text::new("1234", next_point)
+    ///     .into_styled(value_style)
+    ///     .draw(&mut display)?;
+    /// # Ok::<(), core::convert::Infallible>(())
     /// ```
     ///
     /// Use `()` if no value should be returned.
     ///
-    /// [`draw`]: #method.draw
+    /// [`draw`]: #tymethod.draw
     type Output;
 
     /// Draw the graphics object using the supplied DrawTarget.
     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
+}
+
+/// Target specific drawable.
+///
+/// This trait is a target specific version of the [`Drawable`] trait. It can be implemented if it
+/// is necessary to access target functions which aren't accessible using the [`DrawTarget`]
+/// trait implementation. This could, for example, be used to expose hardware accelerated drawing
+/// functions of a display controller to the user.
+///
+/// [`Drawable`]: trait.Drawable.html
+/// [`DrawTarget`]: draw_target/trait.DrawTarget.html
+pub trait TargetSpecificDrawable<D: DrawTarget> {
+    /// The return type of the [`draw`] method.
+    ///
+    /// See the [`Drawable::Output`] docs for more information.
+    ///
+    /// [`draw`]: #tymethod.draw
+    /// [`Drawable::Output`]: trait.Drawable.html#associatedtype.Output
+    type Output;
+
+    /// Draws the drawable to the given draw target.
+    fn draw(&self, target: &mut D) -> Result<Self::Output, D::Error>;
 }
 
 /// A single pixel.

@@ -233,7 +233,7 @@ mod styled;
 pub mod text;
 pub mod transform;
 
-pub use embedded_graphics_core::{pixelcolor, Drawable, Pixel};
+pub use embedded_graphics_core::{pixelcolor, Drawable, Pixel, TargetSpecificDrawable};
 pub use styled::Styled;
 
 /// Trait to convert unsigned into signed integer.
