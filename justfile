@@ -80,6 +80,7 @@ check-links: generate-docs
 # Generate drawing examples in the doc directory
 generate-drawing-examples:
     cd tools/generate-drawing-examples && cargo run
+    rustfmt src/drawing_examples.rs
 
 # Checks if drawing examples are up to date
 check-drawing-examples: generate-drawing-examples

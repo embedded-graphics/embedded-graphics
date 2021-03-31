@@ -1,3 +1,6 @@
+// WARNING: This file is generated, do not modify it directly!
+//          Modify `tools/generate-drawing-examples/main.rs` and run `just generate-drawing-examples` instead.
+//
 //! # Drawing examples
 //!
 //! ## Draw a single pixel
