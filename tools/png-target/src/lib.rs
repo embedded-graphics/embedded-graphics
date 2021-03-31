@@ -45,11 +45,13 @@ impl<C: EgToImageColor> PngTarget<C> {
     pub fn to_base64(&self) -> String {
         let mut png = Vec::new();
 
+        let image = self.scaled_image();
+
         PngEncoder::new(&mut png)
             .encode(
-                self.image.as_bytes(),
-                self.image.width(),
-                self.image.height(),
+                image.as_bytes(),
+                image.width(),
+                image.height(),
                 C::Image::COLOR_TYPE,
             )
             .unwrap();

@@ -222,6 +222,7 @@
 #![deny(unused_qualifications)]
 
 pub mod draw_target;
+pub mod drawing_examples;
 pub mod geometry;
 pub mod image;
 pub mod iterator;
