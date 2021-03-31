@@ -1,7 +1,4 @@
-use crate::text::{
-    renderer::{CharacterStyle, TextRenderer},
-    Alignment, Baseline, LineHeight,
-};
+use crate::text::{renderer::CharacterStyle, Alignment, Baseline, LineHeight};
 
 /// Text style.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -77,7 +74,7 @@ impl<S> TextStyleBuilder<S> {
 
 impl<S> TextStyleBuilder<S>
 where
-    S: CharacterStyle + TextRenderer,
+    S: CharacterStyle,
 {
     /// Builds the text style.
     pub fn build(self) -> TextStyle<S> {
@@ -93,14 +90,14 @@ pub struct UndefinedCharacterStyle;
 mod tests {
     use super::*;
     use crate::{
-        mono_font::{ascii::Font6x9, MonoTextStyleBuilder},
+        mono_font::{ascii::FONT_6X9, MonoTextStyleBuilder},
         pixelcolor::BinaryColor,
     };
 
     #[test]
     fn builder() {
-        let character_style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-            .font(Font6x9)
+        let character_style = MonoTextStyleBuilder::<BinaryColor>::new()
+            .font(&FONT_6X9)
             .build();
 
         let text_style = TextStyleBuilder::new()
@@ -118,8 +115,8 @@ mod tests {
 
     #[test]
     fn builder_default() {
-        let character_style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-            .font(Font6x9)
+        let character_style = MonoTextStyleBuilder::<BinaryColor>::new()
+            .font(&FONT_6X9)
             .build();
 
         // Setting a `character_style` is required to be able to call `build`.

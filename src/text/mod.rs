@@ -14,6 +14,7 @@ pub mod renderer;
 mod text;
 mod text_style;
 
+use embedded_graphics_core::prelude::PixelColor;
 pub use text::Text;
 pub use text_style::{TextStyle, TextStyleBuilder};
 
@@ -51,7 +52,7 @@ pub enum DecorationColor<C> {
     Custom(C),
 }
 
-impl<C> DecorationColor<C> {
+impl<C: PixelColor> DecorationColor<C> {
     /// Returns `true` if the decoration_color is `None`.
     pub fn is_none(&self) -> bool {
         // MSRV: replace with matches! for rust >= 1.42.0
@@ -76,6 +77,14 @@ impl<C> DecorationColor<C> {
         match self {
             Self::Custom(_) => true,
             _ => false,
+        }
+    }
+
+    pub(crate) fn to_color(&self, text_color: Option<C>) -> Option<C> {
+        match self {
+            DecorationColor::TextColor => text_color,
+            DecorationColor::Custom(custom_color) => Some(*custom_color),
+            DecorationColor::None => None,
         }
     }
 }

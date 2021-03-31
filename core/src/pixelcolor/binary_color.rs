@@ -65,6 +65,7 @@ impl BinaryColor {
     /// assert_eq!(BinaryColor::Off.invert(), BinaryColor::On);
     /// assert_eq!(BinaryColor::On.invert(), BinaryColor::Off);
     /// ```
+    #[inline]
     pub fn invert(self) -> Self {
         match self {
             BinaryColor::On => BinaryColor::Off,
@@ -81,6 +82,7 @@ impl BinaryColor {
     ///
     /// assert!(BinaryColor::On.is_on());
     /// ```
+    #[inline]
     pub fn is_on(self) -> bool {
         self == BinaryColor::On
     }
@@ -94,6 +96,7 @@ impl BinaryColor {
     ///
     /// assert!(BinaryColor::Off.is_off());
     /// ```
+    #[inline]
     pub fn is_off(self) -> bool {
         self == BinaryColor::Off
     }

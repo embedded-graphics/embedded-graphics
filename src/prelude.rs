@@ -6,7 +6,6 @@ pub use crate::{
     geometry::{Angle, AngleUnit, Dimensions, OriginDimensions, Point, Size},
     image::{ImageDrawable, ImageDrawableExt},
     iterator::{ContiguousIteratorExt, IntoPixels, PixelIteratorExt},
-    mono_font::MonoFont,
     pixelcolor::{
         raw::{RawData, ToBytes as _},
         GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,

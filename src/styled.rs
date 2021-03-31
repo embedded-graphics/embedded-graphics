@@ -1,10 +1,4 @@
-use crate::{
-    geometry::{Dimensions, Point},
-    mono_font::{MonoFont, MonoTextStyle},
-    pixelcolor::PixelColor,
-    primitives::Rectangle,
-    transform::Transform,
-};
+use crate::{geometry::Point, transform::Transform};
 
 /// Styled.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -38,16 +32,5 @@ where
         self.primitive.translate_mut(by);
 
         self
-    }
-}
-
-impl<T, C, F> Dimensions for Styled<T, MonoTextStyle<C, F>>
-where
-    T: Dimensions,
-    C: PixelColor,
-    F: MonoFont,
-{
-    fn bounding_box(&self) -> Rectangle {
-        self.primitive.bounding_box()
     }
 }

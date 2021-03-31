@@ -26,7 +26,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// ```
     /// use embedded_graphics::{
     ///     mock_display::MockDisplay,
-    ///     mono_font::{ascii::Font6x9, MonoTextStyle},
+    ///     mono_font::{ascii::FONT_6X9, MonoTextStyle},
     ///     pixelcolor::BinaryColor,
     ///     prelude::*,
     ///     text::Text,
@@ -37,13 +37,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// // Draws text at position (5, 10) in the display coordinate system
     /// Text::new("Text", Point::zero())
-    ///     .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
+    ///     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
     ///     .draw(&mut translated_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
     /// # Text::new("Text", Point::new(5, 10))
-    /// #     .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
+    /// #     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #
     /// # display.assert_eq(&expected);
@@ -69,11 +69,11 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// ```
     /// use embedded_graphics::{
     ///     mock_display::MockDisplay,
-    ///     mono_font::{ascii::Font6x9, MonoTextStyle},
+    ///     mono_font::{ascii::FONT_6X9, MonoTextStyle},
     ///     pixelcolor::Rgb565,
     ///     prelude::*,
     ///     primitives::Rectangle,
-    ///     text::Text,
+    ///     text::{Text, Alignment, Baseline, TextStyleBuilder},
     /// };
     ///
     /// /// Fills a draw target with a blue background and prints centered yellow text.
@@ -83,13 +83,17 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// {
     ///     target.clear(Rgb565::BLUE)?;
     ///
-    ///     let target_size = target.bounding_box().size;
-    ///     let text_size = Font6x9::CHARACTER_SIZE.component_mul(Size::new(text.len() as u32, 1));
+    ///     let text_position = target.bounding_box().center();
     ///
-    ///     let text_position = Point::zero() + (target_size - text_size) / 2;
+    ///     let character_style = MonoTextStyle::new(&FONT_6X9, Rgb565::YELLOW);
+    ///     let text_style = TextStyleBuilder::new()
+    ///         .character_style(character_style)
+    ///         .alignment(Alignment::Center)
+    ///         .baseline(Baseline::Middle)
+    ///         .build();
     ///
     ///     Text::new(text, text_position)
-    ///         .into_styled(MonoTextStyle::new(Font6x9, Rgb565::YELLOW))
+    ///         .into_styled(MonoTextStyle::new(&FONT_6X9, Rgb565::YELLOW))
     ///         .draw(target)?;
     ///
     ///     Ok(())
@@ -122,7 +126,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// ```
     /// use embedded_graphics::{
     ///     mock_display::MockDisplay,
-    ///     mono_font::{ascii::Font10x20, MonoTextStyle},
+    ///     mono_font::{ascii::FONT_10X20, MonoTextStyle},
     ///     pixelcolor::BinaryColor,
     ///     prelude::*,
     ///     primitives::Rectangle,
@@ -137,13 +141,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// // Only the first 4 characters will be drawn, because the others are outside
     /// // the clipping area
     /// Text::new("Clipped", Point::new(0, 15))
-    ///     .into_styled(MonoTextStyle::new(Font10x20, BinaryColor::On))
+    ///     .into_styled(MonoTextStyle::new(&FONT_10X20, BinaryColor::On))
     ///     .draw(&mut clipped_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
     /// # Text::new("Clip", Point::new(0, 15))
-    /// #     .into_styled(MonoTextStyle::new(Font10x20, BinaryColor::On))
+    /// #     .into_styled(MonoTextStyle::new(&FONT_10X20, BinaryColor::On))
     /// #     .draw(&mut expected)?;
     /// #
     /// # display.assert_eq(&expected);

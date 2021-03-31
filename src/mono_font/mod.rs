@@ -19,7 +19,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     mono_font::{ascii::Font6x9, MonoTextStyle, MonoTextStyleBuilder},
+//!     mono_font::{ascii::FONT_6X9, MonoTextStyle, MonoTextStyleBuilder},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     text::Text,
@@ -30,7 +30,7 @@
 //!
 //! // Create a new text style
 //! let style = MonoTextStyleBuilder::new()
-//!     .font(Font6x9)
+//!     .font(&FONT_6X9)
 //!     .text_color(Rgb565::YELLOW)
 //!     .background_color(Rgb565::BLUE)
 //!     .build();
@@ -46,7 +46,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     mono_font::{ascii::Font6x9, MonoTextStyle},
+//!     mono_font::{ascii::FONT_6X9, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //!     text::Text,
@@ -56,7 +56,7 @@
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
 //! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display)?;
 //!
@@ -65,7 +65,7 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
+//!     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
 //!     .draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
@@ -80,7 +80,7 @@
 //! use arrayvec::ArrayString;
 //! use core::fmt::Write;
 //! use embedded_graphics::{
-//!     mono_font::{ascii::Font6x9, MonoTextStyleBuilder},
+//!     mono_font::{ascii::FONT_6X9, MonoTextStyleBuilder},
 //!     pixelcolor::Rgb565,
 //!     prelude::*,
 //!     text::Text,
@@ -100,7 +100,7 @@
 //! Text::new(&buf, Point::zero())
 //!     .into_styled(
 //!         MonoTextStyleBuilder::new()
-//!             .font(Font6x9)
+//!             .font(&FONT_6X9)
 //!             .text_color(Rgb565::YELLOW)
 //!             .background_color(Rgb565::BLUE)
 //!             .build(),
@@ -129,61 +129,251 @@
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
 
 pub mod ascii;
+mod draw_target;
 pub mod latin1;
-mod mono_char_pixels;
 mod mono_text_style;
 
-pub(crate) use mono_char_pixels::MonoCharPixels;
+use core::ops::RangeInclusive;
 
 pub use mono_text_style::{MonoTextStyle, MonoTextStyleBuilder};
 
-use crate::geometry::Size;
+use crate::{
+    geometry::{OriginDimensions, Point, Size},
+    image::{ImageRaw, SubImage},
+    pixelcolor::BinaryColor,
+    primitives::Rectangle,
+};
 
 /// Monospaced bitmap font.
-pub trait MonoFont: Copy {
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct MonoFont<'a, 'b> {
     /// Raw image data containing the font.
-    const FONT_IMAGE: &'static [u8];
-
-    /// The width of the raw image data.
-    ///
-    /// The width must be divisible by `8` and `CHARACTER_SIZE.width`.
-    const FONT_IMAGE_WIDTH: u32;
+    image: ImageRaw<'a, BinaryColor>,
 
     /// Size of a single character in pixel.
-    const CHARACTER_SIZE: Size;
+    character_size: Size,
 
     /// Spacing between characters.
     ///
     /// The spacing defines how many empty pixels are added horizontally between adjacent characters
     /// on a single line of text.
-    const CHARACTER_SPACING: u32 = 0;
+    character_spacing: u32,
 
     /// The baseline.
     ///
-    /// TODO: add description how this value is used and what the default value is
-    const BASELINE: Option<i32> = None;
+    /// Offset from the top of the glyph bounding box to the baseline.
+    baseline: u32,
 
-    /// Offset from top of a character to the top of the strikethrough.
-    const STRIKETHROUGH_OFFSET: i32 = Self::CHARACTER_SIZE.height as i32 / 2;
+    /// Strikethrough decoration parameters.
+    strikethrough: Decoration,
 
-    /// Height of the strikethrough.
-    const STRIKETHROUGH_HEIGHT: u32 = 1;
+    /// Underline decoration parameters.
+    underline: Decoration,
 
-    /// Offset from top of a character to the top of the underline.
-    const UNDERLINE_OFFSET: i32 = Self::CHARACTER_SIZE.height as i32;
-
-    /// Height of the underline.
-    const UNDERLINE_HEIGHT: u32 = 1;
-
-    /// Returns the position of a character in the font.
-    fn char_offset(_: char) -> u32;
+    /// Glyph indices.
+    glyph_indices: GlyphIndices<'b>,
 }
+
+impl MonoFont<'_, '_> {
+    /// Returns a subimage for a glyph.
+    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<BinaryColor>> {
+        let glyphs_per_row = self.image.size().width / self.character_size.width;
+
+        // Char _code_ offset from first char, most often a space
+        // E.g. first char = ' ' (32), target char = '!' (33), offset = 33 - 32 = 1
+        let glyph_index = self.glyph_indices.get(c);
+        let row = glyph_index / glyphs_per_row;
+
+        // Top left corner of character, in pixels
+        let char_x = (glyph_index - (row * glyphs_per_row)) * self.character_size.width;
+        let char_y = row * self.character_size.height;
+
+        SubImage::new_unchecked(
+            &self.image,
+            Rectangle::new(
+                Point::new(char_x as i32, char_y as i32),
+                self.character_size,
+            ),
+        )
+    }
+}
+
+/// Mono font builder.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct MonoFontBuilder<'a, 'b> {
+    font: MonoFont<'a, 'b>,
+}
+
+impl<'a, 'b> MonoFontBuilder<'a, 'b> {
+    /// Creates a new mono font builder.
+    pub const fn new() -> Self {
+        Self { font: NULL_FONT }
+    }
+
+    /// Sets the image.
+    pub const fn image(mut self, image: ImageRaw<'a, BinaryColor>) -> Self {
+        self.font.image = image;
+        self
+    }
+
+    /// Sets the character size.
+    ///
+    /// Setting the character size resets the baseline and decoration parameters to their default
+    /// value.
+    ///
+    /// # Panics
+    ///
+    /// This methods panics if the character height is 0.
+    // MSRV 1.46: Don't reset baseline, underline and strikethrough (see other methods).
+    // MSRV 1.47: Use `saturating_sub` to calculate baseline to remove panic.
+    pub const fn character_size(mut self, character_size: Size) -> Self {
+        self.font.character_size = character_size;
+        self.font.baseline = character_size.height - 1;
+        self.font.underline = Decoration::new(character_size.height + 1, 1);
+        self.font.strikethrough = Decoration::new(self.font.baseline / 2, 1);
+
+        self
+    }
+
+    /// Sets the character spacing.
+    pub const fn character_spacing(mut self, character_spacing: u32) -> Self {
+        self.font.character_spacing = character_spacing;
+        self
+    }
+
+    /// Sets the baseline.
+    ///
+    /// To set a custom baseline this method must be called after `character_size`.
+    // MSRV 1.46: Use `Option<u32>` internally and resolve the final value in `build` to make the
+    //            builder behave the same independent of the call order.
+    pub const fn baseline(mut self, baseline: u32) -> Self {
+        self.font.baseline = baseline;
+        self
+    }
+
+    /// Sets the underline decoration.
+    ///
+    /// To set a custom underline offset and height this method must be called after `character_size`
+    /// and `baseline`.
+    // MSRV 1.46: Use `Option<Decoration>` internally and resolve the final value in `build` to make
+    //            the builder behave the same independent of the call order.
+    pub const fn underline(mut self, offset: u32, height: u32) -> Self {
+        self.font.underline = Decoration::new(offset, height);
+        self
+    }
+
+    /// Sets the strikethrough decoration.
+    ///
+    /// To set a custom strikethrough offset and height this method must be called after `character_size`.
+    // MSRV 1.46: Use `Option<Decoration>` internally and resolve the final value in `build` to make
+    //            the builder behave the same independent of the call order.
+    pub const fn strikethrough(mut self, offset: u32, height: u32) -> Self {
+        self.font.strikethrough = Decoration::new(offset, height);
+        self
+    }
+
+    /// Sets the glyph indices.
+    pub const fn glyph_indices(mut self, glyph_indices: GlyphIndices<'b>) -> Self {
+        self.font.glyph_indices = glyph_indices;
+        self
+    }
+
+    /// Builds the font.
+    pub const fn build(self) -> MonoFont<'a, 'b> {
+        self.font
+    }
+}
+
+/// Glyph indices.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct GlyphIndices<'a> {
+    ranges: &'a [GlyphRange],
+    fallback: u32,
+}
+
+impl<'a> GlyphIndices<'a> {
+    /// Creates new character offsets.
+    pub const fn new(ranges: &'a [GlyphRange], fallback: u32) -> Self {
+        Self { ranges, fallback }
+    }
+
+    /// Gets the index of a character.
+    pub fn get(&self, c: char) -> u32 {
+        self.ranges
+            .iter()
+            .find_map(|range| range.get(c))
+            .unwrap_or(self.fallback)
+    }
+}
+
+/// Glyph range.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct GlyphRange {
+    characters: RangeInclusive<char>,
+    start_offset: u32,
+}
+
+impl GlyphRange {
+    /// Creates a new glyph range.
+    pub const fn new(first_char: char, last_char: char, start_offset: u32) -> Self {
+        Self {
+            characters: first_char..=last_char,
+            start_offset,
+        }
+    }
+
+    /// Gets the glyph index of a character.
+    ///
+    /// Returns `None` if the glyph isn't inside this character range.
+    pub fn get(&self, c: char) -> Option<u32> {
+        if self.characters.contains(&c) {
+            let delta = c as u32 - *self.characters.start() as u32;
+
+            Some(self.start_offset + delta)
+        } else {
+            None
+        }
+    }
+}
+
+/// Decoration parameters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Decoration {
+    /// Offset from the top of the character to the top of the decoration.
+    pub offset: u32,
+    /// Height of the decoration.
+    pub height: u32,
+}
+
+impl Decoration {
+    /// Creates new decoration parameters.
+    pub const fn new(offset: u32, height: u32) -> Self {
+        Self { offset, height }
+    }
+
+    fn to_rectangle(&self, position: Point, width: u32) -> Rectangle {
+        let top_left = position + Size::new(0, self.offset);
+        let size = Size::new(width, self.height);
+
+        Rectangle::new(top_left, size)
+    }
+}
+
+const NULL_FONT: MonoFont = MonoFont {
+    image: ImageRaw::new_binary(&[], 1),
+    character_size: Size::zero(),
+    character_spacing: 0,
+    baseline: 0,
+    strikethrough: Decoration::new(0, 0),
+    underline: Decoration::new(0, 0),
+    glyph_indices: ascii::ASCII_GLYPH_INDICES,
+};
 
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
     use crate::{
-        geometry::Point,
+        geometry::{AnchorPoint, Point},
         mock_display::MockDisplay,
         mono_font::MonoTextStyleBuilder,
         pixelcolor::BinaryColor,
@@ -194,10 +384,7 @@ pub(crate) mod tests {
     /// Draws a text using the given font and checks it against the expected pattern.
     // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
     // #[track_caller]
-    pub fn assert_text_from_pattern<F>(text: &str, font: F, pattern: &[&str])
-    where
-        F: MonoFont,
-    {
+    pub fn assert_text_from_pattern(text: &str, font: &MonoFont, pattern: &[&str]) {
         let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
@@ -220,10 +407,7 @@ pub(crate) mod tests {
     /// Test if the baseline constant is set correctly.
     ///
     /// This test assumes that the character `A` is on the baseline.
-    pub fn test_baseline<F>(font: F)
-    where
-        F: MonoFont,
-    {
+    pub fn test_baseline(font: &MonoFont) {
         let character_style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
@@ -241,8 +425,22 @@ pub(crate) mod tests {
             .draw(&mut display)
             .unwrap();
 
-        let baseline = display.affected_area().bottom_right().unwrap().y;
+        let baseline = display.affected_area().bottom_right().unwrap().y as u32;
 
-        assert_eq!(F::BASELINE, Some(baseline));
+        assert_eq!(font.baseline, baseline);
+    }
+
+    #[test]
+    fn default_baseline_and_decorations() {
+        let glyph_bb = Rectangle::new(Point::zero(), Size::new(10, 15));
+        let baseline = glyph_bb.anchor_point(AnchorPoint::BottomLeft).y as u32;
+        let strikethrough = glyph_bb.anchor_point(AnchorPoint::Center).y as u32;
+        let underline = glyph_bb.size.height + 1; // 1px gap between baseline and underline
+
+        let font = MonoFontBuilder::new().character_size(glyph_bb.size).build();
+
+        assert_eq!(font.baseline, baseline);
+        assert_eq!(font.strikethrough, Decoration::new(strikethrough, 1));
+        assert_eq!(font.underline, Decoration::new(underline, 1));
     }
 }

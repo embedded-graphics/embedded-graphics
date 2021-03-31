@@ -1,20 +1,13 @@
 /// $CHAR_WIDTH$x$CHAR_HEIGHT$ pixel monospace font.
 ///
-/// <img src="data:image/png;base64,$PNG_DATA$" alt="$TYPE$ font">
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct $TYPE$;
+/// <img src="data:image/png;base64,$PNG_DATA$" alt="$NAME$ font">
+pub const $NAME$: MonoFont = MonoFontBuilder::new()
+    .image(ImageRaw::new_binary(include_bytes!("$RAW_FILE$"), $IMAGE_WIDTH$))
+    .glyph_indices(super::$GLYPH_INDICES$)
+    .character_size(Size::new($CHAR_WIDTH$, $CHAR_HEIGHT$))
+    .character_spacing($CHARACTER_SPACING$)
+    .baseline($BASELINE$)
+    .underline($BASELINE$ + 2, 1)
+    .strikethrough($CHAR_HEIGHT$ / 2, 1)
+    .build();
 
-impl MonoFont for $TYPE$ {
-    const FONT_IMAGE: &'static [u8] = include_bytes!("$RAW_FILE$");
-    const FONT_IMAGE_WIDTH: u32 = $IMAGE_WIDTH$;
-
-    const CHARACTER_SIZE: Size = Size::new($CHAR_WIDTH$, $CHAR_HEIGHT$);
-    const CHARACTER_SPACING: u32 = $CHARACTER_SPACING$;
-    const BASELINE: Option<i32> = Some($BASELINE$);
-
-    const UNDERLINE_OFFSET: i32 = $BASELINE$ + 2;
-
-    fn char_offset(c: char) -> u32 {
-        super::char_offset(c)
-    }
-}

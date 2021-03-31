@@ -33,7 +33,7 @@ where
     <Self as Iterator>::Item: PixelColor,
 {
     /// Converts a contiguous iterator into a pixel iterator.
-    fn into_pixels(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self>;
+    fn into_pixels_iter(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self>;
 }
 
 impl<I> ContiguousIteratorExt for I
@@ -41,7 +41,7 @@ where
     I: Iterator,
     I::Item: PixelColor,
 {
-    fn into_pixels(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self> {
+    fn into_pixels_iter(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self> {
         contiguous::IntoPixels::new(self, *bounding_box)
     }
 }

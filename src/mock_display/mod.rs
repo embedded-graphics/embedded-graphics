@@ -205,7 +205,7 @@ const DISPLAY_AREA: Rectangle = Rectangle::new(Point::zero(), Size::new_equal(SI
 /// Mock display struct
 ///
 /// See the [module documentation](./index.html) for usage and examples.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct MockDisplay<C>
 where
     C: PixelColor,

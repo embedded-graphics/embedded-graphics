@@ -99,7 +99,10 @@ impl Output {
 
     fn rust_struct(&self) -> String {
         let output = include_str!("../assets/font.tmpl");
-        let output = output.replace("$TYPE$", &format!("Font{}", self.name));
+        let output = output.replace(
+            "$NAME$",
+            &format!("FONT_{}", self.name.to_ascii_uppercase()),
+        );
         let output = output.replace(
             "$RAW_FILE$",
             &format!("../../../fonts/{}/raw/{}.raw", self.encoding, self.name),
@@ -114,6 +117,7 @@ impl Output {
             &self.bitmap.character_spacing.to_string(),
         );
         let output = output.replace("$PNG_DATA$", &self.png.to_base64());
+        let output = output.replace("$GLYPH_INDICES$", encoding_to_glyph_indices(self.encoding));
 
         output
     }
@@ -131,4 +135,11 @@ fn bitmap_to_png(bitmap: &Bitmap) -> Result<PngTarget<BinaryColor>> {
         .unwrap();
 
     Ok(image)
+}
+
+fn encoding_to_glyph_indices(encoding: Encoding) -> &'static str {
+    match encoding {
+        Encoding::Ascii => "ASCII_GLYPH_INDICES",
+        Encoding::Latin1 => "LATIN1_GLYPH_INDICES",
+    }
 }

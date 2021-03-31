@@ -6,15 +6,17 @@ mod generated;
 
 pub use generated::*;
 
-fn char_offset(c: char) -> u32 {
-    let c = c as u32;
+use crate::mono_font::{GlyphIndices, GlyphRange};
 
-    match c {
-        0x20..=0x7F => c - 0x20,
-        0xA0..=0xFF => c - 0xA0 + 0x60,
-        _ => '?' as u32 - ' ' as u32,
-    }
-}
+/// Glyph ranges for Latin-1 fonts.
+const LATIN1_GLYPH_RANGES: &[GlyphRange] = &[
+    GlyphRange::new(' ', '\x7F', 0),
+    GlyphRange::new('\u{00A0}', '\u{00FF}', 0x60),
+];
+
+/// Glyph indices for Latin-1 fonts.
+pub const LATIN1_GLYPH_INDICES: GlyphIndices =
+    GlyphIndices::new(LATIN1_GLYPH_RANGES, '?' as u32 - ' ' as u32);
 
 #[cfg(test)]
 mod tests {
@@ -27,45 +29,57 @@ mod tests {
 
     #[test]
     fn char_offset_valid() {
-        assert_eq!(char_offset(c(0x20)), 0);
-        assert_eq!(char_offset(c(0x40)), 2 * 16);
-        assert_eq!(char_offset(c(0x7F)), 6 * 16 - 1);
-        assert_eq!(char_offset(c(0xA0)), 6 * 16);
-        assert_eq!(char_offset(c(0xD0)), 9 * 16);
-        assert_eq!(char_offset(c(0xFF)), 12 * 16 - 1);
+        assert_eq!(LATIN1_GLYPH_INDICES.get(c(0x20)), 0);
+        assert_eq!(LATIN1_GLYPH_INDICES.get(c(0x40)), 2 * 16);
+        assert_eq!(LATIN1_GLYPH_INDICES.get(c(0x7F)), 6 * 16 - 1);
+        assert_eq!(LATIN1_GLYPH_INDICES.get(c(0xA0)), 6 * 16);
+        assert_eq!(LATIN1_GLYPH_INDICES.get(c(0xD0)), 9 * 16);
+        assert_eq!(LATIN1_GLYPH_INDICES.get(c(0xFF)), 12 * 16 - 1);
     }
 
     #[test]
     fn char_offset_fallback() {
-        assert_eq!(char_offset(c(0x1F)), char_offset('?'));
-        assert_eq!(char_offset(c(0x80)), char_offset('?'));
-        assert_eq!(char_offset(c(0x9F)), char_offset('?'));
-        assert_eq!(char_offset(c(0x100)), char_offset('?'));
+        assert_eq!(
+            LATIN1_GLYPH_INDICES.get(c(0x1F)),
+            LATIN1_GLYPH_INDICES.get('?')
+        );
+        assert_eq!(
+            LATIN1_GLYPH_INDICES.get(c(0x80)),
+            LATIN1_GLYPH_INDICES.get('?')
+        );
+        assert_eq!(
+            LATIN1_GLYPH_INDICES.get(c(0x9F)),
+            LATIN1_GLYPH_INDICES.get('?')
+        );
+        assert_eq!(
+            LATIN1_GLYPH_INDICES.get(c(0x100)),
+            LATIN1_GLYPH_INDICES.get('?')
+        );
     }
 
     #[test]
     fn baseline() {
-        test_baseline(Font4x6);
-        test_baseline(Font5x7);
-        test_baseline(Font5x8);
-        test_baseline(Font6x10);
-        test_baseline(Font6x12);
-        test_baseline(Font6x13Bold);
-        test_baseline(Font6x13);
-        test_baseline(Font6x13Italic);
-        test_baseline(Font6x9);
-        test_baseline(Font7x13Bold);
-        test_baseline(Font7x13);
-        test_baseline(Font7x13Italic);
-        test_baseline(Font7x14Bold);
-        test_baseline(Font7x14);
-        test_baseline(Font8x13Bold);
-        test_baseline(Font8x13);
-        test_baseline(Font8x13Italic);
-        test_baseline(Font9x15Bold);
-        test_baseline(Font9x15);
-        test_baseline(Font9x18Bold);
-        test_baseline(Font9x18);
-        test_baseline(Font10x20);
+        test_baseline(&FONT_4X6);
+        test_baseline(&FONT_5X7);
+        test_baseline(&FONT_5X8);
+        test_baseline(&FONT_6X10);
+        test_baseline(&FONT_6X12);
+        test_baseline(&FONT_6X13BOLD);
+        test_baseline(&FONT_6X13);
+        test_baseline(&FONT_6X13ITALIC);
+        test_baseline(&FONT_6X9);
+        test_baseline(&FONT_7X13BOLD);
+        test_baseline(&FONT_7X13);
+        test_baseline(&FONT_7X13ITALIC);
+        test_baseline(&FONT_7X14BOLD);
+        test_baseline(&FONT_7X14);
+        test_baseline(&FONT_8X13BOLD);
+        test_baseline(&FONT_8X13);
+        test_baseline(&FONT_8X13ITALIC);
+        test_baseline(&FONT_9X15BOLD);
+        test_baseline(&FONT_9X15);
+        test_baseline(&FONT_9X18BOLD);
+        test_baseline(&FONT_9X18);
+        test_baseline(&FONT_10X20);
     }
 }

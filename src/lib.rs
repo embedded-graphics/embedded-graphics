@@ -135,7 +135,7 @@
 //!
 //! ```rust,no_run
 //! use embedded_graphics::{
-//!     mono_font::{ascii::Font6x9, MonoTextStyle},
+//!     mono_font::{ascii::FONT_6X9, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //!     primitives::{Circle, Rectangle, Triangle, PrimitiveStyle},
@@ -152,7 +152,7 @@
 //!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 //!     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
 //!     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
-//!     let text_style = MonoTextStyle::new(Font6x9, BinaryColor::On);
+//!     let text_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
 //!
 //!     let yoffset = 10;
 //!
