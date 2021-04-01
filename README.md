@@ -135,9 +135,9 @@ rendered by the display. See the [`DrawTarget`] documentation for implementation
 
 ### Drawing examples
 
-[![Collage of drawing examples](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/drawing-examples.md)
+[![Collage of drawing examples](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://docs.rs/embedded-graphics/latest/embedded_graphics/examples/index.html)
 
-Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/drawing-examples.md).
+Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://docs.rs/embedded-graphics/latest/embedded_graphics/examples/index.html).
 
 ### Shapes and text
 

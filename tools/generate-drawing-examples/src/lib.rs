@@ -88,7 +88,7 @@ impl ExampleWriter {
             writeln!(file, "//!")?;
             writeln!(
                 file,
-                r#"//! <img src="data:image/png;base64,{}" style="float: right; padding-left: 1rem; padding-bottom: 1rem;">"#,
+                r#"//! <img src="data:image/png;base64,{}" style="float: right; margin-left: 1rem; margin-bottom: 1rem;">"#,
                 example.image
             )?;
             for line in doc_lines {
