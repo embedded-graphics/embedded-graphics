@@ -9,7 +9,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     mono_font::{ascii::Font6x9, MonoTextStyle},
+///     mono_font::{ascii::FONT_6X9, MonoTextStyle},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
 ///     primitives::{Rectangle, PrimitiveStyle},
@@ -31,17 +31,17 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///     type Color = C;
 ///     type Output = ();
 ///
-///     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+///     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
 ///     where
 ///         D: DrawTarget<Color = C>,
 ///     {
 ///         Rectangle::new(self.top_left, self.size)
 ///             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
-///             .draw(display)?;
+///             .draw(target)?;
 ///
 ///         Text::new(self.text, Point::new(6, 13))
-///             .into_styled(MonoTextStyle::new(Font6x9, self.fg_color))
-///             .draw(display)?;
+///             .into_styled(MonoTextStyle::new(&FONT_6X9, self.fg_color))
+///             .draw(target)?;
 ///
 ///         Ok(())
 ///     }
@@ -85,10 +85,12 @@ pub trait Drawable {
     /// ```
     ///
     /// Use `()` if no value should be returned.
+    ///
+    /// [`draw`]: #method.draw
     type Output;
 
     /// Draw the graphics object using the supplied DrawTarget.
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
 }
@@ -137,11 +139,11 @@ where
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(core::iter::once(*self))
+        target.draw_iter(core::iter::once(*self))
     }
 }
 

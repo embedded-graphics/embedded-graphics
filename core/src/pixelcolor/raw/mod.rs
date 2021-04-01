@@ -198,6 +198,7 @@ macro_rules! impl_raw_data {
         }
 
         impl From<$storage_type> for $type {
+            #[inline]
             fn from(value: $storage_type) -> Self {
                 Self::new(value)
             }

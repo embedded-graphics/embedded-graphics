@@ -2,7 +2,7 @@ use criterion::*;
 use embedded_graphics::{
     geometry::Point,
     mono_font::{
-        ascii::{Font10x20, Font6x9},
+        ascii::{FONT_10X20, FONT_6X9},
         MonoTextStyle, MonoTextStyleBuilder,
     },
     pixelcolor::Gray8,
@@ -20,9 +20,9 @@ const THREE_LINES: Text = Text::new("line 1\nl2\nThis is line 3", Point::new_equ
 fn font_6x9(c: &mut Criterion) {
     let mut group = c.benchmark_group("font 6x9");
 
-    let style = MonoTextStyle::new(Font6x9, Gray8::WHITE);
+    let style = MonoTextStyle::new(&FONT_6X9, Gray8::WHITE);
     let style_with_bg = MonoTextStyleBuilder::new()
-        .font(Font6x9)
+        .font(&FONT_6X9)
         .text_color(Gray8::WHITE)
         .background_color(Gray8::BLACK)
         .build();
@@ -61,9 +61,9 @@ fn font_6x9(c: &mut Criterion) {
 fn font_10x20(c: &mut Criterion) {
     let mut group = c.benchmark_group("font 10x20");
 
-    let style = MonoTextStyle::new(Font10x20, Gray8::WHITE);
+    let style = MonoTextStyle::new(&FONT_10X20, Gray8::WHITE);
     let style_with_bg = MonoTextStyleBuilder::new()
-        .font(Font10x20)
+        .font(&FONT_10X20)
         .text_color(Gray8::WHITE)
         .background_color(Gray8::BLACK)
         .build();

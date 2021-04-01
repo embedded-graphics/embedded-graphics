@@ -39,6 +39,7 @@ impl Points {
 impl Iterator for Points {
     type Item = Point;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         // MSRV 1.47.0: use Range::is_empty
         while self.y.end > self.y.start {

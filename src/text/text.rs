@@ -1,7 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point, Size},
-    pixelcolor::PixelColor,
     primitives::Rectangle,
     text::{
         renderer::{TextMetrics, TextRenderer},
@@ -10,7 +9,6 @@ use crate::{
     transform::Transform,
     Drawable, SaturatingCast, Styled,
 };
-
 /// A text object.
 ///
 /// The `Text` struct represents a string that can be drawn onto a display.
@@ -62,11 +60,7 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<C, S> Styled<Text<'_>, S>
-where
-    C: PixelColor,
-    S: TextRenderer<Color = C>,
-{
+impl<S: TextRenderer> Styled<Text<'_>, S> {
     fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
         let mut position = self.primitive.position;
 
@@ -80,11 +74,7 @@ where
     }
 }
 
-impl<C, S> Styled<Text<'_>, TextStyle<S>>
-where
-    C: PixelColor,
-    S: TextRenderer<Color = C>,
-{
+impl<S: TextRenderer> Styled<Text<'_>, TextStyle<S>> {
     fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
         let mut position = self.primitive.position;
 
@@ -120,17 +110,13 @@ where
     }
 }
 
-impl<C, S> Drawable for Styled<Text<'_>, S>
-where
-    C: PixelColor,
-    S: TextRenderer<Color = C>,
-{
-    type Color = C;
+impl<S: TextRenderer> Drawable for Styled<Text<'_>, S> {
+    type Color = S::Color;
     type Output = Point;
 
     fn draw<D>(&self, target: &mut D) -> Result<Point, D::Error>
     where
-        D: DrawTarget<Color = C>,
+        D: DrawTarget<Color = Self::Color>,
     {
         let mut next_position = self.primitive.position;
 
@@ -144,17 +130,13 @@ where
     }
 }
 
-impl<C, S> Drawable for Styled<Text<'_>, TextStyle<S>>
-where
-    C: PixelColor,
-    S: TextRenderer<Color = C>,
-{
-    type Color = C;
+impl<S: TextRenderer> Drawable for Styled<Text<'_>, TextStyle<S>> {
+    type Color = S::Color;
     type Output = Point;
 
     fn draw<D>(&self, target: &mut D) -> Result<Point, D::Error>
     where
-        D: DrawTarget<Color = C>,
+        D: DrawTarget<Color = Self::Color>,
     {
         let mut next_position = self.primitive.position;
 
@@ -184,11 +166,7 @@ fn update_min_max(min_max: &mut Option<(Point, Point)>, metrics: &TextMetrics) {
     }
 }
 
-impl<C, S> Dimensions for Styled<Text<'_>, S>
-where
-    C: PixelColor,
-    S: TextRenderer<Color = C>,
-{
+impl<S: TextRenderer> Dimensions for Styled<Text<'_>, S> {
     fn bounding_box(&self) -> Rectangle {
         let mut min_max: Option<(Point, Point)> = None;
 
@@ -207,11 +185,7 @@ where
     }
 }
 
-impl<C, S> Dimensions for Styled<Text<'_>, TextStyle<S>>
-where
-    C: PixelColor,
-    S: TextRenderer<Color = C>,
-{
+impl<S: TextRenderer> Dimensions for Styled<Text<'_>, TextStyle<S>> {
     fn bounding_box(&self) -> Rectangle {
         let mut min_max: Option<(Point, Point)> = None;
 
@@ -238,7 +212,7 @@ mod tests {
         geometry::Size,
         mock_display::MockDisplay,
         mono_font::{
-            ascii::{Font6x13, Font6x9},
+            ascii::{FONT_6X13, FONT_6X9},
             tests::assert_text_from_pattern,
             MonoTextStyle, MonoTextStyleBuilder,
         },
@@ -266,7 +240,7 @@ mod tests {
     fn multiline() {
         assert_text_from_pattern(
             "AB\nC",
-            Font6x9,
+            &FONT_6X9,
             &[
                 "            ",
                 "  #   ####  ",
@@ -292,7 +266,7 @@ mod tests {
     fn multiline_empty_line() {
         assert_text_from_pattern(
             "A\n\nBC",
-            Font6x9,
+            &FONT_6X9,
             &[
                 "            ",
                 "  #         ",
@@ -327,7 +301,7 @@ mod tests {
     #[test]
     fn multiline_dimensions() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -346,7 +320,7 @@ mod tests {
 
     #[test]
     fn position_and_translate() {
-        let style = MonoTextStyle::new(Font6x9, BinaryColor::On);
+        let style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
 
         let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
 
@@ -367,7 +341,7 @@ mod tests {
     fn inverted_text() {
         let mut display_inverse = MockDisplay::new();
         let style_inverse = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::Off)
             .background_color(BinaryColor::On)
             .build();
@@ -378,7 +352,7 @@ mod tests {
 
         let mut display_normal = MockDisplay::new();
         let style_normal = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .background_color(BinaryColor::Off)
             .build();
@@ -394,7 +368,7 @@ mod tests {
     fn no_fill_does_not_hang() {
         let mut display = MockDisplay::new();
         Text::new(" ", Point::zero())
-            .into_styled(MonoTextStyle::new(Font6x9, BinaryColor::On))
+            .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
             .draw(&mut display)
             .unwrap();
 
@@ -404,7 +378,7 @@ mod tests {
     #[test]
     fn transparent_text_color_does_not_overwrite_background() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .background_color(BinaryColor::On)
             .build();
 
@@ -443,8 +417,8 @@ mod tests {
     #[test]
     #[ignore]
     fn transparent_text_has_zero_size_but_retains_position() {
-        let style = MonoTextStyleBuilder::<BinaryColor, _>::new()
-            .font(Font6x9)
+        let style = MonoTextStyleBuilder::<BinaryColor>::new()
+            .font(&FONT_6X9)
             .build();
 
         let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
@@ -459,7 +433,7 @@ mod tests {
     #[test]
     fn alignment_left() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -499,7 +473,7 @@ mod tests {
     #[test]
     fn alignment_center() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -539,7 +513,7 @@ mod tests {
     #[test]
     fn horizontal_alignment_right() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -581,7 +555,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -648,7 +622,7 @@ mod tests {
         ] {
             for &alignment in &[Alignment::Left, Alignment::Center, Alignment::Right] {
                 let character_style = MonoTextStyleBuilder::new()
-                    .font(Font6x9)
+                    .font(&FONT_6X9)
                     .text_color(BinaryColor::On)
                     .background_color(BinaryColor::Off)
                     .build();
@@ -678,12 +652,12 @@ mod tests {
     #[test]
     fn chained_text_drawing() {
         let character_style1 = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
         let character_style2 = MonoTextStyleBuilder::new()
-            .font(Font6x13)
+            .font(&FONT_6X13)
             .text_color(BinaryColor::Off)
             .build();
 
@@ -713,7 +687,7 @@ mod tests {
     #[test]
     fn line_height_pixels() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 
@@ -748,7 +722,7 @@ mod tests {
     #[test]
     fn line_height_percent() {
         let character_style = MonoTextStyleBuilder::new()
-            .font(Font6x9)
+            .font(&FONT_6X9)
             .text_color(BinaryColor::On)
             .build();
 

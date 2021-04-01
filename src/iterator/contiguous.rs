@@ -37,6 +37,7 @@ where
 {
     type Item = Pixel<I::Item>;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|(p, c)| Pixel(p, c))
     }
