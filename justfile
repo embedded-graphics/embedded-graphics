@@ -104,29 +104,36 @@ generate-drawing-examples-montage:
 
 # Generate README.md for a single crate
 generate-readme crate: (_build-readme crate)
-    cp {{target_dir}}/{{crate}}_README.md {{crate}}/README.md
+    #!/usr/bin/env bash
+    set -euo pipefail
+    CRATE_DIR=$(dirname $(find . -name Cargo.toml -exec grep -l 'name = "{{crate}}"' {} \;))
+    cp "{{target_dir}}/README-{{crate}}.md" "$CRATE_DIR/README.md"
 
 # Check README.md for a single crate
 @check-readme crate: (_build-readme crate)
-    diff -q {{target_dir}}/{{crate}}_README.md ./{{crate}}/README.md || ( \
+    #!/usr/bin/env bash
+    set -euo pipefail
+    CRATE_DIR=$(dirname $(find . -name Cargo.toml -exec grep -l 'name = "{{crate}}"' {} \;))
+    diff -q "{{target_dir}}/README-{{crate}}.md" "$CRATE_DIR/README.md" || ( \
         echo -e "\033[1;31mError:\033[0m README.md for {{crate}} needs to be regenerated."; \
         echo -e "       Run 'just generate-readmes' to regenerate.\n"; \
         exit 1 \
     )
 
 # Generate README.md for all crates
-generate-readmes: (generate-readme ".") (generate-readme "./core")
+generate-readmes: (generate-readme "embedded-graphics") (generate-readme "embedded-graphics-core")
 
 # Checks README.md for all crates
-check-readmes: (check-readme ".") (check-readme "./core")
+check-readmes: (check-readme "embedded-graphics") (check-readme "embedded-graphics-core")
 
 # Builds README.md for a single crate
 _build-readme crate:
     #!/usr/bin/env bash
     set -e -o pipefail
-    mkdir -p {{target_dir}}/readme
+    mkdir -p {{target_dir}}
     echo "Building README.md for {{crate}}"
-    cargo readme -r {{crate}} | sed -E -f filter_readme.sed > {{target_dir}}/{{crate}}_README.md
+    CRATE_DIR=$(dirname $(find . -name Cargo.toml -exec grep -l 'name = "{{crate}}"' {} \;))
+    cargo readme -r "$CRATE_DIR" | sed -E -f "filter-readme-{{crate}}.sed" > "{{target_dir}}/README-{{crate}}.md"
 
 #----------------
 # Font conversion

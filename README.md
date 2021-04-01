@@ -20,19 +20,19 @@ consuming application to use far less RAM at little to no performance penalty.
 
 It contains built in items that make it easy to draw 2D graphics primitives:
 
-* Raw data images
-* Primitives
-    * Lines
-    * Rectangles (and squares)
-    * Circles
-    * Ellipses
-    * Arcs
-    * Sectors
-    * Triangles
-    * Polylines
-    * Rounded rectangles
-* Text
-* Monospaced fonts
+* [Raw data images](https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.ImageRaw.html)
+* [Primitives](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html)
+    * [Lines](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/line/struct.Line.html)
+    * [Rectangles (and squares)](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html)
+    * [Circles](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html)
+    * [Ellipses](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/ellipse/struct.Ellipse.html)
+    * [Arcs](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/arc/struct.Arc.html)
+    * [Sectors](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/sector/struct.Sector.html)
+    * [Triangles](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/triangle/struct.Triangle.html)
+    * [Polylines](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/polyline/struct.Polyline.html)
+    * [Rounded rectangles](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rounded_rectangle/struct.RoundedRectangle.html)
+* [Text](https://docs.rs/embedded-graphics/latest/embedded_graphics/text/index.html)
+* [Monospaced fonts](https://docs.rs/embedded-graphics/latest/embedded_graphics/mono_font/index.html)
 
 ## Additional functions provided by external crates
 
@@ -56,7 +56,7 @@ issue](https://github.com/embedded-graphics/embedded-graphics/issues/new) to add
 ## Display drivers
 
 To support many different kinds of display, embedded-graphics doesn't include any drivers
-directly but provides the `DrawTarget` API in `embedded-graphics-core` that can be
+directly but provides the [`DrawTarget`] API in [`embedded-graphics-core`] that can be
 implemented by external crates. In addition to the drivers for real displays, the
 [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
 development.
@@ -116,7 +116,7 @@ cargo run -p embedded-graphics-simulator --example hello
 Additional features can be enabled by adding the following features to your `Cargo.toml`.
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-support to enable conversions from `nalgebra::Vector2` to `Point` and `Size`.
+support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
 
 * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 calculation.
@@ -127,9 +127,9 @@ Please read [the migration guide](https://github.com/embedded-graphics/embedded-
 
 ## Implementing `embedded_graphics` support for a display driver
 
-To add support for embedded-graphics to a display driver, `DrawTarget` from
-`embedded-graphics-core` must be implemented. This allows all embedded-graphics items to be
-rendered by the display. See the `DrawTarget` documentation for implementation details.
+To add support for embedded-graphics to a display driver, [`DrawTarget`] from
+[`embedded-graphics-core`] must be implemented. This allows all embedded-graphics items to be
+rendered by the display. See the [`DrawTarget`] documentation for implementation details.
 
 ## Examples
 
@@ -141,7 +141,7 @@ Example usage of drawing primitives, text and images with embedded-graphics can 
 
 ### Shapes and text
 
-The following example draws some shapes and text to a `MockDisplay` in place of target
+The following example draws some shapes and text to a [`MockDisplay`] in place of target
 hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
 debugging, development or if hardware is not available.
 
@@ -211,7 +211,13 @@ can be run using `cargo run --example hello-world`. It produces this output:
 
 Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
 
+[`Circle`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
+[`MockDisplay`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html
+[`Point`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Point.html
+[`Size`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Size.html
+[`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 [embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
+[`Drawable`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/drawable/trait.Drawable.html
 
 ## Minimum supported Rust version
 
@@ -220,7 +226,7 @@ Ensure you have the correct version of Rust installed, preferably through <https
 
 ## Development setup
 
-Please see the [development setup guide](./doc/development-setup.md).
+Please see the [development setup guide](https://docs.rs/embedded-graphics/latest/embedded_graphics/doc/development-setup.md).
 
 ## Attribution
 
