@@ -224,13 +224,13 @@
 //!
 //! ```ignore
 //! use embedded_graphics::{
-//!     mono_font::{ascii::Font6x10, MonoTextStyle},
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
 //!     pixelcolor::Rgb888,
 //!     prelude::*,
 //!     text::Text,
 //! };
 //! Text::new("Hello,\nRust!", Point::new(2, 28))
-//!     .into_styled(MonoTextStyle::new(Font6x10, Rgb888::GREEN))
+//!     .into_styled(MonoTextStyle::new(&FONT_6X10, Rgb888::GREEN))
 //!     .draw(&mut display)?;
 //! ```
 //! ## Display a TGA image

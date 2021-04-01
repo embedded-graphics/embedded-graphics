@@ -198,13 +198,13 @@ fn draw_rounded_rectangle(mut display: Display) -> Result<Display, std::convert:
 /// This example draws the text \"Hello,\\nRust!\" with the `Font6x10` font in green.
 fn draw_text(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        mono_font::{ascii::Font6x10, MonoTextStyle},
+        mono_font::{ascii::FONT_6X10, MonoTextStyle},
         pixelcolor::Rgb888,
         prelude::*,
         text::Text,
     };
     Text::new("Hello,\nRust!", Point::new(2, 28))
-        .into_styled(MonoTextStyle::new(Font6x10, Rgb888::GREEN))
+        .into_styled(MonoTextStyle::new(&FONT_6X10, Rgb888::GREEN))
         .draw(&mut display)?;
 
     Ok(display)
