@@ -145,33 +145,43 @@ use crate::{
 };
 
 /// Monospaced bitmap font.
+///
+/// See the [module documentation] for more information about using fonts.
+///
+/// # Implementation notes
+///
+/// Use [`MonoFontBuilder`] to create new font objects.
+///
+/// [module documentation]: index.html
+/// [`MonoFontBuilder`]: struct.MonoFontBuilder.html
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[non_exhaustive]
 pub struct MonoFont<'a, 'b> {
     /// Raw image data containing the font.
-    image: ImageRaw<'a, BinaryColor>,
+    pub image: ImageRaw<'a, BinaryColor>,
 
     /// Size of a single character in pixel.
-    character_size: Size,
+    pub character_size: Size,
 
     /// Spacing between characters.
     ///
     /// The spacing defines how many empty pixels are added horizontally between adjacent characters
     /// on a single line of text.
-    character_spacing: u32,
+    pub character_spacing: u32,
 
     /// The baseline.
     ///
     /// Offset from the top of the glyph bounding box to the baseline.
-    baseline: u32,
+    pub baseline: u32,
 
-    /// Strikethrough decoration parameters.
-    strikethrough: Decoration,
+    /// Strikethrough decoration dimensions.
+    pub strikethrough: DecorationDimensions,
 
-    /// Underline decoration parameters.
-    underline: Decoration,
+    /// Underline decoration dimensions.
+    pub underline: DecorationDimensions,
 
     /// Glyph indices.
-    glyph_indices: GlyphIndices<'b>,
+    pub glyph_indices: GlyphIndices<'b>,
 }
 
 impl MonoFont<'_, '_> {
@@ -229,8 +239,8 @@ impl<'a, 'b> MonoFontBuilder<'a, 'b> {
     pub const fn character_size(mut self, character_size: Size) -> Self {
         self.font.character_size = character_size;
         self.font.baseline = character_size.height - 1;
-        self.font.underline = Decoration::new(character_size.height + 1, 1);
-        self.font.strikethrough = Decoration::new(self.font.baseline / 2, 1);
+        self.font.underline = DecorationDimensions::new(character_size.height + 1, 1);
+        self.font.strikethrough = DecorationDimensions::new(self.font.baseline / 2, 1);
 
         self
     }
@@ -258,7 +268,7 @@ impl<'a, 'b> MonoFontBuilder<'a, 'b> {
     // MSRV 1.46: Use `Option<Decoration>` internally and resolve the final value in `build` to make
     //            the builder behave the same independent of the call order.
     pub const fn underline(mut self, offset: u32, height: u32) -> Self {
-        self.font.underline = Decoration::new(offset, height);
+        self.font.underline = DecorationDimensions::new(offset, height);
         self
     }
 
@@ -268,7 +278,7 @@ impl<'a, 'b> MonoFontBuilder<'a, 'b> {
     // MSRV 1.46: Use `Option<Decoration>` internally and resolve the final value in `build` to make
     //            the builder behave the same independent of the call order.
     pub const fn strikethrough(mut self, offset: u32, height: u32) -> Self {
-        self.font.strikethrough = Decoration::new(offset, height);
+        self.font.strikethrough = DecorationDimensions::new(offset, height);
         self
     }
 
@@ -336,17 +346,22 @@ impl GlyphRange {
     }
 }
 
-/// Decoration parameters.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct Decoration {
+/// Decoration dimensions.
+///
+/// `DecorationDimensions` is used to specify the position and height of underline and strikethrough
+/// decorations in [`MonoFont`]s.
+///
+/// [`MonoFont`]: struct.MonoFont.html
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub struct DecorationDimensions {
     /// Offset from the top of the character to the top of the decoration.
     pub offset: u32,
     /// Height of the decoration.
     pub height: u32,
 }
 
-impl Decoration {
-    /// Creates new decoration parameters.
+impl DecorationDimensions {
+    /// Creates new decoration dimensions.
     pub const fn new(offset: u32, height: u32) -> Self {
         Self { offset, height }
     }
@@ -364,8 +379,8 @@ const NULL_FONT: MonoFont = MonoFont {
     character_size: Size::zero(),
     character_spacing: 0,
     baseline: 0,
-    strikethrough: Decoration::new(0, 0),
-    underline: Decoration::new(0, 0),
+    strikethrough: DecorationDimensions::new(0, 0),
+    underline: DecorationDimensions::new(0, 0),
     glyph_indices: ascii::ASCII_GLYPH_INDICES,
 };
 
@@ -440,7 +455,10 @@ pub(crate) mod tests {
         let font = MonoFontBuilder::new().character_size(glyph_bb.size).build();
 
         assert_eq!(font.baseline, baseline);
-        assert_eq!(font.strikethrough, Decoration::new(strikethrough, 1));
-        assert_eq!(font.underline, Decoration::new(underline, 1));
+        assert_eq!(
+            font.strikethrough,
+            DecorationDimensions::new(strikethrough, 1)
+        );
+        assert_eq!(font.underline, DecorationDimensions::new(underline, 1));
     }
 }

@@ -502,7 +502,7 @@ mod tests {
         mono_font::{
             ascii::{FONT_10X20, FONT_6X9},
             tests::*,
-            Decoration,
+            DecorationDimensions,
         },
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         text::{Text, TextStyleBuilder},
@@ -511,7 +511,7 @@ mod tests {
 
     const SPACED_FONT: MonoFont = MonoFont {
         character_spacing: 5,
-        underline: Decoration::new(9, 1),
+        underline: DecorationDimensions::new(9, 1),
         ..FONT_6X9
     };
 
