@@ -200,9 +200,23 @@ where
         self
     }
 
+    /// Resets the fill color to transparent.
+    pub fn reset_fill_color(mut self) -> Self {
+        self.style.fill_color = None;
+
+        self
+    }
+
     /// Sets the stroke color.
     pub fn stroke_color(mut self, stroke_color: C) -> Self {
         self.style.stroke_color = Some(stroke_color);
+
+        self
+    }
+
+    /// Resets the stroke color to transparent.
+    pub fn reset_stroke_color(mut self) -> Self {
+        self.style.stroke_color = None;
 
         self
     }
@@ -375,12 +389,42 @@ mod tests {
     }
 
     #[test]
+    fn builder_reset_stroke_color() {
+        assert_eq!(
+            PrimitiveStyleBuilder::new()
+                .stroke_color(BinaryColor::On)
+                .stroke_width(10)
+                .fill_color(BinaryColor::Off)
+                .reset_stroke_color()
+                .build(),
+            PrimitiveStyleBuilder::new()
+                .stroke_width(10)
+                .fill_color(BinaryColor::Off)
+                .build()
+        );
+    }
+
+    #[test]
     fn builder_fill() {
         assert_eq!(
             PrimitiveStyleBuilder::new()
                 .fill_color(BinaryColor::On)
                 .build(),
             PrimitiveStyle::with_fill(BinaryColor::On)
+        );
+    }
+
+    #[test]
+    fn builder_reset_fill_color() {
+        assert_eq!(
+            PrimitiveStyleBuilder::new()
+                .fill_color(BinaryColor::On)
+                .stroke_color(BinaryColor::Off)
+                .reset_fill_color()
+                .build(),
+            PrimitiveStyleBuilder::new()
+                .stroke_color(BinaryColor::Off)
+                .build(),
         );
     }
 

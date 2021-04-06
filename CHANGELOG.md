@@ -14,6 +14,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#569](https://github.com/embedded-graphics/embedded-graphics/pull/569) Added a `line_height` field to `TextStyle`.
 - [#571](https://github.com/embedded-graphics/embedded-graphics/pull/571) Added `MockDisplay::set_pixels` to set pixels from an iterator.
 - [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Added `ImageRaw::new_binary` to create `const` images with binary image data.
+- [#576](https://github.com/embedded-graphics/embedded-graphics/pull/576) Added reset methods for color settings to `MonoTextStyleBuilder` and `PrimitiveStyleBuilder`.
 
 ### Changed
 

@@ -434,6 +434,34 @@ impl<'a, 'b, 'c, C> MonoTextStyleBuilder<'a, 'b, 'c, C> {
 
         self
     }
+
+    /// Resets the text color to transparent.
+    pub fn reset_text_color(mut self) -> Self {
+        self.style.text_color = None;
+
+        self
+    }
+
+    /// Resets the background color to transparent.
+    pub fn reset_background_color(mut self) -> Self {
+        self.style.background_color = None;
+
+        self
+    }
+
+    /// Removes the underline decoration.
+    pub fn reset_underline(mut self) -> Self {
+        self.style.underline_color = DecorationColor::None;
+
+        self
+    }
+
+    /// Removes the strikethrough decoration.
+    pub fn reset_strikethrough(mut self) -> Self {
+        self.style.strikethrough_color = DecorationColor::None;
+
+        self
+    }
 }
 
 impl<C> MonoTextStyleBuilder<'_, '_, '_, C>
@@ -557,6 +585,56 @@ mod tests {
 
                 style
             }
+        );
+    }
+
+    #[test]
+    fn builder_resets() {
+        let base = MonoTextStyleBuilder::new()
+            .font(&FONT_10X20)
+            .text_color(BinaryColor::On)
+            .background_color(BinaryColor::On)
+            .underline()
+            .strikethrough();
+
+        assert_eq!(
+            base.clone().reset_text_color().build(),
+            MonoTextStyleBuilder::new()
+                .font(&FONT_10X20)
+                .background_color(BinaryColor::On)
+                .underline()
+                .strikethrough()
+                .build()
+        );
+
+        assert_eq!(
+            base.clone().reset_background_color().build(),
+            MonoTextStyleBuilder::new()
+                .font(&FONT_10X20)
+                .text_color(BinaryColor::On)
+                .underline()
+                .strikethrough()
+                .build()
+        );
+
+        assert_eq!(
+            base.clone().reset_underline().build(),
+            MonoTextStyleBuilder::new()
+                .font(&FONT_10X20)
+                .text_color(BinaryColor::On)
+                .background_color(BinaryColor::On)
+                .strikethrough()
+                .build()
+        );
+
+        assert_eq!(
+            base.clone().reset_strikethrough().build(),
+            MonoTextStyleBuilder::new()
+                .font(&FONT_10X20)
+                .text_color(BinaryColor::On)
+                .background_color(BinaryColor::On)
+                .underline()
+                .build()
         );
     }
 
