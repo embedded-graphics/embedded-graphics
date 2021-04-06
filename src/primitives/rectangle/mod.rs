@@ -167,10 +167,7 @@ mod tests {
         let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
         let rect2 = Rectangle::new(Point::new_equal(35), Size::new(30, 40));
 
-        assert_eq!(
-            rect1.intersection(&rect2),
-            Rectangle::new(Point::zero(), Size::zero())
-        );
+        assert!(rect1.intersection(&rect2).is_zero_sized());
     }
 
     #[test]

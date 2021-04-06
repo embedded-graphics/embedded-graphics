@@ -203,7 +203,7 @@ use crate::{
 ///         // Clamp the rectangle coordinates to the valid range by determining
 ///         // the intersection of the fill area and the visible display area
 ///         // by using Rectangle::intersection.
-///         let area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
+///         let area = area.intersection(&self.bounding_box());
 ///
 ///         // Do not send a draw rectangle command if the intersection size if zero.
 ///         // The size is checked by using `Rectangle::bottom_right`, which returns `None`
@@ -359,7 +359,7 @@ pub trait DrawTarget: Dimensions {
     ///         I: IntoIterator<Item = Self::Color>,
     ///     {
     ///         // Clamp area to drawable part of the display target
-    ///         let drawable_area = area.intersection(&Rectangle::new(Point::zero(), self.size()));
+    ///         let drawable_area = area.intersection(&self.bounding_box());
     ///
     ///         // Check that there are visible pixels to be drawn
     ///         if drawable_area.size != Size::zero() {

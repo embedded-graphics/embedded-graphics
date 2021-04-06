@@ -227,7 +227,8 @@ mod tests {
         let ellipse = Ellipse::new(Point::zero(), Size::new(40, 20));
 
         let display = MockDisplay::from_points(
-            Rectangle::new(Point::zero(), Size::new(40, 20))
+            ellipse
+                .bounding_box()
                 .points()
                 .filter(|p| ellipse.contains(*p)),
             BinaryColor::On,

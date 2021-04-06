@@ -343,7 +343,7 @@ where
         if let (Some(tl), Some(br)) = (tl, br) {
             Rectangle::with_corners(tl, br)
         } else {
-            Rectangle::new(Point::zero(), Size::zero())
+            Rectangle::zero()
         }
     }
 
@@ -418,7 +418,7 @@ where
     pub fn swap_xy(&self) -> MockDisplay<C> {
         let mut mirrored = MockDisplay::new();
 
-        for point in Rectangle::new(Point::zero(), self.size()).points() {
+        for point in self.bounding_box().points() {
             mirrored.set_pixel_unchecked(point, self.get_pixel(Point::new(point.y, point.x)));
         }
 
@@ -457,7 +457,7 @@ where
     {
         let mut target = MockDisplay::new();
 
-        for point in Rectangle::new(Point::zero(), self.size()).points() {
+        for point in self.bounding_box().points() {
             target.set_pixel_unchecked(point, self.get_pixel(point).map(f))
         }
 
@@ -798,11 +798,7 @@ mod tests {
     #[test]
     fn zero_sized_affected_area() {
         let disp: MockDisplay<BinaryColor> = MockDisplay::new();
-
-        assert_eq!(
-            disp.affected_area(),
-            Rectangle::new(Point::zero(), Size::zero())
-        );
+        assert!(disp.affected_area().is_zero_sized(),);
     }
 
     #[test]
