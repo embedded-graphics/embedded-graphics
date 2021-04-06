@@ -25,29 +25,42 @@ version of embedded-graphics-core may be used for multiple major versions of emb
 
 ### Core functionality
 
-* `DrawTarget` - By implementing a draw target for a display driver, all embedded-graphics drawables can be drawn to that display.
-* `Drawable` - This trait can be implemented to make an object drawable to any `DrawTarget`. Examples include shapes, text, UI elements, etc.
-* `ImageDrawable`
+* [`DrawTarget`] - By implementing a draw target for a display driver, all embedded-graphics drawables can be drawn to that display.
+* [`Drawable`] - This trait can be implemented to make an object drawable to any [`DrawTarget`]. Examples include shapes, text, UI elements, etc.
+* [`ImageDrawable`]
 * Color types - see below.
-* Geometry - `Point`, `Size` and `Rectangle` provide ways of defining positions, dimensions and rectangular areas respectively.
+* Geometry - [`Point`], [`Size`] and [`Rectangle`] provide ways of defining positions, dimensions and rectangular areas respectively.
 
 ## Colors
 
-The `pixelcolor` module provides various standard color types, from `BinaryColor` to
-`Rgb888`. See the `pixelcolor` module documentation for the complete list of color depths
+The [`pixelcolor`] module provides various standard color types, from [`BinaryColor`] to
+[`Rgb888`]. See the [`pixelcolor`] module documentation for the complete list of color depths
 and formats available.
 
 ## Display drivers
 
-See the `DrawTarget` documentation for examples on how to integrate embedded-graphics with a
-display driver using the `DrawTarget` trait.
+See the [`DrawTarget`] documentation for examples on how to integrate embedded-graphics with a
+display driver using the [`DrawTarget`] trait.
 
 ## Images
 
-The `ImageDrawable` trait should be implemented for any image or image-like item, for example
+The [`ImageDrawable`] trait should be implemented for any image or image-like item, for example
 a spritemap.
 
 [embedded-graphics]: https://docs.rs/embedded-graphics
+[`Pixel`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/drawable/struct.Pixel.html
+[`Point`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/struct.Point.html
+[`Size`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/struct.Size.html
+[`Drawable`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/drawable/trait.Drawable.html
+[`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
+[`Rectangle`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/primitives/rectangle/struct.Rectangle.html
+[`Dimensions`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/trait.Dimensions.html
+[`OriginDimensions`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/trait.OriginDimensions.html
+[`prelude`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/prelude/index.html
+[`pixelcolor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/index.html
+[`BinaryColor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/enum.BinaryColor.html
+[`Rgb888`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/struct.Rgb888.html
+[`ImageDrawable`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/image/image_drawable/trait.ImageDrawable.html
 
 ## Minimum supported Rust version
 

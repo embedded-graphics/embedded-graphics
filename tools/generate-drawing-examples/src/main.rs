@@ -1,4 +1,4 @@
-//! # Embedded graphics examples
+//! # Drawing examples
 
 use generate_drawing_examples::*;
 
@@ -198,13 +198,13 @@ fn draw_rounded_rectangle(mut display: Display) -> Result<Display, std::convert:
 /// This example draws the text \"Hello,\\nRust!\" with the `Font6x10` font in green.
 fn draw_text(mut display: Display) -> Result<Display, std::convert::Infallible> {
     use embedded_graphics::{
-        mono_font::{ascii::Font6x10, MonoTextStyle},
+        mono_font::{ascii::FONT_6X10, MonoTextStyle},
         pixelcolor::Rgb888,
         prelude::*,
         text::Text,
     };
     Text::new("Hello,\nRust!", Point::new(2, 28))
-        .into_styled(MonoTextStyle::new(Font6x10, Rgb888::GREEN))
+        .into_styled(MonoTextStyle::new(&FONT_6X10, Rgb888::GREEN))
         .draw(&mut display)?;
 
     Ok(display)
@@ -229,18 +229,22 @@ fn draw_tga_image(mut display: Display) -> Result<Display, std::convert::Infalli
 }
 
 fn main() {
-    example!(draw_pixel);
-    example!(draw_line);
-    example!(draw_rectangle);
-    example!(draw_circle);
-    example!(draw_ellipse);
-    example!(draw_arc);
-    example!(draw_sector);
-    example!(draw_triangle);
-    example!(draw_polyline);
-    example!(draw_rounded_rectangle);
-    example!(draw_text);
-    example!(draw_tga_image);
+    let mut writer = ExampleWriter::new(include_str!("main.rs"));
 
-    generate_markdown(include_str!("main.rs"));
+    example!(writer, draw_pixel);
+    example!(writer, draw_line);
+    example!(writer, draw_rectangle);
+    example!(writer, draw_circle);
+    example!(writer, draw_ellipse);
+    example!(writer, draw_arc);
+    example!(writer, draw_sector);
+    example!(writer, draw_triangle);
+    example!(writer, draw_polyline);
+    example!(writer, draw_rounded_rectangle);
+    example!(writer, draw_text);
+    example!(writer, draw_tga_image);
+
+    let path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/examples.rs");
+    writer.write(path).unwrap();
 }

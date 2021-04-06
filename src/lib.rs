@@ -123,9 +123,9 @@
 //!
 //! ## Drawing examples
 //!
-//! [![Collage of drawing examples](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/doc/assets/all_drawing_ops.png)](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/drawing-examples.md)
+//! [![Collage of drawing examples](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/doc/assets/all_drawing_ops.png)](./examples/index.html)
 //!
-//! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/drawing-examples.md).
+//! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](./examples/index.html).
 //!
 //! ## Shapes and text
 //!
@@ -204,7 +204,7 @@
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
-//! [embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
+//! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 
 #![doc(
@@ -222,6 +222,7 @@
 #![deny(unused_qualifications)]
 
 pub mod draw_target;
+pub mod examples;
 pub mod geometry;
 pub mod image;
 pub mod iterator;

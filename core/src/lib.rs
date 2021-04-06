@@ -37,12 +37,12 @@
 //!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Pixel`]: ./drawable/struct.Pixel.html
-//! [`Point`]:  ./geometry/struct.Point.html
-//! [`Size`]:  ./geometry/struct.Size.html
+//! [`Point`]: ./geometry/struct.Point.html
+//! [`Size`]: ./geometry/struct.Size.html
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 //! [`DrawTarget`]: ./draw_target/trait.DrawTarget.html
 //! [`Rectangle`]: ./primitives/rectangle/struct.Rectangle.html
-//! [`Dimensions`]:  ./geometry/trait.Dimensions.html
+//! [`Dimensions`]: ./geometry/trait.Dimensions.html
 //! [`OriginDimensions`]: ./geometry/trait.OriginDimensions.html
 //! [`prelude`]: ./prelude/index.html
 //! [`pixelcolor`]: ./pixelcolor/index.html
