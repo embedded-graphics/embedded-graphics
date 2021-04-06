@@ -216,7 +216,7 @@ Additional examples can be found in the [simulator](https://github.com/embedded-
 [`Point`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Point.html
 [`Size`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Size.html
 [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
-[embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
+[`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 [`Drawable`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/drawable/trait.Drawable.html
 
 ## Minimum supported Rust version

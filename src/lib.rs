@@ -204,7 +204,7 @@
 //! [`Point`]: ./geometry/struct.Point.html
 //! [`Size`]: ./geometry/struct.Size.html
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
-//! [embedded-graphics-core]: https://docs.rs/embedded-graphics-core/
+//! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 //! [`Drawable`]: ./drawable/trait.Drawable.html
 
 #![doc(
