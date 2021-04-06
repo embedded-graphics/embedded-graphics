@@ -19,7 +19,7 @@ Ensure you have the correct version of Rust installed, preferably through <https
 
 ## Development setup
 
-Please see the [development setup guide](./doc/development-setup.md).
+Please see the [development setup guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/development-setup.md).
 
 ## Attribution
 
