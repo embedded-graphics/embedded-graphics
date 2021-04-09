@@ -1,6 +1,5 @@
 use bdf_parser::BdfFont;
-use bdf_to_mono::{bdf_to_bitmap, Encoding};
-use std::io::Write;
+use bdf_to_mono::{Encoding, MonoFontData};
 
 fn main() {
     let bdf_file = std::env::args().nth(1).expect("missing BDF file argument");
@@ -8,7 +7,8 @@ fn main() {
     let font = BdfFont::parse(&bdf).expect("couldn't parse BDF file");
 
     // TODO: make encoding configurable
-    let bitmap = bdf_to_bitmap(&font, Encoding::Ascii).unwrap();
+    let _bitmap = MonoFontData::new(&font, Encoding::Ascii).unwrap();
 
-    std::io::stdout().write_all(&bitmap.data).unwrap()
+    // TODO: add command line arguments
+    // std::io::stdout().write_all(&bitmap.data).unwrap()
 }

@@ -6,9 +6,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
-embedded-graphics = { path = "../.." }
-png-target = { path = "../png-target" }
-anyhow = "1.0.38"
 bdf-to-mono = { path = "../bdf-to-mono" }
+anyhow = "1.0.38"
 bdf-parser = { version = "0.1.0" }
 base64 = "0.13.0"
