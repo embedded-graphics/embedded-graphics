@@ -8,7 +8,12 @@ use std::{ffi::OsStr, fs, path::Path};
 fn main() -> Result<()> {
     let fonts_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fonts");
 
-    let mut ascii_rs = include_str!("../assets/header.tmpl").to_string();
+    let mut ascii_rs = r#"
+        // GENERATED CODE DO NOT MODIFY!
+        // Any manual changes to this file will be overwritten!
+
+        use crate::{mono_font::{MonoFont, MonoFontBuilder}, geometry::Size, image::ImageRaw};
+    "#.to_string();
     let mut latin1_rs = ascii_rs.clone();
 
     let mut paths = Vec::new();
@@ -98,28 +103,31 @@ impl Output {
     }
 
     fn rust_struct(&self) -> String {
-        let output = include_str!("../assets/font.tmpl");
-        let output = output.replace(
-            "$NAME$",
-            &format!("FONT_{}", self.name.to_ascii_uppercase()),
-        );
-        let output = output.replace(
-            "$RAW_FILE$",
-            &format!("../../../fonts/{}/raw/{}.raw", self.encoding, self.name),
-        );
-        let output = output.replace("$IMAGE_WIDTH$", &format!("{}", self.bitmap.width));
-        // TODO: read from file
-        let output = output.replace("$CHAR_WIDTH$", &(self.bitmap.glyph_width).to_string());
-        let output = output.replace("$CHAR_HEIGHT$", &(self.bitmap.glyph_height).to_string());
-        let output = output.replace("$BASELINE$", &(self.bitmap.baseline).to_string());
-        let output = output.replace(
-            "$CHARACTER_SPACING$",
-            &self.bitmap.character_spacing.to_string(),
-        );
-        let output = output.replace("$PNG_DATA$", &self.png.to_base64());
-        let output = output.replace("$GLYPH_INDICES$", encoding_to_glyph_indices(self.encoding));
-
-        output
+        format!(
+            r#"
+            /// {char_width}x{char_height} pixel monospace font.
+            ///
+            /// <img src="data:image/png;base64,{png_data}" alt="{font_name} font">
+            pub const {font_name}: MonoFont = MonoFontBuilder::new()
+                .image(ImageRaw::new_binary(include_bytes!("{raw_file}"), {image_width}))
+                .glyph_indices(super::{glyph_indices})
+                .character_size(Size::new({char_width}, {char_height}))
+                .character_spacing({character_spacing})
+                .baseline({baseline})
+                .underline({baseline} + 2, 1)
+                .strikethrough({char_height} / 2, 1)
+                .build();
+            "#,
+            font_name = format!("FONT_{}", self.name.to_ascii_uppercase()),
+            raw_file = format!("../../../fonts/{}/raw/{}.raw", self.encoding, self.name),
+            image_width = self.bitmap.width,
+            char_width = self.bitmap.glyph_width,
+            char_height = self.bitmap.glyph_height,
+            baseline = self.bitmap.baseline,
+            character_spacing = self.bitmap.character_spacing,
+            png_data = self.png.to_base64(),
+            glyph_indices = encoding_to_glyph_indices(self.encoding),
+        )
     }
 }
 
