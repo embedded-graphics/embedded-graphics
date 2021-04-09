@@ -16,6 +16,7 @@ fn main() -> Result<()> {
     rust.insert(Encoding::Latin1, RUST_HEADER.to_string());
 
     let mut paths = Vec::new();
+    let mut table = Vec::new();
 
     for entry in fonts_dir.join("src").read_dir()? {
         let path = entry?.path();
@@ -60,6 +61,10 @@ fn main() -> Result<()> {
             rust.get_mut(&encoding)
                 .unwrap()
                 .push_str(&data.rust(&font_const, &raw_file_path));
+
+            if encoding == Encoding::Ascii {
+                table.push((font_const.clone(), data.png_data()))
+            }
         }
     }
 
@@ -72,6 +77,50 @@ fn main() -> Result<()> {
         mono_font.join("latin1/generated.rs"),
         &rust.get(&Encoding::Latin1).unwrap(),
     )?;
+
+    update_font_table(&table)?;
+
+    Ok(())
+}
+
+fn update_font_table(table: &[(String, String)]) -> Result<()> {
+    let file = "../../src/mono_font/mod.rs";
+
+    let input = fs::read_to_string(file)?;
+    let mut output = Vec::new();
+
+    let mut lines = input.lines();
+    for line in &mut lines {
+        output.push(line.to_string());
+        if line.trim() == "//START-FONT-TABLE" {
+            break;
+        }
+    }
+
+    output.push("//! | Type | Screenshot |".to_string());
+    output.push("//! |------|------------|".to_string());
+
+    for (name, png_data) in table {
+        output.push(format!(
+            "//! | `{name}` | ![{name}]({png_data}) |",
+            name = name,
+            png_data = png_data
+        ));
+    }
+
+    let mut take = false;
+    for line in lines {
+        if line.trim() == "//END-FONT-TABLE" {
+            take = true;
+        }
+
+        if take {
+            output.push(line.to_string());
+        }
+    }
+    output.push(String::new());
+
+    fs::write(file, output.join("\n"))?;
 
     Ok(())
 }

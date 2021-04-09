@@ -157,6 +157,10 @@ impl MonoFontData {
         png
     }
 
+    pub fn png_data(&self) -> String {
+        format!("data:image/png;base64,{}", self.to_png().to_base64())
+    }
+
     pub fn save_png<P: AsRef<Path>>(&self, png_file: P) -> Result<()> {
         self.to_png().save(png_file)?;
 
@@ -174,7 +178,7 @@ impl MonoFontData {
             r#"
             /// {char_width}x{char_height} pixel monospace font.
             ///
-            /// <img src="data:image/png;base64,{png_data}" alt="{name} font">
+            /// <img src="{png_data}" alt="{name} font">
             pub const {name}: MonoFont = MonoFontBuilder::new()
                 .image(ImageRaw::new_binary(include_bytes!("{raw_file}"), {image_width}))
                 .glyph_indices(super::{glyph_indices})
@@ -192,7 +196,7 @@ impl MonoFontData {
             char_height = self.glyph_height,
             baseline = self.baseline,
             character_spacing = self.character_spacing,
-            png_data = self.to_png().to_base64(),
+            png_data = self.png_data(),
             glyph_indices = format!(
                 "{}_GLYPH_INDICES",
                 self.encoding.to_string().to_ascii_uppercase()
