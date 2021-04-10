@@ -203,6 +203,10 @@ impl MonoFontData {
             ),
         )
     }
+
+    pub fn glyph_size(&self) -> (usize, usize) {
+        (self.glyph_width, self.glyph_height)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
