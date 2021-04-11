@@ -336,7 +336,7 @@ enum LineElement {
 ///     .background_color(Rgb565::BLUE)
 ///     .build();
 ///
-/// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
+/// let text = Text::new("Hello Rust!", Point::new(0, 0), style);
 /// ```
 ///
 /// ## Transparent background
@@ -358,7 +358,7 @@ enum LineElement {
 ///     .text_color(Rgb565::WHITE)
 ///     .build();
 ///
-/// let text = Text::new("Hello Rust!", Point::new(0, 0)).into_styled(style);
+/// let text = Text::new("Hello Rust!", Point::new(0, 0), style);
 /// ```
 ///
 /// ## Modifying an existing style
@@ -533,7 +533,7 @@ mod tests {
             DecorationDimensions,
         },
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        text::{Text, TextStyleBuilder},
+        text::Text,
         Drawable,
     };
 
@@ -647,8 +647,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("ABC", Point::new(0, 6))
-            .into_styled(style)
+        Text::new("ABC", Point::new(0, 6), style)
             .draw(&mut display)
             .unwrap();
 
@@ -673,14 +672,8 @@ mod tests {
             .underline()
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Middle)
-            .build();
-
         let mut display = MockDisplay::new();
-        Text::new("ABC", Point::new(0, 6))
-            .into_styled(text_style)
+        Text::with_baseline("ABC", Point::new(0, 6), character_style, Baseline::Middle)
             .draw(&mut display)
             .unwrap();
 
@@ -708,8 +701,7 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("ABC", Point::new(0, 6))
-            .into_styled(style)
+        Text::new("ABC", Point::new(0, 6), style)
             .draw(&mut display)
             .unwrap();
 
@@ -737,8 +729,7 @@ mod tests {
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
 
-        Text::new("ABC", Point::new(0, 6))
-            .into_styled(style)
+        Text::new("ABC", Point::new(0, 6), style)
             .draw(&mut display)
             .unwrap();
 
@@ -764,8 +755,7 @@ mod tests {
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
 
-        Text::new("ABC", Point::new(0, 6))
-            .into_styled(style)
+        Text::new("ABC", Point::new(0, 6), style)
             .draw(&mut display)
             .unwrap();
 
@@ -889,14 +879,8 @@ mod tests {
             .background_color(BinaryColor::Off)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         let mut display = MockDisplay::new();
-        Text::new("##", Point::zero())
-            .into_styled(text_style)
+        Text::with_baseline("##", Point::zero(), character_style, Baseline::Top)
             .draw(&mut display)
             .unwrap();
 
@@ -922,16 +906,10 @@ mod tests {
             .strikethrough_with_color(Rgb888::RED)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
 
-        Text::new("##", Point::zero())
-            .into_styled(text_style)
+        Text::with_baseline("##", Point::zero(), character_style, Baseline::Top)
             .draw(&mut display)
             .unwrap();
 
@@ -951,54 +929,36 @@ mod tests {
 
     #[test]
     fn character_spacing_dimensions() {
-        let character_style = MonoTextStyleBuilder::new()
+        let style = MonoTextStyleBuilder::new()
             .font(&SPACED_FONT)
             .text_color(BinaryColor::On)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         assert_eq!(
-            Text::new("#", Point::zero())
-                .into_styled(text_style)
-                .bounding_box(),
+            Text::with_baseline("#", Point::zero(), style, Baseline::Top).bounding_box(),
             Rectangle::new(Point::zero(), Size::new(6, 9)),
         );
 
         assert_eq!(
-            Text::new("##", Point::zero())
-                .into_styled(text_style)
-                .bounding_box(),
+            Text::with_baseline("##", Point::zero(), style, Baseline::Top).bounding_box(),
             Rectangle::new(Point::zero(), Size::new(6 * 2 + 5, 9)),
         );
         assert_eq!(
-            Text::new("###", Point::zero())
-                .into_styled(text_style)
-                .bounding_box(),
+            Text::with_baseline("###", Point::zero(), style, Baseline::Top).bounding_box(),
             Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 9)),
         );
     }
 
     #[test]
     fn underlined_character_dimensions() {
-        let character_style = MonoTextStyleBuilder::new()
+        let style = MonoTextStyleBuilder::new()
             .font(&SPACED_FONT)
             .text_color(BinaryColor::On)
             .underline()
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         assert_eq!(
-            Text::new("#", Point::zero())
-                .into_styled(text_style)
-                .bounding_box(),
+            Text::with_baseline("#", Point::zero(), style, Baseline::Top).bounding_box(),
             Rectangle::new(Point::zero(), Size::new(6, 10)),
         );
     }
@@ -1101,14 +1061,10 @@ mod tests {
     fn transparent_text_dimensions_one_line() {
         let position = Point::new(5, 5);
 
-        let character_style = MonoTextStyleBuilder::<BinaryColor>::new()
+        let style = MonoTextStyleBuilder::<BinaryColor>::new()
             .font(&FONT_6X9)
             .build();
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-        let text = Text::new("123", position).into_styled(text_style);
+        let text = Text::with_baseline("123", position, style, Baseline::Top);
 
         assert_eq!(
             text.bounding_box(),
@@ -1128,14 +1084,10 @@ mod tests {
     fn transparent_text_dimensions_one_line_spaced() {
         let position = Point::new(5, 5);
 
-        let character_style = MonoTextStyleBuilder::<BinaryColor>::new()
+        let style = MonoTextStyleBuilder::<BinaryColor>::new()
             .font(&SPACED_FONT)
             .build();
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-        let text = Text::new("123", position).into_styled(text_style);
+        let text = Text::with_baseline("123", position, style, Baseline::Top);
 
         assert_eq!(
             text.bounding_box(),
@@ -1162,14 +1114,10 @@ mod tests {
     fn transparent_text_dimensions_two_lines() {
         let position = Point::new(5, 5);
 
-        let character_style = MonoTextStyleBuilder::<BinaryColor>::new()
+        let style = MonoTextStyleBuilder::<BinaryColor>::new()
             .font(&FONT_6X9)
             .build();
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-        let text = Text::new("123\n1", position).into_styled(text_style);
+        let text = Text::with_baseline("123\n1", position, style, Baseline::Top);
 
         assert_eq!(
             text.bounding_box(),

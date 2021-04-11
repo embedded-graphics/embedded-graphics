@@ -35,16 +35,14 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// let mut display = MockDisplay::new();
     /// let mut translated_display = display.translated(Point::new(5, 10));
     ///
+    /// let style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
+    ///
     /// // Draws text at position (5, 10) in the display coordinate system
-    /// Text::new("Text", Point::zero())
-    ///     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
-    ///     .draw(&mut translated_display)?;
+    /// Text::new("Text", Point::zero(), style).draw(&mut translated_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
-    /// # Text::new("Text", Point::new(5, 10))
-    /// #     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
-    /// #     .draw(&mut expected)?;
+    /// # Text::new("Text", Point::new(5, 10), style).draw(&mut expected)?;
     /// #
     /// # display.assert_eq(&expected);
     /// #
@@ -87,14 +85,11 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     ///     let character_style = MonoTextStyle::new(&FONT_6X9, Rgb565::YELLOW);
     ///     let text_style = TextStyleBuilder::new()
-    ///         .character_style(character_style)
     ///         .alignment(Alignment::Center)
     ///         .baseline(Baseline::Middle)
     ///         .build();
     ///
-    ///     Text::new(text, text_position)
-    ///         .into_styled(MonoTextStyle::new(&FONT_6X9, Rgb565::YELLOW))
-    ///         .draw(target)?;
+    ///     Text::with_text_style(text, text_position, character_style, text_style).draw(target)?;
     ///
     ///     Ok(())
     /// }
@@ -138,17 +133,15 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// let area = Rectangle::new(Point::zero(), Size::new(4 * 10, 20));
     /// let mut clipped_display = display.clipped(&area);
     ///
+    /// let style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
+    ///
     /// // Only the first 4 characters will be drawn, because the others are outside
     /// // the clipping area
-    /// Text::new("Clipped", Point::new(0, 15))
-    ///     .into_styled(MonoTextStyle::new(&FONT_10X20, BinaryColor::On))
-    ///     .draw(&mut clipped_display)?;
+    /// Text::new("Clipped", Point::new(0, 15), style).draw(&mut clipped_display)?;
     /// #
     /// # let mut expected = MockDisplay::new();
     /// #
-    /// # Text::new("Clip", Point::new(0, 15))
-    /// #     .into_styled(MonoTextStyle::new(&FONT_10X20, BinaryColor::On))
-    /// #     .draw(&mut expected)?;
+    /// # Text::new("Clip", Point::new(0, 15), style).draw(&mut expected)?;
     /// #
     /// # display.assert_eq(&expected);
     /// #

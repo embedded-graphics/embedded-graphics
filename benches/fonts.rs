@@ -14,8 +14,13 @@ mod common;
 
 use common::Framebuffer;
 
-const ONE_LINE: Text = Text::new("Hello world!", Point::new_equal(20));
-const THREE_LINES: Text = Text::new("line 1\nl2\nThis is line 3", Point::new_equal(20));
+fn one_line<S>(style: S) -> Text<'static, S> {
+    Text::new("Hello world!", Point::new_equal(20), style)
+}
+
+fn three_lines<S>(style: S) -> Text<'static, S> {
+    Text::new("line 1\nl2\nThis is line 3", Point::new_equal(20), style)
+}
 
 fn font_6x9(c: &mut Criterion) {
     let mut group = c.benchmark_group("font 6x9");
@@ -28,28 +33,28 @@ fn font_6x9(c: &mut Criterion) {
         .build();
 
     group.bench_function("one line", |b| {
-        let object = ONE_LINE.into_styled(style);
+        let object = one_line(style);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
     });
 
     group.bench_function("one line with background", |b| {
-        let object = ONE_LINE.into_styled(style_with_bg);
+        let object = one_line(style_with_bg);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
     });
 
     group.bench_function("three lines", |b| {
-        let object = THREE_LINES.into_styled(style);
+        let object = three_lines(style);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
     });
 
     group.bench_function("three lines with background)", |b| {
-        let object = THREE_LINES.into_styled(style_with_bg);
+        let object = three_lines(style_with_bg);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
@@ -69,28 +74,28 @@ fn font_10x20(c: &mut Criterion) {
         .build();
 
     group.bench_function("one line", |b| {
-        let object = ONE_LINE.into_styled(style);
+        let object = one_line(style);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
     });
 
     group.bench_function("one line with background", |b| {
-        let object = ONE_LINE.into_styled(style_with_bg);
+        let object = one_line(style_with_bg);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
     });
 
     group.bench_function("three lines", |b| {
-        let object = THREE_LINES.into_styled(style);
+        let object = three_lines(style);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))
     });
 
     group.bench_function("three lines with background)", |b| {
-        let object = THREE_LINES.into_styled(style_with_bg);
+        let object = three_lines(style_with_bg);
 
         let mut framebuffer = Framebuffer::new();
         b.iter(|| object.draw(&mut framebuffer))

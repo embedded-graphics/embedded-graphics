@@ -65,8 +65,7 @@ impl<C: PixelColor> TextRenderer for GenericTextStyle<C> {
 fn generic_text_renderer() {
     let mut target = MockDisplay::new();
 
-    Text::new("ab\nc", Point::zero())
-        .into_styled(GenericTextStyle(Rgb888::RED))
+    Text::new("ab\nc", Point::zero(), GenericTextStyle(Rgb888::RED))
         .draw(&mut target)
         .unwrap();
 

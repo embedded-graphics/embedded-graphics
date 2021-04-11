@@ -28,7 +28,7 @@
 //! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
-//! // Create a new text style
+//! // Create a new character style
 //! let style = MonoTextStyleBuilder::new()
 //!     .font(&FONT_6X9)
 //!     .text_color(Rgb565::YELLOW)
@@ -36,9 +36,7 @@
 //!     .build();
 //!
 //! // Create a text at position (20, 30) and draw it using the previously defined style
-//! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(style)
-//!     .draw(&mut display)?;
+//! Text::new("Hello Rust!", Point::new(20, 30), style).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
@@ -55,8 +53,9 @@
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
 //!
-//! Text::new("Hello Rust!", Point::zero())
-//!     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
+//! let style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
+//!
+//! Text::new("Hello Rust!", Point::zero(), style)
 //!     .translate(Point::new(20, 30))
 //!     .draw(&mut display)?;
 //!
@@ -64,9 +63,7 @@
 //!
 //! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
 //! # display.set_allow_out_of_bounds_drawing(true);
-//! Text::new("Hello Rust!", Point::new(20, 30))
-//!     .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
-//!     .draw(&mut display)?;
+//! Text::new("Hello Rust!", Point::new(20, 30), style).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
@@ -97,15 +94,13 @@
 //! // Output `Value: 12.35`
 //! write!(&mut buf, "Value: {:.2}", value).expect("Failed to write to buffer");
 //!
-//! Text::new(&buf, Point::zero())
-//!     .into_styled(
-//!         MonoTextStyleBuilder::new()
-//!             .font(&FONT_6X9)
-//!             .text_color(Rgb565::YELLOW)
-//!             .background_color(Rgb565::BLUE)
-//!             .build(),
-//!     )
-//!     .draw(&mut display)?;
+//! let style = MonoTextStyleBuilder::new()
+//!     .font(&FONT_6X9)
+//!     .text_color(Rgb565::YELLOW)
+//!     .background_color(Rgb565::BLUE)
+//!     .build();
+//!
+//! Text::new(&buf, Point::zero(), style).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
@@ -402,7 +397,7 @@ pub(crate) mod tests {
         mock_display::MockDisplay,
         mono_font::MonoTextStyleBuilder,
         pixelcolor::BinaryColor,
-        text::{Baseline, Text, TextStyleBuilder},
+        text::{Baseline, Text},
         Drawable,
     };
 
@@ -410,19 +405,13 @@ pub(crate) mod tests {
     // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
     // #[track_caller]
     pub fn assert_text_from_pattern(text: &str, font: &MonoFont, pattern: &[&str]) {
-        let character_style = MonoTextStyleBuilder::new()
+        let style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         let mut display = MockDisplay::new();
-        Text::new(text, Point::zero())
-            .into_styled(text_style)
+        Text::with_baseline(text, Point::zero(), style, Baseline::Top)
             .draw(&mut display)
             .unwrap();
 
@@ -433,20 +422,14 @@ pub(crate) mod tests {
     ///
     /// This test assumes that the character `A` is on the baseline.
     pub fn test_baseline(font: &MonoFont) {
-        let character_style = MonoTextStyleBuilder::new()
+        let style = MonoTextStyleBuilder::new()
             .font(font)
             .text_color(BinaryColor::On)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         // Draw 'A' character to determine it's baseline
         let mut display = MockDisplay::new();
-        Text::new("A", Point::zero())
-            .into_styled(text_style)
+        Text::with_baseline("A", Point::zero(), style, Baseline::Top)
             .draw(&mut display)
             .unwrap();
 

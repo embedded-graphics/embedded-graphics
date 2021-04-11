@@ -6,9 +6,8 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         common::Scanline, polyline::scanline_intersections::ScanlineIntersections, Polyline,
-        PrimitiveStyle,
+        PrimitiveStyle, Styled,
     },
-    Styled,
 };
 
 /// Iterate over every scanline in the polyline's bounding box.

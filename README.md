@@ -164,7 +164,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
-    let text_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
+    let character_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
 
     let yoffset = 10;
 
@@ -196,8 +196,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     // Draw centered text.
     let text = "embedded-graphics";
     let width = text.len() as i32 * 6;
-    Text::new(text, Point::new(64 - width / 2, 40))
-        .into_styled(text_style)
+    Text::new(text, Point::new(64 - width / 2, 40), character_style)
         .draw(&mut display)?;
 
     Ok(())

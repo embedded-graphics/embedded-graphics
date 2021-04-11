@@ -1,7 +1,7 @@
 use crate::{
     pixelcolor::PixelColor,
-    primitives::{OffsetOutline, Primitive},
-    SaturatingCast, Styled,
+    primitives::{OffsetOutline, Primitive, Styled},
+    SaturatingCast,
 };
 
 /// Style properties for primitives.

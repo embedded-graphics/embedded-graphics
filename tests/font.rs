@@ -4,7 +4,7 @@ use embedded_graphics::{
     mono_font::{GlyphIndices, GlyphRange, MonoFontBuilder, MonoTextStyle},
     pixelcolor::BinaryColor,
     prelude::*,
-    text::{Baseline, Text, TextStyleBuilder},
+    text::{Baseline, Text},
 };
 
 const DATA: &[u8] = &[0xAA, 0x55];
@@ -20,14 +20,9 @@ fn custom_font() {
         .build();
 
     let character_style = MonoTextStyle::new(&font, BinaryColor::On);
-    let text_style = TextStyleBuilder::new()
-        .character_style(character_style)
-        .baseline(Baseline::Top)
-        .build();
 
     let mut display = MockDisplay::new();
-    Text::new("01", Point::zero())
-        .into_styled(text_style)
+    Text::with_baseline("01", Point::zero(), character_style, Baseline::Top)
         .draw(&mut display)
         .unwrap();
     display.assert_pattern(&[

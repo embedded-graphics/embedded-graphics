@@ -6,9 +6,9 @@ use crate::{
     primitives::{
         common::{Scanline, StyledScanline},
         ellipse::{points::Scanlines, Ellipse, EllipseContains},
-        PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
+        PrimitiveStyle, Rectangle, Styled, StyledPrimitiveAreas,
     },
-    Drawable, Pixel, SaturatingCast, Styled,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the ellipse border

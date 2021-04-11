@@ -7,8 +7,10 @@ use crate::{
         Alignment, Baseline, TextStyle,
     },
     transform::Transform,
-    Drawable, SaturatingCast, Styled,
+    Drawable, SaturatingCast,
 };
+
+use super::TextStyleBuilder;
 /// A text object.
 ///
 /// The `Text` struct represents a string that can be drawn onto a display.
@@ -23,7 +25,7 @@ use crate::{
 /// [`Styled`]: ../struct.Styled.html
 /// [module-level documentation]: index.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Text<'a> {
+pub struct Text<'a, S> {
     /// The string.
     pub text: &'a str,
 
@@ -31,25 +33,76 @@ pub struct Text<'a> {
     ///
     /// Defines the top-left starting pixel of the text object.
     pub position: Point,
+
+    /// The character style.
+    pub character_style: S,
+
+    /// The text style.
+    pub text_style: TextStyle,
 }
 
-impl<'a> Text<'a> {
+impl<'a, S> Text<'a, S> {
     /// Creates a text.
-    pub const fn new(text: &'a str, position: Point) -> Self {
-        Self { text, position }
+    pub const fn new(text: &'a str, position: Point, character_style: S) -> Self {
+        Self {
+            text,
+            position,
+            character_style,
+            text_style: TextStyleBuilder::new().build(),
+        }
     }
 
-    /// Attaches a text style to the text object.
-    pub fn into_styled<S>(self, style: S) -> Styled<Self, S> {
-        Styled::new(self, style)
+    /// Creates a text.
+    pub const fn with_text_style(
+        text: &'a str,
+        position: Point,
+        character_style: S,
+        text_style: TextStyle,
+    ) -> Self {
+        Self {
+            text,
+            position,
+            character_style,
+            text_style,
+        }
+    }
+
+    /// Creates a text.
+    pub const fn with_baseline(
+        text: &'a str,
+        position: Point,
+        character_style: S,
+        baseline: Baseline,
+    ) -> Self {
+        Self {
+            text,
+            position,
+            character_style,
+            text_style: TextStyle::with_baseline(baseline),
+        }
+    }
+
+    /// Creates a text.
+    pub const fn with_alignment(
+        text: &'a str,
+        position: Point,
+        character_style: S,
+        alignment: Alignment,
+    ) -> Self {
+        Self {
+            text,
+            position,
+            character_style,
+            text_style: TextStyle::with_alignment(alignment),
+        }
     }
 }
 
-impl Transform for Text<'_> {
+impl<S: Clone> Transform for Text<'_, S> {
     fn translate(&self, by: Point) -> Self {
         Self {
             position: self.position + by,
-            ..*self
+            ..self.clone()
         }
     }
 
@@ -60,49 +113,35 @@ impl Transform for Text<'_> {
     }
 }
 
-impl<S: TextRenderer> Styled<Text<'_>, S> {
+impl<S: TextRenderer> Text<'_, S> {
     fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
-        let mut position = self.primitive.position;
+        let mut position = self.position;
 
-        self.primitive.text.lines().map(move |line| {
-            let p = position;
-
-            position.y += self.style.line_height().saturating_cast();
-
-            (line, p)
-        })
-    }
-}
-
-impl<S: TextRenderer> Styled<Text<'_>, TextStyle<S>> {
-    fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
-        let mut position = self.primitive.position;
-
-        self.primitive.text.lines().map(move |line| {
-            let p = match self.style.alignment {
+        self.text.lines().map(move |line| {
+            let p = match self.text_style.alignment {
                 Alignment::Left => position,
                 Alignment::Right => {
-                    let metrics = self.style.character_style.measure_string(
+                    let metrics = self.character_style.measure_string(
                         line,
                         Point::zero(),
-                        self.style.baseline,
+                        self.text_style.baseline,
                     );
                     position - (metrics.next_position - Point::new(1, 0))
                 }
                 Alignment::Center => {
-                    let metrics = self.style.character_style.measure_string(
+                    let metrics = self.character_style.measure_string(
                         line,
                         Point::zero(),
-                        self.style.baseline,
+                        self.text_style.baseline,
                     );
                     position - (metrics.next_position - Point::new(1, 0)) / 2
                 }
             };
 
             position.y += self
-                .style
+                .text_style
                 .line_height
-                .to_absolute(self.style.character_style.line_height())
+                .to_absolute(self.character_style.line_height())
                 .saturating_cast();
 
             (line, p)
@@ -110,7 +149,7 @@ impl<S: TextRenderer> Styled<Text<'_>, TextStyle<S>> {
     }
 }
 
-impl<S: TextRenderer> Drawable for Styled<Text<'_>, S> {
+impl<S: TextRenderer> Drawable for Text<'_, S> {
     type Color = S::Color;
     type Output = Point;
 
@@ -118,33 +157,13 @@ impl<S: TextRenderer> Drawable for Styled<Text<'_>, S> {
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        let mut next_position = self.primitive.position;
+        let mut next_position = self.position;
 
         for (line, position) in self.lines() {
-            next_position = self
-                .style
-                .draw_string(line, position, Baseline::Alphabetic, target)?;
-        }
-
-        Ok(next_position)
-    }
-}
-
-impl<S: TextRenderer> Drawable for Styled<Text<'_>, TextStyle<S>> {
-    type Color = S::Color;
-    type Output = Point;
-
-    fn draw<D>(&self, target: &mut D) -> Result<Point, D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        let mut next_position = self.primitive.position;
-
-        for (line, position) in self.lines() {
-            next_position = self.style.character_style.draw_string(
+            next_position = self.character_style.draw_string(
                 line,
                 position,
-                self.style.baseline,
+                self.text_style.baseline,
                 target,
             )?;
         }
@@ -166,41 +185,21 @@ fn update_min_max(min_max: &mut Option<(Point, Point)>, metrics: &TextMetrics) {
     }
 }
 
-impl<S: TextRenderer> Dimensions for Styled<Text<'_>, S> {
-    fn bounding_box(&self) -> Rectangle {
-        let mut min_max: Option<(Point, Point)> = None;
-
-        for (line, position) in self.lines() {
-            let metrics = self
-                .style
-                .measure_string(line, position, Baseline::Alphabetic);
-            update_min_max(&mut min_max, &metrics);
-        }
-
-        if let Some((min, max)) = min_max {
-            Rectangle::with_corners(min, max)
-        } else {
-            Rectangle::new(self.primitive.position, Size::zero())
-        }
-    }
-}
-
-impl<S: TextRenderer> Dimensions for Styled<Text<'_>, TextStyle<S>> {
+impl<S: TextRenderer> Dimensions for Text<'_, S> {
     fn bounding_box(&self) -> Rectangle {
         let mut min_max: Option<(Point, Point)> = None;
 
         for (line, position) in self.lines() {
             let metrics =
-                self.style
-                    .character_style
-                    .measure_string(line, position, self.style.baseline);
+                self.character_style
+                    .measure_string(line, position, self.text_style.baseline);
             update_min_max(&mut min_max, &metrics);
         }
 
         if let Some((min, max)) = min_max {
             Rectangle::with_corners(min, max)
         } else {
-            Rectangle::new(self.primitive.position, Size::zero())
+            Rectangle::new(self.position, Size::zero())
         }
     }
 }
@@ -225,13 +224,17 @@ mod tests {
 
     #[test]
     fn constructor() {
-        let text = Text::new("Hello e-g", Point::new(10, 11));
+        let character_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
+
+        let text = Text::new("Hello e-g", Point::new(10, 11), character_style);
 
         assert_eq!(
             text,
             Text {
                 text: "Hello e-g",
                 position: Point::new(10, 11),
+                character_style,
+                text_style: TextStyle::default(),
             }
         );
     }
@@ -305,12 +308,7 @@ mod tests {
             .text_color(BinaryColor::On)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
-        let text = Text::new("AB\nC", Point::zero()).into_styled(text_style);
+        let text = Text::with_baseline("AB\nC", Point::zero(), character_style, Baseline::Top);
 
         assert_eq!(
             text.bounding_box(),
@@ -322,7 +320,7 @@ mod tests {
     fn position_and_translate() {
         let style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
 
-        let hello = Text::new(HELLO_WORLD, Point::zero()).into_styled(style);
+        let hello = Text::new(HELLO_WORLD, Point::zero(), style);
 
         let hello_translated = hello.translate(Point::new(5, -20));
         assert_eq!(
@@ -330,7 +328,7 @@ mod tests {
             hello_translated.bounding_box().size
         );
 
-        let mut hello_with_point = Text::new(HELLO_WORLD, Point::new(5, -20)).into_styled(style);
+        let mut hello_with_point = Text::new(HELLO_WORLD, Point::new(5, -20), style);
         assert_eq!(hello_translated, hello_with_point);
 
         hello_with_point.translate_mut(Point::new(-5, 20));
@@ -345,8 +343,7 @@ mod tests {
             .text_color(BinaryColor::Off)
             .background_color(BinaryColor::On)
             .build();
-        Text::new("Mm", Point::new(0, 7))
-            .into_styled(style_inverse)
+        Text::new("Mm", Point::new(0, 7), style_inverse)
             .draw(&mut display_inverse)
             .unwrap();
 
@@ -356,8 +353,7 @@ mod tests {
             .text_color(BinaryColor::On)
             .background_color(BinaryColor::Off)
             .build();
-        Text::new("Mm", Point::new(0, 7))
-            .into_styled(style_normal)
+        Text::new("Mm", Point::new(0, 7), style_normal)
             .draw(&mut display_normal)
             .unwrap();
 
@@ -367,10 +363,13 @@ mod tests {
     #[test]
     fn no_fill_does_not_hang() {
         let mut display = MockDisplay::new();
-        Text::new(" ", Point::zero())
-            .into_styled(MonoTextStyle::new(&FONT_6X9, BinaryColor::On))
-            .draw(&mut display)
-            .unwrap();
+        Text::new(
+            " ",
+            Point::zero(),
+            MonoTextStyle::new(&FONT_6X9, BinaryColor::On),
+        )
+        .draw(&mut display)
+        .unwrap();
 
         display.assert_eq(&MockDisplay::new());
     }
@@ -382,11 +381,6 @@ mod tests {
             .background_color(BinaryColor::On)
             .build();
 
-        let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-
         let mut display = MockDisplay::new();
         display.set_allow_overdraw(true);
 
@@ -396,8 +390,7 @@ mod tests {
             .draw(&mut display)
             .unwrap();
 
-        Text::new("AA", Point::zero())
-            .into_styled(text_style)
+        Text::with_baseline("AA", Point::zero(), character_style, Baseline::Top)
             .draw(&mut display)
             .unwrap();
 
@@ -421,7 +414,7 @@ mod tests {
             .font(&FONT_6X9)
             .build();
 
-        let styled = Text::new(" A", Point::new(7, 11)).into_styled(style);
+        let styled = Text::new(" A", Point::new(7, 11), style);
 
         assert_eq!(
             styled.bounding_box(),
@@ -438,14 +431,12 @@ mod tests {
             .build();
 
         let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
             .alignment(Alignment::Left)
             .baseline(Baseline::Top)
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(0, 0))
-            .into_styled(text_style)
+        Text::with_text_style("A\nBC", Point::new(0, 0), character_style, text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -478,14 +469,12 @@ mod tests {
             .build();
 
         let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
             .alignment(Alignment::Center)
             .baseline(Baseline::Top)
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(5, 0))
-            .into_styled(text_style)
+        Text::with_text_style("A\nBC", Point::new(5, 0), character_style, text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -518,14 +507,12 @@ mod tests {
             .build();
 
         let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
             .alignment(Alignment::Right)
             .baseline(Baseline::Top)
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::new(11, 0))
-            .into_styled(text_style)
+        Text::with_text_style("A\nBC", Point::new(11, 0), character_style, text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -559,39 +546,23 @@ mod tests {
             .text_color(BinaryColor::On)
             .build();
 
-        let style_top = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Top)
-            .build();
-        let style_middle = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Middle)
-            .build();
-        let style_bottom = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Bottom)
-            .build();
-        let style_baseline = TextStyleBuilder::new()
-            .character_style(character_style)
-            .baseline(Baseline::Alphabetic)
-            .build();
-
-        Text::new("t", Point::new(0, 8))
-            .into_styled(style_top)
+        Text::with_baseline("t", Point::new(0, 8), character_style, Baseline::Top)
             .draw(&mut display)
             .unwrap();
-        Text::new("m", Point::new(6, 8))
-            .into_styled(style_middle)
+        Text::with_baseline("m", Point::new(6, 8), character_style, Baseline::Middle)
             .draw(&mut display)
             .unwrap();
-        Text::new("b", Point::new(12, 8))
-            .into_styled(style_bottom)
+        Text::with_baseline("b", Point::new(12, 8), character_style, Baseline::Bottom)
             .draw(&mut display)
             .unwrap();
-        Text::new("B", Point::new(18, 8))
-            .into_styled(style_baseline)
-            .draw(&mut display)
-            .unwrap();
+        Text::with_baseline(
+            "B",
+            Point::new(18, 8),
+            character_style,
+            Baseline::Alphabetic,
+        )
+        .draw(&mut display)
+        .unwrap();
 
         display.assert_pattern(&[
             "                       ",
@@ -628,12 +599,16 @@ mod tests {
                     .build();
 
                 let text_style = TextStyleBuilder::new()
-                    .character_style(character_style)
                     .alignment(alignment)
                     .baseline(baseline)
                     .build();
 
-                let text = Text::new("1\n23", Point::new_equal(20)).into_styled(text_style);
+                let text = Text::with_text_style(
+                    "1\n23",
+                    Point::new_equal(20),
+                    character_style,
+                    text_style,
+                );
 
                 let mut display = MockDisplay::new();
                 text.draw(&mut display).unwrap();
@@ -662,12 +637,10 @@ mod tests {
             .build();
 
         let mut display = MockDisplay::new();
-        let next = Text::new("AB", Point::new(0, 8))
-            .into_styled(character_style1)
+        let next = Text::new("AB", Point::new(0, 8), character_style1)
             .draw(&mut display)
             .unwrap();
-        Text::new("C", next)
-            .into_styled(character_style2)
+        Text::new("C", next, character_style2)
             .draw(&mut display)
             .unwrap();
 
@@ -692,13 +665,11 @@ mod tests {
             .build();
 
         let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
             .line_height(LineHeight::Pixels(7))
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nB", Point::new(0, 5))
-            .into_styled(text_style)
+        Text::with_text_style("A\nB", Point::new(0, 5), character_style, text_style)
             .draw(&mut display)
             .unwrap();
 
@@ -727,14 +698,12 @@ mod tests {
             .build();
 
         let text_style = TextStyleBuilder::new()
-            .character_style(character_style)
             .baseline(Baseline::Top)
             .line_height(LineHeight::Percent(200))
             .build();
 
         let mut display = MockDisplay::new();
-        Text::new("A\nBC", Point::zero())
-            .into_styled(text_style)
+        Text::with_text_style("A\nBC", Point::zero(), character_style, text_style)
             .draw(&mut display)
             .unwrap();
 
