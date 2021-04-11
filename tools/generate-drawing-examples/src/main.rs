@@ -244,7 +244,6 @@ fn main() {
     example!(writer, draw_text);
     example!(writer, draw_tga_image);
 
-    let path =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/examples.rs");
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/examples.rs");
     writer.write(path).unwrap();
 }

@@ -1,15 +1,17 @@
 use anyhow::{anyhow, Result};
 use bdf_parser::BdfFont;
-use bdf_to_mono::{bdf_to_bitmap, Bitmap, Encoding};
-use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
-use png_target::PngTarget;
-use std::{ffi::OsStr, fs, path::Path};
+use bdf_to_mono::{Encoding, MonoFontData};
+use std::{
+    ffi::{OsStr, OsString},
+    fs,
+    path::{Path, PathBuf},
+};
 
 fn main() -> Result<()> {
     let fonts_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fonts");
 
-    let mut ascii_rs = include_str!("../assets/header.tmpl").to_string();
-    let mut latin1_rs = ascii_rs.clone();
+    let mut rust_ascii = RUST_HEADER.to_string();
+    let mut rust_latin1 = rust_ascii.clone();
 
     let mut paths = Vec::new();
 
@@ -22,124 +24,206 @@ fn main() -> Result<()> {
         }
     }
 
-    // Sort paths to make sure the order of fonts in the generated files doesn't change.
-    paths.sort();
+    let mut fonts = paths
+        .iter()
+        .map(|file| {
+            println!("Parsing {}", file.file_name().unwrap().to_string_lossy());
 
-    for file in paths {
-        println!("Converting {}", file.file_name().unwrap().to_string_lossy());
-        let font_name = file
-            .file_stem()
-            .unwrap()
-            .to_string_lossy()
-            .replace("B", "Bold")
-            .replace("O", "Italic");
+            Font::new(file, &fonts_dir)
+        })
+        .collect::<Result<Vec<_>>>()?;
 
-        let bdf = fs::read(file)?;
-        let font = BdfFont::parse(&bdf).map_err(|_| anyhow!("couldn't parse BDF file"))?;
+    fonts.sort_by(|a, b| {
+        let (aw, ah) = a.ascii.glyph_size();
+        let (bw, bh) = b.ascii.glyph_size();
 
-        let ascii_out = Output::new(&font_name, &font, Encoding::Ascii)?;
-        let latin1_out = Output::new(&font_name, &font, Encoding::Latin1)?;
+        aw.cmp(&bw)
+            .then(ah.cmp(&bh))
+            .then(a.constant.cmp(&b.constant))
+    });
 
-        ascii_out.write_raw(&fonts_dir)?;
-        latin1_out.write_raw(&fonts_dir)?;
+    for font in fonts.iter() {
+        println!("Converting {}", font.file_stem.to_string_lossy());
 
-        ascii_out.write_png(&fonts_dir)?;
-        latin1_out.write_png(&fonts_dir)?;
+        font.save_files()?;
 
-        ascii_rs.push_str(&ascii_out.rust_struct());
-        latin1_rs.push_str(&latin1_out.rust_struct());
+        rust_ascii.push_str(&font.rust(Encoding::Ascii));
+        rust_latin1.push_str(&font.rust(Encoding::Latin1));
     }
 
     let mono_font = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/mono_font");
-    fs::write(mono_font.join("ascii/generated.rs"), &ascii_rs)?;
-    fs::write(mono_font.join("latin1/generated.rs"), &latin1_rs)?;
+    fs::write(mono_font.join("ascii/generated.rs"), &rust_ascii)?;
+    fs::write(mono_font.join("latin1/generated.rs"), &rust_latin1)?;
+
+    update_font_table("../../src/mono_font/mod.rs", Encoding::Ascii, &fonts)?;
+    update_font_table("../../src/mono_font/ascii/mod.rs", Encoding::Ascii, &fonts)?;
+    update_font_table(
+        "../../src/mono_font/latin1/mod.rs",
+        Encoding::Latin1,
+        &fonts,
+    )?;
 
     Ok(())
 }
 
-struct Output {
-    name: String,
-    encoding: Encoding,
-    bitmap: Bitmap,
-    png: PngTarget<BinaryColor>,
+fn update_font_table(file: &str, encoding: Encoding, fonts: &[Font]) -> Result<()> {
+    let start_tag = match encoding {
+        Encoding::Ascii => "//START-FONT-TABLE-ASCII",
+        Encoding::Latin1 => "//START-FONT-TABLE-LATIN1",
+    };
+
+    let input = fs::read_to_string(file)?;
+    let mut output = Vec::new();
+
+    // Copy all lines to the start tag.
+    let mut lines = input.lines();
+    for line in &mut lines {
+        output.push(line.to_string());
+        if line.trim() == start_tag {
+            break;
+        }
+    }
+
+    output.push("//! | Type | Screenshot | | Type | Screenshot |".to_string());
+    output.push("//! |------|------------|-|------|------------|".to_string());
+
+    // Split table into two columns. The split position is rounded upward to make sure the left
+    // column has more entries for an odd number of entries.
+    let (left, right) = fonts.split_at((fonts.len() + 1) / 2);
+    let mut right = right.iter();
+
+    for left_font in left {
+        let line = if let Some(right_font) = right.next() {
+            format!(
+            "//! | `{left_name}` | ![{left_name}]({left_png_data}) | | `{right_name}` | ![{right_name}]({right_png_data}) |",
+            left_name = left_font.constant,
+            left_png_data = left_font.data(encoding).png_data(),
+            right_name = right_font.constant,
+            right_png_data = right_font.data(encoding).png_data(),
+        )
+        } else {
+            // Add empty fields to right column, if the left column contains more entries.
+            format!(
+                "//! | `{left_name}` | ![{left_name}]({left_png_data}) | | | |",
+                left_name = left_font.constant,
+                left_png_data = left_font.data(encoding).png_data(),
+            )
+        };
+
+        output.push(line);
+    }
+
+    // Skip old table content and add lines after the end tag to the output.
+    let mut take = false;
+    for line in lines {
+        if line.trim() == "//END-FONT-TABLE" {
+            take = true;
+        }
+
+        if take {
+            output.push(line.to_string());
+        }
+    }
+    output.push(String::new());
+
+    fs::write(file, output.join("\n"))?;
+
+    Ok(())
 }
 
-impl Output {
-    fn new(name: &str, font: &BdfFont, encoding: Encoding) -> Result<Self> {
-        let bitmap = bdf_to_bitmap(font, encoding)?;
-        let png = bitmap_to_png(&bitmap)?;
+fn raw_directory(base: &Path, encoding: Encoding) -> Result<PathBuf> {
+    let raw_directory = base.join(&encoding.to_string()).join("raw");
+    fs::create_dir_all(&raw_directory)?;
+
+    Ok(raw_directory)
+}
+
+fn png_directory(base: &Path, encoding: Encoding) -> Result<PathBuf> {
+    let png_directory = base.join(&encoding.to_string()).join("png");
+    fs::create_dir_all(&png_directory)?;
+
+    Ok(png_directory)
+}
+
+const RUST_HEADER: &str = r#"
+    // GENERATED CODE DO NOT MODIFY!
+    // Any manual changes to this file will be overwritten!
+
+    use crate::{mono_font::{MonoFont, MonoFontBuilder}, geometry::Size, image::ImageRaw};
+"#;
+
+struct Font {
+    file_stem: OsString,
+    constant: String,
+    ascii: MonoFontData,
+    latin1: MonoFontData,
+    fonts_dir: PathBuf,
+}
+
+impl Font {
+    fn new(file: &Path, fonts_dir: &Path) -> Result<Self> {
+        let file_stem = file.file_stem().unwrap().to_owned();
+
+        let constant = format!(
+            "FONT_{}",
+            file_stem
+                .to_string_lossy()
+                .to_ascii_uppercase()
+                .replace("O", "_ITALIC")
+                .replace("B", "_BOLD")
+        );
+
+        let bdf_data = fs::read(file)?;
+        let bdf = BdfFont::parse(&bdf_data).map_err(|_| anyhow!("couldn't parse BDF file"))?;
+
+        let ascii = MonoFontData::new(&bdf, Encoding::Ascii)?;
+        let latin1 = MonoFontData::new(&bdf, Encoding::Latin1)?;
 
         Ok(Self {
-            name: name.to_string(),
-            encoding,
-            bitmap,
-            png,
+            file_stem,
+            constant,
+            ascii,
+            latin1,
+            fonts_dir: fonts_dir.into(),
         })
     }
 
-    fn write_raw(&self, base_path: &Path) -> Result<()> {
-        let raw_directory = base_path.join(&self.encoding.to_string()).join("raw");
-        fs::create_dir_all(&raw_directory)?;
+    fn data(&self, encoding: Encoding) -> &MonoFontData {
+        match encoding {
+            Encoding::Ascii => &self.ascii,
+            Encoding::Latin1 => &self.latin1,
+        }
+    }
 
-        let raw_file = raw_directory.join(&self.name).with_extension("raw");
-        fs::write(&raw_file, &self.bitmap.data)?;
+    fn save_files(&self) -> Result<()> {
+        self.save_files_for_encoding(Encoding::Ascii)?;
+        self.save_files_for_encoding(Encoding::Latin1)
+    }
+
+    fn save_files_for_encoding(&self, encoding: Encoding) -> Result<()> {
+        let data = self.data(encoding);
+
+        let raw_file = raw_directory(&self.fonts_dir, encoding)?
+            .join(&self.file_stem)
+            .with_extension("raw");
+        data.save_raw(raw_file)?;
+
+        let png_file = png_directory(&self.fonts_dir, encoding)?
+            .join(&self.file_stem)
+            .with_extension("png");
+        data.save_png(png_file)?;
 
         Ok(())
     }
 
-    fn write_png(&self, base_path: &Path) -> Result<()> {
-        let png_directory = base_path.join(&self.encoding.to_string()).join("png");
-        fs::create_dir_all(&png_directory)?;
+    fn rust(&self, encoding: Encoding) -> String {
+        let data = self.data(encoding);
 
-        let png_file = png_directory.join(&self.name).with_extension("png");
-        self.png.save(&png_file)?;
-
-        Ok(())
-    }
-
-    fn rust_struct(&self) -> String {
-        let output = include_str!("../assets/font.tmpl");
-        let output = output.replace(
-            "$NAME$",
-            &format!("FONT_{}", self.name.to_ascii_uppercase()),
+        let raw_file_path = format!(
+            "../../../fonts/{}/raw/{}.raw",
+            encoding,
+            self.file_stem.to_string_lossy()
         );
-        let output = output.replace(
-            "$RAW_FILE$",
-            &format!("../../../fonts/{}/raw/{}.raw", self.encoding, self.name),
-        );
-        let output = output.replace("$IMAGE_WIDTH$", &format!("{}", self.bitmap.width));
-        // TODO: read from file
-        let output = output.replace("$CHAR_WIDTH$", &(self.bitmap.glyph_width).to_string());
-        let output = output.replace("$CHAR_HEIGHT$", &(self.bitmap.glyph_height).to_string());
-        let output = output.replace("$BASELINE$", &(self.bitmap.baseline).to_string());
-        let output = output.replace(
-            "$CHARACTER_SPACING$",
-            &self.bitmap.character_spacing.to_string(),
-        );
-        let output = output.replace("$PNG_DATA$", &self.png.to_base64());
-        let output = output.replace("$GLYPH_INDICES$", encoding_to_glyph_indices(self.encoding));
-
-        output
-    }
-}
-
-fn bitmap_to_png(bitmap: &Bitmap) -> Result<PngTarget<BinaryColor>> {
-    let mut image = PngTarget::new(Size::new(bitmap.width as u32, bitmap.height as u32), 1);
-
-    image
-        .bounding_box()
-        .points()
-        .filter(|p| bitmap.pixel(p.x as usize, p.y as usize))
-        .map(|p| Pixel(p, BinaryColor::On))
-        .draw(&mut image)
-        .unwrap();
-
-    Ok(image)
-}
-
-fn encoding_to_glyph_indices(encoding: Encoding) -> &'static str {
-    match encoding {
-        Encoding::Ascii => "ASCII_GLYPH_INDICES",
-        Encoding::Latin1 => "LATIN1_GLYPH_INDICES",
+        data.rust(&self.constant, &raw_file_path)
     }
 }

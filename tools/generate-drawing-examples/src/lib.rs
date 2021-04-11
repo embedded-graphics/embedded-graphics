@@ -74,7 +74,10 @@ impl ExampleWriter {
     pub fn write<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
         let mut file = std::fs::File::create(path)?;
 
-        writeln!(file, "// WARNING: This file is generated, do not modify it directly!")?;
+        writeln!(
+            file,
+            "// WARNING: This file is generated, do not modify it directly!"
+        )?;
         writeln!(file, "//          Modify `tools/generate-drawing-examples/main.rs` and run `just generate-drawing-examples` instead.")?;
         writeln!(file, "//")?;
         for line in &self.header_lines {
