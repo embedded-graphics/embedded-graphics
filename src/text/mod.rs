@@ -156,9 +156,9 @@
 //!
 //! [`Text`]: struct.Text.html
 //! [`Text::new`]: struct.TextStyle.html#method.new
-//! [`with_alignment`]: struct.TextStyle.html#method.with_alignment
-//! [`with_baseline`]: struct.TextStyle.html#method.with_baseline
-//! [`with_text_style`]: struct.TextStyle.html#method.with_text_style
+//! [`with_alignment`]: struct.Text.html#method.with_alignment
+//! [`with_baseline`]: struct.Text.html#method.with_baseline
+//! [`with_text_style`]: struct.Text.html#method.with_text_style
 //! [`TextStyle`]: struct.TextStyle.html
 //! [`alignment`]: struct.TextStyle.html#structfield.alignment
 //! [`baseline`]: struct.TextStyle.html#structfield.baseline
