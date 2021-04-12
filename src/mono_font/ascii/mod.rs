@@ -1,6 +1,4 @@
-//! ASCII.
-//!
-//! TODO: docs
+//! ASCII variant of built-in fonts.
 //!
 //START-FONT-TABLE-ASCII
 //! | Type | Screenshot | | Type | Screenshot |
@@ -25,7 +23,7 @@ pub use generated::*;
 use crate::mono_font::{GlyphIndices, GlyphRange};
 
 /// Glyph ranges for ASCII fonts.
-pub const ASCII_GLYPH_RANGES: &[GlyphRange] = &[GlyphRange::new(' ', '\x7F', 0)];
+const ASCII_GLYPH_RANGES: &[GlyphRange] = &[GlyphRange::new(' ', '\x7F', 0)];
 
 /// Glyph indices for ASCII fonts.
 pub const ASCII_GLYPH_INDICES: GlyphIndices =

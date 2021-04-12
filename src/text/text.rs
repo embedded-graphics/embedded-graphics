@@ -11,17 +11,11 @@ use crate::{
 };
 
 use super::TextStyleBuilder;
-/// A text object.
+/// Text drawable.
 ///
-/// The `Text` struct represents a string that can be drawn onto a display.
+/// A text drawable can be used to draw text to a draw target.
 ///
-/// TODO: The paragraph below needs to be updated, because `Text` no longer requires `Styled`.
-///
-/// The text object only contains the string and position and no additional styling information,
-/// like the font or color. To draw a text object it is necessary to attach a style to it by using
-/// the `into_styled` method to create a `Styled` object.
-///
-/// See the [module-level documentation] for examples how to use text objects.
+/// See the [module-level documentation] for more information about text drawables and examples.
 ///
 /// [module-level documentation]: index.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
@@ -30,8 +24,6 @@ pub struct Text<'a, S> {
     pub text: &'a str,
 
     /// The position.
-    ///
-    /// Defines the top-left starting pixel of the text object.
     pub position: Point,
 
     /// The character style.
@@ -42,7 +34,7 @@ pub struct Text<'a, S> {
 }
 
 impl<'a, S> Text<'a, S> {
-    /// Creates a text.
+    /// Creates a text drawable with the default text style.
     pub const fn new(text: &'a str, position: Point, character_style: S) -> Self {
         Self {
             text,
@@ -52,7 +44,7 @@ impl<'a, S> Text<'a, S> {
         }
     }
 
-    /// Creates a text.
+    /// Creates a text drawable with the given text style.
     pub const fn with_text_style(
         text: &'a str,
         position: Point,
@@ -67,7 +59,7 @@ impl<'a, S> Text<'a, S> {
         }
     }
 
-    /// Creates a text.
+    /// Creates a text drawable with the given baseline.
     pub const fn with_baseline(
         text: &'a str,
         position: Point,
@@ -82,7 +74,7 @@ impl<'a, S> Text<'a, S> {
         }
     }
 
-    /// Creates a text.
+    /// Creates a text drawable with the given alignment.
     pub const fn with_alignment(
         text: &'a str,
         position: Point,

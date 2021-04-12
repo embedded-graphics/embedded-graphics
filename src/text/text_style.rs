@@ -1,6 +1,15 @@
 use crate::text::{Alignment, Baseline, LineHeight};
 
 /// Text style.
+///
+/// A text style is used to set how text lines are layed out in a text drawable.
+///
+/// Use [`TextStyleBuilder`] to build text style object.
+///
+/// See the [module-level documentation] for more information about text styles and examples.
+///
+/// [`TextStyleBuilder`]: struct.TextStyleBuilder.html
+/// [module-level documentation]: index.html
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]
 pub struct TextStyle {
@@ -32,7 +41,7 @@ impl Default for TextStyle {
     }
 }
 
-/// Text style builder.
+/// Builder for text styles.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TextStyleBuilder {
     style: TextStyle,

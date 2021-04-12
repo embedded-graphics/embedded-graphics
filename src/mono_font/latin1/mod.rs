@@ -1,6 +1,4 @@
-//! Latin1.
-//!
-//! TODO: docs
+//! Latin 1 variant of built-in fonts.
 //!
 //START-FONT-TABLE-LATIN1
 //! | Type | Screenshot | | Type | Screenshot |
