@@ -15,14 +15,14 @@ use super::TextStyleBuilder;
 ///
 /// The `Text` struct represents a string that can be drawn onto a display.
 ///
+/// TODO: The paragraph below needs to be updated, because `Text` no longer requires `Styled`.
+///
 /// The text object only contains the string and position and no additional styling information,
 /// like the font or color. To draw a text object it is necessary to attach a style to it by using
-/// the [`into_styled`] method to create a [`Styled`] object.
+/// the `into_styled` method to create a `Styled` object.
 ///
 /// See the [module-level documentation] for examples how to use text objects.
 ///
-/// [`into_styled`]: #method.into_styled
-/// [`Styled`]: ../struct.Styled.html
 /// [module-level documentation]: index.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Text<'a, S> {

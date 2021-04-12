@@ -13,8 +13,10 @@
 //!
 //! ## Print styled "Hello Rust!"
 //!
+//! TODO: `Text` no longer use `Styled`.
+//!
 //! Text can be drawn to a display by creating a [`Text`] object and attaching a
-//! text style to it by using a [`Styled`] object. This example prints
+//! text style to it by using a `Styled` object. This example prints
 //! "Hello Rust" with a yellow text on a blue background.
 //!
 //! ```rust
@@ -128,7 +130,6 @@
 //!
 //! [built-in fonts]: #built-in-fonts
 //! [`Text`]: ../text/struct.Text.html
-//! [`Styled`]: ../struct.Styled.html
 //! [`MonoTextStyle`]: struct.MonoTextStyle.html
 //! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
 //! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
