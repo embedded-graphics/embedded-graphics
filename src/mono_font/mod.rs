@@ -4,111 +4,22 @@
 //! several [built-in fonts].
 //!
 //! Additional custom fonts can be added by the application or other crates. This
-//! is demonstrated in the `text-custom-font` example in the simulator crate.
+//! is demonstrated in the `text-custom-font` example in the [examples repository].
 //!
 //! # Examples
 //!
-//! The examples below use the `Font6x8` font, however any of the [built-in fonts]
-//! in this module or custom fonts can be substituted.
-//!
-//! ## Print styled "Hello Rust!"
-//!
-//! TODO: `Text` no longer use `Styled`.
-//!
-//! Text can be drawn to a display by creating a [`Text`] object and attaching a
-//! text style to it by using a `Styled` object. This example prints
-//! "Hello Rust" with a yellow text on a blue background.
-//!
-//! ```rust
-//! use embedded_graphics::{
-//!     mono_font::{ascii::FONT_6X9, MonoTextStyle, MonoTextStyleBuilder},
-//!     pixelcolor::Rgb565,
-//!     prelude::*,
-//!     text::Text,
-//! };
-//! # use embedded_graphics::mock_display::MockDisplay;
-//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
-//! # display.set_allow_out_of_bounds_drawing(true);
-//!
-//! // Create a new character style
-//! let style = MonoTextStyleBuilder::new()
-//!     .font(&FONT_6X9)
-//!     .text_color(Rgb565::YELLOW)
-//!     .background_color(Rgb565::BLUE)
-//!     .build();
-//!
-//! // Create a text at position (20, 30) and draw it using the previously defined style
-//! Text::new("Hello Rust!", Point::new(20, 30), style).draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
-//! ```
-//!
-//! ## Translate text by (20px, 30px)
-//!
-//! ```rust
-//! use embedded_graphics::{
-//!     mono_font::{ascii::FONT_6X9, MonoTextStyle},
-//!     pixelcolor::BinaryColor,
-//!     prelude::*,
-//!     text::Text,
-//! };
-//! # use embedded_graphics::mock_display::MockDisplay;
-//! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-//! # display.set_allow_out_of_bounds_drawing(true);
-//!
-//! let style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
-//!
-//! Text::new("Hello Rust!", Point::zero(), style)
-//!     .translate(Point::new(20, 30))
-//!     .draw(&mut display)?;
-//!
-//! // this is equivalent to:
-//!
-//! # let mut display: MockDisplay<BinaryColor> = MockDisplay::default();
-//! # display.set_allow_out_of_bounds_drawing(true);
-//! Text::new("Hello Rust!", Point::new(20, 30), style).draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
-//! ```
-//!
-//! ## Use `write!()` and arrayvec to render a formatted string
-//!
-//! This example uses arrayvec's [`ArrayString`] to render a floating point value using the
-//! [`write!()`] macro. These strings have a fixed maximum length, but allow the use of
-//! Rust's builtin string formatting.
-//!
-//! ```rust
-//! use arrayvec::ArrayString;
-//! use core::fmt::Write;
-//! use embedded_graphics::{
-//!     mono_font::{ascii::FONT_6X9, MonoTextStyleBuilder},
-//!     pixelcolor::Rgb565,
-//!     prelude::*,
-//!     text::Text,
-//! };
-//! # use embedded_graphics::mock_display::MockDisplay;
-//! # let mut display = MockDisplay::default();
-//! # display.set_allow_out_of_bounds_drawing(true);
-//!
-//! let value = 12.34567;
-//!
-//! // Create a fixed buffer of length 12
-//! let mut buf = ArrayString::<[_; 12]>::new();
-//!
-//! // Output `Value: 12.35`
-//! write!(&mut buf, "Value: {:.2}", value).expect("Failed to write to buffer");
-//!
-//! let style = MonoTextStyleBuilder::new()
-//!     .font(&FONT_6X9)
-//!     .text_color(Rgb565::YELLOW)
-//!     .background_color(Rgb565::BLUE)
-//!     .build();
-//!
-//! Text::new(&buf, Point::zero(), style).draw(&mut display)?;
-//! # Ok::<(), core::convert::Infallible>(())
-//! ```
+//! The [`text` module] contains examples how these fonts can be used in an application.
 //!
 //! # Built-in fonts
 //!
-//! TODO: Describe the difference between `ascii` and `latin1` and mention the `latin1` table in the `latin1` module.
+//! Each built-in font is provided in an ASCII and a Latin 1 (ISO 8859-1) variant. The ASCII variant
+//! contains a smaller subset of characters which saves memory in embedded application, but only
+//! covers all characters of the English language. The Latin 1 variant has complete coverage for
+//! [the languages listed here](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Modern_languages_with_complete_coverage),
+//! and partial coverage for [these languages](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Languages_with_incomplete_coverage).
+//!
+//! The table below shows the ASCII variant of the built-in fonts. See the [`latin1` module] for
+//! an overview of the complete character set included in the Latin 1 variants.
 //!
 // WARNING: The table between START-FONT-TABLE and END-FONT-TABLE is generated.
 //          Use `just convert-fonts` to update the table.
@@ -129,10 +40,10 @@
 //END-FONT-TABLE
 //!
 //! [built-in fonts]: #built-in-fonts
-//! [`Text`]: ../text/struct.Text.html
+//! [`latin1` module]: latin1/index.html
+//! [`text` module]: ../text/index.html#examples
 //! [`MonoTextStyle`]: struct.MonoTextStyle.html
-//! [`ArrayString`]: https://docs.rs/arrayvec/0.4.11/arrayvec/struct.ArrayString.html
-//! [`write!()`]: https://doc.rust-lang.org/nightly/std/macro.write.html
+//! [examples repository]:  https://github.com/embedded-graphics/examples
 
 pub mod ascii;
 mod draw_target;
@@ -301,6 +212,8 @@ impl<'a, 'b> MonoFontBuilder<'a, 'b> {
 }
 
 /// Glyph indices.
+///
+/// Maps characters to glyph indices.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct GlyphIndices<'a> {
     ranges: &'a [GlyphRange],

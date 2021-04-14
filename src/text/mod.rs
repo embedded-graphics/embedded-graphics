@@ -1,14 +1,172 @@
-//! Text drawable.
+//! Text drawing.
 //!
-//! TODO: - Add an overview of the e-g text rendering, e.g. what a `Text` object is used for and
-//!         how it can be used with different text styles/renderers.
-//!       - Describe the difference between `TextStyle` and `MonoTextStyle`
-//!       - How is `Text::position` used by text renders dependent on `TextStyle::baseline`
-//!       - Add examples:
-//!         - Basic text without `TextStyle`
-//!         - Advanced text with `TextStyle`
-//!         - Draw text with multiple styles by using the result of `Text.draw(...)`
-//!       - Link to `renderer` module docs for users who want to implement custom renderers.
+//! The [`Text`] drawable can be used to draw text on a draw target. To construct a [`Text`] object
+//! at least a text string, position and character style are required. For advanced formatting
+//! options an additional [`TextStyle`] object might be required.
+//!
+//! Text rendering in embedded-graphics is designed to be extendable by text renderers for different
+//! font formats. To use a text renderer in an embedded-graphics project each renderer provides a
+//! character style object. This object is used to set the appearance of characters, like the text
+//! color or the used font. The available settings vary between different text renderer and are
+//! documented in the text renderer documentation.
+//!
+//! See the [`renderer` module] docs for more information about implementing custom text renderers.
+//!
+//! Embedded-graphics includes a text renderer for monospaced fonts in the [`mono_font`] module.
+//! Most examples will use this renderer and the associated [`MonoTextStyle`] character style.
+//! But they should be easily adaptable to any external renderer listed in the
+//! [external crates list].
+//!
+//! # Text style
+//!
+//! In addition to styling the individual characters the [`Text`] drawable also contains a
+//! [`TextStyle`] setting. The text style is used to set the alignment and line spacing of text
+//! objects.
+//!
+//! The [`alignment`] setting sets the horizontal alignment of the text. With the default value
+//! `Left` the text will be rendered to the right of the given text position. Analogously `Right`
+//! aligned text will be rendered to the left of the given position. `Center`ed text will extend
+//! equally to the left and right of the text position.
+//!
+//! The [`baseline`] setting defines the vertical alignment of the first line of text. With the default
+//! setting of `Alphabetic` the glyphs will be drawn with their descenders below the given position.
+//! This means that the bottom of glyphs without descender (like 'A') will be on the same Y
+//! coordinate as the given position. The other baseline settings will position the glyphs relative
+//! to the EM box, without considering the baseline.
+//!
+//! If the text contains multiple lines only the first line will be vertically aligned based on the
+//! baseline setting. All following lines will be spaced relative to the first line, according to the [`line_height`] setting.
+//!
+//! # Examples
+//!
+//! ## Draw basic text
+//!
+//! ```
+//! use embedded_graphics::{
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     text::Text,
+//! };
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//! # display.set_allow_out_of_bounds_drawing(true);
+//!
+//! // Create a new character style
+//! let style = MonoTextStyle::new(&FONT_6X10, Rgb565::WHITE);
+//!
+//! // Create a text at position (20, 30) and draw it using the previously defined style
+//! Text::new("Hello Rust!", Point::new(20, 30), style).draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//! ## Draw centered text
+//!
+//! [`Text`] provides the [`with_alignment`] and [`with_baseline`] constructors to easily set
+//! these commonly used settings without having to build a [`TextStyle`] object first.
+//!
+//! ```
+//! use embedded_graphics::{
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     text::{Text, Alignment},
+//! };
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//! # display.set_allow_out_of_bounds_drawing(true);
+//!
+//! // Create a new character style
+//! let style = MonoTextStyle::new(&FONT_6X10, Rgb565::WHITE);
+//!
+//! // Create a text at position (20, 30) and draw it using the previously defined style
+//! Text::with_alignment(
+//!     "First line\nSecond line",
+//!     Point::new(20, 30),
+//!     style,
+//!     Alignment::Center,
+//! )
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! ## Draw text with `TextStyle`
+//!
+//! For more advanced text styles a [`TextStyle`] object can be build using the
+//! [`TextStyleBuilder`] and then passed to the [`with_text_style`] constructor.
+//!
+//! ```
+//! use embedded_graphics::{
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     text::{Alignment, LineHeight, Text, TextStyleBuilder},
+//! };
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//! # display.set_allow_out_of_bounds_drawing(true);
+//!
+//! // Create a new character style.
+//! let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::WHITE);
+//!
+//! // Create a new text style.
+//! let text_style = TextStyleBuilder::new()
+//!     .alignment(Alignment::Center)
+//!     .line_height(LineHeight::Percent(150))
+//!     .build();
+//!
+//! // Create a text at position (20, 30) and draw it using the previously defined style.
+//! Text::with_text_style(
+//!     "First line\nSecond line",
+//!     Point::new(20, 30),
+//!     character_style,
+//!     text_style,
+//! )
+//! .draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! ## Combine different character styles
+//!
+//! The `draw` method for text drawables returns the position of the next character. This can be
+//! used to combine text with different character styles on a single line of text.
+//!
+//! ```
+//! use embedded_graphics::{
+//!     mono_font::{ascii::{FONT_6X10, FONT_10X20}, MonoTextStyle},
+//!     pixelcolor::Rgb565,
+//!     prelude::*,
+//!     text::{Alignment, LineHeight, Text, TextStyleBuilder},
+//! };
+//! # use embedded_graphics::mock_display::MockDisplay;
+//! # let mut display: MockDisplay<Rgb565> = MockDisplay::default();
+//! # display.set_allow_out_of_bounds_drawing(true);
+//!
+//! // Create a small and a large character style.
+//! let small_style = MonoTextStyle::new(&FONT_6X10, Rgb565::WHITE);
+//! let large_style = MonoTextStyle::new(&FONT_10X20, Rgb565::WHITE);
+//!
+//! // Draw the first text at (20, 30) using the small character style.
+//! let next = Text::new("small ", Point::new(20, 30), small_style).draw(&mut display)?;
+//!
+//! // Draw the second text after the first text using the large character style.
+//! let next = Text::new("large", next, large_style).draw(&mut display)?;
+//! # Ok::<(), core::convert::Infallible>(())
+//! ```
+//!
+//! [`Text`]: struct.Text.html
+//! [`Text::new`]: struct.TextStyle.html#method.new
+//! [`with_alignment`]: struct.Text.html#method.with_alignment
+//! [`with_baseline`]: struct.Text.html#method.with_baseline
+//! [`with_text_style`]: struct.Text.html#method.with_text_style
+//! [`TextStyle`]: struct.TextStyle.html
+//! [`alignment`]: struct.TextStyle.html#structfield.alignment
+//! [`baseline`]: struct.TextStyle.html#structfield.baseline
+//! [`line_height`]: struct.TextStyle.html#structfield.line_height
+//! [`TextStyleBuilder`]: struct.TextStyleBuilder.html
+//! [`mono_font`]: ../mono_font/index.html
+//! [`MonoTextStyle`]: ../mono_font/struct.MonoTextStyle.html
+//! [`renderer` module]: renderer/index.html
+//! [external crates list]: ../index.html#additional-functions-provided-by-external-crates
 
 pub mod renderer;
 mod text;
