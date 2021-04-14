@@ -21,26 +21,20 @@ pub use self::{
     ellipse::Ellipse,
     line::Line,
     polyline::Polyline,
-    primitive_style::{
-        PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, StyledPrimitiveAreas,
-    },
+    primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
     rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
     sector::Sector,
     triangle::Triangle,
 };
-use crate::{
-    geometry::{Dimensions, Point},
-    pixelcolor::PixelColor,
-};
+use crate::geometry::{Dimensions, Point};
 pub use embedded_graphics_core::primitives::PointsIter;
-pub use styled::Styled;
+pub use styled::{Styled, StyledDimensions, StyledDrawable};
 
 /// Primitive trait
-pub trait Primitive: Dimensions + PointsIter {
+pub trait Primitive: Dimensions {
     /// Converts this primitive into a `Styled`.
-    fn into_styled<C>(self, style: PrimitiveStyle<C>) -> Styled<Self, PrimitiveStyle<C>>
+    fn into_styled<S>(self, style: S) -> Styled<Self, S>
     where
-        C: PixelColor,
         Self: Sized,
     {
         Styled::new(self, style)

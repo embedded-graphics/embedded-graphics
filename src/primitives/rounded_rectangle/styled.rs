@@ -6,9 +6,10 @@ use crate::{
     primitives::{
         common::{Scanline, StyledScanline},
         rounded_rectangle::{points::Scanlines, RoundedRectangle},
-        PrimitiveStyle, Rectangle, Styled, StyledPrimitiveAreas,
+        styled::{Styled, StyledDimensions, StyledDrawable},
+        PrimitiveStyle, Rectangle,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 use super::RoundedRectangleContains;
@@ -112,30 +113,35 @@ where
     }
 }
 
-impl<C> Drawable for Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for RoundedRectangle {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        match (self.style.effective_stroke_color(), self.style.fill_color) {
+        match (style.effective_stroke_color(), style.fill_color) {
             (Some(stroke_color), None) => {
-                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
                     scanline.draw_stroke(target, stroke_color)?;
                 }
             }
             (Some(stroke_color), Some(fill_color)) => {
-                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
                     scanline.draw_stroke_and_fill(target, stroke_color, fill_color)?;
                 }
             }
             (None, Some(fill_color)) => {
-                for scanline in Scanlines::new(&self.fill_area()) {
+                for scanline in Scanlines::new(&style.fill_area(self)) {
                     scanline.draw(target, fill_color)?;
                 }
             }
@@ -146,14 +152,11 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for RoundedRectangle {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 
@@ -454,7 +457,7 @@ mod tests {
             },
         );
 
-        let transparent_rect = rect.into_styled::<Rgb888>(PrimitiveStyle::new());
+        let transparent_rect = rect.into_styled(PrimitiveStyle::<Rgb888>::new());
         let filled_rect = rect.into_styled(PrimitiveStyle::with_fill(Rgb888::RED));
 
         assert_eq!(transparent_rect.bounding_box(), filled_rect.bounding_box(),);

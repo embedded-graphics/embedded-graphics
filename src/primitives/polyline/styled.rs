@@ -6,25 +6,21 @@ use crate::{
     primitives::{
         common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
-        PointsIter, PrimitiveStyle, Rectangle, Styled,
+        styled::{Styled, StyledDimensions, StyledDrawable},
+        PointsIter, PrimitiveStyle, Rectangle,
     },
     transform::Transform,
-    Drawable, Pixel,
+    Pixel,
 };
 
-impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    /// Compute the bounding box of the non-translated polyline.
-    pub(in crate::primitives::polyline) fn untranslated_bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
-            let (min, max) = ThickSegmentIter::new(
-                self.primitive.vertices,
-                self.style.stroke_width,
-                StrokeOffset::None,
-            )
-            .fold(
+/// Compute the bounding box of the non-translated polyline.
+pub(in crate::primitives::polyline) fn untranslated_bounding_box<C: PixelColor>(
+    primitive: &Polyline,
+    style: &PrimitiveStyle<C>,
+) -> Rectangle {
+    if style.effective_stroke_color().is_some() && primitive.vertices.len() > 1 {
+        let (min, max) =
+            ThickSegmentIter::new(primitive.vertices, style.stroke_width, StrokeOffset::None).fold(
                 (
                     Point::new_equal(core::i32::MAX),
                     Point::new_equal(core::i32::MIN),
@@ -39,26 +35,30 @@ where
                 },
             );
 
-            Rectangle::with_corners(min, max)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        Rectangle::with_corners(min, max)
+    } else {
+        Rectangle::new(primitive.bounding_box().center(), Size::zero())
+    }
+}
+
+fn draw_thick<D>(
+    polyline: &Polyline,
+    style: &PrimitiveStyle<D::Color>,
+    stroke_color: D::Color,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    D: DrawTarget,
+{
+    for line in ScanlineIterator::new(polyline, style) {
+        let rect = line.to_rectangle();
+
+        if !rect.is_zero_sized() {
+            target.fill_solid(&rect, stroke_color)?;
         }
     }
 
-    fn draw_thick<D>(&self, stroke_color: C, target: &mut D) -> Result<(), D::Error>
-    where
-        D: DrawTarget<Color = C>,
-    {
-        for line in ScanlineIterator::new(self) {
-            let rect = line.to_rectangle();
-
-            if !rect.is_zero_sized() {
-                target.fill_solid(&rect, stroke_color)?;
-            }
-        }
-
-        Ok(())
-    }
+    Ok(())
 }
 
 #[derive(Clone, Debug)]
@@ -89,7 +89,7 @@ where
         let line_iter = if styled.style.stroke_width <= 1 {
             StyledIter::Thin(styled.primitive.points())
         } else {
-            let mut scanline_iter = ScanlineIterator::new(styled);
+            let mut scanline_iter = ScanlineIterator::new(&styled.primitive, &styled.style);
             let line_iter = scanline_iter
                 .next()
                 .unwrap_or_else(|| Scanline::new_empty(0));
@@ -155,33 +155,32 @@ where
     }
 }
 
-impl<'a, C> Drawable for Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Polyline<'_> {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        if let Some(stroke_color) = self.style.stroke_color {
-            match self.style.stroke_width {
+        if let Some(stroke_color) = style.stroke_color {
+            match style.stroke_width {
                 0 => Ok(()),
-                1 => display.draw_iter(
-                    self.primitive
-                        .points()
-                        .map(|point| Pixel(point, stroke_color)),
-                ),
+                1 => target.draw_iter(self.points().map(|point| Pixel(point, stroke_color))),
                 _ => {
-                    if self.primitive.translate != Point::zero() {
-                        self.draw_thick(
+                    if self.translate != Point::zero() {
+                        draw_thick(
+                            self,
+                            style,
                             stroke_color,
-                            &mut display.translated(self.primitive.translate),
+                            &mut target.translated(self.translate),
                         )
                     } else {
-                        self.draw_thick(stroke_color, display)
+                        draw_thick(self, style, stroke_color, target)
                     }
                 }
             }
@@ -191,13 +190,9 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<Polyline<'_>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        self.untranslated_bounding_box()
-            .translate(self.primitive.translate)
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Polyline<'_> {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        untranslated_bounding_box(self, style).translate(self.translate)
     }
 }
 

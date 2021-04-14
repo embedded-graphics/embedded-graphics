@@ -6,9 +6,10 @@ use crate::{
     primitives::{
         arc::Arc,
         common::{DistanceIterator, PlaneSector},
-        OffsetOutline, PrimitiveStyle, Rectangle, Styled,
+        styled::{Styled, StyledDimensions, StyledDrawable},
+        OffsetOutline, PrimitiveStyle, Rectangle,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the arc border
@@ -31,15 +32,13 @@ impl<C> StyledPixels<C>
 where
     C: PixelColor,
 {
-    fn new(styled: &Styled<Arc, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
+    fn new(primitive: &Arc, style: &PrimitiveStyle<C>) -> Self {
         let circle = primitive.to_circle();
 
         let outside_edge = circle.offset(style.outside_stroke_width().saturating_cast());
         let inside_edge = circle.offset(style.inside_stroke_width().saturating_cast_neg());
 
-        let iter = if !styled.style.is_transparent() {
+        let iter = if !style.is_transparent() {
             // PERF: The distance iterator should use the smaller arc bounding box
             outside_edge.distances()
         } else {
@@ -53,7 +52,7 @@ where
             plane_sector,
             outer_threshold: outside_edge.threshold(),
             inner_threshold: inside_edge.threshold(),
-            stroke_color: styled.style.stroke_color,
+            stroke_color: style.stroke_color,
         }
     }
 }
@@ -80,18 +79,19 @@ where
     }
 }
 
-impl<C> Drawable for Styled<Arc, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Arc {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        target.draw_iter(StyledPixels::new(self, style))
     }
 }
 
@@ -104,19 +104,16 @@ where
     type Iter = StyledPixels<Self::Color>;
 
     fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+        StyledPixels::new(&self.primitive, &self.style)
     }
 }
 
-impl<C> Dimensions for Styled<Arc, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 
@@ -129,6 +126,7 @@ mod tests {
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        Drawable,
     };
 
     // Check the rendering of a simple arc
@@ -267,8 +265,11 @@ mod tests {
 
         let arc = Arc::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg());
 
-        let transparent_arc =
-            arc.into_styled::<BinaryColor>(PrimitiveStyleBuilder::new().stroke_width(5).build());
+        let transparent_arc = arc.into_styled(
+            PrimitiveStyleBuilder::<BinaryColor>::new()
+                .stroke_width(5)
+                .build(),
+        );
         let stroked_arc = arc.into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 5));
 
         assert_eq!(transparent_arc.bounding_box(), stroked_arc.bounding_box(),);

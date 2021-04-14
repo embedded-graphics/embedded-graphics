@@ -5,10 +5,11 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         common::{ClosedThickSegmentIter, PointType, Scanline, StrokeOffset},
+        styled::{Styled, StyledDimensions, StyledDrawable},
         triangle::{scanline_iterator::ScanlineIterator, Triangle},
-        PrimitiveStyle, Rectangle, StrokeAlignment, Styled,
+        PrimitiveStyle, Rectangle, StrokeAlignment,
     },
-    Drawable, Pixel,
+    Pixel,
 };
 
 /// Pixel iterator for each pixel in the triangle border
@@ -95,36 +96,39 @@ where
     }
 }
 
-impl<C> Drawable for Styled<Triangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Triangle {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        if !self.style.is_transparent() {
-            for (line, kind) in ScanlineIterator::new(
-                &self.primitive,
-                self.style.stroke_width,
-                StrokeOffset::from(self.style.stroke_alignment),
-                self.style.fill_color.is_some(),
-                &self.bounding_box(),
-            ) {
-                let color = match kind {
-                    PointType::Stroke => self.style.effective_stroke_color(),
-                    PointType::Fill => self.style.fill_color,
-                };
+        if style.is_transparent() {
+            return Ok(());
+        }
 
-                if let Some(color) = color {
-                    let rect = line.to_rectangle();
+        for (line, kind) in ScanlineIterator::new(
+            &self,
+            style.stroke_width,
+            StrokeOffset::from(style.stroke_alignment),
+            style.fill_color.is_some(),
+            &self.styled_bounding_box(style),
+        ) {
+            let color = match kind {
+                PointType::Stroke => style.effective_stroke_color(),
+                PointType::Fill => style.fill_color,
+            };
 
-                    if !rect.is_zero_sized() {
-                        display.fill_solid(&rect, color)?;
-                    }
+            if let Some(color) = color {
+                let rect = line.to_rectangle();
+
+                if !rect.is_zero_sized() {
+                    target.fill_solid(&rect, color)?;
                 }
             }
         }
@@ -133,22 +137,19 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<Triangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Triangle {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
         // Short circuit special cases
-        if self.style.stroke_width < 2 || self.style.stroke_alignment == StrokeAlignment::Inside {
-            return self.primitive.bounding_box();
+        if style.stroke_width < 2 || style.stroke_alignment == StrokeAlignment::Inside {
+            return self.bounding_box();
         }
 
-        let t = self.primitive.sorted_clockwise();
+        let t = self.sorted_clockwise();
 
         let (min, max) = ClosedThickSegmentIter::new(
             &t.vertices,
-            self.style.stroke_width,
-            StrokeOffset::from(self.style.stroke_alignment),
+            style.stroke_width,
+            StrokeOffset::from(style.stroke_alignment),
         )
         .fold(
             (
@@ -345,7 +346,7 @@ mod tests {
     fn bounding_box_is_independent_of_colors() {
         let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
 
-        let transparent = triangle.into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let transparent = triangle.into_styled(PrimitiveStyle::<BinaryColor>::new());
         let filled = triangle.into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         assert_eq!(transparent.bounding_box(), filled.bounding_box(),);

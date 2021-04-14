@@ -5,8 +5,11 @@ use core::ops::Range;
 use crate::{
     pixelcolor::PixelColor,
     primitives::{
-        common::Scanline, polyline::scanline_intersections::ScanlineIntersections, Polyline,
-        PrimitiveStyle, Styled,
+        common::Scanline,
+        polyline::{
+            scanline_intersections::ScanlineIntersections, styled::untranslated_bounding_box,
+        },
+        Polyline, PrimitiveStyle,
     },
 };
 
@@ -22,23 +25,17 @@ pub struct ScanlineIterator<'a> {
 
 impl<'a> ScanlineIterator<'a> {
     /// New.
-    pub fn new<C>(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self
-    where
-        C: PixelColor,
-    {
+    pub fn new<C: PixelColor>(primitive: &Polyline<'a>, style: &PrimitiveStyle<C>) -> Self {
         debug_assert!(
-            styled.style.stroke_width > 1,
+            style.stroke_width > 1,
             "Polyline ScanlineIterator should only be used for stroke widths greater than 1"
         );
 
-        let mut rows = styled.untranslated_bounding_box().rows();
+        let mut rows = untranslated_bounding_box(primitive, style).rows();
 
         if let Some(scanline_y) = rows.next() {
-            let intersections = ScanlineIntersections::new(
-                styled.primitive.vertices,
-                styled.style.stroke_width,
-                scanline_y,
-            );
+            let intersections =
+                ScanlineIntersections::new(primitive.vertices, style.stroke_width, scanline_y);
 
             Self {
                 rows,

@@ -10,7 +10,7 @@ pub use crate::{
         raw::{RawData, ToBytes as _},
         GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,
     },
-    primitives::{ContainsPoint, OffsetOutline, PointsIter, Primitive, StyledPrimitiveAreas},
+    primitives::{ContainsPoint, OffsetOutline, PointsIter, Primitive},
     transform::Transform,
     Drawable, Pixel,
 };

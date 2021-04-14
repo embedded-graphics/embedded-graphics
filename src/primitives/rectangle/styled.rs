@@ -5,10 +5,11 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         rectangle::{Points, Rectangle},
-        PointsIter, PrimitiveStyle, Styled, StyledPrimitiveAreas,
+        styled::{Styled, StyledDimensions, StyledDrawable},
+        PointsIter, PrimitiveStyle,
     },
     transform::Transform,
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the rect border
@@ -81,29 +82,30 @@ where
     }
 }
 
-impl<C> Drawable for Styled<Rectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        let fill_area = self.fill_area();
+        let fill_area = style.fill_area(self);
 
         // Fill rectangle
-        if let Some(fill_color) = self.style.fill_color {
-            display.fill_solid(&self.fill_area(), fill_color)?;
+        if let Some(fill_color) = style.fill_color {
+            target.fill_solid(&fill_area, fill_color)?;
         }
 
         // Draw stroke
-        if let Some(stroke_color) = self.style.effective_stroke_color() {
-            let stroke_width = self.style.stroke_width;
+        if let Some(stroke_color) = style.effective_stroke_color() {
+            let stroke_width = style.stroke_width;
 
-            let stroke_area = self.stroke_area();
+            let stroke_area = style.stroke_area(self);
 
             let top_border = Rectangle::new(
                 stroke_area.top_left,
@@ -125,8 +127,8 @@ where
                 Size::new(stroke_area.size.width, bottom_stroke_width),
             );
 
-            display.fill_solid(&top_border, stroke_color)?;
-            display.fill_solid(&bottom_border, stroke_color)?;
+            target.fill_solid(&top_border, stroke_color)?;
+            target.fill_solid(&bottom_border, stroke_color)?;
 
             if fill_area.size.height > 0 {
                 let left_border = Rectangle::new(
@@ -145,8 +147,8 @@ where
                     0,
                 ));
 
-                display.fill_solid(&left_border, stroke_color)?;
-                display.fill_solid(&right_border, stroke_color)?;
+                target.fill_solid(&left_border, stroke_color)?;
+                target.fill_solid(&right_border, stroke_color)?;
             }
         }
 
@@ -154,14 +156,11 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<Rectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Rectangle {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 
@@ -419,7 +418,7 @@ mod tests {
     fn bounding_box_is_independent_of_colors() {
         let rect = Rectangle::new(Point::new(5, 5), Size::new(11, 14));
 
-        let transparent_rect = rect.into_styled::<BinaryColor>(PrimitiveStyle::new());
+        let transparent_rect = rect.into_styled(PrimitiveStyle::<BinaryColor>::new());
         let filled_rect = rect.into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
         assert_eq!(transparent_rect.bounding_box(), filled_rect.bounding_box(),);

@@ -8,9 +8,10 @@ use crate::{
         common::{
             DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        PrimitiveStyle, Rectangle, Sector, Styled, StyledPrimitiveAreas,
+        styled::{Styled, StyledDimensions, StyledDrawable},
+        PrimitiveStyle, Rectangle, Sector,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the sector border
@@ -39,11 +40,9 @@ impl<C> StyledPixels<C>
 where
     C: PixelColor,
 {
-    fn new(styled: &Styled<Sector, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        let stroke_area = styled.stroke_area();
-        let fill_area = styled.fill_area();
+    fn new(primitive: &Sector, style: &PrimitiveStyle<C>) -> Self {
+        let stroke_area = style.stroke_area(primitive);
+        let fill_area = style.fill_area(primitive);
 
         let stroke_area_circle = stroke_area.to_circle();
 
@@ -101,8 +100,8 @@ where
             stroke_threshold_inside,
             stroke_threshold_outside,
             bevel,
-            stroke_color: styled.style.stroke_color,
-            fill_color: styled.style.fill_color,
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
@@ -169,34 +168,32 @@ where
     type Iter = StyledPixels<Self::Color>;
 
     fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+        StyledPixels::new(&self.primitive, &self.style)
     }
 }
 
-impl<C> Drawable for Styled<Sector, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Sector {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        target.draw_iter(StyledPixels::new(self, style))
     }
 }
 
-impl<C> Dimensions for Styled<Sector, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Sector {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 
@@ -214,6 +211,7 @@ mod tests {
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        Drawable,
     };
 
     // Check the rendering of a simple sector
@@ -371,8 +369,11 @@ mod tests {
                 .stroke_alignment(StrokeAlignment::Outside)
                 .build(),
         );
-        let transparent = Sector::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg())
-            .into_styled::<BinaryColor>(PrimitiveStyleBuilder::new().stroke_width(3).build());
+        let transparent = Sector::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg()).into_styled(
+            PrimitiveStyleBuilder::<BinaryColor>::new()
+                .stroke_width(3)
+                .build(),
+        );
 
         // TODO: Uncomment when arc bounding box is fixed in #405
         // let mut display = MockDisplay::new();
