@@ -93,7 +93,7 @@ impl<C: PixelColor> DecorationColor<C> {
 ///
 /// The line height is defined as the vertical distance between the baseline of two adjacent lines
 /// of text.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum LineHeight {
     /// Absolute line height in pixels.
     Pixels(u32),

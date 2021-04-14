@@ -1,7 +1,5 @@
 use criterion::*;
-use embedded_graphics::{
-    geometry::AnchorPoint, pixelcolor::Gray8, prelude::*, primitives::*, Styled,
-};
+use embedded_graphics::{geometry::AnchorPoint, pixelcolor::Gray8, prelude::*, primitives::*};
 
 mod common;
 

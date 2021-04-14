@@ -8,9 +8,9 @@ use crate::{
         common::{
             DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        PrimitiveStyle, Rectangle, Sector, StyledPrimitiveAreas,
+        PrimitiveStyle, Rectangle, Sector, Styled, StyledPrimitiveAreas,
     },
-    Drawable, Pixel, SaturatingCast, Styled,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the sector border

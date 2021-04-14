@@ -6,9 +6,9 @@ use crate::{
     primitives::{
         common::{ClosedThickSegmentIter, PointType, Scanline, StrokeOffset},
         triangle::{scanline_iterator::ScanlineIterator, Triangle},
-        PrimitiveStyle, Rectangle, StrokeAlignment,
+        PrimitiveStyle, Rectangle, StrokeAlignment, Styled,
     },
-    Drawable, Pixel, Styled,
+    Drawable, Pixel,
 };
 
 /// Pixel iterator for each pixel in the triangle border

@@ -7,9 +7,9 @@ use crate::{
         circle::{points::Scanlines, Circle},
         common::{Scanline, StyledScanline},
         rectangle::Rectangle,
-        PrimitiveStyle, StyledPrimitiveAreas,
+        PrimitiveStyle, Styled, StyledPrimitiveAreas,
     },
-    Drawable, Pixel, SaturatingCast, Styled,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the circle border

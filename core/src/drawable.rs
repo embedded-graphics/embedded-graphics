@@ -39,9 +39,9 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
 ///             .draw(target)?;
 ///
-///         Text::new(self.text, Point::new(6, 13))
-///             .into_styled(MonoTextStyle::new(&FONT_6X9, self.fg_color))
-///             .draw(target)?;
+///         let style = MonoTextStyle::new(&FONT_6X9, self.fg_color);
+///
+///         Text::new(self.text, Point::new(6, 13), style).draw(target)?;
 ///
 ///         Ok(())
 ///     }

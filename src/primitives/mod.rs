@@ -10,6 +10,7 @@ mod primitive_style;
 pub mod rectangle;
 pub mod rounded_rectangle;
 pub mod sector;
+mod styled;
 pub mod triangle;
 
 #[doc(no_inline)]
@@ -30,9 +31,9 @@ pub use self::{
 use crate::{
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
-    Styled,
 };
 pub use embedded_graphics_core::primitives::PointsIter;
+pub use styled::Styled;
 
 /// Primitive trait
 pub trait Primitive: Dimensions + PointsIter {

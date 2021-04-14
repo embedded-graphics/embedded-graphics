@@ -5,10 +5,10 @@ use crate::{
     pixelcolor::PixelColor,
     primitives::{
         rectangle::{Points, Rectangle},
-        PointsIter, PrimitiveStyle, StyledPrimitiveAreas,
+        PointsIter, PrimitiveStyle, Styled, StyledPrimitiveAreas,
     },
     transform::Transform,
-    Drawable, Pixel, SaturatingCast, Styled,
+    Drawable, Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the rect border

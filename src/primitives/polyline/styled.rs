@@ -6,10 +6,10 @@ use crate::{
     primitives::{
         common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
-        PointsIter, PrimitiveStyle, Rectangle,
+        PointsIter, PrimitiveStyle, Rectangle, Styled,
     },
     transform::Transform,
-    Drawable, Pixel, Styled,
+    Drawable, Pixel,
 };
 
 impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>

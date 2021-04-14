@@ -6,9 +6,9 @@ use crate::{
     primitives::{
         common::{Scanline, StyledScanline},
         rounded_rectangle::{points::Scanlines, RoundedRectangle},
-        PrimitiveStyle, Rectangle, StyledPrimitiveAreas,
+        PrimitiveStyle, Rectangle, Styled, StyledPrimitiveAreas,
     },
-    Drawable, Pixel, SaturatingCast, Styled,
+    Drawable, Pixel, SaturatingCast,
 };
 
 use super::RoundedRectangleContains;
