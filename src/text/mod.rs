@@ -26,8 +26,7 @@
 //! The [`alignment`] setting sets the horizontal alignment of the text. With the default value
 //! `Left` the text will be rendered to the right of the given text position. Analogously `Right`
 //! aligned text will be rendered to the left of the given position. `Center`ed text will extend
-//! equally to the left and right of the text position. If the text contains multiple lines each
-//! line will be aligned independently of the other lines.
+//! equally to the left and right of the text position.
 //!
 //! The [`baseline`] setting defines the vertical alignment of the first line of text. With the default
 //! setting of `Alphabetic` the glyphs will be drawn with their descenders below the given position.
