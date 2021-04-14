@@ -68,7 +68,7 @@ pub trait Drawable {
     /// The pixel color type.
     type Color: PixelColor;
 
-    /// The return type of the [`draw`] method.
+    /// The return type of the `draw` method.
     ///
     /// The `Output` type can be used to return results and values produced from the drawing of the
     /// current item. For example, rendering two differently styled text items next to each other
@@ -98,8 +98,6 @@ pub trait Drawable {
     /// ```
     ///
     /// Use `()` if no value should be returned.
-    ///
-    /// [`draw`]: #tymethod.draw
     type Output;
 
     /// Draw the graphics object using the supplied DrawTarget.
