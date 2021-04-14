@@ -12,7 +12,7 @@
 //!
 //! # Built-in fonts
 //!
-//! Each build-in font is provided in an ASCII and a Latin 1 (ISO 8859-1) variant. The ASCII variant
+//! Each built-in font is provided in an ASCII and a Latin 1 (ISO 8859-1) variant. The ASCII variant
 //! contains a smaller subset of characters which saves memory in embedded application, but only
 //! covers all characters of the English language. The Latin 1 variant has complete coverage for
 //! [the languages listed here](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Modern_languages_with_complete_coverage),

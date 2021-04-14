@@ -36,7 +36,7 @@
 //! to the EM box, without considering the baseline.
 //!
 //! If the text contains multiple lines only the first line will be vertically aligned based on the
-//! baseline setting. All following lines will be spaced according to the [`line_height`] setting.
+//! baseline setting. All following lines will be spaced relative to the first line, according to the [`line_height`] setting.
 //!
 //! # Examples
 //!
@@ -149,7 +149,7 @@
 //! // Draw the first text at (20, 30) using the small character style.
 //! let next = Text::new("small ", Point::new(20, 30), small_style).draw(&mut display)?;
 //!
-//! // Draw the second text after the first text using the large  character style.
+//! // Draw the second text after the first text using the large character style.
 //! let next = Text::new("large", next, large_style).draw(&mut display)?;
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```

@@ -2,9 +2,9 @@ use crate::text::{Alignment, Baseline, LineHeight};
 
 /// Text style.
 ///
-/// A text style is used to set how text lines are layed out in a text drawable.
+/// A text style is used to set how text lines are laid out in a text drawable.
 ///
-/// Use [`TextStyleBuilder`] to build text style object.
+/// Use [`TextStyleBuilder`] to build a text style object.
 ///
 /// See the [module-level documentation] for more information about text styles and examples.
 ///
