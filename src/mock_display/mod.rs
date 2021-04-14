@@ -291,7 +291,7 @@ where
     /// # Panics
     ///
     /// This method will panic if `point` is outside the display bounding box.
-    fn set_pixel(&mut self, point: Point, color: Option<C>) {
+    pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
         assert!(
             point.x >= 0 && point.y >= 0 && point.x < SIZE as i32 && point.y < SIZE as i32,
             "point must be inside display bounding box: {:?}",
