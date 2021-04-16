@@ -48,7 +48,6 @@ impl Iterator for Points {
 mod tests {
     use super::*;
     use crate::{
-        iterator::IntoPixels,
         pixelcolor::BinaryColor,
         primitives::{PointsIter, Primitive, PrimitiveStyle},
         transform::Transform,
@@ -62,7 +61,7 @@ mod tests {
         let styled_points = triangle
             .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_pixels()
+            .pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(triangle.points().eq(styled_points));

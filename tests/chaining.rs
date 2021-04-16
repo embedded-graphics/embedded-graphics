@@ -44,11 +44,11 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
 
     let chained = Rectangle::new(Point::new(0, 0), Size::new(1, 1))
         .into_styled(PrimitiveStyle::default())
-        .into_pixels()
+        .pixels()
         .chain(
             Circle::new(Point::new(1, 1), 3)
                 .into_styled(PrimitiveStyle::default())
-                .into_pixels(),
+                .pixels(),
         );
 
     chained.draw(&mut display)
@@ -57,11 +57,11 @@ fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
 fn multi() -> impl Iterator<Item = Pixel<TestPixelColor>> {
     let line = Line::new(Point::new(0, 1), Point::new(2, 3))
         .into_styled(PrimitiveStyle::with_stroke(1u8.into(), 1))
-        .into_pixels();
+        .pixels();
 
     let circle = Circle::new(Point::new(2, 2), 7)
         .into_styled(PrimitiveStyle::with_stroke(1u8.into(), 1))
-        .into_pixels();
+        .pixels();
 
     line.chain(circle)
 }

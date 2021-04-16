@@ -229,9 +229,10 @@
 //!     prelude::*,
 //!     text::Text,
 //! };
-//! Text::new("Hello,\nRust!", Point::new(2, 28))
-//!     .into_styled(MonoTextStyle::new(&FONT_6X10, Rgb888::GREEN))
-//!     .draw(&mut display)?;
+//!
+//! let style = MonoTextStyle::new(&FONT_6X10, Rgb888::GREEN);
+//!
+//! Text::new("Hello,\nRust!", Point::new(2, 28), style).draw(&mut display)?;
 //! ```
 //! ## Display a TGA image
 //!

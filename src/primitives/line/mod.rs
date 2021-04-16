@@ -1,11 +1,5 @@
 //! The line primitive
 
-mod bresenham;
-pub(in crate::primitives) mod intersection_params;
-mod points;
-mod styled;
-mod thick_points;
-
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
@@ -16,8 +10,15 @@ use crate::{
     transform::Transform,
     SaturatingCast,
 };
+
+mod bresenham;
+pub(in crate::primitives) mod intersection_params;
+mod points;
+mod styled;
+mod thick_points;
+
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Line primitive
 ///
@@ -207,7 +208,7 @@ impl Transform for Line {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Size, iterator::IntoPixels, mock_display::MockDisplay, pixelcolor::BinaryColor,
+        geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor,
         primitives::PrimitiveStyle, Drawable, Pixel,
     };
     use arrayvec::ArrayVec;
@@ -238,7 +239,7 @@ mod tests {
         let line =
             Line::new(start, end).into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 0));
 
-        assert!(line.into_pixels().eq(core::iter::empty()));
+        assert!(line.pixels().eq(core::iter::empty()));
     }
 
     #[test]
@@ -408,7 +409,7 @@ mod tests {
         let styled_points: ArrayVec<[_; 32]> = line
             .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_pixels()
+            .pixels()
             .map(|Pixel(p, _)| p)
             .collect();
 

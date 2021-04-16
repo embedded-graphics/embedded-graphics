@@ -1,12 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::Dimensions,
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         arc::Arc,
         common::{DistanceIterator, PlaneSector},
-        styled::{Styled, StyledDimensions, StyledDrawable},
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
         OffsetOutline, PrimitiveStyle, Rectangle,
     },
     Pixel, SaturatingCast,
@@ -14,10 +13,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the arc border
 #[derive(Clone, PartialEq, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     iter: DistanceIterator,
 
     plane_sector: PlaneSector,
@@ -28,10 +24,7 @@ where
     stroke_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledPixelsIterator<C> {
     fn new(primitive: &Arc, style: &PrimitiveStyle<C>) -> Self {
         let circle = primitive.to_circle();
 
@@ -57,10 +50,7 @@ where
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -91,20 +81,15 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Arc {
     where
         D: DrawTarget<Color = C>,
     {
-        target.draw_iter(StyledPixels::new(self, style))
+        target.draw_iter(StyledPixelsIterator::new(self, style))
     }
 }
 
-impl<C> IntoPixels for &Styled<Arc, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Arc {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(&self.primitive, &self.style)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 

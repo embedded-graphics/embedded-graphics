@@ -2,13 +2,12 @@ use crate::{
     draw_target::DrawTarget,
     geometry::angle_consts::ANGLE_90DEG,
     geometry::{Angle, Dimensions},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{
             DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        styled::{Styled, StyledDimensions, StyledDrawable},
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle, Sector,
     },
     Pixel, SaturatingCast,
@@ -16,10 +15,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the sector border
 #[derive(Clone, PartialEq, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     iter: DistanceIterator,
 
     plane_sector: PlaneSector,
@@ -36,10 +32,7 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledPixelsIterator<C> {
     fn new(primitive: &Sector, style: &PrimitiveStyle<C>) -> Self {
         let stroke_area = style.stroke_area(primitive);
         let fill_area = style.fill_area(primitive);
@@ -106,10 +99,7 @@ where
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -159,16 +149,11 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Sector, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Sector {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(&self.primitive, &self.style)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
@@ -184,7 +169,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Sector {
     where
         D: DrawTarget<Color = C>,
     {
-        target.draw_iter(StyledPixels::new(self, style))
+        target.draw_iter(StyledPixelsIterator::new(self, style))
     }
 }
 
@@ -210,7 +195,9 @@ mod tests {
         geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{
+            Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, Styled,
+        },
         Drawable,
     };
 
@@ -260,7 +247,7 @@ mod tests {
             Sector::new(Point::new(-5, -5), 21, 0.0.deg(), 90.0.deg())
                 .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        assert!(sector.into_pixels().count() > 0);
+        assert!(sector.pixels().count() > 0);
     }
 
     fn test_stroke_alignment(

@@ -58,7 +58,6 @@ mod tests {
     use super::*;
     use crate::{
         geometry::AngleUnit,
-        iterator::IntoPixels,
         pixelcolor::BinaryColor,
         primitives::{PointsIter, Primitive, PrimitiveStyle},
         Pixel,
@@ -71,7 +70,7 @@ mod tests {
         let styled_points = arc
             .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_pixels()
+            .pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(arc.points().eq(styled_points));

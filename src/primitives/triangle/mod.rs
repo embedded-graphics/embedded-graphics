@@ -1,9 +1,6 @@
 //! The triangle primitive.
 
-mod points;
-mod scanline_intersections;
-mod scanline_iterator;
-mod styled;
+use core::cmp::{max, min, Ordering};
 
 use crate::{
     geometry::{Dimensions, Point},
@@ -13,9 +10,14 @@ use crate::{
     },
     transform::Transform,
 };
-use core::cmp::{max, min, Ordering};
+
+mod points;
+mod scanline_intersections;
+mod scanline_iterator;
+mod styled;
+
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Triangle primitive
 ///

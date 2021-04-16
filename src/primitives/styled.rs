@@ -96,6 +96,13 @@ impl<T: OffsetOutline, C: PixelColor> Styled<T, PrimitiveStyle<C>> {
     }
 }
 
+impl<T: StyledPixels<S>, S> Styled<T, S> {
+    /// Returns an iterator over the pixels in this styled primitive.
+    pub fn pixels(&self) -> T::Iter {
+        self.primitive.pixels(&self.style)
+    }
+}
+
 impl<T: StyledDimensions<S>, S> Dimensions for Styled<T, S> {
     fn bounding_box(&self) -> Rectangle {
         self.primitive.styled_bounding_box(&self.style)
@@ -146,4 +153,13 @@ pub trait StyledDrawable<S> {
 pub trait StyledDimensions<S> {
     /// Returns the bounding box using the given style.
     fn styled_bounding_box(&self, style: &S) -> Rectangle;
+}
+
+/// Styled drawable.
+pub trait StyledPixels<S> {
+    /// Iterator type.
+    type Iter;
+
+    /// Returns an iterator over all pixels in this styled primitive.
+    fn pixels(&self, style: &S) -> Self::Iter;
 }

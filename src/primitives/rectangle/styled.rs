@@ -1,11 +1,10 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point, Size},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         rectangle::{Points, Rectangle},
-        styled::{Styled, StyledDimensions, StyledDrawable},
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PointsIter, PrimitiveStyle,
     },
     transform::Transform,
@@ -14,10 +13,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     iter: Points,
 
     stroke_color: Option<C>,
@@ -26,30 +22,24 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
-    pub(in crate::primitives) fn new(styled: &Styled<Rectangle, PrimitiveStyle<C>>) -> Self {
-        let iter = if !styled.style.is_transparent() {
-            styled.stroke_area().points()
+impl<C: PixelColor> StyledPixelsIterator<C> {
+    pub(in crate::primitives) fn new(primitive: &Rectangle, style: &PrimitiveStyle<C>) -> Self {
+        let iter = if !style.is_transparent() {
+            style.stroke_area(primitive).points()
         } else {
             Points::empty()
         };
 
         Self {
             iter,
-            fill_area: styled.fill_area(),
-            stroke_color: styled.style.stroke_color,
-            fill_color: styled.style.fill_color,
+            fill_area: style.fill_area(primitive),
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -69,16 +59,11 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Rectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Rectangle {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<C>;
-
-    fn into_pixels(self) -> Self::Iter {
-        Self::Iter::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        Self::Iter::new(self, style)
     }
 }
 
@@ -169,7 +154,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Point, Size},
-        iterator::{IntoPixels, PixelIteratorExt},
+        iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::{Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
@@ -180,7 +165,7 @@ mod tests {
     fn it_draws_unfilled_rect() {
         let mut rect = Rectangle::new(Point::new(2, 2), Size::new(3, 3))
             .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-            .into_pixels();
+            .pixels();
 
         assert_eq!(rect.next(), Some(Pixel(Point::new(2, 2), Rgb565::RED)));
         assert_eq!(rect.next(), Some(Pixel(Point::new(3, 2), Rgb565::RED)));
@@ -201,7 +186,7 @@ mod tests {
         let styled_points = rectangle
             .clone()
             .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
-            .into_pixels()
+            .pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(rectangle.points().eq(styled_points));
@@ -256,10 +241,7 @@ mod tests {
         let mut drawn_center = MockDisplay::new();
         let mut iter_center = MockDisplay::new();
         rectangle_center.draw(&mut drawn_center).unwrap();
-        rectangle_center
-            .into_pixels()
-            .draw(&mut iter_center)
-            .unwrap();
+        rectangle_center.pixels().draw(&mut iter_center).unwrap();
         drawn_center.assert_eq(&iter_center);
 
         let rectangle_inside = Rectangle::new(TOP_LEFT - Point::new(1, 1), SIZE + Size::new(2, 2))
@@ -272,10 +254,7 @@ mod tests {
         let mut drawn_inside = MockDisplay::new();
         let mut iter_inside = MockDisplay::new();
         rectangle_inside.draw(&mut drawn_inside).unwrap();
-        rectangle_inside
-            .into_pixels()
-            .draw(&mut iter_inside)
-            .unwrap();
+        rectangle_inside.pixels().draw(&mut iter_inside).unwrap();
         drawn_inside.assert_eq(&iter_inside);
 
         let rectangle_outside = Rectangle::new(TOP_LEFT + Point::new(2, 2), SIZE - Size::new(4, 4))
@@ -288,10 +267,7 @@ mod tests {
         let mut drawn_outside = MockDisplay::new();
         let mut iter_outside = MockDisplay::new();
         rectangle_outside.draw(&mut drawn_outside).unwrap();
-        rectangle_outside
-            .into_pixels()
-            .draw(&mut iter_outside)
-            .unwrap();
+        rectangle_outside.pixels().draw(&mut iter_outside).unwrap();
         drawn_outside.assert_eq(&iter_outside);
     }
 
@@ -307,7 +283,7 @@ mod tests {
         let mut drawn = MockDisplay::new();
         let mut iter = MockDisplay::new();
         rectangle.draw(&mut drawn).unwrap();
-        rectangle.into_pixels().draw(&mut iter).unwrap();
+        rectangle.pixels().draw(&mut iter).unwrap();
         drawn.assert_eq(&iter);
     }
 
@@ -350,7 +326,7 @@ mod tests {
 
                 // Calls draw_iter()
                 rect.into_styled(style)
-                    .into_pixels()
+                    .pixels()
                     .draw(&mut display_iter)
                     .unwrap();
 
@@ -383,7 +359,7 @@ mod tests {
 
         let styled = rectangle.into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        let _pixels = styled.into_pixels();
+        let _pixels = styled.pixels();
 
         let moved = rectangle.translate(Point::new(1, 2));
 

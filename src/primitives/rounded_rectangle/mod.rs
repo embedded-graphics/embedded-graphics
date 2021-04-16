@@ -1,10 +1,5 @@
 //! The rounded rectangle primitive.
 
-mod corner_radii;
-mod ellipse_quadrant;
-mod points;
-mod styled;
-
 use core::ops::Range;
 
 use crate::{
@@ -12,10 +7,16 @@ use crate::{
     primitives::{rectangle::Rectangle, ContainsPoint, OffsetOutline, PointsIter, Primitive},
     transform::Transform,
 };
+
+mod corner_radii;
+mod ellipse_quadrant;
+mod points;
+mod styled;
+
 pub use corner_radii::{CornerRadii, CornerRadiiBuilder};
 use ellipse_quadrant::{EllipseQuadrant, Quadrant};
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Rounded rectangle primitive.
 ///

@@ -8,24 +8,6 @@ use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
 };
 
-/// Produce an iterator over all pixels in an object.
-///
-/// This trait is implemented for _references_ to all styled items in embedded-graphics, therefore
-/// does not consume the original item.
-pub trait IntoPixels {
-    /// The type of color for each pixel produced by the iterator returned from `into_pixels`.
-    type Color: PixelColor;
-
-    /// The iterator produced when calling `into_pixels`.
-    type Iter: Iterator<Item = Pixel<Self::Color>>;
-
-    /// Create an iterator over all pixels in the object.
-    ///
-    /// The iterator may return pixels in any order, however it may be beneficial for performance
-    /// reasons to return them starting at the top left corner in row-first order.
-    fn into_pixels(self) -> Self::Iter;
-}
-
 /// Extension trait for contiguous iterators.
 pub trait ContiguousIteratorExt
 where
@@ -33,7 +15,7 @@ where
     <Self as Iterator>::Item: PixelColor,
 {
     /// Converts a contiguous iterator into a pixel iterator.
-    fn into_pixels_iter(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self>;
+    fn into_pixels(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self>;
 }
 
 impl<I> ContiguousIteratorExt for I
@@ -41,7 +23,7 @@ where
     I: Iterator,
     I::Item: PixelColor,
 {
-    fn into_pixels_iter(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self> {
+    fn into_pixels(self, bounding_box: &Rectangle) -> contiguous::IntoPixels<Self> {
         contiguous::IntoPixels::new(self, *bounding_box)
     }
 }

@@ -1,12 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{Scanline, StyledScanline},
         ellipse::{points::Scanlines, Ellipse, EllipseContains},
-        styled::{Styled, StyledDimensions, StyledDrawable},
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle,
     },
     Pixel, SaturatingCast,
@@ -14,10 +13,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the ellipse border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     styled_scanlines: StyledScanlines,
 
     stroke_left: Scanline,
@@ -28,29 +24,23 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
-    pub(in crate::primitives) fn new(styled: &Styled<Ellipse, PrimitiveStyle<C>>) -> Self {
-        let stroke_area = styled.stroke_area();
-        let fill_area = styled.fill_area();
+impl<C: PixelColor> StyledPixelsIterator<C> {
+    pub(in crate::primitives) fn new(primitive: &Ellipse, style: &PrimitiveStyle<C>) -> Self {
+        let stroke_area = style.stroke_area(primitive);
+        let fill_area = style.fill_area(primitive);
 
         Self {
             styled_scanlines: StyledScanlines::new(&stroke_area, &fill_area),
             stroke_left: Scanline::new_empty(0),
             fill: Scanline::new_empty(0),
             stroke_right: Scanline::new_empty(0),
-            stroke_color: styled.style.stroke_color,
-            fill_color: styled.style.fill_color,
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -98,16 +88,11 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Ellipse, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Ellipse {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
@@ -233,9 +218,9 @@ mod tests {
         ellipse.draw(&mut drawable).unwrap();
         drawable.assert_pattern(pattern);
 
-        let mut into_pixels = MockDisplay::new();
-        ellipse.into_pixels().draw(&mut into_pixels).unwrap();
-        into_pixels.assert_pattern(pattern);
+        let mut pixels = MockDisplay::new();
+        ellipse.pixels().draw(&mut pixels).unwrap();
+        pixels.assert_pattern(pattern);
     }
 
     #[test]

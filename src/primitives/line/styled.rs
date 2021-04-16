@@ -1,10 +1,9 @@
 use crate::{
     draw_target::DrawTarget,
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         line::{thick_points::ThickPoints, Line, StrokeOffset},
-        styled::{Styled, StyledDimensions, StyledDrawable},
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle,
     },
     Pixel, SaturatingCast,
@@ -12,18 +11,12 @@ use crate::{
 
 /// Styled line iterator.
 #[derive(Clone, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     stroke_color: Option<C>,
     line_iter: ThickPoints,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledPixelsIterator<C> {
     pub(in crate::primitives::line) fn new(primitive: &Line, style: &PrimitiveStyle<C>) -> Self {
         // Note: stroke color will be None if stroke width is 0
         let stroke_color = style.effective_stroke_color();
@@ -36,11 +29,7 @@ where
     }
 }
 
-// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -53,16 +42,11 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Line, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Line {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(&self.primitive, &self.style)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
@@ -78,7 +62,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     where
         D: DrawTarget<Color = C>,
     {
-        target.draw_iter(StyledPixels::new(self, style))
+        target.draw_iter(StyledPixelsIterator::new(self, style))
     }
 }
 

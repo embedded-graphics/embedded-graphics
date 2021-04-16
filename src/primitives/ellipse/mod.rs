@@ -1,15 +1,16 @@
 //! The ellipse primitive
 
-mod points;
-mod styled;
-
 use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{circle, ContainsPoint, OffsetOutline, PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
+
+mod points;
+mod styled;
+
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Ellipse primitive
 ///
