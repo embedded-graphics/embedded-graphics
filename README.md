@@ -92,7 +92,7 @@ Note that some drivers may not support the latest version of embedded-graphics.
 ## Simulator
 
 Embedded graphics comes with a [simulator]! The simulator can be used to test and debug
-embedded graphics code, or produce examples and interactive demos to show of embedded graphics
+embedded graphics code, or produce examples and interactive demos to show off embedded graphics
 features.
 
 ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/simulator-demo.png)
