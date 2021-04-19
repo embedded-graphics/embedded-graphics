@@ -49,7 +49,7 @@
 //! [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
 //! development.
 //!
-//! ![Photographs showing embedded-graphics running on physical display hardware.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/banner-photo.jpg)
+//! ![Photographs showing embedded-graphics running on physical display hardware.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/c712bcb014a077b6b7515f1a3dcf8e6d0324bf8d/assets/banner-photo.jpg)
 //!
 //! These are just some of the displays the community has added embedded-graphics support to. This
 //! list is taken from the [dependent crates
@@ -83,7 +83,7 @@
 //! embedded graphics code, or produce examples and interactive demos to show off embedded graphics
 //! features.
 //!
-//! ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/simulator-demo.png)
+//! ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/c712bcb014a077b6b7515f1a3dcf8e6d0324bf8d/assets/simulator-demo.png)
 //!
 //! Take a look at the [examples repository](https://github.com/embedded-graphics/examples) to see what
 //! embedded-graphics can do, and how it might look on a display. You can run the examples like
@@ -121,7 +121,7 @@
 //!
 //! ## Drawing examples
 //!
-//! [![A grid of screenshots showing primitives, text and other items that can be drawn using embedded-graphics.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/doc/assets/all_drawing_ops.png)](./examples/index.html)
+//! [![A grid of screenshots showing primitives, text and other items that can be drawn using embedded-graphics.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/c712bcb014a077b6b7515f1a3dcf8e6d0324bf8d/doc/assets/all_drawing_ops.png)](./examples/index.html)
 //!
 //! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](./examples/index.html).
 //!
@@ -203,7 +203,7 @@
 //! This example is also included in the [examples](https://github.com/embedded-graphics/examples) repository and
 //! can be run using `cargo run --example hello-world`. It produces this output:
 //!
-//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/8fc3227783c92de82882cfd515c82cb0bfd7a0cd/assets/hello-world-simulator.png)
+//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/c712bcb014a077b6b7515f1a3dcf8e6d0324bf8d/assets/hello-world-simulator.png)
 //!
 //! Additional examples can be found in the [examples](https://github.com/embedded-graphics/examples) repository.
 //!
