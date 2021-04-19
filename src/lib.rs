@@ -203,7 +203,7 @@
 //! This example is also included in the [examples](https://github.com/embedded-graphics/examples) repository and
 //! can be run using `cargo run --example hello-world`. It produces this output:
 //!
-//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/hello-world-simulator.png)
+//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/8fc3227783c92de82882cfd515c82cb0bfd7a0cd/assets/hello-world-simulator.png)
 //!
 //! Additional examples can be found in the [examples](https://github.com/embedded-graphics/examples) repository.
 //!
