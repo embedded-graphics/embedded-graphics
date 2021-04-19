@@ -1,8 +1,4 @@
-use crate::{
-    pixelcolor::PixelColor,
-    primitives::{OffsetOutline, Primitive, Styled},
-    SaturatingCast,
-};
+use crate::{pixelcolor::PixelColor, primitives::OffsetOutline, SaturatingCast};
 
 /// Style properties for primitives.
 ///
@@ -108,6 +104,22 @@ where
     /// `stroke_color`.
     pub(crate) fn effective_stroke_color(&self) -> Option<C> {
         self.stroke_color.filter(|_| self.stroke_width > 0)
+    }
+
+    /// Returns the stroke area.
+    pub(in crate::primitives) fn stroke_area<P: OffsetOutline>(&self, primitive: &P) -> P {
+        // saturate offset at i32::max_value() if stroke width is to large
+        let offset = self.outside_stroke_width().saturating_cast();
+
+        primitive.offset(offset)
+    }
+
+    /// Returns the fill area.
+    pub(in crate::primitives) fn fill_area<P: OffsetOutline>(&self, primitive: &P) -> P {
+        // saturate offset at i32::min_value() if stroke width is to large
+        let offset = self.inside_stroke_width().saturating_cast_neg();
+
+        primitive.offset(offset)
     }
 }
 
@@ -264,39 +276,6 @@ pub enum StrokeAlignment {
 impl Default for StrokeAlignment {
     fn default() -> Self {
         Self::Center
-    }
-}
-/// Stroke and fill area trait.
-pub trait StyledPrimitiveAreas {
-    /// Type of primitive shape used for the stroke and fill areas.
-    type Primitive;
-
-    /// Returns the stroke area.
-    fn stroke_area(&self) -> Self::Primitive;
-
-    /// Returns the fill area.
-    fn fill_area(&self) -> Self::Primitive;
-}
-
-impl<T, C> StyledPrimitiveAreas for Styled<T, PrimitiveStyle<C>>
-where
-    T: Primitive + OffsetOutline,
-    C: PixelColor,
-{
-    type Primitive = T;
-
-    fn stroke_area(&self) -> Self::Primitive {
-        // saturate offset at i32::max_value() if stroke width is to large
-        let offset = self.style.outside_stroke_width().saturating_cast();
-
-        self.primitive.offset(offset)
-    }
-
-    fn fill_area(&self) -> Self::Primitive {
-        // saturate offset at i32::min_value() if stroke width is to large
-        let offset = self.style.inside_stroke_width().saturating_cast_neg();
-
-        self.primitive.offset(offset)
     }
 }
 

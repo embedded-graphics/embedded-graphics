@@ -1,8 +1,5 @@
 //! The sector primitive
 
-mod points;
-mod styled;
-
 use crate::{
     geometry::{Angle, Dimensions, Point, Size},
     primitives::{
@@ -10,8 +7,12 @@ use crate::{
     },
     transform::Transform,
 };
+
+mod points;
+mod styled;
+
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Sector primitive
 ///

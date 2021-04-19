@@ -1,30 +1,25 @@
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
     geometry::{Dimensions, Point, Size},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{Scanline, StrokeOffset, ThickSegmentIter},
         polyline::{self, scanline_iterator::ScanlineIterator, Polyline},
-        PointsIter, PrimitiveStyle, Rectangle, Styled,
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
+        PointsIter, PrimitiveStyle, Rectangle,
     },
     transform::Transform,
-    Drawable, Pixel,
+    Pixel,
 };
 
-impl<'a, C> Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    /// Compute the bounding box of the non-translated polyline.
-    pub(in crate::primitives::polyline) fn untranslated_bounding_box(&self) -> Rectangle {
-        if self.style.effective_stroke_color().is_some() && self.primitive.vertices.len() > 1 {
-            let (min, max) = ThickSegmentIter::new(
-                self.primitive.vertices,
-                self.style.stroke_width,
-                StrokeOffset::None,
-            )
-            .fold(
+/// Compute the bounding box of the non-translated polyline.
+pub(in crate::primitives::polyline) fn untranslated_bounding_box<C: PixelColor>(
+    primitive: &Polyline,
+    style: &PrimitiveStyle<C>,
+) -> Rectangle {
+    if style.effective_stroke_color().is_some() && primitive.vertices.len() > 1 {
+        let (min, max) =
+            ThickSegmentIter::new(primitive.vertices, style.stroke_width, StrokeOffset::None).fold(
                 (
                     Point::new_equal(core::i32::MAX),
                     Point::new_equal(core::i32::MIN),
@@ -39,26 +34,30 @@ where
                 },
             );
 
-            Rectangle::with_corners(min, max)
-        } else {
-            Rectangle::new(self.primitive.bounding_box().center(), Size::zero())
+        Rectangle::with_corners(min, max)
+    } else {
+        Rectangle::new(primitive.bounding_box().center(), Size::zero())
+    }
+}
+
+fn draw_thick<D>(
+    polyline: &Polyline,
+    style: &PrimitiveStyle<D::Color>,
+    stroke_color: D::Color,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    D: DrawTarget,
+{
+    for line in ScanlineIterator::new(polyline, style) {
+        let rect = line.to_rectangle();
+
+        if !rect.is_zero_sized() {
+            target.fill_solid(&rect, stroke_color)?;
         }
     }
 
-    fn draw_thick<D>(&self, stroke_color: C, target: &mut D) -> Result<(), D::Error>
-    where
-        D: DrawTarget<Color = C>,
-    {
-        for line in ScanlineIterator::new(self) {
-            let rect = line.to_rectangle();
-
-            if !rect.is_zero_sized() {
-                target.fill_solid(&rect, stroke_color)?;
-            }
-        }
-
-        Ok(())
-    }
+    Ok(())
 }
 
 #[derive(Clone, Debug)]
@@ -73,23 +72,17 @@ enum StyledIter<'a> {
 
 /// Pixel iterator for each pixel in the line
 #[derive(Clone, Debug)]
-pub struct StyledPixels<'a, C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<'a, C> {
     stroke_color: Option<C>,
     line_iter: StyledIter<'a>,
 }
 
-impl<'a, C> StyledPixels<'a, C>
-where
-    C: PixelColor,
-{
-    pub(in crate::primitives) fn new(styled: &Styled<Polyline<'a>, PrimitiveStyle<C>>) -> Self {
-        let line_iter = if styled.style.stroke_width <= 1 {
-            StyledIter::Thin(styled.primitive.points())
+impl<'a, C: PixelColor> StyledPixelsIterator<'a, C> {
+    pub(in crate::primitives) fn new(primitive: &Polyline<'a>, style: &PrimitiveStyle<C>) -> Self {
+        let line_iter = if style.stroke_width <= 1 {
+            StyledIter::Thin(primitive.points())
         } else {
-            let mut scanline_iter = ScanlineIterator::new(styled);
+            let mut scanline_iter = ScanlineIterator::new(primitive, style);
             let line_iter = scanline_iter
                 .next()
                 .unwrap_or_else(|| Scanline::new_empty(0));
@@ -97,21 +90,18 @@ where
             StyledIter::Thick {
                 scanline_iter,
                 line_iter,
-                translate: styled.primitive.translate,
+                translate: primitive.translate,
             }
         };
 
-        StyledPixels {
-            stroke_color: styled.style.effective_stroke_color(),
+        StyledPixelsIterator {
+            stroke_color: style.effective_stroke_color(),
             line_iter,
         }
     }
 }
 
-impl<'a, C> Iterator for StyledPixels<'a, C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<'_, C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -142,46 +132,40 @@ where
     }
 }
 
-impl<'a, C> IntoPixels for &Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<'a, C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Polyline<'a> {
+    type Iter = StyledPixelsIterator<'a, C>;
 
-    type Iter = StyledPixels<'a, C>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
-impl<'a, C> Drawable for Styled<Polyline<'a>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Polyline<'_> {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        if let Some(stroke_color) = self.style.stroke_color {
-            match self.style.stroke_width {
+        if let Some(stroke_color) = style.stroke_color {
+            match style.stroke_width {
                 0 => Ok(()),
-                1 => display.draw_iter(
-                    self.primitive
-                        .points()
-                        .map(|point| Pixel(point, stroke_color)),
-                ),
+                1 => target.draw_iter(self.points().map(|point| Pixel(point, stroke_color))),
                 _ => {
-                    if self.primitive.translate != Point::zero() {
-                        self.draw_thick(
+                    if self.translate != Point::zero() {
+                        draw_thick(
+                            self,
+                            style,
                             stroke_color,
-                            &mut display.translated(self.primitive.translate),
+                            &mut target.translated(self.translate),
                         )
                     } else {
-                        self.draw_thick(stroke_color, display)
+                        draw_thick(self, style, stroke_color, target)
                     }
                 }
             }
@@ -191,13 +175,9 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<Polyline<'_>, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        self.untranslated_bounding_box()
-            .translate(self.primitive.translate)
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Polyline<'_> {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        untranslated_bounding_box(self, style).translate(self.translate)
     }
 }
 
@@ -206,7 +186,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::Point,
-        iterator::{IntoPixels, PixelIteratorExt},
+        iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
         primitives::{Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
@@ -331,7 +311,7 @@ mod tests {
 
         pl.draw(&mut d1).unwrap();
 
-        pl.into_pixels().draw(&mut d2).unwrap();
+        pl.pixels().draw(&mut d2).unwrap();
 
         d1.assert_eq(&d2);
     }
@@ -474,7 +454,7 @@ mod tests {
 
         Polyline::new(&PATTERN)
             .into_styled(base_style)
-            .into_pixels()
+            .pixels()
             .draw(&mut display)
             .unwrap();
 
@@ -488,7 +468,7 @@ mod tests {
         // No stroke width = no pixels
         assert!(Polyline::new(&points)
             .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 0))
-            .into_pixels()
+            .pixels()
             .eq(core::iter::empty()));
 
         // No stroke color = no pixels
@@ -498,7 +478,7 @@ mod tests {
                     .stroke_width(1)
                     .build()
             )
-            .into_pixels()
+            .pixels()
             .eq(core::iter::empty()));
     }
 
@@ -591,7 +571,7 @@ mod tests {
 
         Polyline::new(&[])
             .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 2))
-            .into_pixels()
+            .pixels()
             .draw(&mut display)
             .unwrap();
 

@@ -1,32 +1,23 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::Dimensions,
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         line::{thick_points::ThickPoints, Line, StrokeOffset},
-        PrimitiveStyle, Rectangle, Styled,
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
+        PrimitiveStyle, Rectangle,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 /// Styled line iterator.
 #[derive(Clone, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     stroke_color: Option<C>,
     line_iter: ThickPoints,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
-    pub(in crate::primitives::line) fn new(styled: &Styled<Line, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
+impl<C: PixelColor> StyledPixelsIterator<C> {
+    pub(in crate::primitives::line) fn new(primitive: &Line, style: &PrimitiveStyle<C>) -> Self {
         // Note: stroke color will be None if stroke width is 0
         let stroke_color = style.effective_stroke_color();
         let stroke_width = style.stroke_width.saturating_cast();
@@ -38,11 +29,7 @@ where
     }
 }
 
-// [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -55,42 +42,33 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Line, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Line {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
-impl<C> Drawable for Styled<Line, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        target.draw_iter(StyledPixelsIterator::new(self, style))
     }
 }
 
-impl<C> Dimensions for Styled<Line, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        let (l, r) = self
-            .primitive
-            .extents(self.style.stroke_width, StrokeOffset::None);
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Line {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let (l, r) = self.extents(style.stroke_width, StrokeOffset::None);
 
         let min = l
             .start
@@ -111,10 +89,11 @@ where
 mod tests {
     use super::*;
     use crate::{
-        geometry::Point,
+        geometry::{Dimensions, Point},
         mock_display::MockDisplay,
         pixelcolor::{Rgb888, RgbColor},
         primitives::{Primitive, PrimitiveStyleBuilder},
+        Drawable,
     };
 
     #[test]
@@ -165,8 +144,11 @@ mod tests {
     fn bounding_box_is_independent_of_colors() {
         let line = Line::new(Point::new(5, 5), Point::new(11, 14));
 
-        let transparent_line =
-            line.into_styled::<Rgb888>(PrimitiveStyleBuilder::new().stroke_width(10).build());
+        let transparent_line = line.into_styled(
+            PrimitiveStyleBuilder::<Rgb888>::new()
+                .stroke_width(10)
+                .build(),
+        );
         let stroked_line = line.into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 10));
 
         assert_eq!(transparent_line.bounding_box(), stroked_line.bounding_box(),);

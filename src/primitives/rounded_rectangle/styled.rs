@@ -1,24 +1,21 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{Scanline, StyledScanline},
         rounded_rectangle::{points::Scanlines, RoundedRectangle},
-        PrimitiveStyle, Rectangle, Styled, StyledPrimitiveAreas,
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
+        PrimitiveStyle, Rectangle,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 use super::RoundedRectangleContains;
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     styled_scanlines: StyledScanlines,
 
     stroke_left: Scanline,
@@ -29,29 +26,26 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
-    pub(in crate::primitives) fn new(styled: &Styled<RoundedRectangle, PrimitiveStyle<C>>) -> Self {
-        let stroke_area = styled.stroke_area();
-        let fill_area = styled.fill_area();
+impl<C: PixelColor> StyledPixelsIterator<C> {
+    pub(in crate::primitives) fn new(
+        primitive: &RoundedRectangle,
+        style: &PrimitiveStyle<C>,
+    ) -> Self {
+        let stroke_area = style.stroke_area(primitive);
+        let fill_area = style.fill_area(primitive);
 
         Self {
             styled_scanlines: StyledScanlines::new(&stroke_area, &fill_area),
             stroke_left: Scanline::new_empty(0),
             fill: Scanline::new_empty(0),
             stroke_right: Scanline::new_empty(0),
-            stroke_color: styled.style.stroke_color,
-            fill_color: styled.style.fill_color,
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -99,43 +93,43 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for RoundedRectangle {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
-impl<C> Drawable for Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for RoundedRectangle {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        match (self.style.effective_stroke_color(), self.style.fill_color) {
+        match (style.effective_stroke_color(), style.fill_color) {
             (Some(stroke_color), None) => {
-                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
                     scanline.draw_stroke(target, stroke_color)?;
                 }
             }
             (Some(stroke_color), Some(fill_color)) => {
-                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
                     scanline.draw_stroke_and_fill(target, stroke_color, fill_color)?;
                 }
             }
             (None, Some(fill_color)) => {
-                for scanline in Scanlines::new(&self.fill_area()) {
+                for scanline in Scanlines::new(&style.fill_area(self)) {
                     scanline.draw(target, fill_color)?;
                 }
             }
@@ -146,14 +140,11 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<RoundedRectangle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for RoundedRectangle {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 
@@ -204,7 +195,7 @@ mod tests {
     use super::*;
     use crate::{
         geometry::{Dimensions, Point, Size},
-        iterator::{IntoPixels, PixelIteratorExt},
+        iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{
@@ -221,7 +212,7 @@ mod tests {
         )
         .into_styled(PrimitiveStyleBuilder::<BinaryColor>::new().build());
 
-        assert!(rounded_rect.into_pixels().eq(core::iter::empty()));
+        assert!(rounded_rect.pixels().eq(core::iter::empty()));
     }
 
     #[test]
@@ -248,9 +239,9 @@ mod tests {
         rounded_rect.draw(&mut drawable).unwrap();
         drawable.assert_eq(&expected);
 
-        let mut into_pixels = MockDisplay::new();
-        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
-        into_pixels.assert_eq(&expected);
+        let mut pixels = MockDisplay::new();
+        rounded_rect.pixels().draw(&mut pixels).unwrap();
+        pixels.assert_eq(&expected);
     }
 
     #[test]
@@ -303,9 +294,9 @@ mod tests {
         rounded_rect.draw(&mut drawable).unwrap();
         drawable.assert_pattern(expected_pattern);
 
-        let mut into_pixels = MockDisplay::new();
-        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
-        into_pixels.assert_pattern(expected_pattern);
+        let mut pixels = MockDisplay::new();
+        rounded_rect.pixels().draw(&mut pixels).unwrap();
+        pixels.assert_pattern(expected_pattern);
     }
 
     #[test]
@@ -353,9 +344,9 @@ mod tests {
         rounded_rect.draw(&mut drawable).unwrap();
         drawable.assert_pattern(expected_pattern);
 
-        let mut into_pixels = MockDisplay::new();
-        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
-        into_pixels.assert_pattern(expected_pattern);
+        let mut pixels = MockDisplay::new();
+        rounded_rect.pixels().draw(&mut pixels).unwrap();
+        pixels.assert_pattern(expected_pattern);
     }
 
     #[test]
@@ -398,9 +389,9 @@ mod tests {
         rounded_rect.draw(&mut drawable).unwrap();
         drawable.assert_pattern(expected_pattern);
 
-        let mut into_pixels = MockDisplay::new();
-        rounded_rect.into_pixels().draw(&mut into_pixels).unwrap();
-        into_pixels.assert_pattern(expected_pattern);
+        let mut pixels = MockDisplay::new();
+        rounded_rect.pixels().draw(&mut pixels).unwrap();
+        pixels.assert_pattern(expected_pattern);
     }
 
     #[test]
@@ -454,7 +445,7 @@ mod tests {
             },
         );
 
-        let transparent_rect = rect.into_styled::<Rgb888>(PrimitiveStyle::new());
+        let transparent_rect = rect.into_styled(PrimitiveStyle::<Rgb888>::new());
         let filled_rect = rect.into_styled(PrimitiveStyle::with_fill(Rgb888::RED));
 
         assert_eq!(transparent_rect.bounding_box(), filled_rect.bounding_box(),);

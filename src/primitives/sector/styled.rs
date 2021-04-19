@@ -2,23 +2,20 @@ use crate::{
     draw_target::DrawTarget,
     geometry::angle_consts::ANGLE_90DEG,
     geometry::{Angle, Dimensions},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         common::{
             DistanceIterator, LineSide, LinearEquation, PlaneSector, PointType, NORMAL_VECTOR_SCALE,
         },
-        PrimitiveStyle, Rectangle, Sector, Styled, StyledPrimitiveAreas,
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
+        PrimitiveStyle, Rectangle, Sector,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the sector border
 #[derive(Clone, PartialEq, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     iter: DistanceIterator,
 
     plane_sector: PlaneSector,
@@ -35,15 +32,10 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
-    fn new(styled: &Styled<Sector, PrimitiveStyle<C>>) -> Self {
-        let Styled { primitive, style } = styled;
-
-        let stroke_area = styled.stroke_area();
-        let fill_area = styled.fill_area();
+impl<C: PixelColor> StyledPixelsIterator<C> {
+    fn new(primitive: &Sector, style: &PrimitiveStyle<C>) -> Self {
+        let stroke_area = style.stroke_area(primitive);
+        let fill_area = style.fill_area(primitive);
 
         let stroke_area_circle = stroke_area.to_circle();
 
@@ -101,16 +93,13 @@ where
             stroke_threshold_inside,
             stroke_threshold_outside,
             bevel,
-            stroke_color: styled.style.stroke_color,
-            fill_color: styled.style.fill_color,
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
     type Item = Pixel<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -160,43 +149,36 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Sector, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Sector {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
-impl<C> Drawable for Styled<Sector, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Sector {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        display.draw_iter(self.into_pixels())
+        target.draw_iter(StyledPixelsIterator::new(self, style))
     }
 }
 
-impl<C> Dimensions for Styled<Sector, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Sector {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 
@@ -213,7 +195,10 @@ mod tests {
         geometry::{AngleUnit, Point},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb888, RgbColor},
-        primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+        primitives::{
+            Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, Styled,
+        },
+        Drawable,
     };
 
     // Check the rendering of a simple sector
@@ -262,7 +247,7 @@ mod tests {
             Sector::new(Point::new(-5, -5), 21, 0.0.deg(), 90.0.deg())
                 .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        assert!(sector.into_pixels().count() > 0);
+        assert!(sector.pixels().count() > 0);
     }
 
     fn test_stroke_alignment(
@@ -371,8 +356,11 @@ mod tests {
                 .stroke_alignment(StrokeAlignment::Outside)
                 .build(),
         );
-        let transparent = Sector::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg())
-            .into_styled::<BinaryColor>(PrimitiveStyleBuilder::new().stroke_width(3).build());
+        let transparent = Sector::with_center(CENTER, SIZE, 0.0.deg(), 90.0.deg()).into_styled(
+            PrimitiveStyleBuilder::<BinaryColor>::new()
+                .stroke_width(3)
+                .build(),
+        );
 
         // TODO: Uncomment when arc bounding box is fixed in #405
         // let mut display = MockDisplay::new();

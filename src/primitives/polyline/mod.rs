@@ -1,17 +1,18 @@
 //! The polyline primitive
 
-mod points;
-pub(in crate::primitives) mod scanline_intersections;
-mod scanline_iterator;
-mod styled;
-
 use crate::{
     geometry::{Dimensions, Point, Size},
     primitives::{PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
+
+mod points;
+pub(in crate::primitives) mod scanline_intersections;
+mod scanline_iterator;
+mod styled;
+
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Polyline primitive
 ///

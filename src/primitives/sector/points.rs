@@ -49,7 +49,6 @@ mod tests {
     use super::*;
     use crate::{
         geometry::AngleUnit,
-        iterator::IntoPixels,
         pixelcolor::BinaryColor,
         primitives::{PointsIter, Primitive, PrimitiveStyle},
         Pixel,
@@ -62,7 +61,7 @@ mod tests {
         let styled_points = sector
             .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_pixels()
+            .pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(sector.points().eq(styled_points));

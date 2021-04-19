@@ -1,14 +1,16 @@
 //! The rectangle primitive. Also good for drawing squares.
 
-mod styled;
-
 use crate::{
     geometry::{Point, Size},
     primitives::{ContainsPoint, OffsetOutline, Primitive},
     transform::Transform,
 };
+
 pub use embedded_graphics_core::primitives::{rectangle::Points, Rectangle};
-pub use styled::StyledPixels;
+
+mod styled;
+
+pub use styled::StyledPixelsIterator;
 
 impl Primitive for Rectangle {}
 

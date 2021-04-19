@@ -1,23 +1,20 @@
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, Point, PointExt},
-    iterator::IntoPixels,
     pixelcolor::PixelColor,
     primitives::{
         circle::{points::Scanlines, Circle},
         common::{Scanline, StyledScanline},
         rectangle::Rectangle,
-        PrimitiveStyle, Styled, StyledPrimitiveAreas,
+        styled::{StyledDimensions, StyledDrawable, StyledPixels},
+        PrimitiveStyle,
     },
-    Drawable, Pixel, SaturatingCast,
+    Pixel, SaturatingCast,
 };
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct StyledPixels<C>
-where
-    C: PixelColor,
-{
+pub struct StyledPixelsIterator<C> {
     styled_scanlines: StyledScanlines,
 
     stroke_left: Scanline,
@@ -28,26 +25,23 @@ where
     fill_color: Option<C>,
 }
 
-impl<C> StyledPixels<C>
-where
-    C: PixelColor,
-{
-    pub(in crate::primitives) fn new(styled: &Styled<Circle, PrimitiveStyle<C>>) -> Self {
-        let stroke_area = styled.stroke_area();
-        let fill_area = styled.fill_area();
+impl<C: PixelColor> StyledPixelsIterator<C> {
+    pub(in crate::primitives) fn new(primitive: &Circle, style: &PrimitiveStyle<C>) -> Self {
+        let stroke_area = style.stroke_area(primitive);
+        let fill_area = style.fill_area(primitive);
 
         Self {
             styled_scanlines: StyledScanlines::new(&stroke_area, &fill_area),
             stroke_left: Scanline::new_empty(0),
             fill: Scanline::new_empty(0),
             stroke_right: Scanline::new_empty(0),
-            stroke_color: styled.style.stroke_color,
-            fill_color: styled.style.fill_color,
+            stroke_color: style.stroke_color,
+            fill_color: style.fill_color,
         }
     }
 }
 
-impl<C> Iterator for StyledPixels<C>
+impl<C> Iterator for StyledPixelsIterator<C>
 where
     C: PixelColor,
 {
@@ -98,43 +92,43 @@ where
     }
 }
 
-impl<C> IntoPixels for &Styled<Circle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Circle {
+    type Iter = StyledPixelsIterator<C>;
 
-    type Iter = StyledPixels<Self::Color>;
-
-    fn into_pixels(self) -> Self::Iter {
-        StyledPixels::new(self)
+    fn pixels(&self, style: &PrimitiveStyle<C>) -> Self::Iter {
+        StyledPixelsIterator::new(self, style)
     }
 }
 
-impl<C> Drawable for Styled<Circle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Circle {
     type Color = C;
     type Output = ();
 
-    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    fn draw_styled<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = C>,
     {
-        match (self.style.effective_stroke_color(), self.style.fill_color) {
+        match (style.effective_stroke_color(), style.fill_color) {
             (Some(stroke_color), None) => {
-                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
                     scanline.draw_stroke(target, stroke_color)?;
                 }
             }
             (Some(stroke_color), Some(fill_color)) => {
-                for scanline in StyledScanlines::new(&self.stroke_area(), &self.fill_area()) {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
                     scanline.draw_stroke_and_fill(target, stroke_color, fill_color)?;
                 }
             }
             (None, Some(fill_color)) => {
-                for scanline in Scanlines::new(&self.fill_area()) {
+                for scanline in Scanlines::new(&style.fill_area(self)) {
                     scanline.draw(target, fill_color)?;
                 }
             }
@@ -145,14 +139,11 @@ where
     }
 }
 
-impl<C> Dimensions for Styled<Circle, PrimitiveStyle<C>>
-where
-    C: PixelColor,
-{
-    fn bounding_box(&self) -> Rectangle {
-        let offset = self.style.outside_stroke_width().saturating_cast();
+impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Circle {
+    fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
+        let offset = style.outside_stroke_width().saturating_cast();
 
-        self.primitive.bounding_box().offset(offset)
+        self.bounding_box().offset(offset)
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -198,7 +189,7 @@ mod tests {
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{
-            OffsetOutline, PointsIter, Primitive, PrimitiveStyleBuilder, StrokeAlignment,
+            OffsetOutline, PointsIter, Primitive, PrimitiveStyleBuilder, StrokeAlignment, Styled,
         },
         Drawable,
     };
@@ -234,9 +225,9 @@ mod tests {
             circle.draw(&mut drawable).unwrap();
             drawable.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
 
-            let mut into_pixels = MockDisplay::new();
-            circle.into_pixels().draw(&mut into_pixels).unwrap();
-            into_pixels.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
+            let mut pixels = MockDisplay::new();
+            circle.pixels().draw(&mut pixels).unwrap();
+            pixels.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
         }
     }
 
@@ -263,9 +254,9 @@ mod tests {
                 )
             });
 
-            let mut into_pixels = MockDisplay::new();
-            circle.into_pixels().draw(&mut into_pixels).unwrap();
-            into_pixels.assert_eq_with_message(&expected, |f| {
+            let mut pixels = MockDisplay::new();
+            circle.pixels().draw(&mut pixels).unwrap();
+            pixels.assert_eq_with_message(&expected, |f| {
                 write!(
                     f,
                     "diameter = {}, stroke_width = {}",
@@ -304,9 +295,9 @@ mod tests {
                 )
             });
 
-            let mut into_pixels = MockDisplay::new();
-            circle.into_pixels().draw(&mut into_pixels).unwrap();
-            into_pixels.assert_eq_with_message(&expected, |f| {
+            let mut pixels = MockDisplay::new();
+            circle.pixels().draw(&mut pixels).unwrap();
+            pixels.assert_eq_with_message(&expected, |f| {
                 write!(
                     f,
                     "diameter = {}, stroke_width = {}",
@@ -323,7 +314,7 @@ mod tests {
         let styled_points = circle
             .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
-            .into_pixels()
+            .pixels()
             .map(|Pixel(p, _)| p);
 
         assert!(circle.points().eq(styled_points));
@@ -369,18 +360,18 @@ mod tests {
             Circle::new(Point::new(-5, -5), 21)
                 .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 
-        assert!(circle.into_pixels().count() > 0);
+        assert!(circle.pixels().count() > 0);
     }
 
     #[test]
     fn it_handles_negative_coordinates() {
         let positive = Circle::new(Point::new(10, 10), 5)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_pixels();
+            .pixels();
 
         let negative = Circle::new(Point::new(-10, -10), 5)
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
-            .into_pixels();
+            .pixels();
 
         assert!(negative.eq(positive.map(|Pixel(p, c)| Pixel(p - Point::new(20, 20), c))));
     }
@@ -445,9 +436,7 @@ mod tests {
                 size
             );
             assert!(
-                circle_no_stroke
-                    .into_pixels()
-                    .eq(circle_stroke.into_pixels()),
+                circle_no_stroke.pixels().eq(circle_stroke.pixels()),
                 "Filled and unfilled circle iters are unequal for radius {}",
                 size
             );
@@ -491,7 +480,7 @@ mod tests {
     #[test]
     fn bounding_box_is_independent_of_colors() {
         let transparent_circle =
-            Circle::new(Point::new(5, 5), 11).into_styled::<BinaryColor>(PrimitiveStyle::new());
+            Circle::new(Point::new(5, 5), 11).into_styled(PrimitiveStyle::<BinaryColor>::new());
         let filled_circle = Circle::new(Point::new(5, 5), 11)
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 

@@ -15,6 +15,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#571](https://github.com/embedded-graphics/embedded-graphics/pull/571) Added `MockDisplay::set_pixels` to set pixels from an iterator.
 - [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Added `ImageRaw::new_binary` to create `const` images with binary image data.
 - [#576](https://github.com/embedded-graphics/embedded-graphics/pull/576) Added reset methods for color settings to `MonoTextStyleBuilder` and `PrimitiveStyleBuilder`.
+- [#582](https://github.com/embedded-graphics/embedded-graphics/pull/582) Added `StyledDrawable`, `StyledDimensions` and `StyledPixels` traits.
 
 ### Changed
 
@@ -29,10 +30,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Removed the `height` argument from `ImageRaw::new`. The `height` is now calculated based on the width and data length.
 - **(breaking)** [#572](https://github.com/embedded-graphics/embedded-graphics/pull/572) Replaced `pixelcolor::raw::RawDataIter` by the types in the `iterator::raw` module.
 - **(breaking)** [#573](https://github.com/embedded-graphics/embedded-graphics/pull/573) Changed `MonoFont` from a trait to a struct.
-- **(breaking)** [#573](https://github.com/embedded-graphics/embedded-graphics/pull/573) Renamed `ContiguousIteratorExt::into_pixels` to `into_pixels_iter` to reduce possible confusion with `IntoPixels::into_pixels`.
 - **(breaking)** [#580](https://github.com/embedded-graphics/embedded-graphics/pull/580) Changed `Text` to directly contain the styling information without needing a `Styled` wrapper.
 - **(breaking)** [#580](https://github.com/embedded-graphics/embedded-graphics/pull/580) Removed `character_style` from `TextStyle`. Character and text style can now be set independently in the `Text` object.
 - **(breaking)** [#580](https://github.com/embedded-graphics/embedded-graphics/pull/580) Moved `Styled` from the crate root to the `primitives` module.
+
+### Removed
+
+- **(breaking)** [#582](https://github.com/embedded-graphics/embedded-graphics/pull/582) Removed `iterator::IntoPixels` trait. Use `Styled::pixels` instead.
 
 ### Fixed
 

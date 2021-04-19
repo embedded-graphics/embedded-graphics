@@ -1,8 +1,5 @@
 //! The circle primitive
 
-mod points;
-mod styled;
-
 use crate::{
     geometry::{Dimensions, Point, PointExt, Size},
     primitives::{
@@ -10,8 +7,12 @@ use crate::{
     },
     transform::Transform,
 };
+
+mod points;
+mod styled;
+
 pub use points::Points;
-pub use styled::StyledPixels;
+pub use styled::StyledPixelsIterator;
 
 /// Circle primitive
 ///
