@@ -97,19 +97,16 @@ features.
 
 ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/simulator-demo.png)
 
-Take a look at the [simulator examples] to see what
+Take a look at the [examples repository](https://github.com/embedded-graphics/examples) to see what
 embedded-graphics can do, and how it might look on a display. You can run the examples like
 this:
 
 ```bash
-git clone https://github.com/embedded-graphics/embedded-graphics.git
-cd embedded-graphics
+git clone https://github.com/embedded-graphics/examples.git
+cd examples
 
-cargo run -p embedded-graphics-simulator --example hello
+cargo run --example hello-world
 ```
-
-[simulator]: https://github.com/embedded-graphics/simulator
-[simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 
 ## Crate features
 
@@ -228,6 +225,8 @@ Additional examples can be found in the [examples](https://github.com/embedded-g
 [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 [`Drawable`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/drawable/trait.Drawable.html
+[simulator]: https://github.com/embedded-graphics/simulator
+[simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 
 ## Minimum supported Rust version
 
@@ -237,10 +236,6 @@ Ensure you have the correct version of Rust installed, preferably through <https
 ## Development setup
 
 Please see the [development setup guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/development-setup.md).
-
-## Attribution
-
-All source font PNGs are taken from the excellent [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps).
 
 ## License
 

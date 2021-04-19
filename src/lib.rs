@@ -85,19 +85,16 @@
 //!
 //! ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/simulator-demo.png)
 //!
-//! Take a look at the [simulator examples] to see what
+//! Take a look at the [examples repository](https://github.com/embedded-graphics/examples) to see what
 //! embedded-graphics can do, and how it might look on a display. You can run the examples like
 //! this:
 //!
 //! ```bash
-//! git clone https://github.com/embedded-graphics/embedded-graphics.git
-//! cd embedded-graphics
+//! git clone https://github.com/embedded-graphics/examples.git
+//! cd examples
 //!
-//! cargo run -p embedded-graphics-simulator --example hello
+//! cargo run --example hello-world
 //! ```
-//!
-//! [simulator]: https://github.com/embedded-graphics/simulator
-//! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 //!
 //! # Crate features
 //!
@@ -217,6 +214,8 @@
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 //! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 //! [`Drawable`]: ./drawable/trait.Drawable.html
+//! [simulator]: https://github.com/embedded-graphics/simulator
+//! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"
