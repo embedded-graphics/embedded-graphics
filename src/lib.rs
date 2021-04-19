@@ -49,7 +49,7 @@
 //! [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
 //! development.
 //!
-//! ![Embedded graphics on real hardware](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/banner-photo.jpg)
+//! ![Photographs showing embedded-graphics running on physical display hardware.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/banner-photo.jpg)
 //!
 //! These are just some of the displays the community has added embedded-graphics support to. This
 //! list is taken from the [dependent crates
@@ -80,24 +80,21 @@
 //! # Simulator
 //!
 //! Embedded graphics comes with a [simulator]! The simulator can be used to test and debug
-//! embedded graphics code, or produce examples and interactive demos to show of embedded graphics
+//! embedded graphics code, or produce examples and interactive demos to show off embedded graphics
 //! features.
 //!
-//! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/simulator-demo.png)
+//! ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/simulator-demo.png)
 //!
-//! Take a look at the [simulator examples] to see what
+//! Take a look at the [examples repository](https://github.com/embedded-graphics/examples) to see what
 //! embedded-graphics can do, and how it might look on a display. You can run the examples like
 //! this:
 //!
 //! ```bash
-//! git clone https://github.com/embedded-graphics/embedded-graphics.git
-//! cd embedded-graphics
+//! git clone https://github.com/embedded-graphics/examples.git
+//! cd examples
 //!
-//! cargo run -p embedded-graphics-simulator --example hello
+//! cargo run --example hello-world
 //! ```
-//!
-//! [simulator]: https://github.com/embedded-graphics/simulator
-//! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 //!
 //! # Crate features
 //!
@@ -109,9 +106,10 @@
 //! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 //! calculation.
 //!
-//! # Migrating from 0.5 to 0.6
+//! # Migrating from older versions
 //!
-//! Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
+//! * [Migration guide from 0.5 to 0.6](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
+//! * [Migration guide from 0.6 to 0.7](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
 //!
 //! # Implementing `embedded_graphics` support for a display driver
 //!
@@ -123,7 +121,7 @@
 //!
 //! ## Drawing examples
 //!
-//! [![Collage of drawing examples](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/doc/assets/all_drawing_ops.png)](./examples/index.html)
+//! [![A grid of screenshots showing primitives, text and other items that can be drawn using embedded-graphics.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/doc/assets/all_drawing_ops.png)](./examples/index.html)
 //!
 //! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](./examples/index.html).
 //!
@@ -135,31 +133,38 @@
 //!
 //! ```rust,no_run
 //! use embedded_graphics::{
-//!     mono_font::{ascii::FONT_6X9, MonoTextStyle},
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::{Circle, Rectangle, Triangle, PrimitiveStyle},
-//!     text::Text,
+//!     primitives::{
+//!         Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
+//!     },
+//!     text::{Alignment, Text},
 //!     mock_display::MockDisplay,
 //! };
 //!
 //! fn main() -> Result<(), std::convert::Infallible> {
 //!     // Create a new mock display
 //!     let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-//!     # display.set_allow_overdraw(true);
+//! #   display.set_allow_overdraw(true);
 //!
 //!     // Create styles used by the drawing operations.
 //!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 //!     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+//!     let border_stroke = PrimitiveStyleBuilder::new()
+//!         .stroke_color(BinaryColor::On)
+//!         .stroke_width(3)
+//!         .stroke_alignment(StrokeAlignment::Inside)
+//!         .build();
 //!     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
-//!     let character_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
+//!     let character_style = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
 //!
 //!     let yoffset = 10;
 //!
 //!     // Draw a 3px wide outline around the display.
-//!     let display_size = display.size() - Size::new(1, 1);
-//!     Rectangle::new(Point::zero(), display_size)
-//!         .into_styled(thick_stroke)
+//!     display
+//!         .bounding_box()
+//!         .into_styled(border_stroke)
 //!         .draw(&mut display)?;
 //!
 //!     // Draw a triangle.
@@ -183,20 +188,24 @@
 //!
 //!     // Draw centered text.
 //!     let text = "embedded-graphics";
-//!     let width = text.len() as i32 * 6;
-//!     Text::new(text, Point::new(64 - width / 2, 40), character_style)
-//!         .draw(&mut display)?;
+//!     Text::with_alignment(
+//!         text,
+//!         display.bounding_box().center() + Point::new(0, 15),
+//!         character_style,
+//!         Alignment::Center,
+//!     )
+//!     .draw(&mut display)?;
 //!
 //!     Ok(())
 //! }
 //! ```
 //!
-//! This example is also included in the [simulator](https://github.com/embedded-graphics/simulator/tree/master/examples) crate and
+//! This example is also included in the [examples](https://github.com/embedded-graphics/examples) repository and
 //! can be run using `cargo run --example hello-world`. It produces this output:
 //!
-//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/hello-world-simulator.png)
+//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/8fc3227783c92de82882cfd515c82cb0bfd7a0cd/assets/hello-world-simulator.png)
 //!
-//! Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
+//! Additional examples can be found in the [examples](https://github.com/embedded-graphics/examples) repository.
 //!
 //! [`Circle`]: ./primitives/circle/struct.Circle.html
 //! [`MockDisplay`]: ./mock_display/struct.MockDisplay.html
@@ -205,6 +214,8 @@
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 //! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 //! [`Drawable`]: ./drawable/trait.Drawable.html
+//! [simulator]: https://github.com/embedded-graphics/simulator
+//! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"

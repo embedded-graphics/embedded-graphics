@@ -21,10 +21,6 @@ Ensure you have the correct version of Rust installed, preferably through <https
 
 Please see the [development setup guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/doc/development-setup.md).
 
-## Attribution
-
-All source font PNGs are taken from the excellent [Uzebox Wiki page](http://uzebox.org/wiki/Font_Bitmaps).
-
 ## License
 
 Licensed under either of
