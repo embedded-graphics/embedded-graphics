@@ -154,8 +154,10 @@ use embedded_graphics::{
     mono_font::{ascii::FONT_6X9, MonoTextStyle},
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Rectangle, Triangle, PrimitiveStyle, StrokeAlignment},
-    text::Text,
+    primitives::{
+        Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
+    },
+    text::{Alignment, Text},
     mock_display::MockDisplay,
 };
 
@@ -167,9 +169,9 @@ fn main() -> Result<(), std::convert::Infallible> {
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
     let border_stroke = PrimitiveStyleBuilder::new()
+        .stroke_color(BinaryColor::On)
         .stroke_width(3)
         .stroke_alignment(StrokeAlignment::Inside)
-        .stroke_color(BinaryColor::On)
         .build();
     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
     let character_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
@@ -180,7 +182,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     display
         .bounding_box()
         .into_styled(border_stroke)
-        .draw(display)?;
+        .draw(&mut display)?;
 
     // Draw a triangle.
     Triangle::new(
@@ -209,7 +211,7 @@ fn main() -> Result<(), std::convert::Infallible> {
         character_style,
         Alignment::Center,
     )
-    .draw(display)?;
+    .draw(&mut display)?;
 
     Ok(())
 }
