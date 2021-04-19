@@ -121,13 +121,10 @@ support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`]
 * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 calculation.
 
-## Migrating from 0.5 to 0.6
+## Migrating from older versions
 
-Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
-
-## Migrating from 0.6 to 0.7
-
-Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.6-0.7.md).
+* [Migration guide from 0.5 to 0.6](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
+* [Migration guide from 0.6 to 0.7](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
 
 ## Implementing `embedded_graphics` support for a display driver
 
@@ -217,12 +214,12 @@ fn main() -> Result<(), std::convert::Infallible> {
 }
 ```
 
-This example is also included in the [simulator](https://github.com/embedded-graphics/simulator/tree/master/examples) crate and
+This example is also included in the [examples](https://github.com/embedded-graphics/examples) repository and
 can be run using `cargo run --example hello-world`. It produces this output:
 
 ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/hello-world-simulator.png)
 
-Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
+Additional examples can be found in the [examples](https://github.com/embedded-graphics/examples) repository.
 
 [`Circle`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
 [`MockDisplay`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html
