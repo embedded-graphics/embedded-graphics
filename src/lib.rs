@@ -49,7 +49,7 @@
 //! [simulator](https://docs.rs/embedded-graphics-simulator/) can be used to test code during
 //! development.
 //!
-//! ![Embedded graphics on real hardware](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/banner-photo.jpg)
+//! ![Photographs showing embedded-graphics running on physical display hardware.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/banner-photo.jpg)
 //!
 //! These are just some of the displays the community has added embedded-graphics support to. This
 //! list is taken from the [dependent crates
@@ -83,7 +83,7 @@
 //! embedded graphics code, or produce examples and interactive demos to show of embedded graphics
 //! features.
 //!
-//! ![It can display all sorts of embedded-graphics test code.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/simulator-demo.png)
+//! ![A screenshot of embedded-graphics running in its simulator.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/simulator-demo.png)
 //!
 //! Take a look at the [simulator examples] to see what
 //! embedded-graphics can do, and how it might look on a display. You can run the examples like
@@ -113,6 +113,10 @@
 //!
 //! Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
 //!
+//! # Migrating from 0.6 to 0.7
+//!
+//! Please read [the migration guide](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.6-0.7.md).
+//!
 //! # Implementing `embedded_graphics` support for a display driver
 //!
 //! To add support for embedded-graphics to a display driver, [`DrawTarget`] from
@@ -123,7 +127,7 @@
 //!
 //! ## Drawing examples
 //!
-//! [![Collage of drawing examples](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/doc/assets/all_drawing_ops.png)](./examples/index.html)
+//! [![A grid of screenshots showing primitives, text and other items that can be drawn using embedded-graphics.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/doc/assets/all_drawing_ops.png)](./examples/index.html)
 //!
 //! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](./examples/index.html).
 //!
@@ -138,7 +142,7 @@
 //!     mono_font::{ascii::FONT_6X9, MonoTextStyle},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::{Circle, Rectangle, Triangle, PrimitiveStyle},
+//!     primitives::{Circle, Rectangle, Triangle, PrimitiveStyle, StrokeAlignment},
 //!     text::Text,
 //!     mock_display::MockDisplay,
 //! };
@@ -146,21 +150,26 @@
 //! fn main() -> Result<(), std::convert::Infallible> {
 //!     // Create a new mock display
 //!     let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-//!     # display.set_allow_overdraw(true);
+//! #   display.set_allow_overdraw(true);
 //!
 //!     // Create styles used by the drawing operations.
 //!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
 //!     let thick_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 3);
+//!     let border_stroke = PrimitiveStyleBuilder::new()
+//!         .stroke_width(3)
+//!         .stroke_alignment(StrokeAlignment::Inside)
+//!         .stroke_color(BinaryColor::On)
+//!         .build();
 //!     let fill = PrimitiveStyle::with_fill(BinaryColor::On);
 //!     let character_style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
 //!
 //!     let yoffset = 10;
 //!
 //!     // Draw a 3px wide outline around the display.
-//!     let display_size = display.size() - Size::new(1, 1);
-//!     Rectangle::new(Point::zero(), display_size)
-//!         .into_styled(thick_stroke)
-//!         .draw(&mut display)?;
+//!     display
+//!         .bounding_box()
+//!         .into_styled(border_stroke)
+//!         .draw(display)?;
 //!
 //!     // Draw a triangle.
 //!     Triangle::new(
@@ -183,9 +192,13 @@
 //!
 //!     // Draw centered text.
 //!     let text = "embedded-graphics";
-//!     let width = text.len() as i32 * 6;
-//!     Text::new(text, Point::new(64 - width / 2, 40), character_style)
-//!         .draw(&mut display)?;
+//!     Text::with_alignment(
+//!         text,
+//!         display.bounding_box().center() + Point::new(0, 15),
+//!         character_style,
+//!         Alignment::Center,
+//!     )
+//!     .draw(display)?;
 //!
 //!     Ok(())
 //! }
@@ -194,7 +207,7 @@
 //! This example is also included in the [simulator](https://github.com/embedded-graphics/simulator/tree/master/examples) crate and
 //! can be run using `cargo run --example hello-world`. It produces this output:
 //!
-//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/master/assets/hello-world-simulator.png)
+//! ![Embedded Graphics Simulator example screenshot](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/0c85d1b721a479bed56e74c35a727959580c3182/assets/hello-world-simulator.png)
 //!
 //! Additional examples can be found in the [simulator](https://github.com/embedded-graphics/simulator) crate.
 //!
