@@ -211,6 +211,12 @@ impl<'a, 'b> MonoFontBuilder<'a, 'b> {
     }
 }
 
+impl<'a, 'b> From<&MonoFont<'a, 'b>> for MonoFontBuilder<'a, 'b> {
+    fn from(font: &MonoFont<'a, 'b>) -> Self {
+        Self { font: *font }
+    }
+}
+
 /// Glyph indices.
 ///
 /// Maps characters to glyph indices.

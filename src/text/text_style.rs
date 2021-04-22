@@ -88,6 +88,12 @@ impl TextStyleBuilder {
     }
 }
 
+impl From<&TextStyle> for TextStyleBuilder {
+    fn from(style: &TextStyle) -> Self {
+        Self { style: *style }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
