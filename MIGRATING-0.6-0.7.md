@@ -115,8 +115,6 @@ Support for external font renderers has been added. TODO: Expand
 - New default baseline is alphabetic
 - New fonts with `ascii` and `latin1` glyph subsets
 - `MonoFont` is now a struct instead of a trait
-- Added `TextStyle` to set the horizontal and vertical alignment for `Text` drawables
-- New default vertical alignment is baseline
 
 The list of fonts has changed to the following:
 
@@ -370,12 +368,10 @@ It now also disallows out of bounds drawing by default. This behaviour can be ch
 The `style` module has been removed. The items in it have been moved:
 
 - `PrimitiveStyle` and `PrimitiveStyleBuilder` are now available under `embedded_graphics::primitives::{PrimitiveStyle, PrimitiveStyleBuilder}`.
-- `TextStyle` and `TextStyleBuilder` are now available under `embedded_graphics::text::{TextStyle, TextStyleBuilder}`.
+- `TextStyle` and `TextStyleBuilder` were renamed are now available under `embedded_graphics::mono_font::{MonoTextStyle, MonoTextStyleBuilder}`.
 
   Note that usage with `Text` has changed. See [the text changes section](#Text-rendering) for more.
 
-- `PrimitiveStyle` & `PrimitiveStyleBuilder` -> `primitives` module
-- `TextStyle` & `TextStyleBuilder` -> `text` module + see text changes
 - `Styled` is now exported from the crate root, e.g. `use embedded_graphics::Styled`.
 
 ## Text and fonts
