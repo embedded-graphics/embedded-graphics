@@ -372,14 +372,12 @@ The `style` module has been removed. The items in it have been moved:
 
   Note that usage with `Text` has changed. See [the text changes section](#Text-rendering) for more.
 
-- `Styled` is now exported from the crate root, e.g. `use embedded_graphics::Styled`.
-
 ## Text and fonts
 
 The collection of builtin fonts are now sourced from public domain BDF fonts in the XOrg project. Due to this, they have slightly different dimensions and glyphs and so have changed names. Some sizes are not the same in the new set, but a rough mapping is as follows:
 
 - `fonts::Font6x6` -> Removed
-- `fonts::Font6x8` -> `mono_font::[ascii|latin1]::Font5x8`
+- `fonts::Font6x8` -> `mono_font::[ascii|latin1]::Font6x10`. If a display performs better when using 8px high fonts, `mono_font::[ascii|latin1]::Font5x8` is suggested instead.
 - `fonts::Font6x12` -> `mono_font::[ascii|latin1]::Font6x12`
 - `fonts::Font8x16` -> `mono_font::[ascii|latin1]::Font8x13`
 - `fonts::Font12x16` -> `mono_font::[ascii|latin1]::Font9x15`
