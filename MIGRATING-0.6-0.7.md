@@ -41,20 +41,11 @@ New primitives have been added:
 - `Sector`
 - `Polyline`
 - `Ellipse`
+- `RoundedRectangle`
 
-The `Line` primitive now supports stroke widths greater than 1px.
+The `Line` and `Triangle` primitives now support stroke widths greater than 1px.
 
 Primitives now support stroke alignment using the `StrokeAlignment` enum.
-
-### Mock display
-
-`MockDisplay` now supports all RGB and grayscale color types in its patterns.
-
-New methods:
-
-- `swap_xy` - copies the current display with X and Y coordinates swapped.
-- `map` - create a copy of the current display with a predicate applied to all pixels.
-- `affected_area` - gets the bounding box of all changes made to the display.
 
 ### Geometry
 
@@ -87,13 +78,20 @@ Other methods added to both `Point` and `Size` are:
 - `component_mul`
 - `component_div`
 
-The `Rectangle::intersection` method was added to get the intersecting `Rectangle` between `self` and another given `Rectangle`.
+The `Rectangle::intersection` method was added to get the intersecting area of two rectangles.
 
 ### Color
 
+New color constants for the CSS colors were added for all RGB color types. The color constants are
+defined in the `WebColors` trait, which is included in the prelude. The names of the constants are
+prefixed by `CSS_` to avoid naming conflicts with the existing color constants. The CSS color
+`hotpink` can, for example, be accessed by using `Rgb888::CSS_HOT_PINK`.
+
 The `ToBytes` trait has been added to support conversion of colors into byte arrays.
 
-### Sub draw targets
+### Draw targets adapters
+
+TODO: Add a description how draw target adapters can be used.
 
 The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of a `DrawTarget` to be drawn to.
 
@@ -147,6 +145,16 @@ Two character sets are now provided for each font. The `ascii` set contains fewe
 
 `ascii` has full coverage of the English language. For other languages, `latin1` has complete coverage for [the languages listed here](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Modern_languages_with_complete_coverage), and partial coverage for [these languages](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Languages_with_incomplete_coverage).
 
+### Mock display
+
+`MockDisplay` now supports all RGB and grayscale color types in its patterns.
+
+New methods:
+
+- `swap_xy` - copies the current display with X and Y coordinates swapped.
+- `map` - create a copy of the current display with a predicate applied to all pixels.
+- `affected_area` - gets the bounding box of all changes made to the display.
+
 ## For display driver authors
 
 Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
@@ -154,20 +162,6 @@ Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
 
 `DrawTarget`s must also implement the `Dimensions` trait.
-
-## For crates that handle images
-
-Crates that handle images should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-The `ImageDrawable` trait has moved there, as well as common use items like the `Dimensions` trait and `Rectangle` primitive.
-
-TODO: Improve this section before release.
-
-## For text rendering crates
-
-Crates that handle text rendering should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-TODO: Improve this section before release.
 
 ### Method changes
 
@@ -192,6 +186,20 @@ All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`
 These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics primitives will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
 
 To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics> for more details on the usage and arguments of the above methods.
+
+## For crates that handle images
+
+Crates that handle images should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+
+The `ImageDrawable` trait has moved there, as well as common use items like the `Dimensions` trait and `Rectangle` primitive.
+
+TODO: Improve this section before release.
+
+## For text rendering crates
+
+Crates that handle text rendering should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+
+TODO: Improve this section before release. Text rendering isn't included in `core` anymore.
 
 ## General
 
@@ -236,9 +244,9 @@ anything, e.g. `type Output = ();`
 
 ### `IntoIterator` changes
 
-All `IntoIterator` impls are now replaced with the custom `IntoPixels` trait which exposes the `into_pixels()` method. This trait is included in the prelude, or can be included by adding `embedded_graphics::iterator::IntoPixels` to the imports list. Using the prelude is recommended.
+Styled primitives no longer implement `IntoIterator` to create a pixel iterator. Use the new `Styled::pixels` method instead.
 
-For example, chaining two items together now requires explicit calls to `into_pixels()`:
+For example, chaining two pixel iterators together now requires explicit calls to `pixels()`:
 
 ```diff
 + use embedded_graphics::prelude::*;
@@ -247,12 +255,12 @@ let background = Rectangle::new(...);
 let text = Text::new(...);
 
 - background.into_iter().chain(&text)
-+ background.into_pixels().chain(text.into_pixels())
++ background.pixels().chain(text.pixels())
 ```
 
 ## Macros are removed
 
-All text, primitive and style macros have been removed. To create text, primitives and styles, use the appropriate struct methods instead.
+All text, primitive and style macros have been removed. To create text, primitives and styles, use the appropriate constructors or builders instead.
 
 For example, a styled rectangle is now built like this:
 
@@ -280,7 +288,8 @@ TODO: The behavior of the `Dimensions` impls has changed
 
 ### Circle
 
-A circle is now defined by it's top-left corner and diameter.
+A circle is now defined by it's top-left corner and diameter. This has the advantage that circles
+with odd diameters are now also supported.
 
 ```diff
 // Create a circle centered around (30, 30) with a diameter of 20px
@@ -291,15 +300,13 @@ use embedded_graphics::{geometry::Point, primitives::Circle};
 + let circle = Circle::new(Point::new(20, 20), 20);
 ```
 
-This allows circles with odd diameters to be created.
-
-To retain old behaviour and create a circle from a center point and radius, use `Circle::with_center`.
+To create a circle from a center point and diameter, use `Circle::with_center`:
 
 ```diff
 use embedded_graphics::{geometry::Point, primitives::Circle};
 
 - let circle = Circle::new(Point::new(20, 20), 5);
-+ let circle = Circle::with_center(Point::new(20, 20), 5);
++ let circle = Circle::with_center(Point::new(20, 20), 10);
 ```
 
 ### Rectangle
@@ -313,10 +320,10 @@ use embedded_graphics::{geometry::{Point, Size}, primitives::Rectangle};
 + let rectangle = Rectangle::new(Point::new(20, 30), Size::new(20, 30));
 ```
 
-To retain the old behaviour, use `Rectangle::with_corners` instead:
+To retain the old behavior, use `Rectangle::with_corners` instead:
 
 ```diff
-use embedded_graphics::{geometry::{Point}, primitives::Rectangle};
+use embedded_graphics::{geometry::Point, primitives::Rectangle};
 
 - let rectangle = Rectangle::new(Point::new(20, 30), Point::new(40, 50));
 + let rectangle = Rectangle::with_corners(Point::new(20, 30), Point::new(40, 50));
@@ -355,19 +362,17 @@ It is no longer possible to create a triangle from an array of `Point`s. Instead
 
 ## Geometry
 
-Implementations of the `Dimensions` trait now only require the `bounding_box` method to be implemented. This should return a rectangle encompasing the entire shape.
+The three methods in the `Dimensions` trait were replaced by a single `bounding_box` method. This should return a `Rectangle` which encompasses the entire shape.
 
 ## Mock display
 
-The `MockDisplay`, used often for unit testing, now checks for pixel overdraw by default. To disable this behaviour, call `set_allow_overdraw(false)` on the `MockDisplay` instance.
-
-It now also disallows out of bounds drawing by default. This behaviour can be changed by calling `display.set_allow_out_of_bounds_drawing(true)`.
+The `MockDisplay`, used often for unit testing, now checks for pixel overdraw and out of bounds drawing by default. These additional checks can be disabled by using the `set_allow_overdraw` and `set_allow_out_of_bounds_drawing` methods, if required.
 
 ## Style module
 
 The `style` module has been removed. The items in it have been moved:
 
-- `PrimitiveStyle` and `PrimitiveStyleBuilder` are now available under `embedded_graphics::primitives::{PrimitiveStyle, PrimitiveStyleBuilder}`.
+- `PrimitiveStyle`, `PrimitiveStyleBuilder` and `Styled` are now available in the `embedded_graphics::primitives` module.
 - `TextStyle` and `TextStyleBuilder` were renamed are now available under `embedded_graphics::mono_font::{MonoTextStyle, MonoTextStyleBuilder}`.
 
   Note that usage with `Text` has changed. See [the text changes section](#Text-rendering) for more.
