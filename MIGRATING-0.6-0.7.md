@@ -140,7 +140,7 @@ All fonts are provided in `embedded_graphics::mono_font::[ascii|latin1]::[font n
   - Also available in **bold** (`Font9x18Bold`)
 - `Font10x20`
 
-Two character sets are now provided for each font. The `ascii` set can be use to reduce memory consumption by the font data, at the cost of losing extra characters.
+Two character sets are now provided for each font. The `ascii` contains fewer characters and therefore has a reduced memory footprint, while `latin1` contains a larger number of glyphs.
 
 - `embedded_graphics::mono_font::ascii` provides the characters U+0020 to U+007F in the [Basic Latin code block](https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)), excluding control characters.
 - `embedded_graphics::mono_font::latin1` provides all all characters in the `ascii` variant with the addition of U+00A0 to U+00FF in the [Latin-1 Supplement code block](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)) (excluding control characters).
@@ -381,7 +381,7 @@ The collection of builtin fonts are now sourced from public domain BDF fonts in 
 - `fonts::Font6x12` -> `mono_font::[ascii|latin1]::Font6x12`
 - `fonts::Font8x16` -> `mono_font::[ascii|latin1]::Font8x13`
 - `fonts::Font12x16` -> `mono_font::[ascii|latin1]::Font9x15`
-- `fonts::Font24x32` -> `mono_font::[ascii|latin1]::Font10x20` (this is the largest font available, however the old `Font24x32` was just a scaling of `Font12x16`)
+- `fonts::Font24x32` -> (removed)
 
 To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
 
