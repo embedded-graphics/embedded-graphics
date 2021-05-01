@@ -8,10 +8,13 @@ pub trait GrayColor: PixelColor {
     /// Returns the luma channel value.
     fn luma(&self) -> u8;
 
-    /// Black color (0% luma)
+    /// Black color (0% luma).
     const BLACK: Self;
 
-    /// White color (100% luma)
+    /// Middle gray color (50% luma).
+    const GRAY_50: Self;
+
+    /// White color (100% luma).
     const WHITE: Self;
 }
 
@@ -41,10 +44,8 @@ macro_rules! gray_color {
                 self.0.into_inner()
             }
 
-            /// Black color (0% luma)
             const BLACK: Self = Self::new(0);
-
-            /// White color (100% luma)
+            const GRAY_50: Self = Self::new(0x80 >> (8 - $raw_type::BITS_PER_PIXEL));
             const WHITE: Self = Self::new(255);
         }
 
@@ -83,6 +84,10 @@ mod tests {
         assert_eq!(Gray2::BLACK.luma(), 0);
         assert_eq!(Gray4::BLACK.luma(), 0);
         assert_eq!(Gray8::BLACK.luma(), 0);
+
+        assert_eq!(Gray2::GRAY_50.luma(), 0x2);
+        assert_eq!(Gray4::GRAY_50.luma(), 0x8);
+        assert_eq!(Gray8::GRAY_50.luma(), 0x80);
 
         assert_eq!(Gray2::WHITE.luma(), 0x3);
         assert_eq!(Gray4::WHITE.luma(), 0xF);

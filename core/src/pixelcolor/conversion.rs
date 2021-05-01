@@ -5,42 +5,65 @@ const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {
     ((value as u16 * to_max as u16 + from_max as u16 / 2) / from_max as u16) as u8
 }
 
+/// Calculates the luma value based on ITU-R BT.601.
+fn luma(color: Rgb888) -> u8 {
+    let r = u16::from(color.r());
+    let g = u16::from(color.g());
+    let b = u16::from(color.b());
+
+    // Original formula: 0.299 * R + 0.587 * G + 0.144 * B
+    ((r * 77 + g * 150 + b * 29 + 128) / 256) as u8
+}
+
 /// Macro to implement conversion between RGB color types.
 macro_rules! impl_rgb_conversion {
-    ($type:ident, ($($other_type:ident),+)) => {
-        $(
-            impl From<$other_type> for $type {
-                fn from(other: $other_type) -> Self {
-                    Self::new(
-                        convert_channel(other.r(), $other_type::MAX_R, $type::MAX_R),
-                        convert_channel(other.g(), $other_type::MAX_G, $type::MAX_G),
-                        convert_channel(other.b(), $other_type::MAX_B, $type::MAX_B),
-                    )
-                }
+    ($from_type:ident => $($to_type:ident),+) => {
+        $(impl From<$from_type> for $to_type {
+            fn from(other: $from_type) -> Self {
+                Self::new(
+                    convert_channel(other.r(), $from_type::MAX_R, $to_type::MAX_R),
+                    convert_channel(other.g(), $from_type::MAX_G, $to_type::MAX_G),
+                    convert_channel(other.b(), $from_type::MAX_B, $to_type::MAX_B),
+                )
             }
-        )*
+        })*
 
-        impl $type {
+        impl $from_type {
             pub(crate) const fn with_rgb888(r: u8, g: u8, b: u8) -> Self {
                 Self::new(
-                    convert_channel(r, Rgb888::MAX_R, $type::MAX_R),
-                    convert_channel(g, Rgb888::MAX_G, $type::MAX_G),
-                    convert_channel(b, Rgb888::MAX_B, $type::MAX_B),
+                    convert_channel(r, Rgb888::MAX_R, $from_type::MAX_R),
+                    convert_channel(g, Rgb888::MAX_G, $from_type::MAX_G),
+                    convert_channel(b, Rgb888::MAX_B, $from_type::MAX_B),
                 )
             }
         }
     };
 }
 
-impl_rgb_conversion!(Rgb555, (Bgr555, Rgb565, Bgr565, Rgb888, Bgr888));
-impl_rgb_conversion!(Bgr555, (Rgb555, Rgb565, Bgr565, Rgb888, Bgr888));
-impl_rgb_conversion!(Rgb565, (Rgb555, Bgr555, Bgr565, Rgb888, Bgr888));
-impl_rgb_conversion!(Bgr565, (Rgb555, Bgr555, Rgb565, Rgb888, Bgr888));
-impl_rgb_conversion!(Rgb888, (Rgb555, Bgr555, Rgb565, Bgr565, Bgr888));
-impl_rgb_conversion!(Bgr888, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888));
+impl_rgb_conversion!(Rgb555 => Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+impl_rgb_conversion!(Bgr555 => Rgb555, Rgb565, Bgr565, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb565 => Rgb555, Bgr555, Bgr565, Rgb888, Bgr888);
+impl_rgb_conversion!(Bgr565 => Rgb555, Bgr555, Rgb565, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb888 => Rgb555, Bgr555, Rgb565, Bgr565, Bgr888);
+impl_rgb_conversion!(Bgr888 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888);
 
-/// Macro to implement conversions from `GrayX` to RGB color types.
-macro_rules! impl_from_gray {
+/// Macro to implement conversion between grayscale color types.
+macro_rules! impl_gray_conversion {
+    ($from_type:ident => $($to_type:ident),+) => {
+        $(impl From<$from_type> for $to_type {
+            fn from(other: $from_type) -> Self {
+                Self::new(convert_channel(other.luma(), $from_type::WHITE.luma(), $to_type::WHITE.luma()))
+            }
+        })*
+    };
+}
+
+impl_gray_conversion!(Gray2 => Gray4, Gray8);
+impl_gray_conversion!(Gray4 => Gray2, Gray8);
+impl_gray_conversion!(Gray8 => Gray2, Gray4);
+
+/// Macro to implement conversions between grayscale and RGB color types.
+macro_rules! impl_rgb_to_and_from_gray {
     ($($gray_type:ident),+ => $rgb_type:ident) => {
         $(impl From<$gray_type> for $rgb_type {
             fn from(other: $gray_type) -> Self {
@@ -51,39 +74,66 @@ macro_rules! impl_from_gray {
                 )
             }
         })+
+
+        $(impl From<$rgb_type> for $gray_type {
+            fn from(other: $rgb_type) -> Self {
+                let intensity = luma(Rgb888::from(other));
+                Gray8::new(intensity).into()
+            }
+        })+
     };
+
     ($($gray_type:ident),+ => $rgb_type:ident, $($rest:ident),+) => {
-        impl_from_gray!($($gray_type),+ => $rgb_type);
-        impl_from_gray!($($gray_type),+ => $($rest),*);
+        impl_rgb_to_and_from_gray!($($gray_type),+ => $rgb_type);
+        impl_rgb_to_and_from_gray!($($gray_type),+ => $($rest),*);
     }
 }
 
-impl_from_gray!(Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+impl_rgb_to_and_from_gray!(Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
 
 /// Macro to implement conversion from `BinaryColor` to RGB and grayscale types.
 macro_rules! impl_from_binary {
-    ($type:ident) => {
-        // Convert BinaryColor::Off to black and BinaryColor::On to white
-        impl From<BinaryColor> for $type {
+    ($($type:ident),*) => {
+        $(impl From<BinaryColor> for $type {
             fn from(color: BinaryColor) -> Self {
                 color.map_color(Self::BLACK, Self::WHITE)
             }
-        }
+        })*
     };
 }
 
-impl_from_binary!(Rgb555);
-impl_from_binary!(Bgr555);
-impl_from_binary!(Rgb565);
-impl_from_binary!(Bgr565);
-impl_from_binary!(Rgb888);
-impl_from_binary!(Bgr888);
-impl_from_binary!(Gray2);
-impl_from_binary!(Gray4);
-impl_from_binary!(Gray8);
+impl_from_binary!(Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888, Gray2, Gray4, Gray8);
+
+/// Macro to implement conversion from grayscale types to `BinaryColor`.
+macro_rules! impl_gray_to_binary {
+    ($($type:ident),* ) => {
+        $(impl From<$type> for BinaryColor {
+            fn from(color: $type) -> Self {
+                (color.luma() >= $type::GRAY_50.luma()).into()
+            }
+        })*
+    };
+}
+
+impl_gray_to_binary!(Gray2, Gray4, Gray8);
+
+/// Macro to implement conversion from RGB types to `BinaryColor`.
+macro_rules! impl_rgb_to_binary {
+    ($($type:ident),*) => {
+        $(impl From<$type> for BinaryColor {
+            fn from(color: $type) -> Self {
+                (luma(Rgb888::from(color)) >= 128).into()
+            }
+        })*
+    };
+}
+
+impl_rgb_to_binary!(Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
 
 #[cfg(test)]
 mod tests {
+    use core::fmt::Debug;
+
     use super::*;
 
     #[test]
@@ -113,74 +163,130 @@ mod tests {
         }
     }
 
-    macro_rules! test_rgb_conversions {
-        ($from_type:ident, ($($to_type:ident),+)) => {
-            $(
-                assert_eq!($to_type::from($from_type::BLACK), $to_type::BLACK);
-                assert_eq!($to_type::from($from_type::RED), $to_type::RED);
-                assert_eq!($to_type::from($from_type::GREEN), $to_type::GREEN);
-                assert_eq!($to_type::from($from_type::BLUE), $to_type::BLUE);
-                assert_eq!($to_type::from($from_type::YELLOW), $to_type::YELLOW);
-                assert_eq!($to_type::from($from_type::MAGENTA), $to_type::MAGENTA);
-                assert_eq!($to_type::from($from_type::CYAN), $to_type::CYAN);
-                assert_eq!($to_type::from($from_type::WHITE), $to_type::WHITE);
-            )*
+    /// Calls the given function with every combination of two sets of types.
+    ///
+    /// If only one set of types is given the same types will be used for both sets.
+    macro_rules! type_matrix {
+        ($function:ident; $from_type:ident => $to_type:ident) => {
+            $function::<$from_type, $to_type>();
         };
 
-        ($from_type:ident) => {
-            test_rgb_conversions!($from_type, (Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888));
+        ($function:ident; $from_type:ident => $to_type:ident, $($to_types:ident),+ ) => {
+            type_matrix!($function; $from_type => $to_type);
+            type_matrix!($function; $from_type => $($to_types),*);
+        };
+
+        ($function:ident; $from_type:ident, $($from_types:ident),+ => $($to_types:ident),+ ) => {
+            type_matrix!($function; $from_type => $($to_types),*);
+            type_matrix!($function; $($from_types),* => $($to_types),*);
+        };
+
+        ($function:ident; $($types:ident),+) => {
+            type_matrix!($function; $($types),* => $($types),*);
         };
     }
 
     #[test]
-    fn rgb_color_conversions() {
-        test_rgb_conversions!(Rgb555);
-        test_rgb_conversions!(Bgr555);
-        test_rgb_conversions!(Rgb565);
-        test_rgb_conversions!(Bgr565);
-        test_rgb_conversions!(Rgb888);
-        test_rgb_conversions!(Bgr888);
-    }
-
-    macro_rules! test_rgb_from_gray {
-        ($rgb_type:ident, $($gray_type:ident),+) => {
-            $(
-                assert_eq!($rgb_type::from(<$gray_type>::BLACK), $rgb_type::BLACK);
-                assert_eq!($rgb_type::from(<$gray_type>::WHITE), $rgb_type::WHITE);
-            )+
-        };
-        ($rgb_type:ident) => {
-            test_rgb_from_gray!($rgb_type, Gray2, Gray4, Gray8);
+    fn rgb_to_rgb() {
+        fn test_rgb_to_rgb<FromC: RgbColor + Debug, ToC: RgbColor + From<FromC> + Debug>() {
+            assert_eq!(ToC::from(FromC::BLACK), ToC::BLACK);
+            assert_eq!(ToC::from(FromC::RED), ToC::RED);
+            assert_eq!(ToC::from(FromC::GREEN), ToC::GREEN);
+            assert_eq!(ToC::from(FromC::BLUE), ToC::BLUE);
+            assert_eq!(ToC::from(FromC::YELLOW), ToC::YELLOW);
+            assert_eq!(ToC::from(FromC::MAGENTA), ToC::MAGENTA);
+            assert_eq!(ToC::from(FromC::CYAN), ToC::CYAN);
+            assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
+
+        type_matrix!(test_rgb_to_rgb; Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
     }
 
     #[test]
-    fn rgb_from_gray() {
-        test_rgb_from_gray!(Rgb555);
-        test_rgb_from_gray!(Bgr555);
-        test_rgb_from_gray!(Rgb565);
-        test_rgb_from_gray!(Bgr565);
-        test_rgb_from_gray!(Rgb888);
-        test_rgb_from_gray!(Bgr888);
-    }
+    fn rgb_to_gray() {
+        fn test_rgb_to_gray<FromC: RgbColor + Debug, ToC: GrayColor + From<FromC> + Debug>() {
+            assert_eq!(ToC::from(FromC::BLACK), ToC::BLACK);
+            assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
+        }
 
-    macro_rules! test_from_binary {
-        ($type:ident) => {
-            assert_eq!($type::from(BinaryColor::Off), $type::BLACK);
-            assert_eq!($type::from(BinaryColor::On), $type::WHITE);
-        };
+        type_matrix!(test_rgb_to_gray; Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888 => Gray2, Gray4, Gray8);
     }
 
     #[test]
-    pub fn conversion_from_binary_color() {
-        test_from_binary!(Rgb555);
-        test_from_binary!(Bgr555);
-        test_from_binary!(Rgb565);
-        test_from_binary!(Bgr565);
-        test_from_binary!(Rgb888);
-        test_from_binary!(Bgr888);
-        test_from_binary!(Gray2);
-        test_from_binary!(Gray4);
-        test_from_binary!(Gray8);
+    fn rgb_to_binary() {
+        fn test_rgb_to_binary<FromC: RgbColor + Debug, ToC>()
+        where
+            BinaryColor: From<FromC>,
+        {
+            assert_eq!(BinaryColor::from(FromC::BLACK), BinaryColor::Off);
+            assert_eq!(BinaryColor::from(FromC::WHITE), BinaryColor::On);
+        }
+
+        type_matrix!(test_rgb_to_binary; Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888 => BinaryColor);
+    }
+
+    #[test]
+    fn gray_to_gray() {
+        fn test_gray_to_gray<FromC: GrayColor + Debug, ToC: GrayColor + From<FromC> + Debug>() {
+            assert_eq!(ToC::from(FromC::BLACK), ToC::BLACK);
+            assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
+        }
+
+        type_matrix!(test_gray_to_gray; Gray2, Gray4, Gray8);
+    }
+
+    #[test]
+    fn gray_to_rgb() {
+        fn test_gray_to_rgb<FromC: GrayColor + Debug, ToC: RgbColor + From<FromC> + Debug>() {
+            assert_eq!(ToC::from(FromC::BLACK), ToC::BLACK);
+            assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
+        }
+
+        type_matrix!(test_gray_to_rgb; Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+    }
+
+    #[test]
+    fn gray_to_binary() {
+        fn test_gray_to_binary<FromC: GrayColor + Debug, ToC>()
+        where
+            BinaryColor: From<FromC>,
+        {
+            assert_eq!(BinaryColor::from(FromC::BLACK), BinaryColor::Off);
+            assert_eq!(BinaryColor::from(FromC::WHITE), BinaryColor::On);
+        }
+
+        type_matrix!(test_gray_to_binary; Gray2, Gray4, Gray8 => BinaryColor);
+    }
+
+    #[test]
+    fn binary_to_rgb() {
+        fn test_binary_to_rgb<FromC, ToC: RgbColor + From<BinaryColor> + Debug>() {
+            assert_eq!(ToC::from(BinaryColor::Off), ToC::BLACK);
+            assert_eq!(ToC::from(BinaryColor::On), ToC::WHITE);
+        }
+
+        type_matrix!(test_binary_to_rgb; BinaryColor => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+    }
+
+    #[test]
+    fn binary_to_gray() {
+        fn test_binary_to_gray<FromC, ToC: GrayColor + From<BinaryColor> + Debug>() {
+            assert_eq!(ToC::from(BinaryColor::Off), ToC::BLACK);
+            assert_eq!(ToC::from(BinaryColor::On), ToC::WHITE);
+        }
+
+        type_matrix!(test_binary_to_gray; BinaryColor => Gray2, Gray4, Gray8);
+    }
+
+    #[test]
+    fn test_luma() {
+        assert_eq!(luma(Rgb888::BLACK), 0);
+        assert_eq!(luma(Rgb888::WHITE), 255);
+
+        assert_eq!(
+            luma(Rgb888::new(255, 255, 254)),
+            255,
+            "should be rounded upward"
+        );
     }
 }
