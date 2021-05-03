@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.1] - 2021-05-03
+
 ### Added
 
 - [#589](https://github.com/embedded-graphics/embedded-graphics/pull/589) Implemented `From` trait to convert from RGB colors to grayscale colors, between different grayscale colors and from grayscale and RGB colors to `BinaryColor`.
@@ -51,7 +53,8 @@
 - [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.0...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.1...HEAD
+[0.3.1]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.0...embedded-graphics-core-v0.3.1
 
 [0.3.0]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.2.0...embedded-graphics-core-v0.3.0
 [0.2.0]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.1.1...embedded-graphics-core-v0.2.0
