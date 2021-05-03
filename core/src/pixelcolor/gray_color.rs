@@ -11,9 +11,6 @@ pub trait GrayColor: PixelColor {
     /// Black color (0% luma).
     const BLACK: Self;
 
-    /// Middle gray color (50% luma).
-    const GRAY_50: Self;
-
     /// White color (100% luma).
     const WHITE: Self;
 }
@@ -26,6 +23,8 @@ macro_rules! gray_color {
         pub struct $type($raw_type);
 
         impl $type {
+            pub(crate) const GRAY_50: Self = Self::new(0x80 >> (8 - $raw_type::BITS_PER_PIXEL));
+
             /// Creates a new grayscale color.
             ///
             /// Too large luma values are masked to the valid range by setting
@@ -45,7 +44,6 @@ macro_rules! gray_color {
             }
 
             const BLACK: Self = Self::new(0);
-            const GRAY_50: Self = Self::new(0x80 >> (8 - $raw_type::BITS_PER_PIXEL));
             const WHITE: Self = Self::new(255);
         }
 
