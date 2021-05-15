@@ -46,6 +46,7 @@ pub use points::Points;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Rectangle {
     /// Top left point of the rectangle.
     pub top_left: Point,

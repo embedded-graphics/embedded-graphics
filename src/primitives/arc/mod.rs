@@ -44,6 +44,7 @@ pub use styled::StyledPixelsIterator;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Arc {
     /// Top-left point of the bounding-box of the circle supporting the arc
     pub top_left: Point,

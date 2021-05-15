@@ -20,6 +20,7 @@ use super::TextStyleBuilder;
 ///
 /// [module-level documentation]: index.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Text<'a, S> {
     /// The string.
     pub text: &'a str,

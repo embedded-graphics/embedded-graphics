@@ -139,6 +139,7 @@ pub trait Drawable {
 /// [`Drawable`]: trait.Drawable.html
 /// [`DrawTarget`]: draw_target/trait.DrawTarget.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Pixel<C>(pub Point, pub C)
 where
     C: PixelColor;

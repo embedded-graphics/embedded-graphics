@@ -170,6 +170,7 @@ macro_rules! impl_raw_data {
         #[doc = "[`new`]: #method.new"]
         #[doc = "[`into_inner`]: trait.RawData.html#tymethod.into_inner"]
         #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         pub struct $type($storage_type);
 
         impl $type {
@@ -248,6 +249,7 @@ pub trait ByteOrder: private::Sealed {}
 
 /// Little endian byte order marker.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum LittleEndian {}
 
 impl ByteOrder for LittleEndian {}
@@ -255,6 +257,7 @@ impl private::Sealed for LittleEndian {}
 
 /// Big endian byte order marker.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum BigEndian {}
 
 impl ByteOrder for BigEndian {}

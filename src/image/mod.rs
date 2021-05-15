@@ -132,6 +132,7 @@ use core::fmt::Debug;
 /// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
 /// [`ImageDrawable`]: trait.ImageDrawable.html
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Image<'a, T> {
     image_drawable: &'a T,
     offset: Point,

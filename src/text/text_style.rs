@@ -11,6 +11,7 @@ use crate::text::{Alignment, Baseline, LineHeight};
 /// [`TextStyleBuilder`]: struct.TextStyleBuilder.html
 /// [module-level documentation]: index.html
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 #[non_exhaustive]
 pub struct TextStyle {
     /// Horizontal text alignment.
@@ -43,6 +44,7 @@ impl Default for TextStyle {
 
 /// Builder for text styles.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct TextStyleBuilder {
     style: TextStyle,
 }
