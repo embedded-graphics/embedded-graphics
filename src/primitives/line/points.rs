@@ -12,6 +12,7 @@ use crate::{
 ///
 /// [`points`]: struct.Line.html#method.points
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points {
     parameters: BresenhamParameters,
     bresenham: Bresenham,

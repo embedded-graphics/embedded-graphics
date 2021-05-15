@@ -175,6 +175,7 @@ pub use text_style::{TextStyle, TextStyleBuilder};
 
 /// Text baseline.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum Baseline {
     /// Top.
     Top,
@@ -188,6 +189,7 @@ pub enum Baseline {
 
 /// Horizontal text alignment.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum Alignment {
     /// Left.
     Left,
@@ -199,6 +201,7 @@ pub enum Alignment {
 
 /// Text decoration color.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum DecorationColor<C> {
     /// No text decoration.
     None,
@@ -238,6 +241,7 @@ impl<C: PixelColor> DecorationColor<C> {
 /// The line height is defined as the vertical distance between the baseline of two adjacent lines
 /// of text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum LineHeight {
     /// Absolute line height in pixels.
     Pixels(u32),

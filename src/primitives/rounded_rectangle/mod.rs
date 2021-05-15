@@ -137,6 +137,7 @@ pub use styled::StyledPixelsIterator;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct RoundedRectangle {
     /// The base rectangle
     pub rectangle: Rectangle,
@@ -337,6 +338,7 @@ impl Transform for RoundedRectangle {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(in crate::primitives) struct RoundedRectangleContains {
     /// Bounding box rows.
     rows: Range<i32>,

@@ -14,6 +14,7 @@ use crate::{
 ///
 /// [`translated`]: crate::draw_target::DrawTargetExt::translated
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Translated<'a, T>
 where
     T: DrawTarget,

@@ -9,6 +9,7 @@ use crate::{
 };
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 struct LineConfig {
     first: Scanline,
     second: Scanline,
@@ -18,6 +19,7 @@ struct LineConfig {
 
 /// Triangle scanline intersections iterator.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ScanlineIntersections {
     lines: LineConfig,
     triangle: Triangle,

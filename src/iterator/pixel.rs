@@ -4,6 +4,7 @@ use crate::{geometry::Point, pixelcolor::PixelColor, Pixel};
 
 /// Translated pixel iterator.
 #[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Translated<I> {
     iter: I,
     offset: Point,

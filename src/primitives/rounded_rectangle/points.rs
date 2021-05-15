@@ -9,6 +9,7 @@ use crate::{
 
 /// Iterator over all points inside the rounded rectangle.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points {
     scanlines: Scanlines,
     current_scanline: Scanline,
@@ -35,6 +36,7 @@ impl Iterator for Points {
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Scanlines {
     rounded_rectangle: RoundedRectangleContains,
 }

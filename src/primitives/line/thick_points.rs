@@ -12,6 +12,7 @@ use crate::{
 const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(in crate::primitives::line) enum ParallelLineType {
     Normal,
     Extra,
@@ -24,6 +25,7 @@ pub(in crate::primitives::line) enum ParallelLineType {
 /// between the left and right side of original line to keep the resulting thick
 /// line symmetric.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(in crate::primitives::line) struct ParallelsIterator {
     /// Parameters used for moves along the parallel lines.
     pub parallel_parameters: BresenhamParameters,
@@ -200,6 +202,7 @@ impl Iterator for ParallelsIterator {
 
 /// Iterator over all pixels in the stroke of a thick line.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ThickPoints {
     parallel: Bresenham,
     parallel_length: u32,

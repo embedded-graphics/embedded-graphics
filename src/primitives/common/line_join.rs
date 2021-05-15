@@ -11,6 +11,7 @@ use crate::{
 
 /// Join kind
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum JoinKind {
     /// Mitered (sharp point)
     Miter,
@@ -43,6 +44,7 @@ pub enum JoinKind {
 
 /// The left/right corners that make up the start or end edge of a thick line.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct EdgeCorners {
     /// Left side point.
     pub left: Point,
@@ -53,6 +55,7 @@ pub struct EdgeCorners {
 
 /// A join between two lines.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct LineJoin {
     /// Join kind.
     pub kind: JoinKind,

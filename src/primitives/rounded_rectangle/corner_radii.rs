@@ -27,6 +27,7 @@ use crate::geometry::Size;
 /// );
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct CornerRadii {
     /// Top left corner radius
     pub top_left: Size,
@@ -109,6 +110,7 @@ impl CornerRadii {
 
 /// [`CornerRadii`] builder.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct CornerRadiiBuilder {
     corners: CornerRadii,
 }

@@ -138,6 +138,7 @@ pub trait Drawable {
 ///
 /// [`DrawTarget`]: crate::draw_target::DrawTarget
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Pixel<C>(pub Point, pub C)
 where
     C: PixelColor;

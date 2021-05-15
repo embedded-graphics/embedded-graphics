@@ -9,6 +9,7 @@ use crate::{
 
 /// A quadrant around an origin
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum Quadrant {
     TopLeft,
     TopRight,
@@ -17,6 +18,7 @@ pub enum Quadrant {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(in crate::primitives) struct EllipseQuadrant {
     bounding_box: Rectangle,
     center_2x: Point,

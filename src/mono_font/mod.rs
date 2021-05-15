@@ -149,12 +149,30 @@ impl fmt::Debug for MonoFont<'_> {
     }
 }
 
+#[cfg(feature = "defmt")]
+impl ::defmt::Format for MonoFont<'_> {
+    fn format(&self, f: ::defmt::Formatter) {
+        ::defmt::write!(
+            f,
+            "MonoFont {{ image: {}, character_size: {}, character_spacing: {}, baseline: {}, strikethrough: {}, underline: {}, .. }}",
+            &self.image,
+            &self.character_size,
+            &self.character_spacing,
+            &self.baseline,
+            &self.strikethrough,
+            &self.underline,
+
+        )
+    }
+}
+
 /// Decoration dimensions.
 ///
 /// `DecorationDimensions` is used to specify the position and height of underline and strikethrough
 /// decorations in [`MonoFont`]s.
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct DecorationDimensions {
     /// Offset from the top of the character to the top of the decoration.
     pub offset: u32,

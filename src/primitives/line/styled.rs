@@ -12,6 +12,7 @@ use az::SaturatingAs;
 
 /// Styled line iterator.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     stroke_color: Option<C>,
     line_iter: ThickPoints,

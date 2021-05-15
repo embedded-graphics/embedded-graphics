@@ -4,6 +4,7 @@ use crate::{draw_target::DrawTarget, primitives::common::Scanline};
 
 /// Scanline with stroke and fill regions.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledScanline {
     y: i32,
     stroke_range: Range<i32>,

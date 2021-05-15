@@ -46,6 +46,7 @@ pub use styled::StyledPixelsIterator;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Line {
     /// Start point
     pub start: Point,

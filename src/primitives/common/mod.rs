@@ -21,6 +21,7 @@ pub use thick_segment_iter::ThickSegmentIter;
 use crate::primitives::StrokeAlignment;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum StrokeOffset {
     /// Stroke is centered around the line skeleton.
     None,
@@ -47,6 +48,7 @@ impl From<StrokeAlignment> for StrokeOffset {
 /// Imagine standing on `start`, looking ahead to where `end` is. `Left` is to your left, `Right` to
 /// your right.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum LineSide {
     /// Left side of the line
     Left,
@@ -67,6 +69,7 @@ impl LineSide {
 
 /// Point type.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum PointType {
     /// Represents part of the stroke.
     Stroke,

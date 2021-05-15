@@ -7,6 +7,7 @@ use core::ops::Range;
 
 /// Scanline.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Scanline {
     pub y: i32,
     pub x: Range<i32>,

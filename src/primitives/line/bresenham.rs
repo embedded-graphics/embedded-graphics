@@ -1,6 +1,7 @@
 use crate::{geometry::Point, primitives::Line};
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 /// Struct to hold major and minor values.
 pub struct MajorMinor<T> {
     /// Major value.
@@ -22,6 +23,7 @@ impl<T> MajorMinor<T> {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct BresenhamParameters {
     /// Error threshold.
     ///
@@ -111,6 +113,7 @@ impl BresenhamParameters {
 
 /// Implementation of the bresenham algorithm.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Bresenham {
     /// Current point.
     pub point: Point,
@@ -195,6 +198,7 @@ impl Bresenham {
 
 /// Point returned by `next_all` and `previous_all` to distinguish the point type.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum BresenhamPoint {
     /// Normal point.
     Normal(Point),

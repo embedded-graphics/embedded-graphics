@@ -9,6 +9,7 @@ use core::ops::Range;
 
 /// Iterate over every scanline in the triangle's bounding box.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(in crate::primitives::triangle) struct ScanlineIterator {
     rows: Range<i32>,
     scanline_y: i32,

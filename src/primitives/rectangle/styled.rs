@@ -14,6 +14,7 @@ use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     iter: Points,
 

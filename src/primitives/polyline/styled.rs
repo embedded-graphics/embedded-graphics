@@ -61,6 +61,7 @@ where
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 enum StyledIter<'a> {
     Thin(polyline::Points<'a>),
     Thick {
@@ -72,6 +73,7 @@ enum StyledIter<'a> {
 
 /// Pixel iterator for each pixel in the line
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<'a, C> {
     stroke_color: Option<C>,
     line_iter: StyledIter<'a>,

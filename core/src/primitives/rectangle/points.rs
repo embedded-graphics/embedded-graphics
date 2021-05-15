@@ -4,6 +4,7 @@ use crate::{geometry::Point, primitives::Rectangle};
 
 /// Iterator over all points inside the rectangle.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points {
     x: Range<i32>,
     y: Range<i32>,

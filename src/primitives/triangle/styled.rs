@@ -13,6 +13,7 @@ use crate::{
 
 /// Pixel iterator for each pixel in the triangle border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     lines_iter: ScanlineIterator,
     current_line: Scanline,

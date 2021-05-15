@@ -16,6 +16,7 @@ use super::RoundedRectangleContains;
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     styled_scanlines: StyledScanlines,
 
@@ -150,6 +151,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for RoundedRectangle {
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 struct StyledScanlines {
     scanlines: Scanlines,
     fill_area: RoundedRectangleContains,

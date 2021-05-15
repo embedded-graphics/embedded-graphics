@@ -8,6 +8,7 @@ use crate::{
 
 /// Iterator over all points inside the sector.
 #[derive(Clone, PartialEq, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points {
     iter: DistanceIterator,
 

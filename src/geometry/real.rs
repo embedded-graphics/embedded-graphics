@@ -21,6 +21,7 @@ mod real_impl {
     pub(crate) const TAU: Real = Real(2.0 * f32::consts::PI);
 
     #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+    #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
     pub(crate) struct Real(pub(super) f32);
 
     impl From<f32> for Real {
@@ -70,6 +71,7 @@ mod real_impl {
     pub(crate) const TAU: Real = Real(I16F16::from_bits(411775));
 
     #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+    #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
     pub(crate) struct Real(pub(super) I16F16);
 
     impl Real {

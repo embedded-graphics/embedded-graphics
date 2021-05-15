@@ -10,6 +10,7 @@ pub const NORMAL_VECTOR_SCALE: i32 = 1 << 10;
 ///
 /// The equation is stored as a normal vector and the distance to the origin.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct LinearEquation {
     /// Normal vector, perpendicular to the line.
     ///
@@ -67,6 +68,7 @@ impl LinearEquation {
 
 /// Linear equation with zero distance to the origin.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct OriginLinearEquation {
     pub normal_vector: Point,
 }

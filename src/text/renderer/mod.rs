@@ -87,6 +87,7 @@ pub trait TextRenderer {
 /// See [`TextRenderer::measure_string`] for more information.
 ///
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct TextMetrics {
     /// Bounding box.
     pub bounding_box: Rectangle,

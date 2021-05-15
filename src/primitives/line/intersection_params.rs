@@ -10,6 +10,7 @@ use crate::{
 
 /// Intersection test result.
 #[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum Intersection {
     /// Intersection at point
     Point {
@@ -40,6 +41,7 @@ pub enum Intersection {
 }
 /// Line intersection parameters.
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct IntersectionParams<'a> {
     line1: &'a Line,
     line2: &'a Line,

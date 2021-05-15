@@ -91,6 +91,20 @@ macro_rules! impl_rgb_color {
             }
         }
 
+        #[cfg(feature = "defmt")]
+        impl ::defmt::Format for $type {
+            fn format(&self, f: ::defmt::Formatter) {
+                ::defmt::write!(
+                    f,
+                    "{}(r: {=u8}, g: {=u8}, b: {=u8})",
+                    stringify!($type),
+                    self.r(),
+                    self.g(),
+                    self.b()
+                )
+            }
+        }
+
         impl $type
         where
             Self: RgbColor,

@@ -113,6 +113,8 @@
 //! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 //! calculation.
 //!
+//! * `defmt` - provide implementations of `defmt::Format` for all types where possible.
+//!
 //! # Migrating from older versions
 //!
 //! * [Migration guide from 0.5 to 0.6](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).

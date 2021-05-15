@@ -8,6 +8,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
+- [#592](https://github.com/embedded-graphics/embedded-graphics/pull/592) Add support for defmt behind a feature (`defmt`).
 - [#612](https://github.com/embedded-graphics/embedded-graphics/pull/625) Added `ImagePixelGetter` trait and an implementation for `ImageRaw`.
 - [#621](https://github.com/embedded-graphics/embedded-graphics/pull/621) Added `Rgb666` and `Bgr666` color type support.
 - [#641](https://github.com/embedded-graphics/embedded-graphics/pull/641) Added `Line::with_delta` constructor.

@@ -16,6 +16,7 @@ use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the sector border
 #[derive(Clone, PartialEq, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     iter: DistanceIterator,
 
@@ -184,6 +185,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Sector {
 }
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 enum BevelKind {
     Interior,
     Exterior,

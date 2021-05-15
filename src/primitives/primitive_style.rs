@@ -14,6 +14,7 @@ use az::SaturatingAs;
 /// [primitive]: crate::primitives
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 #[non_exhaustive]
 pub struct PrimitiveStyle<C>
 where
@@ -192,6 +193,7 @@ where
 /// ```
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct PrimitiveStyleBuilder<C>
 where
     C: PixelColor,
@@ -269,6 +271,7 @@ where
 
 /// Stroke alignment.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum StrokeAlignment {
     /// Inside.
     Inside,

@@ -12,6 +12,7 @@ use crate::{
 ///
 /// [`ThickSegment`]: super::thick_segment::ThickSegment
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ThickSegmentIter<'a> {
     windows: core::slice::Windows<'a, Point>,
     start_join: LineJoin,
