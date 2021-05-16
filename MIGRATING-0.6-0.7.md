@@ -6,15 +6,15 @@
   - [Table of contents](#table-of-contents)
   - [New features](#new-features)
     - [Primitives](#primitives)
-    - [Mock display](#mock-display)
     - [Geometry](#geometry)
     - [Color](#color)
-    - [Sub draw targets](#sub-draw-targets)
+    - [Draw target adapters](#draw-target-adapters)
     - [Fonts and text](#fonts-and-text)
+    - [Mock display](#mock-display)
   - [For display driver authors](#for-display-driver-authors)
+    - [Method changes](#method-changes)
   - [For crates that handle images](#for-crates-that-handle-images)
   - [For text rendering crates](#for-text-rendering-crates)
-    - [Method changes](#method-changes)
   - [General](#general)
     - [`Drawable`](#drawable)
     - [`IntoIterator` changes](#intoiterator-changes)
@@ -89,15 +89,13 @@ prefixed by `CSS_` to avoid naming conflicts with the existing color constants. 
 
 The `ToBytes` trait has been added to support conversion of colors into byte arrays.
 
-### Draw targets adapters
-
-TODO: Add a description how draw target adapters can be used.
+### Draw target adapters
 
 The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of a `DrawTarget` to be drawn to.
 
 `DrawTargetExt` is implemented for `DrawTarget`.
 
-Please search for `DrawTargetExt` on <https://docs.rs/embedded-graphics> for usage examples.
+Please search for `DrawTargetExt` at <https://docs.rs/embedded-graphics> for usage examples.
 
 ### Fonts and text
 
@@ -161,7 +159,58 @@ Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
 
-`DrawTarget`s must also implement the `Dimensions` trait.
+`DrawTarget`s must also implement the `OriginDimensions` trait.
+
+For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
+
+```diff
+- use crate::{
+-     drawable::Pixel,
+-     geometry::Size,
+-     pixelcolor::{PixelColor, BinaryColor},
+-     DrawTarget,
+- };
+-
+- impl DrawTarget<BinaryColor> for Ssd1306 {
+-     type Error = core::convert::Infallible;
+-
+-     fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>) -> Result<(), Self::Error> {
+-         // ...
+-
+-         Ok(())
+-     }
+-
+-     fn size(&self) -> Size {
+-         // ...
+-     }
+- }
++ use embedded_graphics_core::{
++     draw_target::DrawTarget,
++     geometry::{OriginDimensions, Size},
++     pixelcolor::{PixelColor, BinaryColor},
++     Pixel,
++ };
++
++ DrawTarget for Ssd1306 {
++     type Color = BinaryColor;
++     type Error = core::convert::Infallible;
++
++     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
++     where
++         I: IntoIterator<Item = Pixel<Self::Color>>,
++     {
++         // ...
++
++         Ok(())
++     }
++ }
++
++ impl OriginDimensions for Ssd1306 {
++     fn size(&self) -> Size {
++         // ...
++     }
++ }
+```
 
 ### Method changes
 
@@ -181,19 +230,56 @@ All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`
 
 - `clear`
 
-  Fill the entire display with a solid color.
+  Fills the entire display with a solid color.
 
 These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics primitives will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
 
-To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics> for more details on the usage and arguments of the above methods.
+To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
 
 ## For crates that handle images
 
-Crates that handle images should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+Crates that handle images should now implement the `ImageDrawable` and `OriginDimensions` traits to integrate with embedded-graphics.
 
-The `ImageDrawable` trait has moved there, as well as common use items like the `Dimensions` trait and `Rectangle` primitive.
+The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit color and draws to targets that support the same.
 
-TODO: Improve this section before release.
+```rust
+use embedded_graphics::{
+    draw_target::{DrawTarget, DrawTargetExt},
+    geometry::{OriginDimensions, Size},
+    image::ImageDrawable,
+    pixelcolor::{PixelColor, Rgb888},
+    primitives::Rectangle,
+};
+
+struct MyRgb888Image {
+  // ...
+}
+
+impl ImageDrawable<Rgb888> for MyRgb888Image {
+    type Color = Rgb888;
+
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Rgb888>,
+    {
+        // ... send contiguous pixels read from the image to the target ...
+    }
+
+    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        // Delegate to the draw() method using a reduced draw target
+        self.draw(&mut target.translated(-area.top_left).clipped(area))
+    }
+}
+
+impl OriginDimensions for MyRgb888Image {
+    fn size(&self) -> Size {
+        // Return image width and height in pixels
+    }
+}
+```
 
 ## For text rendering crates
 
