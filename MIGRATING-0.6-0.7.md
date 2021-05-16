@@ -283,9 +283,7 @@ impl OriginDimensions for MyRgb888Image {
 
 ## For text rendering crates
 
-Crates that handle text rendering should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-TODO: Improve this section before release. Text rendering isn't included in `core` anymore.
+Crates that handle text rendering should now implement the `CharacterStyle` and `TextRenderer` traits. These are used for both text styling and layout.
 
 ## General
 
