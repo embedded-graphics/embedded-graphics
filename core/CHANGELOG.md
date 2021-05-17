@@ -12,10 +12,6 @@
 
 - [#589](https://github.com/embedded-graphics/embedded-graphics/pull/589) Implemented `From` trait to convert from RGB colors to grayscale colors, between different grayscale colors and from grayscale and RGB colors to `BinaryColor`.
 
-### Fixed
-
-- [#591](https://github.com/embedded-graphics/embedded-graphics/pull/591) Clarifed DrawTarget API.
-
 ## [0.3.0] - 2021-04-19
 
 ### Added
