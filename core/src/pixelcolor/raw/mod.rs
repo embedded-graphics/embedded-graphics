@@ -209,13 +209,26 @@ macro_rules! impl_raw_data {
     ($type:ident : $storage_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr) => {
         impl_raw_data!(
             $type: $storage_type,
-            $bpp, $mask, $bpp_str,
+            $bpp,
+            $mask,
+            $bpp_str,
             concat!(
-                "`", stringify!($type), "` is internally stored in an `", stringify!($storage_type),
-                "`. It can be constructed from an `", stringify!($storage_type), "` by using the ",
+                "`",
+                stringify!($type),
+                "` is internally stored in an `",
+                stringify!($storage_type),
+                "`. It can be constructed from an `",
+                stringify!($storage_type),
+                "` by using the ",
                 "[`new`] method or by calling `",
-                stringify!($type), "::from(", stringify!($storage_type),"_value)`. ",
-                "To convert a `", stringify!($type), "` back into a `", stringify!($storage_type),
+                stringify!($type),
+                "::from(",
+                stringify!($storage_type),
+                "_value)`. ",
+                "To convert a `",
+                stringify!($type),
+                "` back into a `",
+                stringify!($storage_type),
                 "` the [`into_inner`] method can be used."
             )
         );
