@@ -22,7 +22,6 @@
     - [`IntoIterator` changes](#intoiterator-changes)
   - [Macros are removed](#macros-are-removed)
   - [Primitives](#primitives-1)
-    - [Styling](#styling)
     - [Circle](#circle)
     - [Rectangle](#rectangle)
     - [Triangle](#triangle)
@@ -434,10 +433,9 @@ For example, a styled rectangle is now built like this:
 
 ## Primitives
 
-### Styling
+Previously, drawing a filled shape with a transparent stroke of non-zero width would bleed the fill under the stroke. This is changed in 0.7 to honor the stroke color, even if it is `None`, allowing for filled shapes with transparent borders.
 
-TODO: Drawing primitives with transparent strokes will now affect the fill area.
-TODO: The behavior of the `Dimensions` impls has changed
+A stroke or fill color of `None` now does not affect the primitive's dimensions.
 
 ### Circle
 
@@ -549,4 +547,14 @@ Note that the table above shows the new fonts' `ascii` variants only. Some new f
 
 To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
 
-TODO: Discuss baseline font alignment, etc, as per GH comment.
+The default vertical alignment for fonts is now the font's baseline. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
+
+```rust
+use embedded_graphics::text::{Baseline, TextStyle, TextStyleBuilder};
+
+let style = TextStyle::with_baseline(Baseline::Top);
+
+// OR
+
+let style = TextStyleBuilder::new().baseline(Baseline::Top).build();
+```
