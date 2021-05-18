@@ -15,6 +15,8 @@
     - [Method changes](#method-changes)
   - [For crates that handle images](#for-crates-that-handle-images)
   - [For text rendering crates](#for-text-rendering-crates)
+    - [Monospace fonts](#monospace-fonts)
+    - [More complex fonts](#more-complex-fonts)
   - [General](#general)
     - [`Drawable`](#drawable)
     - [`IntoIterator` changes](#intoiterator-changes)
@@ -283,7 +285,74 @@ impl OriginDimensions for MyRgb888Image {
 
 ## For text rendering crates
 
-Crates that handle text rendering should now implement the `CharacterStyle` and `TextRenderer` traits. These are used for both text styling and layout.
+### Monospace fonts
+
+Monospaced fonts should now be built using the `MonoFontBuilder` struct and assigned to a `const`. The following example shows a migration of a font with 5x9 pixel characters using the Latin-1 encoding.
+
+```diff
+// The font bitmap has 32 character glyphs per row.
+const CHARS_PER_ROW: u32 = 32;
+
+// Each character is 5x9 px.
+const GLYPH_SIZE: Size = Size::new(5, 9);
+
+- // Map a given character to an index in the glyph bitmap
+- fn char_offset_impl(c: char) -> u32 {
+-     let fallback = '?' as u32 - ' ' as u32;
+-     if c < ' ' {
+-         return fallback;
+-     }
+-     if c <= '~' {
+-         return c as u32 - ' ' as u32;
+-     }
+-     if c < '\u{00A0}' || c > 'ÿ' {
+-         return fallback;
+-     }
+-     c as u32 - ' ' as u32 - 33
+- }
+-
+- #[derive(Debug, Copy, Clone)]
+- pub struct ExampleFont {}
+- impl Font for ExampleFont {
+-     const FONT_IMAGE: &'static [u8] = include_bytes!("../data/ExampleFont.raw");
+-     const CHARACTER_SIZE: Size = Size::new(5, 9);
+-     const FONT_IMAGE_WIDTH: u32 = Self::CHARACTER_SIZE.width * CHARS_PER_ROW;
+-
+-     fn char_offset(c: char) -> u32 {
+-         char_offset_impl(c)
+-     }
+- }
++ use embedded_graphics::{
++     geometry::Size,
++     image::ImageRaw,
++     mono_font::{GlyphIndices, GlyphRange, MonoFont, MonoFontBuilder},
++ };
++
++ pub const EXAMPLE_FONT: MonoFont = MonoFontBuilder::new()
++     .image(ImageRaw::new_binary(
++         include_bytes!("../data/ExampleFont.raw"),
++         CHARS_PER_ROW * GLYPH_SIZE.width,
++     ))
++     .character_size(GLYPH_SIZE)
++     .glyph_indices(GlyphIndices::new(
++         &[
++             // Base ASCII range
++             GlyphRange::new(' ', '~', 0),
++             // Latin1 range with offset 96 character positions into the glyph bitmap
++             GlyphRange::new('\u{00A0}', 'ÿ', 96),
++         ],
++         // Fallback: show unrecognised characters as a '?'
++         '?' as u32 - ' ' as u32,
++     ))
++     .build();
+```
+
+### More complex fonts
+
+Crates that handle text rendering more complex than simple monospace fonts should now implement the
+`CharacterStyle` and `TextRenderer` traits. These are used for both text styling and layout.
+
+Please refer to their respective docs for implementation details.
 
 ## General
 
