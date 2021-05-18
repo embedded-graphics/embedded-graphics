@@ -353,6 +353,8 @@ Crates that handle text rendering more complex than simple monospace fonts shoul
 
 Please refer to their respective docs for implementation details.
 
+An implementation of more complex font rendering using BDF font files is available in the [eg-bdf](https://github.com/embedded-graphics/bdf/tree/4eb67f99e5f3a1eba6aea4d57cb4642727a95f8f/eg-bdf) crate, which may be useful as a reference for other implementations.
+
 ## General
 
 ### `Drawable`
