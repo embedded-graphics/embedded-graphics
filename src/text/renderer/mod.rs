@@ -1,7 +1,13 @@
 //! Text renderer.
 //!
-//! TODO: Describe how this API can be implemented and add an example to the docs or link to an
-//!       external example.
+//! For more complex font rendering cases that are not covered by the [`mono_font`] module, the
+//! `TextRenderer` trait can be implemented for a font.
+//!
+//! An implementation can be found in the [embedded-bdf] repository and may be useful as a reference
+//! for other implementations.
+//!
+//! [`mono_font`]: ../../mono_font/index.html [embedded-bdf]:
+//! https://github.com/embedded-graphics/bdf/tree/a73a34cf45a5ef90cc7441afc12ec611cfe15563/eg-bdf
 
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
