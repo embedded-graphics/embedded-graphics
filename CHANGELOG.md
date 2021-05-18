@@ -11,6 +11,9 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#587](https://github.com/embedded-graphics/embedded-graphics/pull/587) Added `From<&TextStyle>` impl for `TextStyleBuilder` and `From<&MonoFont>` for `MonoFontBuilder`.
 - [#589](https://github.com/embedded-graphics/embedded-graphics/pull/589) Implemented `From` trait to convert from RGB colors to grayscale colors, between different grayscale colors and from grayscale and RGB colors to `BinaryColor`.
 
+### Changed
+
+- **(breaking)** - [#596](https://github.com/embedded-graphics/embedded-graphics/pull/596) Added more glyph subsets for bundled `MonoFont`s. The `latin1` subset was renamed to `iso8859-1`.
 
 ## [0.7.0-beta.1] - 2021-04-19
 

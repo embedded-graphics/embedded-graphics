@@ -122,14 +122,16 @@ impl<'a> StrGlyphMapping<'a> {
                     let start = chars.next()?;
                     let end = chars.next()?;
 
-                    start..=end
+                    start as u32..=end as u32
                 }
-                c => c..=c,
+                c => c as u32..=c as u32,
             };
 
             Some(range)
         })
         .flatten()
+        //MSRV: directly iterator over char ranges
+        .filter_map(core::char::from_u32)
         .enumerate()
     }
 
@@ -141,6 +143,7 @@ impl<'a> StrGlyphMapping<'a> {
 
 impl GlyphMapping for StrGlyphMapping<'_> {
     fn index(&self, c: char) -> usize {
+        // PERF: use ranges instead of chars iter
         self.chars()
             .find(|(_, v)| c == *v)
             .map(|(index, _)| index)
