@@ -12,14 +12,14 @@
 //!
 //! # Built-in fonts
 //!
-//! Each built-in font is provided in an ASCII and a Latin 1 (ISO 8859-1) variant. The ASCII variant
-//! contains a smaller subset of characters which saves memory in embedded application, but only
-//! covers all characters of the English language. The Latin 1 variant has complete coverage for
-//! [the languages listed here](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Modern_languages_with_complete_coverage),
-//! and partial coverage for [these languages](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Languages_with_incomplete_coverage).
+//! Each built-in font is provided in different glyph subsets. The ASCII variant is the smallest
+//! subset which saves memory in embedded application, but only covers all characters of the English
+//! language. The ISO 8859 subsets support a wide range of languages, see
+//! [Wikipedia](https://en.wikipedia.org/wiki/ISO/IEC_8859#The_parts_of_ISO/IEC_8859) for a list of
+//! languages.
 //!
-//! The table below shows the ASCII variant of the built-in fonts. See the [`latin1` module] for
-//! an overview of the complete character set included in the Latin 1 variants.
+//! The table below shows the ASCII variant of the built-in fonts. See the subset modules for
+//! an overview of the complete character set included in the other variants.
 //!
 // WARNING: The table between START-FONT-TABLE and END-FONT-TABLE is generated.
 //          Use `just convert-fonts` to update the table.
@@ -40,7 +40,6 @@
 //END-FONT-TABLE
 //!
 //! [built-in fonts]: #built-in-fonts
-//! [`latin1` module]: latin1/index.html
 //! [`text` module]: ../text/index.html#examples
 //! [`MonoTextStyle`]: struct.MonoTextStyle.html
 //! [examples repository]:  https://github.com/embedded-graphics/examples
