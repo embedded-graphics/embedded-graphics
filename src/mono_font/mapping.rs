@@ -28,7 +28,7 @@
 //!
 //! This direct mapping is inefficient for mappings that map consecutive ranges of characters to
 //! consecutive index ranges. To define a range of characters a `\0` character followed by the
-//! start and end characters of the inclusive range can be used. This way the mapping in previous
+//! start and end characters of the inclusive range can be used. This way the mapping in the previous
 //! example can be abbreviated to:
 //!
 //! ```
