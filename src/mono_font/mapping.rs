@@ -112,8 +112,8 @@ impl<'a> StrGlyphMapping<'a> {
         })
     }
 
-    /// Returns an enumerated iterator over the characters.
-    pub fn chars(&self) -> impl Iterator<Item = (usize, char)> + '_ {
+    /// Returns an iterator over the characters in this mapping.
+    pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
         let mut chars = self.data.chars();
 
         core::iter::from_fn(move || {
@@ -132,12 +132,11 @@ impl<'a> StrGlyphMapping<'a> {
         .flatten()
         //MSRV: directly iterator over char ranges
         .filter_map(core::char::from_u32)
-        .enumerate()
     }
 
     /// Returns if the mapping contains the given char.
     pub fn contains(&self, c: char) -> bool {
-        self.chars().any(|(_, v)| c == v)
+        self.chars().any(|v| v == c)
     }
 }
 
@@ -145,6 +144,7 @@ impl GlyphMapping for StrGlyphMapping<'_> {
     fn index(&self, c: char) -> usize {
         // PERF: use ranges instead of chars iter
         self.chars()
+            .enumerate()
             .find(|(_, v)| c == *v)
             .map(|(index, _)| index)
             .unwrap_or(self.replacement_index)
@@ -265,7 +265,7 @@ mod tests {
         assert_eq!(iter.next(), None);
 
         let mut iter = mapping.chars();
-        assert_eq!(iter.next(), Some((0, 'a')));
+        assert_eq!(iter.next(), Some('a'));
         assert_eq!(iter.next(), None);
 
         assert_eq!(mapping.index('a'), 0);
@@ -282,9 +282,9 @@ mod tests {
         assert_eq!(iter.next(), None);
 
         let mut iter = mapping.chars();
-        assert_eq!(iter.next(), Some((0, 'a')));
-        assert_eq!(iter.next(), Some((1, 'b')));
-        assert_eq!(iter.next(), Some((2, 'c')));
+        assert_eq!(iter.next(), Some('a'));
+        assert_eq!(iter.next(), Some('b'));
+        assert_eq!(iter.next(), Some('c'));
         assert_eq!(iter.next(), None);
 
         assert_eq!(mapping.index('a'), 0);
@@ -302,9 +302,9 @@ mod tests {
         assert_eq!(iter.next(), None);
 
         let mut iter = mapping.chars();
-        assert_eq!(iter.next(), Some((0, 'a')));
-        assert_eq!(iter.next(), Some((1, 'b')));
-        assert_eq!(iter.next(), Some((2, 'c')));
+        assert_eq!(iter.next(), Some('a'));
+        assert_eq!(iter.next(), Some('b'));
+        assert_eq!(iter.next(), Some('c'));
         assert_eq!(iter.next(), None);
 
         assert_eq!(mapping.index('a'), 0);
@@ -335,11 +335,11 @@ mod tests {
         assert_eq!(iter.next(), None);
 
         let mut iter = mapping.chars();
-        assert_eq!(iter.next(), Some((0, 'a')));
-        assert_eq!(iter.next(), Some((1, 'b')));
-        assert_eq!(iter.next(), Some((2, 'c')));
-        assert_eq!(iter.next(), Some((3, 'd')));
-        assert_eq!(iter.next(), Some((4, 'e')));
+        assert_eq!(iter.next(), Some('a'));
+        assert_eq!(iter.next(), Some('b'));
+        assert_eq!(iter.next(), Some('c'));
+        assert_eq!(iter.next(), Some('d'));
+        assert_eq!(iter.next(), Some('e'));
         assert_eq!(iter.next(), None);
 
         assert_eq!(mapping.index('a'), 0);
