@@ -1,5 +1,7 @@
 # Migrating from embedded-graphics 0.6.x to 0.7.0
 
+> Please note that this migration guide may be incomplete in some sections. If any missing or incorrect information is found, please [open an issue](https://github.com/embedded-graphics/embedded-graphics/issues/new) or [join the Element chatroom](https://matrix.to/#/#rust-embedded-graphics:matrix.org) to bring it to our attention.
+
 ## Table of contents
 
 - [Migrating from embedded-graphics 0.6.x to 0.7.0](#migrating-from-embedded-graphics-06x-to-070)
