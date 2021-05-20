@@ -1164,7 +1164,7 @@ mod tests {
                 character_spacing: 0,
                 baseline: 0,
                 strikethrough: DecorationDimensions::default_strikethrough(2),
-                underline: DecorationDimensions::default_strikethrough(2),
+                underline: DecorationDimensions::default_underline(2),
                 glyph_mapping: &mapping::ASCII,
             };
 

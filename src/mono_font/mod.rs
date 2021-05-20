@@ -13,12 +13,12 @@
 //! # Built-in fonts
 //!
 //! Each built-in font is provided in different glyph subsets. The ASCII variant is the smallest
-//! subset which saves memory in embedded application, but only covers all characters of the English
+//! subset which saves memory in embedded applications, but only covers all characters of the English
 //! language. The ISO 8859 subsets support a wide range of languages, see
 //! [Wikipedia](https://en.wikipedia.org/wiki/ISO/IEC_8859#The_parts_of_ISO/IEC_8859) for a list of
 //! languages.
 //!
-//! The table below shows the ASCII variant of the built-in fonts. See the subset modules for
+//! The table below shows the ASCII variant of the built-in fonts. See the [subset modules](#modules) for
 //! an overview of the complete character set included in the other variants.
 //!
 // WARNING: The table between START-FONT-TABLE and END-FONT-TABLE is generated.

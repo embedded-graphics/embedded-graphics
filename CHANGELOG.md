@@ -13,7 +13,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
-- **(breaking)** - [#596](https://github.com/embedded-graphics/embedded-graphics/pull/596) Added more glyph subsets for bundled `MonoFont`s. The `latin1` subset was renamed to `iso8859-1`.
+- **(breaking)** - [#596](https://github.com/embedded-graphics/embedded-graphics/pull/596) Added more ISO8859 glyph subsets as well as JIS_X0201 for bundled `MonoFont`s, supporting more languages. The `latin1` subset was renamed to `iso8859-1`.
 
 ## [0.7.0-beta.1] - 2021-04-19
 
