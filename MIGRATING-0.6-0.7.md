@@ -160,7 +160,7 @@ Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter.
 
-`DrawTarget`s must also implement the `OriginDimensions` trait.
+`DrawTarget`s have an additional bound on the `Dimensions` trait, however it is recommended that `OriginDimensions` is implemented instead, as the target display's origin usually starts at `(0, 0)`. `Dimensions` is automatically implemented for `OriginDimensions`.
 
 For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
 
@@ -239,7 +239,7 @@ To reduce duplication, please search the `DrawTarget` documentation on <https://
 
 ## For crates that handle images
 
-Crates that handle images should now implement the `ImageDrawable` and `OriginDimensions` traits to integrate with embedded-graphics.
+Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits to integrate with embedded-graphics.
 
 The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit color and draws to targets that support the same.
 
@@ -256,7 +256,7 @@ struct MyRgb888Image {
   // ...
 }
 
-impl ImageDrawable<Rgb888> for MyRgb888Image {
+impl ImageDrawable for MyRgb888Image {
     type Color = Rgb888;
 
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
@@ -353,7 +353,7 @@ Crates that handle text rendering more complex than simple monospace fonts shoul
 
 Please refer to their respective docs for implementation details.
 
-An implementation of more complex font rendering using BDF font files is available in the [eg-bdf](https://github.com/embedded-graphics/bdf/tree/4eb67f99e5f3a1eba6aea4d57cb4642727a95f8f/eg-bdf) crate, which may be useful as a reference for other implementations.
+An implementation of more complex font rendering using BDF font files is available in the [eg-bdf](https://github.com/embedded-graphics/embedded-bdf) crate, which may be useful as a reference for other implementations.
 
 ## General
 
@@ -435,9 +435,9 @@ For example, a styled rectangle is now built like this:
 
 ## Primitives
 
-Previously, drawing a filled shape with a transparent stroke of non-zero width would bleed the fill under the stroke. This is changed in 0.7 to honor the stroke color, even if it is `None`, allowing for filled shapes with transparent borders.
+Previously, drawing a filled shape with a transparent stroke of non-zero width would bleed the fill under the stroke. This is changed in 0.7 to honor the stroke width and alignment, even if it is the stroke color is `None`, allowing for filled shapes with transparent borders.
 
-A stroke or fill color of `None` now does not affect the primitive's dimensions.
+The stroke and fill color no longer affect the primitive's bounding box returned by `Dimensions::bounding_box`. The stroke width is now always considered even if the stroke is transparent.
 
 ### Circle
 
@@ -549,7 +549,7 @@ Note that the table above shows the new fonts' `ascii` variants only. Some new f
 
 To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
 
-The default vertical alignment for fonts is now the font's baseline. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
+The default baseline for fonts is now the font's baseline instead of the top of the glyph bounding box. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
 
 ```rust
 use embedded_graphics::text::{Baseline, TextStyle, TextStyleBuilder};

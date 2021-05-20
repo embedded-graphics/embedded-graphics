@@ -1,13 +1,14 @@
 //! Text renderer.
 //!
-//! For more complex font rendering cases that are not covered by the [`mono_font`] module, the
-//! `TextRenderer` trait can be implemented for a font.
+//! For more complex text rendering cases that are not covered by the [`mono_font`] module, the
+//! `TextRenderer` trait can be implemented by external text renderers.
 //!
-//! An implementation can be found in the [embedded-bdf] repository and may be useful as a reference
-//! for other implementations.
+//! Implementations of this trait can be found in the [bdf] and [eg-seven-segment] repositories,
+//! which may be useful as a reference of other implementations.
 //!
-//! [`mono_font`]: ../../mono_font/index.html [embedded-bdf]:
-//! https://github.com/embedded-graphics/bdf/tree/a73a34cf45a5ef90cc7441afc12ec611cfe15563/eg-bdf
+//! [`mono_font`]: ../../mono_font/index.html
+//! [bdf]: https://github.com/embedded-graphics/bdf
+//! [eg-seven-segment]: https://github.com/embedded-graphics/eg-seven-segment
 
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
