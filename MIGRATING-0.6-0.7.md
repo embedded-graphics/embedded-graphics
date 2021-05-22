@@ -1,6 +1,6 @@
 # Migrating from embedded-graphics 0.6.x to 0.7.0
 
-> Please note that this migration guide may be incomplete in some sections. If any missing or incorrect information is found, please [open an issue](https://github.com/embedded-graphics/embedded-graphics/issues/new) or [join the Element chatroom](https://matrix.to/#/#rust-embedded-graphics:matrix.org) to bring it to our attention.
+> Please note that this migration guide may be incomplete in some sections. If any missing or incorrect information is found, please [open an issue](https://github.com/embedded-graphics/embedded-graphics/issues/new) or [join the Matrix chatroom](https://matrix.to/#/#rust-embedded-graphics:matrix.org) to bring it to our attention.
 
 ## Table of contents
 
@@ -391,6 +391,76 @@ The three methods in the `Dimensions` trait were replaced by a single `bounding_
 ## Mock display
 
 The `MockDisplay`, used often for unit testing, now checks for pixel overdraw and out of bounds drawing by default. These additional checks can be disabled by using the `set_allow_overdraw` and `set_allow_out_of_bounds_drawing` methods, if required.
+
+The `width` and `height` methods have been removed. Use the `bounding_box` method provided by the `Dimensions` trait instead:
+
+```rust
+// Or: use embedded_graphics::prelude::*;
+use embedded_graphics::geometry::Dimensions;
+
+use embedded_graphics::mock_display::MockDisplay;
+
+let display = MockDisplay::new();
+
+let width = display.bounding_box().size.width;
+let height = display.bounding_box().size.height;
+```
+
+The `PartialEq` implementation for `MockDisplay` is now removed. To check for equality against another `MockDisplay`, the `assert_eq`, `assert_eq_with_message` or `eq` methods can be used instead.
+
+```rust
+#[test]
+fn check_equality() {
+    let expected = MockDisplay::from_pattern(&[ /* ... */ ]);
+
+    let mut display = MockDisplay::new();
+
+    Circle::new(Point::new(1, 1), 1)
+        .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+        .draw(&mut display)?;
+
+    display.assert_eq(&expected);
+}
+```
+
+The `assert_pattern` and `assert_pattern_with_message` methods are also useful for checking display state in tests.
+
+```rust
+- #[test]
+- fn tiny_circle_filled() {
+-     let mut display = MockDisplay::new();
+-
+-     Circle::new(Point::new(1, 1), 1)
+-         .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+-         .draw(&mut display)?;
+-
+-     assert_eq!(
+-         display,
+-         MockDisplay::from_pattern(&[
+-             " # ",
+-             "###",
+-             " # "
+-         ])
+-     );
+- }
++ #[test]
++ fn tiny_circle_filled() {
++     let mut display = MockDisplay::new();
++
++     Circle::new(Point::new(0, 0), 3)
++         .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
++         .draw(&mut display)
++         .unwrap();
++
++     display.assert_pattern(&[
++         " # ",
++         "###",
++         " # ",
++     ]);
++ }
+```
+
+To see a visual representation of failing equality tests, set `EG_FANCY_PANIC=1` when running the tests.
 
 ## Style module
 

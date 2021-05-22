@@ -118,8 +118,20 @@ Two character sets are now provided for each font. The `ascii` set contains fewe
 
 `MockDisplay` now supports all RGB and grayscale color types in its patterns.
 
+By setting the environment variable `EG_FANCY_PANIC=1` when running the tests, failing `MockDisplay` assertions can now pretty print the difference between two `MockDisplay`s.
+
 New methods:
 
-- `swap_xy` - copies the current display with X and Y coordinates swapped.
-- `map` - create a copy of the current display with a predicate applied to all pixels.
 - `affected_area` - gets the bounding box of all changes made to the display.
+- `assert_eq_with_message` - the same as above, but with the ability to write custom messages in the test output.
+- `assert_eq` - check for equality against another `MockDisplay` and panic if they are not the same.
+- `assert_pattern_with_message` - the same as above, but with the ability to write custom messages in the test output.
+- `assert_pattern` - check for equality against a pattern and panic if they do not match.
+- `diff` - compare the display against another `MockDisplay`, producing a new `MockDisplay` containing the colored difference between them.
+- `eq` - check for equality between two `MockDisplay`s.
+- `from_points` - create a `MockDisplay` from an iterator over `Point`s.
+- `map` - create a copy of the current display with a predicate applied to all pixels.
+- `set_allow_out_of_bounds_drawing` - if set to `true`, disables the panicking behaviour when a drawing operation attempts to draw pixels outside the visible mock display area.
+- `set_allow_overdraw` - if set to `true`, disables the panicking behaviour when a pixel is drawn to twice.
+- `set_pixels` - sets the points in an iterator to the given color.
+- `swap_xy` - copies the current display with X and Y coordinates swapped.
