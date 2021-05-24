@@ -30,7 +30,7 @@ use crate::{
 /// [`new`]: #method.new
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[non_exhaustive]
-pub struct MonoTextStyle<'a, 'b, 'c, C> {
+pub struct MonoTextStyle<'a, C> {
     /// Text color.
     pub text_color: Option<C>,
 
@@ -44,15 +44,12 @@ pub struct MonoTextStyle<'a, 'b, 'c, C> {
     pub strikethrough_color: DecorationColor<C>,
 
     /// Font.
-    pub font: &'a MonoFont<'b, 'c>,
+    pub font: &'a MonoFont<'a>,
 }
 
-impl<'a, 'b, 'c, C> MonoTextStyle<'a, 'b, 'c, C>
-where
-    C: PixelColor,
-{
+impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
     /// Creates a text style with transparent background.
-    pub fn new(font: &'a MonoFont<'b, 'c>, text_color: C) -> Self {
+    pub fn new(font: &'a MonoFont<'a>, text_color: C) -> Self {
         MonoTextStyleBuilder::new()
             .font(font)
             .text_color(text_color)
@@ -183,7 +180,7 @@ where
     }
 }
 
-impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, '_, '_, C> {
+impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
     type Color = C;
 
     fn draw_string<D>(
@@ -282,10 +279,7 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, '_, '_, C> {
     }
 }
 
-impl<C> CharacterStyle for MonoTextStyle<'_, '_, '_, C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> CharacterStyle for MonoTextStyle<'_, C> {
     type Color = C;
 
     fn set_text_color(&mut self, text_color: Option<Self::Color>) {
@@ -385,11 +379,11 @@ enum LineElement {
 /// [`Text`]: ../text/struct.Text.html
 /// [`MonoTextStyle`]: struct.MonoTextStyle.html
 #[derive(Copy, Clone, Debug)]
-pub struct MonoTextStyleBuilder<'a, 'b, 'c, C> {
-    style: MonoTextStyle<'a, 'b, 'c, C>,
+pub struct MonoTextStyleBuilder<'a, C> {
+    style: MonoTextStyle<'a, C>,
 }
 
-impl<C> MonoTextStyleBuilder<'_, '_, '_, C> {
+impl<C> MonoTextStyleBuilder<'_, C> {
     /// Creates a new text style builder.
     pub fn new() -> Self {
         Self {
@@ -404,12 +398,9 @@ impl<C> MonoTextStyleBuilder<'_, '_, '_, C> {
     }
 }
 
-impl<'a, 'b, 'c, C> MonoTextStyleBuilder<'a, 'b, 'c, C> {
+impl<'a, C> MonoTextStyleBuilder<'a, C> {
     /// Sets the font.
-    pub fn font<'a2, 'b2, 'c2>(
-        self,
-        font: &'a2 MonoFont<'b2, 'c2>,
-    ) -> MonoTextStyleBuilder<'a2, 'b2, 'c2, C> {
+    pub fn font<'b>(self, font: &'b MonoFont<'b>) -> MonoTextStyleBuilder<'b, C> {
         let style = MonoTextStyle {
             font,
             background_color: self.style.background_color,
@@ -464,10 +455,7 @@ impl<'a, 'b, 'c, C> MonoTextStyleBuilder<'a, 'b, 'c, C> {
     }
 }
 
-impl<C> MonoTextStyleBuilder<'_, '_, '_, C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> MonoTextStyleBuilder<'_, C> {
     /// Sets the text color.
     pub fn text_color(mut self, text_color: C) -> Self {
         self.style.text_color = Some(text_color);
@@ -497,26 +485,20 @@ where
     }
 }
 
-impl<'a, 'b, 'c, C> MonoTextStyleBuilder<'a, 'b, 'c, C>
-where
-    C: PixelColor,
-{
+impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
     /// Builds the text style.
     ///
     /// This method can only be called after a font was set by using the [`font`] method. All other
     /// settings are optional and they will be set to their default value if they are missing.
     ///
     /// [`font`]: #method.font
-    pub fn build(self) -> MonoTextStyle<'a, 'b, 'c, C> {
+    pub fn build(self) -> MonoTextStyle<'a, C> {
         self.style
     }
 }
 
-impl<'a, 'b, 'c, C> From<&MonoTextStyle<'a, 'b, 'c, C>> for MonoTextStyleBuilder<'a, 'b, 'c, C>
-where
-    C: PixelColor,
-{
-    fn from(style: &MonoTextStyle<'a, 'b, 'c, C>) -> Self {
+impl<'a, C: PixelColor> From<&MonoTextStyle<'a, C>> for MonoTextStyleBuilder<'a, C> {
+    fn from(style: &MonoTextStyle<'a, C>) -> Self {
         Self { style: *style }
     }
 }
@@ -526,9 +508,11 @@ mod tests {
     use super::*;
     use crate::{
         geometry::Dimensions,
+        image::ImageRaw,
         mock_display::MockDisplay,
         mono_font::{
             ascii::{FONT_10X20, FONT_6X9},
+            mapping,
             tests::*,
             DecorationDimensions,
         },
@@ -1169,5 +1153,31 @@ mod tests {
             Some((Point::new(32, 20), LineElement::Char('c')))
         );
         assert_eq!(iter.next(), Some((Point::new(38, 20), LineElement::Done)));
+    }
+
+    #[test]
+    fn builder_change_font() {
+        let _style = {
+            let font = MonoFont {
+                image: ImageRaw::new_binary(&[1, 2, 3], 1),
+                character_size: Size::new(1, 2),
+                character_spacing: 0,
+                baseline: 0,
+                strikethrough: DecorationDimensions::default_strikethrough(2),
+                underline: DecorationDimensions::default_underline(2),
+                glyph_mapping: &mapping::ASCII,
+            };
+
+            let style = MonoTextStyleBuilder::new()
+                .font(&font)
+                .text_color(BinaryColor::On)
+                .build();
+
+            // `style` cannot be returned from this block, because if is limited by the lifetime of
+            // `font`. But it should be possible to return `style2` because `FONT_6X9` is a const.
+            let style2 = MonoTextStyleBuilder::from(&style).font(&FONT_6X9).build();
+
+            style2
+        };
     }
 }
