@@ -8,7 +8,6 @@ publish = false
 [dependencies]
 embedded-graphics = { path = "../../" }
 png-target = { path = "../png-target/" }
-# TODO: remove git dependency
-tinytga = { git = "https://github.com/embedded-graphics/tinytga.git", rev = "9e26fe986f0eae436f4f7fafd4e9c55ff1c09d00"}
+tinytga = "0.4.0-beta.1"
 regex = "1.4.3"
 unindent = "0.1.7"
