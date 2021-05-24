@@ -6,6 +6,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+## [0.7.0-beta.2] - 2021-05-24
+
 ### Added
 
 - [#587](https://github.com/embedded-graphics/embedded-graphics/pull/587) Added `From<&TextStyle>` impl for `TextStyleBuilder` and `From<&MonoFont>` for `MonoFontBuilder`.
@@ -635,7 +637,8 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.1...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.2...HEAD
+[0.7.0-beta.2]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.1...embedded-graphics-v0.7.0-beta.2
 [0.7.0-beta.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.3...embedded-graphics-v0.7.0-beta.1
 
 [0.7.0-alpha.3]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.2...embedded-graphics-v0.7.0-alpha.3
