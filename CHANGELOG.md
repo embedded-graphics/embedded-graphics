@@ -15,7 +15,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
-- **(breaking)** - [#596](https://github.com/embedded-graphics/embedded-graphics/pull/596) Added more ISO8859 glyph subsets as well as JIS_X0201 for bundled `MonoFont`s, supporting more languages. The `latin1` subset was renamed to `iso8859-1`.
+- **(breaking)** - [#596](https://github.com/embedded-graphics/embedded-graphics/pull/596) Added more ISO8859 glyph subsets as well as JIS_X0201 for bundled `MonoFont`s, supporting more languages. The `latin1` subset was renamed to `iso_8859_1`.
 
 ## [0.7.0-beta.1] - 2021-04-19
 
@@ -637,10 +637,10 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.2...HEAD
 [0.7.0-beta.2]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.1...embedded-graphics-v0.7.0-beta.2
 [0.7.0-beta.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.3...embedded-graphics-v0.7.0-beta.1
-
 [0.7.0-alpha.3]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.2...embedded-graphics-v0.7.0-alpha.3
 [0.7.0-alpha.2]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-alpha.1...embedded-graphics-v0.7.0-alpha.2
 [0.7.0-alpha.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.6.2...embedded-graphics-v0.7.0-alpha.1
