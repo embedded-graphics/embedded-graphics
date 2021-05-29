@@ -12,8 +12,9 @@ use crate::{
         renderer::{CharacterStyle, TextMetrics, TextRenderer},
         Baseline, DecorationColor,
     },
-    Drawable, SaturatingCast,
+    Drawable,
 };
+use az::SaturatingAs;
 
 /// Style properties for text using a monospaced font.
 ///
@@ -171,11 +172,11 @@ impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
                 .character_size
                 .height
                 .saturating_sub(1)
-                .saturating_cast(),
+                .saturating_as(),
             Baseline::Middle => {
-                (self.font.character_size.height.saturating_sub(1) / 2).saturating_cast()
+                (self.font.character_size.height.saturating_sub(1) / 2).saturating_as()
             }
-            Baseline::Alphabetic => self.font.baseline.saturating_cast(),
+            Baseline::Alphabetic => self.font.baseline.saturating_as(),
         }
     }
 }
@@ -250,7 +251,7 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
             self.draw_decorations(width, position, target)?;
         }
 
-        Ok(position + Point::new(width.saturating_cast(), self.baseline_offset(baseline)))
+        Ok(position + Point::new(width.saturating_as(), self.baseline_offset(baseline)))
     }
 
     fn measure_string(&self, text: &str, position: Point, baseline: Baseline) -> TextMetrics {

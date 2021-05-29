@@ -10,8 +10,9 @@ use crate::{
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle, Sector,
     },
-    Pixel, SaturatingCast,
+    Pixel,
 };
+use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the sector border
 #[derive(Clone, PartialEq, Debug)]
@@ -51,12 +52,13 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
 
         let plane_sector = PlaneSector::new(stroke_area.angle_start, stroke_area.angle_sweep);
 
+        let inside_stroke_width: i32 = style.inside_stroke_width().saturating_as();
+        let outside_stroke_width: i32 = style.outside_stroke_width().saturating_as();
+
         let stroke_threshold_inside =
-            style.inside_stroke_width().saturating_cast() * NORMAL_VECTOR_SCALE * 2
-                - NORMAL_VECTOR_SCALE;
+            inside_stroke_width * NORMAL_VECTOR_SCALE * 2 - NORMAL_VECTOR_SCALE;
         let stroke_threshold_outside =
-            style.outside_stroke_width().saturating_cast() * NORMAL_VECTOR_SCALE * 2
-                + NORMAL_VECTOR_SCALE;
+            outside_stroke_width * NORMAL_VECTOR_SCALE * 2 + NORMAL_VECTOR_SCALE;
 
         // TODO: Polylines and sectors should use the same miter limit.
         let angle_sweep_abs = primitive.angle_sweep.abs();
@@ -67,8 +69,7 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
         let bevel = if exterior_bevel || interior_bevel {
             let half_sweep = primitive.angle_start
                 + Angle::from_radians(primitive.angle_sweep.to_radians() / 2.0);
-            let threshold =
-                style.outside_stroke_width().saturating_cast() * NORMAL_VECTOR_SCALE * 4;
+            let threshold = outside_stroke_width * NORMAL_VECTOR_SCALE * 4;
 
             if interior_bevel {
                 Some((
@@ -176,7 +177,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Sector {
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Sector {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_cast();
+        let offset = style.outside_stroke_width().saturating_as();
 
         self.bounding_box().offset(offset)
     }

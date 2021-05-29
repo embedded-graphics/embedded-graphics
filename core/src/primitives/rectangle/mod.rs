@@ -5,8 +5,8 @@ mod points;
 use crate::{
     geometry::{AnchorPoint, Dimensions, Point, Size},
     primitives::PointsIter,
-    SaturatingCast,
 };
+use az::SaturatingAs;
 use core::{
     cmp::min,
     ops::{Range, RangeInclusive},
@@ -373,7 +373,7 @@ impl Rectangle {
             ..self
                 .top_left
                 .y
-                .saturating_add(self.size.height.saturating_cast())
+                .saturating_add(self.size.height.saturating_as())
     }
 
     /// Returns the range of X coordinates in this rectangle.
@@ -412,7 +412,7 @@ impl Rectangle {
             ..self
                 .top_left
                 .x
-                .saturating_add(self.size.width.saturating_cast())
+                .saturating_add(self.size.width.saturating_as())
     }
 
     /// Returns `true` is the rectangle is zero sized.

@@ -8,8 +8,8 @@ use crate::{
         PointsIter, Primitive, Rectangle,
     },
     transform::Transform,
-    SaturatingCast,
 };
+use az::SaturatingAs;
 
 mod bresenham;
 pub(in crate::primitives) mod intersection_params;
@@ -95,7 +95,7 @@ impl Line {
         thickness: u32,
         stroke_offset: StrokeOffset,
     ) -> (Line, Line) {
-        let mut it = ParallelsIterator::new(self, thickness.saturating_cast(), stroke_offset);
+        let mut it = ParallelsIterator::new(self, thickness.saturating_as(), stroke_offset);
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
 

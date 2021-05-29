@@ -1,4 +1,5 @@
-use crate::{pixelcolor::PixelColor, primitives::OffsetOutline, SaturatingCast};
+use crate::{pixelcolor::PixelColor, primitives::OffsetOutline};
+use az::SaturatingAs;
 
 /// Style properties for primitives.
 ///
@@ -109,7 +110,7 @@ where
     /// Returns the stroke area.
     pub(in crate::primitives) fn stroke_area<P: OffsetOutline>(&self, primitive: &P) -> P {
         // saturate offset at i32::max_value() if stroke width is to large
-        let offset = self.outside_stroke_width().saturating_cast();
+        let offset = self.outside_stroke_width().saturating_as();
 
         primitive.offset(offset)
     }
@@ -117,7 +118,7 @@ where
     /// Returns the fill area.
     pub(in crate::primitives) fn fill_area<P: OffsetOutline>(&self, primitive: &P) -> P {
         // saturate offset at i32::min_value() if stroke width is to large
-        let offset = self.inside_stroke_width().saturating_cast_neg();
+        let offset = -self.inside_stroke_width().saturating_as::<i32>();
 
         primitive.offset(offset)
     }

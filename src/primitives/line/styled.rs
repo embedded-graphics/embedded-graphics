@@ -6,8 +6,9 @@ use crate::{
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle,
     },
-    Pixel, SaturatingCast,
+    Pixel,
 };
+use az::SaturatingAs;
 
 /// Styled line iterator.
 #[derive(Clone, Debug)]
@@ -20,7 +21,7 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
     pub(in crate::primitives::line) fn new(primitive: &Line, style: &PrimitiveStyle<C>) -> Self {
         // Note: stroke color will be None if stroke width is 0
         let stroke_color = style.effective_stroke_color();
-        let stroke_width = style.stroke_width.saturating_cast();
+        let stroke_width = style.stroke_width.saturating_as();
 
         Self {
             stroke_color,

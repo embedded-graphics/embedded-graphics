@@ -7,8 +7,9 @@ use crate::{
         Alignment, Baseline, TextStyle,
     },
     transform::Transform,
-    Drawable, SaturatingCast,
+    Drawable,
 };
+use az::SaturatingAs;
 
 use super::TextStyleBuilder;
 /// Text drawable.
@@ -134,7 +135,7 @@ impl<S: TextRenderer> Text<'_, S> {
                 .text_style
                 .line_height
                 .to_absolute(self.character_style.line_height())
-                .saturating_cast();
+                .saturating_as::<i32>();
 
             (line, p)
         })

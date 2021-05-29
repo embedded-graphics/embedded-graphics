@@ -8,8 +8,9 @@ use crate::{
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle,
     },
-    Pixel, SaturatingCast,
+    Pixel,
 };
+use az::SaturatingAs;
 
 use super::RoundedRectangleContains;
 
@@ -142,7 +143,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for RoundedRectangle {
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for RoundedRectangle {
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_cast();
+        let offset = style.outside_stroke_width().saturating_as();
 
         self.bounding_box().offset(offset)
     }
