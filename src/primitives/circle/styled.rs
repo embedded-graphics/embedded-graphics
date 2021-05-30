@@ -9,8 +9,9 @@ use crate::{
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle,
     },
-    Pixel, SaturatingCast,
+    Pixel,
 };
+use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -141,7 +142,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Circle {
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Circle {
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_cast();
+        let offset = style.outside_stroke_width().saturating_as();
 
         self.bounding_box().offset(offset)
     }
@@ -206,7 +207,7 @@ mod tests {
         let mut display = MockDisplay::new();
         display.set_pixels(circle.points(), stroke_color);
         display.set_pixels(
-            circle.offset(stroke_width.saturating_cast_neg()).points(),
+            circle.offset(-stroke_width.saturating_as::<i32>()).points(),
             fill_color,
         );
 

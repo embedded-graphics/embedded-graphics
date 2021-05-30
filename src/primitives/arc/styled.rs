@@ -8,8 +8,10 @@ use crate::{
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         OffsetOutline, PrimitiveStyle, Rectangle,
     },
-    Pixel, SaturatingCast,
+    Pixel,
 };
+
+use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the arc border
 #[derive(Clone, PartialEq, Debug)]
@@ -28,8 +30,8 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
     fn new(primitive: &Arc, style: &PrimitiveStyle<C>) -> Self {
         let circle = primitive.to_circle();
 
-        let outside_edge = circle.offset(style.outside_stroke_width().saturating_cast());
-        let inside_edge = circle.offset(style.inside_stroke_width().saturating_cast_neg());
+        let outside_edge = circle.offset(style.outside_stroke_width().saturating_as());
+        let inside_edge = circle.offset(-style.inside_stroke_width().saturating_as::<i32>());
 
         let iter = if !style.is_transparent() {
             // PERF: The distance iterator should use the smaller arc bounding box
@@ -96,7 +98,7 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Arc {
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
     // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_cast();
+        let offset = style.outside_stroke_width().saturating_as();
 
         self.bounding_box().offset(offset)
     }

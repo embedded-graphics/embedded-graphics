@@ -8,8 +8,9 @@ use crate::{
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         PrimitiveStyle, Rectangle,
     },
-    Pixel, SaturatingCast,
+    Pixel,
 };
+use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the ellipse border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -137,7 +138,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Ellipse {
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Ellipse {
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_cast();
+        let offset = style.outside_stroke_width().saturating_as();
 
         self.bounding_box().offset(offset)
     }
@@ -188,12 +189,12 @@ mod tests {
         mock_display::MockDisplay,
         pixelcolor::BinaryColor,
         primitives::{Circle, Primitive, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
-        Drawable, SaturatingCast,
+        Drawable,
     };
 
     fn test_circles(style: PrimitiveStyle<BinaryColor>) {
         for diameter in 0..50 {
-            let top_left = Point::new_equal(style.stroke_width.saturating_cast());
+            let top_left = Point::new_equal(style.stroke_width.saturating_as());
 
             let mut expected = MockDisplay::new();
             Circle::new(top_left, diameter)

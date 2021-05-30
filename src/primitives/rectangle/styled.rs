@@ -8,8 +8,9 @@ use crate::{
         PointsIter, PrimitiveStyle,
     },
     transform::Transform,
-    Pixel, SaturatingCast,
+    Pixel,
 };
+use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the rect border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -143,7 +144,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Rectangle {
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_cast();
+        let offset = style.outside_stroke_width().saturating_as();
 
         self.bounding_box().offset(offset)
     }
