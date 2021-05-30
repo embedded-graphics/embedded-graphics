@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** - [#600](https://github.com/embedded-graphics/embedded-graphics/pull/600) Renamed `Mapping::all` to `Mapping::iter`.
+
 ## [0.7.0-beta.2] - 2021-05-24
 
 ### Added

@@ -168,7 +168,7 @@ macro_rules! impl_mapping {
 
         impl Mapping {
             /// Returns an iterator over all mappings.
-            pub fn all() -> impl Iterator<Item = Self> {
+            pub fn iter() -> impl Iterator<Item = Self> {
                 const ALL: &[Mapping] = &[$(Mapping::$enum_variant),*];
 
                 ALL.iter().copied()
