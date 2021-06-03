@@ -16,6 +16,7 @@
 - [Mock display](#mock-display)
 - [Style module](#style-module)
 - [Text and fonts](#text-and-fonts)
+- [The `embedded-graphics-core` crate](#the-embedded-graphics-core-crate)
 - [For display driver authors](#for-display-driver-authors)
   - [Method changes](#method-changes)
 - [For crates that handle images](#for-crates-that-handle-images)
@@ -299,13 +300,23 @@ let style = TextStyle::with_baseline(Baseline::Top);
 let style = TextStyleBuilder::new().baseline(Baseline::Top).build();
 ```
 
+## The `embedded-graphics-core` crate
+
+Some of the more stable items in `embedded-graphics` have been moved to the new [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate. This crate is intended to be used by display drivers, text renderers, image libraries and other crates that extend the functionality of `embedded-graphics`.
+
+Application authors should continue to use the `embedded-graphics` crate. All items from `embedded-graphics-core` are reexported in `embedded-graphics`.
+
+`embedded-graphics-core` will change over time, however it will change at a much slower rate than `embedded-graphics` itself, and will likely release fewer breaking changes. This will provide more stability and compatability for the wider embedded-graphics ecosystem, whilst allowing non-core features of embedded-graphics to evolve at a faster pace. The same version of embedded-graphics-core may be used for multiple major versions of embedded-graphics.
+
 ## For display driver authors
 
-Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](#the-embedded-graphics-core-crate) crate to integrate with embedded-graphics.
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter. As this can be a limitation versus older code which implements `DrawTarget` for e.g. `C: Into<Rgb565>`, the `color_converted` method can be used to create a draw target which converts the drawable's color format to the display's color format.
 
-The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to replace the removed `size` method. By using the `Dimensions` trait the drawable area of a draw targets can be positioned freely and is no longer limited to start in the origin at `(0, 0)`. But for display drivers it is recommended that the drawable area does start at `(0, 0)`. To simplify implementation and provide a type level guarantee that the drawable area starts at the origin ,`OriginDimensions` can be implemented instead of `Dimensions`. The `Dimensions` trait is automatically implemented for all types that implement `OriginDimensions`.
+The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to replace the removed `size` method. By using the `Dimensions` trait the drawable area of a draw targets can be positioned freely and is no longer limited to start in the origin at `(0, 0)`. But for display drivers it is recommended that the drawable area does start at `(0, 0)`. To simplify implementation and provide a type level guarantee that the drawable area starts at the origin, `OriginDimensions` can be implemented instead of `Dimensions`. The `Dimensions` trait is automatically implemented for all types that implement `OriginDimensions`.
+
+Note that `Dimensions` and `OriginDimensions` should be imported from `embedded-graphics-core`, not `embedded-graphics`. See the [relevant section](#the-embedded-graphics-core-crate) for more details.
 
 For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
 
@@ -384,7 +395,7 @@ To reduce duplication, please search the `DrawTarget` documentation on <https://
 
 ## For crates that handle images
 
-Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits to integrate with embedded-graphics.
+Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits from [`embedded-graphics-core`](#the-embedded-graphics-core-crate) to integrate with embedded-graphics.
 
 The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit color and draws to targets that support the same.
 
