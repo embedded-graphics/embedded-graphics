@@ -4,12 +4,6 @@
 
 ## Table of contents
 
-- [For display driver authors](#for-display-driver-authors)
-  - [Method changes](#method-changes)
-- [For crates that handle images](#for-crates-that-handle-images)
-- [For text rendering crates](#for-text-rendering-crates)
-  - [Monospace fonts](#monospace-fonts)
-  - [More complex fonts](#more-complex-fonts)
 - [General](#general)
   - [`Drawable`](#drawable)
   - [`IntoIterator` changes](#intoiterator-changes)
@@ -22,207 +16,12 @@
 - [Mock display](#mock-display)
 - [Style module](#style-module)
 - [Text and fonts](#text-and-fonts)
-
-## For display driver authors
-
-Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-`DrawTarget` now uses an associated type for the target color instead of a type parameter. As this can be a limitation versus older code which implements `DrawTarget` for e.g. `C: Into<Rgb565>`, the `color_converted` method can be used to create a draw target which converts the drawable's color format to the display's color format.
-
-The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to replace the removed `size` method. By using the `Dimensions` trait the drawable area of a draw targets can be positioned freely and is no longer limited to start in the origin at `(0, 0)`. But for display drivers it is recommended that the drawable area does start at `(0, 0)`. To simplify implementation and provide a type level guarantee that the drawable area starts at the origin ,`OriginDimensions` can be implemented instead of `Dimensions`. The `Dimensions` trait is automatically implemented for all types that implement `OriginDimensions`.
-
-For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
-
-```diff
-- use crate::{
--     drawable::Pixel,
--     geometry::Size,
--     pixelcolor::{PixelColor, BinaryColor},
--     DrawTarget,
-- };
--
-- impl DrawTarget<BinaryColor> for Ssd1306 {
--     type Error = core::convert::Infallible;
--
--     fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>) -> Result<(), Self::Error> {
--         // ...
--
--         Ok(())
--     }
--
--     fn size(&self) -> Size {
--         // ...
--     }
-- }
-+ use embedded_graphics_core::{
-+     draw_target::DrawTarget,
-+     geometry::{OriginDimensions, Size},
-+     pixelcolor::{PixelColor, BinaryColor},
-+     Pixel,
-+ };
-+
-+ DrawTarget for Ssd1306 {
-+     type Color = BinaryColor;
-+     type Error = core::convert::Infallible;
-+
-+     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
-+     where
-+         I: IntoIterator<Item = Pixel<Self::Color>>,
-+     {
-+         // ...
-+
-+         Ok(())
-+     }
-+ }
-+
-+ impl OriginDimensions for Ssd1306 {
-+     fn size(&self) -> Size {
-+         // ...
-+     }
-+ }
-```
-
-### Method changes
-
-All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. These methods were hard to implement correctly and consistently between different drivers. The new lower level draw methods are easier to implement and still improve performance over pixel by pixel drawing.
-
-- `draw_iter`
-
-  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
-
-- `fill_contiguous`
-
-  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
-
-- `fill_solid`
-
-  Fills a given area with a solid color.
-
-- `clear`
-
-  Fills the entire display with a solid color.
-
-These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics drawables will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
-
-To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
-
-## For crates that handle images
-
-Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits to integrate with embedded-graphics.
-
-The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit color and draws to targets that support the same.
-
-```rust
-use embedded_graphics::{
-    draw_target::{DrawTarget, DrawTargetExt},
-    geometry::{OriginDimensions, Size},
-    image::ImageDrawable,
-    pixelcolor::{PixelColor, Rgb888},
-    primitives::Rectangle,
-};
-
-struct MyRgb888Image {
-  // ...
-}
-
-impl ImageDrawable for MyRgb888Image {
-    type Color = Rgb888;
-
-    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
-    where
-        D: DrawTarget<Color = Rgb888>,
-    {
-        // Draw the image to the target, e.g. by calling `target.fill_contiguous` or by using another `Drawable`.
-    }
-
-    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        // Delegate to the draw() method using a reduced draw target
-        self.draw(&mut target.translated(-area.top_left).clipped(area))
-    }
-}
-
-impl OriginDimensions for MyRgb888Image {
-    fn size(&self) -> Size {
-        // Return image width and height in pixels
-    }
-}
-```
-
-## For text rendering crates
-
-### Monospace fonts
-
-Monospaced fonts should now be built using the `MonoFontBuilder` struct and assigned to a `const`. The following example shows a migration of a font with 5x9 pixel characters using the Latin-1 encoding.
-
-```diff
-// The font bitmap has 32 character glyphs per row.
-const CHARS_PER_ROW: u32 = 32;
-
-// Each character is 5x9 px.
-const GLYPH_SIZE: Size = Size::new(5, 9);
-
-- // Map a given character to an index in the glyph bitmap
-- fn char_offset_impl(c: char) -> u32 {
--     let fallback = '?' as u32 - ' ' as u32;
--     if c < ' ' {
--         return fallback;
--     }
--     if c <= '~' {
--         return c as u32 - ' ' as u32;
--     }
--     if c < '\u{00A0}' || c > 'ÿ' {
--         return fallback;
--     }
--     c as u32 - ' ' as u32 - 33
-- }
--
-- #[derive(Debug, Copy, Clone)]
-- pub struct ExampleFont {}
-- impl Font for ExampleFont {
--     const FONT_IMAGE: &'static [u8] = include_bytes!("../data/ExampleFont.raw");
--     const CHARACTER_SIZE: Size = Size::new(5, 9);
--     const FONT_IMAGE_WIDTH: u32 = Self::CHARACTER_SIZE.width * CHARS_PER_ROW;
--
--     fn char_offset(c: char) -> u32 {
--         char_offset_impl(c)
--     }
-- }
-+ use embedded_graphics::{
-+     geometry::Size,
-+     image::ImageRaw,
-+     mono_font::{GlyphIndices, GlyphRange, MonoFont, MonoFontBuilder},
-+ };
-+
-+ pub const EXAMPLE_FONT: MonoFont = MonoFontBuilder::new()
-+     .image(ImageRaw::new_binary(
-+         include_bytes!("../data/ExampleFont.raw"),
-+         CHARS_PER_ROW * GLYPH_SIZE.width,
-+     ))
-+     .character_size(GLYPH_SIZE)
-+     .glyph_indices(GlyphIndices::new(
-+         &[
-+             // Base ASCII range
-+             GlyphRange::new(' ', '~', 0),
-+             // Latin1 range with offset 96 character positions into the glyph bitmap
-+             GlyphRange::new('\u{00A0}', 'ÿ', 96),
-+         ],
-+         // Fallback: show unrecognised characters as a '?'
-+         '?' as u32 - ' ' as u32,
-+     ))
-+     .build();
-```
-
-### More complex fonts
-
-Crates that handle text rendering more complex than simple monospace fonts should now implement the
-`CharacterStyle` and `TextRenderer` traits. These are used for both text styling and layout.
-
-Please refer to their respective docs for implementation details.
-
-An implementation of more complex font rendering using BDF font files is available in the [eg-bdf](https://github.com/embedded-graphics/embedded-bdf) crate, which may be useful as a reference for other implementations.
+- [For display driver authors](#for-display-driver-authors)
+  - [Method changes](#method-changes)
+- [For crates that handle images](#for-crates-that-handle-images)
+- [For text rendering crates](#for-text-rendering-crates)
+  - [Monospace fonts](#monospace-fonts)
+  - [More complex fonts](#more-complex-fonts)
 
 ## General
 
@@ -499,3 +298,204 @@ let style = TextStyle::with_baseline(Baseline::Top);
 
 let style = TextStyleBuilder::new().baseline(Baseline::Top).build();
 ```
+
+## For display driver authors
+
+Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
+
+`DrawTarget` now uses an associated type for the target color instead of a type parameter. As this can be a limitation versus older code which implements `DrawTarget` for e.g. `C: Into<Rgb565>`, the `color_converted` method can be used to create a draw target which converts the drawable's color format to the display's color format.
+
+The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to replace the removed `size` method. By using the `Dimensions` trait the drawable area of a draw targets can be positioned freely and is no longer limited to start in the origin at `(0, 0)`. But for display drivers it is recommended that the drawable area does start at `(0, 0)`. To simplify implementation and provide a type level guarantee that the drawable area starts at the origin ,`OriginDimensions` can be implemented instead of `Dimensions`. The `Dimensions` trait is automatically implemented for all types that implement `OriginDimensions`.
+
+For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
+
+```diff
+- use crate::{
+-     drawable::Pixel,
+-     geometry::Size,
+-     pixelcolor::{PixelColor, BinaryColor},
+-     DrawTarget,
+- };
+-
+- impl DrawTarget<BinaryColor> for Ssd1306 {
+-     type Error = core::convert::Infallible;
+-
+-     fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>) -> Result<(), Self::Error> {
+-         // ...
+-
+-         Ok(())
+-     }
+-
+-     fn size(&self) -> Size {
+-         // ...
+-     }
+- }
++ use embedded_graphics_core::{
++     draw_target::DrawTarget,
++     geometry::{OriginDimensions, Size},
++     pixelcolor::{PixelColor, BinaryColor},
++     Pixel,
++ };
++
++ DrawTarget for Ssd1306 {
++     type Color = BinaryColor;
++     type Error = core::convert::Infallible;
++
++     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
++     where
++         I: IntoIterator<Item = Pixel<Self::Color>>,
++     {
++         // ...
++
++         Ok(())
++     }
++ }
++
++ impl OriginDimensions for Ssd1306 {
++     fn size(&self) -> Size {
++         // ...
++     }
++ }
+```
+
+### Method changes
+
+All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. These methods were hard to implement correctly and consistently between different drivers. The new lower level draw methods are easier to implement and still improve performance over pixel by pixel drawing.
+
+- `draw_iter`
+
+  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
+
+- `fill_contiguous`
+
+  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
+
+- `fill_solid`
+
+  Fills a given area with a solid color.
+
+- `clear`
+
+  Fills the entire display with a solid color.
+
+These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics drawables will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
+
+To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
+
+## For crates that handle images
+
+Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits to integrate with embedded-graphics.
+
+The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit color and draws to targets that support the same.
+
+```rust
+use embedded_graphics::{
+    draw_target::{DrawTarget, DrawTargetExt},
+    geometry::{OriginDimensions, Size},
+    image::ImageDrawable,
+    pixelcolor::{PixelColor, Rgb888},
+    primitives::Rectangle,
+};
+
+struct MyRgb888Image {
+  // ...
+}
+
+impl ImageDrawable for MyRgb888Image {
+    type Color = Rgb888;
+
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Rgb888>,
+    {
+        // Draw the image to the target, e.g. by calling `target.fill_contiguous` or by using another `Drawable`.
+    }
+
+    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        // Delegate to the draw() method using a reduced draw target
+        self.draw(&mut target.translated(-area.top_left).clipped(area))
+    }
+}
+
+impl OriginDimensions for MyRgb888Image {
+    fn size(&self) -> Size {
+        // Return image width and height in pixels
+    }
+}
+```
+
+## For text rendering crates
+
+### Monospace fonts
+
+Monospaced fonts should now be built using the `MonoFontBuilder` struct and assigned to a `const`. The following example shows a migration of a font with 5x9 pixel characters using the Latin-1 encoding.
+
+```diff
+// The font bitmap has 32 character glyphs per row.
+const CHARS_PER_ROW: u32 = 32;
+
+// Each character is 5x9 px.
+const GLYPH_SIZE: Size = Size::new(5, 9);
+
+- // Map a given character to an index in the glyph bitmap
+- fn char_offset_impl(c: char) -> u32 {
+-     let fallback = '?' as u32 - ' ' as u32;
+-     if c < ' ' {
+-         return fallback;
+-     }
+-     if c <= '~' {
+-         return c as u32 - ' ' as u32;
+-     }
+-     if c < '\u{00A0}' || c > 'ÿ' {
+-         return fallback;
+-     }
+-     c as u32 - ' ' as u32 - 33
+- }
+-
+- #[derive(Debug, Copy, Clone)]
+- pub struct ExampleFont {}
+- impl Font for ExampleFont {
+-     const FONT_IMAGE: &'static [u8] = include_bytes!("../data/ExampleFont.raw");
+-     const CHARACTER_SIZE: Size = Size::new(5, 9);
+-     const FONT_IMAGE_WIDTH: u32 = Self::CHARACTER_SIZE.width * CHARS_PER_ROW;
+-
+-     fn char_offset(c: char) -> u32 {
+-         char_offset_impl(c)
+-     }
+- }
++ use embedded_graphics::{
++     geometry::Size,
++     image::ImageRaw,
++     mono_font::{GlyphIndices, GlyphRange, MonoFont, MonoFontBuilder},
++ };
++
++ pub const EXAMPLE_FONT: MonoFont = MonoFontBuilder::new()
++     .image(ImageRaw::new_binary(
++         include_bytes!("../data/ExampleFont.raw"),
++         CHARS_PER_ROW * GLYPH_SIZE.width,
++     ))
++     .character_size(GLYPH_SIZE)
++     .glyph_indices(GlyphIndices::new(
++         &[
++             // Base ASCII range
++             GlyphRange::new(' ', '~', 0),
++             // Latin1 range with offset 96 character positions into the glyph bitmap
++             GlyphRange::new('\u{00A0}', 'ÿ', 96),
++         ],
++         // Fallback: show unrecognised characters as a '?'
++         '?' as u32 - ' ' as u32,
++     ))
++     .build();
+```
+
+### More complex fonts
+
+Crates that handle text rendering more complex than simple monospace fonts should now implement the
+`CharacterStyle` and `TextRenderer` traits. These are used for both text styling and layout.
+
+Please refer to their respective docs for implementation details.
+
+An implementation of more complex font rendering using BDF font files is available in the [eg-bdf](https://github.com/embedded-graphics/embedded-bdf) crate, which may be useful as a reference for other implementations.
