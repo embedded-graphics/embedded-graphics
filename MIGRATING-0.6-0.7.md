@@ -29,9 +29,9 @@
 
 Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
 
-`DrawTarget` now uses an associated type for the target color instead of a type parameter.
+`DrawTarget` now uses an associated type for the target color instead of a type parameter. As this can be a limitation versus older code which implements `DrawTarget` for e.g. `C: Into<Rgb565>`, the `color_converted` method can be used to create a draw target which converts the drawable's color format to the display's color format.
 
-`DrawTarget`s have an additional bound on the `Dimensions` trait, however it is recommended that `OriginDimensions` is implemented instead, as the target display's origin usually starts at `(0, 0)`. `Dimensions` is automatically implemented for `OriginDimensions`.
+The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to replace the removed `size` method. By using the `Dimensions` trait the drawable area of a draw targets can be positioned freely and is no longer limited to start in the origin at `(0, 0)`. But for display drivers it is recommended that the drawable area does start at `(0, 0)`. To simplify implementation and provide a type level guarantee that the drawable area starts at the origin ,`OriginDimensions` can be implemented instead of `Dimensions`. The `Dimensions` trait is automatically implemented for all types that implement `OriginDimensions`.
 
 For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
 
@@ -86,7 +86,7 @@ For example, the `SSD1306` driver using the on/off `BinaryColor` would change as
 
 ### Method changes
 
-All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. The new methods provided by `DrawTarget` are as follows:
+All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. These methods were hard to implement correctly and consistently between different drivers. The new lower level draw methods are easier to implement and still improve performance over pixel by pixel drawing.
 
 - `draw_iter`
 
@@ -104,7 +104,7 @@ All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`
 
   Fills the entire display with a solid color.
 
-These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics primitives will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
+These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics drawables will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
 
 To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
 
@@ -134,7 +134,7 @@ impl ImageDrawable for MyRgb888Image {
     where
         D: DrawTarget<Color = Rgb888>,
     {
-        // ... send contiguous pixels read from the image to the target ...
+        // Draw the image to the target, e.g. by calling `target.fill_contiguous` or by using another `Drawable`.
     }
 
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
@@ -406,7 +406,9 @@ let width = display.bounding_box().size.width;
 let height = display.bounding_box().size.height;
 ```
 
-The `PartialEq` implementation for `MockDisplay` is now removed. To check for equality against another `MockDisplay`, the `assert_eq`, `assert_eq_with_message` or `eq` methods can be used instead.
+An advanced visual representation of failing `MockDisplay` assertions can be enabled by setting the `EG_FANCY_PANIC` environment variable to `1`, for example, by calling `EG_FANCY_PANIC=1 cargo test`.
+
+To make this output format possible assertions need to use the new `MockDisplay::assert_eq` and `assert_eq_with_message` methods instead of the `assert_eq!` macro. To ensure that the new methods are used the `PartialEq` implementation for `MockDisplay` was removed. In case that the equality of two mock `MockDisplay` needs to be tested outside of an assertion the `MockDisplay::eq` method can be used.
 
 ```rust
 #[test]
@@ -423,9 +425,9 @@ fn check_equality() {
 }
 ```
 
-The `assert_pattern` and `assert_pattern_with_message` methods are also useful for checking display state in tests.
+The `assert_pattern` and `assert_pattern_with_message` can be used to check the display state against a pattern without using `MockDisplay::from_pattern` and a separate assertion.
 
-```rust
+```diff
 - #[test]
 - fn tiny_circle_filled() {
 -     let mut display = MockDisplay::new();
@@ -459,8 +461,6 @@ The `assert_pattern` and `assert_pattern_with_message` methods are also useful f
 +     ]);
 + }
 ```
-
-To see a visual representation of failing equality tests, set `EG_FANCY_PANIC=1` when running the tests.
 
 ## Style module
 

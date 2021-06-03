@@ -71,6 +71,7 @@ Please search for `DrawTargetExt` at <https://docs.rs/embedded-graphics> for usa
 ### Fonts and text
 
 TODO(rfuest): Improve this section before release:
+TODO(rfuest): Replace `ascii` and `latin1` with the new subsets
 
 Support for external font renderers has been added. TODO: Expand
 
