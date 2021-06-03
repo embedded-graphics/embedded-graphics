@@ -442,7 +442,7 @@ impl OriginDimensions for MyRgb888Image {
 
 ### Monospace fonts
 
-Monospaced fonts should now be built using the `MonoFontBuilder` struct and assigned to a `const`. The following example shows a migration of a font with 5x9 pixel characters using the Latin-1 encoding.
+Monospaced fonts should now be built by creatign a `MonoFont` struct and assigning it to a `const`. The following example shows a migration of a font with 5x9 pixel characters using the Latin-1 encoding.
 
 ```diff
 // The font bitmap has 32 character glyphs per row.
@@ -480,26 +480,60 @@ const GLYPH_SIZE: Size = Size::new(5, 9);
 + use embedded_graphics::{
 +     geometry::Size,
 +     image::ImageRaw,
-+     mono_font::{GlyphIndices, GlyphRange, MonoFont, MonoFontBuilder},
++     mono_font::{mapping::StrGlyphMapping, DecorationDimensions, MonoFont},
 + };
 +
-+ pub const EXAMPLE_FONT: MonoFont = MonoFontBuilder::new()
-+     .image(ImageRaw::new_binary(
-+         include_bytes!("../data/ExampleFont.raw"),
-+         CHARS_PER_ROW * GLYPH_SIZE.width,
-+     ))
-+     .character_size(GLYPH_SIZE)
-+     .glyph_indices(GlyphIndices::new(
-+         &[
-+             // Base ASCII range
-+             GlyphRange::new(' ', '~', 0),
-+             // Latin1 range with offset 96 character positions into the glyph bitmap
-+             GlyphRange::new('\u{00A0}', 'ÿ', 96),
-+         ],
-+         // Fallback: show unrecognised characters as a '?'
-+         '?' as u32 - ' ' as u32,
-+     ))
-+     .build();
++ pub const EXAMPLE_FONT: MonoFont = MonoFont {
++     image: ImageRaw::new_binary(
++         // In this example, this equals 32 characters per row, each character 5px across.
++         160,
++     ),
++     // A glyph mapping with base ASCII range and Latin1 range.
++     glyph_mapping: &StrGlyphMapping::new("\0 ~\0\u{00A0}ÿ", '?' as usize - ' ' as usize),
++     character_size: Size::new(5, 9),
++     character_spacing: 0,
++     baseline: 7,
++     underline: DecorationDimensions::new(8, 1),
++     strikethrough: DecorationDimensions::new(4, 1),
++ };
+```
+
+If a more complex or dynamic glyph mapping is required, a function can be provided instead:
+
+```rust
+use embedded_graphics::{
+    geometry::Size,
+    image::ImageRaw,
+    mono_font::{mapping::StrGlyphMapping, DecorationDimensions, MonoFont},
+};
+
+pub const EXAMPLE_FONT: MonoFont = MonoFont {
+    image: ImageRaw::new_binary(
+        include_bytes!("../data/ExampleFont.raw"),
+        // In this example, this equals 32 characters per row, each character 5px across.
+        160,
+    ),
+    glyph_mapping: &char_offset,
+    character_size: Size::new(5, 9),
+    character_spacing: 0,
+    baseline: 7,
+    underline: DecorationDimensions::new(8, 1),
+    strikethrough: DecorationDimensions::new(4, 1),
+};
+
+fn char_offset(c: char) -> usize {
+    let fallback = '?' as usize - ' ' as usize;
+    if c < ' ' {
+        return fallback;
+    }
+    if c <= '~' {
+        return c as usize - ' ' as usize;
+    }
+    if c < '\u{00A0}' || c > 'ÿ' {
+        return fallback;
+    }
+    c as usize - ' ' as usize - 33
+}
 ```
 
 ### More complex fonts
