@@ -6,6 +6,7 @@
 
 - [Macros are removed](#macros-are-removed)
 - [Primitives](#primitives)
+  - [Styling](#styling)
   - [Circle](#circle)
   - [Rectangle](#rectangle)
   - [Triangle](#triangle)
@@ -19,6 +20,7 @@
 - [The `embedded-graphics-core` crate](#the-embedded-graphics-core-crate)
 - [For display driver authors](#for-display-driver-authors)
   - [Method changes](#method-changes)
+  - [Example migration](#example-migration)
 - [For crates that handle images](#for-crates-that-handle-images)
 - [For text rendering crates](#for-text-rendering-crates)
   - [Monospace fonts](#monospace-fonts)
@@ -46,6 +48,8 @@ For example, a styled rectangle is now built like this:
 ```
 
 ## Primitives
+
+### Styling
 
 Previously, drawing a filled shape with a transparent stroke of non-zero width would bleed the fill under the stroke. This is changed in 0.7 to honor the stroke width and alignment, even if it is the stroke color is `None`, allowing for filled shapes with transparent borders.
 
@@ -302,15 +306,11 @@ The `assert_pattern` and `assert_pattern_with_message` can be used to check the 
 
 ## The `embedded-graphics-core` crate
 
-Some of the more stable items in `embedded-graphics` have been moved to the new [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate. This crate is intended to be used by display drivers, text renderers, image libraries and other crates that extend the functionality of `embedded-graphics`.
+Types that are required by other crates that extend the functionality of `embedded-graphics` have been moved into the new [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate. The core crate is intended to provide a more stable interface for display drivers and image libraries to make them work across multiple major releases of `embedded-graphics`.
 
-Application authors should continue to use the `embedded-graphics` crate. All items from `embedded-graphics-core` are reexported in `embedded-graphics`.
-
-`embedded-graphics-core` will change over time, however it will change at a much slower rate than `embedded-graphics` itself, and will likely release fewer breaking changes. This will provide more stability and compatability for the wider embedded-graphics ecosystem, whilst allowing non-core features of embedded-graphics to evolve at a faster pace. The same version of embedded-graphics-core may be used for multiple major versions of embedded-graphics.
+It is recommended that `embedded-graphics` is used for applications and `embedded-graphics-core` be used for crates that extend embedded graphics where possible. Note that some features required by e.g. image crates are currently only present in `embedded-graphics`, so using `embedded-graphics-core` is not always possible.
 
 ## For display driver authors
-
-Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](#the-embedded-graphics-core-crate) crate to integrate with embedded-graphics.
 
 `DrawTarget` now uses an associated type for the target color instead of a type parameter. As this can be a limitation versus older code which implements `DrawTarget` for e.g. `C: Into<Rgb565>`, the `color_converted` method can be used to create a draw target which converts the drawable's color format to the display's color format.
 
@@ -318,7 +318,33 @@ The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to 
 
 Note that `Dimensions` and `OriginDimensions` should be imported from `embedded-graphics-core`, not `embedded-graphics`. See the [relevant section](#the-embedded-graphics-core-crate) for more details.
 
-For example, the `SSD1306` driver using the on/off `BinaryColor` would change as follows:
+### Method changes
+
+All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. These methods were hard to implement correctly and consistently between different drivers. The new lower level draw methods are easier to implement and still improve performance over pixel by pixel drawing.
+
+- `draw_iter`
+
+  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
+
+- `fill_contiguous`
+
+  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
+
+- `fill_solid`
+
+  Fills a given area with a solid color.
+
+- `clear`
+
+  Fills the entire display with a solid color.
+
+These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics drawables will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
+
+To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
+
+### Example migration
+
+The following example updates the `SSD1306` driver using the `BinaryColor` color type.
 
 ```diff
 - use crate::{
@@ -369,35 +395,11 @@ For example, the `SSD1306` driver using the on/off `BinaryColor` would change as
 + }
 ```
 
-### Method changes
-
-All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. These methods were hard to implement correctly and consistently between different drivers. The new lower level draw methods are easier to implement and still improve performance over pixel by pixel drawing.
-
-- `draw_iter`
-
-  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
-
-- `fill_contiguous`
-
-  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
-
-- `fill_solid`
-
-  Fills a given area with a solid color.
-
-- `clear`
-
-  Fills the entire display with a solid color.
-
-These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics drawables will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
-
-To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
-
 ## For crates that handle images
 
 Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits from [`embedded-graphics-core`](#the-embedded-graphics-core-crate) to integrate with embedded-graphics.
 
-The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit color and draws to targets that support the same.
+The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit RGB color.
 
 ```rust
 use embedded_graphics::{
@@ -442,28 +444,25 @@ impl OriginDimensions for MyRgb888Image {
 
 ### Monospace fonts
 
-Monospaced fonts should now be built by creatign a `MonoFont` struct and assigning it to a `const`. The following example shows a migration of a font with 5x9 pixel characters using the Latin-1 encoding.
+Monospaced fonts no longer use a separate type per font and are now defined by using a `MonoFont` object. In most applications fonts will be declared as a compile time constant, but fonts can now also be loaded or generated at runtime.
 
 ```diff
-// The font bitmap has 32 character glyphs per row.
-const CHARS_PER_ROW: u32 = 32;
-
-// Each character is 5x9 px.
-const GLYPH_SIZE: Size = Size::new(5, 9);
-
+- // The font bitmap has 32 character glyphs per row.
+- const CHARS_PER_ROW: u32 = 32;
+-
 - // Map a given character to an index in the glyph bitmap
 - fn char_offset_impl(c: char) -> u32 {
 -     let fallback = '?' as u32 - ' ' as u32;
 -     if c < ' ' {
 -         return fallback;
 -     }
--     if c <= '~' {
+-     if c <= '\u{007f}' {
 -         return c as u32 - ' ' as u32;
 -     }
 -     if c < '\u{00A0}' || c > 'ÿ' {
 -         return fallback;
 -     }
--     c as u32 - ' ' as u32 - 33
+-     c as u32 - ' ' as u32 - 32
 - }
 -
 - #[derive(Debug, Copy, Clone)]
@@ -480,16 +479,15 @@ const GLYPH_SIZE: Size = Size::new(5, 9);
 + use embedded_graphics::{
 +     geometry::Size,
 +     image::ImageRaw,
-+     mono_font::{mapping::StrGlyphMapping, DecorationDimensions, MonoFont},
++     mono_font::{mapping::ISO_8859_1, DecorationDimensions, MonoFont},
 + };
 +
 + pub const EXAMPLE_FONT: MonoFont = MonoFont {
 +     image: ImageRaw::new_binary(
-+         // In this example, this equals 32 characters per row, each character 5px across.
-+         160,
++         // This example uses 32 characters per row, each character 5px across.
++         32 * 5,
 +     ),
-+     // A glyph mapping with base ASCII range and Latin1 range.
-+     glyph_mapping: &StrGlyphMapping::new("\0 ~\0\u{00A0}ÿ", '?' as usize - ' ' as usize),
++     glyph_mapping: &ISO_8859_1,
 +     character_size: Size::new(5, 9),
 +     character_spacing: 0,
 +     baseline: 7,
@@ -498,7 +496,7 @@ const GLYPH_SIZE: Size = Size::new(5, 9);
 + };
 ```
 
-If a more complex or dynamic glyph mapping is required, a function can be provided instead:
+Custom mappings between characters and glyph positions can be used by using `StrGlyphMapping`, using a function or implementing the `GlyphMapping` trait:
 
 ```rust
 use embedded_graphics::{
@@ -509,30 +507,26 @@ use embedded_graphics::{
 
 pub const EXAMPLE_FONT: MonoFont = MonoFont {
     image: ImageRaw::new_binary(
-        include_bytes!("../data/ExampleFont.raw"),
-        // In this example, this equals 32 characters per row, each character 5px across.
-        160,
+        include_bytes!("../data/digits.raw"),
+        // In this example, this equals 10 characters per row, each character 15px across.
+        10 * 15,
     ),
-    glyph_mapping: &char_offset,
-    character_size: Size::new(5, 9),
-    character_spacing: 0,
-    baseline: 7,
-    underline: DecorationDimensions::new(8, 1),
-    strikethrough: DecorationDimensions::new(4, 1),
+    glyph_mapping: &StrGlyphMapping::new("\009", 0),
+    // or use a function:
+    // glyph_mapping: &digit_mapping,
+    character_size: Size::new(15, 30),
+    character_spacing: 5,
+    baseline: 29,
+    underline: DecorationDimensions::default_underline(30),
+    strikethrough: DecorationDimensions::default_strikethrough(30),
 };
 
-fn char_offset(c: char) -> usize {
-    let fallback = '?' as usize - ' ' as usize;
-    if c < ' ' {
-        return fallback;
+fn digit_mapping(c: char) -> usize {
+    if c >= '0' || c <= '9' {
+        c as usize - '0' as usize
+    } else {
+        0
     }
-    if c <= '~' {
-        return c as usize - ' ' as usize;
-    }
-    if c < '\u{00A0}' || c > 'ÿ' {
-        return fallback;
-    }
-    c as usize - ' ' as usize - 33
 }
 ```
 
