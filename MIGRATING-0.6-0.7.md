@@ -4,18 +4,18 @@
 
 ## Table of contents
 
-- [General](#general)
-  - [`Drawable`](#drawable)
-  - [`IntoIterator` changes](#intoiterator-changes)
 - [Macros are removed](#macros-are-removed)
 - [Primitives](#primitives)
   - [Circle](#circle)
   - [Rectangle](#rectangle)
   - [Triangle](#triangle)
 - [Geometry](#geometry)
-- [Mock display](#mock-display)
 - [Style module](#style-module)
 - [Text and fonts](#text-and-fonts)
+- [General](#general)
+  - [`Drawable`](#drawable)
+  - [`IntoIterator` changes](#intoiterator-changes)
+- [Mock display](#mock-display)
 - [The `embedded-graphics-core` crate](#the-embedded-graphics-core-crate)
 - [For display driver authors](#for-display-driver-authors)
   - [Method changes](#method-changes)
@@ -23,63 +23,6 @@
 - [For text rendering crates](#for-text-rendering-crates)
   - [Monospace fonts](#monospace-fonts)
   - [More complex fonts](#more-complex-fonts)
-
-## General
-
-### `Drawable`
-
-The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
-
-An associated type, `Output`, has also been added which can be used to return values
-from drawing operations. The unit type `()` can be used if the `draw` method doesn't need to return
-anything, e.g. `type Output = ();`
-
-```diff
-- impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
-- where
--     C: PixelColor + From<BinaryColor>,
-- {
--     fn draw<D>(self, display: &mut D) -> Result<(), D::Error> where D: DrawTarget<C> {
--         // ...
--     }
-- }
-+ impl<C> Drawable for Button<'_, C>
-+ where
-+     C: PixelColor + From<BinaryColor>,
-+ {
-+     type Color = C;
-+
-+     type Output = ();
-+
-+     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
-+     where
-+         D: DrawTarget<Color = C>,
-+     {
-+         Rectangle::new(self.top_left, self.size)
-+             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
-+             .draw(display)?;
-+         Text::new(self.text, Point::new(6, 6))
-+             .into_styled(TextStyle::new(Font6x8, self.fg_color))
-+             .draw(display)
-+     }
-+ }
-```
-
-### `IntoIterator` changes
-
-Styled primitives no longer implement `IntoIterator` to create a pixel iterator. Use the new `Styled::pixels` method instead.
-
-For example, chaining two pixel iterators together now requires explicit calls to `pixels()`:
-
-```diff
-+ use embedded_graphics::prelude::*;
-
-let background = Rectangle::new(...);
-let text = Text::new(...);
-
-- background.into_iter().chain(&text)
-+ background.pixels().chain(text.pixels())
-```
 
 ## Macros are removed
 
@@ -186,6 +129,103 @@ It is no longer possible to create a triangle from an array of `Point`s. Instead
 
 The three methods in the `Dimensions` trait were replaced by a single `bounding_box` method. This should return a `Rectangle` which encompasses the entire shape.
 
+## Style module
+
+The `style` module has been removed. The items in it have been moved:
+
+- `PrimitiveStyle`, `PrimitiveStyleBuilder` and `Styled` are now available in the `embedded_graphics::primitives` module.
+- `TextStyle` and `TextStyleBuilder` were renamed are now available under `embedded_graphics::mono_font::{MonoTextStyle, MonoTextStyleBuilder}`.
+
+  Note that usage with `Text` has changed. See [the text changes section](#Text-rendering) for more.
+
+## Text and fonts
+
+The collection of builtin fonts are now sourced from public domain BDF fonts in the XOrg project.
+Due to this, they have slightly different dimensions and glyphs and so have changed names. Some
+sizes are not the same in the new set, but a rough mapping is as follows:
+
+| Old font                                                                                                                                                                             | Visually closest new font                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fonts::Font6x6`<br>![Font6x6 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x6.png)       | `mono_font::{ascii, latin1}::FONT_4X6`<br>![FONT_4X6 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/4x6.png)                                                                  |
+| `fonts::Font6x8`<br>![Font6x8 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x8.png)       | `mono_font::{ascii, latin1}::FONT_6X10`<br>![FONT_6X10 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x10.png)                                                               |
+| `fonts::Font6x12`<br>![Font6x12 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x12.png)    | `mono_font::{ascii, latin1}::FONT_6X13`<br>![FONT_6X13 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x13.png)                                                               |
+| `fonts::Font8x16`<br>![Font8x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font8x16.png)    | `mono_font::{ascii, latin1}::FONT_9X15_BOLD`<br>![FONT_9X15_BOLD glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/9x15B.png)                                                    |
+| `fonts::Font12x16`<br>![Font12x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font12x16.png) | `mono_font::{ascii, latin1}::FONT_10X20`<br>![FONT_10X20 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/10x20.png)                                                            |
+| `fonts::Font24x32`                                                                                                                                                                   | The largest available new font is `FONT_10X20`, which is significantly smaller than the old `Font24x32`. Larger fonts are available in [external crates](https://github.com/embedded-graphics/embedded-graphics#additional-functions-provided-by-external-crates). |
+
+Note that the table above shows the new fonts' `ascii` variants only. Some new fonts also use taller bitmaps for the same cap height.
+
+To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
+
+The default baseline for fonts is now the font's baseline instead of the top of the glyph bounding box. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
+
+```rust
+use embedded_graphics::text::{Baseline, TextStyle, TextStyleBuilder};
+
+let style = TextStyle::with_baseline(Baseline::Top);
+
+// OR
+
+let style = TextStyleBuilder::new().baseline(Baseline::Top).build();
+```
+
+## General
+
+### `Drawable`
+
+The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
+
+An associated type, `Output`, has also been added which can be used to return values
+from drawing operations. The unit type `()` can be used if the `draw` method doesn't need to return
+anything, e.g. `type Output = ();`
+
+```diff
+- impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
+- where
+-     C: PixelColor + From<BinaryColor>,
+- {
+-     fn draw<D>(self, display: &mut D) -> Result<(), D::Error> where D: DrawTarget<C> {
+-         // ...
+-     }
+- }
++ impl<C> Drawable for Button<'_, C>
++ where
++     C: PixelColor + From<BinaryColor>,
++ {
++     type Color = C;
++
++     type Output = ();
++
++     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
++     where
++         D: DrawTarget<Color = C>,
++     {
++         Rectangle::new(self.top_left, self.size)
++             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
++             .draw(display)?;
++         Text::new(self.text, Point::new(6, 6))
++             .into_styled(TextStyle::new(Font6x8, self.fg_color))
++             .draw(display)
++     }
++ }
+```
+
+### `IntoIterator` changes
+
+Styled primitives no longer implement `IntoIterator` to create a pixel iterator. Use the new `Styled::pixels` method instead.
+
+For example, chaining two pixel iterators together now requires explicit calls to `pixels()`:
+
+```diff
++ use embedded_graphics::prelude::*;
+
+let background = Rectangle::new(...);
+let text = Text::new(...);
+
+- background.into_iter().chain(&text)
++ background.pixels().chain(text.pixels())
+```
+
 ## Mock display
 
 The `MockDisplay`, used often for unit testing, now checks for pixel overdraw and out of bounds drawing by default. These additional checks can be disabled by using the `set_allow_overdraw` and `set_allow_out_of_bounds_drawing` methods, if required.
@@ -258,46 +298,6 @@ The `assert_pattern` and `assert_pattern_with_message` can be used to check the 
 +         " # ",
 +     ]);
 + }
-```
-
-## Style module
-
-The `style` module has been removed. The items in it have been moved:
-
-- `PrimitiveStyle`, `PrimitiveStyleBuilder` and `Styled` are now available in the `embedded_graphics::primitives` module.
-- `TextStyle` and `TextStyleBuilder` were renamed are now available under `embedded_graphics::mono_font::{MonoTextStyle, MonoTextStyleBuilder}`.
-
-  Note that usage with `Text` has changed. See [the text changes section](#Text-rendering) for more.
-
-## Text and fonts
-
-The collection of builtin fonts are now sourced from public domain BDF fonts in the XOrg project.
-Due to this, they have slightly different dimensions and glyphs and so have changed names. Some
-sizes are not the same in the new set, but a rough mapping is as follows:
-
-| Old font                                                                                                                                                                             | Visually closest new font                                                                                                                                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `fonts::Font6x6`<br>![Font6x6 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x6.png)       | `mono_font::{ascii, latin1}::FONT_4X6`<br>![FONT_4X6 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/4x6.png)                                                                  |
-| `fonts::Font6x8`<br>![Font6x8 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x8.png)       | `mono_font::{ascii, latin1}::FONT_6X10`<br>![FONT_6X10 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x10.png)                                                               |
-| `fonts::Font6x12`<br>![Font6x12 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x12.png)    | `mono_font::{ascii, latin1}::FONT_6X13`<br>![FONT_6X13 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x13.png)                                                               |
-| `fonts::Font8x16`<br>![Font8x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font8x16.png)    | `mono_font::{ascii, latin1}::FONT_9X15_BOLD`<br>![FONT_9X15_BOLD glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/9x15B.png)                                                    |
-| `fonts::Font12x16`<br>![Font12x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font12x16.png) | `mono_font::{ascii, latin1}::FONT_10X20`<br>![FONT_10X20 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/10x20.png)                                                            |
-| `fonts::Font24x32`                                                                                                                                                                   | The largest available new font is `FONT_10X20`, which is significantly smaller than the old `Font24x32`. Larger fonts are available in [external crates](https://github.com/embedded-graphics/embedded-graphics#additional-functions-provided-by-external-crates). |
-
-Note that the table above shows the new fonts' `ascii` variants only. Some new fonts also use taller bitmaps for the same cap height.
-
-To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
-
-The default baseline for fonts is now the font's baseline instead of the top of the glyph bounding box. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
-
-```rust
-use embedded_graphics::text::{Baseline, TextStyle, TextStyleBuilder};
-
-let style = TextStyle::with_baseline(Baseline::Top);
-
-// OR
-
-let style = TextStyleBuilder::new().baseline(Baseline::Top).build();
 ```
 
 ## The `embedded-graphics-core` crate
