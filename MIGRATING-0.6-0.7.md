@@ -21,7 +21,7 @@
 - [For display driver authors](#for-display-driver-authors)
   - [Method changes](#method-changes)
   - [Example migration](#example-migration)
-- [For crates that handle images](#for-crates-that-handle-images)
+- [Image format support crates](#image-format-support-crates)
 - [For text rendering crates](#for-text-rendering-crates)
   - [Monospace fonts](#monospace-fonts)
   - [More complex fonts](#more-complex-fonts)
@@ -395,9 +395,9 @@ The following example updates the `SSD1306` driver using the `BinaryColor` color
 + }
 ```
 
-## For crates that handle images
+## Image format support crates
 
-Crates that handle images must now implement the `ImageDrawable` and `OriginDimensions` traits from [`embedded-graphics-core`](#the-embedded-graphics-core-crate) to integrate with embedded-graphics.
+Image format support crates must now implement the `ImageDrawable` and `OriginDimensions` traits from [`embedded-graphics-core`](#the-embedded-graphics-core-crate) to integrate with embedded-graphics.
 
 The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit RGB color.
 
