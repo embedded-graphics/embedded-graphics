@@ -1,262 +1,30 @@
 # Migrating from embedded-graphics 0.6.x to 0.7.0
 
+> Please note that this migration guide may be incomplete in some sections. If any missing or incorrect information is found, please [open an issue](https://github.com/embedded-graphics/embedded-graphics/issues/new) or [join the Matrix chatroom](https://matrix.to/#/#rust-embedded-graphics:matrix.org) to bring it to our attention.
+
 ## Table of contents
 
-- [Migrating from embedded-graphics 0.6.x to 0.7.0](#migrating-from-embedded-graphics-06x-to-070)
-  - [Table of contents](#table-of-contents)
-  - [New features](#new-features)
-    - [Primitives](#primitives)
-    - [Mock display](#mock-display)
-    - [Geometry](#geometry)
-    - [Color](#color)
-    - [Sub draw targets](#sub-draw-targets)
-    - [Fonts and text](#fonts-and-text)
-  - [For display driver authors](#for-display-driver-authors)
-  - [For crates that handle images](#for-crates-that-handle-images)
-  - [For text rendering crates](#for-text-rendering-crates)
-    - [Method changes](#method-changes)
-  - [General](#general)
-    - [`Drawable`](#drawable)
-    - [`IntoIterator` changes](#intoiterator-changes)
-  - [Macros are removed](#macros-are-removed)
-  - [Primitives](#primitives-1)
-    - [Styling](#styling)
-    - [Circle](#circle)
-    - [Rectangle](#rectangle)
-    - [Triangle](#triangle)
-  - [Geometry](#geometry-1)
-  - [Mock display](#mock-display-1)
-  - [Style module](#style-module)
-  - [Text and fonts](#text-and-fonts)
-
-## New features
-
-// TODO: This entire section will be moved into a GH release text body and/or blog post. Leaving here until that release is published.
-
-### Primitives
-
-New primitives have been added:
-
-- `Arc`
-- `Sector`
-- `Polyline`
-- `Ellipse`
-- `RoundedRectangle`
-
-The `Line` and `Triangle` primitives now support stroke widths greater than 1px.
-
-Primitives now support stroke alignment using the `StrokeAlignment` enum.
-
-### Geometry
-
-Adds the `Point::x_axis`, `Point::y_axis`, `Size::x_axis` and `Size::y_axis` methods to get one axis of a point or size, with the other set to zero.
-
-```rust
-use embedded_graphics::geometry::Point;
-
-let point = Point::new(15, 23);
-
-assert_eq!(point.x_axis() = Point::new(15, 0));
-assert_eq!(point.y_axis() = Point::new(0, 23));
-```
-
-`Point::new_equal` and `Size::new_equal` have also been added as convenience methods to create points or sizes with equal coordinates.
-
-```diff
-use embedded_graphics::geometry::Size;
-
-- let size = Size::new(20, 20);
-+ let size = Size::new_equal(20);
-```
-
-`Point::length_squared` was added to `Point`.
-
-Other methods added to both `Point` and `Size` are:
-
-- `component_min`
-- `component_max`
-- `component_mul`
-- `component_div`
-
-The `Rectangle::intersection` method was added to get the intersecting area of two rectangles.
-
-### Color
-
-New color constants for the CSS colors were added for all RGB color types. The color constants are
-defined in the `WebColors` trait, which is included in the prelude. The names of the constants are
-prefixed by `CSS_` to avoid naming conflicts with the existing color constants. The CSS color
-`hotpink` can, for example, be accessed by using `Rgb888::CSS_HOT_PINK`.
-
-The `ToBytes` trait has been added to support conversion of colors into byte arrays.
-
-### Draw targets adapters
-
-TODO: Add a description how draw target adapters can be used.
-
-The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of a `DrawTarget` to be drawn to.
-
-`DrawTargetExt` is implemented for `DrawTarget`.
-
-Please search for `DrawTargetExt` on <https://docs.rs/embedded-graphics> for usage examples.
-
-### Fonts and text
-
-TODO(rfuest): Improve this section before release:
-
-Support for external font renderers has been added. TODO: Expand
-
-- Added support for external renderers
-- `MonoTextStyleBuilder::new(Font)` -> `MonoTextStyle::new().font(&Font)`
-- Added support for underline and strikethrough to the internal text renderer
-- `Text` no longer requires `into_styled`, because it directly contains `character_style` and `text_style`
-- Added `TextStyle` to set the horizontal alignment and baseline for `Text` drawables
-- New default baseline is alphabetic
-- New fonts with `ascii` and `latin1` glyph subsets
-- `MonoFont` is now a struct instead of a trait
-
-The list of fonts has changed to the following:
-
-All fonts are provided in `embedded_graphics::mono_font::{ascii, latin1}::[font name]`
-
-- `FONT_4X6`
-- `FONT_5X7`
-- `FONT_5X8`
-- `FONT_6X10`
-- `FONT_6X12`
-- `FONT_6X13`
-  - Also available in **bold** (`FONT_6X13_BOLD`) and _italic_ (`FONT_6X13_ITALIC`)
-- `FONT_6X9`
-- `FONT_7X13`
-  - Also available in **bold** (`FONT_7X13_BOLD`) and _italic_ (`FONT_7X13_ITALIC`)
-- `FONT_7X14`
-  - Also available in **bold** (`FONT_7X14`)
-- `FONT_8X13`
-  - Also available in **bold** (`FONT_8X13_BOLD`) and _italic_ (`FONT_8X13_ITALIC`)
-- `FONT_9X15`
-  - Also available in **bold** (`FONT_9X15_BOLD`)
-- `FONT_9X18`
-  - Also available in **bold** (`FONT_9X18_BOLD`)
-- `FONT_10X20`
-
-Two character sets are now provided for each font. The `ascii` set contains fewer characters and therefore has a reduced memory footprint, while `latin1` contains a larger number of glyphs.
-
-- `embedded_graphics::mono_font::ascii` provides the characters U+0020 to U+007F in the [Basic Latin code block](<https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)>), excluding control characters.
-- `embedded_graphics::mono_font::latin1` provides all all characters in the `ascii` variant with the addition of U+00A0 to U+00FF in the [Latin-1 Supplement code block](<https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)>) (excluding control characters).
-
-`ascii` has full coverage of the English language. For other languages, `latin1` has complete coverage for [the languages listed here](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Modern_languages_with_complete_coverage), and partial coverage for [these languages](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Languages_with_incomplete_coverage).
-
-### Mock display
-
-`MockDisplay` now supports all RGB and grayscale color types in its patterns.
-
-New methods:
-
-- `swap_xy` - copies the current display with X and Y coordinates swapped.
-- `map` - create a copy of the current display with a predicate applied to all pixels.
-- `affected_area` - gets the bounding box of all changes made to the display.
-
-## For display driver authors
-
-Driver authors should use `DrawTarget` exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-`DrawTarget` now uses an associated type for the target color instead of a type parameter.
-
-`DrawTarget`s must also implement the `Dimensions` trait.
-
-### Method changes
-
-All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. The new methods provided by `DrawTarget` are as follows:
-
-- `draw_iter`
-
-  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
-
-- `fill_contiguous`
-
-  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
-
-- `fill_solid`
-
-  Fills a given area with a solid color.
-
-- `clear`
-
-  Fill the entire display with a solid color.
-
-These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics primitives will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
-
-To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics> for more details on the usage and arguments of the above methods.
-
-## For crates that handle images
-
-Crates that handle images should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-The `ImageDrawable` trait has moved there, as well as common use items like the `Dimensions` trait and `Rectangle` primitive.
-
-TODO: Improve this section before release.
-
-## For text rendering crates
-
-Crates that handle text rendering should now implement items exported by the [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate to integrate with embedded-graphics.
-
-TODO: Improve this section before release. Text rendering isn't included in `core` anymore.
-
-## General
-
-### `Drawable`
-
-The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
-
-An associated type, `Output`, has also been added which can be used to return values
-from drawing operations. The unit type `()` can be used if the `draw` method doesn't need to return
-anything, e.g. `type Output = ();`
-
-```diff
-- impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
-- where
--     C: PixelColor + From<BinaryColor>,
-- {
--     fn draw<D>(self, display: &mut D) -> Result<(), D::Error> where D: DrawTarget<C> {
--         // ...
--     }
-- }
-+ impl<C> Drawable for Button<'_, C>
-+ where
-+     C: PixelColor + From<BinaryColor>,
-+ {
-+     type Color = C;
-+
-+     type Output = ();
-+
-+     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
-+     where
-+         D: DrawTarget<Color = C>,
-+     {
-+         Rectangle::new(self.top_left, self.size)
-+             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
-+             .draw(display)?;
-+         Text::new(self.text, Point::new(6, 6))
-+             .into_styled(TextStyle::new(Font6x8, self.fg_color))
-+             .draw(display)
-+     }
-+ }
-```
-
-### `IntoIterator` changes
-
-Styled primitives no longer implement `IntoIterator` to create a pixel iterator. Use the new `Styled::pixels` method instead.
-
-For example, chaining two pixel iterators together now requires explicit calls to `pixels()`:
-
-```diff
-+ use embedded_graphics::prelude::*;
-
-let background = Rectangle::new(...);
-let text = Text::new(...);
-
-- background.into_iter().chain(&text)
-+ background.pixels().chain(text.pixels())
-```
+- [Macros are removed](#macros-are-removed)
+- [Primitives](#primitives)
+  - [Styling](#styling)
+  - [Circle](#circle)
+  - [Rectangle](#rectangle)
+  - [Triangle](#triangle)
+- [Geometry](#geometry)
+- [Style module](#style-module)
+- [Text and fonts](#text-and-fonts)
+- [General](#general)
+  - [`Drawable`](#drawable)
+  - [`IntoIterator` changes](#intoiterator-changes)
+- [Mock display](#mock-display)
+- [The `embedded-graphics-core` crate](#the-embedded-graphics-core-crate)
+- [For display driver authors](#for-display-driver-authors)
+  - [Method changes](#method-changes)
+  - [Example migration](#example-migration)
+- [Image format support crates](#image-format-support-crates)
+- [For text rendering crates](#for-text-rendering-crates)
+  - [Monospace fonts](#monospace-fonts)
+  - [More complex fonts](#more-complex-fonts)
 
 ## Macros are removed
 
@@ -283,8 +51,9 @@ For example, a styled rectangle is now built like this:
 
 ### Styling
 
-TODO: Drawing primitives with transparent strokes will now affect the fill area.
-TODO: The behavior of the `Dimensions` impls has changed
+Previously, drawing a filled shape with a transparent stroke of non-zero width would bleed the fill under the stroke. This is changed in 0.7 to honor the stroke width and alignment, even if it is the stroke color is `None`, allowing for filled shapes with transparent borders.
+
+The stroke and fill color no longer affect the primitive's bounding box returned by `Dimensions::bounding_box`. The stroke width is now always considered even if the stroke is transparent.
 
 ### Circle
 
@@ -364,10 +133,6 @@ It is no longer possible to create a triangle from an array of `Point`s. Instead
 
 The three methods in the `Dimensions` trait were replaced by a single `bounding_box` method. This should return a `Rectangle` which encompasses the entire shape.
 
-## Mock display
-
-The `MockDisplay`, used often for unit testing, now checks for pixel overdraw and out of bounds drawing by default. These additional checks can be disabled by using the `set_allow_overdraw` and `set_allow_out_of_bounds_drawing` methods, if required.
-
 ## Style module
 
 The `style` module has been removed. The items in it have been moved:
@@ -396,4 +161,380 @@ Note that the table above shows the new fonts' `ascii` variants only. Some new f
 
 To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
 
-TODO: Discuss baseline font alignment, etc, as per GH comment.
+The default baseline for fonts is now the font's baseline instead of the top of the glyph bounding box. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
+
+```rust
+use embedded_graphics::text::{Baseline, TextStyle, TextStyleBuilder};
+
+let style = TextStyle::with_baseline(Baseline::Top);
+
+// OR
+
+let style = TextStyleBuilder::new().baseline(Baseline::Top).build();
+```
+
+## General
+
+### `Drawable`
+
+The `Drawable` trait now uses an associated type for its pixel color instead of a type parameters.
+
+An associated type, `Output`, has also been added which can be used to return values
+from drawing operations. The unit type `()` can be used if the `draw` method doesn't need to return
+anything, e.g. `type Output = ();`
+
+```diff
+- impl<'a, C: 'a> Drawable<C> for &Button<'a, C>
+- where
+-     C: PixelColor + From<BinaryColor>,
+- {
+-     fn draw<D>(self, display: &mut D) -> Result<(), D::Error> where D: DrawTarget<C> {
+-         // ...
+-     }
+- }
++ impl<C> Drawable for Button<'_, C>
++ where
++     C: PixelColor + From<BinaryColor>,
++ {
++     type Color = C;
++
++     type Output = ();
++
++     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
++     where
++         D: DrawTarget<Color = C>,
++     {
++         Rectangle::new(self.top_left, self.size)
++             .into_styled(PrimitiveStyle::with_fill(self.bg_color))
++             .draw(display)?;
++         Text::new(self.text, Point::new(6, 6))
++             .into_styled(TextStyle::new(Font6x8, self.fg_color))
++             .draw(display)
++     }
++ }
+```
+
+### `IntoIterator` changes
+
+Styled primitives no longer implement `IntoIterator` to create a pixel iterator. Use the new `Styled::pixels` method instead.
+
+For example, chaining two pixel iterators together now requires explicit calls to `pixels()`:
+
+```diff
++ use embedded_graphics::prelude::*;
+
+let background = Rectangle::new(...);
+let text = Text::new(...);
+
+- background.into_iter().chain(&text)
++ background.pixels().chain(text.pixels())
+```
+
+## Mock display
+
+The `MockDisplay`, used often for unit testing, now checks for pixel overdraw and out of bounds drawing by default. These additional checks can be disabled by using the `set_allow_overdraw` and `set_allow_out_of_bounds_drawing` methods, if required.
+
+The `width` and `height` methods have been removed. Use the `bounding_box` method provided by the `Dimensions` trait instead:
+
+```rust
+// Or: use embedded_graphics::prelude::*;
+use embedded_graphics::geometry::Dimensions;
+
+use embedded_graphics::mock_display::MockDisplay;
+
+let display = MockDisplay::new();
+
+let width = display.bounding_box().size.width;
+let height = display.bounding_box().size.height;
+```
+
+An advanced visual representation of failing `MockDisplay` assertions can be enabled by setting the `EG_FANCY_PANIC` environment variable to `1`, for example, by calling `EG_FANCY_PANIC=1 cargo test`.
+
+To make this output format possible assertions need to use the new `MockDisplay::assert_eq` and `assert_eq_with_message` methods instead of the `assert_eq!` macro. To ensure that the new methods are used the `PartialEq` implementation for `MockDisplay` was removed. In case that the equality of two mock `MockDisplay` needs to be tested outside of an assertion the `MockDisplay::eq` method can be used.
+
+```rust
+#[test]
+fn check_equality() {
+    let expected = MockDisplay::from_pattern(&[ /* ... */ ]);
+
+    let mut display = MockDisplay::new();
+
+    Circle::new(Point::new(1, 1), 1)
+        .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+        .draw(&mut display)?;
+
+    display.assert_eq(&expected);
+}
+```
+
+The `assert_pattern` and `assert_pattern_with_message` can be used to check the display state against a pattern without using `MockDisplay::from_pattern` and a separate assertion.
+
+```diff
+- #[test]
+- fn tiny_circle_filled() {
+-     let mut display = MockDisplay::new();
+-
+-     Circle::new(Point::new(1, 1), 1)
+-         .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+-         .draw(&mut display)?;
+-
+-     assert_eq!(
+-         display,
+-         MockDisplay::from_pattern(&[
+-             " # ",
+-             "###",
+-             " # "
+-         ])
+-     );
+- }
++ #[test]
++ fn tiny_circle_filled() {
++     let mut display = MockDisplay::new();
++
++     Circle::new(Point::new(0, 0), 3)
++         .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
++         .draw(&mut display)
++         .unwrap();
++
++     display.assert_pattern(&[
++         " # ",
++         "###",
++         " # ",
++     ]);
++ }
+```
+
+## The `embedded-graphics-core` crate
+
+Types that are required by other crates that extend the functionality of `embedded-graphics` have been moved into the new [`embedded-graphics-core`](https://crates.io/crates/embedded-graphics-core) crate. The core crate is intended to provide a more stable interface for display drivers and image libraries to make them work across multiple major releases of `embedded-graphics`.
+
+It is recommended that `embedded-graphics` is used for applications and `embedded-graphics-core` be used for crates that extend embedded graphics where possible. Note that some features required by e.g. image crates are currently only present in `embedded-graphics`, so using `embedded-graphics-core` is not always possible.
+
+## For display driver authors
+
+`DrawTarget` now uses an associated type for the target color instead of a type parameter. As this can be a limitation versus older code which implements `DrawTarget` for e.g. `C: Into<Rgb565>`, the `color_converted` method can be used to create a draw target which converts the drawable's color format to the display's color format.
+
+The `DrawTarget` trait now has an additional bound on the `Dimensions` trait to replace the removed `size` method. By using the `Dimensions` trait the drawable area of a draw targets can be positioned freely and is no longer limited to start in the origin at `(0, 0)`. But for display drivers it is recommended that the drawable area does start at `(0, 0)`. To simplify implementation and provide a type level guarantee that the drawable area starts at the origin, `OriginDimensions` can be implemented instead of `Dimensions`. The `Dimensions` trait is automatically implemented for all types that implement `OriginDimensions`.
+
+Note that `Dimensions` and `OriginDimensions` should be imported from `embedded-graphics-core`, not `embedded-graphics`. See the [relevant section](#the-embedded-graphics-core-crate) for more details.
+
+### Method changes
+
+All `draw_*` methods to draw specific primitives (`draw_circle`, `draw_triangle`, etc) have been removed. These methods were hard to implement correctly and consistently between different drivers. The new lower level draw methods are easier to implement and still improve performance over pixel by pixel drawing.
+
+- `draw_iter`
+
+  Draws individual pixels to the display without a defined order. This is the only required method in this trait, however will likely be the slowest pixel drawing implementation as it cannot take advantage of hardware accelerated features (e.g. filling a given area with a solid color with `fill_solid`).
+
+- `fill_contiguous`
+
+  Fills a given area with an iterator providing a contiguous stream of pixel colors. This may be used to efficiently draw an image or other non-transparent item to the display. The given pixel iterator can be assumed to be contiguous, iterating from top to bottom, each row left to right. This assumption potentially allows more efficient streaming of pixel data to a display.
+
+- `fill_solid`
+
+  Fills a given area with a solid color.
+
+- `clear`
+
+  Fills the entire display with a solid color.
+
+These methods aim to be more compatible with hardware-accelerated drawing commands. Where possible, embedded-graphics drawables will use `fill_contiguous` and `fill_solid` to improve performance, however may fall back to `draw_iter` by default.
+
+To reduce duplication, please search the `DrawTarget` documentation on <https://docs.rs/embedded-graphics-core> for more details on the usage and arguments of the above methods.
+
+### Example migration
+
+The following example updates the `SSD1306` driver using the `BinaryColor` color type.
+
+```diff
+- use crate::{
+-     drawable::Pixel,
+-     geometry::Size,
+-     pixelcolor::{PixelColor, BinaryColor},
+-     DrawTarget,
+- };
+-
+- impl DrawTarget<BinaryColor> for Ssd1306 {
+-     type Error = core::convert::Infallible;
+-
+-     fn draw_pixel(&mut self, pixel: Pixel<BinaryColor>) -> Result<(), Self::Error> {
+-         // ...
+-
+-         Ok(())
+-     }
+-
+-     fn size(&self) -> Size {
+-         // ...
+-     }
+- }
++ use embedded_graphics_core::{
++     draw_target::DrawTarget,
++     geometry::{OriginDimensions, Size},
++     pixelcolor::{PixelColor, BinaryColor},
++     Pixel,
++ };
++
++ DrawTarget for Ssd1306 {
++     type Color = BinaryColor;
++     type Error = core::convert::Infallible;
++
++     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
++     where
++         I: IntoIterator<Item = Pixel<Self::Color>>,
++     {
++         // ...
++
++         Ok(())
++     }
++ }
++
++ impl OriginDimensions for Ssd1306 {
++     fn size(&self) -> Size {
++         // ...
++     }
++ }
+```
+
+## Image format support crates
+
+Image format support crates must now implement the `ImageDrawable` and `OriginDimensions` traits from [`embedded-graphics-core`](#the-embedded-graphics-core-crate) to integrate with embedded-graphics.
+
+The below examples shows an implementation for an imaginary `MyRgb888Image` which uses 24 bit RGB color.
+
+```rust
+use embedded_graphics::{
+    draw_target::{DrawTarget, DrawTargetExt},
+    geometry::{OriginDimensions, Size},
+    image::ImageDrawable,
+    pixelcolor::{PixelColor, Rgb888},
+    primitives::Rectangle,
+};
+
+struct MyRgb888Image {
+  // ...
+}
+
+impl ImageDrawable for MyRgb888Image {
+    type Color = Rgb888;
+
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Rgb888>,
+    {
+        // Draw the image to the target, e.g. by calling `target.fill_contiguous` or by using another `Drawable`.
+    }
+
+    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        // Delegate to the draw() method using a reduced draw target
+        self.draw(&mut target.translated(-area.top_left).clipped(area))
+    }
+}
+
+impl OriginDimensions for MyRgb888Image {
+    fn size(&self) -> Size {
+        // Return image width and height in pixels
+    }
+}
+```
+
+## For text rendering crates
+
+### Monospace fonts
+
+Monospaced fonts no longer use a separate type per font and are now defined by using a `MonoFont` object. In most applications fonts will be declared as a compile time constant, but fonts can now also be loaded or generated at runtime.
+
+```diff
+- // The font bitmap has 32 character glyphs per row.
+- const CHARS_PER_ROW: u32 = 32;
+-
+- // Map a given character to an index in the glyph bitmap
+- fn char_offset_impl(c: char) -> u32 {
+-     let fallback = '?' as u32 - ' ' as u32;
+-     if c < ' ' {
+-         return fallback;
+-     }
+-     if c <= '\u{007f}' {
+-         return c as u32 - ' ' as u32;
+-     }
+-     if c < '\u{00A0}' || c > 'ÿ' {
+-         return fallback;
+-     }
+-     c as u32 - ' ' as u32 - 32
+- }
+-
+- #[derive(Debug, Copy, Clone)]
+- pub struct ExampleFont {}
+- impl Font for ExampleFont {
+-     const FONT_IMAGE: &'static [u8] = include_bytes!("../data/ExampleFont.raw");
+-     const CHARACTER_SIZE: Size = Size::new(5, 9);
+-     const FONT_IMAGE_WIDTH: u32 = Self::CHARACTER_SIZE.width * CHARS_PER_ROW;
+-
+-     fn char_offset(c: char) -> u32 {
+-         char_offset_impl(c)
+-     }
+- }
++ use embedded_graphics::{
++     geometry::Size,
++     image::ImageRaw,
++     mono_font::{mapping::ISO_8859_1, DecorationDimensions, MonoFont},
++ };
++
++ pub const EXAMPLE_FONT: MonoFont = MonoFont {
++     image: ImageRaw::new_binary(
++         // This example uses 32 characters per row, each character 5px across.
++         32 * 5,
++     ),
++     glyph_mapping: &ISO_8859_1,
++     character_size: Size::new(5, 9),
++     character_spacing: 0,
++     baseline: 7,
++     underline: DecorationDimensions::new(8, 1),
++     strikethrough: DecorationDimensions::new(4, 1),
++ };
+```
+
+Custom mappings between characters and glyph positions can be used by using `StrGlyphMapping`, using a function or implementing the `GlyphMapping` trait:
+
+```rust
+use embedded_graphics::{
+    geometry::Size,
+    image::ImageRaw,
+    mono_font::{mapping::StrGlyphMapping, DecorationDimensions, MonoFont},
+};
+
+pub const EXAMPLE_FONT: MonoFont = MonoFont {
+    image: ImageRaw::new_binary(
+        include_bytes!("../data/digits.raw"),
+        // In this example, this equals 10 characters per row, each character 15px across.
+        10 * 15,
+    ),
+    glyph_mapping: &StrGlyphMapping::new("\009", 0),
+    // or use a function:
+    // glyph_mapping: &digit_mapping,
+    character_size: Size::new(15, 30),
+    character_spacing: 5,
+    baseline: 29,
+    underline: DecorationDimensions::default_underline(30),
+    strikethrough: DecorationDimensions::default_strikethrough(30),
+};
+
+fn digit_mapping(c: char) -> usize {
+    if c >= '0' || c <= '9' {
+        c as usize - '0' as usize
+    } else {
+        0
+    }
+}
+```
+
+### More complex fonts
+
+Crates that handle text rendering more complex than simple monospace fonts should now implement the
+`CharacterStyle` and `TextRenderer` traits. These are used for both text styling and layout.
+
+Please refer to their respective docs for implementation details.
+
+An implementation of more complex font rendering using BDF font files is available in the [eg-bdf](https://github.com/embedded-graphics/embedded-bdf) crate, which may be useful as a reference for other implementations.

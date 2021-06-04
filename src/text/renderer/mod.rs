@@ -1,7 +1,14 @@
 //! Text renderer.
 //!
-//! TODO: Describe how this API can be implemented and add an example to the docs or link to an
-//!       external example.
+//! For more complex text rendering cases that are not covered by the [`mono_font`] module, the
+//! `TextRenderer` trait can be implemented by external text renderers.
+//!
+//! Implementations of this trait can be found in the [bdf] and [eg-seven-segment] repositories,
+//! which may be useful as a reference of other implementations.
+//!
+//! [`mono_font`]: ../../mono_font/index.html
+//! [bdf]: https://github.com/embedded-graphics/bdf
+//! [eg-seven-segment]: https://github.com/embedded-graphics/eg-seven-segment
 
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
