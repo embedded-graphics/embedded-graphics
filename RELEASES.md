@@ -129,10 +129,9 @@ New methods:
 - `assert_pattern_with_message` - the same as above, but with the ability to write custom messages in the test output.
 - `assert_pattern` - check for equality against a pattern and panic if they do not match.
 - `diff` - compare the display against another `MockDisplay`, producing a new `MockDisplay` containing the colored difference between them.
-- `eq` - check for equality between two `MockDisplay`s.
 - `from_points` - create a `MockDisplay` from an iterator over `Point`s.
 - `map` - create a copy of the current display with a predicate applied to all pixels.
-- `set_allow_out_of_bounds_drawing` - if set to `true`, disables the panicking behaviour when a drawing operation attempts to draw pixels outside the visible mock display area.
-- `set_allow_overdraw` - if set to `true`, disables the panicking behaviour when a pixel is drawn to twice.
+- `set_allow_out_of_bounds_drawing` - if set to `true`, disables the panicking behavior when a drawing operation attempts to draw pixels outside the visible mock display area.
+- `set_allow_overdraw` - if set to `true`, disables the panicking behavior when a pixel is drawn to twice.
 - `set_pixels` - sets the points in an iterator to the given color.
 - `swap_xy` - copies the current display with X and Y coordinates swapped.
