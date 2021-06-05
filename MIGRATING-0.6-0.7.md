@@ -131,7 +131,7 @@ It is no longer possible to create a triangle from an array of `Point`s. Instead
 
 ## Geometry
 
-Inconsistencies in the coordinate system, like a off by one error in the size of rectangles, have been fixed.
+Inconsistencies in the coordinate system, like an off by one error in the size of rectangles, have been fixed.
 
 The three methods in the `Dimensions` trait were replaced by a single `bounding_box` method. This should return a `Rectangle` which encompasses the entire shape.
 
@@ -156,7 +156,7 @@ by the used text renderer and the available settings will differ between differe
 For the builtin monospaced font support the character style is `MonoTextStyle`, which replaces the
 `TextStyle` object from embedded-graphics 0.6.
 
-The second style is the new `TextStyle` which sets how the text should be layed out. Available
+The second style is the new `TextStyle` which defines how the text should be laid out. Available
 settings are horizontal alignment, baseline and line height. This style is independent of the used
 text renderer.
 

@@ -68,7 +68,7 @@ prefixed by `CSS_` to avoid naming conflicts with the existing color constants. 
 
 The `ToBytes` trait has been added to support conversion of colors into byte arrays.
 
-All builtin color types can now be converted to each other builtin type by using `From` or `Into`.
+All builtin color types can now be converted to any other builtin color type by using `From` or `Into`.
 
 ### Draw target adapters
 
@@ -91,9 +91,50 @@ JIS X 201 glpyh subsets.
 
 The builtin monospaced text renderer now supports underline and strikethough decorations.
 
+```rust
+use embedded_graphics::{
+    mono_font::{ascii::FONT_8X13, MonoTextStyleBuilder},
+    pixelcolor::Rgb888,
+    prelude::*,
+    text::{Alignment, Baseline, Text, TextStyleBuilder},
+};
+
+// Use the builtin 8x13 monospace font with red foreground color
+let character_style = MonoTextStyleBuilder::new()
+    .font(&FONT_8X13)
+    .text_color(Rgb888::CSS_TOMATO)
+    .build();
+
+// Anchor the text relative to its horizontal center point and vertical middle
+let center_aligned = TextStyleBuilder::new()
+    .alignment(Alignment::Center)
+    .baseline(Baseline::Middle)
+    .build();
+
+Text::with_text_style(
+    "Center aligned text",
+    Point::new(100, 20),
+    character_style,
+    center_aligned,
+)
+.draw(&mut display)?;
+
 ### Images
 
-`SubImage` was added to draw a part of and image.
+`SubImage` was added to draw a part of an image.
+
+```rust
+use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
+use tinytga::Tga;
+
+// Load spritemap TGA image
+let tiles: Tga<Rgb888> = Tga::from_slice(include_bytes!("assets/sprites.tga")).unwrap();
+
+// Grab a 64x64px subsection of the image
+let sprite_a = tiles.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(64, 64)));
+
+// Draw the sprite with its top left corner at (25, 35)
+Image::new(&sprite_a, Point::new(25, 35)).draw(&mut display)?;
 
 ### Mock display
 
