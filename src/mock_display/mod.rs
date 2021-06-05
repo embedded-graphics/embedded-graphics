@@ -493,12 +493,10 @@ where
 
         display
     }
+}
 
-    /// Returns `true` if `self` and `other` are equal.
-    ///
-    /// `MockDisplay` doesn't implement the `PartialEq` to make sure that the `assert_eq` and
-    /// `assert_pattern` methods are used instead of the `assert_eq!` macro.
-    pub fn eq(&self, other: &MockDisplay<C>) -> bool {
+impl<C: PixelColor> PartialEq for MockDisplay<C> {
+    fn eq(&self, other: &Self) -> bool {
         self.pixels.iter().eq(other.pixels.iter())
     }
 }

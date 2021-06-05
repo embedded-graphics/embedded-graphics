@@ -13,6 +13,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Changed
 
 - **(breaking)** - [#600](https://github.com/embedded-graphics/embedded-graphics/pull/600) Renamed `Mapping::all` to `Mapping::iter`.
+- **(breaking)** - [#603](https://github.com/embedded-graphics/embedded-graphics/pull/603) `MockDisplay::eq` was replaced by a `PartialEq` implementation for `MockDisplay`.
 
 ## [0.7.0-beta.2] - 2021-05-24
 

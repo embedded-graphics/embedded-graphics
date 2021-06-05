@@ -250,7 +250,7 @@ let height = display.bounding_box().size.height;
 
 An advanced visual representation of failing `MockDisplay` assertions can be enabled by setting the `EG_FANCY_PANIC` environment variable to `1`, for example, by calling `EG_FANCY_PANIC=1 cargo test`.
 
-To make this output format possible assertions need to use the new `MockDisplay::assert_eq` and `assert_eq_with_message` methods instead of the `assert_eq!` macro. To ensure that the new methods are used the `PartialEq` implementation for `MockDisplay` was removed. In case that the equality of two mock `MockDisplay` needs to be tested outside of an assertion the `MockDisplay::eq` method can be used.
+To use `EG_FANCY_PANIC` the new `MockDisplay::assert_eq` and `assert_eq_with_message` must be used instead of the `assert_eq!` macro.
 
 ```rust
 #[test]
