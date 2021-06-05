@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.2] - 2021-06-05
+
 ### Added
 
 - [#602](https://github.com/embedded-graphics/embedded-graphics/pull/602) Implemented `core::fmt::Display` for `Point` and `Size`.
@@ -57,7 +59,8 @@
 - [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.1...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.2...HEAD
+[0.3.2]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.1...embedded-graphics-core-v0.3.2
 [0.3.1]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.0...embedded-graphics-core-v0.3.1
 
 [0.3.0]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.2.0...embedded-graphics-core-v0.3.0
