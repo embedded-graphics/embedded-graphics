@@ -136,6 +136,11 @@ let sprite_a = tiles.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(64, 6
 Image::new(&sprite_a, Point::new(25, 35)).draw(&mut display)?;
 ```
 
+### Performance
+
+The performance of many drawing operations has been improved by drawing larger contiguous regions
+of pixels instead of individual pixels.
+
 ### Mock display
 
 `MockDisplay` now supports all RGB and grayscale color types in its patterns.
