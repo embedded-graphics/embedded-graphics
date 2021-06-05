@@ -1,6 +1,6 @@
 # Releases
 
-Relese notes for [embedded-graphics](https://crates.io/crates/embedded-graphics).
+Release notes for [embedded-graphics](https://crates.io/crates/embedded-graphics).
 
 ## 0.7.0
 
@@ -17,6 +17,12 @@ New primitives have been added:
 The `Line` and `Triangle` primitives now support stroke widths greater than 1px.
 
 Primitives now support stroke alignment using the `StrokeAlignment` enum.
+
+The outline of all closed shapes now can now be offset by using the `OffsetOutline::offset` method.
+
+The `ContainsPoint::contains` method can be used to check if a point is inside a primitive.
+
+All primitives can be converted into an iterator over the contained points by using the `PointsIter::points` method.
 
 ### Geometry
 
@@ -40,14 +46,14 @@ use embedded_graphics::geometry::Size;
 + let size = Size::new_equal(20);
 ```
 
-`Point::length_squared` was added to `Point`.
-
 Other methods added to both `Point` and `Size` are:
 
 - `component_min`
 - `component_max`
 - `component_mul`
 - `component_div`
+
+`Angle` was added to represent angles in `Arc` and `Sector` primitives.
 
 The `Rectangle::intersection` method was added to get the intersecting area of two rectangles.
 
@@ -60,6 +66,8 @@ prefixed by `CSS_` to avoid naming conflicts with the existing color constants. 
 
 The `ToBytes` trait has been added to support conversion of colors into byte arrays.
 
+All builtin color types can now be converted to any other builtin color type by using `From` or `Into`.
+
 ### Draw target adapters
 
 The `DrawTargetExt` trait is introduced to allow a translated, cropped or clipped sub-area of a `DrawTarget` to be drawn to.
@@ -70,50 +78,68 @@ Please search for `DrawTargetExt` at <https://docs.rs/embedded-graphics> for usa
 
 ### Fonts and text
 
-TODO(rfuest): Improve this section before release:
-TODO(rfuest): Replace `ascii` and `latin1` with the new subsets
+Support for external text renderers was added. To support this the existing `fonts` module has been
+split into one for the generic `Text` drawable and one for the builtin monospaced text renderer.
+Refer to the migration guide for more information about this change.
 
-Support for external font renderers has been added. TODO: Expand
+Additional languages are supported by new fonts which are available in ASCII, multiple ISO-8859 and
+JIS X 201 glpyh subsets.
 
-- Added support for external renderers
-- `MonoTextStyleBuilder::new(Font)` -> `MonoTextStyle::new().font(&Font)`
-- Added support for underline and strikethrough to the internal text renderer
-- `Text` no longer requires `into_styled`, because it directly contains `character_style` and `text_style`
-- Added `TextStyle` to set the horizontal alignment and baseline for `Text` drawables
-- New default baseline is alphabetic
-- New fonts with `ascii` and `latin1` glyph subsets
-- `MonoFont` is now a struct instead of a trait
+`Text` drawables now support horizontal alignment, baseline and line height settings.
 
-The list of fonts has changed to the following:
+The builtin monospaced text renderer now supports underline and strikethough decorations.
 
-All fonts are provided in `embedded_graphics::mono_font::{ascii, latin1}::[font name]`
+```rust
+use embedded_graphics::{
+    mono_font::{ascii::FONT_8X13, MonoTextStyleBuilder},
+    pixelcolor::Rgb888,
+    prelude::*,
+    text::{Alignment, Baseline, Text, TextStyleBuilder},
+};
 
-- `FONT_4X6`
-- `FONT_5X7`
-- `FONT_5X8`
-- `FONT_6X10`
-- `FONT_6X12`
-- `FONT_6X13`
-  - Also available in **bold** (`FONT_6X13_BOLD`) and _italic_ (`FONT_6X13_ITALIC`)
-- `FONT_6X9`
-- `FONT_7X13`
-  - Also available in **bold** (`FONT_7X13_BOLD`) and _italic_ (`FONT_7X13_ITALIC`)
-- `FONT_7X14`
-  - Also available in **bold** (`FONT_7X14`)
-- `FONT_8X13`
-  - Also available in **bold** (`FONT_8X13_BOLD`) and _italic_ (`FONT_8X13_ITALIC`)
-- `FONT_9X15`
-  - Also available in **bold** (`FONT_9X15_BOLD`)
-- `FONT_9X18`
-  - Also available in **bold** (`FONT_9X18_BOLD`)
-- `FONT_10X20`
+// Use the builtin 8x13 monospace font with red foreground color
+let character_style = MonoTextStyleBuilder::new()
+    .font(&FONT_8X13)
+    .text_color(Rgb888::CSS_TOMATO)
+    .build();
 
-Two character sets are now provided for each font. The `ascii` set contains fewer characters and therefore has a reduced memory footprint, while `latin1` contains a larger number of glyphs.
+// Anchor the text relative to its horizontal center point and vertical middle
+let center_aligned = TextStyleBuilder::new()
+    .alignment(Alignment::Center)
+    .baseline(Baseline::Middle)
+    .build();
 
-- `embedded_graphics::mono_font::ascii` provides the characters U+0020 to U+007F in the [Basic Latin code block](<https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)>), excluding control characters.
-- `embedded_graphics::mono_font::latin1` provides all all characters in the `ascii` variant with the addition of U+00A0 to U+00FF in the [Latin-1 Supplement code block](<https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)>) (excluding control characters).
+Text::with_text_style(
+    "Center aligned text",
+    Point::new(100, 20),
+    character_style,
+    center_aligned,
+)
+.draw(&mut display)?;
+```
 
-`ascii` has full coverage of the English language. For other languages, `latin1` has complete coverage for [the languages listed here](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Modern_languages_with_complete_coverage), and partial coverage for [these languages](https://en.wikipedia.org/wiki/ISO/IEC_8859-1#Languages_with_incomplete_coverage).
+### Images
+
+`SubImage` was added to draw a part of an image.
+
+```rust
+use embedded_graphics::{image::Image, pixelcolor::Rgb888, prelude::*, primitives::Rectangle};
+use tinytga::Tga;
+
+// Load spritemap TGA image
+let tiles: Tga<Rgb888> = Tga::from_slice(include_bytes!("assets/sprites.tga")).unwrap();
+
+// Grab a 64x64px subsection of the image
+let sprite_a = tiles.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(64, 64)));
+
+// Draw the sprite with its top left corner at (25, 35)
+Image::new(&sprite_a, Point::new(25, 35)).draw(&mut display)?;
+```
+
+### Performance
+
+The performance of many drawing operations has been improved by drawing larger contiguous regions
+of pixels instead of individual pixels.
 
 ### Mock display
 
