@@ -24,6 +24,7 @@ byteorder = { version = "1.3.4", default-features = false }
 
 [dev-dependencies]
 embedded-graphics = { path = ".." }
+arrayvec = { version = "0.5.2", default-features = false }
 
 [features]
 default = []

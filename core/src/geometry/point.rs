@@ -1,8 +1,10 @@
-use crate::geometry::Size;
 use core::{
     convert::{TryFrom, TryInto},
+    fmt,
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
 };
+
+use crate::geometry::Size;
 
 /// 2D point.
 ///
@@ -459,6 +461,12 @@ impl TryFrom<&[u32; 2]> for Point {
     }
 }
 
+impl fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}, {}", self.x, self.y)
+    }
+}
+
 #[cfg(feature = "nalgebra_support")]
 use nalgebra::{base::Scalar, Vector2};
 
@@ -485,6 +493,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use core::fmt::Write;
 
     #[test]
     fn convert_positive_to_u32_tuple() {
@@ -738,5 +748,13 @@ mod tests {
 
         assert_eq!(a.component_min(b), Point::new(15, 30));
         assert_eq!(a.component_max(b), Point::new(20, 50));
+    }
+
+    #[test]
+    fn display() {
+        let mut buffer = arrayvec::ArrayString::<[u8; 32]>::new();
+        write!(buffer, "{}", Point::new(123, -456)).unwrap();
+
+        assert_eq!(&buffer, "123, -456");
     }
 }

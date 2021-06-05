@@ -1,5 +1,9 @@
+use core::{
+    fmt,
+    ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign},
+};
+
 use crate::geometry::Point;
-use core::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
 /// 2D size.
 ///
@@ -344,6 +348,12 @@ impl From<&Size> for (u32, u32) {
     }
 }
 
+impl fmt::Display for Size {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} x {}", self.width, self.height)
+    }
+}
+
 #[cfg(feature = "nalgebra_support")]
 use nalgebra::{base::Scalar, Vector2};
 
@@ -370,6 +380,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use core::fmt::Write;
 
     #[test]
     fn sizes_can_be_added() {
@@ -470,5 +482,13 @@ mod tests {
 
         assert_eq!(a.component_min(b), Size::new(15, 30));
         assert_eq!(a.component_max(b), Size::new(20, 50));
+    }
+
+    #[test]
+    fn display() {
+        let mut buffer = arrayvec::ArrayString::<[u8; 32]>::new();
+        write!(buffer, "{}", Size::new(123, 456)).unwrap();
+
+        assert_eq!(&buffer, "123 x 456");
     }
 }
