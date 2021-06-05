@@ -46,8 +46,6 @@ use embedded_graphics::geometry::Size;
 + let size = Size::new_equal(20);
 ```
 
-`Point::length_squared` was added to `Point`.
-
 Other methods added to both `Point` and `Size` are:
 
 - `component_min`
@@ -118,6 +116,7 @@ Text::with_text_style(
     center_aligned,
 )
 .draw(&mut display)?;
+```
 
 ### Images
 
@@ -135,6 +134,7 @@ let sprite_a = tiles.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(64, 6
 
 // Draw the sprite with its top left corner at (25, 35)
 Image::new(&sprite_a, Point::new(25, 35)).draw(&mut display)?;
+```
 
 ### Mock display
 
