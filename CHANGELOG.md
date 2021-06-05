@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#602](https://github.com/embedded-graphics/embedded-graphics/pull/602) Implemented `core::fmt::Display` for `Point` and `Size`.
+
 ### Changed
 
 - **(breaking)** - [#600](https://github.com/embedded-graphics/embedded-graphics/pull/600) Renamed `Mapping::all` to `Mapping::iter`.
