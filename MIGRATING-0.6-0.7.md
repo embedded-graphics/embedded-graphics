@@ -131,6 +131,8 @@ It is no longer possible to create a triangle from an array of `Point`s. Instead
 
 ## Geometry
 
+Inconsistencies in the coordinate system, like a off by one error in the size of rectangles, have been fixed.
+
 The three methods in the `Dimensions` trait were replaced by a single `bounding_box` method. This should return a `Rectangle` which encompasses the entire shape.
 
 ## Style module
@@ -140,9 +142,23 @@ The `style` module has been removed. The items in it have been moved:
 - `PrimitiveStyle`, `PrimitiveStyleBuilder` and `Styled` are now available in the `embedded_graphics::primitives` module.
 - `TextStyle` and `TextStyleBuilder` were renamed are now available under `embedded_graphics::mono_font::{MonoTextStyle, MonoTextStyleBuilder}`.
 
-  Note that usage with `Text` has changed. See [the text changes section](#Text-rendering) for more.
+  Note that usage with `Text` has changed. See [the text changes section](#text-and-fonts) for more.
 
 ## Text and fonts
+
+The `fonts` module has been split into a `text` and a `mono_font` module. The `text` module contains
+a `Text` drawable which can be used with different text renderers. The `mono_font` module contains
+a text renderer for monospaced fonts and the builtin fonts.
+
+`Text` drawable now use two style objects to define the output format. The first style object is
+a character style, which defines parameters like the font and text color. This object is provided
+by the used text renderer and the available settings will differ between different renderers.
+For the builtin monospaced font support the character style is `MonoTextStyle`, which replaces the
+`TextStyle` object from embedded-graphics 0.6.
+
+The second style is the new `TextStyle` which sets how the text should be layed out. Available
+settings are horizontal alignment, baseline and line height. This style is independent of the used
+text renderer.
 
 The collection of builtin fonts are now sourced from public domain BDF fonts in the XOrg project.
 Due to this, they have slightly different dimensions and glyphs and so have changed names. Some
@@ -150,18 +166,16 @@ sizes are not the same in the new set, but a rough mapping is as follows:
 
 | Old font                                                                                                                                                                             | Visually closest new font                                                                                                                                                                                                                                          |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `fonts::Font6x6`<br>![Font6x6 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x6.png)       | `mono_font::{ascii, latin1}::FONT_4X6`<br>![FONT_4X6 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/4x6.png)                                                                  |
-| `fonts::Font6x8`<br>![Font6x8 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x8.png)       | `mono_font::{ascii, latin1}::FONT_6X10`<br>![FONT_6X10 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x10.png)                                                               |
-| `fonts::Font6x12`<br>![Font6x12 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x12.png)    | `mono_font::{ascii, latin1}::FONT_6X13`<br>![FONT_6X13 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x13.png)                                                               |
-| `fonts::Font8x16`<br>![Font8x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font8x16.png)    | `mono_font::{ascii, latin1}::FONT_9X15_BOLD`<br>![FONT_9X15_BOLD glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/9x15B.png)                                                    |
-| `fonts::Font12x16`<br>![Font12x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font12x16.png) | `mono_font::{ascii, latin1}::FONT_10X20`<br>![FONT_10X20 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/10x20.png)                                                            |
+| `fonts::Font6x6`<br>![Font6x6 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x6.png)       | `mono_font::ascii::FONT_4X6`<br>![FONT_4X6 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/4x6.png)                                                                  |
+| `fonts::Font6x8`<br>![Font6x8 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x8.png)       | `mono_font::ascii::FONT_6X10`<br>![FONT_6X10 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x10.png)                                                               |
+| `fonts::Font6x12`<br>![Font6x12 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font6x12.png)    | `mono_font::ascii::FONT_6X13`<br>![FONT_6X13 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/6x13.png)                                                               |
+| `fonts::Font8x16`<br>![Font8x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font8x16.png)    | `mono_font::ascii::FONT_9X15_BOLD`<br>![FONT_9X15_BOLD glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/9x15B.png)                                                    |
+| `fonts::Font12x16`<br>![Font12x16 glpyh bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.6.2/embedded-graphics/data/font12x16.png) | `mono_font::ascii::FONT_10X20`<br>![FONT_10X20 glyph bitmap](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/embedded-graphics-v0.7.0-beta.1/fonts/ascii/png/10x20.png)                                                            |
 | `fonts::Font24x32`                                                                                                                                                                   | The largest available new font is `FONT_10X20`, which is significantly smaller than the old `Font24x32`. Larger fonts are available in [external crates](https://github.com/embedded-graphics/embedded-graphics#additional-functions-provided-by-external-crates). |
 
-Note that the table above shows the new fonts' `ascii` variants only. Some new fonts also use taller bitmaps for the same cap height.
+Note that all fonts are available in with different glyph subsets to support a wide variety of languages. The table above only shows the new fonts' `ascii` variants. The new fonts tend to use a larger glyph height for the same cap height, which improves readability but may require some layout changes.
 
-To style fonts, use the `MonoTextStyle` struct. `TextStyle` still exists, but has been repurposed to provide a more general interface to text styling. This more closely mirrors the way primitives are built and styled.
-
-The default baseline for fonts is now the font's baseline instead of the top of the glyph bounding box. To retain the 0.6 behaviour and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
+The default baseline for fonts is now the font's alphabetic baseline instead of the top of the glyph bounding box. To retain the 0.6 behavior and position text using its top-left corner, set the `baseline` property to `Baseline::Top`:
 
 ```rust
 use embedded_graphics::text::{Baseline, TextStyle, TextStyleBuilder};
