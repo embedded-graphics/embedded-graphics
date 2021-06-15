@@ -2,7 +2,7 @@
 name = "embedded-graphics-core"
 description = "Core traits and functionality for embedded-graphics"
 version = "0.3.2"
-authors = ["James Waples <james@wapl.es>"]
+authors = ["James Waples <james@wapl.es>", "Ralf Fuest <mail@rfuest.de>"]
 edition = "2018"
 repository = "https://github.com/embedded-graphics/embedded-graphics"
 documentation = "https://docs.rs/embedded-graphics-core"
