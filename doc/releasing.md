@@ -27,13 +27,13 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
 - Double check the release level (major, minor, patch)
 - Release the crates in the following order:
 
-  1. For `embedded-graphics-core` **if there are changes to release**: `just release-core <level>`
+  1. For `embedded-graphics-core` **if there are changes to release**: `just release-core --push-remote <push-remote> <level>`
 
      a. When the above command completes, check the `embedded-graphics-core` version in `Cargo.toml` in the project root. It should have been updated automatically to the just-released core version.
 
-  2. For `embedded-graphics`: `just release-e-g <level>`
+  2. For `embedded-graphics`: `just release-e-g --push-remote <push-remote> <level>`
 
-  Where `<level>` is `major`, `minor`, `patch`, or a specific SemVer version number.
+  Where `<level>` is `major`, `minor`, `patch`, or a specific SemVer version number, and where `<push-remote>` is the git remote for the upstream repository `embedded-graphics/embedded-graphics`.
 
 ## Post release
 
