@@ -148,9 +148,9 @@ convert-fonts:
 #--------
 
 # Release embedded-graphics-core
-release-core *args:
+release-core +args:
     cargo release --workspace --exclude embedded-graphics --dependent-version fix {{args}}
 
 # Release embedded-graphics
-release-e-g *args:
+release-e-g +args:
     cargo release --package embedded-graphics --dependent-version fix {{args}}
