@@ -35,6 +35,10 @@
 //! The [`ImageDrawable`] trait should be implemented for any image or image-like item, for example
 //! a spritemap.
 //!
+//! # Features
+//!
+//!  - `defmt_support` - implements `defmt::Format` for all types where this is possible.
+//!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Pixel`]: ./drawable/struct.Pixel.html
 //! [`Point`]: ./geometry/struct.Point.html
