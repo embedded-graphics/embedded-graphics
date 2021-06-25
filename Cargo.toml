@@ -46,7 +46,7 @@ arrayvec = { version = "0.5.2", default-features = false }
 default = []
 nalgebra_support = [ "embedded-graphics-core/nalgebra_support" ]
 fixed_point = [ "fixed" ]
-defmt_support = [ "defmt", "embedded-graphics-core/defmt" ]
+defmt_support = [ "defmt", "embedded-graphics-core/defmt_support" ]
 
 [[bench]]
 harness = false

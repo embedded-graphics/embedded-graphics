@@ -30,3 +30,4 @@ arrayvec = { version = "0.5.2", default-features = false }
 [features]
 default = []
 nalgebra_support = [ "nalgebra" ]
+defmt_support = [ "defmt" ]
