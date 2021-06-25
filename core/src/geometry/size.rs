@@ -62,7 +62,7 @@ use crate::geometry::Point;
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Size {
     /// The width.
     pub width: u32,
