@@ -47,6 +47,10 @@ display driver using the [`DrawTarget`] trait.
 The [`ImageDrawable`] trait should be implemented for any image or image-like item, for example
 a spritemap.
 
+## Features
+
+ - `defmt_support` - implements `defmt::Format` for all types where this is possible.
+
 [embedded-graphics]: https://docs.rs/embedded-graphics
 [`Pixel`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/drawable/struct.Pixel.html
 [`Point`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/struct.Point.html
