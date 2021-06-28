@@ -1,16 +1,15 @@
 use core::marker::PhantomData;
 
-use embedded_graphics_core::{pixelcolor::BinaryColor, primitives::Rectangle};
-
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
-    image::ImageDrawable,
+    image::{ImageDrawable, ImagePixelGetter},
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData},
-        PixelColor,
+        BinaryColor, PixelColor,
     },
+    primitives::Rectangle,
 };
 
 /// Image with little endian data.
@@ -263,6 +262,25 @@ where
     }
 }
 
+impl<'a, C, BO> ImagePixelGetter for ImageRaw<'a, C, BO>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    BO: ByteOrder,
+    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+{
+    fn pixel(&self, p: Point) -> Self::Color {
+        if !self.bounding_box().contains(p) {
+            panic!("point out of bounds: ({}), image size: {}", p, self.size);
+        }
+
+        RawDataSlice::new(self.data)
+            .into_iter()
+            .nth(p.x as usize + p.y as usize * self.data_width() as usize)
+            .unwrap()
+            .into()
+    }
+}
+
 struct ContiguousPixels<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -440,6 +458,23 @@ mod tests {
     }
 
     #[test]
+    fn bpp1_get_pixel() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
+
+        assert_eq!(image_data.pixel(Point::new(0, 0)), BinaryColor::On);
+        assert_eq!(image_data.pixel(Point::new(8, 0)), BinaryColor::Off);
+        assert_eq!(image_data.pixel(Point::new(0, 1)), BinaryColor::Off);
+        assert_eq!(image_data.pixel(Point::new(8, 1)), BinaryColor::On);
+        assert_eq!(image_data.pixel(Point::new(0, 2)), BinaryColor::On);
+        assert_eq!(image_data.pixel(Point::new(8, 2)), BinaryColor::On);
+    }
+
+    #[test]
     fn bpp2() {
         let data = [
             0b00_01_10_11, //
@@ -560,6 +595,22 @@ mod tests {
     }
 
     #[test]
+    fn bpp16_big_endian_get_pixel() {
+        let data = [
+            0xF8, 0x00, //
+            0x07, 0xE0, //
+            0x00, 0x1F, //
+            0x00, 0x00, //
+        ];
+        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2);
+
+        assert_eq!(image_data.pixel(Point::new(0, 0)), Rgb565::RED);
+        assert_eq!(image_data.pixel(Point::new(1, 0)), Rgb565::GREEN);
+        assert_eq!(image_data.pixel(Point::new(0, 1)), Rgb565::BLUE);
+        assert_eq!(image_data.pixel(Point::new(1, 1)), Rgb565::BLACK);
+    }
+
+    #[test]
     fn bpp24_little_endian() {
         let data = [
             0xFF, 0x00, 0x00, //
@@ -672,5 +723,57 @@ mod tests {
 
         let data = [0u8; 4];
         assert_eq!(ImageRaw::<BinaryColor>::new(&data, 12).size().height, 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "point out of bounds: (-1, 0), image size: 9 x 3")]
+    fn get_pixel_x_negative() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data = ImageRaw::<BinaryColor>::new(&data, 9);
+
+        image_data.pixel(Point::new(-1, 0));
+    }
+
+    #[test]
+    #[should_panic(expected = "point out of bounds: (0, -1), image size: 9 x 3")]
+    fn get_pixel_y_negative() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data = ImageRaw::<BinaryColor>::new(&data, 9);
+
+        image_data.pixel(Point::new(0, -1));
+    }
+
+    #[test]
+    #[should_panic(expected = "point out of bounds: (9, 0), image size: 9 x 3")]
+    fn get_pixel_x_too_large() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data = ImageRaw::<BinaryColor>::new(&data, 9);
+
+        image_data.pixel(Point::new(9, 0));
+    }
+
+    #[test]
+    #[should_panic(expected = "point out of bounds: (0, 3), image size: 9 x 3")]
+    fn get_pixel_y_too_large() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data = ImageRaw::<BinaryColor>::new(&data, 9);
+
+        image_data.pixel(Point::new(0, 3));
     }
 }
