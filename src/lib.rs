@@ -276,6 +276,7 @@
 
 pub mod draw_target;
 pub mod examples;
+pub mod framebuffer;
 pub mod geometry;
 pub mod image;
 pub mod iterator;
