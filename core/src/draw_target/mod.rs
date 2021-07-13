@@ -407,8 +407,7 @@ pub trait DrawTarget: Dimensions {
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_contiguous(
             area,
-            core::iter::repeat(color)
-                .take((area.size.width * area.size.height) as usize)
+            core::iter::repeat(color).take((area.size.width * area.size.height) as usize),
         )
     }
 
