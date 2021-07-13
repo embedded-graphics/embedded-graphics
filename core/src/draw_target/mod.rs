@@ -405,7 +405,15 @@ pub trait DrawTarget: Dimensions {
     /// The default implementation of this method calls [`fill_contiguous`](#method.fill_contiguous)
     /// with an iterator that repeats the given `color` for every point in `area`.
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
-        self.fill_contiguous(area, area.points().map(|_| color))
+        let mut count = 0u32;
+        let max = area.size.width * area.size.height;
+        self.fill_contiguous(
+            area,
+            core::iter::repeat(color).take_while(|_| {
+                count += 1;
+                count <= max
+            }),
+        )
     }
 
     /// Fill the entire display with a solid color.
