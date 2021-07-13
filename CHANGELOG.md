@@ -6,6 +6,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+- ensure `DrawTarget::fill_solid` does not cause endless loop in case `DrawTarget::fill_contiguous` is used without limiting `colors` iterator with `take`
+
 ## [0.7.1] - 2021-06-15
 
 ### Changed
