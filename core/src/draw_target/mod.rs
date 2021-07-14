@@ -299,6 +299,9 @@ pub trait DrawTarget: Dimensions {
     /// drawing method for a display that writes data to the hardware immediately. If possible, the
     /// other methods in this trait should be implemented to improve performance when rendering
     /// more contiguous pixel patterns.
+    ///
+    /// This method should ignore any pixels that fall outside the drawable area of the
+    /// target display without returning an error. This can be checked with the [`Rectangle::contains`] method
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Pixel<Self::Color>>;
@@ -316,8 +319,11 @@ pub trait DrawTarget: Dimensions {
     /// The provided iterator is not required to provide `width * height` pixels to completely fill
     /// the area. In this case, `fill_contiguous` should return without error.
     ///
-    /// This method should not attempt to draw any pixels that fall outside the drawable area of the
-    /// target display. The `area` argument can be clipped to the drawable area using the
+    /// The provided iterator is not required to be limited to `width * height` pixels.
+    /// In this case, `fill_contiguous` should ignore the additional pixels and return without error.
+    ///
+    /// This method should ignore any pixels that fall outside the drawable area of the
+    /// target display without returning an error. The `area` argument can be clipped to the drawable area using the
     /// [`Rectangle::intersection`] method.
     ///
     /// The default implementation of this method delegates to [`draw_iter`](#tymethod.draw_iter).
@@ -397,6 +403,10 @@ pub trait DrawTarget: Dimensions {
     }
 
     /// Fill a given area with a solid color.
+    ///
+    /// This method should ignore any pixels that fall outside the drawable area of the
+    /// target display without returning an error. The `area` argument can be clipped to the drawable area using the
+    /// [`Rectangle::intersection`] method.
     ///
     /// If the target display provides optimized hardware commands for filling a rectangular area of
     /// the display with a solid color, this method should be overridden to use those commands to
