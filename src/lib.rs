@@ -109,7 +109,7 @@
 //! # Migrating from older versions
 //!
 //! * [Migration guide from 0.5 to 0.6](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
-//! * [Migration guide from 0.6 to 0.7](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
+//! * [Migration guide from 0.6 to 0.7](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.6-0.7.md).
 //!
 //! # Implementing `embedded_graphics` support for a display driver
 //!
