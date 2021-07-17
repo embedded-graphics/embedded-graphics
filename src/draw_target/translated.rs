@@ -15,6 +15,7 @@ use crate::{
 /// [`DrawTarget`]: trait.DrawTarget.html
 /// [`translated`]: trait.DrawTargetExt.html#tymethod.translated
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Translated<'a, T>
 where
     T: DrawTarget,

@@ -41,6 +41,7 @@ use crate::pixelcolor::raw::{
 ///
 /// [module-level documentation]: index.html
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct RawDataSlice<'a, R, BO> {
     data: &'a [u8],
     raw_type: PhantomData<R>,
@@ -125,6 +126,7 @@ impl<'a, BO> IntoIterator for RawDataSlice<'a, RawU8, BO> {
 ///
 /// [module-level documentation]: index.html
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct BitsIterator<'a, R> {
     data: &'a [u8],
     index: usize,
@@ -147,6 +149,7 @@ impl<'a, R: RawData> BitsIterator<'a, R> {
 ///
 /// [module-level documentation]: index.html
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct ByteIterator<'a> {
     data: slice::Iter<'a, u8>,
 }
@@ -181,6 +184,7 @@ impl<'a> Iterator for ByteIterator<'a> {
 ///
 /// [module-level documentation]: index.html
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct BytesIterator<'a, R, BO> {
     // MSRV: replace by ArrayChunks when the feature is stabilized
     data: slice::ChunksExact<'a, u8>,

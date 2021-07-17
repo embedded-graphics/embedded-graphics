@@ -113,6 +113,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// [`PixelColor`]: ../pixelcolor/trait.PixelColor.html
 /// [`ByteOrder`]: ../pixelcolor/raw/trait.ByteOrder.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct ImageRaw<'a, C, BO = BigEndian>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,

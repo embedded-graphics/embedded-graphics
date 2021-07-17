@@ -30,6 +30,7 @@ use az::SaturatingAs;
 /// [`MonoTextStyleBuilder`]: ./struct.MonoTextStyleBuilder.html
 /// [`new`]: #method.new
 #[derive(Copy, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 #[non_exhaustive]
 pub struct MonoTextStyle<'a, C> {
     /// Text color.
@@ -301,6 +302,7 @@ impl<C: PixelColor> CharacterStyle for MonoTextStyle<'_, C> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 enum LineElement {
     Char(char),
     Spacing,
@@ -380,6 +382,7 @@ enum LineElement {
 /// [`Text`]: ../text/struct.Text.html
 /// [`MonoTextStyle`]: struct.MonoTextStyle.html
 #[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
 }

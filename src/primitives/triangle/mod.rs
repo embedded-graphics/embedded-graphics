@@ -65,6 +65,7 @@ pub use styled::StyledPixelsIterator;
 ///
 /// [`from_slice`]: #method.from_slice
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Triangle {
     /// The vertices of the triangle.
     pub vertices: [Point; 3],

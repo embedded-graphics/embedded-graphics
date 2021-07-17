@@ -88,6 +88,7 @@ pub trait TextRenderer {
 ///
 /// [`TextRenderer::measure_string`]: trait.TextRenderer.html#tymethod.measure_string
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct TextMetrics {
     /// Bounding box.
     pub bounding_box: Rectangle,

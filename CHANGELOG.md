@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#592](https://github.com/embedded-graphics/embedded-graphics/pull/592) Add support for defmt behind a feature (`defmt_support`).
+
 ## [0.7.1] - 2021-06-15
 
 ### Changed

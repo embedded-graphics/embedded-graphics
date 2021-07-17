@@ -10,6 +10,7 @@ use crate::{
 
 /// Styled.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt_support", derive(::defmt::Format))]
 pub struct Styled<T, S> {
     /// Primitive.
     pub primitive: T,
