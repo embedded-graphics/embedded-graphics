@@ -74,8 +74,8 @@ generate-docs:
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
-    cargo deadlinks --dir target/doc/embedded_graphics
-    cargo deadlinks --dir target/doc/embedded_graphics_core
+    cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics
+    cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics_core
 
 # Generate drawing examples in the doc directory
 generate-drawing-examples:
