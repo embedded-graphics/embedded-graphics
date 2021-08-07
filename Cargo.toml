@@ -36,7 +36,7 @@ byteorder = { version = "1.3.4", default-features = false }
 
 # criterion is not listed as a dev-dependency to work around a problem with no_std compatibility
 # and because dev-dependencies can't be optional
-criterion = { version = "0.3.3", optional = true }
+criterion = { version = "=0.3.4", optional = true }
 
 [dev-dependencies]
 arrayvec = { version = "0.5.2", default-features = false }
