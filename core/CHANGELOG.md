@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#621](https://github.com/embedded-graphics/embedded-graphics/pull/621) Added `Rgb666` and `Bgr666` color type support.
+
 ## [0.3.2] - 2021-06-05
 
 ### Added

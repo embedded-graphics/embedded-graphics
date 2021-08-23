@@ -220,6 +220,9 @@ rgb_color!(Bgr555, RawU16, u16, Bgr = (5, 5, 5));
 rgb_color!(Rgb565, RawU16, u16, Rgb = (5, 6, 5));
 rgb_color!(Bgr565, RawU16, u16, Bgr = (5, 6, 5));
 
+rgb_color!(Rgb666, RawU24, u32, Rgb = (6, 6, 6));
+rgb_color!(Bgr666, RawU24, u32, Bgr = (6, 6, 6));
+
 rgb_color!(Rgb888, RawU24, u32, Rgb = (8, 8, 8));
 rgb_color!(Bgr888, RawU24, u32, Bgr = (8, 8, 8));
 
@@ -276,6 +279,20 @@ mod tests {
         test_bpp16(Bgr565::new(0b10001, 0, 0), 0b10001 << 0);
         test_bpp16(Bgr565::new(0, 0b100001, 0), 0b100001 << 5);
         test_bpp16(Bgr565::new(0, 0, 0b10001), 0b10001 << 5 + 6);
+    }
+
+    #[test]
+    pub fn bit_positions_rgb666() {
+        test_bpp24(Rgb666::new(0b100001, 0, 0), 0b100001 << 6 + 6);
+        test_bpp24(Rgb666::new(0, 0b100001, 0), 0b100001 << 6);
+        test_bpp24(Rgb666::new(0, 0, 0b100001), 0b100001 << 0);
+    }
+
+    #[test]
+    pub fn bit_positions_bgr666() {
+        test_bpp24(Bgr666::new(0b100001, 0, 0), 0b100001 << 0);
+        test_bpp24(Bgr666::new(0, 0b100001, 0), 0b100001 << 6);
+        test_bpp24(Bgr666::new(0, 0, 0b100001), 0b100001 << 6 + 6);
     }
 
     #[test]
