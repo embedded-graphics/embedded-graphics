@@ -1,5 +1,5 @@
 use crate::pixelcolor::{
-    raw::{RawU1, RawU16, RawU2, RawU24, RawU32, RawU4, RawU8},
+    raw::{RawU1, RawU16, RawU18, RawU2, RawU24, RawU32, RawU4, RawU8},
     PixelColor,
 };
 
@@ -48,6 +48,36 @@ impl_to_bytes!(RawU4, [u8; 1]);
 impl_to_bytes!(RawU8, [u8; 1]);
 impl_to_bytes!(RawU16, [u8; 2]);
 impl_to_bytes!(RawU32, [u8; 4]);
+
+impl ToBytes for RawU18 {
+    type Bytes = [u8; 3];
+
+    fn to_be_bytes(self) -> Self::Bytes {
+        let mut ret = [0; 3];
+
+        ret.copy_from_slice(&self.0.to_be_bytes()[1..4]);
+
+        ret
+    }
+
+    fn to_le_bytes(self) -> Self::Bytes {
+        let mut ret = [0; 3];
+
+        ret.copy_from_slice(&self.0.to_le_bytes()[0..3]);
+
+        ret
+    }
+
+    #[cfg(target_endian = "big")]
+    fn to_ne_bytes(self) -> Self::Bytes {
+        self.to_be_bytes()
+    }
+
+    #[cfg(target_endian = "little")]
+    fn to_ne_bytes(self) -> Self::Bytes {
+        self.to_le_bytes()
+    }
+}
 
 impl ToBytes for RawU24 {
     type Bytes = [u8; 3];
@@ -117,7 +147,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb888};
+    use crate::pixelcolor::{
+        Bgr565, Bgr666, Bgr888, BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb666, Rgb888,
+    };
 
     fn assert_all_orders<T>(value: T, bytes: T::Bytes)
     where
@@ -214,6 +246,70 @@ mod tests {
         assert_eq!(
             Bgr565::new(0, 0, 255).to_le_bytes(),
             [0b000_00000, 0b11111_000]
+        );
+    }
+
+    #[test]
+    fn bpp18_bgr_be() {
+        assert_eq!(
+            Bgr666::new(0xFF, 0x00, 0x00).to_be_bytes(),
+            [0b000000000, 0b000000000, 0b00_111111]
+        );
+        assert_eq!(
+            Bgr666::new(0x0, 0xFF, 0x00).to_be_bytes(),
+            [0b000000000, 0b0000_1111, 0b11_000000]
+        );
+        assert_eq!(
+            Bgr666::new(0x00, 0x00, 0xFF).to_be_bytes(),
+            [0b0000000_11, 0b1111_0000, 0b000000000]
+        );
+    }
+
+    #[test]
+    fn bpp18_bgr_le() {
+        assert_eq!(
+            Bgr666::new(0xFF, 0x00, 0x00).to_le_bytes(),
+            [0b00_111111, 0b000000000, 0b000000000]
+        );
+        assert_eq!(
+            Bgr666::new(0x0, 0xFF, 0x00).to_le_bytes(),
+            [0b11_000000, 0b0000_1111, 0b000000000]
+        );
+        assert_eq!(
+            Bgr666::new(0x00, 0x00, 0xFF).to_le_bytes(),
+            [0b000000000, 0b1111_0000, 0b0000000_11]
+        );
+    }
+
+    #[test]
+    fn bpp18_rgb_be() {
+        assert_eq!(
+            Rgb666::new(0xFF, 0x00, 0x00).to_be_bytes(),
+            [0b0000000_11, 0b1111_0000, 0b000000000]
+        );
+        assert_eq!(
+            Rgb666::new(0x0, 0xFF, 0x00).to_be_bytes(),
+            [0b000000000, 0b0000_1111, 0b11_000000]
+        );
+        assert_eq!(
+            Rgb666::new(0x00, 0x00, 0xFF).to_be_bytes(),
+            [0b000000000, 0b000000000, 0b00_111111]
+        );
+    }
+
+    #[test]
+    fn bpp18_rgb_le() {
+        assert_eq!(
+            Rgb666::new(0xFF, 0x00, 0x00).to_le_bytes(),
+            [0b000000000, 0b1111_0000, 0b0000000_11]
+        );
+        assert_eq!(
+            Rgb666::new(0x0, 0xFF, 0x00).to_le_bytes(),
+            [0b11_000000, 0b0000_1111, 0b000000000]
+        );
+        assert_eq!(
+            Rgb666::new(0x00, 0x00, 0xFF).to_le_bytes(),
+            [0b00_111111, 0b000000000, 0b000000000]
         );
     }
 
