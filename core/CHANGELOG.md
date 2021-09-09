@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.3] - 2021-09-09
+
 ### Added
 
 - [#621](https://github.com/embedded-graphics/embedded-graphics/pull/621) Added `Rgb666` and `Bgr666` color type support.
@@ -63,7 +65,8 @@
 - [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.2...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.3...HEAD
+[0.3.3]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.2...embedded-graphics-core-v0.3.3
 [0.3.2]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.1...embedded-graphics-core-v0.3.2
 [0.3.1]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.0...embedded-graphics-core-v0.3.1
 
