@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#621](https://github.com/embedded-graphics/embedded-graphics/pull/621) Added `Rgb666` and `Bgr666` color type support.
+
 ## [0.7.1] - 2021-06-15
 
 ### Changed
