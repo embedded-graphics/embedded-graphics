@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#625](https://github.com/embedded-graphics/embedded-graphics/pull/625) Added CSS colors and color conversions to `Rgb666` and `Bgr666`.
+
 ## [0.3.3] - 2021-09-09
 
 ### Added

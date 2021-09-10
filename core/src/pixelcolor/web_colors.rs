@@ -1,6 +1,8 @@
 //! Named colors as defined in the CSS specification.
 
-use crate::pixelcolor::{Bgr555, Bgr565, Bgr888, PixelColor, Rgb555, Rgb565, Rgb888, RgbColor};
+use crate::pixelcolor::{
+    Bgr555, Bgr565, Bgr666, Bgr888, PixelColor, Rgb555, Rgb565, Rgb666, Rgb888, RgbColor,
+};
 
 macro_rules! color_doc {
     (@internal $text:expr, $($rest:tt)*) => {
@@ -66,7 +68,7 @@ macro_rules! web_colors {
 
 #[rustfmt::skip]
 web_colors!(
-    (Rgb555, Rgb565, Rgb888, Bgr555, Bgr565, Bgr888),
+    (Rgb555, Rgb565, Rgb666, Rgb888, Bgr555, Bgr565, Bgr666, Bgr888),
     [
         (CSS_ALICE_BLUE, "Alice Blue", (240, 248, 255)),
         (CSS_ANTIQUE_WHITE, "Antique White", (250, 235, 215)),
@@ -223,6 +225,8 @@ mod tests {
         assert_eq!(Bgr555::WHITE, Bgr555::CSS_WHITE);
         assert_eq!(Rgb565::WHITE, Rgb565::CSS_WHITE);
         assert_eq!(Bgr565::WHITE, Bgr565::CSS_WHITE);
+        assert_eq!(Rgb666::WHITE, Rgb666::CSS_WHITE);
+        assert_eq!(Bgr666::WHITE, Bgr666::CSS_WHITE);
         assert_eq!(Rgb888::WHITE, Rgb888::CSS_WHITE);
         assert_eq!(Bgr888::WHITE, Bgr888::CSS_WHITE);
 
@@ -230,6 +234,8 @@ mod tests {
         assert_eq!(Bgr555::RED, Bgr555::CSS_RED);
         assert_eq!(Rgb565::RED, Rgb565::CSS_RED);
         assert_eq!(Bgr565::RED, Bgr565::CSS_RED);
+        assert_eq!(Rgb666::RED, Rgb666::CSS_RED);
+        assert_eq!(Bgr666::RED, Bgr666::CSS_RED);
         assert_eq!(Rgb888::RED, Rgb888::CSS_RED);
         assert_eq!(Bgr888::RED, Bgr888::CSS_RED);
 
@@ -237,6 +243,8 @@ mod tests {
         assert_eq!(Bgr555::GREEN, Bgr555::CSS_LIME);
         assert_eq!(Rgb565::GREEN, Rgb565::CSS_LIME);
         assert_eq!(Bgr565::GREEN, Bgr565::CSS_LIME);
+        assert_eq!(Rgb666::GREEN, Rgb666::CSS_LIME);
+        assert_eq!(Bgr666::GREEN, Bgr666::CSS_LIME);
         assert_eq!(Rgb888::GREEN, Rgb888::CSS_LIME);
         assert_eq!(Bgr888::GREEN, Bgr888::CSS_LIME);
 
@@ -244,6 +252,8 @@ mod tests {
         assert_eq!(Bgr555::BLUE, Bgr555::CSS_BLUE);
         assert_eq!(Rgb565::BLUE, Rgb565::CSS_BLUE);
         assert_eq!(Bgr565::BLUE, Bgr565::CSS_BLUE);
+        assert_eq!(Rgb666::BLUE, Rgb666::CSS_BLUE);
+        assert_eq!(Bgr666::BLUE, Bgr666::CSS_BLUE);
         assert_eq!(Rgb888::BLUE, Rgb888::CSS_BLUE);
         assert_eq!(Bgr888::BLUE, Bgr888::CSS_BLUE);
     }

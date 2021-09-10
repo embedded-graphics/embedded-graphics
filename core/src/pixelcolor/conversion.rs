@@ -40,12 +40,14 @@ macro_rules! impl_rgb_conversion {
     };
 }
 
-impl_rgb_conversion!(Rgb555 => Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
-impl_rgb_conversion!(Bgr555 => Rgb555, Rgb565, Bgr565, Rgb888, Bgr888);
-impl_rgb_conversion!(Rgb565 => Rgb555, Bgr555, Bgr565, Rgb888, Bgr888);
-impl_rgb_conversion!(Bgr565 => Rgb555, Bgr555, Rgb565, Rgb888, Bgr888);
-impl_rgb_conversion!(Rgb888 => Rgb555, Bgr555, Rgb565, Bgr565, Bgr888);
-impl_rgb_conversion!(Bgr888 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888);
+impl_rgb_conversion!(Rgb555 => Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Bgr555 => Rgb555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb565 => Rgb555, Bgr555, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Bgr565 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb666 => Rgb555, Bgr555, Rgb565, Bgr666, Bgr565, Bgr888, Rgb888);
+impl_rgb_conversion!(Bgr666 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr565, Bgr888, Rgb888);
+impl_rgb_conversion!(Rgb888 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Bgr888);
+impl_rgb_conversion!(Bgr888 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Rgb888);
 
 /// Macro to implement conversion between grayscale color types.
 macro_rules! impl_gray_conversion {
