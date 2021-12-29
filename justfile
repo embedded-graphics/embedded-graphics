@@ -2,7 +2,7 @@ targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unkno
 
 target_dir := "target"
 
-# list of all features except criterion
+# list of all features
 all_features := "nalgebra_support fixed"
 
 doc_dir := "doc"
@@ -23,11 +23,11 @@ build-without-fmt-check-stable: test test-all build-benches check-readmes check-
 
 # Build the benches
 build-benches:
-    cargo bench --workspace --features "criterion" --no-run
+    cargo bench --workspace --no-run
 
 # Run the benches
 bench *args:
-    cargo bench --workspace --features "criterion" {{args}}
+    cargo bench --workspace {{args}}
 
 # Run cargo test in release mode
 test:

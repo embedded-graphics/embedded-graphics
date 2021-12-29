@@ -34,12 +34,9 @@ micromath = { version = "1.1.0", default-features = false }
 embedded-graphics-core = { path = "core", version = "0.3.2"}
 byteorder = { version = "1.3.4", default-features = false }
 
-# criterion is not listed as a dev-dependency to work around a problem with no_std compatibility
-# and because dev-dependencies can't be optional
-criterion = { version = "=0.3.4", optional = true }
-
 [dev-dependencies]
 arrayvec = { version = "0.5.2", default-features = false }
+criterion = "0.3.5"
 
 [features]
 default = []
@@ -49,29 +46,24 @@ fixed_point = [ "fixed" ]
 [[bench]]
 harness = false
 name = "primitives"
-required-features = ["criterion"]
 
 [[bench]]
 harness = false
 name = "primitives_fixed_point"
-required-features = ["criterion", "fixed_point"]
+required-features = ["fixed_point"]
 
 [[bench]]
 harness = false
 name = "fonts"
-required-features = ["criterion"]
 
 [[bench]]
 harness = false
 name = "image"
-required-features = ["criterion"]
 
 [[bench]]
 harness = false
 name = "contains"
-required-features = ["criterion"]
 
 [[bench]]
 harness = false
 name = "raw_data_iter"
-required-features = ["criterion"]
