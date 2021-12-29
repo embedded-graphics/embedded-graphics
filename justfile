@@ -2,6 +2,9 @@ targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unkno
 
 target_dir := "target"
 
+# list of all features
+all_features := "nalgebra_support fixed"
+
 doc_dir := "doc"
 doc_assets_dir := doc_dir + "/assets"
 
@@ -27,7 +30,7 @@ test:
 
 # Run cargo test in release mode with all features enabled
 test-all:
-    cargo test --workspace --release --all-features
+    cargo test --workspace --release --features "{{all_features}}"
 
 # Check the formatting
 check-formatting:
@@ -36,7 +39,7 @@ check-formatting:
 # Cross compiles embedded-graphics for a target
 build-target target *args:
     cargo build --workspace --target {{target}} {{args}}
-    cargo build --workspace --target {{target}} --all-features {{args}}
+    cargo build --workspace --target {{target}} --features "{{all_features}}" {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:
@@ -67,7 +70,7 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --workspace --all-features --no-deps
+    cargo doc --workspace --features "{{all_features}}" --no-deps
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs
