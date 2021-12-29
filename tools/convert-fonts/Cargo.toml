@@ -2,7 +2,7 @@
 name = "convert-fonts"
 version = "0.1.0"
 authors = ["Ralf Fuest <mail@rfuest.de>"]
-edition = "2018"
+edition = "2021"
 publish = false
 
 [dependencies]

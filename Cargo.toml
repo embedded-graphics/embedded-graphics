@@ -15,7 +15,7 @@ exclude = [
 	".gitignore",
 	"convert_1bpp.sh",
 ]
-edition = "2018"
+edition = "2021"
 
 [workspace]
 members = ["core"]
