@@ -14,12 +14,7 @@ doc_assets_dir := doc_dir + "/assets"
 
 build: check-formatting check-drawing-examples build-without-fmt-check
 
-build-without-fmt-check: test test-all check-readmes check-links
-
-# TODO: Remove this and move `build-benches` back into `build-without-fmt-check` when MSRV is
-# increased enough to make all the benchmark tooling compile again. Also remove
-# `tools/generate-drawing-examples/rust-toolchain`.
-build-without-fmt-check-stable: test test-all build-benches check-readmes check-links
+build-without-fmt-check: test test-all check-readmes check-links build-benches
 
 # Build the benches
 build-benches:
