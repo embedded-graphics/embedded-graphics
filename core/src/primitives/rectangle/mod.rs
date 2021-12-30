@@ -429,8 +429,7 @@ impl Rectangle {
     /// let rect = Rectangle::new(Point::new(10, 20), Size::zero());
     /// assert_eq!(rect.is_zero_sized(), true);
     /// ```
-    // MSRV: Add const when upgrading to at least 1.46.0
-    pub fn is_zero_sized(&self) -> bool {
+    pub const fn is_zero_sized(&self) -> bool {
         self.size.height == 0 || self.size.width == 0
     }
 }
