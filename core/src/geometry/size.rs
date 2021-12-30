@@ -157,7 +157,7 @@ impl Size {
     /// Saturating addition.
     ///
     /// Returns `u32::max_value()` for `width` and/or `height` instead of overflowing.
-    pub fn saturating_add(self, other: Self) -> Self {
+    pub const fn saturating_add(self, other: Self) -> Self {
         Self {
             width: self.width.saturating_add(other.width),
             height: self.height.saturating_add(other.height),
@@ -168,7 +168,7 @@ impl Size {
     ///
     /// Returns `0` for `width` and/or `height` instead of overflowing, if the
     /// value in `other` is larger then in `self`.
-    pub fn saturating_sub(self, other: Self) -> Self {
+    pub const fn saturating_sub(self, other: Self) -> Self {
         Self {
             width: self.width.saturating_sub(other.width),
             height: self.height.saturating_sub(other.height),
@@ -218,7 +218,7 @@ impl Size {
     ///
     /// assert_eq!(result, Size::new(40, 90));
     /// ```
-    pub fn component_mul(self, other: Self) -> Self {
+    pub const fn component_mul(self, other: Self) -> Self {
         Self::new(self.width * other.width, self.height * other.height)
     }
 
@@ -235,7 +235,7 @@ impl Size {
     ///
     /// assert_eq!(result, Size::new(4, 3));
     /// ```
-    pub fn component_div(self, other: Self) -> Self {
+    pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.width / other.width, self.height / other.height)
     }
 }
