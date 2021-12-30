@@ -49,7 +49,7 @@ pub struct RawDataSlice<'a, R, BO> {
 
 impl<'a, R, BO> RawDataSlice<'a, R, BO> {
     /// Creates a new raw data slice.
-    pub fn new(data: &'a [u8]) -> Self {
+    pub const fn new(data: &'a [u8]) -> Self {
         Self {
             data,
             raw_type: PhantomData,
