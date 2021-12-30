@@ -66,7 +66,7 @@ impl BinaryColor {
     /// assert_eq!(BinaryColor::On.invert(), BinaryColor::Off);
     /// ```
     #[inline]
-    pub fn invert(self) -> Self {
+    pub const fn invert(self) -> Self {
         match self {
             BinaryColor::On => BinaryColor::Off,
             BinaryColor::Off => BinaryColor::On,
@@ -83,8 +83,11 @@ impl BinaryColor {
     /// assert!(BinaryColor::On.is_on());
     /// ```
     #[inline]
-    pub fn is_on(self) -> bool {
-        self == BinaryColor::On
+    pub const fn is_on(self) -> bool {
+        match self {
+            BinaryColor::On => true,
+            BinaryColor::Off => false,
+        }
     }
 
     /// Returns `true` if this color is `Off`.
@@ -97,8 +100,11 @@ impl BinaryColor {
     /// assert!(BinaryColor::Off.is_off());
     /// ```
     #[inline]
-    pub fn is_off(self) -> bool {
-        self == BinaryColor::Off
+    pub const fn is_off(self) -> bool {
+        match self {
+            BinaryColor::On => false,
+            BinaryColor::Off => true,
+        }
     }
 
     /// Maps active and inactive colors to a different type.
