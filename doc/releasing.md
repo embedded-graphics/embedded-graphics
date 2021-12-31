@@ -12,7 +12,7 @@ Target audience: crate maintainers who wish to release `embedded-graphics` or `e
 ## On your local machine
 
 - `cd` to the repository root
-- Use the crate MSRV of 1.56.1 by running `rustup override set 1.56.1`
+- Use the crate MSRV of 1.57 by running `rustup override set 1.57`
 - Check that `just` and `cargo-release` are installed and available in `$PATH`.
   - `just --version`
   - `cargo release --version`

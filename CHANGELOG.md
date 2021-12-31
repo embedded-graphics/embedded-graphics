@@ -14,7 +14,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
-- **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump all crate Minimum Supported Rust Versions (MSRV) to 1.56.1, aka edition 2021.
+- **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump all crate Minimum Supported Rust Versions (MSRV) to 1.57.
 - [#606](https://github.com/embedded-graphics/embedded-graphics/pull/606) Bump minimum embedded-graphics-core version from `0.3.0` to `0.3.2`
 
 ## [0.7.0] - 2021-06-05
