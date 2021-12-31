@@ -222,7 +222,9 @@ mod tests {
     }
 
     // Check the rendering of a filled sector with negative sweep
-    #[test]
+    // TODO: Re-enable this test for `fixed_point` and track as part of #484
+    #[cfg_attr(not(feature = "fixed_point"), test)]
+    #[cfg_attr(feature = "fixed_point", allow(unused))]
     fn tiny_sector_filled() {
         let mut display = MockDisplay::new();
 
