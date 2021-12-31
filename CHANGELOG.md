@@ -33,6 +33,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `Circle::with_center`
   - `Ellipse::with_center`
   - `Sector::with_center`
+  - `Sector::from_circle`
+  - `Sector::to_circle`
   - `Styled::new`
 
 ## [0.7.1] - 2021-06-15
