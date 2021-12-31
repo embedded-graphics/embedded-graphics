@@ -84,10 +84,7 @@ impl BinaryColor {
     /// ```
     #[inline]
     pub const fn is_on(self) -> bool {
-        match self {
-            BinaryColor::On => true,
-            BinaryColor::Off => false,
-        }
+        matches!(self, BinaryColor::On)
     }
 
     /// Returns `true` if this color is `Off`.
@@ -101,10 +98,7 @@ impl BinaryColor {
     /// ```
     #[inline]
     pub const fn is_off(self) -> bool {
-        match self {
-            BinaryColor::On => false,
-            BinaryColor::Off => true,
-        }
+        matches!(self, BinaryColor::Off)
     }
 
     /// Maps active and inactive colors to a different type.
