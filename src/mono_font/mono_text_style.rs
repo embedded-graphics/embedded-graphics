@@ -386,7 +386,7 @@ pub struct MonoTextStyleBuilder<'a, C> {
 
 impl<C> MonoTextStyleBuilder<'_, C> {
     /// Creates a new text style builder.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             style: MonoTextStyle {
                 font: &super::NULL_FONT,
