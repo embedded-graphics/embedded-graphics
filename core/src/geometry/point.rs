@@ -165,7 +165,7 @@ impl Point {
     ///
     /// This function will panic if `width` or `height` are too large to be represented as an `i32`
     /// and debug assertions are enabled.
-    pub const fn sub_size(self, other: Size) -> Point {
+    pub(crate) const fn sub_size(self, other: Size) -> Point {
         let width = other.width as i32;
         let height = other.height as i32;
 
