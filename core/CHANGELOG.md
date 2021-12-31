@@ -10,6 +10,10 @@
 
 - [#625](https://github.com/embedded-graphics/embedded-graphics/pull/625) Added CSS colors and color conversions to `Rgb666` and `Bgr666`.
 
+### Changed
+
+- **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
+
 ## [0.3.3] - 2021-09-09
 
 ### Added
