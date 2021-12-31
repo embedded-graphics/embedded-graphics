@@ -85,7 +85,7 @@ impl Sector {
     }
 
     /// Create a new sector centered around a given point with a specific diameter and start and sweep angles
-    pub fn with_center(
+    pub const fn with_center(
         center: Point,
         diameter: u32,
         angle_start: Angle,

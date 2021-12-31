@@ -72,8 +72,8 @@ impl PointsIter for Rectangle {
 ///
 /// The center offset is defined as the offset between the top left corner and
 /// the center point of a rectangle with the given size.
-fn center_offset(size: Size) -> Size {
-    size.saturating_sub(Size::new_equal(1)) / 2
+const fn center_offset(size: Size) -> Size {
+    size.saturating_sub(Size::new_equal(1)).div_u32(2)
 }
 
 impl Rectangle {
@@ -98,9 +98,9 @@ impl Rectangle {
     /// For rectangles with even width and/or height the top left corner doesn't
     /// align with the pixel grid. Because of this the coordinates of the top left
     /// corner will be rounded up to the nearest integer coordinate.
-    pub fn with_center(center: Point, size: Size) -> Self {
+    pub const fn with_center(center: Point, size: Size) -> Self {
         Rectangle {
-            top_left: center - center_offset(size),
+            top_left: center.sub_size(center_offset(size)),
             size,
         }
     }

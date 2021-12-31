@@ -175,6 +175,13 @@ impl Size {
         }
     }
 
+    /// Division.
+    ///
+    /// This method provides a workaround for the `Div` trait not being usable in `const` contexts.
+    pub const fn div_u32(self, rhs: u32) -> Size {
+        Size::new(self.width / rhs, self.height / rhs)
+    }
+
     /// Creates a size from two corner points of a bounding box.
     pub(crate) const fn from_bounding_box(corner_1: Point, corner_2: Point) -> Self {
         let width = (corner_1.x - corner_2.x).abs() as u32 + 1;
@@ -289,7 +296,7 @@ impl Div<u32> for Size {
     type Output = Size;
 
     fn div(self, rhs: u32) -> Size {
-        Size::new(self.width / rhs, self.height / rhs)
+        self.div_u32(rhs)
     }
 }
 
