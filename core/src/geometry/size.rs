@@ -178,7 +178,7 @@ impl Size {
     /// Division.
     ///
     /// This method provides a workaround for the `Div` trait not being usable in `const` contexts.
-    pub const fn div_u32(self, rhs: u32) -> Size {
+    pub(crate) const fn div_u32(self, rhs: u32) -> Size {
         Size::new(self.width / rhs, self.height / rhs)
     }
 
