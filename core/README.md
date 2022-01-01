@@ -64,7 +64,7 @@ a spritemap.
 
 ## Minimum supported Rust version
 
-The minimum supported Rust version for embedded-graphics-core is `1.40.0` or greater.
+The minimum supported Rust version for embedded-graphics-core is `1.57` or greater.
 Ensure you have the correct version of Rust installed, preferably through <https://rustup.rs>.
 
 ## Development setup

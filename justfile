@@ -2,9 +2,6 @@ targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unkno
 
 target_dir := "target"
 
-# list of all features except criterion
-all_features := "nalgebra_support fixed"
-
 doc_dir := "doc"
 doc_assets_dir := doc_dir + "/assets"
 
@@ -14,20 +11,15 @@ doc_assets_dir := doc_dir + "/assets"
 
 build: check-formatting check-drawing-examples build-without-fmt-check
 
-build-without-fmt-check: test test-all check-readmes check-links
-
-# TODO: Remove this and move `build-benches` back into `build-without-fmt-check` when MSRV is
-# increased enough to make all the benchmark tooling compile again. Also remove
-# `tools/generate-drawing-examples/rust-toolchain`.
-build-without-fmt-check-stable: test test-all build-benches check-readmes check-links
+build-without-fmt-check: test test-all check-readmes check-links build-benches
 
 # Build the benches
 build-benches:
-    cargo bench --workspace --features "criterion" --no-run
+    cargo bench --workspace --no-run
 
 # Run the benches
 bench *args:
-    cargo bench --workspace --features "criterion" {{args}}
+    cargo bench --workspace {{args}}
 
 # Run cargo test in release mode
 test:
@@ -35,7 +27,7 @@ test:
 
 # Run cargo test in release mode with all features enabled
 test-all:
-    cargo test --workspace --release --features "{{all_features}}"
+    cargo test --workspace --release --all-features
 
 # Check the formatting
 check-formatting:
@@ -44,7 +36,7 @@ check-formatting:
 # Cross compiles embedded-graphics for a target
 build-target target *args:
     cargo build --workspace --target {{target}} {{args}}
-    cargo build --workspace --target {{target}} --features "{{all_features}}" {{args}}
+    cargo build --workspace --target {{target}} --all-features {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:
@@ -75,7 +67,7 @@ install-targets:
 # Generates the docs
 generate-docs:
     cargo clean --doc
-    cargo doc --workspace --features "{{all_features}}" --no-deps
+    cargo doc --workspace --all-features --no-deps
 
 # Runs cargo-deadlinks on the docs
 check-links: generate-docs

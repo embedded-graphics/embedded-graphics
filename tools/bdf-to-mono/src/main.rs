@@ -2,19 +2,19 @@ use std::path::PathBuf;
 
 use bdf_parser::BdfFont;
 use bdf_to_mono::{Encoding, MonoFontData};
-use clap::Clap;
+use clap::Parser;
 
-#[derive(Clap)]
+#[derive(clap::Parser)]
 struct Args {
-    #[clap(about = "BDF input")]
+    #[clap(help = "BDF input")]
     bdf_file: PathBuf,
-    #[clap(about = "Name of MonoFont constant")]
+    #[clap(help = "Name of MonoFont constant")]
     mono_font_const: String,
-    #[clap(long, about = "write PNG file")]
+    #[clap(long, help = "write PNG file")]
     png: Option<PathBuf>,
-    #[clap(long, about = "write RAW file")]
+    #[clap(long, help = "write RAW file")]
     raw: Option<PathBuf>,
-    #[clap(long, about = "encoding", possible_values = &["ascii", "latin1"], default_value = "ascii")]
+    #[clap(long, help = "encoding", possible_values = &["ascii", "latin1"], default_value = "ascii")]
     encoding: String,
 }
 

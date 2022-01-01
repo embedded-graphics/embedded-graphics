@@ -22,7 +22,7 @@ jobs:
   # Check that everything (tests, benches, etc) builds using the MSRV
   precheck-msrv:
     docker: &docker
-      - image: jamwaffles/circleci-embedded-graphics:1.40.0-3
+      - image: jamwaffles/circleci-embedded-graphics:1.57.0-0
         auth:
           username: jamwaffles
           password: $DOCKERHUB_PASSWORD

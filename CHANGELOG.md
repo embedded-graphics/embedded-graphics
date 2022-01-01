@@ -10,6 +10,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#621](https://github.com/embedded-graphics/embedded-graphics/pull/621) Added `Rgb666` and `Bgr666` color type support.
 
+### Changed
+
+- **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
+
 ## [0.7.1] - 2021-06-15
 
 ### Changed
