@@ -11,7 +11,7 @@ pub use embedded_graphics_core::geometry::{
 };
 pub(crate) use real::Real;
 
-pub(crate) trait PointExt {
+pub trait PointExt {
     /// Returns a point that is rotated by 90° relative to the origin.
     fn rotate_90(self) -> Self;
 

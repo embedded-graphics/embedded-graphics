@@ -242,6 +242,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn oops() {
+        let mapping = StrGlyphMapping::new("\0\u{20}\u{7e}\0\u{a1}\u{ff}", '?' as usize);
+
+        assert_eq!(mapping.index('A'), 10);
+    }
+
+    #[test]
     fn empty() {
         let mapping = StrGlyphMapping::new("", 0);
 

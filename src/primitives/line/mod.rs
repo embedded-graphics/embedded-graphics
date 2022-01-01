@@ -1,9 +1,9 @@
 //! The line primitive
 
+pub use crate::primitives::common::StrokeOffset;
 use crate::{
     geometry::{Dimensions, Point},
     primitives::{
-        common::StrokeOffset,
         line::thick_points::{ParallelLineType, ParallelsIterator},
         PointsIter, Primitive, Rectangle,
     },
@@ -97,7 +97,7 @@ impl Line {
     ///
     /// The returned line is rotated 90 degree counter clockwise and shares the start point with the
     /// original line.
-    fn perpendicular(&self) -> Self {
+    pub fn perpendicular(&self) -> Self {
         let delta = self.end - self.start;
         let delta = Point::new(delta.y, -delta.x);
 
@@ -107,11 +107,7 @@ impl Line {
     /// Get two lines representing the left and right edges of the thick line.
     ///
     /// If a thickness of `0` is given, the lines returned will lie on the same points as `self`.
-    pub(in crate::primitives) fn extents(
-        &self,
-        thickness: u32,
-        stroke_offset: StrokeOffset,
-    ) -> (Line, Line) {
+    pub fn extents(&self, thickness: u32, stroke_offset: StrokeOffset) -> (Line, Line) {
         let mut it = ParallelsIterator::new(self, thickness.saturating_as(), stroke_offset);
         let reduce =
             it.parallel_parameters.position_step.major + it.parallel_parameters.position_step.minor;
