@@ -19,7 +19,7 @@ pub struct Styled<T, S> {
 
 impl<T, S> Styled<T, S> {
     /// Creates a styled.
-    pub fn new(primitive: T, style: S) -> Self {
+    pub const fn new(primitive: T, style: S) -> Self {
         Self { primitive, style }
     }
 }

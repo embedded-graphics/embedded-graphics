@@ -13,6 +13,29 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Changed
 
 - **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
+- [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) Made the following functions `const`:
+  - `Point::component_mul`
+  - `Point::component_div`
+  - `Size::saturating_add`
+  - `Size::saturating_sub`
+  - `Size::component_mul`
+  - `Size::component_div`
+  - `BinaryColor::invert`
+  - `BinaryColor::is_on`
+  - `BinaryColor::is_off`
+  - `Rectangle::with_center`
+  - `Rectangle::is_zero_sized`
+  - `RawDataSlice::new`
+  - `MonoTextStyle::new`
+  - `Arc::with_center`
+  - `Arc::from_circle`
+  - `Arc::to_circle`
+  - `Circle::with_center`
+  - `Ellipse::with_center`
+  - `Sector::with_center`
+  - `Sector::from_circle`
+  - `Sector::to_circle`
+  - `Styled::new`
 
 ## [0.7.1] - 2021-06-15
 

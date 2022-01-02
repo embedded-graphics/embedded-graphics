@@ -70,7 +70,7 @@ impl Circle {
     }
 
     /// Create a new circle centered around a given point with a specific diameter
-    pub fn with_center(center: Point, diameter: u32) -> Self {
+    pub const fn with_center(center: Point, diameter: u32) -> Self {
         let top_left = Rectangle::with_center(center, Size::new_equal(diameter)).top_left;
 
         Circle { top_left, diameter }

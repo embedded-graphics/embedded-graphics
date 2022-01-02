@@ -85,7 +85,7 @@ impl Sector {
     }
 
     /// Create a new sector centered around a given point with a specific diameter and start and sweep angles
-    pub fn with_center(
+    pub const fn with_center(
         center: Point,
         diameter: u32,
         angle_start: Angle,
@@ -104,7 +104,7 @@ impl Sector {
     /// Creates an arc based on a circle.
     ///
     /// The resulting sector will match the `top_left` and `diameter` of the base circle.
-    pub fn from_circle(circle: Circle, angle_start: Angle, angle_sweep: Angle) -> Self {
+    pub const fn from_circle(circle: Circle, angle_start: Angle, angle_sweep: Angle) -> Self {
         Sector {
             top_left: circle.top_left,
             diameter: circle.diameter,
@@ -114,7 +114,7 @@ impl Sector {
     }
 
     /// Returns a circle with the same `top_left` and `diameter` as this sector.
-    pub fn to_circle(&self) -> Circle {
+    pub const fn to_circle(&self) -> Circle {
         Circle::new(self.top_left, self.diameter)
     }
 

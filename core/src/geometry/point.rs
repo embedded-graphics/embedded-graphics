@@ -157,6 +157,24 @@ impl Point {
         Point::new(self.x.abs(), self.y.abs())
     }
 
+    /// Offsets a point by subtracting a size.
+    ///
+    /// This method provides a workaround for the `Sub` trait not being usable in `const` contexts.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
+    pub(crate) const fn sub_size(self, other: Size) -> Point {
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        Point::new(self.x - width, self.y - height)
+    }
+
     /// Returns the componentwise minimum of two `Point`s
     ///
     /// # Examples
@@ -196,7 +214,7 @@ impl Point {
     ///
     /// assert_eq!(result, Point::new(-40, 90));
     /// ```
-    pub fn component_mul(self, other: Self) -> Self {
+    pub const fn component_mul(self, other: Self) -> Self {
         Self::new(self.x * other.x, self.y * other.y)
     }
 
@@ -213,7 +231,7 @@ impl Point {
     ///
     /// assert_eq!(result, Point::new(2, -10));
     /// ```
-    pub fn component_div(self, other: Self) -> Self {
+    pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
     }
 }
@@ -290,13 +308,7 @@ impl Sub<Size> for Point {
     /// This function will panic if `width` or `height` are too large to be represented as an `i32`
     /// and debug assertions are enabled.
     fn sub(self, other: Size) -> Point {
-        let width = other.width as i32;
-        let height = other.height as i32;
-
-        debug_assert!(width >= 0, "width is too large");
-        debug_assert!(height >= 0, "height is too large");
-
-        Point::new(self.x - width, self.y - height)
+        self.sub_size(other)
     }
 }
 
