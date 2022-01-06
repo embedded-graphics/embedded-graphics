@@ -25,10 +25,9 @@ use az::SaturatingAs;
 /// background, use the [`new`] method. For more complex text styles, use the
 /// [`MonoTextStyleBuilder`].
 ///
-/// [`Text`]: ../text/struct.Text.html
+/// [`Text`]: crate::text::Text
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
-/// [`MonoTextStyleBuilder`]: ./struct.MonoTextStyleBuilder.html
-/// [`new`]: #method.new
+/// [`new`]: MonoTextStyle::new()
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct MonoTextStyle<'a, C> {
@@ -61,7 +60,7 @@ impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
     ///
     /// Drawing a `Text` with a transparent `MonoTextStyle` will not draw any pixels.
     ///
-    /// [`Text`]: ../text/struct.Text.html
+    /// [`Text`]: super::text::Text
     pub fn is_transparent(&self) -> bool {
         self.text_color.is_none()
             && self.background_color.is_none()
@@ -375,10 +374,9 @@ enum LineElement {
 ///     .build();
 /// ```
 ///
-/// [`FONT_6X9`]: ascii/constant.FONT_6X9.html
+/// [`FONT_6X9`]: crate::mono_font::ascii::FONT_6X9
 /// [other fonts]: index.html
-/// [`Text`]: ../text/struct.Text.html
-/// [`MonoTextStyle`]: struct.MonoTextStyle.html
+/// [`Text`]: crate::text::Text
 #[derive(Copy, Clone, Debug)]
 pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
@@ -492,7 +490,7 @@ impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
     /// This method can only be called after a font was set by using the [`font`] method. All other
     /// settings are optional and they will be set to their default value if they are missing.
     ///
-    /// [`font`]: #method.font
+    /// [`font`]: MonoTextStyleBuilder::font()
     pub fn build(self) -> MonoTextStyle<'a, C> {
         self.style
     }

@@ -62,8 +62,8 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// [`DrawTarget`]: draw_target/trait.DrawTarget.html
-/// [`draw_iter`]: draw_target/trait.DrawTarget.html#tymethod.draw_iter
+/// [`DrawTarget`]: crate::draw_target::DrawTarget
+/// [`draw_iter`]: crate::draw_target::DrawTarget::draw_iter
 pub trait Drawable {
     /// The pixel color type.
     type Color: PixelColor;
@@ -136,8 +136,7 @@ pub trait Drawable {
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 ///
-/// [`Drawable`]: trait.Drawable.html
-/// [`DrawTarget`]: draw_target/trait.DrawTarget.html
+/// [`DrawTarget`]: crate::draw_target::DrawTarget
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Pixel<C>(pub Point, pub C)
 where

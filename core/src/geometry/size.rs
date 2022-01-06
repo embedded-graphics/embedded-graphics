@@ -56,8 +56,7 @@ use crate::geometry::Point;
 /// # }
 /// ```
 ///
-/// [`Drawable`]: ../drawable/trait.Drawable.html
-/// [`Point`]: struct.Point.html
+/// [`Drawable`]: super::drawable::Drawable
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra

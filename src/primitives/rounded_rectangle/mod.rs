@@ -22,10 +22,10 @@ pub use styled::StyledPixelsIterator;
 ///
 /// Creates a rectangle with rounded corners. Corners can be circular or elliptical in shape, and
 /// each corner may have a separate radius applied to it. To create a rounded rectangle with the same
-/// radius for each corner, use the [`with_equal_corners`](#method.with_equal_corners) method.
+/// radius for each corner, use the [`with_equal_corners`](RoundedRectangle::with_equal_corners()) method.
 ///
 /// Rounded rectangles with different radii for each corner can be created by passing a
-/// [`CornerRadii`](../struct.CornerRadii.html) configuration struct to the [`new`](#method.new)
+/// [`CornerRadii`](super::CornerRadii) configuration struct to the [`new`](RoundedRectangle::new())
 /// method.
 ///
 /// # Overlapping corners
@@ -43,7 +43,7 @@ pub use styled::StyledPixelsIterator;
 /// ## Create a uniform rounded rectangle
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Using
-/// [`with_equal_corners`](#method.with_equal_corners), all corners are given the same 10px circular
+/// [`with_equal_corners`](RoundedRectangle::with_equal_corners()), all corners are given the same 10px circular
 /// radius. The rectangle is drawn using a solid green fill with a 5px red stroke.
 ///
 /// ```rust
@@ -73,8 +73,8 @@ pub use styled::StyledPixelsIterator;
 /// ## Different corner radii
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Each corner is given a distinct
-/// radius in the x and y direction by creating a [`CornerRadii`](../struct.CornerRadii.html)
-/// object and passing that to [`RoundedRectangle::new`](#method.new).
+/// radius in the x and y direction by creating a [`CornerRadii`](super::CornerRadii)
+/// object and passing that to [`RoundedRectangle::new`](RoundedRectangle::new()).
 ///
 /// ```rust
 /// use embedded_graphics::{
@@ -107,7 +107,7 @@ pub use styled::StyledPixelsIterator;
 /// ## Using `CornerRadiiBuilder`
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Corner radii are set using the
-/// [`CornerRadiiBuilder`](../struct.CornerRadiiBuilder.html) builder.
+/// [`CornerRadiiBuilder`](super::CornerRadiiBuilder) builder.
 ///
 /// ```rust
 /// use embedded_graphics::{

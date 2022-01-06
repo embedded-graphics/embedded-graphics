@@ -153,20 +153,17 @@
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
-//! [`Text`]: struct.Text.html
-//! [`Text::new`]: struct.TextStyle.html#method.new
-//! [`with_alignment`]: struct.Text.html#method.with_alignment
-//! [`with_baseline`]: struct.Text.html#method.with_baseline
-//! [`with_text_style`]: struct.Text.html#method.with_text_style
-//! [`TextStyle`]: struct.TextStyle.html
-//! [`alignment`]: struct.TextStyle.html#structfield.alignment
-//! [`baseline`]: struct.TextStyle.html#structfield.baseline
-//! [`line_height`]: struct.TextStyle.html#structfield.line_height
-//! [`TextStyleBuilder`]: struct.TextStyleBuilder.html
-//! [`mono_font`]: ../mono_font/index.html
-//! [`MonoTextStyle`]: ../mono_font/struct.MonoTextStyle.html
-//! [`renderer` module]: renderer/index.html
-//! [external crates list]: ../index.html#additional-functions-provided-by-external-crates
+//! [`Text::new`]: TextStyle::new()
+//! [`with_alignment`]: Text::with_alignment()
+//! [`with_baseline`]: Text::with_baseline()
+//! [`with_text_style`]: Text::with_text_style()
+//! [`alignment`]: TextStyle::alignment
+//! [`baseline`]: TextStyle::baseline
+//! [`line_height`]: TextStyle::line_height
+//! [`mono_font`]: super::mono_font
+//! [`MonoTextStyle`]: super::mono_font::MonoTextStyle
+//! [`renderer` module]: renderer
+//! [external crates list]: super#additional-functions-provided-by-external-crates
 
 pub mod renderer;
 mod text;

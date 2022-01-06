@@ -10,7 +10,7 @@ use crate::{
 /// Iterates over all line segments in the polyline, returning a 6-sided shape as a [`ThickSegment`]
 /// for each segment. These are tessellated and are used to produce scanline intersections.
 ///
-/// [`ThickSegment`]: ../thick_segment/struct.ThickSegment.html
+/// [`ThickSegment`]: super::thick_segment::ThickSegment
 #[derive(Clone, Debug)]
 pub struct ThickSegmentIter<'a> {
     windows: core::slice::Windows<'a, Point>,

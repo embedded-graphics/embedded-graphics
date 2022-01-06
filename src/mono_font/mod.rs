@@ -40,8 +40,7 @@
 //END-FONT-TABLE
 //!
 //! [built-in fonts]: #built-in-fonts
-//! [`text` module]: ../text/index.html#examples
-//! [`MonoTextStyle`]: struct.MonoTextStyle.html
+//! [`text` module]: super::text#examples
 //! [examples repository]:  https://github.com/embedded-graphics/examples
 
 mod draw_target;
@@ -66,7 +65,7 @@ use crate::{
 ///
 /// See the [module documentation] for more information about using fonts.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 #[derive(Clone, Copy)]
 pub struct MonoFont<'a> {
     /// Raw image data containing the font.
@@ -156,7 +155,6 @@ impl fmt::Debug for MonoFont<'_> {
 /// `DecorationDimensions` is used to specify the position and height of underline and strikethrough
 /// decorations in [`MonoFont`]s.
 ///
-/// [`MonoFont`]: struct.MonoFont.html
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct DecorationDimensions {
     /// Offset from the top of the character to the top of the decoration.

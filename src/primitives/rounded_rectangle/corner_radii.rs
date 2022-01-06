@@ -45,7 +45,7 @@ impl CornerRadii {
     /// Create a new set of corner radii with all corners having equal values.
     ///
     /// To create a `CornerRadii` instance with different radii for each corner, use the
-    /// [`CornerRadiiBuilder`](./struct.CornerRadiiBuilder.html) builder.
+    /// [`CornerRadiiBuilder`] builder.
     pub const fn new(radius: Size) -> Self {
         Self {
             top_left: radius,
@@ -107,7 +107,7 @@ impl CornerRadii {
     }
 }
 
-/// [`CornerRadii`](./struct.CornerRadii.html) builder.
+/// [`CornerRadii`] builder.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct CornerRadiiBuilder {
     corners: CornerRadii,

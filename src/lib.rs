@@ -8,19 +8,19 @@
 //!
 //! It contains built in items that make it easy to draw 2D graphics primitives:
 //!
-//! * [Raw data images](./image/struct.ImageRaw.html)
-//! * [Primitives](./primitives/index.html)
-//!     * [Lines](./primitives/line/struct.Line.html)
-//!     * [Rectangles (and squares)](./primitives/rectangle/struct.Rectangle.html)
-//!     * [Circles](./primitives/circle/struct.Circle.html)
-//!     * [Ellipses](./primitives/ellipse/struct.Ellipse.html)
-//!     * [Arcs](./primitives/arc/struct.Arc.html)
-//!     * [Sectors](./primitives/sector/struct.Sector.html)
-//!     * [Triangles](./primitives/triangle/struct.Triangle.html)
-//!     * [Polylines](./primitives/polyline/struct.Polyline.html)
-//!     * [Rounded rectangles](./primitives/rounded_rectangle/struct.RoundedRectangle.html)
-//! * [Text](./text/index.html)
-//! * [Monospaced fonts](./mono_font/index.html)
+//! * [Raw data images](image::ImageRaw)
+//! * [Primitives](primitives)
+//!     * [Lines](primitives::line::Line)
+//!     * [Rectangles (and squares)](primitives::rectangle::Rectangle)
+//!     * [Circles](primitives::circle::Circle)
+//!     * [Ellipses](primitives::ellipse::Ellipse)
+//!     * [Arcs](primitives::arc::Arc)
+//!     * [Sectors](primitives::sector::Sector)
+//!     * [Triangles](primitives::triangle::Triangle)
+//!     * [Polylines](primitives::polyline::Polyline)
+//!     * [Rounded rectangles](primitives::rounded_rectangle::RoundedRectangle)
+//! * [Text](text)
+//! * [Monospaced fonts](mono_font)
 //!
 //! # Additional functions provided by external crates
 //!
@@ -125,7 +125,7 @@
 //!
 //! [![A grid of screenshots showing primitives, text and other items that can be drawn using embedded-graphics.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/4c680418cc4c37b8f7ed92d8b26edfde880d4c96/doc/assets/all_drawing_ops.png)](./examples/index.html)
 //!
-//! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](./examples/index.html).
+//! Example usage of drawing primitives, text and images with embedded-graphics can be found [here](examples).
 //!
 //! ## Shapes and text
 //!
@@ -209,13 +209,13 @@
 //!
 //! Additional examples can be found in the [examples](https://github.com/embedded-graphics/examples) repository.
 //!
-//! [`Circle`]: ./primitives/circle/struct.Circle.html
-//! [`MockDisplay`]: ./mock_display/struct.MockDisplay.html
-//! [`Point`]: ./geometry/struct.Point.html
-//! [`Size`]: ./geometry/struct.Size.html
+//! [`Circle`]: primitives::circle::Circle
+//! [`MockDisplay`]: mock_display::MockDisplay
+//! [`Point`]: geometry::Point
+//! [`Size`]: geometry::Size
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 //! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
-//! [`Drawable`]: ./drawable/trait.Drawable.html
+//! [`Drawable`]: drawable::Drawable
 //! [simulator]: https://github.com/embedded-graphics/simulator
 //! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 
@@ -232,6 +232,8 @@
 #![deny(unstable_features)]
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![deny(rustdoc::private_intra_doc_links)]
 
 pub mod draw_target;
 pub mod examples;

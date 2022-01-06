@@ -36,19 +36,17 @@
 //! a spritemap.
 //!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
-//! [`Pixel`]: ./drawable/struct.Pixel.html
-//! [`Point`]: ./geometry/struct.Point.html
-//! [`Size`]: ./geometry/struct.Size.html
-//! [`Drawable`]: ./drawable/trait.Drawable.html
-//! [`DrawTarget`]: ./draw_target/trait.DrawTarget.html
-//! [`Rectangle`]: ./primitives/rectangle/struct.Rectangle.html
-//! [`Dimensions`]: ./geometry/trait.Dimensions.html
-//! [`OriginDimensions`]: ./geometry/trait.OriginDimensions.html
-//! [`prelude`]: ./prelude/index.html
-//! [`pixelcolor`]: ./pixelcolor/index.html
-//! [`BinaryColor`]: ./pixelcolor/enum.BinaryColor.html
-//! [`Rgb888`]: ./pixelcolor/struct.Rgb888.html
-//! [`ImageDrawable`]: ./image/image_drawable/trait.ImageDrawable.html
+//! [`Pixel`]: drawable::Pixel
+//! [`Point`]: geometry::Point
+//! [`Size`]: geometry::Size
+//! [`Drawable`]: drawable::Drawable
+//! [`DrawTarget`]: draw_target::DrawTarget
+//! [`Rectangle`]: primitives::rectangle::Rectangle
+//! [`Dimensions`]: geometry::Dimensions
+//! [`OriginDimensions`]: geometry::OriginDimensions
+//! [`BinaryColor`]: pixelcolor::BinaryColor
+//! [`Rgb888`]: pixelcolor::Rgb888
+//! [`ImageDrawable`]: image::ImageDrawable
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/b225511f390c0ed9bc065eb67d05125845312148/assets/logo_core.svg?sanitize=true"
@@ -63,6 +61,8 @@
 #![deny(unstable_features)]
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![deny(rustdoc::private_intra_doc_links)]
 
 pub mod draw_target;
 mod drawable;

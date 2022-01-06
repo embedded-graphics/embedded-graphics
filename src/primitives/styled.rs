@@ -53,7 +53,7 @@ impl<T: OffsetOutline, C: PixelColor> Styled<T, PrimitiveStyle<C>> {
     /// assert_eq!(circle.fill_area(), Circle::with_center(center, diameter - style.stroke_width));
     /// ```
     ///
-    /// [`draw`]: ../trait.Drawable.html#tymethod.draw
+    /// [`draw`]: crate::Drawable::draw
     pub fn fill_area(&self) -> T {
         self.style.fill_area(&self.primitive)
     }
@@ -90,7 +90,7 @@ impl<T: OffsetOutline, C: PixelColor> Styled<T, PrimitiveStyle<C>> {
     /// assert!(!is_on_stroke(center));
     /// ```
     ///
-    /// [`draw`]: ../trait.Drawable.html#tymethod.draw
+    /// [`draw`]: crate::Drawable::draw
     pub fn stroke_area(&self) -> T {
         self.style.stroke_area(&self.primitive)
     }

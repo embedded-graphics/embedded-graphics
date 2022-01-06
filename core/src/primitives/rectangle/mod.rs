@@ -366,8 +366,8 @@ impl Rectangle {
     /// }
     /// ```
     ///
-    /// [`columns`]: #method.columns
-    /// [`points`]: ../trait.PointsIter.html#tymethod.points
+    /// [`columns`]: Rectangle::columns()
+    /// [`points`]: super::PointsIter::points
     pub fn rows(&self) -> Range<i32> {
         self.top_left.y
             ..self
@@ -405,8 +405,8 @@ impl Rectangle {
     /// }
     /// ```
     ///
-    /// [`rows`]: #method.rows
-    /// [`points`]: ../trait.PointsIter.html#tymethod.points
+    /// [`rows`]: Rectangle::rows()
+    /// [`points`]: super::PointsIter::points
     pub fn columns(&self) -> Range<i32> {
         self.top_left.x
             ..self

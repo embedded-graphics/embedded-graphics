@@ -90,14 +90,10 @@
 //!
 //! [tinytga]: https://crates.io/crates/tinytga
 //! [tinybmp]: https://crates.io/crates/tinybmp
-//! [raw pixel data]: struct.ImageRaw.html
-//! [`ImageDrawable`]: trait.ImageDrawable.html
-//! [`ImageDrawableExt`]: trait.ImageDrawableExt.html
-//! [`sub_image`]: trait.ImageDrawableExt.html#tymethod.sub_image
-//! [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
-//! [`Image`]: ./struct.Image.html
-//! [`SubImage`]: struct.SubImage.html
-//! [`prelude`]: ../prelude/index.html
+//! [raw pixel data]: ImageRaw
+//! [`sub_image`]: ImageDrawableExt::sub_image
+//! [`OriginDimensions`]: super::geometry::OriginDimensions
+//! [`prelude`]: super::prelude
 
 mod image_drawable_ext;
 mod image_raw;
@@ -126,11 +122,10 @@ use core::fmt::Debug;
 ///
 /// Refer to the [module documentation] for examples.
 ///
-/// [module documentation]: ./index.html
-/// [`Transform::translate`]: ../transform/trait.Transform.html#tymethod.translate
-/// [`Transform::translate_mut`]: ../transform/trait.Transform.html#tymethod.translate_mut
-/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-/// [`ImageDrawable`]: trait.ImageDrawable.html
+/// [module documentation]: self
+/// [`Transform::translate`]: super::transform::Transform::translate
+/// [`Transform::translate_mut`]: super::transform::Transform::translate_mut
+/// [`DrawTarget`]: super::draw_target::DrawTarget
 #[derive(Debug, Clone, Copy)]
 pub struct Image<'a, T> {
     image_drawable: &'a T,

@@ -78,10 +78,9 @@
 //! draw the specified color and doesn't depend on the raw data conversions,
 //! see the [`raw` module] documentation for an example that uses this feature.
 //!
-//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-//! [`PixelColor`]: trait.PixelColor.html
-//! [`Raw`]: trait.PixelColor.html#associatedtype.Raw
-//! [`raw` module]: raw/index.html
+//! [`DrawTarget`]: super::draw_target::DrawTarget
+//! [`Raw`]: PixelColor::Raw
+//! [`raw` module]: raw
 
 mod binary_color;
 mod conversion;
@@ -102,7 +101,7 @@ pub use web_colors::WebColors;
 ///
 /// See the [module-level documentation] for more details.
 ///
-/// [module-level documentation]: index.html
+/// [module-level documentation]: self
 pub trait PixelColor: Copy + PartialEq {
     /// Raw data type.
     ///
@@ -110,7 +109,7 @@ pub trait PixelColor: Copy + PartialEq {
     ///
     /// See the [`raw` module documentation] for more details.
     ///
-    /// [`raw` module documentation]: raw/index.html
+    /// [`raw` module documentation]: raw
     type Raw: RawData;
 }
 
@@ -135,8 +134,6 @@ pub trait PixelColor: Copy + PartialEq {
 /// assert_eq!(raw, 0b11111_000000_01010u16);
 /// ```
 ///
-/// [`PixelColor`]: ./trait.PixelColor.html
-/// [`Rgb565`]: ./struct.Rgb565.html
 pub trait IntoStorage {
     /// The underlying storage type for the pixel color
     type Storage;

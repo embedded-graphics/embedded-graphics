@@ -8,7 +8,6 @@ use crate::text::{Alignment, Baseline, LineHeight};
 ///
 /// See the [module-level documentation] for more information about text styles and examples.
 ///
-/// [`TextStyleBuilder`]: struct.TextStyleBuilder.html
 /// [module-level documentation]: index.html
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]

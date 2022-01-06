@@ -7,12 +7,11 @@ use az::SaturatingAs;
 /// is drawn.
 ///
 /// Because `PrimitiveStyle` has the [`non_exhaustive`] attribute, it cannot be created using a
-/// struct literal. To create a `PrimitiveStyle`, the [`with_stroke`](#method.with_stroke) and
-/// [`with_fill`](#method.with_fill) methods can be used for styles that only require a stroke or
+/// struct literal. To create a `PrimitiveStyle`, the [`with_stroke`](PrimitiveStyle::with_stroke()) and
+/// [`with_fill`](PrimitiveStyle::with_fill()) methods can be used for styles that only require a stroke or
 /// fill respectively. For more complex styles, use the [`PrimitiveStyleBuilder`].
 ///
-/// [primitive]: ../primitives/index.html
-/// [`PrimitiveStyleBuilder`]: struct.PrimitiveStyleBuilder.html
+/// [primitive]: crate::primitives
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[non_exhaustive]
@@ -186,7 +185,6 @@ where
 /// let rectangle = Rectangle::new(Point::new(20, 20), Size::new(20, 10)).into_styled(style);
 /// ```
 ///
-/// [`PrimitiveStyle`]: ./struct.PrimitiveStyle.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct PrimitiveStyleBuilder<C>
 where

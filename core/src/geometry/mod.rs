@@ -47,13 +47,12 @@ use crate::primitives::Rectangle;
 ///
 /// The bounding box of [`ImageDrawable`]s must always start at the origin, therefore [`OriginDimensions`] must be implemented instead of this trait.
 ///
-/// [`Drawable`]: ../trait.Drawable.html
-/// [`Drawable::draw`]: ../trait.Drawable.html#tymethod.draw
-/// [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-/// [`ImageDrawable`]: ../image/trait.ImageDrawable.html
-/// [`OriginDimensions`]: trait.OriginDimensions.html
-/// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
-/// [`points`]: ../primitives/trait.PointsIter.html
+/// [`Drawable`]: super::Drawable
+/// [`Drawable::draw`]: super::Drawable::draw
+/// [`DrawTarget`]: super::draw_target::DrawTarget
+/// [`ImageDrawable`]: super::image::ImageDrawable
+/// [`Rectangle`]: super::primitives::rectangle::Rectangle
+/// [`points`]: super::primitives::PointsIter
 /// [`MockDisplay::affected_area`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html#method.affected_area
 /// [`contains`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.ContainsPoint.html#tymethod.contains
 /// [primitives]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html
@@ -77,7 +76,7 @@ pub trait Dimensions {
 /// will always be at the origin, which will be the case for most display drivers. Some types, like [`ImageDrawable`],
 /// require a bounding box that starts at the origin and can only be used if [`OriginDimensions`] is implemented.
 ///
-/// [`ImageDrawable`]: ../image/trait.ImageDrawable.html
+/// [`ImageDrawable`]: super::image::ImageDrawable
 pub trait OriginDimensions {
     /// Returns the size of the bounding box.
     fn size(&self) -> Size;
