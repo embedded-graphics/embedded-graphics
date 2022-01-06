@@ -71,8 +71,24 @@ impl Dimensions for Line {
 }
 
 impl Line {
-    /// Create a new line
+    /// Creates a line between two points.
     pub const fn new(start: Point, end: Point) -> Self {
+        Self { start, end }
+    }
+
+    /// Creates a line with a start point and a delta vector.
+    ///
+    /// # Examples
+    /// ```
+    /// use embedded_graphics::{prelude::*, primitives::Line};
+    ///
+    /// let line = Line::with_delta(Point::new(10, 20), Point::new(20, -20));
+    /// # assert_eq!(line, Line::new(Point::new(10, 20), Point::new(30, 0)));
+    /// ```
+    pub const fn with_delta(start: Point, delta: Point) -> Self {
+        // Add coordinates manually because `start + delta` isn't const.
+        let end = Point::new(start.x + delta.x, start.y + delta.y);
+
         Self { start, end }
     }
 
