@@ -77,11 +77,11 @@ impl Line {
     }
 
     /// Creates a line with a start point and a delta vector.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use embedded_graphics::{prelude::*, primitives::Line};
-    /// 
+    ///
     /// let line = Line::with_delta(Point::new(10, 20), Point::new(20, -20));
     /// # assert_eq!(line, Line::new(Point::new(10, 20), Point::new(30, 0)));
     /// ```
