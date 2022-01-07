@@ -16,9 +16,7 @@ use super::TextStyleBuilder;
 ///
 /// A text drawable can be used to draw text to a draw target.
 ///
-/// See the [module-level documentation] for more information about text drawables and examples.
-///
-/// [module-level documentation]: index.html
+/// See the [module-level documentation](super) for more information about text drawables and examples.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Text<'a, S> {
     /// The string.

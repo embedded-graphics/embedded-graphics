@@ -15,7 +15,7 @@ use crate::{
 /// [module-level documentation] for an example.
 ///
 /// [`sub_image`]: trait.ImageDrawableExt.html#tymethod.sub_image
-/// [module-level documentation]: index.html#sub-images
+/// [module-level documentation]: super#sub-images
 #[derive(Debug)]
 pub struct SubImage<'a, T> {
     parent: &'a T,

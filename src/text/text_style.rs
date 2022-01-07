@@ -6,9 +6,7 @@ use crate::text::{Alignment, Baseline, LineHeight};
 ///
 /// Use [`TextStyleBuilder`] to build a text style object.
 ///
-/// See the [module-level documentation] for more information about text styles and examples.
-///
-/// [module-level documentation]: index.html
+/// See the [module-level documentation](super) for more information about text styles and examples.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]
 pub struct TextStyle {

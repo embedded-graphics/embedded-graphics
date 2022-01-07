@@ -163,11 +163,7 @@ macro_rules! impl_raw_data {
         #[doc = ""]
         #[doc = $doc]
         #[doc = ""]
-        #[doc = "See the [module-level documentation] for more information."]
-        #[doc = ""]
-        #[doc = "[module-level documentation]: index.html"]
-        #[doc = "[`new`]: #method.new"]
-        #[doc = "[`into_inner`]: trait.RawData.html#tymethod.into_inner"]
+        #[doc = "See the [module-level documentation](super) for more information."]
         #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
         pub struct $type($storage_type);
 
@@ -216,19 +212,19 @@ macro_rules! impl_raw_data {
                 stringify!($type),
                 "` is internally stored in an `",
                 stringify!($storage_type),
-                "`. It can be constructed from an `",
+                "`. It can be constructed from an [`",
                 stringify!($storage_type),
-                "` by using the ",
-                "[`new`] method or by calling `",
+                "`] by using the ",
+                "[`new`](Self::new) method or by calling `",
                 stringify!($type),
                 "::from(",
                 stringify!($storage_type),
                 "_value)`. ",
                 "To convert a `",
                 stringify!($type),
-                "` back into a `",
+                "` back into a [`",
                 stringify!($storage_type),
-                "` the [`into_inner`] method can be used."
+                "`] the [`into_inner`](Self::into_inner) method can be used."
             )
         );
     };

@@ -375,7 +375,7 @@ enum LineElement {
 /// ```
 ///
 /// [`FONT_6X9`]: crate::mono_font::ascii::FONT_6X9
-/// [other fonts]: index.html
+/// [other fonts]: super
 /// [`Text`]: crate::text::Text
 #[derive(Copy, Clone, Debug)]
 pub struct MonoTextStyleBuilder<'a, C> {
