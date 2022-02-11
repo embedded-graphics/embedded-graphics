@@ -214,7 +214,7 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
             )?,
             (None, None) => {
                 let dx = (self.font.character_size.width + self.font.character_spacing)
-                    * text.len() as u32;
+                    * text.chars().count() as u32;
 
                 position + Size::new(dx, 0)
             }
@@ -257,7 +257,7 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
     fn measure_string(&self, text: &str, position: Point, baseline: Baseline) -> TextMetrics {
         let bb_position = position - Point::new(0, self.baseline_offset(baseline));
 
-        let bb_width = (text.len() as u32
+        let bb_width = (text.chars().count() as u32
             * (self.font.character_size.width + self.font.character_spacing))
             .saturating_sub(self.font.character_spacing);
 
@@ -513,6 +513,7 @@ mod tests {
         mock_display::MockDisplay,
         mono_font::{
             ascii::{FONT_10X20, FONT_6X9},
+            iso_8859_1::FONT_6X9 as FONT_6X9_LATIN1,
             mapping,
             tests::*,
             DecorationDimensions,
@@ -1040,6 +1041,31 @@ mod tests {
                 baseline, next, expected_next
             );
         }
+    }
+
+    #[test]
+    fn latin1_text_dimensions_one_line() {
+        let position = Point::new(5, 5);
+
+        let style = MonoTextStyleBuilder::<BinaryColor>::new()
+            .font(&FONT_6X9_LATIN1)
+            .build();
+        let text = Text::with_baseline("123°§£", position, style, Baseline::Top);
+
+        assert_eq!(
+            text.bounding_box(),
+            Rectangle::new(
+                position,
+                FONT_6X9_LATIN1
+                    .character_size
+                    .component_mul(Size::new(6, 1))
+            )
+        );
+
+        let mut display = MockDisplay::new();
+        let next = text.draw(&mut display).unwrap();
+
+        assert_eq!(next, position + FONT_6X9_LATIN1.character_size.x_axis() * 6);
     }
 
     #[test]

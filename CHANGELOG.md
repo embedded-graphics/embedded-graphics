@@ -38,6 +38,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `Sector::to_circle`
   - `Styled::new`
 
+### Fixed
+
+- [#648](https://github.com/embedded-graphics/embedded-graphics/pull/648) Fixed incorrect text bounding box calculation when multi-byte characters are used.
+
 ## [0.7.1] - 2021-06-15
 
 ### Changed
