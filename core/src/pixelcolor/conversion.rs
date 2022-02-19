@@ -3,7 +3,7 @@ use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*};
 /// Convert color channel values from one bit depth to another.
 ///
 /// Fixed point implementation of the conversion formula:
-/// out = round(in * from_max / to_max)
+/// `out = round(in * from_max / to_max)`
 const fn convert_channel<const FROM_MAX: u8, const TO_MAX: u8>(value: u8) -> u8 {
     const SHIFT: usize = 24;
     const CONST_0_5: u32 = 1 << (SHIFT - 1);
