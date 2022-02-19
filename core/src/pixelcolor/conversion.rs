@@ -8,12 +8,8 @@ const fn convert_channel<const FROM_MAX: u8, const TO_MAX: u8>(value: u8) -> u8 
     const SHIFT: usize = 24;
     const CONST_0_5: u32 = 1 << (SHIFT - 1);
 
-    /// Returns `from_max / to_max` scaled by `1 << SHIFT`.
-    const fn factor<const FROM_MAX: u8, const TO_MAX: u8>() -> u32 {
-        ((TO_MAX as u32) << SHIFT) / (FROM_MAX as u32)
-    }
-
-    let result = value as u32 * factor::<FROM_MAX, TO_MAX>();
+    // `value * from_max / to_max` scaled by `1 << SHIFT`.
+    let result = value as u32 * (((TO_MAX as u32) << SHIFT) / FROM_MAX as u32);
 
     // Scale the result back down into an u8.
     ((result + CONST_0_5) >> SHIFT) as u8
