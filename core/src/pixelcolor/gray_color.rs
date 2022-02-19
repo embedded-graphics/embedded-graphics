@@ -23,6 +23,7 @@ macro_rules! gray_color {
         pub struct $type($raw_type);
 
         impl $type {
+            pub(crate) const MAX_LUMA: u8 = 0xFF >> (8 - $raw_type::BITS_PER_PIXEL);
             pub(crate) const GRAY_50: Self = Self::new(0x80 >> (8 - $raw_type::BITS_PER_PIXEL));
 
             /// Creates a new grayscale color.

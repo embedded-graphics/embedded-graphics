@@ -1,8 +1,18 @@
 use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*};
 
 /// Convert color channel values from one bit depth to another.
-const fn convert_channel(value: u8, from_max: u8, to_max: u8) -> u8 {
-    ((value as u16 * to_max as u16 + from_max as u16 / 2) / from_max as u16) as u8
+///
+/// Fixed point implementation of the conversion formula:
+/// `out = round(in * from_max / to_max)`
+const fn convert_channel<const FROM_MAX: u8, const TO_MAX: u8>(value: u8) -> u8 {
+    const SHIFT: usize = 24;
+    const CONST_0_5: u32 = 1 << (SHIFT - 1);
+
+    // `value * from_max / to_max` scaled by `1 << SHIFT`.
+    let result = value as u32 * (((TO_MAX as u32) << SHIFT) / FROM_MAX as u32);
+
+    // Scale the result back down into an u8.
+    ((result + CONST_0_5) >> SHIFT) as u8
 }
 
 /// Calculates the luma value based on ITU-R BT.601.
@@ -21,9 +31,9 @@ macro_rules! impl_rgb_conversion {
         $(impl From<$from_type> for $to_type {
             fn from(other: $from_type) -> Self {
                 Self::new(
-                    convert_channel(other.r(), $from_type::MAX_R, $to_type::MAX_R),
-                    convert_channel(other.g(), $from_type::MAX_G, $to_type::MAX_G),
-                    convert_channel(other.b(), $from_type::MAX_B, $to_type::MAX_B),
+                    convert_channel::<{$from_type::MAX_R}, {$to_type::MAX_R}>(other.r()),
+                    convert_channel::<{$from_type::MAX_G}, {$to_type::MAX_G}>(other.g()),
+                    convert_channel::<{$from_type::MAX_B}, {$to_type::MAX_B}>(other.b()),
                 )
             }
         })*
@@ -31,9 +41,9 @@ macro_rules! impl_rgb_conversion {
         impl $from_type {
             pub(crate) const fn with_rgb888(r: u8, g: u8, b: u8) -> Self {
                 Self::new(
-                    convert_channel(r, Rgb888::MAX_R, $from_type::MAX_R),
-                    convert_channel(g, Rgb888::MAX_G, $from_type::MAX_G),
-                    convert_channel(b, Rgb888::MAX_B, $from_type::MAX_B),
+                    convert_channel::<{Rgb888::MAX_R}, {$from_type::MAX_R}>(r),
+                    convert_channel::<{Rgb888::MAX_G}, {$from_type::MAX_G}>(g),
+                    convert_channel::<{Rgb888::MAX_B}, {$from_type::MAX_B}>(b),
                 )
             }
         }
@@ -54,7 +64,7 @@ macro_rules! impl_gray_conversion {
     ($from_type:ident => $($to_type:ident),+) => {
         $(impl From<$from_type> for $to_type {
             fn from(other: $from_type) -> Self {
-                Self::new(convert_channel(other.luma(), $from_type::WHITE.luma(), $to_type::WHITE.luma()))
+                Self::new(convert_channel::<{$from_type::MAX_LUMA}, {$to_type::MAX_LUMA}>(other.luma()))
             }
         })*
     };
@@ -70,9 +80,9 @@ macro_rules! impl_rgb_to_and_from_gray {
         $(impl From<$gray_type> for $rgb_type {
             fn from(other: $gray_type) -> Self {
                 Self::new(
-                    convert_channel(other.luma(), <$gray_type>::WHITE.luma(), $rgb_type::MAX_R),
-                    convert_channel(other.luma(), <$gray_type>::WHITE.luma(), $rgb_type::MAX_G),
-                    convert_channel(other.luma(), <$gray_type>::WHITE.luma(), $rgb_type::MAX_B),
+                    convert_channel::<{$gray_type::MAX_LUMA}, {$rgb_type::MAX_R}>(other.luma()),
+                    convert_channel::<{$gray_type::MAX_LUMA}, {$rgb_type::MAX_G}>(other.luma()),
+                    convert_channel::<{$gray_type::MAX_LUMA}, {$rgb_type::MAX_B}>(other.luma()),
                 )
             }
         })+
@@ -290,5 +300,69 @@ mod tests {
             255,
             "should be rounded upward"
         );
+    }
+
+    fn test_channel_conversion<const FROM_MAX: u8, const TO_MAX: u8>() {
+        fn convert_channel_reference(value: u8, from_max: u8, to_max: u8) -> u8 {
+            ((value as u16 * to_max as u16 + from_max as u16 / 2) / from_max as u16) as u8
+        }
+
+        for value in 0..FROM_MAX {
+            assert_eq!(
+                convert_channel::<FROM_MAX, TO_MAX>(value),
+                convert_channel_reference(value, FROM_MAX, TO_MAX),
+                "from_max: {}, to_max: {}, value: {}",
+                FROM_MAX,
+                TO_MAX,
+                value,
+            );
+        }
+    }
+
+    const fn bits_to_max(bits: u8) -> u8 {
+        0xFF >> (8 - bits)
+    }
+
+    #[test]
+    fn channel_conversions_larger() {
+        test_channel_conversion::<{ bits_to_max(2) }, { bits_to_max(4) }>();
+        test_channel_conversion::<{ bits_to_max(2) }, { bits_to_max(5) }>();
+        test_channel_conversion::<{ bits_to_max(2) }, { bits_to_max(6) }>();
+        test_channel_conversion::<{ bits_to_max(2) }, { bits_to_max(8) }>();
+
+        test_channel_conversion::<{ bits_to_max(4) }, { bits_to_max(5) }>();
+        test_channel_conversion::<{ bits_to_max(4) }, { bits_to_max(6) }>();
+        test_channel_conversion::<{ bits_to_max(4) }, { bits_to_max(8) }>();
+
+        test_channel_conversion::<{ bits_to_max(5) }, { bits_to_max(6) }>();
+        test_channel_conversion::<{ bits_to_max(5) }, { bits_to_max(8) }>();
+
+        test_channel_conversion::<{ bits_to_max(6) }, { bits_to_max(8) }>();
+    }
+
+    #[test]
+    fn channel_conversions_smaller() {
+        test_channel_conversion::<{ bits_to_max(8) }, { bits_to_max(6) }>();
+        test_channel_conversion::<{ bits_to_max(8) }, { bits_to_max(5) }>();
+        test_channel_conversion::<{ bits_to_max(8) }, { bits_to_max(4) }>();
+        test_channel_conversion::<{ bits_to_max(8) }, { bits_to_max(2) }>();
+
+        test_channel_conversion::<{ bits_to_max(6) }, { bits_to_max(5) }>();
+        test_channel_conversion::<{ bits_to_max(6) }, { bits_to_max(4) }>();
+        test_channel_conversion::<{ bits_to_max(6) }, { bits_to_max(2) }>();
+
+        test_channel_conversion::<{ bits_to_max(5) }, { bits_to_max(4) }>();
+        test_channel_conversion::<{ bits_to_max(4) }, { bits_to_max(2) }>();
+
+        test_channel_conversion::<{ bits_to_max(4) }, { bits_to_max(2) }>();
+    }
+
+    #[test]
+    fn channel_conversions_identity() {
+        test_channel_conversion::<{ bits_to_max(8) }, { bits_to_max(8) }>();
+        test_channel_conversion::<{ bits_to_max(6) }, { bits_to_max(6) }>();
+        test_channel_conversion::<{ bits_to_max(5) }, { bits_to_max(5) }>();
+        test_channel_conversion::<{ bits_to_max(4) }, { bits_to_max(4) }>();
+        test_channel_conversion::<{ bits_to_max(2) }, { bits_to_max(2) }>();
     }
 }
