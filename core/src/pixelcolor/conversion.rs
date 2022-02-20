@@ -5,14 +5,18 @@ use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*};
 /// Fixed point implementation of the conversion formula:
 /// `out = round(in * from_max / to_max)`
 const fn convert_channel<const FROM_MAX: u8, const TO_MAX: u8>(value: u8) -> u8 {
-    const SHIFT: usize = 24;
-    const CONST_0_5: u32 = 1 << (SHIFT - 1);
+    if TO_MAX != FROM_MAX {
+        const SHIFT: usize = 24;
+        const CONST_0_5: u32 = 1 << (SHIFT - 1);
 
-    // `value * from_max / to_max` scaled by `1 << SHIFT`.
-    let result = value as u32 * (((TO_MAX as u32) << SHIFT) / FROM_MAX as u32);
+        // `value * from_max / to_max` scaled by `1 << SHIFT`.
+        let result = value as u32 * (((TO_MAX as u32) << SHIFT) / FROM_MAX as u32);
 
-    // Scale the result back down into an u8.
-    ((result + CONST_0_5) >> SHIFT) as u8
+        // Scale the result back down into an u8.
+        ((result + CONST_0_5) >> SHIFT) as u8
+    } else {
+        value
+    }
 }
 
 /// Calculates the luma value based on ITU-R BT.601.

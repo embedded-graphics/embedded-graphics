@@ -13,7 +13,7 @@
 ### Changed
 
 - **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
-- [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651) Improved performance of color conversions.
+- [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
 
 ## [0.3.3] - 2021-09-09
 
