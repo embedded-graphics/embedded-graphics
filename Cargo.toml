@@ -67,3 +67,7 @@ name = "contains"
 [[bench]]
 harness = false
 name = "raw_data_iter"
+
+[[bench]]
+harness = false
+name = "color_conversion"

@@ -37,7 +37,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `Sector::from_circle`
   - `Sector::to_circle`
   - `Styled::new`
-- [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651) Improved performance of color conversions.
+- [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
 
 ### Fixed
 
