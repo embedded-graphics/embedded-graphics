@@ -10,7 +10,7 @@ rustup update
 rustup component add rustfmt
 
 # Install `cargo-readme` and `cargo-deadlinks`
-cargo install cargo-readme cargo-deadlinks
+cargo install cargo-readme cargo-deadlinks lychee
 
 # Install `just`
 cargo install just
@@ -33,7 +33,8 @@ just generate-readme <crate>
 just generate-readme simulator
 ```
 
-All readmes can be generated at the same time by running `just generate-readmes` in the project root.
+All readmes can be generated at the same time by running `just generate-readmes` in the project
+root.
 
 Running `just build` will check if the readme was successfully updated. The updated `README.md`
 should be committed into git.
