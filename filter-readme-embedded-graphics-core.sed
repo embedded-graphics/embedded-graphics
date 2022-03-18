@@ -4,3 +4,9 @@
 s#\[(.+)\]\(\.\/(.*)\)#[\1](https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/\2)#g
 s#\[(.+)\]\: +\.\/(.*)#[\1]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/\2#g
 
+# Remove intra-doc links, originally from https://github.com/livioribeiro/cargo-readme/issues/70#issuecomment-907867904
+# Unwrap inline links, e.g. `[The thing](the::Thing)` -> `The Thing`
+s#\[([^]]+)\]\(([A-Za-z_]+::)*[A-Za-z_]+\)#\1#g
+
+# Delete lines containing reference links like `[Foo]: bar::Foo`
+/\[([^]]+)\]\: ([A-Za-z_]+::)*[A-Za-z_]+$/d

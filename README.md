@@ -20,19 +20,19 @@ consuming application to use far less RAM at little to no performance penalty.
 
 It contains built in items that make it easy to draw 2D graphics primitives:
 
-* [Raw data images](https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.ImageRaw.html)
-* [Primitives](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html)
-    * [Lines](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/line/struct.Line.html)
-    * [Rectangles (and squares)](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html)
-    * [Circles](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html)
-    * [Ellipses](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/ellipse/struct.Ellipse.html)
-    * [Arcs](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/arc/struct.Arc.html)
-    * [Sectors](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/sector/struct.Sector.html)
-    * [Triangles](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/triangle/struct.Triangle.html)
-    * [Polylines](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/polyline/struct.Polyline.html)
-    * [Rounded rectangles](https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rounded_rectangle/struct.RoundedRectangle.html)
-* [Text](https://docs.rs/embedded-graphics/latest/embedded_graphics/text/index.html)
-* [Monospaced fonts](https://docs.rs/embedded-graphics/latest/embedded_graphics/mono_font/index.html)
+* Raw data images
+* Primitives
+    * Lines
+    * Rectangles (and squares)
+    * Circles
+    * Ellipses
+    * Arcs
+    * Sectors
+    * Triangles
+    * Polylines
+    * Rounded rectangles
+* Text
+* Monospaced fonts
 
 ## Additional functions provided by external crates
 
@@ -137,7 +137,7 @@ rendered by the display. See the [`DrawTarget`] documentation for implementation
 
 [![A grid of screenshots showing primitives, text and other items that can be drawn using embedded-graphics.](https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/4c680418cc4c37b8f7ed92d8b26edfde880d4c96/doc/assets/all_drawing_ops.png)](https://docs.rs/embedded-graphics/latest/embedded_graphics/examples/index.html)
 
-Example usage of drawing primitives, text and images with embedded-graphics can be found [here](https://docs.rs/embedded-graphics/latest/embedded_graphics/examples/index.html).
+Example usage of drawing primitives, text and images with embedded-graphics can be found here.
 
 ### Shapes and text
 
@@ -220,13 +220,8 @@ can be run using `cargo run --example hello-world`. It produces this output:
 
 Additional examples can be found in the [examples](https://github.com/embedded-graphics/examples) repository.
 
-[`Circle`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
-[`MockDisplay`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html
-[`Point`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Point.html
-[`Size`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Size.html
 [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
-[`Drawable`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/drawable/trait.Drawable.html
 [simulator]: https://github.com/embedded-graphics/simulator
 [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
 

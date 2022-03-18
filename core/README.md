@@ -48,19 +48,7 @@ The [`ImageDrawable`] trait should be implemented for any image or image-like it
 a spritemap.
 
 [embedded-graphics]: https://docs.rs/embedded-graphics
-[`Pixel`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/drawable/struct.Pixel.html
-[`Point`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/struct.Point.html
-[`Size`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/struct.Size.html
-[`Drawable`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/drawable/trait.Drawable.html
-[`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
-[`Rectangle`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/primitives/rectangle/struct.Rectangle.html
-[`Dimensions`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/trait.Dimensions.html
-[`OriginDimensions`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/trait.OriginDimensions.html
-[`prelude`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/prelude/index.html
-[`pixelcolor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/index.html
-[`BinaryColor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/enum.BinaryColor.html
-[`Rgb888`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/struct.Rgb888.html
-[`ImageDrawable`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/image/image_drawable/trait.ImageDrawable.html
+[`Rgb888`]: pixelcolor::Rgb888
 
 ## Minimum supported Rust version
 
