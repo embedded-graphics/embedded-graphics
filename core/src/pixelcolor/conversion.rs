@@ -105,7 +105,7 @@ macro_rules! impl_rgb_to_and_from_gray {
     }
 }
 
-impl_rgb_to_and_from_gray!(Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+impl_rgb_to_and_from_gray!(Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
 
 /// Macro to implement conversion from `BinaryColor` to RGB and grayscale types.
 macro_rules! impl_from_binary {
