@@ -217,7 +217,7 @@ mod tests {
             assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
 
-        type_matrix!(test_rgb_to_rgb; Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+        type_matrix!(test_rgb_to_rgb; Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
     }
 
     #[test]
@@ -227,7 +227,7 @@ mod tests {
             assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
 
-        type_matrix!(test_rgb_to_gray; Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888 => Gray2, Gray4, Gray8);
+        type_matrix!(test_rgb_to_gray; Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888 => Gray2, Gray4, Gray8);
     }
 
     #[test]
@@ -240,7 +240,7 @@ mod tests {
             assert_eq!(BinaryColor::from(FromC::WHITE), BinaryColor::On);
         }
 
-        type_matrix!(test_rgb_to_binary; Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888 => BinaryColor);
+        type_matrix!(test_rgb_to_binary; Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888 => BinaryColor);
     }
 
     #[test]
@@ -260,7 +260,7 @@ mod tests {
             assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
 
-        type_matrix!(test_gray_to_rgb; Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+        type_matrix!(test_gray_to_rgb; Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
     }
 
     #[test]
@@ -283,7 +283,7 @@ mod tests {
             assert_eq!(ToC::from(BinaryColor::On), ToC::WHITE);
         }
 
-        type_matrix!(test_binary_to_rgb; BinaryColor => Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+        type_matrix!(test_binary_to_rgb; BinaryColor => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
     }
 
     #[test]
