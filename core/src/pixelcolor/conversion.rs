@@ -118,7 +118,9 @@ macro_rules! impl_from_binary {
     };
 }
 
-impl_from_binary!(Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888, Gray2, Gray4, Gray8);
+impl_from_binary!(
+    Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888, Gray2, Gray4, Gray8
+);
 
 /// Macro to implement conversion from grayscale types to `BinaryColor`.
 macro_rules! impl_gray_to_binary {
@@ -144,7 +146,7 @@ macro_rules! impl_rgb_to_binary {
     };
 }
 
-impl_rgb_to_binary!(Rgb555, Bgr555, Rgb565, Bgr565, Rgb888, Bgr888);
+impl_rgb_to_binary!(Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
 
 #[cfg(test)]
 mod tests {
