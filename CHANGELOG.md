@@ -14,6 +14,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
+- **(breaking)** [#660](https://github.com/embedded-graphics/embedded-graphics/pull/660) Remove `RawU18` color storage type and use `RawU24` in is place for `Rgb666` and `Bgr666`.
 - **(breaking)** - [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
 - [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) Made the following functions `const`:
   - `Point::component_mul`
