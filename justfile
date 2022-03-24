@@ -69,11 +69,11 @@ generate-docs:
     cargo clean --doc
     cargo doc --workspace --all-features --no-deps
 
-# Runs cargo-deadlinks on the docs
-check-links: generate-docs
+# Checks for broken links in cargo docs and readmes
+check-links: generate-docs generate-readmes
     cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics
     cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics_core
-    lychee --exclude=circleci.com --exclude='LICENSE*' README.md  core/README.md
+    lychee --exclude=circleci.com --verbose --exclude='LICENSE*' './**/README.md'
 
 # Generate drawing examples in the doc directory
 generate-drawing-examples:
