@@ -8,8 +8,6 @@ commands:
       - restore_cache:
           key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
       - run: cargo update
-      # TODO: Migrate into e-g build image if we decide to go with lychee
-      - run: cargo install lychee
 
   # Save cache
   eg_finish:
@@ -24,7 +22,7 @@ jobs:
   # Check that everything (tests, benches, etc) builds using the MSRV
   precheck-msrv:
     docker: &docker
-      - image: jamwaffles/circleci-embedded-graphics:1.57.0-0
+      - image: jamwaffles/circleci-embedded-graphics:1.57.0-1
         auth:
           username: jamwaffles
           password: $DOCKERHUB_PASSWORD
