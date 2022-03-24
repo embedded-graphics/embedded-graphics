@@ -65,11 +65,9 @@ macro_rules! impl_rgb_color {
         #[doc = "Use the methods provided by the [`RgbColor`] trait to access"]
         #[doc = "individual color channels and predefined color constants."]
         #[doc = ""]
-        #[doc = "See the [module-level documentation] for more information about"]
+        #[doc = "See the [module-level documentation](super) for more information about"]
         #[doc = "conversion between this type and raw data."]
         #[doc = ""]
-        #[doc = "[`RgbColor`]: trait.RgbColor.html"]
-        #[doc = "[module-level documentation]: index.html"]
         #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
         pub struct $type($storage_type);
 

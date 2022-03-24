@@ -60,8 +60,7 @@ use crate::geometry::Size;
 /// # }
 /// ```
 ///
-/// [`Size`]: struct.Size.html
-/// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
+/// [`Rectangle`]: crate::primitives::rectangle::Rectangle
 /// [`Vector2<N>`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [`Vector2`]: https://docs.rs/nalgebra/0.18.0/nalgebra/base/type.Vector2.html
 /// [Nalgebra]: https://docs.rs/nalgebra

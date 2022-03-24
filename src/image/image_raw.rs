@@ -105,13 +105,11 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// # assert_eq!(image1, image2);
 /// ```
 ///
-/// [`raw` module documentation]: ../pixelcolor/raw/index.html
-/// [`Drawable`]: ../drawable/trait.Drawable.html
-/// [`ImageRawBE`]: type.ImageRawBE.html
-/// [`ImageRawLE`]: type.ImageRawLE.html
-/// [`Image`]: struct.Image.html
-/// [`PixelColor`]: ../pixelcolor/trait.PixelColor.html
-/// [`ByteOrder`]: ../pixelcolor/raw/trait.ByteOrder.html
+/// [`raw` module documentation]: crate::pixelcolor::raw
+/// [`Image`]: crate::image::Image
+/// [`Drawable`]: crate::drawable::Drawable
+/// [`PixelColor`]: crate::pixelcolor::PixelColor
+/// [`ByteOrder`]: crate::pixelcolor::raw::ByteOrder
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ImageRaw<'a, C, BO = BigEndian>
 where

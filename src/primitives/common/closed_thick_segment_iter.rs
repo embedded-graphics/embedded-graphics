@@ -13,8 +13,8 @@ use crate::{
 /// Unlike [`ThickSegmentIter`], this iterator closes the shape with a final line between the
 /// start and end points.
 ///
-/// [`ThickSegment`]: ../thick_segment/struct.ThickSegment.html
-/// [`ThickSegmentIter`]: ../thick_segment_iter/struct.ThickSegmentIter.html
+/// [`ThickSegment`]: super::thick_segment::ThickSegment
+/// [`ThickSegmentIter`]: super::thick_segment_iter::ThickSegmentIter
 #[derive(Clone, Debug)]
 pub struct ClosedThickSegmentIter<'a> {
     windows: core::slice::Windows<'a, Point>,

@@ -30,7 +30,7 @@ pub(crate) mod angle_consts {
 /// let angle_a = Angle::from_degrees(10.0);
 /// let angle_b = Angle::from_radians(PI);
 ///
-/// // Angles can also be created using the [AngleUnit](./trait.AngleUnit.html) trait
+/// // Angles can also be created using the [AngleUnit] trait
 /// let angle_c = 30.0.deg();
 /// let angle_d = PI.rad();
 /// ```

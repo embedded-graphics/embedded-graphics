@@ -166,21 +166,20 @@
 //! ]);
 //! ```
 //!
-//! [`pixelcolor`]: ../pixelcolor/index.html#structs
-//! [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
-//! [`Gray2`]: ../pixelcolor/struct.Gray2.html
-//! [`Gray4`]: ../pixelcolor/struct.Gray4.html
-//! [`Gray8`]: ../pixelcolor/struct.Gray8.html
-//! [`Rgb565`]: ../pixelcolor/struct.Rgb565.html
-//! [`Rgb888`]: ../pixelcolor/struct.Rgb888.html
-//! [`DrawTarget`]: ../draw_target/trait.DrawTarget.html
-//! [`MockDisplay`]: struct.MockDisplay.html
-//! [`assert_eq`]: struct.MockDisplay.html#method.assert_eq
-//! [`assert_pattern`]: struct.MockDisplay.html#method.assert_pattern
-//! [`diff`]: struct.MockDisplay.html#method.diff
-//! [`from_pattern`]: struct.MockDisplay.html#method.from_pattern
-//! [`set_allow_overdraw`]: struct.MockDisplay.html#method.set_allow_overdraw
-//! [`set_allow_out_of_bounds_drawing`]: struct.MockDisplay.html#method.set_allow_out_of_bounds_drawing
+//! [`pixelcolor`]: super::pixelcolor#structs
+//! [`BinaryColor`]: super::pixelcolor::BinaryColor
+//! [`Gray2`]: super::pixelcolor::Gray2
+//! [`Gray4`]: super::pixelcolor::Gray4
+//! [`Gray8`]: super::pixelcolor::Gray8
+//! [`Rgb565`]: super::pixelcolor::Rgb565
+//! [`Rgb888`]: super::pixelcolor::Rgb888
+//! [`DrawTarget`]: super::draw_target::DrawTarget
+//! [`assert_eq`]: MockDisplay::assert_eq()
+//! [`assert_pattern`]: MockDisplay::assert_pattern()
+//! [`diff`]: MockDisplay::diff()
+//! [`from_pattern`]: MockDisplay::from_pattern()
+//! [`set_allow_overdraw`]: MockDisplay::set_allow_overdraw()
+//! [`set_allow_out_of_bounds_drawing`]: MockDisplay::set_allow_out_of_bounds_drawing()
 
 mod color_mapping;
 mod fancy_panic;
@@ -204,7 +203,7 @@ const DISPLAY_AREA: Rectangle = Rectangle::new(Point::zero(), Size::new_equal(SI
 
 /// Mock display struct
 ///
-/// See the [module documentation](./index.html) for usage and examples.
+/// See the [module documentation](self) for usage and examples.
 #[derive(Clone)]
 pub struct MockDisplay<C>
 where
@@ -251,10 +250,10 @@ where
     /// ]);
     /// ```
     ///
-    /// [`Point`]: ../geometry/struct.Point.html
-    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
-    /// [`map`]: #method.map
-    /// [`BinaryColor`]: ../pixelcolor/enum.BinaryColor.html
+    /// [`Point`]: super::geometry::Point
+    /// [`PointsIter::points`]: super::primitives::PointsIter::points
+    /// [`map`]: MockDisplay::map()
+    /// [`BinaryColor`]: super::pixelcolor::BinaryColor
     pub fn from_points<I>(points: I, color: C) -> Self
     where
         I: IntoIterator<Item = Point>,
@@ -366,8 +365,8 @@ where
     /// Similarly, overdraw is checked by default and will panic if a point is drawn to the same
     /// coordinate twice. This behavior can be disabled by calling [`set_allow_overdraw(true)`].
     ///
-    /// [`set_allow_out_of_bounds_drawing(true)`]: #method.set_allow_out_of_bounds_drawing
-    /// [`set_allow_overdraw(true)`]: #method.set_allow_overdraw
+    /// [`set_allow_out_of_bounds_drawing(true)`]: MockDisplay::set_allow_out_of_bounds_drawing()
+    /// [`set_allow_overdraw(true)`]: MockDisplay::set_allow_overdraw()
     pub fn draw_pixel(&mut self, point: Point, color: C) {
         if !DISPLAY_AREA.contains(point) {
             if !self.allow_out_of_bounds_drawing {
@@ -432,7 +431,7 @@ where
     ///
     /// Invert a `MockDisplay` by applying [`BinaryColor::invert`] to the color of each pixel.
     ///
-    /// [`BinaryColor::invert`]: ../pixelcolor/enum.BinaryColor.html#method.invert
+    /// [`BinaryColor::invert`]: super::pixelcolor::BinaryColor::invert()
     ///
     /// ```
     /// use embedded_graphics::{mock_display::MockDisplay, pixelcolor::BinaryColor};
@@ -515,7 +514,6 @@ where
     /// All other characters are converted by implementations of the
     /// [`ColorMapping`] trait.
     ///
-    /// [`ColorMapping`]: trait.ColorMapping.html
     pub fn from_pattern(pattern: &[&str]) -> MockDisplay<C> {
         // Check pattern dimensions.
         let pattern_width = pattern.first().map_or(0, |row| row.len());
@@ -574,7 +572,7 @@ where
     ///
     /// Panics if the displays aren't equal.
     ///
-    /// [module-level documentation]: index.html#assertions
+    /// [module-level documentation]: self#assertions
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_eq(&self, other: &MockDisplay<C>) {
@@ -599,7 +597,7 @@ where
     ///
     /// Panics if the displays aren't equal.
     ///
-    /// [module-level documentation]: index.html#assertions
+    /// [module-level documentation]: self#assertions
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_eq_with_message<F>(&self, other: &MockDisplay<C>, msg: F)
@@ -630,7 +628,7 @@ where
     ///
     /// Panics if the display content isn't equal to the pattern.
     ///
-    /// [module-level documentation]: index.html#assertions
+    /// [module-level documentation]: self#assertions
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_pattern(&self, pattern: &[&str]) {
@@ -650,7 +648,7 @@ where
     ///
     /// Panics if the display content isn't equal to the pattern.
     ///
-    /// [module-level documentation]: index.html#assertions
+    /// [module-level documentation]: self#assertions
     // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
     // #[track_caller]
     pub fn assert_pattern_with_message<F>(&self, pattern: &[&str], msg: F)

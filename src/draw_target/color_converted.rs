@@ -9,8 +9,7 @@ use core::marker::PhantomData;
 /// Created by calling [`color_converted`] on any [`DrawTarget`].
 /// See the [`color_converted`] method documentation for more information.
 ///
-/// [`DrawTarget`]: trait.DrawTarget.html
-/// [`color_converted`]: trait.DrawTargetExt.html#tymethod.color_converted
+/// [`color_converted`]: crate::draw_target::DrawTargetExt::color_converted
 #[derive(Debug)]
 pub struct ColorConverted<'a, T, C> {
     /// The parent draw target.

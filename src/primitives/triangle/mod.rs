@@ -63,7 +63,7 @@ pub use styled::StyledPixelsIterator;
 /// # assert_eq!(tri, Triangle::new(p1, p2, p3));
 /// ```
 ///
-/// [`from_slice`]: #method.from_slice
+/// [`from_slice`]: Triangle::from_slice()
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Triangle {
     /// The vertices of the triangle.
@@ -165,7 +165,7 @@ impl Triangle {
     ///
     /// This method will panic if the given slice is not exactly 3 items long.
     ///
-    /// [`Point`]: ../../geometry/struct.Point.html
+    /// [`Point`]: super::super::geometry::Point
     pub fn from_slice(vertices: &[Point]) -> Self {
         match vertices {
             [p1, p2, p3] => Self::new(*p1, *p2, *p3),

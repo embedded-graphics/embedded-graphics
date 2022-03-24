@@ -6,7 +6,7 @@
 //! Implementations of this trait can be found in the [bdf] and [eg-seven-segment] repositories,
 //! which may be useful as a reference of other implementations.
 //!
-//! [`mono_font`]: ../../mono_font/index.html
+//! [`mono_font`]: super::super::mono_font
 //! [bdf]: https://github.com/embedded-graphics/bdf
 //! [eg-seven-segment]: https://github.com/embedded-graphics/eg-seven-segment
 
@@ -86,7 +86,6 @@ pub trait TextRenderer {
 ///
 /// See [`TextRenderer::measure_string`] for more information.
 ///
-/// [`TextRenderer::measure_string`]: trait.TextRenderer.html#tymethod.measure_string
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct TextMetrics {
     /// Bounding box.

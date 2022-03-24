@@ -5,9 +5,7 @@ use embedded_graphics_core::pixelcolor::{
 
 /// Mapping between `char`s and colors.
 ///
-/// See the [module-level documentation] for a table of implemented mappings.
-///
-/// [module-level documentation]: index.html
+/// See the [module-level documentation](super) for a table of implemented mappings.
 pub trait ColorMapping: Into<Rgb888> {
     /// Color used to display `None` values when `EG_FANCY_PANIC` is enabled.
     ///

@@ -8,6 +8,8 @@ commands:
       - restore_cache:
           key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
       - run: cargo update
+      # TODO: Migrate into e-g build image if we decide to go with lychee
+      - run: cargo install lychee
 
   # Save cache
   eg_finish:

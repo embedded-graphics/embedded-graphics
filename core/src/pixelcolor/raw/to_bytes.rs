@@ -5,9 +5,7 @@ use crate::pixelcolor::{
 
 /// Trait to convert colors into a byte array.
 ///
-/// See the [module-level documentation] for an example.
-///
-/// [module-level documentation]: index.html#converting-colors-to-raw-data
+/// See the [module-level documentation](super#converting-colors-to-raw-data) for an example.
 pub trait ToBytes {
     /// Return type of methods in this trait.
     type Bytes;

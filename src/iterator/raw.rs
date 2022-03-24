@@ -22,8 +22,7 @@
 //! assert_eq!(iter.next(), None);
 //! ```
 //!
-//! [`ImageRaw`]: ../../image/struct.ImageRaw.html
-//! [`RawDataSlice`]: struct.RawDataSlice.html
+//! [`ImageRaw`]: super::super::image::ImageRaw
 
 use core::{marker::PhantomData, slice};
 
@@ -39,7 +38,7 @@ use crate::pixelcolor::raw::{
 ///
 /// See the [module-level documentation] for more information.
 ///
-/// [module-level documentation]: index.html
+/// [module-level documentation]: self
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RawDataSlice<'a, R, BO> {
     data: &'a [u8],
@@ -123,7 +122,7 @@ impl<'a, BO> IntoIterator for RawDataSlice<'a, RawU8, BO> {
 ///
 /// See the [module-level documentation] for more information.
 ///
-/// [module-level documentation]: index.html
+/// [module-level documentation]: self
 #[derive(Debug)]
 pub struct BitsIterator<'a, R> {
     data: &'a [u8],
@@ -145,7 +144,7 @@ impl<'a, R: RawData> BitsIterator<'a, R> {
 ///
 /// See the [module-level documentation] for more information.
 ///
-/// [module-level documentation]: index.html
+/// [module-level documentation]: self
 #[derive(Debug)]
 pub struct ByteIterator<'a> {
     data: slice::Iter<'a, u8>,
@@ -179,7 +178,7 @@ impl<'a> Iterator for ByteIterator<'a> {
 ///
 /// See the [module-level documentation] for more information.
 ///
-/// [module-level documentation]: index.html
+/// [module-level documentation]: self
 #[derive(Debug)]
 pub struct BytesIterator<'a, R, BO> {
     // MSRV: replace by ArrayChunks when the feature is stabilized

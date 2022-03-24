@@ -273,11 +273,11 @@ use crate::{
 /// # Ok::<(), CommError>(())
 /// ```
 ///
-/// [`fill_solid`]: #method.fill_solid
-/// [`draw_iter`]: #tymethod.draw_iter
-/// [`Dimensions`]: ../geometry/trait.Dimensions.html
-/// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
-/// [`Error` type]: #associatedtype.Error
+/// [`fill_solid`]: DrawTarget::fill_solid()
+/// [`draw_iter`]: DrawTarget::draw_iter
+/// [`Dimensions`]: super::geometry::Dimensions
+/// [`OriginDimensions`]: super::geometry::OriginDimensions
+/// [`Error` type]: DrawTarget::Error
 pub trait DrawTarget: Dimensions {
     /// The pixel color type the targetted display supports.
     type Color: PixelColor;
@@ -320,7 +320,7 @@ pub trait DrawTarget: Dimensions {
     /// target display. The `area` argument can be clipped to the drawable area using the
     /// [`Rectangle::intersection`] method.
     ///
-    /// The default implementation of this method delegates to [`draw_iter`](#tymethod.draw_iter).
+    /// The default implementation of this method delegates to [`draw_iter`](DrawTarget::draw_iter).
     ///
     /// # Examples
     ///
@@ -382,9 +382,9 @@ pub trait DrawTarget: Dimensions {
     /// }
     /// ```
     ///
-    /// [`draw_iter`]: #tymethod.draw_iter
-    /// [`Rectangle::intersection`]: ../primitives/rectangle/struct.Rectangle.html#method.intersection
-    /// [`PointsIter::points`]: ../primitives/trait.PointsIter.html#tymethod.points
+    /// [`draw_iter`]: DrawTarget::draw_iter
+    /// [`Rectangle::intersection`]: super::primitives::rectangle::Rectangle::intersection()
+    /// [`PointsIter::points`]: super::primitives::PointsIter::points
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
@@ -402,7 +402,7 @@ pub trait DrawTarget: Dimensions {
     /// the display with a solid color, this method should be overridden to use those commands to
     /// improve performance.
     ///
-    /// The default implementation of this method calls [`fill_contiguous`](#method.fill_contiguous)
+    /// The default implementation of this method calls [`fill_contiguous`](DrawTarget::fill_contiguous())
     /// with an iterator that repeats the given `color` for every point in `area`.
     fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_contiguous(area, core::iter::repeat(color))
@@ -416,9 +416,9 @@ pub trait DrawTarget: Dimensions {
     /// The default implementation of this method delegates to [`fill_solid`] to fill the
     /// [`bounding_box`] returned by the [`Dimensions`] implementation.
     ///
-    /// [`Dimensions`]: ../geometry/trait.Dimensions.html
-    /// [`bounding_box`]: ../geometry/trait.Dimensions.html#tymethod.bounding_box
-    /// [`fill_solid`]: #method.fill_solid
+    /// [`Dimensions`]: super::geometry::Dimensions
+    /// [`bounding_box`]: super::geometry::Dimensions::bounding_box
+    /// [`fill_solid`]: DrawTarget::fill_solid()
     fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
         self.fill_solid(&self.bounding_box(), color)
     }

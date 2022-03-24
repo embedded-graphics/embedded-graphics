@@ -19,7 +19,7 @@ use crate::{
 /// addition to this trait, to define their dimensions.
 ///
 /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
-/// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
+/// [`OriginDimensions`]: crate::geometry::OriginDimensions
 pub trait ImageDrawable: OriginDimensions {
     /// The color type.
     type Color: PixelColor;
@@ -35,7 +35,7 @@ pub trait ImageDrawable: OriginDimensions {
     /// origin and no drawing operations outside the bounding box are allowed.
     ///
     /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
-    /// [`OriginDimensions`]: ../geometry/trait.OriginDimensions.html
+    /// [`OriginDimensions`]: crate::geometry::OriginDimensions
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
@@ -50,7 +50,7 @@ pub trait ImageDrawable: OriginDimensions {
     /// It must be ensured that no drawing operation outside this [`Rectangle`] occur.
     ///
     /// [`SubImage`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.SubImage.html
-    /// [`Rectangle`]: ../primitives/rectangle/struct.Rectangle.html
+    /// [`Rectangle`]: crate::primitives::rectangle::Rectangle
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>;

@@ -4,6 +4,7 @@ members = [
     "convert-fonts",
     "generate-drawing-examples",
     "png-target",
+    "check-md-refs"
 ]
 
 [patch.crates-io]

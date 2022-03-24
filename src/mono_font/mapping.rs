@@ -41,9 +41,7 @@
 //! assert_eq!(mapping.index('2'), 7);
 //! ```
 //!
-//! [`MonoFont`]: ../struct.MonoFont.html
-//! [`StrGlyphMapping`]: struct.StrGlyphMapping.html
-//! [`GlyphMapping`]: trait.GlyphMapping.html
+//! [`MonoFont`]: super::MonoFont
 
 use core::ops::RangeInclusive;
 
@@ -68,7 +66,7 @@ where
 ///
 /// See the [module-level documentation] for more details.
 ///
-/// [module-level documentation]: index.html
+/// [module-level documentation]: self
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct StrGlyphMapping<'a> {
     data: &'a str,
