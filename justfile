@@ -73,7 +73,11 @@ generate-docs:
 check-links: generate-docs generate-readmes
     cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics
     cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics_core
-    lychee --exclude=circleci.com --verbose --exclude='LICENSE*' './**/README.md'
+
+    cd tools/check-md-refs && cargo run -- '../../core/README.md'
+    cd tools/check-md-refs && cargo run -- '../../README.md'
+
+    lychee --exclude=circleci.com --verbose --exclude='LICENSE*' -- './**/README.md'
 
 # Generate drawing examples in the doc directory
 generate-drawing-examples:

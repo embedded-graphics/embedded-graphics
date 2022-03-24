@@ -217,7 +217,7 @@
 //! [Raw data images]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.ImageRaw.html
 //! [Primitives]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html
 //! [Lines]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/line/struct.Line.html
-//! [Rectangles : https://docs.rs/embedded-graphics/latest/embedded_graphics/and squares)]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html
+//! [Rectangles (and squares)]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html
 //! [Circles]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
 //! [Ellipses]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/ellipse/struct.Ellipse.html
 //! [Arcs]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/arc/struct.Arc.html

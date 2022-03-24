@@ -9,7 +9,7 @@ rustup update
 # Ensure rustfmt is installed
 rustup component add rustfmt
 
-# Install `cargo-readme` and `cargo-deadlinks`
+# Install `cargo-readme`, `cargo-deadlinks` and `lychee`
 cargo install cargo-readme cargo-deadlinks lychee
 
 # Install `just`

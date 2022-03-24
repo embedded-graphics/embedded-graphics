@@ -227,7 +227,7 @@ Additional examples can be found in the [examples](https://github.com/embedded-g
 [Raw data images]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.ImageRaw.html
 [Primitives]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html
 [Lines]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/line/struct.Line.html
-[Rectangles : https://docs.rs/embedded-graphics/latest/embedded_graphics/and squares)]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html
+[Rectangles (and squares)]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html
 [Circles]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
 [Ellipses]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/ellipse/struct.Ellipse.html
 [Arcs]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/arc/struct.Arc.html
@@ -239,24 +239,6 @@ Additional examples can be found in the [examples](https://github.com/embedded-g
 [Monospaced fonts]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mono_font/index.html
 [examples]: https://docs.rs/embedded-graphics/latest/embedded_graphics/examples/index.html
 
-[`Circle`]: primitives::circle::Circle
-[`MockDisplay`]: mock_display::MockDisplay
-[`Point`]: geometry::Point
-[`Size`]: geometry::Size
-[Raw data images]: image::ImageRaw
-[Primitives]: primitives
-[Lines]: primitives::line::Line
-[Rectangles (and squares)]: primitives::rectangle::Rectangle
-[Circles]: primitives::circle::Circle
-[Ellipses]: primitives::ellipse::Ellipse
-[Arcs]: primitives::arc::Arc
-[Sectors]: primitives::sector::Sector
-[Triangles]: primitives::triangle::Triangle
-[Polylines]: primitives::polyline::Polyline
-[Rounded rectangles]: primitives::rounded_rectangle::RoundedRectangle
-[Text]: text
-[Monospaced fonts]: mono_font
-[`Drawable`]: drawable::Drawable
 [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 [simulator]: https://github.com/embedded-graphics/simulator

@@ -61,17 +61,7 @@ a spritemap.
 [`pixelcolor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/trait.PixelColor.html
 
 [embedded-graphics]: https://docs.rs/embedded-graphics
-[`Pixel`]: drawable::Pixel
-[`Point`]: geometry::Point
-[`Size`]: geometry::Size
-[`Drawable`]: drawable::Drawable
-[`DrawTarget`]: draw_target::DrawTarget
-[`Rectangle`]: primitives::rectangle::Rectangle
-[`Dimensions`]: geometry::Dimensions
-[`OriginDimensions`]: geometry::OriginDimensions
-[`BinaryColor`]: pixelcolor::BinaryColor
 [`Rgb888`]: pixelcolor::Rgb888
-[`ImageDrawable`]: image::ImageDrawable
 
 ## Minimum supported Rust version
 
