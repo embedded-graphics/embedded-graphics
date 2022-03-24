@@ -135,7 +135,7 @@ _build-readme crate:
     mkdir -p {{target_dir}}
     echo "Building README.md for {{crate}}"
     CRATE_DIR=$(dirname $(find . -name Cargo.toml -exec grep -l 'name = "{{crate}}"' {} \;))
-    cargo readme -r "$CRATE_DIR" | sed -E -f "filter-readme-{{crate}}.sed" > "{{target_dir}}/README-{{crate}}.md"
+    cargo readme -r "$CRATE_DIR" | sed -E -f "filter-readme.sed" > "{{target_dir}}/README-{{crate}}.md"
 
 #----------------
 # Font conversion
