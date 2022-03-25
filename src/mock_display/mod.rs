@@ -573,8 +573,7 @@ where
     /// Panics if the displays aren't equal.
     ///
     /// [module-level documentation]: self#assertions
-    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
-    // #[track_caller]
+    #[track_caller]
     pub fn assert_eq(&self, other: &MockDisplay<C>) {
         if !self.eq(other) {
             if option_env!("EG_FANCY_PANIC") == Some("1") {
@@ -598,8 +597,7 @@ where
     /// Panics if the displays aren't equal.
     ///
     /// [module-level documentation]: self#assertions
-    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
-    // #[track_caller]
+    #[track_caller]
     pub fn assert_eq_with_message<F>(&self, other: &MockDisplay<C>, msg: F)
     where
         F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -629,8 +627,7 @@ where
     /// Panics if the display content isn't equal to the pattern.
     ///
     /// [module-level documentation]: self#assertions
-    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
-    // #[track_caller]
+    #[track_caller]
     pub fn assert_pattern(&self, pattern: &[&str]) {
         let other = MockDisplay::<C>::from_pattern(pattern);
 
@@ -649,8 +646,7 @@ where
     /// Panics if the display content isn't equal to the pattern.
     ///
     /// [module-level documentation]: self#assertions
-    // MSRV: add track_caller attribute to get better error messages for rust >= 1.46.0
-    // #[track_caller]
+    #[track_caller]
     pub fn assert_pattern_with_message<F>(&self, pattern: &[&str], msg: F)
     where
         F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
