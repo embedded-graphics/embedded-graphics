@@ -25,8 +25,7 @@ impl Scanline {
 
     /// Returns `true` if the x range of the scanline is empty.
     pub fn is_empty(&self) -> bool {
-        // MSRV: use `Range::is_empty` on version >= 1.47.0
-        !(self.x.start < self.x.end)
+        self.x.is_empty()
     }
 
     /// Extends the scanline to include the given x coordinate.
