@@ -196,6 +196,7 @@ pub enum Alignment {
     /// Right.
     Right,
 }
+
 /// Text decoration color.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub enum DecorationColor<C> {
@@ -210,29 +211,17 @@ pub enum DecorationColor<C> {
 impl<C: PixelColor> DecorationColor<C> {
     /// Returns `true` if the decoration_color is `None`.
     pub fn is_none(&self) -> bool {
-        // MSRV: replace with matches! for rust >= 1.42.0
-        match self {
-            Self::None => true,
-            _ => false,
-        }
+        matches!(self, Self::None)
     }
 
     /// Returns `true` if the decoration_color is `TextColor`.
     pub fn is_text_color(&self) -> bool {
-        // MSRV: replace with matches! for rust >= 1.42.0
-        match self {
-            Self::TextColor => true,
-            _ => false,
-        }
+        matches!(self, Self::TextColor)
     }
 
     /// Returns `true` if the decoration_color is `Custom`.
     pub fn is_custom(&self) -> bool {
-        // MSRV: replace with matches! for rust >= 1.42.0
-        match self {
-            Self::Custom(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Custom(_))
     }
 
     pub(crate) fn to_color(&self, text_color: Option<C>) -> Option<C> {

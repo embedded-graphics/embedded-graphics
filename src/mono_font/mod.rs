@@ -145,8 +145,7 @@ impl fmt::Debug for MonoFont<'_> {
             .field("strikethrough", &self.strikethrough)
             .field("underline", &self.underline)
             .field("glyph_mapping", &"?")
-            // MSRV 1.53.0: use `finish_non_exhaustive`
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 
@@ -171,9 +170,8 @@ impl DecorationDimensions {
 
     /// Creates a new default strikethrough decoration for the given glyph height.
     pub const fn default_strikethrough(glyph_height: u32) -> Self {
-        // MSRV 1.47: Use `saturating_sub` to remove possible panic.
         Self {
-            offset: (glyph_height - 1) / 2,
+            offset: glyph_height.saturating_sub(1) / 2,
             height: 1,
         }
     }
@@ -217,8 +215,7 @@ pub(crate) mod tests {
     };
 
     /// Draws a text using the given font and checks it against the expected pattern.
-    // MSRV: Add `track_caller` attribute for rust version >= 1.46.0
-    // #[track_caller]
+    #[track_caller]
     pub fn assert_text_from_pattern(text: &str, font: &MonoFont, pattern: &[&str]) {
         let style = MonoTextStyleBuilder::new()
             .font(font)
