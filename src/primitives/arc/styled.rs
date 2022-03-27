@@ -57,15 +57,12 @@ impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let stroke_color = self.stroke_color?;
-        let outer_threshold = self.outer_threshold;
-        let inner_threshold = self.inner_threshold;
-        let plane_sector = self.plane_sector;
 
         self.iter
             .find(|(_, delta, distance)| {
-                *distance < outer_threshold
-                    && *distance >= inner_threshold
-                    && plane_sector.contains(*delta)
+                *distance < self.outer_threshold
+                    && *distance >= self.inner_threshold
+                    && self.plane_sector.contains(*delta)
             })
             .map(|(point, ..)| Pixel(point, stroke_color))
     }
