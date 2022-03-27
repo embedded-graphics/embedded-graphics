@@ -252,7 +252,7 @@ mod tests {
             "  #", //
         ]);
 
-        let mut out = arrayvec::ArrayString::<[_; 1024]>::new();
+        let mut out = arrayvec::ArrayString::<1024>::new();
         write!(&mut out, "{}", FancyPanic::new(&display, &expected, 30)).unwrap();
 
         assert_eq!(&out, concat!(
@@ -279,7 +279,7 @@ mod tests {
             "  #", //
         ]);
 
-        let mut out = arrayvec::ArrayString::<[_; 1024]>::new();
+        let mut out = arrayvec::ArrayString::<1024>::new();
         write!(&mut out, "{}", FancyPanic::new(&display, &expected, 0)).unwrap();
 
         assert_eq!(&out, concat!(
