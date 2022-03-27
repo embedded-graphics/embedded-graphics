@@ -40,11 +40,9 @@ where
     where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
-        let clip_area = self.clip_area;
-
         let pixels = pixels
             .into_iter()
-            .filter(|Pixel(p, _)| clip_area.contains(*p));
+            .filter(|Pixel(p, _)| self.clip_area.contains(*p));
 
         self.parent.draw_iter(pixels)
     }
