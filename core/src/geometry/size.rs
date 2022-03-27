@@ -492,7 +492,7 @@ mod tests {
 
     #[test]
     fn display() {
-        let mut buffer = arrayvec::ArrayString::<[u8; 32]>::new();
+        let mut buffer = arrayvec::ArrayString::<32>::new();
         write!(buffer, "{}", Size::new(123, 456)).unwrap();
 
         assert_eq!(&buffer, "123 x 456");
