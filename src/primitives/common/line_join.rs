@@ -290,12 +290,7 @@ impl LineJoin {
 
     /// Whether the join is degenerate (segments self-intersect) or not.
     pub fn is_degenerate(&self) -> bool {
-        // MSRV: Use matches!() macro when we're at 1.42.0 or greater.
-        if let JoinKind::Degenerate { .. } = self.kind {
-            true
-        } else {
-            false
-        }
+        matches!(self.kind, JoinKind::Degenerate { .. })
     }
 }
 

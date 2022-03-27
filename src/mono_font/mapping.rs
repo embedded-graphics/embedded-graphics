@@ -120,16 +120,14 @@ impl<'a> StrGlyphMapping<'a> {
                     let start = chars.next()?;
                     let end = chars.next()?;
 
-                    start as u32..=end as u32
+                    start..=end
                 }
-                c => c as u32..=c as u32,
+                c => c..=c,
             };
 
             Some(range)
         })
         .flatten()
-        //MSRV: directly iterator over char ranges
-        .filter_map(core::char::from_u32)
     }
 
     /// Returns if the mapping contains the given char.

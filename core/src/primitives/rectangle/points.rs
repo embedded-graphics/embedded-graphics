@@ -41,8 +41,7 @@ impl Iterator for Points {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        // MSRV 1.47.0: use Range::is_empty
-        while self.y.end > self.y.start {
+        while !self.y.is_empty() {
             if let Some(x) = self.x.next() {
                 return Some(Point::new(x, self.y.start));
             }

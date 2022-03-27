@@ -182,18 +182,21 @@ impl<'a> ImageRaw<'a, BinaryColor> {
     /// Only the width of the image needs to be specified. The height of the image will be
     /// calculated based on the length of the given image data.
     ///
-    /// # Panics
-    ///
-    /// This function panics if `width == 0`.
-    // MSRV: return a zero sized image instead of a panic for Rust >= 1.46.0
-    //       (requires if in const function)
+    /// Returns an image with 0 x 0 pixel size if `width` is 0.
+    //
     // MSRV: remove this function when const functions with trait bounds are supported
     pub const fn new_binary(data: &'a [u8], width: u32) -> Self {
-        let height = data.len() / bytes_per_row(width, 1);
+        let size = if width == 0 {
+            Size::zero()
+        } else {
+            let height = data.len() / bytes_per_row(width, 1);
+
+            Size::new(width, height as u32)
+        };
 
         Self {
             data,
-            size: Size::new(width, height as u32),
+            size,
             pixel_type: PhantomData,
             byte_order: PhantomData,
         }
@@ -670,5 +673,12 @@ mod tests {
 
         let data = [0u8; 4];
         assert_eq!(ImageRaw::<BinaryColor>::new(&data, 12).size().height, 2);
+    }
+
+    #[test]
+    fn binary_image_with_zero_width() {
+        let image = ImageRaw::new_binary(&[], 0);
+
+        assert_eq!(image.size, Size::zero());
     }
 }
