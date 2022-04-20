@@ -36,7 +36,7 @@ fn main() {
     }
 
     if let Some(raw_file) = &args.raw {
-        bitmap.save_png(raw_file).unwrap();
+        bitmap.save_raw(raw_file).unwrap();
         println!(
             "{}",
             bitmap.rust(
