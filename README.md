@@ -49,6 +49,7 @@ this are adding support for different image formats or implementing custom fonts
 * [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
 * [Heapless plotting library for small embedded targets - `embedded-plots`](https://crates.io/crates/embedded-plots)
 * [Virtual seven-segment displays - `eg-seven-segment`](https://crates.io/crates/eg-seven-segment)
+* [Canvas for drawing onto before drawing on the display - `embedded-canvas`](https://crates.io/crates/embedded-canvas)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
