@@ -50,6 +50,7 @@ this are adding support for different image formats or implementing custom fonts
 * [Heapless plotting library for small embedded targets - `embedded-plots`](https://crates.io/crates/embedded-plots)
 * [Virtual seven-segment displays - `eg-seven-segment`](https://crates.io/crates/eg-seven-segment)
 * [Canvas for drawing onto before drawing on the display - `embedded-canvas`](https://crates.io/crates/embedded-canvas)
+* [Frames Per Second counter for embedded devices - `embedded-fps`](https://crates.io/crates/embedded-fps)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
