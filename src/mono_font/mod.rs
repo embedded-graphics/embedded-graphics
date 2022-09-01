@@ -275,4 +275,11 @@ pub(crate) mod tests {
         test_baseline(&ascii::FONT_9X18);
         test_baseline(&ascii::FONT_10X20);
     }
+
+    /// (Statically) test that [`MonoFont: Send + Sync`].
+    fn _mono_font_is_sync()
+    where
+        for<'a> MonoFont<'a>: Send + Sync,
+    {
+    }
 }
