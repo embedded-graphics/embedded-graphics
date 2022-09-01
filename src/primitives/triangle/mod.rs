@@ -177,7 +177,7 @@ impl Triangle {
     ///
     /// This method can be used to determine if the triangle is colinear by checking if the returned
     /// value is equal to zero.
-    pub(in crate::primitives) fn area_doubled(&self) -> i32 {
+    pub(in crate::primitives) const fn area_doubled(&self) -> i32 {
         let [p1, p2, p3] = self.vertices;
 
         -p2.y * p3.x + p1.y * (p3.x - p2.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y
@@ -198,7 +198,7 @@ impl Triangle {
     /// Sort the 3 vertices of the triangle in order of increasing Y value.
     ///
     /// If two points have the same Y value, the one with the lesser X value is put before.
-    fn sorted_yx(&self) -> Self {
+    const fn sorted_yx(&self) -> Self {
         let [p1, p2, p3] = self.vertices;
 
         let (y1, y2) = sort_two_yx(p1, p2);
@@ -321,7 +321,7 @@ impl Transform for Triangle {
     }
 }
 
-fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
+const fn sort_two_yx(p1: Point, p2: Point) -> (Point, Point) {
     // If p1.y is less than p2.y, return it first. Otherwise, if they have the same Y coordinate,
     // the first point becomes the one with the lesser X coordinate.
     if p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x) {

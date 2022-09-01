@@ -32,7 +32,7 @@ where
         Self { parent, area }
     }
 
-    pub(crate) fn new_unchecked(parent: &'a T, area: Rectangle) -> Self {
+    pub(crate) const fn new_unchecked(parent: &'a T, area: Rectangle) -> Self {
         Self { parent, area }
     }
 }

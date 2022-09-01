@@ -93,7 +93,7 @@ impl Circle {
     }
 
     /// Returns the threshold for this circles diameter.
-    pub(in crate::primitives) fn threshold(&self) -> u32 {
+    pub(in crate::primitives) const fn threshold(&self) -> u32 {
         diameter_to_threshold(self.diameter)
     }
 
@@ -176,7 +176,7 @@ impl Transform for Circle {
     }
 }
 
-pub(in crate::primitives) fn diameter_to_threshold(diameter: u32) -> u32 {
+pub(in crate::primitives) const fn diameter_to_threshold(diameter: u32) -> u32 {
     if diameter <= 4 {
         diameter.pow(2) - diameter / 2
     } else {

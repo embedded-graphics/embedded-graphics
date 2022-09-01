@@ -17,6 +17,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - **(breaking)** [#660](https://github.com/embedded-graphics/embedded-graphics/pull/660) Remove `RawU18` color storage type and use `RawU24` in is place for `Rgb666` and `Bgr666`.
 - [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) Made the following functions `const`:
+- **(breaking)** [#690](https://github.com/embedded-graphics/embedded-graphics/pull/690) Remove `ImageRaw::new_binary` `const` helper method. `ImageRaw::new` can now be used in `const` contexts, so use it instead of `new_binary`.
+- [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) [#699](https://github.com/embedded-graphics/embedded-graphics/pull/699) Made the following functions `const`:
   - `Point::component_mul`
   - `Point::component_div`
   - `Size::saturating_add`
@@ -39,6 +41,36 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `Sector::from_circle`
   - `Sector::to_circle`
   - `Styled::new`
+  - `ImageRaw::new`
+  - `ImageRaw::data_width`
+  - `Image::new`
+  - `FancyDisplay::new`
+  - `MockDisplay::get_pixel`
+  - `MonoFont::mime`
+  - `MonoFont::glyph_mapping`
+  - `MonoTextStyleBuilder::new`
+  - `MonoTextStyleBuilder::text_color`
+  - `MonoTextStyleBuilder::background_color`
+  - `MonoTextStyleBuilder::underline_with_color`
+  - `MonoTextStyleBuilder::strikethrough_with_color`
+  - `MonoTextStyleBuilder::build`
+  - `Ellipse::new`
+  - `Ellipse::contains`
+  - `PrimitiveStyle::new`
+  - `PrimitiveStyle::with_stroke`
+  - `PrimitiveStyle::with_fill`
+  - `PrimitiveStyle::is_transparent`
+  - `PrimitiveStyleBuilder::new`
+  - `PrimitiveStyleBuilder::fill_color`
+  - `PrimitiveStyleBuilder::reset_fill_color`
+  - `PrimitiveStyleBuilder::stroke_color`
+  - `PrimitiveStyleBuilder::reset_stroke_color`
+  - `PrimitiveStyleBuilder::stroke_width`
+  - `PrimitiveStyleBuilder::stroke_alignment`
+  - `PrimitiveStyleBuilder::build`
+  - `DecorationColor::is_none`
+  - `DecorationColor::is_text_color`
+  - `DecorationColor::is_custom`
 - [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
 - [#653](https://github.com/embedded-graphics/embedded-graphics/pull/653) Don't ignore trailing newlines in `Text`.
 - [#662](https://github.com/embedded-graphics/embedded-graphics/pull/662) `ImageRaw::new` no longer panics if `width == 0`.

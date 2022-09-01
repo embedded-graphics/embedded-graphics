@@ -136,7 +136,7 @@ where
     /// calculated based on the length of the given image data. If the length of the image data
     /// isn't an integer multiple of the data length for a single row the last partial row will
     /// be ignored.
-    pub fn new(data: &'a [u8], width: u32) -> Self {
+    pub const fn new(data: &'a [u8], width: u32) -> Self {
         // Prevent panic for `width == 0` by returning a zero sized image.
         if width == 0 {
             return Self {
@@ -161,7 +161,7 @@ where
     ///
     /// For images with less than 8 bits per pixel each row is padded to contain an integer number
     /// of bytes. This method returns the width of each row including the padding pixels.
-    fn data_width(&self) -> u32 {
+    const fn data_width(&self) -> u32 {
         if C::Raw::BITS_PER_PIXEL < 8 {
             let pixels_per_byte = 8 / C::Raw::BITS_PER_PIXEL as u32;
 
@@ -184,6 +184,7 @@ impl<'a> ImageRaw<'a, BinaryColor> {
     /// Returns an image with 0 x 0 pixel size if `width` is 0.
     //
     // MSRV: remove this function when const functions with trait bounds are supported
+    // TODO: What replaces this when removed?
     pub const fn new_binary(data: &'a [u8], width: u32) -> Self {
         let size = if width == 0 {
             Size::zero()

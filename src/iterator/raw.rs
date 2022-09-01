@@ -131,7 +131,7 @@ pub struct BitsIterator<'a, R> {
 }
 
 impl<'a, R: RawData> BitsIterator<'a, R> {
-    fn new(data: &'a [u8]) -> Self {
+    const fn new(data: &'a [u8]) -> Self {
         Self {
             data,
             index: 0,

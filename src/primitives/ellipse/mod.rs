@@ -183,7 +183,7 @@ impl EllipseContains {
     /// Creates an object to determine if a point is inside an ellipse.
     ///
     /// The ellipse is always located in the origin.
-    pub fn new(size: Size) -> Self {
+    pub const fn new(size: Size) -> Self {
         let Size { width, height } = size;
 
         let a = width.pow(2);
@@ -200,7 +200,7 @@ impl EllipseContains {
     }
 
     /// Returns `true` if the point is inside the ellipse.
-    pub fn contains(&self, point: Point) -> bool {
+    pub const fn contains(&self, point: Point) -> bool {
         let x = point.x.pow(2) as u32;
         let y = point.y.pow(2) as u32;
 

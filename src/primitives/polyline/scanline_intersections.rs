@@ -42,7 +42,7 @@ impl<'a> ScanlineIntersections<'a> {
     }
 
     /// Empty scanline iterator.
-    pub(in crate::primitives) fn empty() -> Self {
+    pub(in crate::primitives) const fn empty() -> Self {
         Self {
             next_start_join: None,
             width: 0,

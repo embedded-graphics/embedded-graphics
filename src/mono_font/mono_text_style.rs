@@ -384,7 +384,7 @@ pub struct MonoTextStyleBuilder<'a, C> {
 
 impl<C> MonoTextStyleBuilder<'_, C> {
     /// Creates a new text style builder.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             style: MonoTextStyle {
                 font: &super::NULL_FONT,
@@ -456,28 +456,28 @@ impl<'a, C> MonoTextStyleBuilder<'a, C> {
 
 impl<C: PixelColor> MonoTextStyleBuilder<'_, C> {
     /// Sets the text color.
-    pub fn text_color(mut self, text_color: C) -> Self {
+    pub const fn text_color(mut self, text_color: C) -> Self {
         self.style.text_color = Some(text_color);
 
         self
     }
 
     /// Sets the background color.
-    pub fn background_color(mut self, background_color: C) -> Self {
+    pub const fn background_color(mut self, background_color: C) -> Self {
         self.style.background_color = Some(background_color);
 
         self
     }
 
     /// Enables underline with a custom color.
-    pub fn underline_with_color(mut self, underline_color: C) -> Self {
+    pub const fn underline_with_color(mut self, underline_color: C) -> Self {
         self.style.underline_color = DecorationColor::Custom(underline_color);
 
         self
     }
 
     /// Enables strikethrough with a custom color.
-    pub fn strikethrough_with_color(mut self, strikethrough_color: C) -> Self {
+    pub const fn strikethrough_with_color(mut self, strikethrough_color: C) -> Self {
         self.style.strikethrough_color = DecorationColor::Custom(strikethrough_color);
 
         self
@@ -491,7 +491,7 @@ impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
     /// settings are optional and they will be set to their default value if they are missing.
     ///
     /// [`font`]: MonoTextStyleBuilder::font()
-    pub fn build(self) -> MonoTextStyle<'a, C> {
+    pub const fn build(self) -> MonoTextStyle<'a, C> {
         self.style
     }
 }

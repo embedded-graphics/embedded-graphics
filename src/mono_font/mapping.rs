@@ -171,14 +171,14 @@ macro_rules! impl_mapping {
             }
 
             /// Returns the MIME identifier for this mapping.
-            pub fn mime(self) -> &'static str {
+            pub const fn mime(self) -> &'static str {
                 match self {
                     $(Mapping::$enum_variant => stringify!($constant)),*
                 }
             }
 
             /// Returns a glyph mapping for this mapping.
-            pub fn glyph_mapping(self) -> &'static StrGlyphMapping<'static> {
+            pub const fn glyph_mapping(self) -> &'static StrGlyphMapping<'static> {
                 match self {
                     $(Self::$enum_variant => &$constant),*
                 }

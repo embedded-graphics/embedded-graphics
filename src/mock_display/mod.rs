@@ -279,7 +279,7 @@ where
     }
 
     /// Returns the color of a pixel.
-    pub fn get_pixel(&self, p: Point) -> Option<C> {
+    pub const fn get_pixel(&self, p: Point) -> Option<C> {
         let Point { x, y } = p;
 
         self.pixels[x as usize + y as usize * SIZE]
