@@ -13,10 +13,10 @@
 
 ### Changed
 
-- **(breaking)** [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
 - **(breaking)** [#660](https://github.com/embedded-graphics/embedded-graphics/pull/660) Remove `RawU18` color storage type and use `RawU24` in is place for `Rgb666` and `Bgr666`.
 - [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
 - **(breaking)** [#663](https://github.com/embedded-graphics/embedded-graphics/pull/663) Upgraded Cargo dependencies to their latest versions.
+- **(breaking)** [#689](https://github.com/embedded-graphics/embedded-graphics/pull/689) Bump Minimum Supported Rust Version (MSRV) to 1.61.
 
 ## [0.3.3] - 2021-09-09
 

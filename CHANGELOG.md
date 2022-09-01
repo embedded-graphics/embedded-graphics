@@ -14,7 +14,6 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Changed
 
-- **(breaking)** [#638](https://github.com/embedded-graphics/embedded-graphics/pull/638) Bump Minimum Supported Rust Version (MSRV) to 1.57.
 - **(breaking)** [#660](https://github.com/embedded-graphics/embedded-graphics/pull/660) Remove `RawU18` color storage type and use `RawU24` in is place for `Rgb666` and `Bgr666`.
 - [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) Made the following functions `const`:
   - `Point::component_mul`
@@ -42,6 +41,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
 - [#662](https://github.com/embedded-graphics/embedded-graphics/pull/662) `ImageRaw::new` no longer panics if `width == 0`.
 - **(breaking)** [#663](https://github.com/embedded-graphics/embedded-graphics/pull/663) Upgraded Cargo dependencies to their latest versions.
+- **(breaking)** [#689](https://github.com/embedded-graphics/embedded-graphics/pull/689) Bump Minimum Supported Rust Version (MSRV) to 1.61.
 
 ### Fixed
 
