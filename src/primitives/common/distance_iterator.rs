@@ -33,7 +33,7 @@ impl DistanceIterator {
     }
 
     /// Creates an empty distance iterator.
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             center_2x: Point::zero(),
             points: rectangle::Points::empty(),

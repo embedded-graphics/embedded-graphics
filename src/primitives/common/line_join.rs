@@ -106,7 +106,7 @@ impl LineJoin {
     }
 
     /// Empty join
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             kind: JoinKind::End,
             first_edge_end: EdgeCorners {
@@ -243,7 +243,7 @@ impl LineJoin {
     }
 
     /// The filler line (if any) for bevel and degenerate joints.
-    fn filler_line(&self) -> Option<Line> {
+    const fn filler_line(&self) -> Option<Line> {
         match self.kind {
             JoinKind::Bevel { outer_side, .. } | JoinKind::Degenerate { outer_side, .. } => {
                 let line = match outer_side {
@@ -289,7 +289,7 @@ impl LineJoin {
     }
 
     /// Whether the join is degenerate (segments self-intersect) or not.
-    pub fn is_degenerate(&self) -> bool {
+    pub const fn is_degenerate(&self) -> bool {
         matches!(self.kind, JoinKind::Degenerate { .. })
     }
 }

@@ -48,33 +48,33 @@ where
     C: PixelColor,
 {
     /// Creates a primitive style without fill and stroke.
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        Self::const_default()
     }
 
     /// Creates a stroke primitive style.
     ///
     /// If the `stroke_width` is `0` the resulting style won't draw a stroke.
-    pub fn with_stroke(stroke_color: C, stroke_width: u32) -> Self {
+    pub const fn with_stroke(stroke_color: C, stroke_width: u32) -> Self {
         Self {
             stroke_color: Some(stroke_color),
             stroke_width,
-            ..PrimitiveStyle::default()
+            ..PrimitiveStyle::const_default()
         }
     }
 
     /// Creates a fill primitive style.
-    pub fn with_fill(fill_color: C) -> Self {
+    pub const fn with_fill(fill_color: C) -> Self {
         Self {
             fill_color: Some(fill_color),
-            ..PrimitiveStyle::default()
+            ..PrimitiveStyle::const_default()
         }
     }
 
     /// Returns the stroke width on the outside of the shape.
     ///
     /// The outside stroke width is determined by `stroke_width` and `stroke_alignment`.
-    pub(crate) fn outside_stroke_width(&self) -> u32 {
+    pub(crate) const fn outside_stroke_width(&self) -> u32 {
         match self.stroke_alignment {
             StrokeAlignment::Inside => 0,
             StrokeAlignment::Center => self.stroke_width / 2,
@@ -85,7 +85,7 @@ where
     /// Returns the stroke width on the inside of the shape.
     ///
     /// The inside stroke width is determined by `stroke_width` and `stroke_alignment`.
-    pub(crate) fn inside_stroke_width(&self) -> u32 {
+    pub(crate) const fn inside_stroke_width(&self) -> u32 {
         match self.stroke_alignment {
             StrokeAlignment::Inside => self.stroke_width,
             StrokeAlignment::Center => self.stroke_width.saturating_add(1) / 2,
@@ -94,7 +94,7 @@ where
     }
 
     /// Returns if a primitive drawn with this style is completely transparent.
-    pub fn is_transparent(&self) -> bool {
+    pub const fn is_transparent(&self) -> bool {
         (self.stroke_color.is_none() || self.stroke_width == 0) && self.fill_color.is_none()
     }
 
@@ -121,6 +121,17 @@ where
 
         primitive.offset(offset)
     }
+
+    /// A helper function to allow `const` default.
+    // MSRV: Move into `Default` impl when we have consts in traits
+    const fn const_default() -> Self {
+        Self {
+            fill_color: None,
+            stroke_color: None,
+            stroke_width: 0,
+            stroke_alignment: StrokeAlignment::Center,
+        }
+    }
 }
 
 impl<C> Default for PrimitiveStyle<C>
@@ -128,12 +139,7 @@ where
     C: PixelColor,
 {
     fn default() -> Self {
-        Self {
-            fill_color: None,
-            stroke_color: None,
-            stroke_width: 0,
-            stroke_alignment: StrokeAlignment::Center,
-        }
+        Self::const_default()
     }
 }
 
@@ -198,56 +204,56 @@ where
     C: PixelColor,
 {
     /// Creates a new primitive style builder.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
-            style: PrimitiveStyle::default(),
+            style: PrimitiveStyle::const_default(),
         }
     }
 
     /// Sets the fill color.
-    pub fn fill_color(mut self, fill_color: C) -> Self {
+    pub const fn fill_color(mut self, fill_color: C) -> Self {
         self.style.fill_color = Some(fill_color);
 
         self
     }
 
     /// Resets the fill color to transparent.
-    pub fn reset_fill_color(mut self) -> Self {
+    pub const fn reset_fill_color(mut self) -> Self {
         self.style.fill_color = None;
 
         self
     }
 
     /// Sets the stroke color.
-    pub fn stroke_color(mut self, stroke_color: C) -> Self {
+    pub const fn stroke_color(mut self, stroke_color: C) -> Self {
         self.style.stroke_color = Some(stroke_color);
 
         self
     }
 
     /// Resets the stroke color to transparent.
-    pub fn reset_stroke_color(mut self) -> Self {
+    pub const fn reset_stroke_color(mut self) -> Self {
         self.style.stroke_color = None;
 
         self
     }
 
     /// Sets the stroke width.
-    pub fn stroke_width(mut self, stroke_width: u32) -> Self {
+    pub const fn stroke_width(mut self, stroke_width: u32) -> Self {
         self.style.stroke_width = stroke_width;
 
         self
     }
 
     /// Sets the stroke alignment.
-    pub fn stroke_alignment(mut self, stroke_alignment: StrokeAlignment) -> Self {
+    pub const fn stroke_alignment(mut self, stroke_alignment: StrokeAlignment) -> Self {
         self.style.stroke_alignment = stroke_alignment;
 
         self
     }
 
     /// Builds the primitive style.
-    pub fn build(self) -> PrimitiveStyle<C> {
+    pub const fn build(self) -> PrimitiveStyle<C> {
         self.style
     }
 }

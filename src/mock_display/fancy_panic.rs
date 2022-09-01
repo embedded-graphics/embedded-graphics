@@ -146,7 +146,11 @@ impl<'a, C> FancyDisplay<'a, C>
 where
     C: PixelColor + ColorMapping,
 {
-    fn new(display: &'a MockDisplay<C>, bounding_box: Rectangle, column_width: usize) -> Self {
+    const fn new(
+        display: &'a MockDisplay<C>,
+        bounding_box: Rectangle,
+        column_width: usize,
+    ) -> Self {
         Self {
             display,
             bounding_box,

@@ -137,7 +137,7 @@ where
     T: ImageDrawable,
 {
     /// Creates a new `Image`.
-    pub fn new(image_drawable: &'a T, position: Point) -> Self {
+    pub const fn new(image_drawable: &'a T, position: Point) -> Self {
         Self {
             image_drawable,
             offset: position,

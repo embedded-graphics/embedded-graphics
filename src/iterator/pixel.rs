@@ -14,7 +14,7 @@ where
     I: Iterator<Item = Pixel<C>>,
     C: PixelColor,
 {
-    pub(super) fn new(iter: I, offset: Point) -> Self {
+    pub(super) const fn new(iter: I, offset: Point) -> Self {
         Self { iter, offset }
     }
 }

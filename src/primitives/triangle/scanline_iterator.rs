@@ -47,7 +47,7 @@ impl ScanlineIterator {
         }
     }
 
-    fn empty() -> Self {
+    const fn empty() -> Self {
         Self {
             rows: 0i32..0,
             scanline_y: 0,

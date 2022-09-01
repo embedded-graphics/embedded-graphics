@@ -57,7 +57,7 @@ pub enum LineSide {
 
 impl LineSide {
     /// Swap side.
-    pub fn swap(self) -> Self {
+    pub const fn swap(self) -> Self {
         match self {
             Self::Left => Self::Right,
             Self::Right => Self::Left,

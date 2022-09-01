@@ -25,14 +25,14 @@ impl StyledScanline {
     /// Returns the stroke region on the left side.
     ///
     /// If the scanline contains no fill region the entire scanline will be returned.
-    pub fn stroke_left(&self) -> Scanline {
+    pub const fn stroke_left(&self) -> Scanline {
         Scanline::new(self.y, self.stroke_range.start..self.fill_range.start)
     }
 
     /// Returns the stroke region on the right side.
     ///
     /// If the scanline contains no fill region an empty scanline will be returned.
-    pub fn stroke_right(&self) -> Scanline {
+    pub const fn stroke_right(&self) -> Scanline {
         Scanline::new(self.y, self.fill_range.end..self.stroke_range.end)
     }
 

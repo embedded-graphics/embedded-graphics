@@ -15,7 +15,7 @@ enum Operation {
 
 impl Operation {
     /// Executes the operation.
-    fn execute(self, first: bool, second: bool) -> bool {
+    const fn execute(self, first: bool, second: bool) -> bool {
         match self {
             Operation::Intersection => first && second,
             Operation::Union => first || second,

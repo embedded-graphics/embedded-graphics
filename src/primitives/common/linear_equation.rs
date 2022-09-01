@@ -89,7 +89,7 @@ impl OriginLinearEquation {
     }
 
     /// Creates a new horizontal linear equation.
-    pub fn new_horizontal() -> Self {
+    pub const fn new_horizontal() -> Self {
         Self {
             normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
         }

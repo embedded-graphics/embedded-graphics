@@ -210,21 +210,21 @@ pub enum DecorationColor<C> {
 
 impl<C: PixelColor> DecorationColor<C> {
     /// Returns `true` if the decoration_color is `None`.
-    pub fn is_none(&self) -> bool {
+    pub const fn is_none(&self) -> bool {
         matches!(self, Self::None)
     }
 
     /// Returns `true` if the decoration_color is `TextColor`.
-    pub fn is_text_color(&self) -> bool {
+    pub const fn is_text_color(&self) -> bool {
         matches!(self, Self::TextColor)
     }
 
     /// Returns `true` if the decoration_color is `Custom`.
-    pub fn is_custom(&self) -> bool {
+    pub const fn is_custom(&self) -> bool {
         matches!(self, Self::Custom(_))
     }
 
-    pub(crate) fn to_color(&self, text_color: Option<C>) -> Option<C> {
+    pub(crate) const fn to_color(&self, text_color: Option<C>) -> Option<C> {
         match self {
             DecorationColor::TextColor => text_color,
             DecorationColor::Custom(custom_color) => Some(*custom_color),
@@ -257,7 +257,7 @@ impl LineHeight {
     /// let relative_height = LineHeight::Percent(150);
     /// assert_eq!(relative_height.to_absolute(20), 30);
     /// ```
-    pub fn to_absolute(self, base_line_height: u32) -> u32 {
+    pub const fn to_absolute(self, base_line_height: u32) -> u32 {
         match self {
             Self::Pixels(px) => px,
             Self::Percent(percent) => base_line_height * percent / 100,

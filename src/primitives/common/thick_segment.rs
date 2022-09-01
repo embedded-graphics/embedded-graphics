@@ -16,7 +16,7 @@ pub struct ThickSegment {
 
 impl ThickSegment {
     /// Create a new thick segment from two joints.
-    pub fn new(start_join: LineJoin, end_join: LineJoin) -> Self {
+    pub const fn new(start_join: LineJoin, end_join: LineJoin) -> Self {
         Self {
             start_join,
             end_join,
@@ -29,7 +29,7 @@ impl ThickSegment {
     }
 
     /// Get the right/left edges of this line segment.
-    fn edges(&self) -> (Line, Line) {
+    const fn edges(&self) -> (Line, Line) {
         (
             Line::new(
                 self.start_join.second_edge_start.right,

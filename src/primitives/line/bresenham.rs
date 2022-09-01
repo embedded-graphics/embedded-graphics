@@ -16,7 +16,7 @@ pub struct MajorMinor<T> {
 
 impl<T> MajorMinor<T> {
     /// Creates a new struct holding a major and a minor value.
-    pub fn new(major: T, minor: T) -> Self {
+    pub const fn new(major: T, minor: T) -> Self {
         Self { major, minor }
     }
 }
@@ -100,7 +100,7 @@ impl BresenhamParameters {
     /// Returns if extra points need to be mirrored along the line.
     ///
     /// Extra points should always be added to the right side of a line.
-    fn mirror_extra_points(&self) -> bool {
+    const fn mirror_extra_points(&self) -> bool {
         if self.position_step.major.x != 0 {
             self.position_step.major.x == self.position_step.minor.y
         } else {
