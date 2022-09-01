@@ -21,6 +21,7 @@ commands:
 jobs:
   # Check that everything (tests, benches, etc) builds using the MSRV
   precheck-msrv:
+    resource_class: large
     docker: &docker
       - image: jamwaffles/circleci-embedded-graphics:1.61.0-0
         auth:
@@ -33,6 +34,7 @@ jobs:
 
   # Check that everything (tests, benches, etc) builds using the latest stable Rust version
   precheck-stable:
+    resource_class: large
     docker: *docker
     steps:
       - run: rustup default stable
@@ -42,6 +44,7 @@ jobs:
 
   # Check that everything (tests, benches, etc) builds using the latest Rust beta
   precheck-beta:
+    resource_class: large
     docker: *docker
     steps:
       - run: rustup default beta
@@ -51,6 +54,7 @@ jobs:
 
   # Build crates for embedded target
   all-targets:
+    resource_class: large
     docker: *docker
     steps:
       - eg_init
