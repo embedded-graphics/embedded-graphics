@@ -46,7 +46,7 @@
 use core::ops::RangeInclusive;
 
 /// Mapping from characters to glyph indices.
-pub trait GlyphMapping {
+pub trait GlyphMapping: Sync {
     /// Maps a character to a glyph index.
     ///
     /// If `c` isn't included in the font the index of a suitable replacement glyph is returned.
@@ -55,7 +55,7 @@ pub trait GlyphMapping {
 
 impl<F> GlyphMapping for F
 where
-    F: Fn(char) -> usize,
+    F: Sync + Fn(char) -> usize,
 {
     fn index(&self, c: char) -> usize {
         self(c)
