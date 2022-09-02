@@ -180,7 +180,7 @@ impl MonoFontData {
             ///
             /// <img src="{png_data}" alt="{name} font">
             pub const {name}: MonoFont = MonoFontBuilder::new()
-                .image(ImageRaw::new_binary(include_bytes!("{raw_file}"), {image_width}))
+                .image(ImageRaw::new(include_bytes!("{raw_file}"), {image_width}))
                 .glyph_indices(super::{glyph_indices})
                 .character_size(Size::new({char_width}, {char_height}))
                 .character_spacing({character_spacing})

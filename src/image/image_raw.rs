@@ -7,7 +7,7 @@ use crate::{
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData},
-        BinaryColor, PixelColor,
+        PixelColor,
     },
     primitives::Rectangle,
 };
@@ -168,37 +168,6 @@ where
             bytes_per_row(self.size.width, C::Raw::BITS_PER_PIXEL) as u32 * pixels_per_byte
         } else {
             self.size.width
-        }
-    }
-}
-
-impl<'a> ImageRaw<'a, BinaryColor> {
-    /// Creates a new binary image.
-    ///
-    /// Due to `const fn` limitations the `new` method cannot be used in `const` contexts. This
-    /// method provides a workaround to create `ImageRaw`s with `BinaryColor` images.
-    ///
-    /// Only the width of the image needs to be specified. The height of the image will be
-    /// calculated based on the length of the given image data.
-    ///
-    /// Returns an image with 0 x 0 pixel size if `width` is 0.
-    //
-    // MSRV: remove this function when const functions with trait bounds are supported
-    // TODO: What replaces this when removed?
-    pub const fn new_binary(data: &'a [u8], width: u32) -> Self {
-        let size = if width == 0 {
-            Size::zero()
-        } else {
-            let height = data.len() / bytes_per_row(width, 1);
-
-            Size::new(width, height as u32)
-        };
-
-        Self {
-            data,
-            size,
-            pixel_type: PhantomData,
-            byte_order: PhantomData,
         }
     }
 }
@@ -427,25 +396,6 @@ mod tests {
             0xAA, 0x80, //
         ];
         let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
-
-        assert_pattern(
-            image_data,
-            &[
-                "#.#.#.#..", //
-                ".#.#.#.##", //
-                "#.#.#.#.#", //
-            ],
-        );
-    }
-
-    #[test]
-    fn bpp1_new_binary() {
-        let data = [
-            0xAA, 0x00, //
-            0x55, 0xFF, //
-            0xAA, 0x80, //
-        ];
-        let image_data = ImageRaw::new_binary(&data, 9);
 
         assert_pattern(
             image_data,
@@ -727,7 +677,7 @@ mod tests {
 
     #[test]
     fn binary_image_with_zero_width() {
-        let image = ImageRaw::new_binary(&[], 0);
+        let image = ImageRaw::<BinaryColor>::new(&[], 0);
 
         assert_eq!(image.size, Size::zero());
     }

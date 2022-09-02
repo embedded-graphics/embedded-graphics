@@ -193,7 +193,7 @@ impl DecorationDimensions {
 }
 
 const NULL_FONT: MonoFont = MonoFont {
-    image: ImageRaw::new_binary(&[], 1),
+    image: ImageRaw::new(&[], 1),
     character_size: Size::zero(),
     character_spacing: 0,
     baseline: 0,

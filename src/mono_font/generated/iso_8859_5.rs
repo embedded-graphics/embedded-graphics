@@ -18,7 +18,7 @@
 
 /// 4x6 pixel monospace font.
 pub const FONT_4X6: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_4x6.raw"),
         64,
     ),
@@ -32,7 +32,7 @@ pub const FONT_4X6: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 5x7 pixel monospace font.
 pub const FONT_5X7: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_5x7.raw"),
         80,
     ),
@@ -46,7 +46,7 @@ pub const FONT_5X7: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 5x8 pixel monospace font.
 pub const FONT_5X8: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_5x8.raw"),
         80,
     ),
@@ -60,7 +60,7 @@ pub const FONT_5X8: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 6x9 pixel monospace font.
 pub const FONT_6X9: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_6x9.raw"),
         96,
     ),
@@ -74,7 +74,7 @@ pub const FONT_6X9: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 6x10 pixel monospace font.
 pub const FONT_6X10: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_6x10.raw"),
         96,
     ),
@@ -88,7 +88,7 @@ pub const FONT_6X10: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 6x12 pixel monospace font.
 pub const FONT_6X12: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_6x12.raw"),
         96,
     ),
@@ -102,7 +102,7 @@ pub const FONT_6X12: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 6x13 pixel monospace font.
 pub const FONT_6X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_6x13.raw"),
         96,
     ),
@@ -116,7 +116,7 @@ pub const FONT_6X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 6x13 pixel monospace font.
 pub const FONT_6X13_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_6x13_bold.raw"),
         96,
     ),
@@ -130,7 +130,7 @@ pub const FONT_6X13_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFon
 
 /// 6x13 pixel monospace font.
 pub const FONT_6X13_ITALIC: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_6x13_italic.raw"),
         96,
     ),
@@ -144,7 +144,7 @@ pub const FONT_6X13_ITALIC: crate::mono_font::MonoFont = crate::mono_font::MonoF
 
 /// 7x13 pixel monospace font.
 pub const FONT_7X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_7x13.raw"),
         112,
     ),
@@ -158,7 +158,7 @@ pub const FONT_7X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 7x13 pixel monospace font.
 pub const FONT_7X13_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_7x13_bold.raw"),
         112,
     ),
@@ -172,7 +172,7 @@ pub const FONT_7X13_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFon
 
 /// 7x13 pixel monospace font.
 pub const FONT_7X13_ITALIC: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_7x13_italic.raw"),
         112,
     ),
@@ -186,7 +186,7 @@ pub const FONT_7X13_ITALIC: crate::mono_font::MonoFont = crate::mono_font::MonoF
 
 /// 7x14 pixel monospace font.
 pub const FONT_7X14: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_7x14.raw"),
         112,
     ),
@@ -200,7 +200,7 @@ pub const FONT_7X14: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 7x14 pixel monospace font.
 pub const FONT_7X14_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_7x14_bold.raw"),
         112,
     ),
@@ -214,7 +214,7 @@ pub const FONT_7X14_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFon
 
 /// 8x13 pixel monospace font.
 pub const FONT_8X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_8x13.raw"),
         128,
     ),
@@ -228,7 +228,7 @@ pub const FONT_8X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 8x13 pixel monospace font.
 pub const FONT_8X13_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_8x13_bold.raw"),
         128,
     ),
@@ -242,7 +242,7 @@ pub const FONT_8X13_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFon
 
 /// 8x13 pixel monospace font.
 pub const FONT_8X13_ITALIC: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_8x13_italic.raw"),
         128,
     ),
@@ -256,7 +256,7 @@ pub const FONT_8X13_ITALIC: crate::mono_font::MonoFont = crate::mono_font::MonoF
 
 /// 9x15 pixel monospace font.
 pub const FONT_9X15: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_9x15.raw"),
         144,
     ),
@@ -270,7 +270,7 @@ pub const FONT_9X15: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 9x15 pixel monospace font.
 pub const FONT_9X15_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_9x15_bold.raw"),
         144,
     ),
@@ -284,7 +284,7 @@ pub const FONT_9X15_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFon
 
 /// 9x18 pixel monospace font.
 pub const FONT_9X18: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_9x18.raw"),
         144,
     ),
@@ -298,7 +298,7 @@ pub const FONT_9X18: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 9x18 pixel monospace font.
 pub const FONT_9X18_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_9x18_bold.raw"),
         144,
     ),
@@ -312,7 +312,7 @@ pub const FONT_9X18_BOLD: crate::mono_font::MonoFont = crate::mono_font::MonoFon
 
 /// 10x20 pixel monospace font.
 pub const FONT_10X20: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new_binary(
+    image: crate::image::ImageRaw::new(
         include_bytes!("../../../fonts/raw/iso_8859_5/font_10x20.raw"),
         160,
     ),

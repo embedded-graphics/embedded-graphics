@@ -14,7 +14,7 @@ fn custom_font() {
     let mapping = StrGlyphMapping::new("01", 0);
 
     let font = MonoFont {
-        image: ImageRaw::new_binary(DATA, 8),
+        image: ImageRaw::new(DATA, 8),
         character_size: Size::new(2, 2),
         character_spacing: 0,
         baseline: 0,
