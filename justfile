@@ -21,13 +21,13 @@ build-benches:
 bench *args:
     cargo bench --workspace {{args}}
 
-# Run cargo test in release mode
+# Run cargo test
 test:
-    cargo test --workspace --release
+    cargo test --workspace
 
-# Run cargo test in release mode with all features enabled
+# Run cargo test with all features enabled
 test-all:
-    cargo test --workspace --release --all-features
+    cargo test --workspace --all-features
 
 # Check the formatting
 check-formatting:
