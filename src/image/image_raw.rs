@@ -1,16 +1,15 @@
 use core::marker::PhantomData;
 
-use embedded_graphics_core::{pixelcolor::BinaryColor, primitives::Rectangle};
-
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
-    image::ImageDrawable,
+    image::{ImageDrawable, ImagePixelGetter},
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData},
-        PixelColor,
+        BinaryColor, PixelColor,
     },
+    primitives::Rectangle,
 };
 
 /// Image with little endian data.
@@ -264,6 +263,23 @@ where
     }
 }
 
+impl<'a, C, BO> ImagePixelGetter for ImageRaw<'a, C, BO>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    BO: ByteOrder,
+    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+{
+    fn pixel(&self, p: Point) -> Option<Self::Color> {
+        self.bounding_box().contains(p).then(|| {
+            RawDataSlice::new(self.data)
+                .into_iter()
+                .nth(p.x as usize + p.y as usize * self.data_width() as usize)
+                .unwrap()
+                .into()
+        })
+    }
+}
+
 struct ContiguousPixels<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
@@ -441,6 +457,23 @@ mod tests {
     }
 
     #[test]
+    fn bpp1_get_pixel() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
+
+        assert_eq!(image_data.pixel(Point::new(0, 0)), Some(BinaryColor::On));
+        assert_eq!(image_data.pixel(Point::new(8, 0)), Some(BinaryColor::Off));
+        assert_eq!(image_data.pixel(Point::new(0, 1)), Some(BinaryColor::Off));
+        assert_eq!(image_data.pixel(Point::new(8, 1)), Some(BinaryColor::On));
+        assert_eq!(image_data.pixel(Point::new(0, 2)), Some(BinaryColor::On));
+        assert_eq!(image_data.pixel(Point::new(8, 2)), Some(BinaryColor::On));
+    }
+
+    #[test]
     fn bpp2() {
         let data = [
             0b00_01_10_11, //
@@ -558,6 +591,22 @@ mod tests {
                 "BK", //
             ],
         );
+    }
+
+    #[test]
+    fn bpp16_big_endian_get_pixel() {
+        let data = [
+            0xF8, 0x00, //
+            0x07, 0xE0, //
+            0x00, 0x1F, //
+            0x00, 0x00, //
+        ];
+        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2);
+
+        assert_eq!(image_data.pixel(Point::new(0, 0)), Some(Rgb565::RED));
+        assert_eq!(image_data.pixel(Point::new(1, 0)), Some(Rgb565::GREEN));
+        assert_eq!(image_data.pixel(Point::new(0, 1)), Some(Rgb565::BLUE));
+        assert_eq!(image_data.pixel(Point::new(1, 1)), Some(Rgb565::BLACK));
     }
 
     #[test]
@@ -680,5 +729,20 @@ mod tests {
         let image = ImageRaw::new_binary(&[], 0);
 
         assert_eq!(image.size, Size::zero());
+    }
+
+    #[test]
+    fn pixel_out_of_bounds() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data = ImageRaw::<BinaryColor>::new(&data, 9);
+
+        assert_eq!(image_data.pixel(Point::new(-1, 0)), None);
+        assert_eq!(image_data.pixel(Point::new(0, -1)), None);
+        assert_eq!(image_data.pixel(Point::new(9, 0)), None);
+        assert_eq!(image_data.pixel(Point::new(9, 3)), None);
     }
 }
