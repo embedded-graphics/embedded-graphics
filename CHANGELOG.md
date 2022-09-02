@@ -40,6 +40,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
   - `Sector::to_circle`
   - `Styled::new`
 - [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
+- [#653](https://github.com/embedded-graphics/embedded-graphics/pull/653) Don't ignore trailing newlines in `Text`.
 - [#662](https://github.com/embedded-graphics/embedded-graphics/pull/662) `ImageRaw::new` no longer panics if `width == 0`.
 - **(breaking)** [#688](https://github.com/embedded-graphics/embedded-graphics/pull/688) `MonoFont` is now `Send + Sync`; implementations of `GlyphMapping` must be `Sync`.
 - **(breaking)** [#663](https://github.com/embedded-graphics/embedded-graphics/pull/663) Upgraded Cargo dependencies to their latest versions.

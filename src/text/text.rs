@@ -105,10 +105,17 @@ impl<S: Clone> Transform for Text<'_, S> {
 }
 
 impl<S: TextRenderer> Text<'_, S> {
+    fn line_height(&self) -> i32 {
+        self.text_style
+            .line_height
+            .to_absolute(self.character_style.line_height())
+            .saturating_as::<i32>()
+    }
+
     fn lines(&self) -> impl Iterator<Item = (&str, Point)> {
         let mut position = self.position;
 
-        self.text.lines().map(move |line| {
+        self.text.split('\n').map(move |line| {
             let p = match self.text_style.alignment {
                 Alignment::Left => position,
                 Alignment::Right => {
@@ -129,13 +136,15 @@ impl<S: TextRenderer> Text<'_, S> {
                 }
             };
 
-            position.y += self
-                .text_style
-                .line_height
-                .to_absolute(self.character_style.line_height())
-                .saturating_as::<i32>();
+            position.y += self.line_height();
 
-            (line, p)
+            // remove trailing '\r' for '\r\n' line endings
+            let len = line.len();
+            if len > 0 && line.as_bytes()[len - 1] == b'\r' {
+                (&line[0..len - 1], p)
+            } else {
+                (line, p)
+            }
         })
     }
 }
@@ -305,6 +314,49 @@ mod tests {
             text.bounding_box(),
             Rectangle::new(Point::zero(), Size::new(2 * 6, 2 * 9))
         );
+    }
+
+    #[test]
+    fn multiline_trailing_newline() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(&FONT_6X9)
+            .text_color(BinaryColor::On)
+            .build();
+
+        let mut single_text_display = MockDisplay::new();
+        Text::with_baseline("AB\nC", Point::zero(), character_style, Baseline::Top)
+            .draw(&mut single_text_display)
+            .unwrap();
+
+        let mut multiple_text_display = MockDisplay::new();
+        let pos = Text::with_baseline("AB\n", Point::zero(), character_style, Baseline::Top)
+            .draw(&mut multiple_text_display)
+            .unwrap();
+        Text::with_baseline("C", pos, character_style, Baseline::Top)
+            .draw(&mut multiple_text_display)
+            .unwrap();
+
+        assert_eq!(single_text_display, multiple_text_display);
+    }
+
+    #[test]
+    fn line_endings() {
+        let character_style = MonoTextStyleBuilder::new()
+            .font(&FONT_6X9)
+            .text_color(BinaryColor::On)
+            .build();
+
+        let mut cr_lf_display = MockDisplay::new();
+        Text::with_baseline("AB\r\nC", Point::zero(), character_style, Baseline::Top)
+            .draw(&mut cr_lf_display)
+            .unwrap();
+
+        let mut lf_display = MockDisplay::new();
+        Text::with_baseline("AB\nC", Point::zero(), character_style, Baseline::Top)
+            .draw(&mut lf_display)
+            .unwrap();
+
+        assert_eq!(cr_lf_display, lf_display);
     }
 
     #[test]
