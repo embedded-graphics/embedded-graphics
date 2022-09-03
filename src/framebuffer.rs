@@ -22,7 +22,15 @@ use crate::{
 /// This function is a workaround for current limitations in Rust const generics.
 /// It can be used to calculate the `N` parameter based on the size and color type of the framebuffer.
 pub const fn buffer_size<C: PixelColor>(width: usize, height: usize) -> usize {
-    (width * C::Raw::BITS_PER_PIXEL + 7) / 8 * height
+    buffer_size_bpp(width, height, C::Raw::BITS_PER_PIXEL)
+}
+
+/// Calculates the required buffer size.
+///
+/// This function is a workaround for current limitations in Rust const generics.
+/// It can be used to calculate the `N` parameter based on the size and bit depth of the framebuffer.
+pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
+    (width * bpp + 7) / 8 * height
 }
 
 /// A framebuffer.
@@ -45,7 +53,7 @@ pub const fn buffer_size<C: PixelColor>(width: usize, height: usize) -> usize {
 ///     .draw(&mut fb)
 ///     .unwrap();
 /// ```
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct Framebuffer<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> {
     data: [u8; N],
     color_type: PhantomData<C>,
@@ -58,9 +66,11 @@ impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
 where
     C: PixelColor,
 {
+    const BUFFER_SIZE: usize = buffer_size::<C>(WIDTH, HEIGHT);
+
     /// Static assertion that N is correct.
     // MSRV: remove N when constant generic expressions are stabilized
-    const CHECK_N: () = if N != buffer_size::<C>(WIDTH, HEIGHT) {
+    const CHECK_N: () = if N < Self::BUFFER_SIZE {
         panic!("Invalid N: see Framebuffer documentation for more information");
     };
 
@@ -99,8 +109,8 @@ where
     for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
     /// Returns an image based on the framebuffer content.
-    pub const fn as_image(&self) -> ImageRaw<'_, C, BO> {
-        ImageRaw::new(&self.data, WIDTH as u32)
+    pub fn as_image(&self) -> ImageRaw<'_, C, BO> {
+        ImageRaw::new(&self.data[0..Self::BUFFER_SIZE], WIDTH as u32)
     }
 
     /// Get pixel color.
@@ -701,5 +711,32 @@ mod tests {
         <framebuffer!(Rgb565, 10, 10)>::new().set_pixel(Point::zero(), Rgb565::WHITE);
         <framebuffer!(Rgb888, 10, 10)>::new().set_pixel(Point::zero(), Rgb888::WHITE);
         <framebuffer!(U32Color, 10, 10)>::new().set_pixel(Point::zero(), U32Color(0));
+    }
+
+    #[test]
+    fn oversized_buffer() {
+        let fb = Framebuffer::<
+            BinaryColor,
+            _,
+            LittleEndian,
+            10,
+            5,
+            { buffer_size::<BinaryColor>(10, 5) * 3 / 2 },
+        >::new();
+
+        assert_eq!(fb.size(), Size::new(10, 5));
+        assert_eq!(fb.as_image().size(), Size::new(10, 5));
+
+        let outside_x = Point::zero() + fb.size().x_axis();
+        let outside_y = Point::zero() + fb.size().y_axis();
+
+        assert_eq!(fb.pixel(outside_x), None);
+        assert_eq!(fb.pixel(outside_y), None);
+
+        let mut fb2 = fb.clone();
+        fb2.set_pixel(outside_x, BinaryColor::On);
+        fb2.set_pixel(outside_y, BinaryColor::On);
+
+        assert_eq!(fb, fb2);
     }
 }
