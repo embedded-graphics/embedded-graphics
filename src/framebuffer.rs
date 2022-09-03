@@ -61,13 +61,13 @@ where
     C: PixelColor,
 {
     /// Static assertion that N is correct.
-    /// MSRV: remove N when constant generic expressions are stabilized
+    // MSRV: remove N when constant generic expressions are stabilized
     const CHECK_N: () = if N != buffer_size::<C>(WIDTH, HEIGHT) {
         panic!("Invalid N: see Framebuffer documentation for more information");
     };
 
     /// Creates a new framebuffer.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         #[allow(path_statements)]
         {
             // Make sure CHECK_N isn't optimized out.
@@ -83,7 +83,7 @@ where
     }
 
     /// Returns a reference to the raw framebuffer data.
-    pub fn data(&self) -> &[u8; N] {
+    pub const fn data(&self) -> &[u8; N] {
         &self.data
     }
 
@@ -101,13 +101,14 @@ where
     for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
     /// Returns an image based on the framebuffer content.
-    pub fn as_image(&self) -> ImageRaw<'_, C, BO> {
+    pub const fn as_image(&self) -> ImageRaw<'_, C, BO> {
         ImageRaw::new(&self.data, WIDTH as u32)
     }
 
     /// Get pixel color.
     ///
     /// Returns `None` is `p` is outside the framebuffer bounding box.
+    // TODO: Optimise implementation by moving away from `ImageRaw::pixel` and directly calculating skip value.
     pub fn pixel(&self, p: Point) -> Option<C> {
         self.as_image().pixel(p)
     }
@@ -174,7 +175,7 @@ where
 {
     /// Sets the color of a pixel.
     ///
-    /// Trying to set a pixel outside the framebuffer is a noop.
+    /// Setting a pixel outside the framebuffer's bounding box will be a noop.
     pub fn set_pixel(&mut self, p: Point, c: C) {
         if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
             if x < WIDTH && y < HEIGHT {
