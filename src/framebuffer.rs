@@ -38,8 +38,6 @@ pub const fn buffer_size<C: PixelColor>(width: usize, height: usize) -> usize {
 ///     primitives::PrimitiveStyle,
 /// };
 ///
-/// let mut fb = <framebuffer!(Rgb565, 320, 240)>::new();
-/// // or:
 /// let mut fb = Framebuffer::<Rgb565, _, LittleEndian, 320, 240, {buffer_size::<Rgb565>(320, 240)}>::new();
 ///
 /// fb.bounding_box()
@@ -274,32 +272,6 @@ impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDi
     }
 }
 
-/// Calculate the framebuffer generic constants.
-#[macro_export]
-macro_rules! framebuffer {
-    ($color_type:ty, $byte_order:ty, $width:expr, $height:expr) => {
-        $crate::framebuffer::Framebuffer::<
-            $color_type,
-            <$color_type as $crate::pixelcolor::PixelColor>::Raw,
-            $byte_order,
-            $width,
-            $height,
-            { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
-        >
-    };
-
-    ($color_type:ty, $width:expr, $height:expr) => {
-        $crate::framebuffer::Framebuffer::<
-            $color_type,
-            <$color_type as $crate::pixelcolor::PixelColor>::Raw,
-            $crate::pixelcolor::raw::LittleEndian,
-            $width,
-            $height,
-            { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
-        >
-    };
-}
-
 #[cfg(test)]
 mod tests {
     use embedded_graphics_core::prelude::GrayColor;
@@ -315,6 +287,31 @@ mod tests {
         primitives::{Primitive, PrimitiveStyle},
         Drawable,
     };
+
+    /// Calculate the framebuffer generic constants.
+    macro_rules! framebuffer {
+        ($color_type:ty, $byte_order:ty, $width:expr, $height:expr) => {
+            $crate::framebuffer::Framebuffer::<
+                $color_type,
+                <$color_type as $crate::pixelcolor::PixelColor>::Raw,
+                $byte_order,
+                $width,
+                $height,
+                { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
+            >
+        };
+
+        ($color_type:ty, $width:expr, $height:expr) => {
+            $crate::framebuffer::Framebuffer::<
+                $color_type,
+                <$color_type as $crate::pixelcolor::PixelColor>::Raw,
+                $crate::pixelcolor::raw::LittleEndian,
+                $width,
+                $height,
+                { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
+            >
+        };
+    }
 
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     struct U32Color(u32);
