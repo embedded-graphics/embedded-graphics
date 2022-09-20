@@ -37,7 +37,7 @@ defmt = { version = "0.3.2", optional = true }
 
 [dev-dependencies]
 arrayvec = { version = "0.7.2", default-features = false }
-criterion = "0.3.5"
+criterion = { version = "0.4.0", features = [ "html_reports" ] }
 
 [features]
 default = []
