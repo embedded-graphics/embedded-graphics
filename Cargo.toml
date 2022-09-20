@@ -73,3 +73,7 @@ name = "raw_data_iter"
 [[bench]]
 harness = false
 name = "color_conversion"
+
+[[bench]]
+harness = false
+name = "framebuffer"
