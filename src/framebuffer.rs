@@ -115,7 +115,7 @@ where
 
     /// Get pixel color.
     ///
-    /// Returns `None` is `p` is outside the framebuffer bounding box.
+    /// Returns `None` if `p` is outside the framebuffer bounding box.
     // TODO: Optimise implementation by moving away from `ImageRaw::pixel` and directly calculating skip value.
     pub fn pixel(&self, p: Point) -> Option<C> {
         self.as_image().pixel(p)
