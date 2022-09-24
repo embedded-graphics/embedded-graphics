@@ -71,7 +71,6 @@ mod real_impl {
     pub(crate) const TAU: Real = Real(I16F16::from_bits(411775));
 
     #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-    #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
     pub(crate) struct Real(pub(super) I16F16);
 
     impl Real {
@@ -119,6 +118,13 @@ mod real_impl {
     impl From<Real> for u32 {
         fn from(src: Real) -> Self {
             src.0.to_num::<u32>()
+        }
+    }
+
+    #[cfg(feature = "defmt")]
+    impl ::defmt::Format for Real {
+        fn format(&self, fmt: ::defmt::Formatter<'_>) {
+            ::defmt::write!(fmt, "Read({=i32:X})", self.0.to_bits())
         }
     }
 }
