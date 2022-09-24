@@ -110,7 +110,7 @@ this:
 
 ```bash
 git clone https://github.com/embedded-graphics/examples.git
-cd examples
+cd examples/eg-0.7
 
 cargo run --example hello-world
 ```
