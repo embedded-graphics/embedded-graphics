@@ -113,7 +113,9 @@
 //! * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 //! calculation.
 //!
-//! * `defmt` - provide implementations of `defmt::Format` for all types where possible.
+//! * `defmt` - provide implementations of `defmt::Format` for all types where possible. [`defmt`]
+//!   is a library for logging that moves as much work as possible over to a separate logging
+//!   machine, making it especially suited to low-resource MCUs.
 //!
 //! # Migrating from older versions
 //!
@@ -259,6 +261,7 @@
 //! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 //! [simulator]: https://github.com/embedded-graphics/simulator
 //! [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
+//! [`defmt`]: https://defmt.ferrous-systems.com/
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/embedded-graphics/embedded-graphics/191fe7f8a0fedc713f9722b9dc59208dacadee7e/assets/logo.svg?sanitize=true"

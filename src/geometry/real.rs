@@ -124,7 +124,12 @@ mod real_impl {
     #[cfg(feature = "defmt")]
     impl ::defmt::Format for Real {
         fn format(&self, fmt: ::defmt::Formatter<'_>) {
-            ::defmt::write!(fmt, "Read({=i32:X})", self.0.to_bits())
+            ::defmt::write!(
+                fmt,
+                "Real({=i32:#X} ≈{=f32})",
+                self.0.to_bits(),
+                self.0.to_num()
+            )
         }
     }
 }
