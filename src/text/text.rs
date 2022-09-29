@@ -18,6 +18,7 @@ use super::TextStyleBuilder;
 ///
 /// See the [module-level documentation](super) for more information about text drawables and examples.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Text<'a, S> {
     /// The string.
     pub text: &'a str,

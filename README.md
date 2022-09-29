@@ -125,6 +125,10 @@ support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`]
 * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
 calculation.
 
+* `defmt` - provide implementations of `defmt::Format` for all types where possible. [`defmt`]
+  is a library for logging that moves as much work as possible over to a separate logging
+  machine, making it especially suited to low-resource MCUs.
+
 ## Migrating from older versions
 
 * [Migration guide from 0.5 to 0.6](https://github.com/embedded-graphics/embedded-graphics/blob/master/MIGRATING-0.5-0.6.md).
@@ -248,6 +252,7 @@ Additional examples can be found in the [examples](https://github.com/embedded-g
 [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 [simulator]: https://github.com/embedded-graphics/simulator
 [simulator examples]: https://github.com/embedded-graphics/simulator/tree/master/examples
+[`defmt`]: https://defmt.ferrous-systems.com/
 
 ## Minimum supported Rust version
 

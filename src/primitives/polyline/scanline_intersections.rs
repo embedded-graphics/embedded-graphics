@@ -12,6 +12,7 @@ use crate::{
 ///
 /// The result is one line of a filled polygon.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ScanlineIntersections<'a> {
     points: &'a [Point],
     remaining_points: &'a [Point],

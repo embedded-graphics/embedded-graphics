@@ -10,6 +10,7 @@ use crate::{
 
 /// Iterator over all points inside the ellipse
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points {
     scanlines: Scanlines,
     current_scanline: Scanline,
@@ -36,6 +37,7 @@ impl Iterator for Points {
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Scanlines {
     rows: Range<i32>,
     columns: Range<i32>,

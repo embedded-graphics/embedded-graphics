@@ -33,6 +33,7 @@ float-cmp = "0.9.0"
 micromath = { version = "2.0.0", default-features = false }
 embedded-graphics-core = { path = "core", version = "0.3.2"}
 byteorder = { version = "1.4.3", default-features = false }
+defmt = { version = "0.3.2", optional = true }
 
 [dev-dependencies]
 arrayvec = { version = "0.7.2", default-features = false }
@@ -42,6 +43,7 @@ criterion = "0.3.5"
 default = []
 nalgebra_support = [ "embedded-graphics-core/nalgebra_support" ]
 fixed_point = [ "fixed" ]
+defmt = [ "dep:defmt", "embedded-graphics-core/defmt" ]
 
 [[bench]]
 harness = false

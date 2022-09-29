@@ -54,6 +54,7 @@ pub use styled::StyledPixelsIterator;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Sector {
     /// Top-left point of the bounding-box of the circle supporting the sector
     pub top_left: Point,

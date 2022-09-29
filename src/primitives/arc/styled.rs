@@ -15,6 +15,7 @@ use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the arc border
 #[derive(Clone, PartialEq, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     iter: DistanceIterator,
 

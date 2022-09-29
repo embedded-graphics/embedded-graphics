@@ -8,6 +8,7 @@ use crate::{
 
 /// Iterator over all points inside the triangle.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points {
     scanline_iter: ScanlineIterator,
     current_line: Scanline,

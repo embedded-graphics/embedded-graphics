@@ -17,6 +17,7 @@ use crate::{
 ///
 /// Each scanline produces multiple actual `Line`s for each intersection of the thick polyline.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ScanlineIterator<'a> {
     rows: Range<i32>,
     scanline_y: i32,

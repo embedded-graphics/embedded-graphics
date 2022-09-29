@@ -127,6 +127,7 @@ use core::fmt::Debug;
 /// [`Transform::translate_mut`]: super::transform::Transform::translate_mut
 /// [`DrawTarget`]: super::draw_target::DrawTarget
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Image<'a, T> {
     image_drawable: &'a T,
     offset: Point,

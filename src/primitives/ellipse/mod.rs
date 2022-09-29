@@ -53,6 +53,7 @@ pub use styled::StyledPixelsIterator;
 /// # Ok::<(), core::convert::Infallible>(())
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Ellipse {
     /// Top-left point of ellipse's bounding box
     pub top_left: Point,
@@ -173,6 +174,7 @@ impl Transform for Ellipse {
 /// Determines if a point is inside an ellipse.
 // TODO: Make this available to the user as part of #343
 #[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(in crate::primitives) struct EllipseContains {
     a: u32,
     b: u32,

@@ -60,6 +60,10 @@ a spritemap.
 [`ImageDrawable`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/image/trait.ImageDrawable.html
 [`pixelcolor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/trait.PixelColor.html
 
+## Features
+
+ - `defmt` - implements `defmt::Format` for all types where this is possible.
+
 [embedded-graphics]: https://docs.rs/embedded-graphics
 [`Rgb888`]: pixelcolor::Rgb888
 

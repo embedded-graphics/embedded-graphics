@@ -35,6 +35,7 @@ pub(crate) mod angle_consts {
 /// let angle_d = PI.rad();
 /// ```
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Angle(Real);
 
 impl Angle {

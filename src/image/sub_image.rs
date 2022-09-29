@@ -17,6 +17,7 @@ use crate::{
 /// [`sub_image`]: trait.ImageDrawableExt.html#tymethod.sub_image
 /// [module-level documentation]: super#sub-images
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct SubImage<'a, T> {
     parent: &'a T,
     area: Rectangle,

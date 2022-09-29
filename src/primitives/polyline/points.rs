@@ -9,6 +9,7 @@ use crate::{
 
 /// An iterator over all pixel positions on the polyline
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct Points<'a> {
     vertices: &'a [Point],
     translate: Point,

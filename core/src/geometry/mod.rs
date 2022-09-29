@@ -93,6 +93,7 @@ where
 
 /// Anchor point.
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Copy, Clone)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum AnchorPoint {
     /// Top left.
     TopLeft,

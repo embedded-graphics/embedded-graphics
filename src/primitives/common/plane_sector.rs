@@ -4,6 +4,7 @@ use crate::{
 };
 
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 enum Operation {
     /// Return the intersection of both half planes.
     Intersection,
@@ -31,6 +32,7 @@ impl Operation {
 /// intersection of both half-planes is used and for angles >= 180° the union of both
 /// half-planes.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct PlaneSector {
     /// Half plane on the left side of a line.
     half_plane_left: OriginLinearEquation,

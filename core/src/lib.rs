@@ -50,6 +50,10 @@
 //! [`pixelcolor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/trait.PixelColor.html
 //! README-LINKS -->
 //!
+//! # Features
+//!
+//!  - `defmt` - implements `defmt::Format` for all types where this is possible.
+//!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Pixel`]: drawable::Pixel
 //! [`Point`]: geometry::Point

@@ -29,6 +29,7 @@ use az::SaturatingAs;
 /// [`non_exhaustive`]: https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html#[non_exhaustive]-structs,-enums,-and-variants
 /// [`new`]: MonoTextStyle::new()
 #[derive(Copy, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 #[non_exhaustive]
 pub struct MonoTextStyle<'a, C> {
     /// Text color.
@@ -300,6 +301,7 @@ impl<C: PixelColor> CharacterStyle for MonoTextStyle<'_, C> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 enum LineElement {
     Char(char),
     Spacing,
@@ -378,6 +380,7 @@ enum LineElement {
 /// [other fonts]: super
 /// [`Text`]: crate::text::Text
 #[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
 }

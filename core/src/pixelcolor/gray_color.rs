@@ -20,6 +20,7 @@ macro_rules! gray_color {
         #[doc = $bpp_str]
         #[doc = "grayscale color."]
         #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+        #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
         pub struct $type($raw_type);
 
         impl $type {

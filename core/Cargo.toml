@@ -21,6 +21,7 @@ circle-ci = { repository = "embedded-graphics/embedded-graphics", branch = "mast
 az = "1.1"
 nalgebra = { version = "0.30.1", optional = true, default-features = false }
 byteorder = { version = "1.3.4", default-features = false }
+defmt = { version = "0.3.2", optional = true}
 
 [dev-dependencies]
 embedded-graphics = { path = ".." }

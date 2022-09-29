@@ -10,6 +10,7 @@ use core::iter::Zip;
 
 /// Converts a contiguous iterator into a pixel iterator.
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct IntoPixels<I>
 where
     I: Iterator,
@@ -45,6 +46,7 @@ where
 
 /// Crops a part of the underlying iterator.
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(crate) struct Cropped<I>
 where
     I: Iterator,

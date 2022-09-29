@@ -15,6 +15,7 @@ use crate::{
 ///    Note that this value is scaled up by a factor of 2 to increase the resolution.
 /// 3. The squared length of the second value.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct DistanceIterator {
     center_2x: Point,
     points: rectangle::Points,

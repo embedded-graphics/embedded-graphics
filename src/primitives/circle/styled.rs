@@ -15,6 +15,7 @@ use az::SaturatingAs;
 
 /// Pixel iterator for each pixel in the circle border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct StyledPixelsIterator<C> {
     styled_scanlines: StyledScanlines,
 
@@ -148,6 +149,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Circle {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 struct StyledScanlines {
     scanlines: Scanlines,
     fill_threshold: u32,
