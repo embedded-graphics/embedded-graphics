@@ -9,6 +9,7 @@ use crate::{
 mod points;
 mod styled;
 
+use crate::geometry::Trigonometry;
 pub use points::Points;
 pub use styled::StyledPixelsIterator;
 
@@ -124,7 +125,29 @@ impl PointsIter for Arc {
 
 impl Dimensions for Arc {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter))
+        // Center
+        let bb = Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter));
+        let cx: f32 = bb.center().x as f32;
+        let cy: f32 = bb.center().y as f32;
+
+        // Starting point position
+        let start_cos: f32 = self.angle_start.cos().into();
+        let start_sin: f32 = self.angle_start.sin().into();
+
+        let start_x = cx + ((self.diameter as f32) / 2.0) * start_cos;
+        let start_y = cy - ((self.diameter as f32) / 2.0) * start_sin;
+
+        // End point position
+        let end_cos: f32 = (self.angle_start + self.angle_sweep).cos().into();
+        let end_sin: f32 = (self.angle_start + self.angle_sweep).sin().into();
+
+        let end_x = cx + ((self.diameter as f32) / 2.0) * end_cos;
+        let end_y = cy - ((self.diameter as f32) / 2.0) * end_sin;
+
+        Rectangle::with_corners(
+            Point::new(start_x as i32, start_y as i32),
+            Point::new(end_x as i32, end_y as i32),
+        )
     }
 }
 
