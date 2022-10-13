@@ -123,19 +123,21 @@ impl PointsIter for Arc {
     }
 }
 
+// TODO Check rect.styled_bounding_box()
 impl Dimensions for Arc {
     fn bounding_box(&self) -> Rectangle {
         // Center
         let bb = Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter));
         let cx: f32 = bb.center().x as f32;
         let cy: f32 = bb.center().y as f32;
+        let chord = (self.diameter as f32) / 2.0;
 
         // Starting point position
         let start_cos: f32 = self.angle_start.cos().into();
         let start_sin: f32 = self.angle_start.sin().into();
 
-        let start_x = cx + ((self.diameter as f32) / 2.0) * start_cos;
-        let start_y = cy - ((self.diameter as f32) / 2.0) * start_sin;
+        let start_x = cx + chord * start_cos;
+        let start_y = cy - chord * start_sin;
 
         // End point position
         let end_cos: f32 = (self.angle_start + self.angle_sweep).cos().into();
@@ -144,10 +146,63 @@ impl Dimensions for Arc {
         let end_x = cx + ((self.diameter as f32) / 2.0) * end_cos;
         let end_y = cy - ((self.diameter as f32) / 2.0) * end_sin;
 
-        Rectangle::with_corners(
+        let mut top: Option<f32> = None;
+        let mut right: Option<f32> = None;
+        let mut bottom: Option<f32> = None;
+        let mut left: Option<f32> = None;
+
+        let start_angle = self.angle_start.normalize().to_degrees();
+        let end_angle = (self.angle_sweep + self.angle_start)
+            .normalize()
+            .to_degrees();
+
+        if end_angle <= start_angle {
+            right = Some(cx + chord);
+        }
+
+        if (start_angle < 90.0 && (end_angle > 90.0 || end_angle <= start_angle))
+            || (start_angle > 90.0 && end_angle > 90.0 && end_angle <= start_angle)
+        {
+            top = Some(cy - chord);
+        }
+
+        if (start_angle < 180.0 && (end_angle > 180.0 || end_angle <= start_angle))
+            || (start_angle > 180.0 && end_angle > 180.0 && end_angle <= start_angle)
+        {
+            left = Some(cx - chord);
+        }
+
+        if (start_angle < 270.0 && (end_angle > 270.0 || end_angle <= start_angle))
+            || (start_angle > 270.0 && end_angle > 270.0 && end_angle <= start_angle)
+        {
+            bottom = Some(cy + chord);
+        }
+
+        let rect = Rectangle::with_corners(
             Point::new(start_x as i32, start_y as i32),
             Point::new(end_x as i32, end_y as i32),
-        )
+        );
+
+        let mut p1 = rect.top_left;
+        let mut p2 = p1 + rect.size.x_axis() + rect.size.y_axis();
+
+        if let Some(top) = top {
+            p1 = Point::new(p1.x, top as i32);
+        }
+
+        if let Some(left) = left {
+            p1 = Point::new(left as i32, p1.y);
+        }
+
+        if let Some(bottom) = bottom {
+            p2 = Point::new(p2.x, bottom as i32);
+        }
+
+        if let Some(right) = right {
+            p2 = Point::new(right as i32, p2.y);
+        }
+
+        Rectangle::with_corners(p1, p2)
     }
 }
 
