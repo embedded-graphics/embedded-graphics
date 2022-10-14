@@ -9,7 +9,7 @@ use crate::{
 mod points;
 mod styled;
 
-use crate::geometry::Trigonometry;
+use crate::geometry::{Real, Trigonometry};
 pub use points::Points;
 pub use styled::StyledPixelsIterator;
 
@@ -107,9 +107,51 @@ impl Arc {
         Circle::new(self.top_left, self.diameter)
     }
 
-    /// Return the center point of the arc.
+    /// Returns the center point of the arc.
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
+    }
+
+    fn radius(&self) -> Real {
+        Real::from(self.diameter.saturating_sub(1)) / 2.into()
+    }
+
+    /// Returns the end angle of the arc.
+    pub fn angle_end(&self) -> Angle {
+        self.angle_start + self.angle_sweep
+    }
+
+    /// Returns the Point from a certain angle.
+    pub fn point_from_angle(&self, angle: &Angle) -> Point {
+        let center = self.center();
+        let radius = self.radius();
+
+        Point::new(
+            center.x + i32::from(angle.cos() * radius),
+            center.y - i32::from(angle.sin() * radius),
+        )
+    }
+
+    /// Returns the Point from the start angle.
+    pub fn point_start(&self) -> Point {
+        self.point_from_angle(&self.angle_start)
+    }
+
+    /// Returns the Point from the end angle.
+    pub fn point_end(&self) -> Point {
+        self.point_from_angle(&self.angle_end())
+    }
+
+    /// Whether or not the arc passes through a given angle.
+    fn passes_through(&self, angle: &Angle) -> bool {
+        let start_angle = self.angle_start.to_degrees();
+        let end_angle = self.angle_end().to_degrees();
+
+        (start_angle < angle.to_degrees()
+            && (end_angle > angle.to_degrees() || end_angle <= start_angle))
+            || (start_angle > angle.to_degrees()
+                && end_angle > angle.to_degrees()
+                && end_angle <= start_angle)
     }
 }
 
@@ -126,80 +168,29 @@ impl PointsIter for Arc {
 // TODO Check rect.styled_bounding_box()
 impl Dimensions for Arc {
     fn bounding_box(&self) -> Rectangle {
-        // Center
-        let bb = Rectangle::new(self.top_left, Size::new(self.diameter, self.diameter));
-        let cx: f32 = bb.center().x as f32;
-        let cy: f32 = bb.center().y as f32;
-        let chord = (self.diameter as f32) / 2.0;
-
-        // Starting point position
-        let start_cos: f32 = self.angle_start.cos().into();
-        let start_sin: f32 = self.angle_start.sin().into();
-
-        let start_x = cx + chord * start_cos;
-        let start_y = cy - chord * start_sin;
-
-        // End point position
-        let end_cos: f32 = (self.angle_start + self.angle_sweep).cos().into();
-        let end_sin: f32 = (self.angle_start + self.angle_sweep).sin().into();
-
-        let end_x = cx + ((self.diameter as f32) / 2.0) * end_cos;
-        let end_y = cy - ((self.diameter as f32) / 2.0) * end_sin;
-
-        let mut top: Option<f32> = None;
-        let mut right: Option<f32> = None;
-        let mut bottom: Option<f32> = None;
-        let mut left: Option<f32> = None;
-
-        let start_angle = self.angle_start.normalize().to_degrees();
-        let end_angle = (self.angle_sweep + self.angle_start)
-            .normalize()
-            .to_degrees();
-
-        if end_angle <= start_angle {
-            right = Some(cx + chord);
-        }
-
-        if (start_angle < 90.0 && (end_angle > 90.0 || end_angle <= start_angle))
-            || (start_angle > 90.0 && end_angle > 90.0 && end_angle <= start_angle)
-        {
-            top = Some(cy - chord);
-        }
-
-        if (start_angle < 180.0 && (end_angle > 180.0 || end_angle <= start_angle))
-            || (start_angle > 180.0 && end_angle > 180.0 && end_angle <= start_angle)
-        {
-            left = Some(cx - chord);
-        }
-
-        if (start_angle < 270.0 && (end_angle > 270.0 || end_angle <= start_angle))
-            || (start_angle > 270.0 && end_angle > 270.0 && end_angle <= start_angle)
-        {
-            bottom = Some(cy + chord);
-        }
-
-        let rect = Rectangle::with_corners(
-            Point::new(start_x as i32, start_y as i32),
-            Point::new(end_x as i32, end_y as i32),
-        );
-
+        // Create a rectangle between the start and the end angle points.
+        let rect = Rectangle::with_corners(self.point_start(), self.point_end());
         let mut p1 = rect.top_left;
         let mut p2 = p1 + rect.size.x_axis() + rect.size.y_axis();
 
-        if let Some(top) = top {
-            p1 = Point::new(p1.x, top as i32);
+        // Extend the rectangle if the arc passes through the circle bounding box borders.
+        let center = self.center();
+        let radius = i32::from(self.radius());
+
+        if self.passes_through(&Angle::from_degrees(90.0)) {
+            p1 = Point::new(p1.x, center.y - radius);
         }
 
-        if let Some(left) = left {
-            p1 = Point::new(left as i32, p1.y);
+        if self.passes_through(&Angle::from_degrees(180.0)) {
+            p1 = Point::new(center.x - radius, p1.y);
         }
 
-        if let Some(bottom) = bottom {
-            p2 = Point::new(p2.x, bottom as i32);
+        if self.passes_through(&Angle::from_degrees(270.0)) {
+            p2 = Point::new(p2.x, center.y + radius);
         }
 
-        if let Some(right) = right {
-            p2 = Point::new(right as i32, p2.y);
+        if self.passes_through(&Angle::from_degrees(360.0)) {
+            p2 = Point::new(center.x + radius, p2.y);
         }
 
         Rectangle::with_corners(p1, p2)
