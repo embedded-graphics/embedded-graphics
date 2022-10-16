@@ -8,7 +8,7 @@
 
 ### Added
 
-- [#612](https://github.com/embedded-graphics/embedded-graphics/pull/612) Added `GetPixel` trait.
+- [#612](https://github.com/embedded-graphics/embedded-graphics/pull/612), [#699](https://github.com/embedded-graphics/embedded-graphics/pull/699) Added `GetPixel` trait.
 - [#625](https://github.com/embedded-graphics/embedded-graphics/pull/625) Added CSS colors and color conversions to `Rgb666` and `Bgr666`.
 - [#656](https://github.com/embedded-graphics/embedded-graphics/pull/656) Added `Rgb666` and `Bgr666` conversions.
 
