@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
-    image::{ImageDrawable, ImagePixelGetter},
+    image::{GetPixel, ImageDrawable},
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{BigEndian, ByteOrder, LittleEndian, RawData},
@@ -234,12 +234,14 @@ where
     }
 }
 
-impl<'a, C, BO> ImagePixelGetter for ImageRaw<'a, C, BO>
+impl<'a, C, BO> GetPixel for ImageRaw<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,
     BO: ByteOrder,
     RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
+    type Color = C;
+
     fn pixel(&self, p: Point) -> Option<Self::Color> {
         self.bounding_box().contains(p).then(|| {
             RawDataSlice::new(self.data)
