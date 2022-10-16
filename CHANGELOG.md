@@ -9,7 +9,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Added
 
 - [#592](https://github.com/embedded-graphics/embedded-graphics/pull/592) Add support for defmt behind a feature (`defmt`).
-- [#612](https://github.com/embedded-graphics/embedded-graphics/pull/625) Added `ImagePixelGetter` trait and an implementation for `ImageRaw`.
+- [#612](https://github.com/embedded-graphics/embedded-graphics/pull/612), [#699](https://github.com/embedded-graphics/embedded-graphics/pull/699) Added `GetPixel` trait and implementations for `ImageRaw` and `Framebuffer`.
 - [#621](https://github.com/embedded-graphics/embedded-graphics/pull/621) Added `Rgb666` and `Bgr666` color type support.
 - [#641](https://github.com/embedded-graphics/embedded-graphics/pull/641) Added `Line::with_delta` constructor.
 - [#656](https://github.com/embedded-graphics/embedded-graphics/pull/656) Added `Rgb666` and `Bgr666` conversions.
@@ -20,7 +20,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#660](https://github.com/embedded-graphics/embedded-graphics/pull/660) Remove `RawU18` color storage type and use `RawU24` in is place for `Rgb666` and `Bgr666`.
 - [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) Made the following functions `const`:
 - **(breaking)** [#690](https://github.com/embedded-graphics/embedded-graphics/pull/690) Remove `ImageRaw::new_binary` `const` helper method. `ImageRaw::new` can now be used in `const` contexts, so use it instead of `new_binary`.
-- [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) [#699](https://github.com/embedded-graphics/embedded-graphics/pull/699) Made the following functions `const`:
+- [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639), [#690](https://github.com/embedded-graphics/embedded-graphics/pull/690) Made the following functions `const`:
   - `Point::component_mul`
   - `Point::component_div`
   - `Size::saturating_add`
