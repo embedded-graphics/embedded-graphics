@@ -13,6 +13,8 @@ use core::{
 };
 pub use points::Points;
 
+use self::points::PointsVertical;
+
 /// Rectangle primitive
 ///
 /// # Examples
@@ -541,6 +543,11 @@ impl Rectangle {
     /// ```
     pub const fn is_zero_sized(&self) -> bool {
         self.size.height == 0 || self.size.width == 0
+    }
+
+    /// TODO: docs
+    pub fn points_vertical(&self) -> PointsVertical {
+        PointsVertical::new(self)
     }
 }
 

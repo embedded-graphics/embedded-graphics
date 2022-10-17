@@ -57,7 +57,7 @@ use crate::{
     geometry::{OriginDimensions, Point, Size},
     image::{ImageRaw, SubImage},
     mono_font::mapping::GlyphMapping,
-    pixelcolor::BinaryColor,
+    pixelcolor::{raw::storage::Msb0, BinaryColor},
     primitives::Rectangle,
 };
 
@@ -69,7 +69,7 @@ use crate::{
 #[derive(Clone, Copy)]
 pub struct MonoFont<'a> {
     /// Raw image data containing the font.
-    pub image: ImageRaw<'a, BinaryColor>,
+    pub image: ImageRaw<'a, Msb0<BinaryColor>>,
 
     /// Size of a single character in pixel.
     pub character_size: Size,
@@ -97,7 +97,7 @@ pub struct MonoFont<'a> {
 
 impl MonoFont<'_> {
     /// Returns a subimage for a glyph.
-    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<BinaryColor>> {
+    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<Msb0<BinaryColor>>> {
         if self.character_size.width == 0 || self.image.size().width < self.character_size.width {
             return SubImage::new_unchecked(&self.image, Rectangle::zero());
         }
@@ -235,10 +235,7 @@ pub(crate) mod tests {
         image::{GetPixel, Image},
         mock_display::MockDisplay,
         mono_font::{mapping::Mapping, MonoTextStyleBuilder},
-        pixelcolor::{
-            raw::{LittleEndian, RawU1},
-            BinaryColor,
-        },
+        pixelcolor::BinaryColor,
         text::{Baseline, Text},
         Drawable,
     };
@@ -312,14 +309,8 @@ pub(crate) mod tests {
     {
     }
 
-    fn new_framebuffer() -> Framebuffer<
-        BinaryColor,
-        RawU1,
-        LittleEndian,
-        96,
-        200,
-        { buffer_size::<BinaryColor>(96, 200) },
-    > {
+    fn new_framebuffer(
+    ) -> Framebuffer<Msb0<BinaryColor>, 96, 200, { buffer_size::<BinaryColor>(96, 200) }> {
         Framebuffer::new()
     }
 

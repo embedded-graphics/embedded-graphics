@@ -9,8 +9,8 @@ use crate::{
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{
-            BigEndian, ByteOrder, LittleEndian, RawData, RawU1, RawU16, RawU2, RawU24, RawU32,
-            RawU4, RawU8, ToBytes,
+            storage::{BigEndian, LittleEndian, Lsb0, Msb0, RawStorage, ColorStorage},
+            RawData, RawU1, RawU16, RawU2, RawU24, RawU32, RawU4, RawU8, ToBytes,
         },
         PixelColor,
     },
@@ -41,12 +41,12 @@ pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
 /// use embedded_graphics::{
 ///     framebuffer,
 ///     framebuffer::{Framebuffer, buffer_size},
-///     pixelcolor::{Rgb565, raw::LittleEndian},
+///     pixelcolor::{Rgb565, raw::storage::LittleEndian},
 ///     prelude::*,
 ///     primitives::PrimitiveStyle,
 /// };
 ///
-/// let mut fb = Framebuffer::<Rgb565, _, LittleEndian, 320, 240, {buffer_size::<Rgb565>(320, 240)}>::new();
+/// let mut fb = Framebuffer::<LittleEndian<Rgb565>, 320, 240, {buffer_size::<Rgb565>(320, 240)}>::new();
 ///
 /// fb.bounding_box()
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
@@ -54,20 +54,20 @@ pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
 ///     .unwrap();
 /// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct Framebuffer<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> {
+pub struct Framebuffer<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> {
     data: [u8; N],
     color_type: PhantomData<C>,
     raw_type: PhantomData<R>,
     byte_order: PhantomData<BO>,
+    color_storage_type: PhantomData<CS>,
     n_assert: (),
 }
 
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> Framebuffer<CS, WIDTH, HEIGHT, N>
 where
-    C: PixelColor,
+    CS: ColorStorage,
 {
-    const BUFFER_SIZE: usize = buffer_size::<C>(WIDTH, HEIGHT);
+    const BUFFER_SIZE: usize = buffer_size::<CS::Color>(WIDTH, HEIGHT);
 
     /// Static assertion that N is correct.
     // MSRV: remove N when constant generic expressions are stabilized
@@ -83,6 +83,7 @@ where
             color_type: PhantomData,
             raw_type: PhantomData,
             byte_order: PhantomData,
+            color_storage_type: PhantomData,
             n_assert: Self::CHECK_N,
         }
     }
@@ -98,113 +99,54 @@ where
     }
 }
 
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> Framebuffer<CS, WIDTH, HEIGHT, N>
 where
-    C: PixelColor + From<C::Raw>,
-    BO: ByteOrder,
-    for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    CS: ColorStorage,
+    <<CS as ColorStorage>::Color as PixelColor>::Raw: Into<CS::Color>,
 {
     /// Returns an image based on the framebuffer content.
-    pub fn as_image(&self) -> ImageRaw<'_, C, BO> {
+    pub fn as_image(&self) -> ImageRaw<'_, CS> {
         ImageRaw::new(&self.data[0..Self::BUFFER_SIZE], WIDTH as u32)
     }
 }
 
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
-    for Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
+    for Framebuffer<CS, WIDTH, HEIGHT, N>
 where
-    C: PixelColor + From<C::Raw>,
-    BO: ByteOrder,
-    for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    CS: ColorStorage,
+    <<CS as ColorStorage>::Color as PixelColor>::Raw: Into<CS::Color>,
+    for<'a> RawDataSlice<'a, <CS as ColorStorage>::RawStorage>:
+        IntoIterator<Item = <<CS as ColorStorage>::Color as PixelColor>::Raw>,
 {
-    type Color = C;
+    type Color = CS::Color;
 
-    fn pixel(&self, p: Point) -> Option<C> {
+    fn pixel(&self, p: Point) -> Option<Self::Color> {
         self.as_image().pixel(p)
     }
 }
 
-macro_rules! impl_bit {
-    ($raw_type:ident) => {
-        impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-            Framebuffer<C, $raw_type, BO, WIDTH, HEIGHT, N>
-        where
-            C: PixelColor + Into<$raw_type>,
-        {
-            /// Sets the color of a pixel.
-            ///
-            /// Trying to set a pixel outside the framebuffer is a noop.
-            pub fn set_pixel(&mut self, p: Point, c: C) {
-                if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
-                    if x < WIDTH && y < HEIGHT {
-                        let pixels_per_bit = 8 / C::Raw::BITS_PER_PIXEL;
-                        let bits_per_row = WIDTH * C::Raw::BITS_PER_PIXEL;
-                        let bytes_per_row = (bits_per_row + 7) / 8;
-                        let byte_index = bytes_per_row * y + (x / pixels_per_bit);
-                        let bit_index = 8 - (x % pixels_per_bit + 1) * C::Raw::BITS_PER_PIXEL;
-
-                        let mask = !((2u8.pow(C::Raw::BITS_PER_PIXEL as u32) - 1) << bit_index);
-                        let bits = c.into().into_inner() << bit_index;
-
-                        self.data[byte_index] = self.data[byte_index] & mask | bits;
-                    }
-                }
-            }
-        }
-
-        impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> DrawTarget
-            for Framebuffer<C, $raw_type, BO, WIDTH, HEIGHT, N>
-        where
-            C: PixelColor<Raw = $raw_type> + Into<$raw_type>,
-        {
-            type Color = C;
-            type Error = Infallible;
-
-            fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
-            where
-                I: IntoIterator<Item = Pixel<Self::Color>>,
-            {
-                for Pixel(p, c) in pixels {
-                    self.set_pixel(p, c);
-                }
-
-                Ok(())
-            }
-        }
-    };
-}
-
-impl_bit!(RawU1);
-impl_bit!(RawU2);
-impl_bit!(RawU4);
-
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<C, RawU8, BO, WIDTH, HEIGHT, N>
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> Framebuffer<CS, WIDTH, HEIGHT, N>
 where
-    C: PixelColor + Into<RawU8>,
+    CS: ColorStorage,
+    CS::Color: Into<<CS::Color as PixelColor>::Raw>,
+    Self: SetPixelRaw<CS::RawStorage>,
 {
     /// Sets the color of a pixel.
     ///
-    /// Setting a pixel outside the framebuffer's bounding box will be a noop.
-    pub fn set_pixel(&mut self, p: Point, c: C) {
-        if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
-            if x < WIDTH && y < HEIGHT {
-                let x = p.x as usize;
-                let y = p.y as usize;
-
-                self.data[y * WIDTH + x] = c.into().into_inner();
-            }
-        }
+    /// Trying to set a pixel outside the framebuffer is a noop.
+    pub fn set_pixel(&mut self, p: Point, c: CS::Color) {
+        self.set_pixel_raw(p, c.into())
     }
 }
 
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> DrawTarget
-    for Framebuffer<C, RawU8, BO, WIDTH, HEIGHT, N>
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> DrawTarget
+    for Framebuffer<CS, WIDTH, HEIGHT, N>
 where
-    C: PixelColor<Raw = RawU8> + Into<RawU8>,
+    CS: ColorStorage,
+    CS::Color: Into<<CS::Color as PixelColor>::Raw>,
+    Self: SetPixelRaw<CS::RawStorage>,
 {
-    type Color = C;
+    type Color = CS::Color;
     type Error = Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -219,18 +161,86 @@ where
     }
 }
 
-macro_rules! impl_bytes {
-    ($raw_type:ty, $bo_type:ty, $to_bytes_fn:ident) => {
-        impl<C, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-            Framebuffer<C, $raw_type, $bo_type, WIDTH, HEIGHT, N>
-        where
-            C: PixelColor + Into<$raw_type>,
+/// TODO: docs
+// TODO: can this be hidden from the API?
+pub trait SetPixelRaw<RS: RawStorage> {
+    /// TODO: docs
+    fn set_pixel_raw(&mut self, p: Point, r: RS::Raw);
+}
+
+macro_rules! impl_bit {
+    (@impl $raw_storage_type:ty, $raw_type:ty) => {
+        impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<$raw_storage_type>
+            for Framebuffer<CS, WIDTH, HEIGHT, N>
         {
-            /// Sets the color of a pixel.
-            ///
-            /// Trying to set a pixel outside the framebuffer is a noop.
-            pub fn set_pixel(&mut self, p: Point, c: C) {
-                const BYTES_PER_PIXEL: usize = <$raw_type>::BITS_PER_PIXEL / 8;
+            fn set_pixel_raw(&mut self, p: Point, r: $raw_type) {
+                if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
+                    if x < WIDTH && y < HEIGHT {
+                        let pixels_per_bit = 8 / <$raw_type>::BITS_PER_PIXEL;
+                        let bits_per_row = WIDTH * <$raw_type>::BITS_PER_PIXEL;
+                        let bytes_per_row = (bits_per_row + 7) / 8;
+                        let byte_index = bytes_per_row * y + (x / pixels_per_bit);
+                        let bit_index = 8 - (x % pixels_per_bit + 1) * <$raw_type>::BITS_PER_PIXEL;
+
+                        let mask = !(<$raw_type>::new(0xFF).into_inner() << bit_index);
+                        let bits = r.into_inner() << bit_index;
+
+                        self.data[byte_index] = self.data[byte_index] & mask | bits;
+                    }
+                }
+            }
+        }
+    };
+
+    ($raw_type:ty) => {
+        impl_bit!(@impl Lsb0<$raw_type>, $raw_type);
+        impl_bit!(@impl Msb0<$raw_type>, $raw_type);
+    };
+}
+
+impl_bit!(RawU1);
+impl_bit!(RawU2);
+impl_bit!(RawU4);
+
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<RawU8>
+    for Framebuffer<CS, WIDTH, HEIGHT, N>
+{
+    fn set_pixel_raw(&mut self, p: Point, r: RawU8) {
+        if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
+            if x < WIDTH && y < HEIGHT {
+                let x = p.x as usize;
+                let y = p.y as usize;
+
+                self.data[y * WIDTH + x] = r.into_inner();
+            }
+        }
+    }
+}
+
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<LittleEndian<RawU8>>
+    for Framebuffer<CS, WIDTH, HEIGHT, N>
+{
+    fn set_pixel_raw(&mut self, p: Point, r: RawU8) {
+        SetPixelRaw::<RawU8>::set_pixel_raw(self, p, r)
+    }
+}
+
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<BigEndian<RawU8>>
+    for Framebuffer<CS, WIDTH, HEIGHT, N>
+{
+    fn set_pixel_raw(&mut self, p: Point, r: RawU8) {
+        SetPixelRaw::<RawU8>::set_pixel_raw(self, p, r)
+    }
+}
+
+macro_rules! impl_bytes {
+    ($raw_storage_type:ty, $to_bytes_fn:ident) => {
+        impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize>
+            SetPixelRaw<$raw_storage_type> for Framebuffer<CS, WIDTH, HEIGHT, N>
+        {
+            fn set_pixel_raw(&mut self, p: Point, r: <$raw_storage_type as RawStorage>::Raw) {
+                const BYTES_PER_PIXEL: usize =
+                    <<$raw_storage_type as RawStorage>::Raw>::BITS_PER_PIXEL / 8;
 
                 if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
                     if x < WIDTH && y < HEIGHT {
@@ -240,36 +250,16 @@ macro_rules! impl_bytes {
                         let index = (y * WIDTH + x) * BYTES_PER_PIXEL;
 
                         self.data[index..index + BYTES_PER_PIXEL]
-                            .copy_from_slice(&c.into().$to_bytes_fn());
+                            .copy_from_slice(&r.$to_bytes_fn());
                     }
                 }
-            }
-        }
-
-        impl<C, const WIDTH: usize, const HEIGHT: usize, const N: usize> DrawTarget
-            for Framebuffer<C, $raw_type, $bo_type, WIDTH, HEIGHT, N>
-        where
-            C: PixelColor<Raw = $raw_type> + Into<$raw_type>,
-        {
-            type Color = C;
-            type Error = Infallible;
-
-            fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
-            where
-                I: IntoIterator<Item = Pixel<Self::Color>>,
-            {
-                for Pixel(p, c) in pixels {
-                    self.set_pixel(p, c);
-                }
-
-                Ok(())
             }
         }
     };
 
     ($raw_type:ty) => {
-        impl_bytes!($raw_type, LittleEndian, to_le_bytes);
-        impl_bytes!($raw_type, BigEndian, to_be_bytes);
+        impl_bytes!(LittleEndian<$raw_type>, to_le_bytes);
+        impl_bytes!(BigEndian<$raw_type>, to_be_bytes);
     };
 }
 
@@ -277,8 +267,8 @@ impl_bytes!(RawU16);
 impl_bytes!(RawU24);
 impl_bytes!(RawU32);
 
-impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDimensions
-    for Framebuffer<C, R, BO, WIDTH, HEIGHT, N>
+impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDimensions
+    for Framebuffer<CS, WIDTH, HEIGHT, N>
 {
     fn size(&self) -> Size {
         Size::new(WIDTH as u32, HEIGHT as u32)
@@ -301,31 +291,6 @@ mod tests {
         Drawable,
     };
 
-    /// Calculate the framebuffer generic constants.
-    macro_rules! framebuffer {
-        ($color_type:ty, $byte_order:ty, $width:expr, $height:expr) => {
-            $crate::framebuffer::Framebuffer::<
-                $color_type,
-                <$color_type as $crate::pixelcolor::PixelColor>::Raw,
-                $byte_order,
-                $width,
-                $height,
-                { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
-            >
-        };
-
-        ($color_type:ty, $width:expr, $height:expr) => {
-            $crate::framebuffer::Framebuffer::<
-                $color_type,
-                <$color_type as $crate::pixelcolor::PixelColor>::Raw,
-                $crate::pixelcolor::raw::LittleEndian,
-                $width,
-                $height,
-                { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
-            >
-        };
-    }
-
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     struct U32Color(u32);
 
@@ -346,8 +311,9 @@ mod tests {
     }
 
     #[test]
-    fn raw_u1() {
-        let mut fb = <framebuffer!(BinaryColor, 9, 2)>::new();
+    fn raw_u1_msb0() {
+        let mut fb =
+            Framebuffer::<Msb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor>(9, 2) }>::new();
 
         use BinaryColor::{Off, On};
         fb.draw_iter(
@@ -376,9 +342,8 @@ mod tests {
     }
 
     #[test]
-    fn raw_u2() {
-        type FB = framebuffer!(Gray2, 6, 4);
-        let mut fb = FB::new();
+    fn raw_u2_msb0() {
+        let mut fb = Framebuffer::<Msb0<Gray2>, 6, 4, { buffer_size::<Gray2>(6, 4) }>::new();
 
         fb.draw_iter(
             [
@@ -408,8 +373,8 @@ mod tests {
     }
 
     #[test]
-    fn raw_u4() {
-        let mut fb = <framebuffer!(Gray4, 3, 2)>::new();
+    fn raw_u4_msb0() {
+        let mut fb = Framebuffer::<Msb0<Gray4>, 3, 2, { buffer_size::<Gray4>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -438,7 +403,7 @@ mod tests {
 
     #[test]
     fn raw_u8() {
-        let mut fb = <framebuffer!(Gray8, 3, 2)>::new();
+        let mut fb = Framebuffer::<Gray8, 3, 2, { buffer_size::<Gray8>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -467,7 +432,8 @@ mod tests {
 
     #[test]
     fn raw_u16_le() {
-        let mut fb = <framebuffer!(Rgb565, 3, 2)>::new();
+        let mut fb =
+            Framebuffer::<LittleEndian<Rgb565>, 3, 2, { buffer_size::<Rgb565>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -496,7 +462,7 @@ mod tests {
 
     #[test]
     fn raw_u16_be() {
-        let mut fb = <framebuffer!(Rgb565, BigEndian, 3, 2)>::new();
+        let mut fb = Framebuffer::<BigEndian<Rgb565>, 3, 2, { buffer_size::<Rgb565>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -525,7 +491,8 @@ mod tests {
 
     #[test]
     fn raw_u24_le() {
-        let mut fb = <framebuffer!(Rgb888, 3, 2)>::new();
+        let mut fb =
+            Framebuffer::<LittleEndian<Rgb888>, 3, 2, { buffer_size::<Rgb888>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -554,7 +521,7 @@ mod tests {
 
     #[test]
     fn raw_u24_be() {
-        let mut fb = <framebuffer!(Rgb888, BigEndian, 3, 2)>::new();
+        let mut fb = Framebuffer::<BigEndian<Rgb888>, 3, 2, { buffer_size::<Rgb888>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -583,7 +550,8 @@ mod tests {
 
     #[test]
     fn raw_u32_le() {
-        let mut fb = <framebuffer!(U32Color, 3, 2)>::new();
+        let mut fb =
+            Framebuffer::<LittleEndian<U32Color>, 3, 2, { buffer_size::<U32Color>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -612,7 +580,8 @@ mod tests {
 
     #[test]
     fn raw_u32_be() {
-        let mut fb = <framebuffer!(U32Color, BigEndian, 3, 2)>::new();
+        let mut fb =
+            Framebuffer::<BigEndian<U32Color>, 3, 2, { buffer_size::<U32Color>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -641,7 +610,8 @@ mod tests {
 
     #[test]
     fn as_image() {
-        let mut fb = <framebuffer!(BinaryColor, 10, 10)>::new();
+        let mut fb =
+            Framebuffer::<Msb0<BinaryColor>, 10, 10, { buffer_size::<BinaryColor>(10, 10) }>::new();
 
         fb.bounding_box()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
@@ -677,7 +647,8 @@ mod tests {
 
     #[test]
     fn pixel() {
-        let mut fb = <framebuffer!(BinaryColor, 10, 10)>::new();
+        let mut fb =
+            Framebuffer::<Msb0<BinaryColor>, 10, 10, { buffer_size::<BinaryColor>(10, 10) }>::new();
 
         fb.draw_iter(
             [(7, 2), (8, 8)]
@@ -707,21 +678,36 @@ mod tests {
         // This tests only checks that the set_pixel methods are present for all BPPs.
         // The correct function is tested indirectly in the DrawTarget tests.
 
-        <framebuffer!(BinaryColor, 10, 10)>::new().set_pixel(Point::zero(), BinaryColor::On);
-        <framebuffer!(Gray2, 10, 10)>::new().set_pixel(Point::zero(), Gray2::WHITE);
-        <framebuffer!(Gray4, 10, 10)>::new().set_pixel(Point::zero(), Gray4::WHITE);
-        <framebuffer!(Gray8, 10, 10)>::new().set_pixel(Point::zero(), Gray8::WHITE);
-        <framebuffer!(Rgb565, 10, 10)>::new().set_pixel(Point::zero(), Rgb565::WHITE);
-        <framebuffer!(Rgb888, 10, 10)>::new().set_pixel(Point::zero(), Rgb888::WHITE);
-        <framebuffer!(U32Color, 10, 10)>::new().set_pixel(Point::zero(), U32Color(0));
+        Framebuffer::<Msb0<BinaryColor>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), BinaryColor::On);
+        Framebuffer::<Lsb0<BinaryColor>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), BinaryColor::On);
+        Framebuffer::<Msb0<Gray2>, 10, 10, 1000>::new().set_pixel(Point::zero(), Gray2::WHITE);
+        Framebuffer::<Lsb0<Gray2>, 10, 10, 1000>::new().set_pixel(Point::zero(), Gray2::WHITE);
+        Framebuffer::<Msb0<Gray4>, 10, 10, 1000>::new().set_pixel(Point::zero(), Gray4::WHITE);
+        Framebuffer::<Lsb0<Gray4>, 10, 10, 1000>::new().set_pixel(Point::zero(), Gray4::WHITE);
+        Framebuffer::<Gray8, 10, 10, 1000>::new().set_pixel(Point::zero(), Gray8::WHITE);
+        Framebuffer::<LittleEndian<Gray8>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), Gray8::WHITE);
+        Framebuffer::<BigEndian<Gray8>, 10, 10, 1000>::new().set_pixel(Point::zero(), Gray8::WHITE);
+        Framebuffer::<LittleEndian<Rgb565>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), Rgb565::WHITE);
+        Framebuffer::<BigEndian<Rgb565>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), Rgb565::WHITE);
+        Framebuffer::<LittleEndian<Rgb888>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), Rgb888::WHITE);
+        Framebuffer::<BigEndian<Rgb888>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), Rgb888::WHITE);
+        Framebuffer::<LittleEndian<U32Color>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), U32Color(0));
+        Framebuffer::<BigEndian<U32Color>, 10, 10, 1000>::new()
+            .set_pixel(Point::zero(), U32Color(0));
     }
 
     #[test]
     fn oversized_buffer() {
         let fb = Framebuffer::<
-            BinaryColor,
-            _,
-            LittleEndian,
+            Msb0<BinaryColor>,
             10,
             5,
             { buffer_size::<BinaryColor>(10, 5) * 3 / 2 },

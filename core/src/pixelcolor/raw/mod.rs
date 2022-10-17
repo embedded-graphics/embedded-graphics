@@ -33,7 +33,7 @@
 //! an additional intensity bit.
 //!
 //! ```rust
-//! use embedded_graphics::{image::ImageRaw, pixelcolor::raw::RawU4, prelude::*};
+//! use embedded_graphics::{image::ImageRaw, pixelcolor::raw::{RawU4, storage::Msb0}, prelude::*};
 //!
 //! /// RGBI color
 //! #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -81,7 +81,7 @@
 //! ];
 //!
 //! // Create new image with RGBI colors.
-//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2);
+//! let image_raw: ImageRaw<Msb0<RGBI>> = ImageRaw::new(IMAGE_DATA, 2);
 //!
 //! // In a real application the image could now be drawn to a display:
 //! // display.draw(&image);
@@ -111,6 +111,7 @@
 //! [`into_storage`]: super::IntoStorage::into_storage
 //! [`to_be_bytes`]: ToBytes::to_be_bytes
 
+pub mod storage;
 mod to_bytes;
 
 pub use to_bytes::ToBytes;

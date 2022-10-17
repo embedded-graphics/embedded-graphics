@@ -18,8 +18,8 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::{Image, ImageRaw, ImageRawBE},
-//!     pixelcolor::Rgb565,
+//!     image::{Image, ImageRaw},
+//!     pixelcolor::{Rgb565, raw::storage::BigEndian},
 //!     prelude::*,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
@@ -35,7 +35,7 @@
 //!
 //! // Create a raw image instance. Other image formats will require different code to load them.
 //! // All code after loading is the same for any image format.
-//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4);
+//! let raw: ImageRaw<BigEndian<Rgb565>> = ImageRaw::new(&data, 4);
 //!
 //! // Create an `Image` object to position the image at `Point::zero()`.
 //! let image = Image::new(&raw, Point::zero());
@@ -55,8 +55,8 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::{Image, ImageRaw, ImageRawBE},
-//!     pixelcolor::Rgb565,
+//!     image::{Image, ImageRaw},
+//!     pixelcolor::{Rgb565, raw::storage::BigEndian},
 //!     prelude::*,
 //!     primitives::Rectangle,
 //! };
@@ -68,7 +68,7 @@
 //! // or: let data = include_bytes!("sprite_atlas.raw");
 //!
 //! # let data = [0u8; 32 * 16 * 2];
-//! let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 32);
+//! let sprite_atlas: ImageRaw<BigEndian<Rgb565>> = ImageRaw::new(&data, 32);
 //!
 //! // Create individual sub images for each sprite in the sprite atlas.
 //! // The position and size of the sub images is defined by a `Rectangle`.
@@ -95,13 +95,14 @@
 //! [`OriginDimensions`]: super::geometry::OriginDimensions
 //! [`prelude`]: super::prelude
 
+pub mod arrangement;
 mod image_drawable_ext;
 mod image_raw;
 mod sub_image;
 
 pub use embedded_graphics_core::image::{GetPixel, ImageDrawable};
 pub use image_drawable_ext::ImageDrawableExt;
-pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
+pub use image_raw::ImageRaw;
 pub use sub_image::SubImage;
 
 use crate::{
@@ -170,11 +171,11 @@ impl<T> Transform for Image<'_, T> {
     /// use embedded_graphics::{
     ///     geometry::Point,
     ///     image::{Image, ImageRaw},
-    ///     pixelcolor::BinaryColor,
+    ///     pixelcolor::{BinaryColor, raw::storage::Msb0},
     ///     prelude::*,
     /// };
     ///
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+    /// let image = ImageRaw::<Msb0<BinaryColor>>::new(&[0xff, 0x00, 0xff, 0x00], 4);
     ///
     /// let image = Image::new(&image, Point::zero());
     ///
@@ -203,11 +204,11 @@ impl<T> Transform for Image<'_, T> {
     /// use embedded_graphics::{
     ///     geometry::Point,
     ///     image::{Image, ImageRaw},
-    ///     pixelcolor::BinaryColor,
+    ///     pixelcolor::{BinaryColor, raw::storage::Msb0},
     ///     prelude::*,
     /// };
     ///
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+    /// let image = ImageRaw::<Msb0<BinaryColor>>::new(&[0xff, 0x00, 0xff, 0x00], 4);
     ///
     /// let mut image = Image::new(&image, Point::zero());
     ///
@@ -250,11 +251,15 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor};
+    use crate::{
+        geometry::Size,
+        mock_display::MockDisplay,
+        pixelcolor::{raw::storage::Msb0, BinaryColor},
+    };
 
     #[test]
     fn negative_top_left() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+        let image = ImageRaw::<Msb0<BinaryColor>>::new(&[0xff, 0x00, 0xff, 0x00], 4);
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
@@ -266,7 +271,7 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4);
+        let image = ImageRaw::<Msb0<BinaryColor>>::new(&[0xff, 0x00, 0xFF, 0x00], 4);
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
@@ -278,7 +283,7 @@ mod tests {
 
     #[test]
     fn position() {
-        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
+        let image_raw = ImageRaw::<Msb0<BinaryColor>>::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
 
         let mut display = MockDisplay::new();
         Image::new(&image_raw, Point::new(1, 2))

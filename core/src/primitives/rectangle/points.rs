@@ -54,6 +54,58 @@ impl Iterator for Points {
         None
     }
 }
+/// Iterator over all points inside the rectangle.
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
+pub struct PointsVertical {
+    x: Range<i32>,
+    y: Range<i32>,
+    y_start: i32,
+}
+
+impl PointsVertical {
+    pub(in crate::primitives::rectangle) fn new(rectangle: &Rectangle) -> Self {
+        // Return `Self::empty` for all zero sized rectangles.
+        // The iterator would behave correctly without this check, but would loop unnecessarily for
+        // rectangles with zero width.
+        if rectangle.is_zero_sized() {
+            return Self::empty();
+        }
+
+        let x = rectangle.columns();
+        let y = rectangle.rows();
+        let y_start = y.start;
+
+        Self { x, y, y_start }
+    }
+
+    /// Create a points iterator that returns no items.
+    pub const fn empty() -> Self {
+        Self {
+            x: 0..0,
+            y: 0..0,
+            y_start: 0,
+        }
+    }
+}
+
+impl Iterator for PointsVertical {
+    type Item = Point;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while !self.x.is_empty() {
+            if let Some(y) = self.y.next() {
+                return Some(Point::new(self.x.start, y));
+            }
+
+            self.x.next();
+            self.y.start = self.y_start;
+        }
+
+        None
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -104,6 +156,50 @@ mod tests {
     #[test]
     fn points_iter_empty() {
         let mut points = Points::empty();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_vertical() {
+        let rectangle = Rectangle::new(Point::new(10, 20), Size::new(2, 3));
+
+        let mut points = rectangle.points_vertical();
+        assert_eq!(points.next(), Some(Point::new(10, 20)));
+        assert_eq!(points.next(), Some(Point::new(10, 21)));
+        assert_eq!(points.next(), Some(Point::new(10, 22)));
+        assert_eq!(points.next(), Some(Point::new(11, 20)));
+        assert_eq!(points.next(), Some(Point::new(11, 21)));
+        assert_eq!(points.next(), Some(Point::new(11, 22)));
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_vertical_zero_size() {
+        let rectangle = Rectangle::new(Point::new(1, 2), Size::zero());
+
+        let mut points = rectangle.points_vertical();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_vertical_zero_size_x() {
+        let rectangle = Rectangle::new(Point::new(1, 2), Size::new(0, 1));
+
+        let mut points = rectangle.points_vertical();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_vertical_zero_size_y() {
+        let rectangle = Rectangle::new(Point::new(1, 2), Size::new(1, 0));
+
+        let mut points = rectangle.points_vertical();
+        assert_eq!(points.next(), None);
+    }
+
+    #[test]
+    fn points_iter_vertical_empty() {
+        let mut points = PointsVertical::empty();
         assert_eq!(points.next(), None);
     }
 }

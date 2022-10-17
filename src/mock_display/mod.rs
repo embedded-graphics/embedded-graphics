@@ -141,9 +141,9 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::{Image, ImageRaw, ImageRawBE},
+//!     image::{Image, ImageRaw},
 //!     mock_display::MockDisplay,
-//!     pixelcolor::{Rgb565, RgbColor},
+//!     pixelcolor::{Rgb565, RgbColor, raw::storage::BigEndian},
 //!     prelude::*,
 //! };
 //!
@@ -152,7 +152,7 @@
 //!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
 //! ];
 //!
-//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4);
+//! let raw: ImageRaw<BigEndian<Rgb565>> = ImageRaw::new(&data, 4);
 //!
 //! let image = Image::new(&raw, Point::zero());
 //!
