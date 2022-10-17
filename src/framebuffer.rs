@@ -5,7 +5,7 @@ use core::{convert::Infallible, marker::PhantomData};
 use crate::{
     draw_target::DrawTarget,
     geometry::{OriginDimensions, Point, Size},
-    image::{ImagePixelGetter, ImageRaw},
+    image::{GetPixel, ImageRaw},
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{
@@ -112,12 +112,19 @@ where
     pub fn as_image(&self) -> ImageRaw<'_, C, BO> {
         ImageRaw::new(&self.data[0..Self::BUFFER_SIZE], WIDTH as u32)
     }
+}
 
-    /// Get pixel color.
-    ///
-    /// Returns `None` is `p` is outside the framebuffer bounding box.
+impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
+    for Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+where
+    C: PixelColor + From<C::Raw>,
+    BO: ByteOrder,
+    for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+{
+    type Color = C;
+
     // TODO: Optimise implementation by moving away from `ImageRaw::pixel` and directly calculating skip value.
-    pub fn pixel(&self, p: Point) -> Option<C> {
+    fn pixel(&self, p: Point) -> Option<C> {
         self.as_image().pixel(p)
     }
 }

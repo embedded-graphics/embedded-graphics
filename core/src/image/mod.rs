@@ -59,9 +59,12 @@ pub trait ImageDrawable: OriginDimensions {
 }
 
 /// Pixel getter.
-pub trait ImagePixelGetter: ImageDrawable {
+pub trait GetPixel {
+    /// The color type.
+    type Color: PixelColor;
+
     /// Gets the color of a pixel.
     ///
-    /// Returns `None` if `p` is outside the image bounding box.
+    /// Returns `None` if `p` is outside the bounding box.
     fn pixel(&self, p: Point) -> Option<Self::Color>;
 }
