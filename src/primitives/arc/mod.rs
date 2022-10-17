@@ -9,7 +9,7 @@ use crate::{
 mod points;
 mod styled;
 
-use crate::geometry::{Real, Trigonometry};
+use crate::geometry::{AngleUnit, Real, Trigonometry};
 pub use points::Points;
 pub use styled::StyledPixelsIterator;
 
@@ -112,10 +112,6 @@ impl Arc {
         self.to_circle().center()
     }
 
-    fn radius(&self) -> Real {
-        Real::from(self.diameter.saturating_sub(1)) / 2.into()
-    }
-
     /// Returns the end angle of the arc.
     pub fn angle_end(&self) -> Angle {
         self.angle_start + self.angle_sweep
@@ -123,13 +119,11 @@ impl Arc {
 
     /// Returns the Point from a certain angle.
     pub fn point_from_angle(&self, angle: &Angle) -> Point {
-        let center = self.center();
-        let radius = self.radius();
+        let center = self.to_circle().center_2x();
+        let cos = i32::from(angle.cos() * Real::from(self.diameter.saturating_sub(1)));
+        let sin = i32::from(angle.sin() * Real::from(self.diameter.saturating_sub(1)));
 
-        Point::new(
-            center.x + i32::from(angle.cos() * radius),
-            center.y - i32::from(angle.sin() * radius),
-        )
+        Point::new(center.x + cos, center.y - sin) / 2
     }
 
     /// Returns the Point from the start angle.
@@ -143,15 +137,12 @@ impl Arc {
     }
 
     /// Whether or not the arc passes through a given angle.
-    fn passes_through(&self, angle: &Angle) -> bool {
-        let start_angle = self.angle_start.to_degrees();
-        let end_angle = self.angle_end().to_degrees();
+    fn passes_through(&self, angle: Angle) -> bool {
+        let start_angle = self.angle_start;
+        let end_angle = self.angle_end();
 
-        (start_angle < angle.to_degrees()
-            && (end_angle > angle.to_degrees() || end_angle <= start_angle))
-            || (start_angle > angle.to_degrees()
-                && end_angle > angle.to_degrees()
-                && end_angle <= start_angle)
+        (start_angle < angle && (end_angle > angle || end_angle <= start_angle))
+            || (start_angle > angle && end_angle > angle && end_angle <= start_angle)
     }
 }
 
@@ -168,29 +159,32 @@ impl PointsIter for Arc {
 // TODO Check rect.styled_bounding_box()
 impl Dimensions for Arc {
     fn bounding_box(&self) -> Rectangle {
-        // Create a rectangle between the start and the end angle points.
-        let rect = Rectangle::with_corners(self.point_start(), self.point_end());
-        let mut p1 = rect.top_left;
-        let mut p2 = p1 + rect.size.x_axis() + rect.size.y_axis();
+        let start = self.point_start();
+        let end = self.point_end();
+        let mut p1 = start.component_min(end);
+        let mut p2 = start.component_max(end);
 
-        // Extend the rectangle if the arc passes through the circle bounding box borders.
-        let center = self.center();
-        let radius = i32::from(self.radius());
-
-        if self.passes_through(&Angle::from_degrees(90.0)) {
-            p1 = Point::new(p1.x, center.y - radius);
+        // Move the points if the arc passes through the circle bounding box borders.
+        if self.passes_through(90.0.deg()) {
+            p1 = Point::new(p1.x, self.top_left.y);
         }
 
-        if self.passes_through(&Angle::from_degrees(180.0)) {
-            p1 = Point::new(center.x - radius, p1.y);
+        if self.passes_through(180.0.deg()) {
+            p1 = Point::new(self.top_left.x, p1.y);
         }
 
-        if self.passes_through(&Angle::from_degrees(270.0)) {
-            p2 = Point::new(p2.x, center.y + radius);
+        if self.passes_through(270.0.deg()) {
+            p2 = Point::new(
+                p2.x,
+                self.top_left.y + self.diameter.saturating_sub(1) as i32,
+            );
         }
 
-        if self.passes_through(&Angle::from_degrees(360.0)) {
-            p2 = Point::new(center.x + radius, p2.y);
+        if self.passes_through(360.0.deg()) {
+            p2 = Point::new(
+                self.top_left.x + self.diameter.saturating_sub(1) as i32,
+                p2.y,
+            );
         }
 
         Rectangle::with_corners(p1, p2)
@@ -243,7 +237,7 @@ mod tests {
         let arc = Arc::new(Point::new(-15, -15), 10, 0.0.deg(), 90.0.deg());
 
         assert_eq!(
-            arc.bounding_box(),
+            arc.to_circle().bounding_box(),
             Rectangle::new(Point::new(-15, -15), Size::new(10, 10))
         );
     }
@@ -253,8 +247,64 @@ mod tests {
         let arc = Arc::new(Point::new(5, 15), 10, 0.0.deg(), 90.0.deg());
 
         assert_eq!(
-            arc.bounding_box(),
+            arc.to_circle().bounding_box(),
             Rectangle::new(Point::new(5, 15), Size::new(10, 10))
+        );
+    }
+
+    #[test]
+    fn passes_through() {}
+
+    #[test]
+    fn bounding_box() {
+        // odd diameter
+        let arc = Arc::new(Point::new(10, 10), 5, 0.0.deg(), 90.0.deg());
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(12, 10), Size::new(3, 3))
+        );
+
+        // even diameter, top right
+        let arc = Arc::new(Point::new(10, 10), 6, 0.0.deg(), 90.0.deg());
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(12, 10), Size::new(4, 3))
+        );
+
+        // even diameter, bottom left
+        let arc = Arc::new(Point::new(10, 10), 6, 180.0.deg(), 90.0.deg());
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(10, 12), Size::new(3, 4))
+        );
+
+        // even diameter, bottom right
+        let arc = Arc::new(Point::new(10, 10), 6, 270.0.deg(), 90.0.deg());
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(12, 12), Size::new(4, 4))
+        );
+
+        // odd diameter, large angle
+        let arc = Arc::new(Point::new(10, 10), 5, 0.0.deg(), 270.0.deg());
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(5, 5))
+        );
+
+        // even diameter, large angle
+        let arc = Arc::new(Point::new(10, 10), 6, 0.0.deg(), 270.0.deg());
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(6, 6))
+        );
+
+        // odd diameter
+        let arc = Arc::new(Point::new(10, 10), 5, 45.0.deg(), 180.0.deg());
+        // start is Point(13, 11) and end is Point(11, 13), so a square of Size(3, 3)
+        assert_eq!(
+            arc.bounding_box(),
+            Rectangle::new(Point::new(10, 10), Size::new(4, 4))
         );
     }
 
