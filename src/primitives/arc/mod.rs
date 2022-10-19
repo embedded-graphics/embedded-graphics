@@ -1,15 +1,17 @@
 //! The arc primitive
 
 use crate::{
-    geometry::{Angle, Dimensions, Point, Size},
+    geometry::{Angle, Dimensions, Point},
     primitives::{Circle, PointsIter, Primitive, Rectangle},
     transform::Transform,
 };
+use embedded_graphics_core::prelude::Size;
 
 mod points;
 mod styled;
 
 use crate::geometry::{AngleUnit, Real, Trigonometry};
+use crate::primitives::common::PlaneSector;
 pub use points::Points;
 pub use styled::StyledPixelsIterator;
 
@@ -117,13 +119,24 @@ impl Arc {
         self.angle_start + self.angle_sweep
     }
 
+    /// Return the delta between a point on the arc at a given angle and the center point.
+    fn delta_from_angle(&self, angle: &Angle) -> Point {
+        let diameter = Real::from(self.diameter.saturating_sub(1));
+
+        Point::new(
+            i32::from(angle.cos() * diameter),
+            // NOTE: Y coordinate is top-down in e-g, but sine function is only in correct phase
+            // with cosine with bottom-up Y axis, hence negation here.
+            -i32::from(angle.sin() * diameter),
+        )
+    }
+
     /// Returns the Point from a certain angle.
     pub fn point_from_angle(&self, angle: &Angle) -> Point {
         let center = self.to_circle().center_2x();
-        let cos = i32::from(angle.cos() * Real::from(self.diameter.saturating_sub(1)));
-        let sin = i32::from(angle.sin() * Real::from(self.diameter.saturating_sub(1)));
+        let delta = self.delta_from_angle(angle);
 
-        Point::new(center.x + cos, center.y - sin) / 2
+        (center + delta) / 2
     }
 
     /// Returns the Point from the start angle.
@@ -137,12 +150,8 @@ impl Arc {
     }
 
     /// Whether or not the arc passes through a given angle.
-    fn passes_through(&self, angle: Angle) -> bool {
-        let start_angle = self.angle_start;
-        let end_angle = self.angle_end();
-
-        (start_angle < angle && (end_angle > angle || end_angle <= start_angle))
-            || (start_angle > angle && end_angle > angle && end_angle <= start_angle)
+    fn passes_through(&self, angle: &Angle) -> bool {
+        PlaneSector::new(self.angle_start, self.angle_sweep).contains(self.delta_from_angle(angle))
     }
 }
 
@@ -164,23 +173,31 @@ impl Dimensions for Arc {
         let mut p1 = start.component_min(end);
         let mut p2 = start.component_max(end);
 
+        if self.angle_sweep.to_degrees() == 0.0 {
+            return Rectangle::new(start, Size::zero());
+        }
+
+        if self.angle_sweep.abs().to_degrees() >= 360.0 {
+            return self.to_circle().bounding_box();
+        }
+
         // Move the points if the arc passes through the circle bounding box borders.
-        if self.passes_through(90.0.deg()) {
+        if self.passes_through(&90.0.deg()) {
             p1 = Point::new(p1.x, self.top_left.y);
         }
 
-        if self.passes_through(180.0.deg()) {
+        if self.passes_through(&180.0.deg()) {
             p1 = Point::new(self.top_left.x, p1.y);
         }
 
-        if self.passes_through(270.0.deg()) {
+        if self.passes_through(&270.0.deg()) {
             p2 = Point::new(
                 p2.x,
                 self.top_left.y + self.diameter.saturating_sub(1) as i32,
             );
         }
 
-        if self.passes_through(360.0.deg()) {
+        if self.passes_through(&360.0.deg()) {
             p2 = Point::new(
                 self.top_left.x + self.diameter.saturating_sub(1) as i32,
                 p2.y,
@@ -230,7 +247,7 @@ impl Transform for Arc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::AngleUnit;
+    use crate::geometry::Size;
 
     #[test]
     fn negative_dimensions() {
