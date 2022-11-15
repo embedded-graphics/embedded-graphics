@@ -2,6 +2,7 @@ use criterion::*;
 use embedded_graphics::{
     framebuffer::{buffer_size, Framebuffer},
     geometry::Point,
+    image::GetPixel,
     pixelcolor::{raw::LittleEndian, BinaryColor, Rgb565},
     prelude::{DrawTarget, Size, WebColors},
     primitives::{Primitive, PrimitiveStyle, Rectangle},
