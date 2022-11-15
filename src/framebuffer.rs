@@ -4,7 +4,7 @@ use core::{convert::Infallible, marker::PhantomData};
 
 use crate::{
     draw_target::DrawTarget,
-    geometry::{OriginDimensions, Point, Size},
+    geometry::{Dimensions, OriginDimensions, Point, Size},
     image::{ImagePixelGetter, ImageRaw},
     iterator::raw::RawDataSlice,
     pixelcolor::{
@@ -12,8 +12,9 @@ use crate::{
             BigEndian, ByteOrder, LittleEndian, RawData, RawU1, RawU16, RawU2, RawU24, RawU32,
             RawU4, RawU8, ToBytes,
         },
-        PixelColor,
+        IntoStorage, PixelColor,
     },
+    primitives::Rectangle,
     Pixel,
 };
 
@@ -166,6 +167,203 @@ macro_rules! impl_bit {
                 }
 
                 Ok(())
+            }
+
+            fn fill_solid(
+                &mut self,
+                area: &Rectangle,
+                color: Self::Color,
+            ) -> Result<(), Self::Error> {
+                let area = self.bounding_box().intersection(area);
+
+                dbg!(area);
+
+                let is_like_ssd1306 = true;
+                let area_width = area.size.width as usize;
+                let area_height = area.size.height as usize;
+
+                let bpp = C::Raw::BITS_PER_PIXEL;
+
+                let fill_pattern = {
+                    let raw_color = color.into().into_inner();
+
+                    println!("Raw colour {:#b}", raw_color);
+
+                    let bpp_mask = 2u8.pow(bpp as u32) - 1;
+                    let mut byte_mask = 0u8;
+
+                    println!("BPP mask {:#b}", bpp_mask);
+
+                    for _ in 0..(8 / bpp) {
+                        byte_mask = (byte_mask << bpp) | (raw_color & bpp_mask)
+                    }
+
+                    println!("Byte mask {:#10b}", byte_mask);
+
+                    byte_mask
+                };
+
+                // let bytes_per_row = if is_like_ssd1306 {
+                //     area.size.width
+                // } else {
+                //     area.size.width / 8
+                // } as usize
+                //     / bpp;
+
+                // let bytes_per_column = if is_like_ssd1306 {
+                //     area.size.height
+                // } else {
+                //     area.size.height / 8
+                // } as usize
+                //     / bpp;
+
+                let top_x = area.top_left.x.unsigned_abs();
+                let top_y = area.top_left.y.unsigned_abs();
+
+                let byte_direction_start = if is_like_ssd1306 { top_y } else { top_x } * bpp as u32;
+
+                let (start_bit, start_byte) = (byte_direction_start % 8, byte_direction_start / 8);
+
+                let start_corner = {
+                    let minor_direction_start = if is_like_ssd1306 { top_x } else { top_y };
+
+                    let x_offset = minor_direction_start;
+
+                    let y_offset = start_byte * WIDTH as u32;
+
+                    x_offset + y_offset
+                };
+
+                dbg!(start_corner);
+
+                dbg!(start_bit, start_byte);
+
+                // The width along the direction each byte travels (i.e. height for downwards
+                // SSD1306-like layout)
+                let byte_direction_width = if is_like_ssd1306 {
+                    area.size.height
+                } else {
+                    area.size.width
+                };
+
+                // --- Partial start byte
+
+                let num_on_bits = (byte_direction_width * bpp as u32);
+
+                // let num_start_on_bits = num_on_bits.min(7);
+                let num_start_on_bits = 8 - start_bit;
+
+                let start_mask = (2u8.pow(num_start_on_bits) - 1) << start_bit;
+
+                dbg!(num_on_bits, num_start_on_bits);
+
+                println!("Start mask {:#10b}", start_mask);
+
+                let start_byte = fill_pattern & start_mask;
+
+                println!("Start byte {:#10b}", start_byte);
+
+                // Row-first, byte points down
+                if is_like_ssd1306 {
+                    self.data[top_corner..][..area_width].fill(start_byte);
+                }
+                // Column-first, byte points right
+                else {
+                    let mut index = top_corner;
+
+                    for i in 0..area_height {
+                        self.data[index] = (self.data[index] & !start_mask) | start_byte;
+
+                        index += area_width;
+                    }
+                }
+
+                let remaining_bits = num_on_bits - num_start_on_bits;
+
+                // --- Fully populated middle bytes - if there are 8 or more bits remaining
+
+                let remaining_bits = if remaining_bits >= 8 {
+                    let remaining_full_bytes = remaining_bits / 8;
+
+                    dbg!(remaining_full_bytes);
+
+                    // Row-first, byte points down
+                    if is_like_ssd1306 {
+                        self.data[start..][..area_width].fill(fill_pattern);
+
+                        start += area_width;
+                    }
+                    // Column-first, byte points right
+                    else {
+                        for i in 0..area_height {
+                            let index = start + (i * area_width);
+
+                            self.data[index] = fill_pattern
+                        }
+                    }
+
+                    remaining_bits - (remaining_full_bytes * 8)
+                } else {
+                    remaining_bits
+                };
+
+                // --- Partial end byte - if there are any bytes left
+
+                dbg!(remaining_bits);
+
+                debug_assert!(remaining_bits < 8);
+
+                if remaining_bits > 0 {
+                    dbg!(remaining_bits);
+
+                    let final_mask = 2u8.pow(remaining_bits) - 1;
+
+                    let final_pattern = fill_pattern & final_mask;
+
+                    // Row-first, byte points down
+                    if is_like_ssd1306 {
+                        self.data[start..][..area_width].fill(final_pattern);
+
+                        start += area_width;
+                    }
+                    // Column-first, byte points right
+                    else {
+                        for i in 0..area_height {
+                            self.data[start] = (self.data[start] & !start_mask) | start_byte;
+
+                            start += (i * area_width);
+                        }
+                    }
+                }
+
+                // ---
+
+                // let start_pos = area.top_left.y.unsigned_abs();
+                // let dimension = area.size.height;
+
+                // // ---
+
+                // dbg!(area, start_pos, dimension);
+
+                // let bpp = C::Raw::BITS_PER_PIXEL as u32;
+                // let start = start_pos;
+
+                // dbg!(bpp, start);
+
+                // let start_start_bit = start * bpp;
+
+                // dbg!(start_start_bit);
+
+                // let start_byte = start_start_bit / 8;
+                // let start_bit = start_start_bit % 8;
+
+                // dbg!(start_byte, start_bit);
+
+                // let num_mask_bits = (dimension * bpp).max(8);
+
+                // dbg!(num_mask_bits);
+
+                todo!();
             }
         }
     };
@@ -339,6 +537,28 @@ mod tests {
         fn from(color: U32Color) -> Self {
             Self::new(color.0)
         }
+    }
+
+    #[test]
+    fn fb_fill_solid_1bpp() {
+        let mut fb = <framebuffer!(BinaryColor, 128, 64)>::new();
+
+        fb.fill_solid(
+            &Rectangle::new(Point::new(10, 3), Size::new(30, 40)),
+            BinaryColor::On,
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn fb_fill_solid_2bpp() {
+        let mut fb = <framebuffer!(Gray2, 128, 64)>::new();
+
+        fb.fill_solid(
+            &Rectangle::new(Point::new(10, 3), Size::new(30, 40)),
+            Gray2::new(0b10),
+        )
+        .unwrap();
     }
 
     #[test]
