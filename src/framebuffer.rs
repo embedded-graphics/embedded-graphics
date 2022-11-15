@@ -2,9 +2,14 @@
 
 use core::{convert::Infallible, marker::PhantomData};
 
+use embedded_graphics_core::{
+    prelude::{Dimensions, OriginDimensions},
+    primitives::Rectangle,
+};
+
 use crate::{
     draw_target::DrawTarget,
-    geometry::{OriginDimensions, Point, Size},
+    geometry::{Point, Size},
     image::{GetPixel, ImageRaw},
     iterator::raw::RawDataSlice,
     pixelcolor::{
@@ -286,6 +291,14 @@ impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDi
 {
     fn size(&self) -> Size {
         Size::new(WIDTH as u32, HEIGHT as u32)
+    }
+}
+
+impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> Dimensions
+    for Framebuffer<C, R, BO, WIDTH, HEIGHT, N>
+{
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), Size::new(WIDTH as _, HEIGHT as _))
     }
 }
 

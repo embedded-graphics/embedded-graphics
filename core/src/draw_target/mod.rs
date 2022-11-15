@@ -423,3 +423,34 @@ pub trait DrawTarget: Dimensions {
         self.fill_solid(&self.bounding_box(), color)
     }
 }
+
+impl<T> DrawTarget for &mut T
+where
+    T: DrawTarget,
+{
+    type Color = T::Color;
+
+    type Error = T::Error;
+
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        (**self).draw_iter(pixels)
+    }
+
+    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Self::Color>,
+    {
+        (**self).fill_contiguous(area, colors)
+    }
+
+    fn fill_solid(&mut self, area: &Rectangle, color: Self::Color) -> Result<(), Self::Error> {
+        (**self).fill_solid(area, color)
+    }
+
+    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        (**self).clear(color)
+    }
+}

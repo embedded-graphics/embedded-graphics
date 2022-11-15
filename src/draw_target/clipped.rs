@@ -10,26 +10,26 @@ use crate::{
 ///
 /// [`clipped`]: crate::draw_target::DrawTargetExt::clipped
 #[derive(Debug)]
-pub struct Clipped<'a, T>
+pub struct Clipped<T>
 where
     T: DrawTarget,
 {
-    parent: &'a mut T,
+    parent: T,
     clip_area: Rectangle,
 }
 
-impl<'a, T> Clipped<'a, T>
+impl<T> Clipped<T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(parent: &'a mut T, clip_area: &Rectangle) -> Self {
+    pub(super) fn new(parent: T, clip_area: &Rectangle) -> Self {
         let clip_area = clip_area.intersection(&parent.bounding_box());
 
         Self { parent, clip_area }
     }
 }
 
-impl<T> DrawTarget for Clipped<'_, T>
+impl<T> DrawTarget for Clipped<T>
 where
     T: DrawTarget,
 {
@@ -69,7 +69,7 @@ where
     }
 }
 
-impl<T> Dimensions for Clipped<'_, T>
+impl<T> Dimensions for Clipped<T>
 where
     T: DrawTarget,
 {
@@ -95,7 +95,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(2, 4));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
 
         let pixels = [
             Pixel(Point::new(0, 1), BinaryColor::On),
@@ -125,7 +125,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(2, 3));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
 
         let colors = [
             1, 1, 1, 1, 1, //
@@ -152,7 +152,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(4, 2));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(6, 4));
         clipped.fill_solid(&area, BinaryColor::On).unwrap();
@@ -170,7 +170,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
         clipped.clear(BinaryColor::On).unwrap();
 
         let mut expected = MockDisplay::new();
@@ -183,7 +183,7 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(2, 4));
         let clipped = display.clipped(&area);
@@ -193,7 +193,7 @@ mod tests {
 
     #[test]
     fn bounding_box_is_clipped() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
         let display_bb = display.bounding_box();
 
         let top_left = Point::new(10, 20);
