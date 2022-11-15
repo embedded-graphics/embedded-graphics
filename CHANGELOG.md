@@ -16,7 +16,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#673](https://github.com/embedded-graphics/embedded-graphics/pull/673) Added `Framebuffer`.
 - [#709](https://github.com/embedded-graphics/embedded-graphics/pull/709) Added `Image::with_center`.
 - [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `AnchorX`, `AnchorY`, `AnchorPoint::x`, `AnchorPoint::y` and `AnchorPoint::from_xy`.
-- [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `Rectangle::resized_x`, `Rectangle::resized_y`, `Rectangle::anchor_x` and `Rectangle::anchor_y`.
+- [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `Rectangle::resized_width`, `Rectangle::resized_height`, `Rectangle::anchor_x` and `Rectangle::anchor_y`.
 
 ### Changed
 

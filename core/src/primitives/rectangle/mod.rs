@@ -269,8 +269,8 @@ impl Rectangle {
     /// ```
     pub fn resized(&self, size: Size, anchor_point: AnchorPoint) -> Self {
         let mut resized = self.clone();
-        resized.resize_x_mut(size.width, anchor_point.x());
-        resized.resize_y_mut(size.height, anchor_point.y());
+        resized.resize_width_mut(size.width, anchor_point.x());
+        resized.resize_height_mut(size.height, anchor_point.y());
 
         resized
     }
@@ -289,16 +289,16 @@ impl Rectangle {
     /// };
     ///
     /// let rect = Rectangle::new(Point::new(20, 20), Size::new(10, 20));
-    /// let resized = rect.resized_x(20, AnchorX::Center);
+    /// let resized = rect.resized_width(20, AnchorX::Center);
     ///
     /// assert_eq!(
     ///     resized,
     ///     Rectangle::new(Point::new(15, 20), Size::new(20, 20))
     /// );
     /// ```
-    pub fn resized_x(&self, width: u32, anchor_x: AnchorX) -> Self {
+    pub fn resized_width(&self, width: u32, anchor_x: AnchorX) -> Self {
         let mut resized = self.clone();
-        resized.resize_x_mut(width, anchor_x);
+        resized.resize_width_mut(width, anchor_x);
 
         resized
     }
@@ -317,21 +317,21 @@ impl Rectangle {
     /// };
     ///
     /// let rect = Rectangle::new(Point::new(20, 20), Size::new(10, 20));
-    /// let resized = rect.resized_y(10, AnchorY::Center);
+    /// let resized = rect.resized_height(10, AnchorY::Center);
     ///
     /// assert_eq!(
     ///     resized,
     ///     Rectangle::new(Point::new(20, 25), Size::new(10, 10))
     /// );
     /// ```
-    pub fn resized_y(&self, height: u32, anchor_y: AnchorY) -> Self {
+    pub fn resized_height(&self, height: u32, anchor_y: AnchorY) -> Self {
         let mut resized = self.clone();
-        resized.resize_y_mut(height, anchor_y);
+        resized.resize_height_mut(height, anchor_y);
 
         resized
     }
 
-    fn resize_x_mut(&mut self, width: u32, anchor_x: AnchorX) {
+    fn resize_width_mut(&mut self, width: u32, anchor_x: AnchorX) {
         // Assume size = 1 for zero sized dimensions.
         let delta =
             self.size.width.saturating_as::<i32>().max(1) - width.saturating_as::<i32>().max(1);
@@ -344,7 +344,7 @@ impl Rectangle {
         self.size.width = width;
     }
 
-    fn resize_y_mut(&mut self, height: u32, anchor_y: AnchorY) {
+    fn resize_height_mut(&mut self, height: u32, anchor_y: AnchorY) {
         // Assume size = 1 for zero sized dimensions.
         let delta =
             self.size.height.saturating_as::<i32>().max(1) - height.saturating_as::<i32>().max(1);
@@ -703,7 +703,7 @@ mod tests {
 
             assert_eq!(resized, expected, "{:?}", anchor_point);
 
-            let resized_x = rect.resized_x(target_size.width, anchor_point.x());
+            let resized_x = rect.resized_width(target_size.width, anchor_point.x());
             assert_eq!(
                 resized_x.top_left,
                 Point::new(resized.top_left.x, rect.top_left.y)
@@ -713,7 +713,7 @@ mod tests {
                 Size::new(resized.size.width, rect.size.height)
             );
 
-            let resized_y = rect.resized_y(target_size.height, anchor_point.y());
+            let resized_y = rect.resized_height(target_size.height, anchor_point.y());
             assert_eq!(
                 resized_y.top_left,
                 Point::new(rect.top_left.x, resized.top_left.y)
