@@ -121,6 +121,14 @@ where
     }
 }
 
+fn check<C>() -> usize
+where
+    C: PixelColor,
+    <<C as PixelColor>::Raw as RawData>::Storage: Into<u8>,
+{
+    C::Raw::BITS_PER_PIXEL
+}
+
 macro_rules! impl_bit {
     ($raw_type:ident) => {
         impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
