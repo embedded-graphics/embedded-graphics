@@ -362,38 +362,34 @@ pub(crate) mod tests {
                 .draw(&mut expected)
                 .unwrap();
 
-            let mut fb = new_framebuffer();
-            let style = MonoTextStyle::new(&font, BinaryColor::On);
+            let chars_per_row = (font.image.size().width / font.character_size.width) as usize;
 
-            let mut p = Point::zero();
-            for char in mapping.glyph_mapping().chars() {
-                let mut str = ArrayString::<16>::new();
-                str.push(char);
-
-                Text::with_baseline(
-                    &str,
-                    p.component_mul(Point::zero() + font.character_size),
-                    style,
-                    Baseline::Top,
-                )
-                .draw(&mut fb)
-                .unwrap();
-
-                p.x += 1;
-                if p.x as u32 >= font.image.size().width / font.character_size.width {
-                    p.x = 0;
-                    p.y += 1;
+            let mut text = ArrayString::<1024>::new();
+            for (i, c) in mapping.glyph_mapping().chars().enumerate() {
+                if i % chars_per_row == 0 && i != 0 {
+                    text.push('\n');
                 }
+                text.push(c);
             }
 
-            if expected != fb {
-                let mut output = ArrayString::<65536>::new();
-                output.push_str("Output:\n");
-                dump_framebuffer(&fb, &mut output);
-                output.push_str("\nExpected:\n");
-                dump_framebuffer(&expected, &mut output);
+            let mut output = new_framebuffer();
+            Text::with_baseline(
+                &text,
+                Point::zero(),
+                MonoTextStyle::new(&font, BinaryColor::On),
+                Baseline::Top,
+            )
+            .draw(&mut output)
+            .unwrap();
 
-                panic!("{}", output)
+            if expected != output {
+                let mut message = ArrayString::<65536>::new();
+                message.push_str("Output:\n");
+                dump_framebuffer(&output, &mut message);
+                message.push_str("\nExpected:\n");
+                dump_framebuffer(&expected, &mut message);
+
+                panic!("{}", message)
             }
         }
     }
