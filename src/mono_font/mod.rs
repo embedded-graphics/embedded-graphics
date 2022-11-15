@@ -222,12 +222,19 @@ const NULL_FONT: MonoFont = MonoFont {
 
 #[cfg(test)]
 pub(crate) mod tests {
+    use arrayvec::ArrayString;
+
     use super::*;
     use crate::{
-        geometry::Point,
+        framebuffer::{buffer_size, Framebuffer},
+        geometry::{Dimensions, Point},
+        image::{GetPixel, Image},
         mock_display::MockDisplay,
-        mono_font::MonoTextStyleBuilder,
-        pixelcolor::BinaryColor,
+        mono_font::{mapping::Mapping, MonoTextStyleBuilder},
+        pixelcolor::{
+            raw::{LittleEndian, RawU1},
+            BinaryColor,
+        },
         text::{Baseline, Text},
         Drawable,
     };
@@ -299,5 +306,91 @@ pub(crate) mod tests {
     where
         for<'a> MonoFont<'a>: Send + Sync,
     {
+    }
+
+    fn new_framebuffer() -> Framebuffer<
+        BinaryColor,
+        RawU1,
+        LittleEndian,
+        96,
+        200,
+        { buffer_size::<BinaryColor>(96, 200) },
+    > {
+        Framebuffer::new()
+    }
+
+    fn dump_framebuffer<T: GetPixel<Color = BinaryColor> + Dimensions, const N: usize>(
+        framebuffer: &T,
+        output: &mut ArrayString<N>,
+    ) {
+        let bb = framebuffer.bounding_box();
+
+        for y in bb.rows() {
+            for x in bb.columns() {
+                let c = match framebuffer.pixel(Point::new(x, y)).unwrap() {
+                    BinaryColor::Off => ' ',
+                    BinaryColor::On => '#',
+                };
+                output.push(c);
+            }
+            output.push('\n');
+        }
+    }
+
+    #[test]
+    fn draw_font_subsets() {
+        let fonts = &[
+            (Mapping::Ascii, ascii::FONT_6X13),
+            (Mapping::Iso8859_1, iso_8859_1::FONT_6X13),
+            (Mapping::Iso8859_10, iso_8859_10::FONT_6X13),
+            (Mapping::Iso8859_13, iso_8859_13::FONT_6X13),
+            (Mapping::Iso8859_14, iso_8859_14::FONT_6X13),
+            (Mapping::Iso8859_15, iso_8859_15::FONT_6X13),
+            (Mapping::Iso8859_16, iso_8859_16::FONT_6X13),
+            (Mapping::Iso8859_2, iso_8859_2::FONT_6X13),
+            (Mapping::Iso8859_3, iso_8859_3::FONT_6X13),
+            (Mapping::Iso8859_4, iso_8859_4::FONT_6X13),
+            (Mapping::Iso8859_5, iso_8859_5::FONT_6X13),
+            (Mapping::Iso8859_7, iso_8859_7::FONT_6X13),
+            (Mapping::Iso8859_9, iso_8859_9::FONT_6X13),
+            (Mapping::JisX0201, jis_x0201::FONT_6X13),
+        ];
+
+        for (mapping, font) in fonts {
+            let mut expected = new_framebuffer();
+            Image::new(&font.image, Point::zero())
+                .draw(&mut expected)
+                .unwrap();
+
+            let chars_per_row = (font.image.size().width / font.character_size.width) as usize;
+
+            let mut text = ArrayString::<1024>::new();
+            for (i, c) in mapping.glyph_mapping().chars().enumerate() {
+                if i % chars_per_row == 0 && i != 0 {
+                    text.push('\n');
+                }
+                text.push(c);
+            }
+
+            let mut output = new_framebuffer();
+            Text::with_baseline(
+                &text,
+                Point::zero(),
+                MonoTextStyle::new(&font, BinaryColor::On),
+                Baseline::Top,
+            )
+            .draw(&mut output)
+            .unwrap();
+
+            if expected != output {
+                let mut message = ArrayString::<65536>::new();
+                message.push_str("Output:\n");
+                dump_framebuffer(&output, &mut message);
+                message.push_str("\nExpected:\n");
+                dump_framebuffer(&expected, &mut message);
+
+                panic!("{}", message)
+            }
+        }
     }
 }
