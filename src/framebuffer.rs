@@ -123,9 +123,6 @@ where
 {
     type Color = C;
 
-    /// Get pixel color.
-    ///
-    /// Returns `None` if `p` is outside the framebuffer bounding box.
     fn pixel(&self, p: Point) -> Option<C> {
         self.as_image().pixel(p)
     }
