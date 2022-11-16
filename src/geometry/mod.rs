@@ -7,7 +7,7 @@ pub(crate) use angle::angle_consts;
 pub(crate) use angle::Trigonometry;
 pub use angle::{Angle, AngleUnit};
 pub use embedded_graphics_core::geometry::{
-    AnchorPoint, Dimensions, OriginDimensions, Point, Size,
+    AnchorPoint, AnchorX, AnchorY, Dimensions, OriginDimensions, Point, Size,
 };
 pub(crate) use real::Real;
 
