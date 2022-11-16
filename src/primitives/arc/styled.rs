@@ -6,7 +6,7 @@ use crate::{
         arc::Arc,
         common::{DistanceIterator, PlaneSector},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        OffsetOutline, PrimitiveStyle, Rectangle,
+        OffsetOutline, PrimitiveStyle, Rectangle, StrokeAlignment,
     },
     Pixel,
 };
@@ -94,11 +94,63 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Arc {
 }
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
-    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_as();
+        let mut outside_arc = Arc::with_center(
+            self.center(),
+            self.diameter,
+            self.angle_start,
+            self.angle_sweep,
+        );
+        let mut inside_arc = Arc::with_center(
+            self.center(),
+            self.diameter,
+            self.angle_start,
+            self.angle_sweep,
+        );
 
-        self.bounding_box().offset(offset)
+        match style.stroke_alignment {
+            StrokeAlignment::Outside => {
+                outside_arc = Arc::with_center(
+                    self.center(),
+                    self.diameter + style.stroke_width * 2,
+                    self.angle_start,
+                    self.angle_sweep,
+                );
+            }
+            StrokeAlignment::Center => {
+                outside_arc = Arc::with_center(
+                    self.center(),
+                    self.diameter + style.stroke_width,
+                    self.angle_start,
+                    self.angle_sweep,
+                );
+                inside_arc = Arc::with_center(
+                    self.center(),
+                    self.diameter - style.stroke_width,
+                    self.angle_start,
+                    self.angle_sweep,
+                );
+            }
+            StrokeAlignment::Inside => {
+                inside_arc = Arc::with_center(
+                    self.center(),
+                    self.diameter - style.stroke_width * 2 + 2,
+                    self.angle_start,
+                    self.angle_sweep,
+                );
+            }
+        };
+
+        let outside_bb = outside_arc.bounding_box();
+        let inside_bb = inside_arc.bounding_box();
+
+        let min_top_left = outside_bb.top_left.component_min(inside_bb.top_left);
+        let max_bottom_right = outside_bb
+            .bottom_right()
+            .unwrap_or_else(|| self.center())
+            .component_max(inside_bb.bottom_right().unwrap_or_else(|| self.center()));
+
+        Rectangle::with_corners(min_top_left, max_bottom_right)
     }
 }
 
