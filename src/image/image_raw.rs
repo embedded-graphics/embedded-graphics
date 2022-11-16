@@ -243,13 +243,14 @@ where
     type Color = C;
 
     fn pixel(&self, p: Point) -> Option<Self::Color> {
-        self.bounding_box().contains(p).then(|| {
-            RawDataSlice::new(self.data)
-                .into_iter()
-                .nth(p.x as usize + p.y as usize * self.data_width() as usize)
-                .unwrap()
-                .into()
-        })
+        if p.x < 0 || p.y < 0 || p.x >= self.size.width as i32 || p.y >= self.size.height as i32 {
+            return None;
+        }
+
+        RawDataSlice::new(self.data)
+            .into_iter()
+            .nth(p.x as usize + p.y as usize * self.data_width() as usize)
+            .map(|r| r.into())
     }
 }
 

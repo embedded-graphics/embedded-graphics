@@ -123,7 +123,6 @@ where
 {
     type Color = C;
 
-    // TODO: Optimise implementation by moving away from `ImageRaw::pixel` and directly calculating skip value.
     fn pixel(&self, p: Point) -> Option<C> {
         self.as_image().pixel(p)
     }
@@ -148,7 +147,7 @@ macro_rules! impl_bit {
                         let byte_index = bytes_per_row * y + (x / pixels_per_bit);
                         let bit_index = 8 - (x % pixels_per_bit + 1) * C::Raw::BITS_PER_PIXEL;
 
-                        let mask = !($raw_type::new(0xFF).into_inner() << bit_index);
+                        let mask = !((2u8.pow(C::Raw::BITS_PER_PIXEL as u32) - 1) << bit_index);
                         let bits = c.into().into_inner() << bit_index;
 
                         self.data[byte_index] = self.data[byte_index] & mask | bits;
