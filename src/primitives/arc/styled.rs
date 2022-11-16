@@ -1,3 +1,5 @@
+use core::cmp::min;
+
 use crate::{
     draw_target::DrawTarget,
     geometry::Dimensions,
@@ -126,7 +128,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
                 );
                 inside_arc = Arc::with_center(
                     self.center(),
-                    self.diameter - style.stroke_width,
+                    self.diameter - min(style.stroke_width, self.diameter),
                     self.angle_start,
                     self.angle_sweep,
                 );
@@ -134,7 +136,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
             StrokeAlignment::Inside => {
                 inside_arc = Arc::with_center(
                     self.center(),
-                    self.diameter - style.stroke_width * 2 + 2,
+                    self.diameter - min(style.stroke_width * 2 + 2, self.diameter),
                     self.angle_start,
                     self.angle_sweep,
                 );
