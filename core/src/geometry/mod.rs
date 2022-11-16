@@ -116,7 +116,7 @@ pub enum AnchorPoint {
 }
 
 impl AnchorPoint {
-    /// Creates an anchor point from a X and Y component.
+    /// Creates an anchor point from an X and Y component.
     pub fn from_xy(x: AnchorX, y: AnchorY) -> Self {
         match (y, x) {
             (AnchorY::Top, AnchorX::Left) => AnchorPoint::TopLeft,

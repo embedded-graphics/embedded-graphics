@@ -275,9 +275,7 @@ impl Rectangle {
         resized
     }
 
-    /// Returns a resized rectangle with the given width.
-    ///
-    /// The rectangle is resized relative to the given anchor edge.
+    /// Returns a new rectangle with the given width, resized relative to the given anchor edge.
     ///
     /// # Examples
     ///
@@ -303,9 +301,7 @@ impl Rectangle {
         resized
     }
 
-    /// Returns a resized rectangle with the given height.
-    ///
-    /// The rectangle is resized relative to the given anchor edge.
+    /// Returns a new rectangle with the given height, resized relative to the given anchor edge.
     ///
     /// # Examples
     ///
@@ -396,9 +392,10 @@ impl Rectangle {
         )
     }
 
-    /// Returns the X coordinate of an anchor edge.
+    /// Returns the X coordinate of a given anchor edge of the rectangle.
     ///
     /// # Examples
+    ///
     /// ```
     /// use embedded_graphics::{
     ///     prelude::*,
@@ -423,9 +420,10 @@ impl Rectangle {
             }
     }
 
-    /// Returns the Y coordinate of an anchor edge.
+    /// Returns the Y coordinate of a given anchor edge of the rectangle.
     ///
     /// # Examples
+    ///
     /// ```
     /// use embedded_graphics::{
     ///     prelude::*,
