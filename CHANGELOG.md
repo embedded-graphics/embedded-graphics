@@ -14,6 +14,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#641](https://github.com/embedded-graphics/embedded-graphics/pull/641) Added `Line::with_delta` constructor.
 - [#656](https://github.com/embedded-graphics/embedded-graphics/pull/656) Added `Rgb666` and `Bgr666` conversions.
 - [#673](https://github.com/embedded-graphics/embedded-graphics/pull/673) Added `Framebuffer`.
+- [#709](https://github.com/embedded-graphics/embedded-graphics/pull/709) Added `Image::with_center`.
 
 ### Changed
 

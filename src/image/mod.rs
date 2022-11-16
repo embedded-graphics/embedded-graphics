@@ -144,6 +144,16 @@ where
             offset: position,
         }
     }
+
+    /// Creates a new `Image` centered around a given point.
+    pub fn with_center(image_drawable: &'a T, center: Point) -> Self {
+        let offset = Rectangle::with_center(center, image_drawable.size()).top_left;
+
+        Self {
+            image_drawable,
+            offset,
+        }
+    }
 }
 
 impl<T> Transform for Image<'_, T> {
@@ -282,6 +292,24 @@ mod tests {
             " .#.#", //
             " #.#.", //
             " .#.#", //
+        ]);
+    }
+
+    #[test]
+    fn with_center() {
+        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
+
+        let mut display = MockDisplay::new();
+        Image::with_center(&image_raw, Point::new(1, 2))
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "    ", //
+            "#.#.", //
+            ".#.#", //
+            "#.#.", //
+            ".#.#", //
         ]);
     }
 }
