@@ -97,54 +97,33 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Arc {
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let mut outside_arc = Arc::with_center(
-            self.center(),
-            self.diameter,
-            self.angle_start,
-            self.angle_sweep,
-        );
-        let mut inside_arc = Arc::with_center(
-            self.center(),
-            self.diameter,
-            self.angle_start,
-            self.angle_sweep,
-        );
-
-        match style.stroke_alignment {
-            StrokeAlignment::Outside => {
-                outside_arc = Arc::with_center(
-                    self.center(),
-                    self.diameter + style.stroke_width * 2,
-                    self.angle_start,
-                    self.angle_sweep,
-                );
-            }
-            StrokeAlignment::Center => {
-                outside_arc = Arc::with_center(
-                    self.center(),
-                    self.diameter + style.stroke_width,
-                    self.angle_start,
-                    self.angle_sweep,
-                );
-                inside_arc = Arc::with_center(
-                    self.center(),
-                    self.diameter - min(style.stroke_width, self.diameter),
-                    self.angle_start,
-                    self.angle_sweep,
-                );
-            }
-            StrokeAlignment::Inside => {
-                inside_arc = Arc::with_center(
-                    self.center(),
-                    self.diameter - min(style.stroke_width * 2 + 2, self.diameter),
-                    self.angle_start,
-                    self.angle_sweep,
-                );
-            }
+        let (inside_diameter, outside_diameter) = match style.stroke_alignment {
+            StrokeAlignment::Outside => (self.diameter, self.diameter + style.stroke_width * 2),
+            StrokeAlignment::Center => (
+                self.diameter - min(style.stroke_width, self.diameter),
+                self.diameter + style.stroke_width,
+            ),
+            StrokeAlignment::Inside => (
+                self.diameter - min(style.stroke_width * 2 + 2, self.diameter),
+                self.diameter,
+            ),
         };
 
-        let outside_bb = outside_arc.bounding_box();
-        let inside_bb = inside_arc.bounding_box();
+        let outside_bb = Arc::with_center(
+            self.center(),
+            outside_diameter,
+            self.angle_start,
+            self.angle_sweep,
+        )
+        .bounding_box();
+
+        let inside_bb = Arc::with_center(
+            self.center(),
+            inside_diameter,
+            self.angle_start,
+            self.angle_sweep,
+        )
+        .bounding_box();
 
         let min_top_left = outside_bb.top_left.component_min(inside_bb.top_left);
         let max_bottom_right = outside_bb
