@@ -3,17 +3,20 @@ use embedded_graphics::{
     framebuffer::{buffer_size, Framebuffer},
     geometry::Point,
     image::GetPixel,
-    pixelcolor::{raw::LittleEndian, BinaryColor, Rgb565},
+    pixelcolor::{
+        raw::storage::{LittleEndian, Lsb0},
+        BinaryColor, Rgb565,
+    },
     prelude::{DrawTarget, Size, WebColors},
     primitives::{Primitive, PrimitiveStyle, Rectangle},
 };
 
 fn framebuffer_set_1bpp(c: &mut Criterion) {
     c.bench_function("framebuffer set pixel 1bpp", |b| {
+        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor>(9, 2) }>::new();
+
         let mut fb = Framebuffer::<
-            BinaryColor,
-            _,
-            LittleEndian,
+            Lsb0<BinaryColor>,
             320,
             240,
             { buffer_size::<BinaryColor>(320, 240) },
@@ -29,9 +32,7 @@ fn framebuffer_set_1bpp(c: &mut Criterion) {
 fn framebuffer_get_1bpp(c: &mut Criterion) {
     c.bench_function("framebuffer get pixel 1bpp", |b| {
         let fb = Framebuffer::<
-            BinaryColor,
-            _,
-            LittleEndian,
+            Lsb0<BinaryColor>,
             320,
             240,
             { buffer_size::<BinaryColor>(320, 240) },
@@ -47,9 +48,7 @@ fn framebuffer_get_1bpp(c: &mut Criterion) {
 fn framebuffer_1bpp_draw_iter(c: &mut Criterion) {
     c.bench_function("framebuffer 1bpp draw iter", |b| {
         let mut fb = Framebuffer::<
-            BinaryColor,
-            _,
-            LittleEndian,
+            Lsb0<BinaryColor>,
             320,
             240,
             { buffer_size::<BinaryColor>(320, 240) },
@@ -68,9 +67,7 @@ fn framebuffer_1bpp_draw_iter(c: &mut Criterion) {
 fn framebuffer_set_rgb565(c: &mut Criterion) {
     c.bench_function("framebuffer set pixel rgb565", |b| {
         let mut fb = Framebuffer::<
-            Rgb565,
-            _,
-            LittleEndian,
+            LittleEndian<Rgb565>,
             320,
             240,
             { buffer_size::<Rgb565>(320, 240) },
@@ -85,14 +82,9 @@ fn framebuffer_set_rgb565(c: &mut Criterion) {
 
 fn framebuffer_get_rgb565(c: &mut Criterion) {
     c.bench_function("framebuffer get pixel rgb565", |b| {
-        let fb = Framebuffer::<
-            Rgb565,
-            _,
-            LittleEndian,
-            320,
-            240,
-            { buffer_size::<Rgb565>(320, 240) },
-        >::new();
+        let fb =
+            Framebuffer::<LittleEndian<Rgb565>, 320, 240, { buffer_size::<Rgb565>(320, 240) }>::new(
+            );
 
         b.iter(|| {
             fb.pixel(Point::new(1, 1));
