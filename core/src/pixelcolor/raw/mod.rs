@@ -170,6 +170,15 @@ macro_rules! impl_raw_data {
         pub struct $type($storage_type);
 
         impl $type {
+            /// The LSB0 bit mask of this color type.
+            ///
+            /// ```rust
+            /// use embedded_graphics::pixelcolor::Raw;
+            ///
+            /// assert_eq!(RawU4::BIT_MASK, 0b0000_1111);
+            /// ```
+            pub const BIT_MASK: usize = $mask;
+
             /// Creates a new color from the least significant
             #[doc = $bpp_str]
             /// of value.

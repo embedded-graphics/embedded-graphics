@@ -29,6 +29,24 @@ fn framebuffer_set_1bpp(c: &mut Criterion) {
     });
 }
 
+fn framebuffer_set_1bpp_lsb0(c: &mut Criterion) {
+    c.bench_function("framebuffer set pixel 1bpp lsb0", |b| {
+        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor>(9, 2) }>::new();
+
+        let mut fb = Framebuffer::<
+            Lsb0<BinaryColor>,
+            320,
+            240,
+            { buffer_size::<BinaryColor>(320, 240) },
+        >::new();
+
+        b.iter(|| {
+            fb.set_pixel(Point::new(1, 1), BinaryColor::On);
+            fb.set_pixel(Point::new(300, 200), BinaryColor::On);
+        })
+    });
+}
+
 fn framebuffer_get_1bpp(c: &mut Criterion) {
     c.bench_function("framebuffer get pixel 1bpp", |b| {
         let fb = Framebuffer::<
@@ -96,6 +114,7 @@ fn framebuffer_get_rgb565(c: &mut Criterion) {
 criterion_group!(
     framebuffer,
     framebuffer_set_1bpp,
+    framebuffer_set_1bpp_lsb0,
     framebuffer_get_1bpp,
     framebuffer_set_rgb565,
     framebuffer_get_rgb565,

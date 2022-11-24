@@ -168,8 +168,18 @@ pub trait SetPixelRaw<RS: RawStorage> {
     fn set_pixel_raw(&mut self, p: Point, r: RS::Raw);
 }
 
+#[inline(always)]
+const fn shift_lsb0(input: usize) -> usize {
+    7 - input
+}
+
+#[inline(always)]
+const fn shift_msb0(input: usize) -> usize {
+    input
+}
+
 macro_rules! impl_bit {
-    (@impl $raw_storage_type:ty, $raw_type:ty) => {
+    (@impl $raw_storage_type:ty, $raw_type:ty, $shifter:expr) => {
         impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<$raw_storage_type>
             for Framebuffer<CS, WIDTH, HEIGHT, N>
         {
@@ -182,8 +192,9 @@ macro_rules! impl_bit {
                         let byte_index = bytes_per_row * y + (x / pixels_per_bit);
                         let bit_index = 8 - (x % pixels_per_bit + 1) * <$raw_type>::BITS_PER_PIXEL;
 
-                        let mask = !(<$raw_type>::new(0xFF).into_inner() << bit_index);
-                        let bits = r.into_inner() << bit_index;
+                        let shift = $shifter(bit_index);
+                        let mask = !((<$raw_type>::BIT_MASK as u8) << shift);
+                        let bits = r.into_inner() << shift;
 
                         self.data[byte_index] = self.data[byte_index] & mask | bits;
                     }
@@ -193,8 +204,8 @@ macro_rules! impl_bit {
     };
 
     ($raw_type:ty) => {
-        impl_bit!(@impl Lsb0<$raw_type>, $raw_type);
-        impl_bit!(@impl Msb0<$raw_type>, $raw_type);
+        impl_bit!(@impl Lsb0<$raw_type>, $raw_type, shift_lsb0);
+        impl_bit!(@impl Msb0<$raw_type>, $raw_type, shift_msb0);
     };
 }
 
@@ -337,6 +348,37 @@ mod tests {
             &[
                 0b10000000, 0b00000000, //
                 0b00000000, 0b10000000, //
+            ]
+        );
+    }
+
+    #[test]
+    fn raw_u1_lsb0() {
+        let mut fb =
+            Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor>(9, 2) }>::new();
+
+        use BinaryColor::{Off, On};
+        fb.draw_iter(
+            [
+                ((0, 0), On),  //
+                ((8, 1), On),  //
+                ((1, 1), On),  //
+                ((1, 1), Off), //
+                ((-1, 0), On), //
+                ((0, -1), On), //
+                ((9, 0), On),  //
+                ((0, 2), On),  //
+            ]
+            .iter()
+            .map(|(p, c)| Pixel(Point::from(*p), *c)),
+        )
+        .unwrap();
+
+        assert_eq!(
+            fb.data(),
+            &[
+                0b00000001, 0b00000000, //
+                0b00000000, 0b00000001, //
             ]
         );
     }
