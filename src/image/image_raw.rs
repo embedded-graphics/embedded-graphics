@@ -285,22 +285,20 @@ where
     type Color = CS::Color;
 
     fn pixel(&self, p: Point) -> Option<Self::Color> {
-        if p.x < 0 || p.y < 0 {
+        if p.x < 0 || p.y < 0 || p.x >= self.size().width as i32 || p.y >= self.size().height as i32
+        {
             return None;
         }
 
-        let x = p.x.unsigned_abs();
-        let y = p.y.unsigned_abs();
-
         let index = if A::IS_HORIZONTAL {
-            x + y * self.padded_main_size()
+            p.x as usize + p.y as usize * self.padded_main_size() as usize
         } else {
-            x * self.padded_main_size() + y
+            p.x as usize * self.padded_main_size() as usize + p.y as usize
         };
 
         RawDataSlice::new(self.data)
             .into_iter()
-            .nth(index as usize)
+            .nth(index)
             .map(Into::into)
     }
 }
