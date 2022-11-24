@@ -232,7 +232,7 @@ pub(crate) mod tests {
     use crate::{
         framebuffer::{buffer_size, Framebuffer},
         geometry::{Dimensions, Point},
-        image::{GetPixel, Image},
+        image::{arrangement::Vertical, GetPixel, Image},
         mock_display::MockDisplay,
         mono_font::{mapping::Mapping, MonoTextStyleBuilder},
         pixelcolor::BinaryColor,
@@ -310,7 +310,8 @@ pub(crate) mod tests {
     }
 
     fn new_framebuffer(
-    ) -> Framebuffer<Msb0<BinaryColor>, 96, 200, { buffer_size::<BinaryColor>(96, 200) }> {
+    ) -> Framebuffer<Msb0<BinaryColor>, Vertical, 96, 200, { buffer_size::<BinaryColor>(96, 200) }>
+    {
         Framebuffer::new()
     }
 
