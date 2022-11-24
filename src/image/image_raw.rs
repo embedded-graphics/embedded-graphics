@@ -17,16 +17,16 @@ use super::arrangement::PixelArrangement;
 
 /// An image constructed from a slice of raw pixel data.
 ///
-/// The `ImageRaw` struct is construct from a slice of raw image data. Because the raw image data
+/// The `ImageRaw` struct is constructed from a slice of raw image data. Because the raw image data
 /// doesn't contain metadata to define the storage format, the `CS` and `A` type parameters must be
 /// used to set the format.
 ///
 /// `CS` is used to specify which [`PixelColor`] is stored inside the image. In addition to the
 /// color type the `CS` parameter is also used to set the bit order for colors with less than 8 bits
-/// per pixel and the byte order (endianness) for colors with more than 8 bits per pixel. If no
+/// per pixel, or the byte order (endianness) for colors with more than 8 bits per pixel. If no
 /// order is specified the default order is [`Msb0`] for < 8 BPP and [`LittleEndian`] for > 8 BPP.
 ///
-/// For color types with less than 8 bits per pixels each row (or column if `A` is `Vertical`) is
+/// For color types with less than 8 bits per pixel each row (or column if `A` is `Vertical`) is
 /// expected to be aligned with the start of a byte.
 ///
 /// The `A` parameter is used to set if the image data is arranged in rows or columns.
@@ -285,7 +285,8 @@ where
     type Color = CS::Color;
 
     fn pixel(&self, p: Point) -> Option<Self::Color> {
-        if p.x < 0 || p.y < 0 || p.x >= self.size().width as i32 || p.y >= self.size().height as i32 {
+        if p.x < 0 || p.y < 0 || p.x >= self.size().width as i32 || p.y >= self.size().height as i32
+        {
             return None;
         }
 
