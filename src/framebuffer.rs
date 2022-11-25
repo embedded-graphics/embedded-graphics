@@ -5,7 +5,10 @@ use core::{convert::Infallible, marker::PhantomData};
 use crate::{
     draw_target::DrawTarget,
     geometry::{OriginDimensions, Point, Size},
-    image::{arrangement::PixelArrangement, GetPixel, ImageRaw},
+    image::{
+        arrangement::{Horizontal, PixelArrangement},
+        GetPixel, ImageRaw,
+    },
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{
@@ -52,6 +55,7 @@ pub const fn buffer_size_bpp<DIR: PixelArrangement>(
 /// use embedded_graphics::{
 ///     framebuffer,
 ///     framebuffer::{Framebuffer, buffer_size},
+///     image::arrangement::Horizontal,
 ///     pixelcolor::{Rgb565, raw::storage::LittleEndian},
 ///     prelude::*,
 ///     primitives::PrimitiveStyle,
@@ -65,7 +69,13 @@ pub const fn buffer_size_bpp<DIR: PixelArrangement>(
 ///     .unwrap();
 /// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct Framebuffer<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> {
+pub struct Framebuffer<
+    CS,
+    const WIDTH: usize,
+    const HEIGHT: usize,
+    const N: usize,
+    DIR = Horizontal,
+> {
     data: [u8; N],
     color_type: PhantomData<C>,
     raw_type: PhantomData<R>,
@@ -76,7 +86,7 @@ pub struct Framebuffer<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 where
     CS: ColorStorage,
     DIR: PixelArrangement,
@@ -115,7 +125,7 @@ where
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 where
     CS: ColorStorage,
     <<CS as ColorStorage>::Color as PixelColor>::Raw: Into<CS::Color>,
@@ -128,7 +138,7 @@ where
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
-    for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 where
     CS: ColorStorage,
     <<CS as ColorStorage>::Color as PixelColor>::Raw: Into<CS::Color>,
@@ -144,7 +154,7 @@ where
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 where
     CS: ColorStorage,
     CS::Color: Into<<CS::Color as PixelColor>::Raw>,
@@ -159,7 +169,7 @@ where
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> DrawTarget
-    for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 where
     CS: ColorStorage,
     CS::Color: Into<<CS::Color as PixelColor>::Raw>,
@@ -200,7 +210,7 @@ const fn shift_msb0(input: usize) -> usize {
 macro_rules! impl_bit {
     (@impl $raw_storage_type:ty, $raw_type:ty, $shifter:expr) => {
         impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<$raw_storage_type>
-            for Framebuffer<CS, DIR, WIDTH, HEIGHT, N> where DIR: PixelArrangement
+            for Framebuffer<CS, WIDTH, HEIGHT, N, DIR> where DIR: PixelArrangement
         {
             fn set_pixel_raw(&mut self, p: Point, r: $raw_type) {
                 if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
@@ -248,7 +258,7 @@ impl_bit!(RawU2);
 impl_bit!(RawU4);
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<RawU8>
-    for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 {
     fn set_pixel_raw(&mut self, p: Point, r: RawU8) {
         if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
@@ -263,7 +273,7 @@ impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelR
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    SetPixelRaw<LittleEndian<RawU8>> for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    SetPixelRaw<LittleEndian<RawU8>> for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 {
     fn set_pixel_raw(&mut self, p: Point, r: RawU8) {
         SetPixelRaw::<RawU8>::set_pixel_raw(self, p, r)
@@ -271,7 +281,7 @@ impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize>
 }
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<BigEndian<RawU8>>
-    for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 {
     fn set_pixel_raw(&mut self, p: Point, r: RawU8) {
         SetPixelRaw::<RawU8>::set_pixel_raw(self, p, r)
@@ -281,7 +291,7 @@ impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelR
 macro_rules! impl_bytes {
     ($raw_storage_type:ty, $to_bytes_fn:ident) => {
         impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-            SetPixelRaw<$raw_storage_type> for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+            SetPixelRaw<$raw_storage_type> for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
         {
             fn set_pixel_raw(&mut self, p: Point, r: <$raw_storage_type as RawStorage>::Raw) {
                 const BYTES_PER_PIXEL: usize =
@@ -313,7 +323,7 @@ impl_bytes!(RawU24);
 impl_bytes!(RawU32);
 
 impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDimensions
-    for Framebuffer<CS, DIR, WIDTH, HEIGHT, N>
+    for Framebuffer<CS, WIDTH, HEIGHT, N, DIR>
 {
     fn size(&self) -> Size {
         Size::new(WIDTH as u32, HEIGHT as u32)
@@ -359,7 +369,6 @@ mod tests {
     fn raw_u1_msb0() {
         let mut fb = Framebuffer::<
             Msb0<BinaryColor>,
-            Horizontal,
             9,
             2,
             { buffer_size::<BinaryColor, Horizontal>(9, 2) },
@@ -396,10 +405,10 @@ mod tests {
     fn raw_u1_lsb0_vertical() {
         let mut fb = Framebuffer::<
             Lsb0<BinaryColor>,
-            Vertical,
             9,
             9,
             { buffer_size::<BinaryColor, Vertical>(9, 9) },
+            Vertical,
         >::new();
 
         assert_eq!(buffer_size::<BinaryColor, Vertical>(9, 9), 18);
@@ -439,7 +448,6 @@ mod tests {
     fn raw_u1_lsb0() {
         let mut fb = Framebuffer::<
             Lsb0<BinaryColor>,
-            Horizontal,
             9,
             2,
             { buffer_size::<BinaryColor, Horizontal>(9, 2) },
@@ -473,13 +481,8 @@ mod tests {
 
     #[test]
     fn raw_u2_msb0() {
-        let mut fb = Framebuffer::<
-            Msb0<Gray2>,
-            Horizontal,
-            6,
-            4,
-            { buffer_size::<Gray2, Horizontal>(6, 4) },
-        >::new();
+        let mut fb =
+            Framebuffer::<Msb0<Gray2>, 6, 4, { buffer_size::<Gray2, Horizontal>(6, 4) }>::new();
 
         fb.draw_iter(
             [
@@ -510,13 +513,8 @@ mod tests {
 
     #[test]
     fn raw_u4_msb0() {
-        let mut fb = Framebuffer::<
-            Msb0<Gray4>,
-            Horizontal,
-            3,
-            2,
-            { buffer_size::<Gray4, Horizontal>(3, 2) },
-        >::new();
+        let mut fb =
+            Framebuffer::<Msb0<Gray4>, 3, 2, { buffer_size::<Gray4, Horizontal>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -545,13 +543,7 @@ mod tests {
 
     #[test]
     fn raw_u8() {
-        let mut fb = Framebuffer::<
-            Gray8,
-            Horizontal,
-            3,
-            2,
-            { buffer_size::<Gray8, Horizontal>(3, 2) },
-        >::new();
+        let mut fb = Framebuffer::<Gray8, 3, 2, { buffer_size::<Gray8, Horizontal>(3, 2) }>::new();
 
         fb.draw_iter(
             [
@@ -582,7 +574,6 @@ mod tests {
     fn raw_u16_le() {
         let mut fb = Framebuffer::<
             LittleEndian<Rgb565>,
-            Horizontal,
             3,
             2,
             { buffer_size::<Rgb565, Horizontal>(3, 2) },
@@ -617,7 +608,6 @@ mod tests {
     fn raw_u16_be() {
         let mut fb = Framebuffer::<
             BigEndian<Rgb565>,
-            Horizontal,
             3,
             2,
             { buffer_size::<Rgb565, Horizontal>(3, 2) },
@@ -652,7 +642,6 @@ mod tests {
     fn raw_u24_le() {
         let mut fb = Framebuffer::<
             LittleEndian<Rgb888>,
-            Horizontal,
             3,
             2,
             { buffer_size::<Rgb888, Horizontal>(3, 2) },
@@ -687,7 +676,6 @@ mod tests {
     fn raw_u24_be() {
         let mut fb = Framebuffer::<
             BigEndian<Rgb888>,
-            Horizontal,
             3,
             2,
             { buffer_size::<Rgb888, Horizontal>(3, 2) },
@@ -722,7 +710,6 @@ mod tests {
     fn raw_u32_le() {
         let mut fb = Framebuffer::<
             LittleEndian<U32Color>,
-            Horizontal,
             3,
             2,
             { buffer_size::<U32Color, Horizontal>(3, 2) },
@@ -757,7 +744,6 @@ mod tests {
     fn raw_u32_be() {
         let mut fb = Framebuffer::<
             BigEndian<U32Color>,
-            Horizontal,
             3,
             2,
             { buffer_size::<U32Color, Horizontal>(3, 2) },
@@ -792,7 +778,6 @@ mod tests {
     fn as_image() {
         let mut fb = Framebuffer::<
             Msb0<BinaryColor>,
-            Horizontal,
             10,
             10,
             { buffer_size::<BinaryColor, Horizontal>(10, 10) },
@@ -834,7 +819,6 @@ mod tests {
     fn pixel() {
         let mut fb = Framebuffer::<
             Msb0<BinaryColor>,
-            Horizontal,
             10,
             10,
             { buffer_size::<BinaryColor, Horizontal>(10, 10) },
@@ -868,7 +852,7 @@ mod tests {
         // This tests only checks that the set_pixel methods are present for all BPPs.
         // The correct function is tested indirectly in the DrawTarget tests.
 
-        type Fb<CS> = Framebuffer<CS, Horizontal, 10, 10, 1000>;
+        type Fb<CS> = Framebuffer<CS, 10, 10, 1000>;
 
         Fb::<Msb0<BinaryColor>>::new().set_pixel(Point::zero(), BinaryColor::On);
         Fb::<Lsb0<BinaryColor>>::new().set_pixel(Point::zero(), BinaryColor::On);
@@ -891,7 +875,6 @@ mod tests {
     fn oversized_buffer() {
         let fb = Framebuffer::<
             Msb0<BinaryColor>,
-            Horizontal,
             10,
             5,
             { buffer_size::<BinaryColor, Horizontal>(10, 5) * 3 / 2 },

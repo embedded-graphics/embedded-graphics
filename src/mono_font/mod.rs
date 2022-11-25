@@ -311,10 +311,10 @@ pub(crate) mod tests {
 
     fn new_framebuffer() -> Framebuffer<
         Msb0<BinaryColor>,
-        Vertical,
         96,
         200,
         { buffer_size::<BinaryColor, Vertical>(96, 200) },
+        Vertical,
     > {
         Framebuffer::new()
     }
