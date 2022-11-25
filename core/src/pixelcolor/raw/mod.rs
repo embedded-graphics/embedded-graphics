@@ -173,7 +173,7 @@ macro_rules! impl_raw_data {
             /// The LSB0 bit mask of this color type.
             ///
             /// ```rust
-            /// use embedded_graphics::pixelcolor::Raw;
+            /// use embedded_graphics::pixelcolor::raw::RawU4;
             ///
             /// assert_eq!(RawU4::BIT_MASK, 0b0000_1111);
             /// ```
