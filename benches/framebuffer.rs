@@ -2,6 +2,7 @@ use criterion::*;
 use embedded_graphics::{
     framebuffer::{buffer_size, Framebuffer},
     geometry::Point,
+    image::arrangement::{Horizontal, Vertical},
     image::GetPixel,
     pixelcolor::{
         raw::storage::{LittleEndian, Lsb0},
@@ -13,13 +14,13 @@ use embedded_graphics::{
 
 fn framebuffer_set_1bpp(c: &mut Criterion) {
     c.bench_function("framebuffer set pixel 1bpp", |b| {
-        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor>(9, 2) }>::new();
+        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor, Horizontal>(9, 2) }>::new();
 
         let mut fb = Framebuffer::<
             Lsb0<BinaryColor>,
             320,
             240,
-            { buffer_size::<BinaryColor>(320, 240) },
+            { buffer_size::<BinaryColor, Horizontal>(320, 240) },
         >::new();
 
         b.iter(|| {
@@ -31,13 +32,32 @@ fn framebuffer_set_1bpp(c: &mut Criterion) {
 
 fn framebuffer_set_1bpp_lsb0(c: &mut Criterion) {
     c.bench_function("framebuffer set pixel 1bpp lsb0", |b| {
-        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor>(9, 2) }>::new();
+        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor, Horizontal>(9, 2) }>::new();
 
         let mut fb = Framebuffer::<
             Lsb0<BinaryColor>,
             320,
             240,
-            { buffer_size::<BinaryColor>(320, 240) },
+            { buffer_size::<BinaryColor, Horizontal>(320, 240) },
+        >::new();
+
+        b.iter(|| {
+            fb.set_pixel(Point::new(1, 1), BinaryColor::On);
+            fb.set_pixel(Point::new(300, 200), BinaryColor::On);
+        })
+    });
+}
+
+fn framebuffer_set_1bpp_lsb0_vertical(c: &mut Criterion) {
+    c.bench_function("framebuffer set pixel 1bpp lsb0 vertical", |b| {
+        Framebuffer::<Lsb0<BinaryColor>, 9, 2, { buffer_size::<BinaryColor, Horizontal>(9, 2) }>::new();
+
+        let mut fb = Framebuffer::<
+            Lsb0<BinaryColor>,
+            320,
+            240,
+            { buffer_size::<BinaryColor, Vertical>(320, 240) },
+            Vertical,
         >::new();
 
         b.iter(|| {
@@ -53,7 +73,7 @@ fn framebuffer_get_1bpp(c: &mut Criterion) {
             Lsb0<BinaryColor>,
             320,
             240,
-            { buffer_size::<BinaryColor>(320, 240) },
+            { buffer_size::<BinaryColor, Horizontal>(320, 240) },
         >::new();
 
         b.iter(|| {
@@ -69,7 +89,7 @@ fn framebuffer_1bpp_draw_iter(c: &mut Criterion) {
             Lsb0<BinaryColor>,
             320,
             240,
-            { buffer_size::<BinaryColor>(320, 240) },
+            { buffer_size::<BinaryColor, Horizontal>(320, 240) },
         >::new();
 
         b.iter(|| {
@@ -88,7 +108,7 @@ fn framebuffer_set_rgb565(c: &mut Criterion) {
             LittleEndian<Rgb565>,
             320,
             240,
-            { buffer_size::<Rgb565>(320, 240) },
+            { buffer_size::<Rgb565, Horizontal>(320, 240) },
         >::new();
 
         b.iter(|| {
@@ -100,9 +120,12 @@ fn framebuffer_set_rgb565(c: &mut Criterion) {
 
 fn framebuffer_get_rgb565(c: &mut Criterion) {
     c.bench_function("framebuffer get pixel rgb565", |b| {
-        let fb =
-            Framebuffer::<LittleEndian<Rgb565>, 320, 240, { buffer_size::<Rgb565>(320, 240) }>::new(
-            );
+        let fb = Framebuffer::<
+            LittleEndian<Rgb565>,
+            320,
+            240,
+            { buffer_size::<Rgb565, Horizontal>(320, 240) },
+        >::new();
 
         b.iter(|| {
             fb.pixel(Point::new(1, 1));
@@ -118,6 +141,7 @@ criterion_group!(
     framebuffer_get_1bpp,
     framebuffer_set_rgb565,
     framebuffer_get_rgb565,
-    framebuffer_1bpp_draw_iter
+    framebuffer_1bpp_draw_iter,
+    framebuffer_set_1bpp_lsb0_vertical,
 );
 criterion_main!(framebuffer);
