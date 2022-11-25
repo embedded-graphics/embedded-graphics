@@ -20,19 +20,18 @@ consuming application to use far less RAM at little to no performance penalty.
 
 It contains built in items that make it easy to draw 2D graphics primitives:
 
-* [Raw data images]
 * [Primitives]
-    * [Lines]
-    * [Rectangles (and squares)]
+    * [Arcs]
     * [Circles]
     * [Ellipses]
-    * [Arcs]
+    * [Lines]
+    * [Polylines]
+    * [Rectangles]
+    * [Rounded rectangles]
     * [Sectors]
     * [Triangles]
-    * [Polylines]
-    * [Rounded rectangles]
-* [Text]
-* [Monospaced fonts]
+* [Images] with built in support for [Raw data images]
+* [Text] with built in support for [Monospaced fonts]
 
 ## Additional functions provided by external crates
 
@@ -236,9 +235,10 @@ Additional examples can be found in the [examples](https://github.com/embedded-g
 [`Point`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Point.html
 [`Size`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/geometry/struct.Size.html
 [Raw data images]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.ImageRaw.html
+[Images]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/index.html
 [Primitives]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html
 [Lines]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/line/struct.Line.html
-[Rectangles (and squares)]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html
+[Rectangles]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/rectangle/struct.Rectangle.html
 [Circles]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/circle/struct.Circle.html
 [Ellipses]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/ellipse/struct.Ellipse.html
 [Arcs]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/arc/struct.Arc.html
