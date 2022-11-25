@@ -205,22 +205,26 @@ macro_rules! impl_bit {
             fn set_pixel_raw(&mut self, p: Point, r: $raw_type) {
                 if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
                     if x < WIDTH && y < HEIGHT {
-                      let (bit_index, byte_index) =  if DIR::IS_HORIZONTAL {
-                            let pixels_per_bit = 8 / <$raw_type>::BITS_PER_PIXEL;
-                            let bits_per_row = WIDTH * <$raw_type>::BITS_PER_PIXEL;
-                            let bytes_per_row = (bits_per_row + 7) / 8;
-                            let byte_index = bytes_per_row * y + (x / pixels_per_bit);
-                            let bit_index = 8 - (x % pixels_per_bit + 1) * <$raw_type>::BITS_PER_PIXEL;
+                        let pixels_per_bit = 8 / <$raw_type>::BITS_PER_PIXEL;
 
-                            (bit_index, byte_index)
+                        // Major = byte direction, minor = perpendicular
+                        let (major, minor) = if DIR::IS_HORIZONTAL {
+                            (x, y)
                         } else {
-                            let y_start_byte = (y * <$raw_type>::BITS_PER_PIXEL) / 8;
-                            let y_start_bit = (y * <$raw_type>::BITS_PER_PIXEL) % 8;
-
-                            let byte_index = WIDTH * y_start_byte + x;
-
-                            (y_start_bit, byte_index)
+                            (y, x)
                         };
+
+                        let start_byte = (major * <$raw_type>::BITS_PER_PIXEL) / 8;
+
+                        let byte_index = if DIR::IS_HORIZONTAL {
+                            let bytes_per_row = (WIDTH * <$raw_type>::BITS_PER_PIXEL + 7) / 8;
+
+                            bytes_per_row * minor + start_byte
+                        } else {
+                            WIDTH * start_byte + minor
+                        };
+
+                        let bit_index = 8 - (major % pixels_per_bit + 1) * <$raw_type>::BITS_PER_PIXEL;
 
                         let shift = $shifter(bit_index);
                         let mask = !((<$raw_type>::BIT_MASK as u8) << shift);
