@@ -21,16 +21,27 @@ use crate::{
 ///
 /// This function is a workaround for current limitations in Rust const generics.
 /// It can be used to calculate the `N` parameter based on the size and color type of the framebuffer.
-pub const fn buffer_size<C: PixelColor>(width: usize, height: usize) -> usize {
-    buffer_size_bpp(width, height, C::Raw::BITS_PER_PIXEL)
+pub const fn buffer_size<C: PixelColor, DIR: PixelArrangement>(
+    width: usize,
+    height: usize,
+) -> usize {
+    buffer_size_bpp::<DIR>(width, height, C::Raw::BITS_PER_PIXEL)
 }
 
 /// Calculates the required buffer size.
 ///
 /// This function is a workaround for current limitations in Rust const generics. It can be used to
 /// calculate the `N` parameter based on the size and bit depth of the framebuffer.
-pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
-    (width * bpp + 7) / 8 * height
+pub const fn buffer_size_bpp<DIR: PixelArrangement>(
+    width: usize,
+    height: usize,
+    bpp: usize,
+) -> usize {
+    if DIR::IS_HORIZONTAL {
+        (width * bpp + 7) / 8 * height
+    } else {
+        (height * bpp + 7) / 8 * width
+    }
 }
 
 /// A framebuffer.
@@ -46,7 +57,7 @@ pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
 ///     primitives::PrimitiveStyle,
 /// };
 ///
-/// let mut fb = Framebuffer::<LittleEndian<Rgb565>, 320, 240, {buffer_size::<Rgb565>(320, 240)}>::new();
+/// let mut fb = Framebuffer::<LittleEndian<Rgb565>, 320, 240, {buffer_size::<Rgb565, Horizontal>(320, 240)}>::new();
 ///
 /// fb.bounding_box()
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
@@ -70,7 +81,7 @@ where
     CS: ColorStorage,
     DIR: PixelArrangement,
 {
-    const BUFFER_SIZE: usize = buffer_size::<CS::Color>(WIDTH, HEIGHT);
+    const BUFFER_SIZE: usize = buffer_size::<CS::Color, DIR>(WIDTH, HEIGHT);
 
     /// Static assertion that N is correct.
     // MSRV: remove N when constant generic expressions are stabilized
@@ -344,7 +355,7 @@ mod tests {
             Horizontal,
             9,
             2,
-            { buffer_size::<BinaryColor>(9, 2) },
+            { buffer_size::<BinaryColor, Horizontal>(9, 2) },
         >::new();
 
         use BinaryColor::{Off, On};
@@ -380,7 +391,7 @@ mod tests {
             Horizontal,
             9,
             2,
-            { buffer_size::<BinaryColor>(9, 2) },
+            { buffer_size::<BinaryColor, Horizontal>(9, 2) },
         >::new();
 
         use BinaryColor::{Off, On};
@@ -411,8 +422,13 @@ mod tests {
 
     #[test]
     fn raw_u2_msb0() {
-        let mut fb =
-            Framebuffer::<Msb0<Gray2>, Horizontal, 6, 4, { buffer_size::<Gray2>(6, 4) }>::new();
+        let mut fb = Framebuffer::<
+            Msb0<Gray2>,
+            Horizontal,
+            6,
+            4,
+            { buffer_size::<Gray2, Horizontal>(6, 4) },
+        >::new();
 
         fb.draw_iter(
             [
@@ -443,8 +459,13 @@ mod tests {
 
     #[test]
     fn raw_u4_msb0() {
-        let mut fb =
-            Framebuffer::<Msb0<Gray4>, Horizontal, 3, 2, { buffer_size::<Gray4>(3, 2) }>::new();
+        let mut fb = Framebuffer::<
+            Msb0<Gray4>,
+            Horizontal,
+            3,
+            2,
+            { buffer_size::<Gray4, Horizontal>(3, 2) },
+        >::new();
 
         fb.draw_iter(
             [
@@ -473,7 +494,13 @@ mod tests {
 
     #[test]
     fn raw_u8() {
-        let mut fb = Framebuffer::<Gray8, Horizontal, 3, 2, { buffer_size::<Gray8>(3, 2) }>::new();
+        let mut fb = Framebuffer::<
+            Gray8,
+            Horizontal,
+            3,
+            2,
+            { buffer_size::<Gray8, Horizontal>(3, 2) },
+        >::new();
 
         fb.draw_iter(
             [
@@ -507,7 +534,7 @@ mod tests {
             Horizontal,
             3,
             2,
-            { buffer_size::<Rgb565>(3, 2) },
+            { buffer_size::<Rgb565, Horizontal>(3, 2) },
         >::new();
 
         fb.draw_iter(
@@ -542,7 +569,7 @@ mod tests {
             Horizontal,
             3,
             2,
-            { buffer_size::<Rgb565>(3, 2) },
+            { buffer_size::<Rgb565, Horizontal>(3, 2) },
         >::new();
 
         fb.draw_iter(
@@ -577,7 +604,7 @@ mod tests {
             Horizontal,
             3,
             2,
-            { buffer_size::<Rgb888>(3, 2) },
+            { buffer_size::<Rgb888, Horizontal>(3, 2) },
         >::new();
 
         fb.draw_iter(
@@ -612,7 +639,7 @@ mod tests {
             Horizontal,
             3,
             2,
-            { buffer_size::<Rgb888>(3, 2) },
+            { buffer_size::<Rgb888, Horizontal>(3, 2) },
         >::new();
 
         fb.draw_iter(
@@ -647,7 +674,7 @@ mod tests {
             Horizontal,
             3,
             2,
-            { buffer_size::<U32Color>(3, 2) },
+            { buffer_size::<U32Color, Horizontal>(3, 2) },
         >::new();
 
         fb.draw_iter(
@@ -682,7 +709,7 @@ mod tests {
             Horizontal,
             3,
             2,
-            { buffer_size::<U32Color>(3, 2) },
+            { buffer_size::<U32Color, Horizontal>(3, 2) },
         >::new();
 
         fb.draw_iter(
@@ -717,7 +744,7 @@ mod tests {
             Horizontal,
             10,
             10,
-            { buffer_size::<BinaryColor>(10, 10) },
+            { buffer_size::<BinaryColor, Horizontal>(10, 10) },
         >::new();
 
         fb.bounding_box()
@@ -759,7 +786,7 @@ mod tests {
             Horizontal,
             10,
             10,
-            { buffer_size::<BinaryColor>(10, 10) },
+            { buffer_size::<BinaryColor, Horizontal>(10, 10) },
         >::new();
 
         fb.draw_iter(
@@ -816,7 +843,7 @@ mod tests {
             Horizontal,
             10,
             5,
-            { buffer_size::<BinaryColor>(10, 5) * 3 / 2 },
+            { buffer_size::<BinaryColor, Horizontal>(10, 5) * 3 / 2 },
         >::new();
 
         assert_eq!(fb.size(), Size::new(10, 5));
