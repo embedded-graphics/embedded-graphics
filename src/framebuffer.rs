@@ -5,10 +5,7 @@ use core::{convert::Infallible, marker::PhantomData};
 use crate::{
     draw_target::DrawTarget,
     geometry::{OriginDimensions, Point, Size},
-    image::{
-        arrangement::{Horizontal, PixelArrangement, Vertical},
-        GetPixel, ImageRaw,
-    },
+    image::{arrangement::PixelArrangement, GetPixel, ImageRaw},
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{
@@ -190,14 +187,14 @@ const fn shift_msb0(input: usize) -> usize {
 }
 
 macro_rules! impl_bit {
-    (@impl $raw_storage_type:ty, $raw_type:ty, $shifter:expr, $dir:ty) => {
-        impl<CS, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<$raw_storage_type>
-            for Framebuffer<CS, $dir, WIDTH, HEIGHT, N>
+    (@impl $raw_storage_type:ty, $raw_type:ty, $shifter:expr) => {
+        impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> SetPixelRaw<$raw_storage_type>
+            for Framebuffer<CS, DIR, WIDTH, HEIGHT, N> where DIR: PixelArrangement
         {
             fn set_pixel_raw(&mut self, p: Point, r: $raw_type) {
                 if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
                     if x < WIDTH && y < HEIGHT {
-                      let (bit_index, byte_index) =  if <$dir>::IS_HORIZONTAL {
+                      let (bit_index, byte_index) =  if DIR::IS_HORIZONTAL {
                             let pixels_per_bit = 8 / <$raw_type>::BITS_PER_PIXEL;
                             let bits_per_row = WIDTH * <$raw_type>::BITS_PER_PIXEL;
                             let bytes_per_row = (bits_per_row + 7) / 8;
@@ -210,7 +207,6 @@ macro_rules! impl_bit {
                             let y_start_bit = (y * <$raw_type>::BITS_PER_PIXEL) % 8;
 
                             let byte_index = WIDTH * y_start_byte + x;
-
 
                             (y_start_bit, byte_index)
                         };
@@ -227,10 +223,8 @@ macro_rules! impl_bit {
     };
 
     ($raw_type:ty) => {
-        impl_bit!(@impl Lsb0<$raw_type>, $raw_type, shift_lsb0, Horizontal);
-        impl_bit!(@impl Msb0<$raw_type>, $raw_type, shift_msb0, Horizontal);
-        impl_bit!(@impl Lsb0<$raw_type>, $raw_type, shift_lsb0, Vertical);
-        impl_bit!(@impl Msb0<$raw_type>, $raw_type, shift_msb0, Vertical);
+        impl_bit!(@impl Lsb0<$raw_type>, $raw_type, shift_lsb0);
+        impl_bit!(@impl Msb0<$raw_type>, $raw_type, shift_msb0);
     };
 }
 
@@ -313,16 +307,13 @@ impl<CS, DIR, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDim
 
 #[cfg(test)]
 mod tests {
-    use embedded_graphics_core::prelude::GrayColor;
-
     use super::*;
-
     use crate::{
         geometry::Dimensions,
         geometry::Point,
-        image::Image,
+        image::{arrangement::Horizontal, Image},
         mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb888, RgbColor},
+        pixelcolor::{BinaryColor, Gray2, Gray4, Gray8, GrayColor, Rgb565, Rgb888, RgbColor},
         primitives::{Primitive, PrimitiveStyle},
         Drawable,
     };
