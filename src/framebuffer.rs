@@ -322,7 +322,10 @@ mod tests {
     use crate::{
         geometry::Dimensions,
         geometry::Point,
-        image::{arrangement::Horizontal, Image},
+        image::{
+            arrangement::{Horizontal, Vertical},
+            Image,
+        },
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Gray2, Gray4, Gray8, GrayColor, Rgb565, Rgb888, RgbColor},
         primitives::{Primitive, PrimitiveStyle},
@@ -380,6 +383,50 @@ mod tests {
             &[
                 0b10000000, 0b00000000, //
                 0b00000000, 0b10000000, //
+            ]
+        );
+    }
+
+    // SSD1306 layout, 9x9 px framebuffer
+    #[test]
+    fn raw_u1_lsb0_vertical() {
+        let mut fb = Framebuffer::<
+            Lsb0<BinaryColor>,
+            Vertical,
+            9,
+            9,
+            { buffer_size::<BinaryColor, Vertical>(9, 9) },
+        >::new();
+
+        assert_eq!(buffer_size::<BinaryColor, Vertical>(9, 9), 18);
+
+        use BinaryColor::{Off, On};
+        fb.draw_iter(
+            [
+                ((0, 0), On),  //
+                ((2, 2), On),  //
+                ((8, 1), On),  //
+                ((1, 1), On),  //
+                ((1, 1), Off), //
+                ((-1, 0), On), //
+                ((0, -1), On), //
+                ((9, 0), On),  //
+                ((0, 2), On),  //
+                ((8, 8), On),  //
+                ((0, 8), On),  //
+                ((0, 9), On),  //
+            ]
+            .iter()
+            .map(|(p, c)| Pixel(Point::from(*p), *c)),
+        )
+        .unwrap();
+
+        #[rustfmt::skip]
+        assert_eq!(
+            fb.data(),
+            &[
+                0b0000_0101, 0b0000_0000, 0b0000_0100, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0010,
+                0b0000_0001, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0001,
             ]
         );
     }
