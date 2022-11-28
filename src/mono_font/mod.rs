@@ -98,6 +98,10 @@ pub struct MonoFont<'a> {
 impl MonoFont<'_> {
     /// Returns a subimage for a glyph.
     pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<BinaryColor>> {
+        if self.character_size.width == 0 || self.image.size().width < self.character_size.width {
+            return SubImage::new_unchecked(&self.image, Rectangle::zero());
+        }
+
         let glyphs_per_row = self.image.size().width / self.character_size.width;
 
         // Char _code_ offset from first char, most often a space
@@ -392,5 +396,77 @@ pub(crate) mod tests {
                 panic!("{}", message)
             }
         }
+    }
+
+    #[test]
+    fn zero_width_image() {
+        const ZERO_WIDTH: MonoFont = MonoFont {
+            image: ImageRaw::new(&[], 0),
+            character_size: Size::zero(),
+            character_spacing: 0,
+            baseline: 0,
+            strikethrough: DecorationDimensions::new(0, 0),
+            underline: DecorationDimensions::new(0, 0),
+            glyph_mapping: &mapping::ASCII,
+        };
+
+        let mut display = MockDisplay::new();
+        Text::new(
+            " ",
+            Point::new_equal(20),
+            MonoTextStyle::new(&ZERO_WIDTH, BinaryColor::On),
+        )
+        .draw(&mut display)
+        .unwrap();
+
+        display.assert_pattern(&[]);
+    }
+
+    #[test]
+    fn image_width_less_than_character_width() {
+        const NOT_WIDE_ENOUGH: MonoFont = MonoFont {
+            image: ImageRaw::new(&[0xAA, 0xAA], 4),
+            character_size: Size::new(5, 2),
+            character_spacing: 0,
+            baseline: 0,
+            strikethrough: DecorationDimensions::new(0, 0),
+            underline: DecorationDimensions::new(0, 0),
+            glyph_mapping: &mapping::ASCII,
+        };
+
+        let mut display = MockDisplay::new();
+        Text::new(
+            " ",
+            Point::new_equal(20),
+            MonoTextStyle::new(&NOT_WIDE_ENOUGH, BinaryColor::On),
+        )
+        .draw(&mut display)
+        .unwrap();
+
+        display.assert_pattern(&[]);
+    }
+
+    #[test]
+    fn image_height_less_than_character_height() {
+        const NOT_HIGH_ENOUGH: MonoFont = MonoFont {
+            image: ImageRaw::new(&[0xAA, 0xAA], 4),
+            character_size: Size::new(4, 1),
+            character_spacing: 0,
+            baseline: 0,
+            strikethrough: DecorationDimensions::new(0, 0),
+            underline: DecorationDimensions::new(0, 0),
+            glyph_mapping: &mapping::ASCII,
+        };
+
+        let mut display = MockDisplay::new();
+        Text::new(
+            " ",
+            Point::zero(),
+            MonoTextStyle::new(&NOT_HIGH_ENOUGH, BinaryColor::On),
+        )
+        .draw(&mut display)
+        .unwrap();
+
+        display.assert_pattern(&["# #"]);
     }
 }
