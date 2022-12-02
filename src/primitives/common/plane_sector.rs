@@ -69,8 +69,8 @@ impl PlaneSector {
         }
 
         Self {
-            half_plane_left: OriginLinearEquation::with_angle(angle_start),
-            half_plane_right: OriginLinearEquation::with_angle(angle_end),
+            half_plane_right: OriginLinearEquation::with_angle(angle_start),
+            half_plane_left: OriginLinearEquation::with_angle(angle_end),
             operation,
         }
     }
@@ -89,21 +89,23 @@ impl PlaneSector {
         inside_threshold: i32,
         outside_threshold: i32,
     ) -> Option<PointType> {
-        let distance_left = self.half_plane_left.distance(point);
         let distance_right = self.half_plane_right.distance(point);
+        let distance_left = self.half_plane_left.distance(point);
 
-        if !self.operation.execute(
-            distance_left > -outside_threshold,
-            distance_right < outside_threshold,
+        if self.operation.execute(
+            distance_right >= -outside_threshold,
+            distance_left <= outside_threshold,
         ) {
-            None
-        } else if !self.operation.execute(
-            distance_left >= inside_threshold,
-            distance_right <= -inside_threshold,
-        ) {
-            Some(PointType::Stroke)
+            if self.operation.execute(
+                distance_right >= inside_threshold,
+                distance_left <= -inside_threshold,
+            ) {
+                Some(PointType::Fill)
+            } else {
+                Some(PointType::Stroke)
+            }
         } else {
-            Some(PointType::Fill)
+            None
         }
     }
 }
@@ -120,13 +122,13 @@ mod tests {
     fn contains(plane_sector: &PlaneSector) -> [bool; 8] {
         [
             plane_sector.contains(Point::new(10, 0)),
-            plane_sector.contains(Point::new(10, -10)),
-            plane_sector.contains(Point::new(0, -10)),
-            plane_sector.contains(Point::new(-10, -10)),
-            plane_sector.contains(Point::new(-10, 0)),
-            plane_sector.contains(Point::new(-10, 10)),
-            plane_sector.contains(Point::new(0, 10)),
             plane_sector.contains(Point::new(10, 10)),
+            plane_sector.contains(Point::new(0, 10)),
+            plane_sector.contains(Point::new(-10, 10)),
+            plane_sector.contains(Point::new(-10, 0)),
+            plane_sector.contains(Point::new(-10, -10)),
+            plane_sector.contains(Point::new(0, -10)),
+            plane_sector.contains(Point::new(10, -10)),
         ]
     }
 

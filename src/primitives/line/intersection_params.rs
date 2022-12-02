@@ -68,9 +68,9 @@ impl<'a> IntersectionParams<'a> {
     }
 
     /// Check whether two almost-colinear lines are intersecting in the wrong place due to numerical
-    /// innacuracies.
+    /// inaccuracies.
     pub fn nearly_colinear_has_error(&self) -> bool {
-        self.denominator.pow(2) < self.line1.delta().dot_product(self.line2.delta())
+        self.denominator.pow(2) < self.line1.delta().dot_product(self.line2.delta()).abs()
     }
 
     /// Compute the intersection point.
@@ -88,10 +88,10 @@ impl<'a> IntersectionParams<'a> {
             return Intersection::Colinear;
         }
 
-        let outer_side = if denominator > 0 {
-            LineSide::Right
-        } else {
+        let outer_side = if denominator < 0 {
             LineSide::Left
+        } else {
+            LineSide::Right
         };
 
         // If we got here, line segments intersect. Compute intersection point using method similar

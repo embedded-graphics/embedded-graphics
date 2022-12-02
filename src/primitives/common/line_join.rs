@@ -214,10 +214,7 @@ impl LineJoin {
             // Line segments overlap (degenerate)
             else {
                 Self {
-                    kind: match outer_side {
-                        LineSide::Left => JoinKind::Degenerate { outer_side },
-                        LineSide::Right => JoinKind::Degenerate { outer_side },
-                    },
+                    kind: JoinKind::Degenerate { outer_side },
                     first_edge_end: EdgeCorners {
                         left: first_edge_left.end,
                         right: first_edge_right.end,
