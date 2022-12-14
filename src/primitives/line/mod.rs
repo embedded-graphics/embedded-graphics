@@ -454,6 +454,15 @@ mod tests {
     }
 
     #[test]
+    fn extents() {
+        let line = Line::new(Point::new(10, 50), Point::new(10, 0));
+        let (l, r) = line.extents(11, StrokeOffset::None);
+
+        assert_eq!(l, line.translate(Point::new(-5, 0)));
+        assert_eq!(r, line.translate(Point::new(5, 0)));
+    }
+
+    #[test]
     fn extents_zero_thickness() {
         let line = Line::new(Point::new(10, 20), Point::new(20, 10));
 

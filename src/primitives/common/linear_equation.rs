@@ -60,8 +60,8 @@ impl LinearEquation {
         let distance = self.distance(point);
 
         match side {
-            LineSide::Right => distance <= 0,
-            LineSide::Left => distance >= 0,
+            LineSide::Left => distance <= 0,
+            LineSide::Right => distance >= 0,
         }
     }
 }
@@ -79,12 +79,13 @@ impl OriginLinearEquation {
         // FIXME: angle.tan() for 180.0 degrees isn't exactly 0 which causes problems when drawing
         //        a single quadrant. Is there a better solution to fix this?
         let normal_vector = if angle == Angle::from_degrees(180.0) {
-            Point::new(0, NORMAL_VECTOR_SCALE)
+            Point::new(0, -NORMAL_VECTOR_SCALE)
         } else {
-            -Point::new(
-                i32::from(angle.sin() * Real::from(NORMAL_VECTOR_SCALE)),
+            Point::new(
                 i32::from(angle.cos() * Real::from(NORMAL_VECTOR_SCALE)),
+                i32::from(angle.sin() * Real::from(NORMAL_VECTOR_SCALE)),
             )
+            .rotate_90()
         };
 
         Self { normal_vector }
@@ -93,15 +94,15 @@ impl OriginLinearEquation {
     /// Creates a new horizontal linear equation.
     pub const fn new_horizontal() -> Self {
         Self {
-            normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
+            normal_vector: Point::new(0, NORMAL_VECTOR_SCALE),
         }
     }
 
     /// Returns the distance between the line and a point.
     ///
     /// The scaling of the returned value depends on the length of the normal vector.
-    /// Positive values will be returned for points on the left side of the line and negative
-    /// values for points on the right.
+    /// Positive values will be returned for points on the right side of the line and negative
+    /// values for points on the left.
     pub fn distance(&self, point: Point) -> i32 {
         point.dot_product(self.normal_vector)
     }
@@ -113,8 +114,8 @@ impl OriginLinearEquation {
         let distance = self.distance(point);
 
         match side {
-            LineSide::Right => distance <= 0,
-            LineSide::Left => distance >= 0,
+            LineSide::Left => distance <= 0,
+            LineSide::Right => distance >= 0,
         }
     }
 }
@@ -129,7 +130,7 @@ mod tests {
         assert_eq!(
             LinearEquation::from_line(&Line::new(Point::zero(), Point::new(1, 0))),
             LinearEquation {
-                normal_vector: Point::new(0, -1),
+                normal_vector: Point::new(0, 1),
                 origin_distance: 0, // line goes through the origin
             }
         );
@@ -137,7 +138,7 @@ mod tests {
         assert_eq!(
             LinearEquation::from_line(&Line::new(Point::zero(), Point::new(0, 1))),
             LinearEquation {
-                normal_vector: Point::new(1, 0),
+                normal_vector: Point::new(-1, 0),
                 origin_distance: 0, // line goes through the origin
             }
         );
@@ -145,10 +146,10 @@ mod tests {
         assert_eq!(
             LinearEquation::from_line(&Line::new(Point::new(2, 3), Point::new(-2, 3))),
             LinearEquation {
-                normal_vector: Point::new(0, 4),
+                normal_vector: Point::new(0, -4),
                 // origin_distance = min. distance between line and origin * length of unit vector
                 //                 = 3 * 4
-                origin_distance: 12,
+                origin_distance: -12,
             }
         );
     }
@@ -158,7 +159,7 @@ mod tests {
         assert_eq!(
             OriginLinearEquation::with_angle(0.0.deg()),
             OriginLinearEquation {
-                normal_vector: Point::new(0, -NORMAL_VECTOR_SCALE),
+                normal_vector: Point::new(0, NORMAL_VECTOR_SCALE),
             }
         );
 
@@ -178,40 +179,138 @@ mod tests {
     }
 
     #[test]
-    fn check_side_horizontal() {
-        let line = OriginLinearEquation::with_angle(0.0.deg());
-        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
-        assert!(line.check_side(Point::new(1, 0), LineSide::Right));
-        assert!(!line.check_side(Point::new(-2, 1), LineSide::Left));
-        assert!(line.check_side(Point::new(3, 1), LineSide::Right));
-        assert!(line.check_side(Point::new(-4, -1), LineSide::Left));
-        assert!(!line.check_side(Point::new(5, -1), LineSide::Right));
+    fn check_side_horizontal_0deg() {
+        let eq1 = OriginLinearEquation::with_angle(0.0.deg());
+        let eq2 = LinearEquation::from_line(&Line::with_delta(Point::zero(), Point::new(10, 0)));
 
-        let line = OriginLinearEquation::with_angle(180.0.deg());
-        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
-        assert!(line.check_side(Point::new(1, 0), LineSide::Right));
-        assert!(line.check_side(Point::new(-2, 1), LineSide::Left));
-        assert!(!line.check_side(Point::new(3, 1), LineSide::Right));
-        assert!(!line.check_side(Point::new(-4, -1), LineSide::Left));
-        assert!(line.check_side(Point::new(5, -1), LineSide::Right));
+        use LineSide::*;
+        for (point, side, expected) in [
+            ((0, 0), Left, true),
+            ((1, 0), Right, true),
+            ((-2, 1), Left, false),
+            ((3, 1), Right, true),
+            ((-4, -1), Left, true),
+            ((5, -1), Right, false),
+        ]
+        .into_iter()
+        {
+            assert_eq!(
+                eq1.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+
+            assert_eq!(
+                eq2.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+        }
     }
 
     #[test]
-    fn check_side_vertical() {
-        let line = OriginLinearEquation::with_angle(90.0.deg());
-        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
-        assert!(line.check_side(Point::new(0, -1), LineSide::Right));
-        assert!(line.check_side(Point::new(-1, 2), LineSide::Left));
-        assert!(!line.check_side(Point::new(-1, -3), LineSide::Right));
-        assert!(!line.check_side(Point::new(1, 4), LineSide::Left));
-        assert!(line.check_side(Point::new(1, -5), LineSide::Right));
+    fn check_side_horizontal_180deg() {
+        let eq1 = OriginLinearEquation::with_angle(180.0.deg());
+        let eq2 = LinearEquation::from_line(&Line::with_delta(Point::zero(), Point::new(-10, 0)));
 
-        let line = OriginLinearEquation::with_angle(270.0.deg());
-        assert!(line.check_side(Point::new(0, 0), LineSide::Left));
-        assert!(line.check_side(Point::new(0, 1), LineSide::Right));
-        assert!(!line.check_side(Point::new(-1, -2), LineSide::Left));
-        assert!(line.check_side(Point::new(-1, 3), LineSide::Right));
-        assert!(line.check_side(Point::new(1, -4), LineSide::Left));
-        assert!(!line.check_side(Point::new(1, 5), LineSide::Right));
+        use LineSide::*;
+        for (point, side, expected) in [
+            ((0, 0), Left, true),
+            ((1, 0), Right, true),
+            ((-2, 1), Left, true),
+            ((3, 1), Right, false),
+            ((-4, -1), Left, false),
+            ((5, -1), Right, true),
+        ]
+        .into_iter()
+        {
+            assert_eq!(
+                eq1.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+
+            assert_eq!(
+                eq2.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+        }
+    }
+
+    #[test]
+    fn check_side_vertical_90deg() {
+        let eq1 = OriginLinearEquation::with_angle(90.0.deg());
+        let eq2 = LinearEquation::from_line(&Line::with_delta(Point::zero(), Point::new(0, 10)));
+
+        use LineSide::*;
+        for (point, side, expected) in [
+            ((0, 0), Left, true),
+            ((0, 1), Right, true),
+            ((-1, -2), Left, false),
+            ((-1, 3), Right, true),
+            ((1, -4), Left, true),
+            ((1, 5), Right, false),
+        ]
+        .into_iter()
+        {
+            assert_eq!(
+                eq1.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+
+            assert_eq!(
+                eq2.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+        }
+    }
+
+    #[test]
+    fn check_side_vertical_270deg() {
+        let eq1 = OriginLinearEquation::with_angle(270.0.deg());
+        let eq2 = LinearEquation::from_line(&Line::with_delta(Point::zero(), Point::new(0, -10)));
+
+        use LineSide::*;
+        for (point, side, expected) in [
+            ((0, 0), Left, true),
+            ((0, -1), Right, true),
+            ((-1, 2), Left, true),
+            ((-1, -3), Right, false),
+            ((1, 4), Left, false),
+            ((1, -5), Right, true),
+        ]
+        .into_iter()
+        {
+            assert_eq!(
+                eq1.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+
+            assert_eq!(
+                eq2.check_side(point.into(), side),
+                expected,
+                "{:?}, {:?}",
+                point,
+                side
+            );
+        }
     }
 }
