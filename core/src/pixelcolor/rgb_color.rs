@@ -1,6 +1,6 @@
 use crate::pixelcolor::{
     raw::{RawData, RawU16, RawU24},
-    PixelColor,
+    PixelColor, StorablePixelColor,
 };
 use core::fmt;
 
@@ -156,7 +156,9 @@ macro_rules! impl_rgb_color {
             const WHITE: Self = Self::new(Self::MAX_R, Self::MAX_G, Self::MAX_B);
         }
 
-        impl PixelColor for $type {
+        impl PixelColor for $type {}
+
+        impl StorablePixelColor for $type {
             type Raw = $data_type;
         }
 
@@ -240,7 +242,6 @@ rgb_color!(Bgr888, RawU24, u32, Bgr = (8, 8, 8));
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::IntoStorage;
 
     /// Convert color to integer and back again to test bit positions
     fn test_bpp16<C>(color: C, value: u16)

@@ -1,11 +1,9 @@
 //! Raw color types.
 //!
-//! This module contains structs to represent the raw data used to store color
-//! information. Colors that implement the [`PixelColor`] trait can use the
-//! associated [`Raw`] type to define their raw data representation.
-//!
-//! Specifying a [`Raw`] type for a [`PixelColor`] is required to use that color
-//! with the [`Image`] struct.
+//! This module contains structs to represent the raw data used to store color information. Colors
+//! can implement the [`StorablePixelColor`] trait define their raw data representation. Any color type
+//! that implements [`StorablePixelColor`] and [`From`] conversions from and to the associated [`Raw`]
+//! type can be used with raw images and framebuffers.
 //!
 //! # Converting colors to raw data
 //!
@@ -24,16 +22,16 @@
 //! assert_eq!(color.to_be_bytes(), [0x11, 0x22, 0x33]);
 //! ```
 //!
-//! # Implementing PixelColor with Raw support
+//! # Implementing a color type with raw support
 //!
-//! This example shows how to implement a new [`PixelColor`] that can be used
-//! with images.
+//! This example shows how to implement a new color type that can be used with images and
+//! framebuffers.
 //!
-//! The RGBI color type uses 4 bits per pixel, one for each color channel and
-//! an additional intensity bit.
+//! The RGBI color type uses 4 bits per pixel, one for each color channel and an additional
+//! intensity bit.
 //!
 //! ```rust
-//! use embedded_graphics::{image::ImageRaw, pixelcolor::raw::{RawU4, storage::Msb0}, prelude::*};
+//! use embedded_graphics::{image::ImageRaw, pixelcolor::raw::{RawU4, order::Msb0}, prelude::*};
 //!
 //! /// RGBI color
 //! #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -61,15 +59,24 @@
 //!     }
 //! }
 //!
-//! /// Implement `PixelColor` to associate a raw data type with the `RGBI` struct.
-//! impl PixelColor for RGBI {
+//! // Implement `PixelColor` to mark the `RGBI` as a embedded-graphics color.
+//! impl PixelColor for RGBI {}
+//!
+//! // Implement `StorablePixelColor` to associate a raw data type with the `RGBI` type.
+//! impl StorablePixelColor for RGBI {
 //!     type Raw = RawU4;
 //! }
 //!
-//! /// `From<RawU4>` is used by `Image` to construct RGBI colors.
+//! // Implement conversion form and to the raw data type, which is required by `PixelColorRaw`.
 //! impl From<RawU4> for RGBI {
 //!     fn from(data: RawU4) -> Self {
 //!         Self(data)
+//!     }
+//! }
+//!
+//! impl From<RGBI> for RawU4 {
+//!     fn from(color: RGBI) -> Self {
+//!         color.0
 //!     }
 //! }
 //!
@@ -81,16 +88,13 @@
 //! ];
 //!
 //! // Create new image with RGBI colors.
-//! let image_raw: ImageRaw<Msb0<RGBI>> = ImageRaw::new(IMAGE_DATA, 2);
+//! let image_raw = ImageRaw::<RGBI, Msb0>::new(IMAGE_DATA, Size::new(2, 2)).unwrap();
 //!
-//! // In a real application the image could now be drawn to a display:
-//! // display.draw(&image);
-//! #
 //! # use embedded_graphics::{mock_display::MockDisplay, image::Image};
 //! #
 //! # let mut display = MockDisplay::new();
-//! # Image::new(&image_raw, Point::zero()).draw(&mut display).unwrap();
-//! #
+//! // The image can now be drawn to any RGBI draw target.
+//! Image::new(&image_raw, Point::zero()).draw(&mut display)?;
 //! # let expected_pixels = [
 //! #     Pixel(Point::new(0, 0), RGBI::new(false, false, true, false)),
 //! #     Pixel(Point::new(1, 0), RGBI::new(false, true, false, false)),
@@ -103,18 +107,24 @@
 //! #
 //! # // assert_eq can't be used because ColorMapping isn't implemented for RGBI
 //! # assert!(display.eq(&expected_display));
+//! # Ok::<_, core::convert::Infallible>(())
 //! ```
+//! TODO: mention how RGBI could be drawn to a draw target with another color type
 //!
 //! [`PixelColor`]: super::PixelColor
-//! [`Raw`]: super::PixelColor::Raw
-//! [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
-//! [`into_storage`]: super::IntoStorage::into_storage
+//! [`StorablePixelColor`]: super::StorablePixelColor
+//! [`Raw`]: super::StorablePixelColor::Raw
+//! [`into_storage`]: super::StorablePixelColor::into_storage
 //! [`to_be_bytes`]: ToBytes::to_be_bytes
 
-pub mod storage;
+mod load_store;
+pub mod order;
 mod to_bytes;
 
+use order::DataOrder;
 pub use to_bytes::ToBytes;
+
+use crate::common::OutOfBoundsError;
 
 /// Trait implemented by all `RawUx` types.
 pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + ToBytes {
@@ -125,6 +135,9 @@ pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + 
 
     /// Bits per pixel.
     const BITS_PER_PIXEL: usize;
+
+    /// Bit mask.
+    const MASK: Self::Storage;
 
     /// Converts this raw data into the storage type.
     ///
@@ -138,27 +151,32 @@ pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + 
     /// the same integer type. If the width of the `RawData` type is less than
     /// 32 bits only the least significant bits are used.
     fn from_u32(value: u32) -> Self;
+
+    /// Loads raw data from a buffer.
+    ///
+    /// Returns `None` is the index is out of bounds.
+    fn load<O: DataOrder<Self>>(buffer: &[u8], index: usize) -> Option<Self>;
+
+    /// Stores the raw data into a buffer.
+    ///
+    /// Returns an error if the index is out of bounds.
+    fn store<O: DataOrder<Self>>(
+        self,
+        buffer: &mut [u8],
+        index: usize,
+    ) -> Result<(), OutOfBoundsError>;
 }
 
-/// Dummy implementation for `()`.
-///
-/// `()` can be used as [`PixelColor::Raw`] if raw data conversion isn't required.
-///
-/// [`PixelColor::Raw`]: super::PixelColor::Raw
-impl RawData for () {
-    type Storage = ();
+/// Trait implemented by `RawUx` types with x < 8.
+pub trait RawDataBits: RawData<Storage = u8> + private::Sealed {}
 
-    const BITS_PER_PIXEL: usize = 0;
-
-    fn into_inner(self) {}
-
-    fn from_u32(_value: u32) {}
-}
+/// Marker trait for `RawUx` types with x >= 8.
+pub trait RawDataBytes: RawData + private::Sealed {}
 
 impl private::Sealed for () {}
 
 macro_rules! impl_raw_data {
-    ($type:ident : $storage_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr, $doc:expr) => {
+    ($type:ident : $storage_type:ident, $bpp:expr, $bpp_str:expr, $doc:expr) => {
         #[doc = $bpp_str]
         #[doc = "per pixel raw data."]
         #[doc = ""]
@@ -170,21 +188,17 @@ macro_rules! impl_raw_data {
         pub struct $type($storage_type);
 
         impl $type {
-            /// The LSB0 bit mask of this color type.
-            ///
-            /// ```rust
-            /// use embedded_graphics::pixelcolor::raw::RawU4;
-            ///
-            /// assert_eq!(RawU4::BIT_MASK, 0b0000_1111);
-            /// ```
-            pub const BIT_MASK: usize = $mask;
-
             /// Creates a new color from the least significant
             #[doc = $bpp_str]
             /// of value.
             #[inline]
             pub const fn new(value: $storage_type) -> Self {
-                $type(value & $mask)
+                Self(value & <Self as RawData>::MASK)
+            }
+
+            #[allow(unused)]
+            pub(crate) const fn new_unmasked(value: $storage_type) -> Self {
+                Self(value)
             }
         }
 
@@ -192,7 +206,9 @@ macro_rules! impl_raw_data {
             type Storage = $storage_type;
 
             const BITS_PER_PIXEL: usize = $bpp;
+            const MASK: $storage_type = $storage_type::MAX >> ($storage_type::BITS - $bpp);
 
+            #[inline]
             fn into_inner(self) -> Self::Storage {
                 self.0
             }
@@ -200,6 +216,20 @@ macro_rules! impl_raw_data {
             fn from_u32(value: u32) -> Self {
                 #[allow(trivial_numeric_casts)]
                 Self::new(value as $storage_type)
+            }
+
+            #[inline]
+            fn load<O: DataOrder<Self>>(buffer: &[u8], index: usize) -> Option<Self> {
+                load_store::LoadStore::load::<O>(buffer, index)
+            }
+
+            #[inline]
+            fn store<O: DataOrder<Self>>(
+                self,
+                buffer: &mut [u8],
+                index: usize,
+            ) -> Result<(), OutOfBoundsError> {
+                load_store::LoadStore::store::<O>(self, buffer, index)
             }
         }
 
@@ -212,11 +242,10 @@ macro_rules! impl_raw_data {
 
         impl private::Sealed for $type {}
     };
-    ($type:ident : $storage_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr) => {
+    ($type:ident : $storage_type:ident, $bpp:expr, $bpp_str:expr) => {
         impl_raw_data!(
             $type: $storage_type,
             $bpp,
-            $mask,
             $bpp_str,
             concat!(
                 "`",
@@ -241,37 +270,27 @@ macro_rules! impl_raw_data {
     };
 }
 
-impl_raw_data!(RawU1: u8, 1, 0x01, "1 bit");
-impl_raw_data!(RawU2: u8, 2, 0x03, "2 bits");
-impl_raw_data!(RawU4: u8, 4, 0x0F, "4 bits");
-impl_raw_data!(RawU8: u8, 8, 0xFF, "8 bits");
-impl_raw_data!(RawU16: u16, 16, 0xFFFF, "16 bits");
-impl_raw_data!(RawU24: u32, 24, 0xFF_FFFF, "24 bits");
-impl_raw_data!(RawU32: u32, 32, 0xFFFF_FFFF, "32 bits");
-
-/// Raw data byte order.
-pub trait ByteOrder: private::Sealed {}
-
-/// Little endian byte order marker.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub enum LittleEndian {}
-
-impl ByteOrder for LittleEndian {}
-impl private::Sealed for LittleEndian {}
-
-/// Big endian byte order marker.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub enum BigEndian {}
-
-impl ByteOrder for BigEndian {}
-impl private::Sealed for BigEndian {}
+impl_raw_data!(RawU1: u8, 1, "1 bit");
+impl_raw_data!(RawU2: u8, 2, "2 bits");
+impl_raw_data!(RawU4: u8, 4, "4 bits");
+impl_raw_data!(RawU8: u8, 8, "8 bits");
+impl_raw_data!(RawU16: u16, 16, "16 bits");
+impl_raw_data!(RawU24: u32, 24, "24 bits");
+impl_raw_data!(RawU32: u32, 32, "32 bits");
 
 mod private {
     /// Sealed trait to prevent implementation of traits in other crates.
     pub trait Sealed {}
 }
+
+impl RawDataBits for RawU1 {}
+impl RawDataBits for RawU2 {}
+impl RawDataBits for RawU4 {}
+
+impl RawDataBytes for RawU8 {}
+impl RawDataBytes for RawU16 {}
+impl RawDataBytes for RawU24 {}
+impl RawDataBytes for RawU32 {}
 
 #[cfg(test)]
 mod tests {

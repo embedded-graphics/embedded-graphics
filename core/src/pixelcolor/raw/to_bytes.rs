@@ -1,6 +1,6 @@
 use crate::pixelcolor::{
     raw::{RawU1, RawU16, RawU2, RawU24, RawU32, RawU4, RawU8},
-    PixelColor,
+    StorablePixelColor,
 };
 
 /// Trait to convert colors into a byte array.
@@ -77,27 +77,8 @@ impl ToBytes for RawU24 {
     }
 }
 
-impl ToBytes for () {
-    type Bytes = [u8; 0];
-
-    fn to_be_bytes(self) -> Self::Bytes {
-        []
-    }
-
-    fn to_le_bytes(self) -> Self::Bytes {
-        []
-    }
-
-    fn to_ne_bytes(self) -> Self::Bytes {
-        []
-    }
-}
-
-impl<C> ToBytes for C
-where
-    C: PixelColor + Into<<C as PixelColor>::Raw>,
-{
-    type Bytes = <<C as PixelColor>::Raw as ToBytes>::Bytes;
+impl<C: StorablePixelColor> ToBytes for C {
+    type Bytes = <<C as StorablePixelColor>::Raw as ToBytes>::Bytes;
 
     fn to_le_bytes(self) -> Self::Bytes {
         self.into().to_le_bytes()

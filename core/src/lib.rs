@@ -84,6 +84,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(rustdoc::private_intra_doc_links)]
 
+pub mod common;
 pub mod draw_target;
 mod drawable;
 pub mod geometry;

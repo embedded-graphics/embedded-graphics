@@ -545,7 +545,11 @@ impl Rectangle {
         self.size.height == 0 || self.size.width == 0
     }
 
-    /// TODO: docs
+    /// Returns an iterator over all points in the rectangle.
+    /// 
+    /// The iterator starts in the top left corner and continues downwards. When the iterator
+    /// reaches the bottom edge of the rectangle it will continue with the top pixel of the next
+    /// column.
     pub fn points_vertical(&self) -> PointsVertical {
         PointsVertical::new(self)
     }

@@ -15,6 +15,10 @@
 - [#656](https://github.com/embedded-graphics/embedded-graphics/pull/656) Added `Rgb666` and `Bgr666` conversions.
 - [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `AnchorX`, `AnchorY`, `AnchorPoint::x`, `AnchorPoint::y` and `AnchorPoint::from_xy`.
 - [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `Rectangle::resized_width`, `Rectangle::resized_height`, `Rectangle::anchor_x` and `Rectangle::anchor_y`.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `common` module.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `Point::swap_xy` and `Size::swap_xy`.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `MASK`, 'load' and 'store' to the `RawData` trait.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `RawDataBits` and `RawDataBytes` marker traits.
 
 ### Changed
 
@@ -22,6 +26,8 @@
 - [#651](https://github.com/embedded-graphics/embedded-graphics/pull/651), [#652](https://github.com/embedded-graphics/embedded-graphics/pull/652) Improved performance of color conversions.
 - **(breaking)** [#663](https://github.com/embedded-graphics/embedded-graphics/pull/663) Upgraded Cargo dependencies to their latest versions.
 - **(breaking)** [#689](https://github.com/embedded-graphics/embedded-graphics/pull/689) Bump Minimum Supported Rust Version (MSRV) to 1.61.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Replaced `IntoStorage` trait and the `PixelColor::Raw` associated type with a new `StorablePixelColor`trait.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Moved `LittleEndian` and `BigEndian` into a new `pixelcolor::raw::order` module and added `Lsb0` and `Msb0` bit orders.
 
 ## [0.3.3] - 2021-09-09
 

@@ -23,11 +23,8 @@
 //!     Red,
 //! }
 //!
-//! /// The `Raw` can be is set to `()` because `EpdColor` doesn't need to be
-//! /// converted to raw data for the display and isn't stored in images.
-//! impl PixelColor for EpdColor {
-//!     type Raw = ();
-//! }
+//! /// Implement the `PixelColor` marker trait to make `EpdColor` usable as a color.
+//! impl PixelColor for EpdColor {}
 //!
 //! /// Mock EPD display.
 //! pub struct EpdDisplay {}
@@ -102,7 +99,13 @@ pub use web_colors::WebColors;
 /// See the [module-level documentation] for more details.
 ///
 /// [module-level documentation]: self
-pub trait PixelColor: Copy + PartialEq {
+pub trait PixelColor: Copy + PartialEq {}
+
+/// Storable pixel color.
+///
+/// A storable pixel color can be converted to and from a raw data type. All colors,
+/// that implement this trait, can be used with raw images and framebuffers.
+pub trait StorablePixelColor: PixelColor + From<Self::Raw> + Into<Self::Raw> {
     /// Raw data type.
     ///
     /// Specifies the raw storage type that can be used to represent this color.
@@ -111,45 +114,26 @@ pub trait PixelColor: Copy + PartialEq {
     ///
     /// [`raw` module documentation]: raw
     type Raw: RawData;
-}
 
-/// Convert a [`PixelColor`] into its underlying storage type
-///
-/// This trait provides the `into_storage` method for implementors of [`PixelColor`]. This method
-/// exposes the underlying storage value of a pixel color type.
-///
-/// # Examples
-///
-/// ## Get the `u16` representing an `Rgb565` color
-///
-/// This example converts an [`Rgb565`] color into its underlying `u16` representation.
-///
-/// ```rust
-/// use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
-///
-/// let color = Rgb565::new(0x1f, 0x00, 0x0a);
-///
-/// let raw = color.into_storage();
-///
-/// assert_eq!(raw, 0b11111_000000_01010u16);
-/// ```
-///
-pub trait IntoStorage {
-    /// The underlying storage type for the pixel color
-    type Storage;
-
-    /// Convert the `PixelColor` into its raw storage form
-    fn into_storage(self) -> Self::Storage;
-}
-
-impl<C> IntoStorage for C
-where
-    C: PixelColor,
-    C::Raw: From<C>,
-{
-    type Storage = <<C as PixelColor>::Raw as RawData>::Storage;
-
-    fn into_storage(self) -> Self::Storage {
-        C::Raw::from(self).into_inner()
+    /// Converts a color into its underlying storage type.
+    ///
+    /// # Examples
+    ///
+    /// ## Get the `u16` representing an `Rgb565` color
+    ///
+    /// This example converts an [`Rgb565`] color into its underlying `u16` representation.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
+    ///
+    /// let color = Rgb565::new(0x1f, 0x00, 0x0a);
+    ///
+    /// let raw = color.into_storage();
+    ///
+    /// assert_eq!(raw, 0b11111_000000_01010u16);
+    /// ```
+    ///
+    fn into_storage(self) -> <Self::Raw as RawData>::Storage {
+        self.into().into_inner()
     }
 }

@@ -282,6 +282,8 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(rustdoc::private_intra_doc_links)]
 
+pub mod array;
+pub mod common;
 pub mod draw_target;
 pub mod examples;
 pub mod framebuffer;

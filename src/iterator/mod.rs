@@ -2,7 +2,6 @@
 
 pub mod contiguous;
 pub mod pixel;
-pub mod raw;
 
 use crate::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle, Pixel,

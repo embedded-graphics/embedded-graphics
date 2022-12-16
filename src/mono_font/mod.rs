@@ -57,7 +57,7 @@ use crate::{
     geometry::{OriginDimensions, Point, Size},
     image::{ImageRaw, SubImage},
     mono_font::mapping::GlyphMapping,
-    pixelcolor::{raw::storage::Msb0, BinaryColor},
+    pixelcolor::{raw::order::Msb0, BinaryColor},
     primitives::Rectangle,
 };
 
@@ -66,10 +66,10 @@ use crate::{
 /// See the [module documentation] for more information about using fonts.
 ///
 /// [module documentation]: self
-#[derive(Clone, Copy)]
+#[derive(Clone)] //, Copy)] TODO: fix
 pub struct MonoFont<'a> {
     /// Raw image data containing the font.
-    pub image: ImageRaw<'a, Msb0<BinaryColor>>,
+    pub image: ImageRaw<'a, BinaryColor, Msb0>,
 
     /// Size of a single character in pixel.
     pub character_size: Size,
@@ -97,7 +97,7 @@ pub struct MonoFont<'a> {
 
 impl MonoFont<'_> {
     /// Returns a subimage for a glyph.
-    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<Msb0<BinaryColor>>> {
+    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<BinaryColor, Msb0>> {
         if self.character_size.width == 0 || self.image.size().width < self.character_size.width {
             return SubImage::new_unchecked(&self.image, Rectangle::zero());
         }
@@ -215,7 +215,7 @@ impl DecorationDimensions {
 }
 
 const NULL_FONT: MonoFont = MonoFont {
-    image: ImageRaw::new(&[], 1),
+    image: ImageRaw::new_const(&[], Size::zero()),
     character_size: Size::zero(),
     character_spacing: 0,
     baseline: 0,
@@ -229,13 +229,15 @@ pub(crate) mod tests {
     use arrayvec::ArrayString;
 
     use super::*;
+
     use crate::{
-        framebuffer::{buffer_size, Framebuffer},
+        common::{buffer_size, Horizontal},
+        framebuffer::{ArrayFramebuffer, Framebuffer},
         geometry::{Dimensions, Point},
-        image::{arrangement::Vertical, GetPixel, Image},
+        image::Image,
         mock_display::MockDisplay,
         mono_font::{mapping::Mapping, MonoTextStyleBuilder},
-        pixelcolor::BinaryColor,
+        pixelcolor::{raw::order::Msb0, BinaryColor},
         text::{Baseline, Text},
         Drawable,
     };
@@ -309,17 +311,7 @@ pub(crate) mod tests {
     {
     }
 
-    fn new_framebuffer() -> Framebuffer<
-        Msb0<BinaryColor>,
-        96,
-        200,
-        { buffer_size::<BinaryColor, Vertical>(96, 200) },
-        Vertical,
-    > {
-        Framebuffer::new()
-    }
-
-    fn dump_framebuffer<T: GetPixel<Color = BinaryColor> + Dimensions, const N: usize>(
+    fn dump_framebuffer<T: Framebuffer<Color = BinaryColor>, const N: usize>(
         framebuffer: &T,
         output: &mut ArrayString<N>,
     ) {
@@ -339,6 +331,13 @@ pub(crate) mod tests {
 
     #[test]
     fn draw_font_subsets() {
+        const FB_SIZE: Size = Size::new(96, 200);
+        type Framebuffer = ArrayFramebuffer<
+            { buffer_size::<BinaryColor, Horizontal>(FB_SIZE) },
+            BinaryColor,
+            Msb0,
+        >;
+
         let fonts = &[
             (Mapping::Ascii, ascii::FONT_6X13),
             (Mapping::Iso8859_1, iso_8859_1::FONT_6X13),
@@ -357,7 +356,7 @@ pub(crate) mod tests {
         ];
 
         for (mapping, font) in fonts {
-            let mut expected = new_framebuffer();
+            let mut expected = Framebuffer::new(FB_SIZE);
             Image::new(&font.image, Point::zero())
                 .draw(&mut expected)
                 .unwrap();
@@ -372,7 +371,7 @@ pub(crate) mod tests {
                 text.push(c);
             }
 
-            let mut output = new_framebuffer();
+            let mut output = Framebuffer::new(FB_SIZE);
             Text::with_baseline(
                 &text,
                 Point::zero(),
@@ -397,7 +396,7 @@ pub(crate) mod tests {
     #[test]
     fn zero_width_image() {
         const ZERO_WIDTH: MonoFont = MonoFont {
-            image: ImageRaw::new(&[], 0),
+            image: ImageRaw::new_const(&[], Size::new(0, 0)),
             character_size: Size::zero(),
             character_spacing: 0,
             baseline: 0,
@@ -421,7 +420,7 @@ pub(crate) mod tests {
     #[test]
     fn image_width_less_than_character_width() {
         const NOT_WIDE_ENOUGH: MonoFont = MonoFont {
-            image: ImageRaw::new(&[0xAA, 0xAA], 4),
+            image: ImageRaw::new_const(&[0xAA, 0xAA], Size::new(4, 2)),
             character_size: Size::new(5, 2),
             character_spacing: 0,
             baseline: 0,
@@ -445,7 +444,7 @@ pub(crate) mod tests {
     #[test]
     fn image_height_less_than_character_height() {
         const NOT_HIGH_ENOUGH: MonoFont = MonoFont {
-            image: ImageRaw::new(&[0xAA, 0xAA], 4),
+            image: ImageRaw::new_const(&[0xAA, 0xAA], Size::new(4, 2)),
             character_size: Size::new(4, 1),
             character_spacing: 0,
             baseline: 0,

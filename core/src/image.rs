@@ -1,9 +1,7 @@
 //! Image drawable.
 
 use crate::{
-    draw_target::DrawTarget,
-    geometry::{OriginDimensions, Point},
-    pixelcolor::PixelColor,
+    draw_target::DrawTarget, geometry::OriginDimensions, pixelcolor::PixelColor,
     primitives::Rectangle,
 };
 
@@ -56,15 +54,4 @@ pub trait ImageDrawable: OriginDimensions {
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
-}
-
-/// Pixel getter.
-pub trait GetPixel {
-    /// The color type.
-    type Color: PixelColor;
-
-    /// Gets the color of a pixel.
-    ///
-    /// Returns `None` if `p` is outside the bounding box.
-    fn pixel(&self, p: Point) -> Option<Self::Color>;
 }
