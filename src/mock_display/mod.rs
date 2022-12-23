@@ -185,6 +185,7 @@ mod color_mapping;
 mod fancy_panic;
 
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
     pixelcolor::{PixelColor, Rgb888, RgbColor},
@@ -697,11 +698,7 @@ where
     }
 }
 
-impl<C> DrawTarget for MockDisplay<C>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> DrawTarget for MockDisplay<C> {
     type Error = core::convert::Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -718,10 +715,11 @@ where
     }
 }
 
-impl<C> OriginDimensions for MockDisplay<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> ColorType for MockDisplay<C> {
+    type Color = C;
+}
+
+impl<C: PixelColor> OriginDimensions for MockDisplay<C> {
     fn size(&self) -> Size {
         DISPLAY_AREA.size
     }

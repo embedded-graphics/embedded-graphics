@@ -1,17 +1,17 @@
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Dimensions, Point, Size},
     primitives::Rectangle,
     text::{
         renderer::{TextMetrics, TextRenderer},
-        Alignment, Baseline, TextStyle,
+        Alignment, Baseline, TextStyle, TextStyleBuilder,
     },
     transform::Transform,
     Drawable,
 };
 use az::SaturatingAs;
 
-use super::TextStyleBuilder;
 /// Text drawable.
 ///
 /// A text drawable can be used to draw text to a draw target.
@@ -150,8 +150,11 @@ impl<S: TextRenderer> Text<'_, S> {
     }
 }
 
-impl<S: TextRenderer> Drawable for Text<'_, S> {
+impl<S: TextRenderer> ColorType for Text<'_, S> {
     type Color = S::Color;
+}
+
+impl<S: TextRenderer> Drawable for Text<'_, S> {
     type Output = Point;
 
     fn draw<D>(&self, target: &mut D) -> Result<Point, D::Error>

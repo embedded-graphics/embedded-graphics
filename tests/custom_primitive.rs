@@ -29,7 +29,6 @@ impl Dimensions for Square {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Square {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(
@@ -38,7 +37,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Square {
         target: &mut D,
     ) -> Result<Self::Output, D::Error>
     where
-        D: DrawTarget<Color = Self::Color>,
+        D: DrawTarget<Color = C>,
     {
         self.to_rectangle().draw_styled(style, target)
     }

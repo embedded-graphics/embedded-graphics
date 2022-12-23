@@ -546,7 +546,7 @@ impl Rectangle {
     }
 
     /// Returns an iterator over all points in the rectangle.
-    /// 
+    ///
     /// The iterator starts in the top left corner and continues downwards. When the iterator
     /// reaches the bottom edge of the rectangle it will continue with the top pixel of the next
     /// column.

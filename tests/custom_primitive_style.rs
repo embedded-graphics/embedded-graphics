@@ -1,4 +1,5 @@
 use embedded_graphics::{
+    common::ColorType,
     mock_display::MockDisplay,
     pixelcolor::Rgb888,
     prelude::*,
@@ -7,8 +8,11 @@ use embedded_graphics::{
 
 struct CheckerboardStyle<C>(C, C);
 
-impl<C: PixelColor> StyledDrawable<CheckerboardStyle<C>> for Rectangle {
+impl<C: PixelColor> ColorType for CheckerboardStyle<C> {
     type Color = C;
+}
+
+impl<C: PixelColor> StyledDrawable<CheckerboardStyle<C>> for Rectangle {
     type Output = ();
 
     fn draw_styled<D>(
@@ -17,7 +21,7 @@ impl<C: PixelColor> StyledDrawable<CheckerboardStyle<C>> for Rectangle {
         target: &mut D,
     ) -> Result<Self::Output, D::Error>
     where
-        D: DrawTarget<Color = Self::Color>,
+        D: DrawTarget<Color = C>,
     {
         target.fill_contiguous(
             self,

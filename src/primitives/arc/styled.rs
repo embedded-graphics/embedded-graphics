@@ -70,7 +70,6 @@ impl<C: PixelColor> Iterator for StyledPixelsIterator<C> {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Arc {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(

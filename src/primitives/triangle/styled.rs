@@ -81,7 +81,6 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Triangle {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Triangle {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(

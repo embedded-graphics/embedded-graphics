@@ -106,6 +106,7 @@ pub use image_raw::ImageRaw;
 pub use sub_image::SubImage;
 
 use crate::{
+    common::ColorType,
     draw_target::{DrawTarget, DrawTargetExt},
     geometry::{Dimensions, OriginDimensions, Point},
     primitives::Rectangle,
@@ -134,10 +135,7 @@ pub struct Image<'a, T> {
     offset: Point,
 }
 
-impl<'a, T> Image<'a, T>
-where
-    T: ImageDrawable,
-{
+impl<'a, T: ImageDrawable> Image<'a, T> {
     /// Creates a new `Image`.
     pub const fn new(image_drawable: &'a T, position: Point) -> Self {
         Self {
@@ -225,11 +223,11 @@ impl<T> Transform for Image<'_, T> {
     }
 }
 
-impl<'a, T> Drawable for Image<'a, T>
-where
-    T: ImageDrawable,
-{
+impl<'a, T: ImageDrawable> ColorType for Image<'a, T> {
     type Color = T::Color;
+}
+
+impl<'a, T: ImageDrawable> Drawable for Image<'a, T> {
     type Output = ();
 
     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
@@ -241,10 +239,7 @@ where
     }
 }
 
-impl<'a, T> Dimensions for Image<'a, T>
-where
-    T: OriginDimensions,
-{
+impl<'a, T: OriginDimensions> Dimensions for Image<'a, T> {
     fn bounding_box(&self) -> Rectangle {
         self.image_drawable.bounding_box().translate(self.offset)
     }

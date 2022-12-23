@@ -1,4 +1,5 @@
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Dimensions, Point},
     pixelcolor::PixelColor,
@@ -110,8 +111,11 @@ impl<T: StyledDimensions<S>, S> Dimensions for Styled<T, S> {
     }
 }
 
-impl<T: StyledDrawable<S>, S> Drawable for Styled<T, S> {
-    type Color = T::Color;
+impl<T: StyledDrawable<S>, S: ColorType> ColorType for Styled<T, S> {
+    type Color = S::Color;
+}
+
+impl<T: StyledDrawable<S>, S: ColorType> Drawable for Styled<T, S> {
     type Output = T::Output;
 
     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
@@ -138,16 +142,14 @@ impl<T: Transform, S: Clone> Transform for Styled<T, S> {
 }
 
 /// Styled drawable.
-pub trait StyledDrawable<S> {
-    /// Color type.
-    type Color: PixelColor;
+pub trait StyledDrawable<S: ColorType> {
     /// Output type.
     type Output;
 
     /// Draws the primitive using the given style.
     fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
     where
-        D: DrawTarget<Color = Self::Color>;
+        D: DrawTarget<Color = S::Color>;
 }
 
 /// Styled dimensions.

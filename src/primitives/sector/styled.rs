@@ -160,7 +160,6 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Sector {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Sector {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(

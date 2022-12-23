@@ -2,27 +2,33 @@
 
 use crate::{geometry::Point, pixelcolor::PixelColor};
 
+/// Trait to set the color type.
+pub trait ColorType {
+    /// The color type.
+    type Color: PixelColor;
+}
+
 /// Trait to get the color of a pixel.
-pub trait GetPixel<C: PixelColor> {
+pub trait GetPixel: ColorType {
     /// Gets the color of a pixel.
     ///
     /// Returns `None` if `point` is outside the bounding box.
-    fn pixel(&self, point: Point) -> Option<C>;
+    fn pixel(&self, point: Point) -> Option<Self::Color>;
 }
 
 /// Trait to set the color of a pixel.
-pub trait SetPixel<C: PixelColor> {
+pub trait SetPixel: ColorType {
     /// Tries to set the color of a pixel.
     ///
     /// Returns an error if the point is outside the bounding box.
-    fn try_set_pixel(&mut self, point: Point, color: C) -> Result<(), OutOfBoundsError>;
+    fn try_set_pixel(&mut self, point: Point, color: Self::Color) -> Result<(), OutOfBoundsError>;
 
     /// Sets the color of a pixel.
     ///
     /// Trying to set the color of a point outside the bounding box is a noop. Use [`Self::try_set_pixel`]
     /// if you need to detect if the point was out of bounds.
     #[inline]
-    fn set_pixel(&mut self, point: Point, color: C) {
+    fn set_pixel(&mut self, point: Point, color: Self::Color) {
         self.try_set_pixel(point, color).ok();
     }
 }

@@ -95,6 +95,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added pixel arrangement type parameter to `ImageRaw`.
 - **(breaking)** [#690](https://github.com/embedded-graphics/embedded-graphics/pull/690), [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Replaced `ImageRaw::new_binary` `const` helper method with `ImageRaw::new_const`.
 - **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Removed the `iterator::raw` module. Use types from the `array` module as a replacement.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Removed associated `Color` type from `DrawTarget`, `Drawable`, `StyledDrawable`, `ImageDrawable`, `CharacterStyle` and `TextRenderer`. Replaced by the new `ColorType` trait.
 
 ### Fixed
 

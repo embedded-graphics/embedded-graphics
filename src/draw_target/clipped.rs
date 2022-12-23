@@ -1,6 +1,6 @@
 use crate::{
-    draw_target::DrawTarget, geometry::Dimensions, iterator::contiguous::Cropped,
-    primitives::Rectangle, transform::Transform, Pixel,
+    common::ColorType, draw_target::DrawTarget, geometry::Dimensions,
+    iterator::contiguous::Cropped, primitives::Rectangle, transform::Transform, Pixel,
 };
 
 /// Clipped draw target.
@@ -10,18 +10,12 @@ use crate::{
 ///
 /// [`clipped`]: crate::draw_target::DrawTargetExt::clipped
 #[derive(Debug)]
-pub struct Clipped<'a, T>
-where
-    T: DrawTarget,
-{
+pub struct Clipped<'a, T: DrawTarget> {
     parent: &'a mut T,
     clip_area: Rectangle,
 }
 
-impl<'a, T> Clipped<'a, T>
-where
-    T: DrawTarget,
-{
+impl<'a, T: DrawTarget> Clipped<'a, T> {
     pub(super) fn new(parent: &'a mut T, clip_area: &Rectangle) -> Self {
         let clip_area = clip_area.intersection(&parent.bounding_box());
 
@@ -29,11 +23,7 @@ where
     }
 }
 
-impl<T> DrawTarget for Clipped<'_, T>
-where
-    T: DrawTarget,
-{
-    type Color = T::Color;
+impl<T: DrawTarget> DrawTarget for Clipped<'_, T> {
     type Error = T::Error;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -69,10 +59,11 @@ where
     }
 }
 
-impl<T> Dimensions for Clipped<'_, T>
-where
-    T: DrawTarget,
-{
+impl<T: DrawTarget> ColorType for Clipped<'_, T> {
+    type Color = T::Color;
+}
+
+impl<T: DrawTarget> Dimensions for Clipped<'_, T> {
     fn bounding_box(&self) -> Rectangle {
         self.clip_area
     }

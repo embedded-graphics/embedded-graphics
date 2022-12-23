@@ -1,4 +1,4 @@
-use crate::{pixelcolor::PixelColor, primitives::OffsetOutline};
+use crate::{common::ColorType, pixelcolor::PixelColor, primitives::OffsetOutline};
 use az::SaturatingAs;
 
 /// Style properties for primitives.
@@ -16,10 +16,7 @@ use az::SaturatingAs;
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 #[non_exhaustive]
-pub struct PrimitiveStyle<C>
-where
-    C: PixelColor,
-{
+pub struct PrimitiveStyle<C: PixelColor> {
     /// Fill color of the primitive.
     ///
     /// If `fill_color` is set to `None` no fill will be drawn.
@@ -44,10 +41,7 @@ where
     pub stroke_alignment: StrokeAlignment,
 }
 
-impl<C> PrimitiveStyle<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> PrimitiveStyle<C> {
     /// Creates a primitive style without fill and stroke.
     pub const fn new() -> Self {
         Self::const_default()
@@ -135,10 +129,11 @@ where
     }
 }
 
-impl<C> Default for PrimitiveStyle<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> ColorType for PrimitiveStyle<C> {
+    type Color = C;
+}
+
+impl<C: PixelColor> Default for PrimitiveStyle<C> {
     fn default() -> Self {
         Self::const_default()
     }
@@ -194,17 +189,11 @@ where
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct PrimitiveStyleBuilder<C>
-where
-    C: PixelColor,
-{
+pub struct PrimitiveStyleBuilder<C: PixelColor> {
     style: PrimitiveStyle<C>,
 }
 
-impl<C> PrimitiveStyleBuilder<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> PrimitiveStyleBuilder<C> {
     /// Creates a new primitive style builder.
     pub const fn new() -> Self {
         Self {
@@ -260,10 +249,7 @@ where
     }
 }
 
-impl<C> From<&PrimitiveStyle<C>> for PrimitiveStyleBuilder<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> From<&PrimitiveStyle<C>> for PrimitiveStyleBuilder<C> {
     fn from(style: &PrimitiveStyle<C>) -> Self {
         Self { style: *style }
     }

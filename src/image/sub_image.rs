@@ -1,4 +1,5 @@
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions},
     image::ImageDrawable,
@@ -38,28 +39,27 @@ where
     }
 }
 
+impl<T: ImageDrawable> ColorType for SubImage<'_, T> {
+    type Color = T::Color;
+}
+
 impl<T> OriginDimensions for SubImage<'_, T> {
     fn size(&self) -> crate::prelude::Size {
         self.area.size
     }
 }
 
-impl<'a, T> ImageDrawable for SubImage<'a, T>
-where
-    T: ImageDrawable,
-{
-    type Color = T::Color;
-
-    fn draw<DT>(&self, target: &mut DT) -> Result<(), DT::Error>
+impl<'a, T: ImageDrawable> ImageDrawable for SubImage<'a, T> {
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
-        DT: DrawTarget<Color = Self::Color>,
+        D: DrawTarget<Color = Self::Color>,
     {
         self.parent.draw_sub_image(target, &self.area)
     }
 
-    fn draw_sub_image<DT>(&self, target: &mut DT, area: &Rectangle) -> Result<(), DT::Error>
+    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
-        DT: DrawTarget<Color = Self::Color>,
+        D: DrawTarget<Color = Self::Color>,
     {
         let area = area.translate(self.area.top_left);
 
@@ -82,23 +82,25 @@ mod tests {
     }
 
     impl ImageDrawable for MockImageDrawable {
-        type Color = BinaryColor;
-
-        fn draw<DT>(&self, _target: &mut DT) -> Result<(), DT::Error>
+        fn draw<D>(&self, _target: &mut D) -> Result<(), D::Error>
         where
-            DT: DrawTarget<Color = BinaryColor>,
+            D: DrawTarget<Color = BinaryColor>,
         {
             panic!("draw shouldn't have been called on MockImageDrawable")
         }
 
-        fn draw_sub_image<DT>(&self, _target: &mut DT, area: &Rectangle) -> Result<(), DT::Error>
+        fn draw_sub_image<D>(&self, _target: &mut D, area: &Rectangle) -> Result<(), D::Error>
         where
-            DT: DrawTarget<Color = BinaryColor>,
+            D: DrawTarget<Color = BinaryColor>,
         {
             assert_eq!(area, &self.expected_area);
 
             Ok(())
         }
+    }
+
+    impl ColorType for MockImageDrawable {
+        type Color = BinaryColor;
     }
 
     impl OriginDimensions for MockImageDrawable {

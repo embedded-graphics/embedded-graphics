@@ -143,7 +143,6 @@ impl<'a, C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Polyline<'a> {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Polyline<'_> {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(

@@ -13,7 +13,7 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     common::{Horizontal, buffer_size},
+//!     common::{ColorType, Horizontal, buffer_size},
 //!     draw_target::DrawTarget,
 //!     framebuffer::{ArrayFramebuffer, Framebuffer},
 //!     pixelcolor::{raw::order::LittleEndian, Rgb565, RgbColor},
@@ -48,7 +48,6 @@
 //! }
 //!
 //! impl DrawTarget for Display {
-//!     type Color = Rgb565;
 //!     type Error = core::convert::Infallible;
 //!
 //!     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -59,6 +58,10 @@
 //!     }
 //!
 //!     // A real implementation should also forward the other draw target methods.
+//! }
+//!
+//! impl ColorType for Display {
+//!     type Color = Rgb565;
 //! }
 //!
 //! impl OriginDimensions for Display {
@@ -168,7 +171,8 @@
 //! ```
 
 use crate::{
-    common::PixelArrangement,
+    common::{GetPixel, PixelArrangement, SetPixel},
+    draw_target::DrawTarget,
     geometry::OriginDimensions,
     image::ImageRaw,
     pixelcolor::{raw::order::DataOrder, StorablePixelColor},
@@ -182,14 +186,13 @@ mod array;
 mod slice;
 
 pub use array::ArrayFramebuffer;
-use embedded_graphics_core::common::{GetPixel, SetPixel};
 pub use slice::SliceFramebuffer;
 
 /// Trait with functions common to all framebuffer implementation.
-// TODO: add DrawTarget trait bound?
-pub trait Framebuffer: OriginDimensions + GetPixel<Self::Color> + SetPixel<Self::Color> {
-    /// The color type.
-    type Color: StorablePixelColor;
+pub trait Framebuffer: OriginDimensions + GetPixel + SetPixel + DrawTarget
+where
+    Self::Color: StorablePixelColor,
+{
     /// The bit or byte order.
     type DataOrder: DataOrder<<Self::Color as StorablePixelColor>::Raw>;
     /// The pixel arrangement.

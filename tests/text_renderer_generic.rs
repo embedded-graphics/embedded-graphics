@@ -1,4 +1,5 @@
 use embedded_graphics::{
+    common::ColorType,
     mock_display::MockDisplay,
     pixelcolor::Rgb888,
     prelude::*,
@@ -12,9 +13,11 @@ use embedded_graphics::{
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct GenericTextStyle<C>(C);
 
-impl<C: PixelColor> TextRenderer for GenericTextStyle<C> {
+impl<C: PixelColor> ColorType for GenericTextStyle<C> {
     type Color = C;
+}
 
+impl<C: PixelColor> TextRenderer for GenericTextStyle<C> {
     fn draw_string<D>(
         &self,
         text: &str,

@@ -1,8 +1,7 @@
 //! Image drawable.
 
 use crate::{
-    draw_target::DrawTarget, geometry::OriginDimensions, pixelcolor::PixelColor,
-    primitives::Rectangle,
+    common::ColorType, draw_target::DrawTarget, geometry::OriginDimensions, primitives::Rectangle,
 };
 
 /// Image drawable.
@@ -20,10 +19,7 @@ use crate::{
 ///
 /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 /// [`OriginDimensions`]: crate::geometry::OriginDimensions
-pub trait ImageDrawable: OriginDimensions {
-    /// The color type.
-    type Color: PixelColor;
-
+pub trait ImageDrawable: ColorType + OriginDimensions {
     /// Draws the entire image to the target.
     ///
     /// This method shouldn't be called directly by user code. Use an [`Image`] object instead.

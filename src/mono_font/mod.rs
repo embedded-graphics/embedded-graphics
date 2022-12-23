@@ -233,7 +233,7 @@ pub(crate) mod tests {
     use crate::{
         common::{buffer_size, Horizontal},
         framebuffer::{ArrayFramebuffer, Framebuffer},
-        geometry::{Dimensions, Point},
+        geometry::Point,
         image::Image,
         mock_display::MockDisplay,
         mono_font::{mapping::Mapping, MonoTextStyleBuilder},

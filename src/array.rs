@@ -9,7 +9,7 @@
 use core::marker::PhantomData;
 
 use crate::{
-    common::OutOfBoundsError,
+    common::{ColorType, OutOfBoundsError},
     pixelcolor::{
         raw::{order::DataOrder, RawData},
         StorablePixelColor,
@@ -17,10 +17,10 @@ use crate::{
 };
 
 /// Common functions for pixel slices and arrays.
-pub trait PixelData {
-    /// The color type.
-    type Color: StorablePixelColor;
-
+pub trait PixelData: ColorType
+where
+    Self::Color: StorablePixelColor,
+{
     /// The data order.
     type Order: DataOrder<<Self::Color as StorablePixelColor>::Raw>;
 
@@ -49,7 +49,10 @@ pub trait PixelData {
 }
 
 /// Common functions for mutable pixel slices and arrays.
-pub trait PixelDataMut: PixelData {
+pub trait PixelDataMut: PixelData
+where
+    Self::Color: StorablePixelColor,
+{
     /// Returns a mutable slice of raw pixel data.
     fn data_mut(&mut self) -> &mut [u8];
 
@@ -113,10 +116,15 @@ impl<C: StorablePixelColor, O: DataOrder<C::Raw>, const N: usize> PixelArray<C, 
     }
 }
 
-impl<C: StorablePixelColor, O: DataOrder<C::Raw>, const N: usize> PixelData
+impl<C: StorablePixelColor, O: DataOrder<C::Raw>, const N: usize> ColorType
     for PixelArray<C, O, N>
 {
     type Color = C;
+}
+
+impl<C: StorablePixelColor, O: DataOrder<C::Raw>, const N: usize> PixelData
+    for PixelArray<C, O, N>
+{
     type Order = O;
 
     #[inline]
@@ -154,8 +162,11 @@ impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> PixelSlice<'a, C, O> {
     }
 }
 
-impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> PixelData for PixelSlice<'a, C, O> {
+impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> ColorType for PixelSlice<'a, C, O> {
     type Color = C;
+}
+
+impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> PixelData for PixelSlice<'a, C, O> {
     type Order = O;
 
     #[inline]
@@ -184,8 +195,11 @@ impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> PixelMutSlice<'a, C, O> {
     }
 }
 
-impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> PixelData for PixelMutSlice<'a, C, O> {
+impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> ColorType for PixelMutSlice<'a, C, O> {
     type Color = C;
+}
+
+impl<'a, C: StorablePixelColor, O: DataOrder<C::Raw>> PixelData for PixelMutSlice<'a, C, O> {
     type Order = O;
 
     #[inline]

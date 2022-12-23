@@ -12,6 +12,7 @@
 //!
 //! ```
 //! use embedded_graphics::{
+//!     common::ColorType,
 //!     geometry::Size, prelude::*, primitives::{Rectangle, PrimitiveStyle},
 //! };
 //!
@@ -30,7 +31,6 @@
 //! pub struct EpdDisplay {}
 //!
 //! impl DrawTarget for EpdDisplay {
-//!     type Color = EpdColor;
 //!     type Error = core::convert::Infallible;
 //!
 //!     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -47,6 +47,10 @@
 //!
 //!         Ok(())
 //!     }
+//! }
+//!
+//! impl ColorType for EpdDisplay {
+//!     type Color = EpdColor;
 //! }
 //!
 //! impl OriginDimensions for EpdDisplay {

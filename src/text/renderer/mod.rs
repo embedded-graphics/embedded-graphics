@@ -11,7 +11,7 @@
 //! [eg-seven-segment]: https://github.com/embedded-graphics/eg-seven-segment
 
 use crate::{
-    draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle,
+    common::ColorType, draw_target::DrawTarget, geometry::Point, primitives::Rectangle,
     text::Baseline,
 };
 
@@ -23,10 +23,7 @@ pub use character_style::CharacterStyle;
 ///
 /// The `TextRenderer` trait is used to integrate text renderers into embedded-graphics. Users should
 /// not call it directly and instead use the functions provided by the `Text` type.
-pub trait TextRenderer {
-    /// Color type.
-    type Color: PixelColor;
-
+pub trait TextRenderer: ColorType {
     /// Draws a string.
     ///
     /// The method returns the start position of the next character to allow chaining of multiple

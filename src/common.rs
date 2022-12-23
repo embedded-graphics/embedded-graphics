@@ -7,7 +7,7 @@ use crate::{
     pixelcolor::{raw::RawData, StorablePixelColor},
 };
 
-pub use embedded_graphics_core::common::{GetPixel, OutOfBoundsError, SetPixel};
+pub use embedded_graphics_core::common::{ColorType, GetPixel, OutOfBoundsError, SetPixel};
 
 /// Buffer error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

@@ -1,4 +1,4 @@
-use crate::{pixelcolor::PixelColor, text::DecorationColor};
+use crate::{common::ColorType, text::DecorationColor};
 
 /// Character style.
 ///
@@ -12,10 +12,7 @@ use crate::{pixelcolor::PixelColor, text::DecorationColor};
 /// Text renderers don't need to support all settings in this trait. All calls to unsupported
 /// setters should be ignored by the implementation. The trait provided empty default
 /// implementations for all setters.
-pub trait CharacterStyle: Clone {
-    /// The color type.
-    type Color: PixelColor;
-
+pub trait CharacterStyle: ColorType + Clone {
     /// Sets the text color.
     fn set_text_color(&mut self, _text_color: Option<Self::Color>) {}
 

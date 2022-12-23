@@ -3,8 +3,8 @@ use core::convert::Infallible;
 use crate::{
     array::{PixelData, PixelDataMut, PixelMutSlice},
     common::{
-        BufferDimensions, BufferError, GetPixel, Horizontal, OutOfBoundsError, PixelArrangement,
-        SetPixel,
+        BufferDimensions, BufferError, ColorType, GetPixel, Horizontal, OutOfBoundsError,
+        PixelArrangement, SetPixel,
     },
     draw_target::DrawTarget,
     framebuffer::Framebuffer,
@@ -43,7 +43,7 @@ where
     }
 
     /// Creates a new framebuffer with a custom stride.
-    /// 
+    ///
     /// Note that the stride is specified in pixels and not in bytes.
     ///
     /// Returns an error if the buffer size is insufficient for the given framebuffer dimensions.
@@ -55,13 +55,21 @@ where
     }
 }
 
-impl<'a, C, O, A> Framebuffer for SliceFramebuffer<'a, C, O, A>
+impl<'a, C, O, A> ColorType for SliceFramebuffer<'a, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
     type Color = C;
+}
+
+impl<'a, C, O, A> Framebuffer for SliceFramebuffer<'a, C, O, A>
+where
+    C: StorablePixelColor,
+    O: DataOrder<C::Raw>,
+    A: PixelArrangement,
+{
     type DataOrder = O;
     type PixelArrangement = A;
 
@@ -73,18 +81,18 @@ where
         self.data.data_mut()
     }
 
-    fn as_image(&self) -> ImageRaw<'_, Self::Color, Self::DataOrder, Self::PixelArrangement> {
+    fn as_image(&self) -> ImageRaw<'_, C, O, A> {
         ImageRaw::with_dimensions(&self.data(), self.dimensions)
     }
 }
 
-impl<'a, C, O, A> GetPixel<C> for SliceFramebuffer<'a, C, O, A>
+impl<'a, C, O, A> GetPixel for SliceFramebuffer<'a, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    fn pixel(&self, point: Point) -> Option<C> {
+    fn pixel(&self, point: Point) -> Option<Self::Color> {
         self.dimensions
             .index(point)
             .ok()
@@ -92,13 +100,13 @@ where
     }
 }
 
-impl<'a, C, O, A> SetPixel<C> for SliceFramebuffer<'a, C, O, A>
+impl<'a, C, O, A> SetPixel for SliceFramebuffer<'a, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    fn try_set_pixel(&mut self, point: Point, color: C) -> Result<(), OutOfBoundsError> {
+    fn try_set_pixel(&mut self, point: Point, color: Self::Color) -> Result<(), OutOfBoundsError> {
         self.dimensions
             .index(point)
             .map(|index| self.data.set(index, color))
@@ -111,7 +119,6 @@ where
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    type Color = C;
     type Error = Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>

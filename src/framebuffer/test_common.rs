@@ -13,9 +13,10 @@ use crate::{
     Pixel,
 };
 
-fn draw_points<F>(framebuffer: &mut F, points: &[((i32, i32), <F as Framebuffer>::Color)])
+fn draw_points<F>(framebuffer: &mut F, points: &[((i32, i32), F::Color)])
 where
-    F: Framebuffer + DrawTarget<Color = <F as Framebuffer>::Color>,
+    F: Framebuffer,
+    F::Color: StorablePixelColor,
     <F as DrawTarget>::Error: core::fmt::Debug,
 {
     framebuffer
@@ -31,7 +32,11 @@ where
         .unwrap();
 }
 
-fn check_bits<F: Framebuffer>(framebuffer: &F, expected_data: &mut [u8]) {
+fn check_bits<F>(framebuffer: &F, expected_data: &mut [u8])
+where
+    F: Framebuffer,
+    F::Color: StorablePixelColor,
+{
     // Reverse bits in expected data for LSB0 bit order.
     if F::DataOrder::ORDER == DataOrderEnum::Alternate {
         for byte in expected_data.iter_mut() {
@@ -66,7 +71,7 @@ pub trait FbTest {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug;
 }
 
@@ -78,7 +83,7 @@ impl FbTest for RawU1Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         use BinaryColor::{Off, On};
@@ -122,7 +127,7 @@ impl FbTest for RawU2Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         let g = Gray2::new;
@@ -160,7 +165,7 @@ impl FbTest for RawU4Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         let g = Gray4::new;
@@ -196,7 +201,7 @@ impl FbTest for RawU8Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         let g = Gray8::new;
@@ -232,7 +237,7 @@ impl FbTest for RawU16Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         let c = |c| Rgb565::from(RawU16::new(c));
@@ -275,7 +280,7 @@ impl FbTest for RawU24Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         let c = |c| Rgb888::from(RawU24::new(c));
@@ -317,7 +322,7 @@ impl FbTest for RawU32Test {
 
     fn test<F>(framebuffer: &mut F)
     where
-        F: Framebuffer<Color = Self::Color> + DrawTarget<Color = Self::Color>,
+        F: Framebuffer<Color = Self::Color>,
         <F as DrawTarget>::Error: core::fmt::Debug,
     {
         let c = |c| U32Color::from(RawU32::new(c));

@@ -28,6 +28,7 @@
 - **(breaking)** [#689](https://github.com/embedded-graphics/embedded-graphics/pull/689) Bump Minimum Supported Rust Version (MSRV) to 1.61.
 - **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Replaced `IntoStorage` trait and the `PixelColor::Raw` associated type with a new `StorablePixelColor`trait.
 - **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Moved `LittleEndian` and `BigEndian` into a new `pixelcolor::raw::order` module and added `Lsb0` and `Msb0` bit orders.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Removed associated `Color` type from `DrawTarget`, `Drawable`, `StyledDrawable`, `ImageDrawable`, `CharacterStyle` and `TextRenderer`. Replaced by the new `ColorType` trait.
 
 ## [0.3.3] - 2021-09-09
 

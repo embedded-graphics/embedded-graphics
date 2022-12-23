@@ -3,7 +3,8 @@ use core::marker::PhantomData;
 use crate::{
     array::{PixelData, PixelSlice},
     common::{
-        BufferDimensions, BufferError, GetPixel, Horizontal, PixelArrangement, PixelArrangementEnum,
+        BufferDimensions, BufferError, ColorType, GetPixel, Horizontal, PixelArrangement,
+        PixelArrangementEnum,
     },
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
@@ -217,8 +218,6 @@ where
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    type Color = C;
-
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
@@ -283,6 +282,15 @@ where
     }
 }
 
+impl<C, O, A> ColorType for ImageRaw<'_, C, O, A>
+where
+    C: StorablePixelColor,
+    O: DataOrder<C::Raw>,
+    A: PixelArrangement,
+{
+    type Color = C;
+}
+
 impl<C, O, A> OriginDimensions for ImageRaw<'_, C, O, A>
 where
     C: StorablePixelColor,
@@ -294,13 +302,13 @@ where
     }
 }
 
-impl<'a, C, O, A> GetPixel<C> for ImageRaw<'a, C, O, A>
+impl<'a, C, O, A> GetPixel for ImageRaw<'a, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    fn pixel(&self, p: Point) -> Option<C> {
+    fn pixel(&self, p: Point) -> Option<Self::Color> {
         self.dimensions
             .index(p)
             .ok()
@@ -427,7 +435,7 @@ mod tests {
     fn draw_image_get_pixel<'a, C, O, A>(image_raw: &ImageRaw<'a, C, O, A>) -> MockDisplay<C>
     where
         C: StorablePixelColor,
-        ImageRaw<'a, C, O, A>: GetPixel<C>,
+        ImageRaw<'a, C, O, A>: GetPixel + ColorType<Color = C>,
     {
         let mut display = MockDisplay::new();
         display

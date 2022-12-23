@@ -1,8 +1,8 @@
 //! A target for embedded-graphics drawing operations.
 
 use crate::{
+    common::ColorType,
     geometry::Dimensions,
-    pixelcolor::PixelColor,
     primitives::{PointsIter, Rectangle},
     Pixel,
 };
@@ -11,8 +11,9 @@ use crate::{
 ///
 /// The `DrawTarget` trait is used to add embedded-graphics support to a display
 /// driver or similar targets like framebuffers or image files.
-/// Targets are required to at least implement the [`draw_iter`] method and the [`Dimensions`]
-/// trait. All other methods provide default implementations which use these methods internally.
+/// Targets are required to at least implement the [`draw_iter`] method and the [`Dimensions`] and
+/// [`ColorType`] traits2. All other methods provide default implementations which use these methods
+/// internally.
 ///
 /// Because the default implementations cannot use features specific to the target hardware they
 /// can be overridden to improve performance. These target specific implementations might, for
@@ -27,7 +28,7 @@ use crate::{
 ///
 /// ## Minimum implementation
 ///
-/// In this example `DrawTarget` is implemented for an an imaginary 64px x 64px 8-bit grayscale display
+/// In this example `DrawTarget` is implemented for an imaginary 64px x 64px 8-bit grayscale display
 /// that is connected using a simplified SPI interface. Because the hardware doesn't support any
 /// acceleration only the [`draw_iter`] method and [`OriginDimensions`] trait need to be implemented.
 ///
@@ -42,6 +43,7 @@ use crate::{
 /// ```rust
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
+///     common::ColorType,
 ///     pixelcolor::{Gray8, GrayColor},
 ///     prelude::*,
 ///     primitives::{Circle, PrimitiveStyle},
@@ -77,7 +79,6 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget for ExampleDisplay {
-///     type Color = Gray8;
 ///     // `ExampleDisplay` uses a framebuffer and doesn't need to communicate with the display
 ///     // controller to draw pixel, which means that drawing operations can never fail. To reflect
 ///     // this the type `Infallible` was chosen as the `Error` type.
@@ -100,6 +101,10 @@ use crate::{
 ///
 ///         Ok(())
 ///     }
+/// }
+///
+/// impl ColorType for ExampleDisplay {
+///     type Color = Gray8;
 /// }
 ///
 /// impl OriginDimensions for ExampleDisplay {
@@ -140,6 +145,7 @@ use crate::{
 /// ```rust
 /// use core::convert::TryInto;
 /// use embedded_graphics::{
+///     common::ColorType,
 ///     pixelcolor::{raw::RawU16, Rgb565, RgbColor},
 ///     prelude::*,
 ///     primitives::{Circle, Rectangle, PrimitiveStyle, PrimitiveStyleBuilder},
@@ -180,7 +186,6 @@ use crate::{
 /// }
 ///
 /// impl DrawTarget for ExampleDisplay {
-///     type Color = Rgb565;
 ///     type Error = CommError;
 ///
 ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -235,6 +240,10 @@ use crate::{
 ///     }
 /// }
 ///
+/// impl ColorType for ExampleDisplay {
+///     type Color = Rgb565;
+/// }
+///
 /// impl OriginDimensions for ExampleDisplay {
 ///     fn size(&self) -> Size {
 ///         Size::new(64, 64)
@@ -278,10 +287,7 @@ use crate::{
 /// [`Dimensions`]: super::geometry::Dimensions
 /// [`OriginDimensions`]: super::geometry::OriginDimensions
 /// [`Error` type]: DrawTarget::Error
-pub trait DrawTarget: Dimensions {
-    /// The pixel color type the targetted display supports.
-    type Color: PixelColor;
-
+pub trait DrawTarget: ColorType + Dimensions {
     /// Error type to return when a drawing operation fails.
     ///
     /// This error is returned if an error occurred during a drawing operation. This mainly applies
@@ -334,6 +340,7 @@ pub trait DrawTarget: Dimensions {
     ///
     /// ```rust
     /// use embedded_graphics::{
+    ///     common::ColorType,
     ///     pixelcolor::{Gray8, GrayColor},
     ///     prelude::*,
     ///     primitives::{ContainsPoint, Rectangle},
@@ -342,7 +349,6 @@ pub trait DrawTarget: Dimensions {
     /// struct ExampleDisplay;
     ///
     /// impl DrawTarget for ExampleDisplay {
-    ///     type Color = Gray8;
     ///     type Error = core::convert::Infallible;
     ///
     ///     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -373,6 +379,10 @@ pub trait DrawTarget: Dimensions {
     ///             Ok(())
     ///         }
     ///     }
+    /// }
+
+    /// impl ColorType for ExampleDisplay {
+    ///     type Color = Gray8;
     /// }
     ///
     /// impl OriginDimensions for ExampleDisplay {

@@ -3,7 +3,7 @@ use core::convert::Infallible;
 use crate::{
     array::{PixelArray, PixelData, PixelDataMut},
     common::{
-        buffer_size, buffer_size_with_stride, BufferDimensions, GetPixel, Horizontal,
+        buffer_size, buffer_size_with_stride, BufferDimensions, ColorType, GetPixel, Horizontal,
         OutOfBoundsError, PixelArrangement, SetPixel,
     },
     draw_target::DrawTarget,
@@ -78,7 +78,7 @@ where
     }
 
     /// Creates a new framebuffer with a custom stride.
-    /// 
+    ///
     /// Note that the stride is specified in pixels and not in bytes.
     ///
     /// # Panics
@@ -99,13 +99,21 @@ where
     }
 }
 
-impl<const N: usize, C, O, A> Framebuffer for ArrayFramebuffer<N, C, O, A>
+impl<const N: usize, C, O, A> ColorType for ArrayFramebuffer<N, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
     type Color = C;
+}
+
+impl<const N: usize, C, O, A> Framebuffer for ArrayFramebuffer<N, C, O, A>
+where
+    C: StorablePixelColor,
+    O: DataOrder<C::Raw>,
+    A: PixelArrangement,
+{
     type DataOrder = O;
     type PixelArrangement = A;
 
@@ -117,18 +125,18 @@ where
         self.data.data_mut()
     }
 
-    fn as_image(&self) -> ImageRaw<'_, Self::Color, Self::DataOrder, Self::PixelArrangement> {
+    fn as_image(&self) -> ImageRaw<'_, C, O, A> {
         ImageRaw::with_dimensions(&self.data(), self.dimensions)
     }
 }
 
-impl<const N: usize, C, O, A> GetPixel<C> for ArrayFramebuffer<N, C, O, A>
+impl<const N: usize, C, O, A> GetPixel for ArrayFramebuffer<N, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    fn pixel(&self, point: Point) -> Option<C> {
+    fn pixel(&self, point: Point) -> Option<Self::Color> {
         self.dimensions
             .index(point)
             .ok()
@@ -136,13 +144,13 @@ where
     }
 }
 
-impl<const N: usize, C, O, A> SetPixel<C> for ArrayFramebuffer<N, C, O, A>
+impl<const N: usize, C, O, A> SetPixel for ArrayFramebuffer<N, C, O, A>
 where
     C: StorablePixelColor,
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    fn try_set_pixel(&mut self, point: Point, color: C) -> Result<(), OutOfBoundsError> {
+    fn try_set_pixel(&mut self, point: Point, color: Self::Color) -> Result<(), OutOfBoundsError> {
         self.dimensions
             .index(point)
             .map(|index| self.data.set(index, color))
@@ -155,7 +163,6 @@ where
     O: DataOrder<C::Raw>,
     A: PixelArrangement,
 {
-    type Color = C;
     type Error = Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
