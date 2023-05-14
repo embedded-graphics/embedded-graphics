@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.0] - 2023-05-14
+
 ### Added
 
 - [#612](https://github.com/embedded-graphics/embedded-graphics/pull/612), [#699](https://github.com/embedded-graphics/embedded-graphics/pull/699) Added `GetPixel` trait.
@@ -80,7 +82,8 @@
 - [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.3...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.4.0...HEAD
+[0.4.0]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.3...embedded-graphics-core-v0.4.0
 [0.3.3]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.2...embedded-graphics-core-v0.3.3
 [0.3.2]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.1...embedded-graphics-core-v0.3.2
 [0.3.1]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.0...embedded-graphics-core-v0.3.1
