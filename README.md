@@ -128,7 +128,8 @@ calculation.
 
 * `defmt` - provide implementations of `defmt::Format` for all types where possible. [`defmt`]
   is a library for logging that moves as much work as possible over to a separate logging
-  machine, making it especially suited to low-resource MCUs.
+  machine, making it especially suited to low-resource MCUs. Note that `defmt` might not work with
+  older versions of rustc that are otherwise supported by embedded-graphics.
 
 ## Migrating from older versions
 

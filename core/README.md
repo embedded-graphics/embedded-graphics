@@ -62,7 +62,8 @@ a spritemap.
 
 ## Features
 
- - `defmt` - implements `defmt::Format` for all types where this is possible.
+ - `defmt` - implements `defmt::Format` for all types where this is possible. Note that `defmt`
+   might not work with older versions of rustc that are otherwise supported by embedded-graphics-core.
 
 [embedded-graphics]: https://docs.rs/embedded-graphics
 [`Rgb888`]: pixelcolor::Rgb888
