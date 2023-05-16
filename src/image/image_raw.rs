@@ -225,8 +225,8 @@ where
         let colors = ContiguousPixels::new(
             self,
             0,
-            self.dimensions.main_size(),
-            self.dimensions.cross_size(),
+            A::ARRANGEMENT.size_to_main(self.dimensions.size()),
+            A::ARRANGEMENT.size_to_cross(self.dimensions.size()),
             self.dimensions.stride(),
         );
 

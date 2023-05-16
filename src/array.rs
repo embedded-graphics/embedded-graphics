@@ -9,7 +9,7 @@
 use core::marker::PhantomData;
 
 use crate::{
-    common::{ColorType, OutOfBoundsError, bytes_to_pixels},
+    common::{bytes_to_pixels, ColorType, OutOfBoundsError},
     pixelcolor::{
         raw::{order::DataOrder, RawData},
         StorablePixelColor,

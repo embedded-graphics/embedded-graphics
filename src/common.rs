@@ -100,26 +100,6 @@ impl<C: StorablePixelColor, A: PixelArrangement> BufferDimensions<C, A> {
         self.size
     }
 
-    /// Returns the main size.
-    ///
-    /// The main size is the primary iteration direction.
-    pub const fn main_size(&self) -> u32 {
-        match A::ARRANGEMENT {
-            PixelArrangementEnum::Horizontal => self.size.width,
-            PixelArrangementEnum::Vertical => self.size.height,
-        }
-    }
-
-    /// Returns the cross size.
-    ///
-    /// The cross size is perpendicular to the primary iteration direction.
-    pub const fn cross_size(&self) -> u32 {
-        match A::ARRANGEMENT {
-            PixelArrangementEnum::Horizontal => self.size.height,
-            PixelArrangementEnum::Vertical => self.size.width,
-        }
-    }
-
     /// Returns the stride in pixels.
     pub const fn stride(&self) -> usize {
         self.stride
@@ -127,13 +107,16 @@ impl<C: StorablePixelColor, A: PixelArrangement> BufferDimensions<C, A> {
 
     /// Checks that the buffer length and stride is valid.
     pub const fn check(&self, buffer: &[u8]) -> Result<(), BufferError> {
-        if self.stride < self.main_size() as usize {
+        let main_size = A::ARRANGEMENT.size_to_main(self.size);
+        let cross_size = A::ARRANGEMENT.size_to_cross(self.size);
+
+        if self.stride < main_size as usize {
             return Err(BufferError::InvalidStride {
-                minimum_stride: self.main_size() as usize,
+                minimum_stride: main_size as usize,
             });
         }
 
-        let expected_pixels = self.stride * self.cross_size() as usize;
+        let expected_pixels = self.stride * cross_size as usize;
         let expected_bytes = pixels_to_bytes::<C>(expected_pixels);
 
         if buffer.len() < expected_bytes {
@@ -154,18 +137,14 @@ impl<C: StorablePixelColor, A: PixelArrangement> BufferDimensions<C, A> {
             return Err(OutOfBoundsError);
         }
 
-        Ok(match A::ARRANGEMENT {
-            PixelArrangementEnum::Horizontal => point.x as usize + point.y as usize * self.stride,
-            PixelArrangementEnum::Vertical => point.x as usize * self.stride + point.y as usize,
-        })
+        let (main, cross) = A::ARRANGEMENT.point_to_main_cross(point);
+
+        Ok(main as usize + cross as usize * self.stride)
     }
 }
 
 const fn default_stride<C: StorablePixelColor, A: PixelArrangement>(size: Size) -> usize {
-    let mut stride = match A::ARRANGEMENT {
-        PixelArrangementEnum::Horizontal => size.width as usize,
-        PixelArrangementEnum::Vertical => size.height as usize,
-    };
+    let mut stride = A::ARRANGEMENT.size_to_main(size) as usize;
 
     if C::Raw::BITS_PER_PIXEL < 8 {
         let pixels_per_bit = 8 / C::Raw::BITS_PER_PIXEL;
@@ -191,10 +170,7 @@ pub const fn buffer_size_with_stride<C: StorablePixelColor, A: PixelArrangement>
     size: Size,
     stride: usize,
 ) -> usize {
-    let pixels = match A::ARRANGEMENT {
-        PixelArrangementEnum::Horizontal => stride * size.height as usize,
-        PixelArrangementEnum::Vertical => stride * size.width as usize,
-    };
+    let pixels = stride * A::ARRANGEMENT.size_to_cross(size) as usize;
 
     pixels_to_bytes::<C>(pixels)
 }
@@ -208,6 +184,29 @@ pub enum PixelArrangementEnum {
     Horizontal,
     /// Vertical arrangement.
     Vertical,
+}
+
+impl PixelArrangementEnum {
+    pub(crate) const fn size_to_main(self, size: Size) -> u32 {
+        match self {
+            PixelArrangementEnum::Horizontal => size.width,
+            PixelArrangementEnum::Vertical => size.height,
+        }
+    }
+
+    pub(crate) const fn size_to_cross(self, size: Size) -> u32 {
+        match self {
+            PixelArrangementEnum::Horizontal => size.height,
+            PixelArrangementEnum::Vertical => size.width,
+        }
+    }
+
+    pub(crate) const fn point_to_main_cross(self, point: Point) -> (i32, i32) {
+        match self {
+            PixelArrangementEnum::Horizontal => (point.x, point.y),
+            PixelArrangementEnum::Vertical => (point.y, point.x),
+        }
+    }
 }
 
 /// Pixel arrangement.
