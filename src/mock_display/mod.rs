@@ -424,7 +424,7 @@ where
         mirrored
     }
 
-    /// Maps a `MockDisplay<C>' to a `MockDisplay<CT>` by applying a function
+    /// Maps a `MockDisplay<C>` to a `MockDisplay<CT>` by applying a function
     /// to each pixel.
     ///
     /// # Examples
