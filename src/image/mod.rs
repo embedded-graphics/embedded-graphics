@@ -95,6 +95,7 @@
 //! [`sub_image`]: ImageDrawableExt::sub_image
 //! [`OriginDimensions`]: super::geometry::OriginDimensions
 //! [`prelude`]: super::prelude
+//! [external crates list]: crate#additional-functions-provided-by-external-crates
 
 mod image_drawable_ext;
 mod image_raw;

@@ -12,7 +12,7 @@ use crate::{
 /// The `DrawTarget` trait is used to add embedded-graphics support to a display
 /// driver or similar targets like framebuffers or image files.
 /// Targets are required to at least implement the [`draw_iter`] method and the [`Dimensions`] and
-/// [`ColorType`] traits2. All other methods provide default implementations which use these methods
+/// [`ColorType`] traits. All other methods provide default implementations which use these methods
 /// internally.
 ///
 /// Because the default implementations cannot use features specific to the target hardware they

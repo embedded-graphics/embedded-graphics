@@ -40,7 +40,8 @@ use crate::{
 ///     .draw(&mut fb)
 ///     .unwrap();
 /// ```
-// MSRV: remove N when constant generic expressions are stabilized
+// MSRV: consider to change N to a generic argument of type `Size` when constant generic
+//       expressions and custom types are stabilized
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct ArrayFramebuffer<const N: usize, C, O, A = Horizontal>
 where
