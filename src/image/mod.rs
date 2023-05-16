@@ -89,11 +89,8 @@
 //! [`OriginDimensions`] traits must be implemented. See the [`ImageDrawable`] documentation
 //! for more information.
 //!
-//! [tinytga]: https://crates.io/crates/tinytga
-//! [tinybmp]: https://crates.io/crates/tinybmp
 //! [raw pixel data]: ImageRaw
 //! [`sub_image`]: ImageDrawableExt::sub_image
-//! [`OriginDimensions`]: super::geometry::OriginDimensions
 //! [`prelude`]: super::prelude
 //! [external crates list]: crate#additional-functions-provided-by-external-crates
 
