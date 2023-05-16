@@ -43,6 +43,14 @@ pub(crate) const fn pixels_to_bytes<C: StorablePixelColor>(pixels: usize) -> usi
     }
 }
 
+pub(crate) const fn bytes_to_pixels<C: StorablePixelColor>(bytes: usize) -> usize {
+    if C::Raw::BITS_PER_PIXEL >= 8 {
+        bytes / (C::Raw::BITS_PER_PIXEL / 8)
+    } else {
+        bytes * (8 / C::Raw::BITS_PER_PIXEL)
+    }
+}
+
 impl<C: StorablePixelColor, A: PixelArrangement> BufferDimensions<C, A> {
     pub const fn with_stride_unchecked(size: Size, stride: usize) -> Self {
         Self {

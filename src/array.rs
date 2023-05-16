@@ -9,7 +9,7 @@
 use core::marker::PhantomData;
 
 use crate::{
-    common::{ColorType, OutOfBoundsError},
+    common::{ColorType, OutOfBoundsError, bytes_to_pixels},
     pixelcolor::{
         raw::{order::DataOrder, RawData},
         StorablePixelColor,
@@ -29,13 +29,7 @@ where
 
     /// Returns the length in pixels.
     fn len(&self) -> usize {
-        let bpp = <Self::Color as StorablePixelColor>::Raw::BITS_PER_PIXEL;
-
-        if bpp >= 8 {
-            self.data().len() / (bpp / 8)
-        } else {
-            self.data().len() * (8 / bpp)
-        }
+        bytes_to_pixels::<Self::Color>(self.data().len())
     }
 
     /// Returns the color at a given index.
