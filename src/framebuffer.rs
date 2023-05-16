@@ -59,6 +59,7 @@ pub struct Framebuffer<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const 
     color_type: PhantomData<C>,
     raw_type: PhantomData<R>,
     byte_order: PhantomData<BO>,
+    n_assert: (),
 }
 
 impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
@@ -70,23 +71,19 @@ where
 
     /// Static assertion that N is correct.
     // MSRV: remove N when constant generic expressions are stabilized
-    const CHECK_N: () = if N < Self::BUFFER_SIZE {
-        panic!("Invalid N: see Framebuffer documentation for more information");
-    };
+    const CHECK_N: () = assert!(
+        N >= Self::BUFFER_SIZE,
+        "Invalid N: see Framebuffer documentation for more information"
+    );
 
     /// Creates a new framebuffer.
     pub const fn new() -> Self {
-        #[allow(path_statements)]
-        {
-            // Make sure CHECK_N isn't optimized out.
-            Self::CHECK_N;
-        }
-
         Self {
             data: [0; N],
             color_type: PhantomData,
             raw_type: PhantomData,
             byte_order: PhantomData,
+            n_assert: Self::CHECK_N,
         }
     }
 

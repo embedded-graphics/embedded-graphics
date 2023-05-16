@@ -25,7 +25,7 @@ pub struct StyledPixelsIterator<C> {
 impl<C: PixelColor> StyledPixelsIterator<C> {
     pub(in crate::primitives) fn new(primitive: &Triangle, style: &PrimitiveStyle<C>) -> Self {
         let mut lines_iter = ScanlineIterator::new(
-            &primitive,
+            primitive,
             style.stroke_width,
             StrokeOffset::from(style.stroke_alignment),
             style.fill_color.is_some(),
@@ -97,7 +97,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Triangle {
         }
 
         for (line, kind) in ScanlineIterator::new(
-            &self,
+            self,
             style.stroke_width,
             StrokeOffset::from(style.stroke_alignment),
             style.fill_color.is_some(),

@@ -268,7 +268,7 @@ impl Rectangle {
     /// );
     /// ```
     pub fn resized(&self, size: Size, anchor_point: AnchorPoint) -> Self {
-        let mut resized = self.clone();
+        let mut resized = *self;
         resized.resize_width_mut(size.width, anchor_point.x());
         resized.resize_height_mut(size.height, anchor_point.y());
 
@@ -295,7 +295,7 @@ impl Rectangle {
     /// );
     /// ```
     pub fn resized_width(&self, width: u32, anchor_x: AnchorX) -> Self {
-        let mut resized = self.clone();
+        let mut resized = *self;
         resized.resize_width_mut(width, anchor_x);
 
         resized
@@ -321,7 +321,7 @@ impl Rectangle {
     /// );
     /// ```
     pub fn resized_height(&self, height: u32, anchor_y: AnchorY) -> Self {
-        let mut resized = self.clone();
+        let mut resized = *self;
         resized.resize_height_mut(height, anchor_y);
 
         resized

@@ -65,7 +65,7 @@ impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Background<T::Color
         self.parent.draw_iter(
             colors
                 .into_iter()
-                .into_pixels(&area)
+                .into_pixels(area)
                 .filter(|Pixel(_, color)| color.is_off())
                 .map(|Pixel(pos, _)| Pixel(pos, foreground_color)),
         )
