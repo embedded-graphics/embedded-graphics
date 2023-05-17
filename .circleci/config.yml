@@ -30,6 +30,7 @@ jobs:
     steps:
       - eg_init
       - run: just build
+      - run: just test-all-except-defmt
       - eg_finish
 
   # Check that everything (tests, benches, etc) builds using the latest stable Rust version
@@ -40,6 +41,7 @@ jobs:
       - run: rustup default stable
       - eg_init
       - run: just build-without-fmt-check
+      - run: just test-all
       - eg_finish
 
   # Check that everything (tests, benches, etc) builds using the latest Rust beta
@@ -50,6 +52,7 @@ jobs:
       - run: rustup default beta
       - eg_init
       - run: just build-without-fmt-check
+      - run: just test-all
       - eg_finish
 
   # Build crates for embedded target
