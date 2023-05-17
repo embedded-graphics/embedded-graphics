@@ -18,6 +18,21 @@ commands:
             - ./target
             - /home/circleci/.cargo/registry
 
+  # Tests to run for all Rust versions
+  all_versions_tests:
+    steps:
+      - run: just build-benches
+      - run: just test
+
+  # Tests to only run on the latest stable Rust version
+  stable_tests:
+    steps:
+      - run: just check-formatting
+      - run: just check-drawing-examples
+      - run: just check-readmes
+      - run: just check-links
+      - run: just test-all
+
 jobs:
   # Check that everything (tests, benches, etc) builds using the MSRV
   precheck-msrv:
@@ -29,8 +44,7 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - eg_init
-      - run: just build
-      - run: just test-all-except-defmt
+      - all_versions_tests
       - eg_finish
 
   # Check that everything (tests, benches, etc) builds using the latest stable Rust version
@@ -40,8 +54,8 @@ jobs:
     steps:
       - run: rustup default stable
       - eg_init
-      - run: just build-without-fmt-check
-      - run: just test-all
+      - all_versions_tests
+      - stable_tests
       - eg_finish
 
   # Check that everything (tests, benches, etc) builds using the latest Rust beta
@@ -51,8 +65,7 @@ jobs:
     steps:
       - run: rustup default beta
       - eg_init
-      - run: just build-without-fmt-check
-      - run: just test-all
+      - all_versions_tests
       - eg_finish
 
   # Build crates for embedded target
