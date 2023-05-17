@@ -10,6 +10,7 @@ pub use crate::{
         raw::{RawData, ToBytes as _},
         GrayColor, PixelColor, RgbColor, StorablePixelColor, WebColors,
     },
+    common::{GetPixel, SetPixel, ColorType},
     primitives::{ContainsPoint, OffsetOutline, PointsIter, Primitive},
     transform::Transform,
     Drawable, Pixel,

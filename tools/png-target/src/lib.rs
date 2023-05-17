@@ -61,7 +61,6 @@ impl<C: EgToImageColor> PngTarget<C> {
 }
 
 impl DrawTarget for PngTarget<BinaryColor> {
-    type Color = BinaryColor;
     type Error = std::convert::Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -84,8 +83,11 @@ impl DrawTarget for PngTarget<BinaryColor> {
     }
 }
 
+impl ColorType for PngTarget<BinaryColor> {
+    type Color = BinaryColor;
+}
+
 impl DrawTarget for PngTarget<Rgb888> {
-    type Color = Rgb888;
     type Error = std::convert::Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -103,6 +105,10 @@ impl DrawTarget for PngTarget<Rgb888> {
 
         Ok(())
     }
+}
+
+impl ColorType for PngTarget<Rgb888> {
+    type Color = Rgb888;
 }
 
 impl<C: EgToImageColor> OriginDimensions for PngTarget<C> {
