@@ -33,12 +33,10 @@ impl Scanline {
     fn extend(&mut self, x: i32) {
         if self.is_empty() {
             self.x = x..x + 1;
-        } else {
-            if x < self.x.start {
-                self.x.start = x;
-            } else if x >= self.x.end {
-                self.x.end = x + 1;
-            }
+        } else if x < self.x.start {
+            self.x.start = x;
+        } else if x >= self.x.end {
+            self.x.end = x + 1;
         }
     }
 

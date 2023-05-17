@@ -120,6 +120,7 @@ impl Line {
         let mut right = (self.start, ParallelLineType::Normal);
 
         match stroke_offset {
+            #[allow(clippy::while_let_loop)]
             StrokeOffset::None => loop {
                 if let Some((bresenham, reduce)) = it.next() {
                     right = (bresenham.point, reduce);
