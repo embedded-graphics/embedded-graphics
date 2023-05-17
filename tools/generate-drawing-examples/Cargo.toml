@@ -8,6 +8,6 @@ publish = false
 [dependencies]
 embedded-graphics = { path = "../../" }
 png-target = { path = "../png-target/" }
-tinytga = "0.4.0-beta.1"
+tinytga = "0.5.0"
 regex = "1.4.3"
 unindent = "0.1.7"
