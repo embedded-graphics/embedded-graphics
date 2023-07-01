@@ -46,6 +46,7 @@ this are adding support for different image formats or implementing custom fonts
 * [ProFont monospace font - `profont`](https://crates.io/crates/profont)
 * [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
 * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
+* [The fonts shipped with `embedded-graphics` 0.6 - `embedded-vintage-fonts`](https://crates.io/crates/embedded-vintage-fonts)
 * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 * [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
 * [Heapless plotting library for small embedded targets - `embedded-plots`](https://crates.io/crates/embedded-plots)
