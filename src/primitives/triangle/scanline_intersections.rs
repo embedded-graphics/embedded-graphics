@@ -194,6 +194,7 @@ impl Iterator for ScanlineIntersections {
     type Item = (Scanline, PointType);
 
     fn next(&mut self) -> Option<Self::Item> {
+        #[allow(clippy::manual_map)]
         if let Some(internal) = self.lines.internal.try_take() {
             Some((internal, self.lines.internal_type))
         } else if let Some(first) = self.lines.first.try_take() {

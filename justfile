@@ -1,5 +1,8 @@
 targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
+# all features except defmt, which requires a newer MSRV
+all_features := "nalgebra fixed"
+
 target_dir := "target"
 
 doc_dir := "doc"
@@ -11,7 +14,7 @@ doc_assets_dir := doc_dir + "/assets"
 
 build: check-formatting check-drawing-examples build-without-fmt-check
 
-build-without-fmt-check: test test-all check-readmes check-links build-benches
+build-without-fmt-check: test check-readmes check-links build-benches
 
 # Build the benches
 build-benches:
@@ -29,6 +32,10 @@ test:
 test-all:
     cargo test --workspace --all-features
 
+# Run cargo test with all features except defmt enabled
+test-all-except-defmt:
+    cargo test --workspace --features "{{all_features}}"
+
 # Check the formatting
 check-formatting:
     cargo fmt --all -- --check
@@ -36,7 +43,7 @@ check-formatting:
 # Cross compiles embedded-graphics for a target
 build-target target *args:
     cargo build --workspace --target {{target}} {{args}}
-    cargo build --workspace --target {{target}} --all-features {{args}}
+    cargo build --workspace --target {{target}} --features "{{all_features}}" {{args}}
 
 # Cross compiles embedded-graphics for all targets
 build-targets *args:

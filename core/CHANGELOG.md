@@ -6,11 +6,15 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.0] - 2023-05-14
+
 ### Added
 
 - [#612](https://github.com/embedded-graphics/embedded-graphics/pull/612), [#699](https://github.com/embedded-graphics/embedded-graphics/pull/699) Added `GetPixel` trait.
 - [#625](https://github.com/embedded-graphics/embedded-graphics/pull/625) Added CSS colors and color conversions to `Rgb666` and `Bgr666`.
 - [#656](https://github.com/embedded-graphics/embedded-graphics/pull/656) Added `Rgb666` and `Bgr666` conversions.
+- [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `AnchorX`, `AnchorY`, `AnchorPoint::x`, `AnchorPoint::y` and `AnchorPoint::from_xy`.
+- [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `Rectangle::resized_width`, `Rectangle::resized_height`, `Rectangle::anchor_x` and `Rectangle::anchor_y`.
 
 ### Changed
 
@@ -78,7 +82,8 @@
 - [#498](https://github.com/embedded-graphics/embedded-graphics/pull/498) Added `Size::saturating_add` and `Size::saturating_sub`.
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.3...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.4.0...HEAD
+[0.4.0]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.3...embedded-graphics-core-v0.4.0
 [0.3.3]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.2...embedded-graphics-core-v0.3.3
 [0.3.2]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.1...embedded-graphics-core-v0.3.2
 [0.3.1]: https://github.com/embedded-graphics/embedded-graphics-core/compare/embedded-graphics-core-v0.3.0...embedded-graphics-core-v0.3.1

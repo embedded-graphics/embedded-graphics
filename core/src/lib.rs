@@ -7,7 +7,7 @@
 //!
 //! Like any other crate, embedded-graphics-core will change over time, however it will change at a
 //! much slower rate than embedded-graphics itself, and will likely release fewer breaking changes.
-//! This will provide more stability and compatability for the weider embedded-graphics ecosystem,
+//! This will provide more stability and compatibility for the wider embedded-graphics ecosystem,
 //! whilst allowing non-core features of embedded-graphics to evolve at a faster pace. The same
 //! version of embedded-graphics-core may be used for multiple major versions of embedded-graphics.
 //!
@@ -52,7 +52,8 @@
 //!
 //! # Features
 //!
-//!  - `defmt` - implements `defmt::Format` for all types where this is possible.
+//!  - `defmt` - implements `defmt::Format` for all types where this is possible. Note that `defmt`
+//!    might not work with older versions of rustc that are otherwise supported by embedded-graphics-core.
 //!
 //! [embedded-graphics]: https://docs.rs/embedded-graphics
 //! [`Pixel`]: drawable::Pixel

@@ -6,6 +6,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+## [0.8.0] - 2023-05-14
+
 ### Added
 
 - [#592](https://github.com/embedded-graphics/embedded-graphics/pull/592) Add support for defmt behind a feature (`defmt`).
@@ -15,6 +17,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#656](https://github.com/embedded-graphics/embedded-graphics/pull/656) Added `Rgb666` and `Bgr666` conversions.
 - [#673](https://github.com/embedded-graphics/embedded-graphics/pull/673) Added `Framebuffer`.
 - [#709](https://github.com/embedded-graphics/embedded-graphics/pull/709) Added `Image::with_center`.
+- [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `AnchorX`, `AnchorY`, `AnchorPoint::x`, `AnchorPoint::y` and `AnchorPoint::from_xy`.
+- [#710](https://github.com/embedded-graphics/embedded-graphics/pull/710) Added `Rectangle::resized_width`, `Rectangle::resized_height`, `Rectangle::anchor_x` and `Rectangle::anchor_y`.
 
 ### Changed
 
@@ -80,10 +84,12 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#688](https://github.com/embedded-graphics/embedded-graphics/pull/688) `MonoFont` is now `Send + Sync`; implementations of `GlyphMapping` must be `Sync`.
 - **(breaking)** [#663](https://github.com/embedded-graphics/embedded-graphics/pull/663) Upgraded Cargo dependencies to their latest versions.
 - **(breaking)** [#689](https://github.com/embedded-graphics/embedded-graphics/pull/689) Bump Minimum Supported Rust Version (MSRV) to 1.61.
+- **(breaking)** [#715](https://github.com/embedded-graphics/embedded-graphics/pull/715) Changed the direction of angles. Positive angles are now clockwise.
 
 ### Fixed
 
 - [#648](https://github.com/embedded-graphics/embedded-graphics/pull/648) Fixed incorrect text bounding box calculation when multi-byte characters are used.
+- [#713](https://github.com/embedded-graphics/embedded-graphics/pull/713) Fixed possible panic when drawing an invalid `MonoFont`.
 
 ## [0.7.1] - 2021-06-15
 
@@ -737,7 +743,8 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
-[unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.1...HEAD
+[unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.8.0...HEAD
+[0.8.0]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.1...embedded-graphics-v0.8.0
 
 [0.7.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0...embedded-graphics-v0.7.1
 [0.7.0]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.2...embedded-graphics-v0.7.0

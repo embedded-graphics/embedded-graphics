@@ -120,6 +120,7 @@ impl Line {
         let mut right = (self.start, ParallelLineType::Normal);
 
         match stroke_offset {
+            #[allow(clippy::while_let_loop)]
             StrokeOffset::None => loop {
                 if let Some((bresenham, reduce)) = it.next() {
                     right = (bresenham.point, reduce);
@@ -451,6 +452,15 @@ mod tests {
             Line::new(Point::zero(), Point::new(0, -10)).perpendicular(),
             Line::new(Point::zero(), Point::new(-10, 0))
         );
+    }
+
+    #[test]
+    fn extents() {
+        let line = Line::new(Point::new(10, 50), Point::new(10, 0));
+        let (l, r) = line.extents(11, StrokeOffset::None);
+
+        assert_eq!(l, line.translate(Point::new(-5, 0)));
+        assert_eq!(r, line.translate(Point::new(5, 0)));
     }
 
     #[test]

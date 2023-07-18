@@ -26,7 +26,7 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
 
         Self {
             stroke_color,
-            line_iter: ThickPoints::new(&primitive, stroke_width),
+            line_iter: ThickPoints::new(primitive, stroke_width),
         }
     }
 }

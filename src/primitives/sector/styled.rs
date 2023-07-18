@@ -70,17 +70,17 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
         let bevel = if exterior_bevel || interior_bevel {
             let half_sweep = primitive.angle_start
                 + Angle::from_radians(primitive.angle_sweep.to_radians() / 2.0);
-            let threshold = outside_stroke_width * NORMAL_VECTOR_SCALE * 4;
+            let threshold = -outside_stroke_width * NORMAL_VECTOR_SCALE * 4;
 
             if interior_bevel {
                 Some((
                     BevelKind::Interior,
-                    LinearEquation::with_angle_and_distance(half_sweep - ANGLE_90DEG, threshold),
+                    LinearEquation::with_angle_and_distance(half_sweep + ANGLE_90DEG, threshold),
                 ))
             } else {
                 Some((
                     BevelKind::Exterior,
-                    LinearEquation::with_angle_and_distance(half_sweep + ANGLE_90DEG, threshold),
+                    LinearEquation::with_angle_and_distance(half_sweep - ANGLE_90DEG, threshold),
                 ))
             }
         } else {
@@ -209,7 +209,7 @@ mod tests {
     fn tiny_sector() {
         let mut display = MockDisplay::new();
 
-        Sector::new(Point::zero(), 9, 30.0.deg(), 120.0.deg())
+        Sector::new(Point::zero(), 9, 210.0.deg(), 120.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut display)
             .unwrap();
@@ -219,7 +219,7 @@ mod tests {
             " ##   ## ", //
             "##     ##", //
             "  ## ##  ", //
-            "    #    ", //
+            "   ###   ", //
         ]);
     }
 
@@ -268,7 +268,7 @@ mod tests {
 
         let mut display = MockDisplay::new();
 
-        Sector::with_center(Point::new(3, 10), diameter, 0.0.deg(), 90.0.deg())
+        Sector::with_center(Point::new(3, 10), diameter, 0.0.deg(), -90.0.deg())
             .into_styled(style)
             .draw(&mut display)
             .unwrap();
@@ -382,7 +382,7 @@ mod tests {
     fn issue_484_line_join_90_deg() {
         let mut display = MockDisplay::<Rgb888>::new();
 
-        Sector::new(Point::new(-6, 1), 15, 0.0.deg(), 90.0.deg())
+        Sector::new(Point::new(-6, 1), 15, 0.0.deg(), -90.0.deg())
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .stroke_color(Rgb888::RED)
@@ -412,7 +412,7 @@ mod tests {
     fn issue_484_line_join_20_deg() {
         let mut display = MockDisplay::<Rgb888>::new();
 
-        Sector::new(Point::new(-4, -3), 15, 0.0.deg(), 20.0.deg())
+        Sector::new(Point::new(-4, -3), 15, 0.0.deg(), -20.0.deg())
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .stroke_color(Rgb888::RED)
@@ -438,7 +438,7 @@ mod tests {
     fn issue_484_line_join_340_deg() {
         let mut display = MockDisplay::<Rgb888>::new();
 
-        Sector::new(Point::new_equal(2), 15, 0.0.deg(), 340.0.deg())
+        Sector::new(Point::new_equal(2), 15, 20.0.deg(), 340.0.deg())
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .stroke_color(Rgb888::RED)
@@ -524,7 +524,7 @@ mod tests {
     fn issue_484_stroke_center_semicircle() {
         let mut display = MockDisplay::new();
 
-        Sector::new(Point::new_equal(1), 15, 0.0.deg(), 180.0.deg())
+        Sector::new(Point::new_equal(1), 15, 180.0.deg(), 180.0.deg())
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .fill_color(BinaryColor::On)
@@ -593,7 +593,7 @@ mod tests {
     fn issue_484_gaps_and_overlap() {
         let mut display = MockDisplay::new();
 
-        Sector::with_center(Point::new(2, 20), 40, -14.0.deg(), 90.0.deg())
+        Sector::with_center(Point::new(2, 20), 40, 14.0.deg(), -90.0.deg())
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .fill_color(Rgb888::GREEN)

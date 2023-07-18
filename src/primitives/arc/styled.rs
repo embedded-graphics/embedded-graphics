@@ -152,7 +152,7 @@ mod tests {
     fn tiny_arc() -> Result<(), core::convert::Infallible> {
         let mut display = MockDisplay::new();
 
-        Arc::new(Point::zero(), 7, 30.0.deg(), 120.0.deg())
+        Arc::new(Point::zero(), 7, 210.0.deg(), 120.0.deg())
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .draw(&mut display)?;
 
@@ -171,14 +171,14 @@ mod tests {
 
         for &diameter in &[11, 12] {
             for &(angle_start, angle_sweep, anchor_point) in &[
-                (0.0.deg(), 90.0.deg(), AnchorPoint::TopRight),
-                (90.0.deg(), 90.0.deg(), AnchorPoint::TopLeft),
-                (180.0.deg(), 90.0.deg(), AnchorPoint::BottomLeft),
-                (270.0.deg(), 90.0.deg(), AnchorPoint::BottomRight),
-                (0.0.deg(), -90.0.deg(), AnchorPoint::BottomRight),
-                (90.0.deg(), -90.0.deg(), AnchorPoint::TopRight),
-                (180.0.deg(), -90.0.deg(), AnchorPoint::TopLeft),
-                (270.0.deg(), -90.0.deg(), AnchorPoint::BottomLeft),
+                (0.0.deg(), 90.0.deg(), AnchorPoint::BottomRight),
+                (90.0.deg(), 90.0.deg(), AnchorPoint::BottomLeft),
+                (180.0.deg(), 90.0.deg(), AnchorPoint::TopLeft),
+                (270.0.deg(), 90.0.deg(), AnchorPoint::TopRight),
+                (0.0.deg(), -90.0.deg(), AnchorPoint::TopRight),
+                (90.0.deg(), -90.0.deg(), AnchorPoint::BottomRight),
+                (180.0.deg(), -90.0.deg(), AnchorPoint::BottomLeft),
+                (270.0.deg(), -90.0.deg(), AnchorPoint::TopLeft),
             ] {
                 let circle = Circle::new(Point::new(1, 1), diameter).into_styled(style);
 

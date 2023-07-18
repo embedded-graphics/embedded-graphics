@@ -46,6 +46,7 @@ this are adding support for different image formats or implementing custom fonts
 * [ProFont monospace font - `profont`](https://crates.io/crates/profont)
 * [Picofont Pico8 font - `embedded-picofont`](https://crates.io/crates/embedded_picofont)
 * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
+* [The fonts shipped with `embedded-graphics` 0.6 - `embedded-vintage-fonts`](https://crates.io/crates/embedded-vintage-fonts)
 * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 * [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
 * [Heapless plotting library for small embedded targets - `embedded-plots`](https://crates.io/crates/embedded-plots)
@@ -128,7 +129,8 @@ calculation.
 
 * `defmt` - provide implementations of `defmt::Format` for all types where possible. [`defmt`]
   is a library for logging that moves as much work as possible over to a separate logging
-  machine, making it especially suited to low-resource MCUs.
+  machine, making it especially suited to low-resource MCUs. Note that `defmt` might not work with
+  older versions of rustc that are otherwise supported by embedded-graphics.
 
 ## Migrating from older versions
 
