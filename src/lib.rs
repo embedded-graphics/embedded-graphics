@@ -85,6 +85,7 @@
 //! * [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
 //! * [st7789](https://crates.io/crates/st7789): A Rust driver library for ST7789 displays
 //! * [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
+//! * [gc9a01-rs](https://crates.io/crates/gc9a01-rs): SPI 4-wire driver for the Gc9a01 display driver
 //!
 //! # Simulator
 //!
