@@ -50,7 +50,7 @@ pub struct MonoTextStyle<'a, C> {
 
 impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
     /// Creates a text style with transparent background.
-    pub fn new(font: &'a MonoFont<'a>, text_color: C) -> Self {
+    pub const fn new(font: &'a MonoFont<'a>, text_color: C) -> Self {
         MonoTextStyleBuilder::new()
             .font(font)
             .text_color(text_color)
@@ -385,7 +385,7 @@ pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
 }
 
-impl<C> MonoTextStyleBuilder<'_, C> {
+impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
     /// Creates a new text style builder.
     pub const fn new() -> Self {
         Self {
@@ -398,11 +398,9 @@ impl<C> MonoTextStyleBuilder<'_, C> {
             },
         }
     }
-}
 
-impl<'a, C> MonoTextStyleBuilder<'a, C> {
     /// Sets the font.
-    pub fn font<'b>(self, font: &'b MonoFont<'b>) -> MonoTextStyleBuilder<'b, C> {
+    pub const fn font<'b>(self, font: &'b MonoFont<'b>) -> MonoTextStyleBuilder<'b, C> {
         let style = MonoTextStyle {
             font,
             background_color: self.style.background_color,
@@ -415,49 +413,47 @@ impl<'a, C> MonoTextStyleBuilder<'a, C> {
     }
 
     /// Enables underline using the text color.
-    pub fn underline(mut self) -> Self {
+    pub const fn underline(mut self) -> Self {
         self.style.underline_color = DecorationColor::TextColor;
 
         self
     }
 
     /// Enables strikethrough using the text color.
-    pub fn strikethrough(mut self) -> Self {
+    pub const fn strikethrough(mut self) -> Self {
         self.style.strikethrough_color = DecorationColor::TextColor;
 
         self
     }
 
     /// Resets the text color to transparent.
-    pub fn reset_text_color(mut self) -> Self {
+    pub const fn reset_text_color(mut self) -> Self {
         self.style.text_color = None;
 
         self
     }
 
     /// Resets the background color to transparent.
-    pub fn reset_background_color(mut self) -> Self {
+    pub const fn reset_background_color(mut self) -> Self {
         self.style.background_color = None;
 
         self
     }
 
     /// Removes the underline decoration.
-    pub fn reset_underline(mut self) -> Self {
+    pub const fn reset_underline(mut self) -> Self {
         self.style.underline_color = DecorationColor::None;
 
         self
     }
 
     /// Removes the strikethrough decoration.
-    pub fn reset_strikethrough(mut self) -> Self {
+    pub const fn reset_strikethrough(mut self) -> Self {
         self.style.strikethrough_color = DecorationColor::None;
 
         self
     }
-}
 
-impl<C: PixelColor> MonoTextStyleBuilder<'_, C> {
     /// Sets the text color.
     pub const fn text_color(mut self, text_color: C) -> Self {
         self.style.text_color = Some(text_color);
@@ -485,9 +481,7 @@ impl<C: PixelColor> MonoTextStyleBuilder<'_, C> {
 
         self
     }
-}
 
-impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
     /// Builds the text style.
     ///
     /// This method can only be called after a font was set by using the [`font`] method. All other
@@ -529,6 +523,12 @@ mod tests {
         underline: DecorationDimensions::new(9, 1),
         ..FONT_6X9
     };
+
+    const UNDERLINED_WHITE_STYLE: MonoTextStyle<Rgb888> = MonoTextStyleBuilder::new()
+        .font(&FONT_6X9)
+        .text_color(Rgb888::WHITE)
+        .underline()
+        .build();
 
     #[test]
     fn builder_default() {
@@ -585,7 +585,7 @@ mod tests {
             .strikethrough();
 
         assert_eq!(
-            base.clone().reset_text_color().build(),
+            base.reset_text_color().build(),
             MonoTextStyleBuilder::new()
                 .font(&FONT_10X20)
                 .background_color(BinaryColor::On)
@@ -595,7 +595,7 @@ mod tests {
         );
 
         assert_eq!(
-            base.clone().reset_background_color().build(),
+            base.reset_background_color().build(),
             MonoTextStyleBuilder::new()
                 .font(&FONT_10X20)
                 .text_color(BinaryColor::On)
@@ -605,7 +605,7 @@ mod tests {
         );
 
         assert_eq!(
-            base.clone().reset_underline().build(),
+            base.reset_underline().build(),
             MonoTextStyleBuilder::new()
                 .font(&FONT_10X20)
                 .text_color(BinaryColor::On)
@@ -615,7 +615,7 @@ mod tests {
         );
 
         assert_eq!(
-            base.clone().reset_strikethrough().build(),
+            base.reset_strikethrough().build(),
             MonoTextStyleBuilder::new()
                 .font(&FONT_10X20)
                 .text_color(BinaryColor::On)
@@ -627,14 +627,8 @@ mod tests {
 
     #[test]
     fn underline_text_color() {
-        let style = MonoTextStyleBuilder::new()
-            .font(&FONT_6X9)
-            .text_color(Rgb888::WHITE)
-            .underline()
-            .build();
-
         let mut display = MockDisplay::new();
-        Text::new("ABC", Point::new(0, 6), style)
+        Text::new("ABC", Point::new(0, 6), UNDERLINED_WHITE_STYLE)
             .draw(&mut display)
             .unwrap();
 
@@ -653,16 +647,15 @@ mod tests {
 
     #[test]
     fn underline_text_color_with_alignment() {
-        let character_style = MonoTextStyleBuilder::new()
-            .font(&FONT_6X9)
-            .text_color(Rgb888::WHITE)
-            .underline()
-            .build();
-
         let mut display = MockDisplay::new();
-        Text::with_baseline("ABC", Point::new(0, 6), character_style, Baseline::Middle)
-            .draw(&mut display)
-            .unwrap();
+        Text::with_baseline(
+            "ABC",
+            Point::new(0, 6),
+            UNDERLINED_WHITE_STYLE,
+            Baseline::Middle,
+        )
+        .draw(&mut display)
+        .unwrap();
 
         display.assert_pattern(&[
             "                  ",
