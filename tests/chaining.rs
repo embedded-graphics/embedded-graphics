@@ -1,6 +1,7 @@
 extern crate embedded_graphics;
 
 use embedded_graphics::{
+    common::ColorType,
     prelude::*,
     primitives::{Circle, Line, Primitive, PrimitiveStyle, Rectangle},
 };
@@ -10,9 +11,7 @@ struct FakeDisplay {}
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TestPixelColor(pub bool);
 
-impl PixelColor for TestPixelColor {
-    type Raw = ();
-}
+impl PixelColor for TestPixelColor {}
 
 impl From<u8> for TestPixelColor {
     fn from(other: u8) -> Self {
@@ -21,7 +20,6 @@ impl From<u8> for TestPixelColor {
 }
 
 impl DrawTarget for FakeDisplay {
-    type Color = TestPixelColor;
     type Error = core::convert::Infallible;
 
     fn draw_iter<I>(&mut self, _pixels: I) -> Result<(), Self::Error>
@@ -30,6 +28,10 @@ impl DrawTarget for FakeDisplay {
     {
         Ok(())
     }
+}
+
+impl ColorType for FakeDisplay {
+    type Color = TestPixelColor;
 }
 
 impl OriginDimensions for FakeDisplay {

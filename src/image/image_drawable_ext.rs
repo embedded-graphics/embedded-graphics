@@ -15,8 +15,8 @@ pub trait ImageDrawableExt: Sized {
     ///
     /// ```rust
     /// use embedded_graphics::{
-    ///     image::{Image, ImageRaw, ImageRawBE},
-    ///     pixelcolor::Rgb565,
+    ///     image::{Image, ImageRaw},
+    ///     pixelcolor::{Rgb565, raw::order::BigEndian},
     ///     prelude::*,
     ///     primitives::Rectangle,
     /// };
@@ -27,7 +27,7 @@ pub trait ImageDrawableExt: Sized {
     /// // or: let data = include_bytes!("sprite_atlas.raw");
     ///
     /// # let data = [0u8; 32 * 16 * 2];
-    /// let sprite_atlas = ImageRawBE::<Rgb565>::new(&data, 32);
+    /// let sprite_atlas = ImageRaw::<Rgb565, BigEndian>::new(&data, Size::new(32, 16)).unwrap();
     ///
     /// let sprite_1 = sprite_atlas.sub_image(&Rectangle::new(Point::new(0, 0), Size::new(16, 16)));
     /// let sprite_2 = sprite_atlas.sub_image(&Rectangle::new(Point::new(16, 0), Size::new(16, 16)));

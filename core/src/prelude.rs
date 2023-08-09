@@ -8,7 +8,7 @@ pub use crate::{
     image::ImageDrawable,
     pixelcolor::{
         raw::{RawData, ToBytes as _},
-        GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,
+        GrayColor, PixelColor, RgbColor, StorablePixelColor, WebColors,
     },
     primitives::PointsIter,
 };

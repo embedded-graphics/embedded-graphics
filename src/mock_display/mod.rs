@@ -141,9 +141,9 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::{Image, ImageRaw, ImageRawBE},
+//!     image::{Image, ImageRaw},
 //!     mock_display::MockDisplay,
-//!     pixelcolor::{Rgb565, RgbColor},
+//!     pixelcolor::{Rgb565, RgbColor, raw::order::BigEndian},
 //!     prelude::*,
 //! };
 //!
@@ -152,7 +152,7 @@
 //!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
 //! ];
 //!
-//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4);
+//! let raw = ImageRaw::<Rgb565, BigEndian>::new(&data, Size::new(4, 2)).unwrap();
 //!
 //! let image = Image::new(&raw, Point::zero());
 //!
@@ -185,6 +185,7 @@ mod color_mapping;
 mod fancy_panic;
 
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Point, Size},
     pixelcolor::{PixelColor, Rgb888, RgbColor},
@@ -697,11 +698,7 @@ where
     }
 }
 
-impl<C> DrawTarget for MockDisplay<C>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> DrawTarget for MockDisplay<C> {
     type Error = core::convert::Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -718,10 +715,11 @@ where
     }
 }
 
-impl<C> OriginDimensions for MockDisplay<C>
-where
-    C: PixelColor,
-{
+impl<C: PixelColor> ColorType for MockDisplay<C> {
+    type Color = C;
+}
+
+impl<C: PixelColor> OriginDimensions for MockDisplay<C> {
     fn size(&self) -> Size {
         DISPLAY_AREA.size
     }

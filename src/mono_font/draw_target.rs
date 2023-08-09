@@ -1,6 +1,6 @@
 use crate::{
-    draw_target::DrawTarget, geometry::Dimensions, iterator::ContiguousIteratorExt,
-    pixelcolor::BinaryColor, primitives::Rectangle, Pixel,
+    common::ColorType, draw_target::DrawTarget, geometry::Dimensions,
+    iterator::ContiguousIteratorExt, pixelcolor::BinaryColor, primitives::Rectangle, Pixel,
 };
 
 pub struct MonoFontDrawTarget<'a, T, C> {
@@ -15,7 +15,6 @@ impl<'a, T: DrawTarget, C> MonoFontDrawTarget<'a, T, C> {
 }
 
 impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Foreground<T::Color>> {
-    type Color = BinaryColor;
     type Error = T::Error;
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
@@ -53,7 +52,6 @@ impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Foreground<T::Color
 }
 
 impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Background<T::Color>> {
-    type Color = BinaryColor;
     type Error = T::Error;
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
@@ -91,7 +89,6 @@ impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Background<T::Color
 }
 
 impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Both<T::Color>> {
-    type Color = BinaryColor;
     type Error = T::Error;
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
@@ -127,6 +124,10 @@ impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Both<T::Color>> {
     fn clear(&mut self, _color: Self::Color) -> Result<(), Self::Error> {
         unreachable!()
     }
+}
+
+impl<T, C> ColorType for MonoFontDrawTarget<'_, T, C> {
+    type Color = BinaryColor;
 }
 
 impl<T: DrawTarget, C> Dimensions for MonoFontDrawTarget<'_, T, C> {

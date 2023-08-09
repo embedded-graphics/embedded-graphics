@@ -1,5 +1,5 @@
 //! `Drawable` trait and helpers
-use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
+use crate::{common::ColorType, draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 
 /// Marks an object as "drawable". Must be implemented for all graphics objects
 ///
@@ -9,6 +9,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///
 /// ```rust
 /// use embedded_graphics::{
+///     common::ColorType,
 ///     mono_font::{ascii::FONT_6X9, MonoTextStyle},
 ///     pixelcolor::{BinaryColor, PixelColor, Rgb888},
 ///     prelude::*,
@@ -24,11 +25,14 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///     text: &'a str,
 /// }
 ///
+/// impl<C: PixelColor> ColorType for Button<'_, C> {
+///     type Color = C;
+/// }
+///
 /// impl<C> Drawable for Button<'_, C>
 /// where
 ///     C: PixelColor + From<BinaryColor>,
 /// {
-///     type Color = C;
 ///     type Output = ();
 ///
 ///     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
@@ -64,10 +68,7 @@ use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 ///
 /// [`DrawTarget`]: crate::draw_target::DrawTarget
 /// [`draw_iter`]: crate::draw_target::DrawTarget::draw_iter
-pub trait Drawable {
-    /// The pixel color type.
-    type Color: PixelColor;
-
+pub trait Drawable: ColorType {
     /// The return type of the `draw` method.
     ///
     /// The `Output` type can be used to return results and values produced from the drawing of the
@@ -139,15 +140,9 @@ pub trait Drawable {
 /// [`DrawTarget`]: crate::draw_target::DrawTarget
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct Pixel<C>(pub Point, pub C)
-where
-    C: PixelColor;
+pub struct Pixel<C: PixelColor>(pub Point, pub C);
 
-impl<C> Drawable for Pixel<C>
-where
-    C: PixelColor,
-{
-    type Color = C;
+impl<C: PixelColor> Drawable for Pixel<C> {
     type Output = ();
 
     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
@@ -156,6 +151,10 @@ where
     {
         target.draw_iter(core::iter::once(*self))
     }
+}
+
+impl<C: PixelColor> ColorType for Pixel<C> {
+    type Color = C;
 }
 
 #[cfg(test)]

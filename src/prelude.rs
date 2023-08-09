@@ -8,8 +8,9 @@ pub use crate::{
     iterator::{ContiguousIteratorExt, PixelIteratorExt},
     pixelcolor::{
         raw::{RawData, ToBytes as _},
-        GrayColor, IntoStorage, PixelColor, RgbColor, WebColors,
+        GrayColor, PixelColor, RgbColor, StorablePixelColor, WebColors,
     },
+    common::{GetPixel, SetPixel, ColorType},
     primitives::{ContainsPoint, OffsetOutline, PointsIter, Primitive},
     transform::Transform,
     Drawable, Pixel,

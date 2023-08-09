@@ -6,6 +6,26 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `common` module.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `Point::swap_xy` and `Size::swap_xy`.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `MASK`, 'load' and 'store' to the `RawData` trait.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `RawDataBits` and `RawDataBytes` marker traits.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `PixelArray`, `PixelSlice` and `PixelMutSlice`.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `SliceFramebuffer` and `Framebuffer` trait.
+- [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added `ImageRaw::with_stride` and `ImageRaw::with_stride_const`.
+
+### Changed
+
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Replaced `IntoStorage` trait and the `PixelColor::Raw` associated type with a new `StorablePixelColor`trait.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Moved `LittleEndian` and `BigEndian` into a new `pixelcolor::raw::order` module and added `Lsb0` and `Msb0` bit orders.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Changed `ImageRaw::new` to take a `Size` parameter instead of the width and return an error if the size is too large. Use `ImageRaw::new_const` for the old behavior in const contexts.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Added pixel arrangement type parameter to `ImageRaw`.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Removed the `iterator::raw` module. Use types from the `array` module as a replacement.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Removed associated `Color` type from `DrawTarget`, `Drawable`, `StyledDrawable`, `ImageDrawable`, `CharacterStyle` and `TextRenderer`. Replaced by the new `ColorType` trait.
+- **(breaking)** [#711](https://github.com/embedded-graphics/embedded-graphics/pull/711) Renamed `Framebuffer` struct to `ArrayFramebuffer`.
+
 ## [0.8.0] - 2023-05-14
 
 ### Added
@@ -23,7 +43,6 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Changed
 
 - **(breaking)** [#660](https://github.com/embedded-graphics/embedded-graphics/pull/660) Remove `RawU18` color storage type and use `RawU24` in is place for `Rgb666` and `Bgr666`.
-- [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639) Made the following functions `const`:
 - **(breaking)** [#690](https://github.com/embedded-graphics/embedded-graphics/pull/690) Remove `ImageRaw::new_binary` `const` helper method. `ImageRaw::new` can now be used in `const` contexts, so use it instead of `new_binary`.
 - [#639](https://github.com/embedded-graphics/embedded-graphics/pull/639), [#690](https://github.com/embedded-graphics/embedded-graphics/pull/690) Made the following functions `const`:
   - `Point::component_mul`

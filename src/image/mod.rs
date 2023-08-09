@@ -4,10 +4,11 @@
 //!
 //! [`ImageDrawable`] is implemented to add support for different image formats. This crate includes
 //! an implementation for [raw pixel data]. Additional implementations for other image formats are
-//! provided by external crates like [tinybmp] and [tinytga].
+//! provided by external crates. See the [external crates list] for a list of available image formats.
 //!
 //! The [`Image`] object is used to specify the location at which an [`ImageDrawable`] is drawn.
-//! Images are drawn relative to their top-left corner.
+//! Images can be placed relative to their top-left corner or center point by using the
+//! [`Image::new`] or [`Image::with_center`] constructors.
 //!
 //! # Examples
 //!
@@ -18,8 +19,8 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::{Image, ImageRaw, ImageRawBE},
-//!     pixelcolor::Rgb565,
+//!     image::{Image, ImageRaw},
+//!     pixelcolor::{Rgb565, raw::order::BigEndian},
 //!     prelude::*,
 //! };
 //! # use embedded_graphics::mock_display::MockDisplay as Display;
@@ -27,17 +28,17 @@
 //! let mut display: Display<Rgb565> = Display::default();
 //!
 //! // Raw big endian image data for demonstration purposes. A real image would likely be much
-//! // larger.
+//! // larger and would be included via the `include_bytes!` macro.
 //! let data = [
 //!     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
 //!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
 //! ];
 //!
-//! // Create a raw image instance. Other image formats will require different code to load them.
-//! // All code after loading is the same for any image format.
-//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4);
+//! // Create a raw image instance. Note that the format of the image data is specified by adding
+//! // type annotations for the color type and the byte order.
+//! let raw = ImageRaw::<Rgb565, BigEndian>::new(&data, Size::new(4, 2)).unwrap();
 //!
-//! // Create an `Image` object to position the image at `Point::zero()`.
+//! // Create an `Image` object to position the top-left corner of the image at `Point::zero()`.
 //! let image = Image::new(&raw, Point::zero());
 //!
 //! // Draw the image to the display.
@@ -55,8 +56,8 @@
 //!
 //! ```rust
 //! use embedded_graphics::{
-//!     image::{Image, ImageRaw, ImageRawBE},
-//!     pixelcolor::Rgb565,
+//!     image::{Image, ImageRaw},
+//!     pixelcolor::{Rgb565, raw::order::BigEndian},
 //!     prelude::*,
 //!     primitives::Rectangle,
 //! };
@@ -68,7 +69,7 @@
 //! // or: let data = include_bytes!("sprite_atlas.raw");
 //!
 //! # let data = [0u8; 32 * 16 * 2];
-//! let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 32);
+//! let sprite_atlas = ImageRaw::<Rgb565, BigEndian>::new(&data, Size::new(32, 16)).unwrap();
 //!
 //! // Create individual sub images for each sprite in the sprite atlas.
 //! // The position and size of the sub images is defined by a `Rectangle`.
@@ -88,23 +89,22 @@
 //! [`OriginDimensions`] traits must be implemented. See the [`ImageDrawable`] documentation
 //! for more information.
 //!
-//! [tinytga]: https://crates.io/crates/tinytga
-//! [tinybmp]: https://crates.io/crates/tinybmp
 //! [raw pixel data]: ImageRaw
 //! [`sub_image`]: ImageDrawableExt::sub_image
-//! [`OriginDimensions`]: super::geometry::OriginDimensions
 //! [`prelude`]: super::prelude
+//! [external crates list]: crate#additional-functions-provided-by-external-crates
 
 mod image_drawable_ext;
 mod image_raw;
 mod sub_image;
 
-pub use embedded_graphics_core::image::{GetPixel, ImageDrawable};
+pub use embedded_graphics_core::image::ImageDrawable;
 pub use image_drawable_ext::ImageDrawableExt;
-pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
+pub use image_raw::ImageRaw;
 pub use sub_image::SubImage;
 
 use crate::{
+    common::ColorType,
     draw_target::{DrawTarget, DrawTargetExt},
     geometry::{Dimensions, OriginDimensions, Point},
     primitives::Rectangle,
@@ -133,10 +133,7 @@ pub struct Image<'a, T> {
     offset: Point,
 }
 
-impl<'a, T> Image<'a, T>
-where
-    T: ImageDrawable,
-{
+impl<'a, T: ImageDrawable> Image<'a, T> {
     /// Creates a new `Image`.
     pub const fn new(image_drawable: &'a T, position: Point) -> Self {
         Self {
@@ -163,18 +160,19 @@ impl<T> Transform for Image<'_, T> {
     ///
     /// ## Move an image around
     ///
-    /// This examples moves a 4x4 black and white image by `(10, 20)` pixels without mutating the
+    /// This example moves a 4x4 black and white image by `(10, 20)` pixels without mutating the
     /// original image
     ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Point,
     ///     image::{Image, ImageRaw},
-    ///     pixelcolor::BinaryColor,
+    ///     pixelcolor::{BinaryColor, raw::order::Msb0},
     ///     prelude::*,
     /// };
     ///
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+    /// let data = &[0xff, 0x00, 0xff, 0x00];
+    /// let image = ImageRaw::<BinaryColor, Msb0>::new(data, Size::new(4, 4)).unwrap();
     ///
     /// let image = Image::new(&image, Point::zero());
     ///
@@ -196,18 +194,19 @@ impl<T> Transform for Image<'_, T> {
     ///
     /// ## Move an image around
     ///
-    /// This examples moves a 4x4 black and white image by `(10, 20)` pixels by mutating the
+    /// This example moves a 4x4 black and white image by `(10, 20)` pixels by mutating the
     /// original image
     ///
     /// ```rust
     /// use embedded_graphics::{
     ///     geometry::Point,
     ///     image::{Image, ImageRaw},
-    ///     pixelcolor::BinaryColor,
+    ///     pixelcolor::{BinaryColor, raw::order::Msb0},
     ///     prelude::*,
     /// };
     ///
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+    /// let data = &[0xff, 0x00, 0xff, 0x00];
+    /// let image = ImageRaw::<BinaryColor, Msb0>::new(data, Size::new(4, 4)).unwrap();
     ///
     /// let mut image = Image::new(&image, Point::zero());
     ///
@@ -222,11 +221,11 @@ impl<T> Transform for Image<'_, T> {
     }
 }
 
-impl<'a, T> Drawable for Image<'a, T>
-where
-    T: ImageDrawable,
-{
+impl<'a, T: ImageDrawable> ColorType for Image<'a, T> {
     type Color = T::Color;
+}
+
+impl<'a, T: ImageDrawable> Drawable for Image<'a, T> {
     type Output = ();
 
     fn draw<D>(&self, display: &mut D) -> Result<Self::Output, D::Error>
@@ -238,10 +237,7 @@ where
     }
 }
 
-impl<'a, T> Dimensions for Image<'a, T>
-where
-    T: OriginDimensions,
-{
+impl<'a, T: OriginDimensions> Dimensions for Image<'a, T> {
     fn bounding_box(&self) -> Rectangle {
         self.image_drawable.bounding_box().translate(self.offset)
     }
@@ -250,11 +246,17 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{geometry::Size, mock_display::MockDisplay, pixelcolor::BinaryColor};
+
+    use crate::{
+        geometry::Size,
+        mock_display::MockDisplay,
+        pixelcolor::{raw::order::Msb0, BinaryColor},
+    };
 
     #[test]
     fn negative_top_left() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+        let data = &[0xff, 0x00, 0xff, 0x00];
+        let image = ImageRaw::<BinaryColor, Msb0>::new(data, Size::new(4, 4)).unwrap();
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
@@ -266,7 +268,8 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4);
+        let data = &[0xff, 0x00, 0xFF, 0x00];
+        let image = ImageRaw::<BinaryColor, Msb0>::new(data, Size::new(4, 4)).unwrap();
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
@@ -278,7 +281,8 @@ mod tests {
 
     #[test]
     fn position() {
-        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
+        let data = &[0xAA, 0x55, 0xAA, 0x55];
+        let image_raw = ImageRaw::<BinaryColor, Msb0>::new(data, Size::new(4, 4)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::new(&image_raw, Point::new(1, 2))
@@ -297,7 +301,8 @@ mod tests {
 
     #[test]
     fn with_center() {
-        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
+        let data = &[0xAA, 0x55, 0xAA, 0x55];
+        let image_raw = ImageRaw::<BinaryColor, Msb0>::new(data, Size::new(4, 4)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::with_center(&image_raw, Point::new(1, 2))

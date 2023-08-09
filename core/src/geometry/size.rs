@@ -110,7 +110,7 @@ impl Size {
     ///
     /// # Examples
     ///
-    /// ## Move a `Point` along the X axis.
+    /// Move a `Point` along the X axis:
     ///
     /// ```rust
     /// use embedded_graphics::geometry::{Point, Size};
@@ -134,7 +134,7 @@ impl Size {
     ///
     /// # Examples
     ///
-    /// ## Move a `Point` along the Y axis.
+    /// Move a `Point` along the Y axis:
     ///
     /// ```rust
     /// use embedded_graphics::geometry::{Point, Size};
@@ -167,7 +167,7 @@ impl Size {
     /// Saturating subtraction.
     ///
     /// Returns `0` for `width` and/or `height` instead of overflowing, if the
-    /// value in `other` is larger then in `self`.
+    /// value in `other` is larger than in `self`.
     pub const fn saturating_sub(self, other: Self) -> Self {
         Self {
             width: self.width.saturating_sub(other.width),
@@ -192,7 +192,9 @@ impl Size {
 
     /// Returns the componentwise minimum of two `Size`s.
     ///
-    /// ```rust
+    /// # Examples
+    ///
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let min = Size::new(20, 30).component_min(Size::new(15, 50));
@@ -205,7 +207,9 @@ impl Size {
 
     /// Returns the componentwise maximum of two `Size`s.
     ///
-    /// ```rust
+    /// # Examples
+    ///
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let min = Size::new(20, 30).component_max(Size::new(15, 50));
@@ -218,7 +222,9 @@ impl Size {
 
     /// Returns the componentwise multiplication of two `Size`s.
     ///
-    /// ```rust
+    /// # Examples
+    ///
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let result = Size::new(20, 30).component_mul(Size::new(2, 3));
@@ -235,7 +241,9 @@ impl Size {
     ///
     /// Panics if one of the components of `other` equals zero.
     ///
-    /// ```rust
+    /// # Examples
+    ///
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let result = Size::new(20, 30).component_div(Size::new(5, 10));
@@ -244,6 +252,21 @@ impl Size {
     /// ```
     pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.width / other.width, self.height / other.height)
+    }
+
+    /// Returns a size with swapped width and height.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::geometry::Size;
+    ///
+    /// let result = Size::new(1, 2).swap_xy();
+    ///
+    /// assert_eq!(result, Size::new(2, 1));
+    /// ```
+    pub const fn swap_xy(self) -> Self {
+        Self::new(self.height, self.width)
     }
 }
 

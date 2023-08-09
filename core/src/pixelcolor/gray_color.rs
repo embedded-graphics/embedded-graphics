@@ -1,6 +1,6 @@
 use crate::pixelcolor::{
     raw::{RawData, RawU2, RawU4, RawU8},
-    PixelColor,
+    PixelColor, StorablePixelColor,
 };
 
 /// Grayscale color.
@@ -36,7 +36,9 @@ macro_rules! gray_color {
             }
         }
 
-        impl PixelColor for $type {
+        impl PixelColor for $type {}
+
+        impl StorablePixelColor for $type {
             type Raw = $raw_type;
         }
 
@@ -70,7 +72,6 @@ gray_color!(Gray8, RawU8, "8 bit");
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::IntoStorage;
 
     #[test]
     pub fn new_masks_luma() {

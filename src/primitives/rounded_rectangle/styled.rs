@@ -104,7 +104,6 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for RoundedRectangle {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for RoundedRectangle {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(

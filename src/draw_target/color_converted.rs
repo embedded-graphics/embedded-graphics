@@ -1,8 +1,9 @@
-use crate::{
-    draw_target::DrawTarget, geometry::Dimensions, pixelcolor::PixelColor, primitives::Rectangle,
-    Pixel,
-};
 use core::marker::PhantomData;
+
+use crate::{
+    common::ColorType, draw_target::DrawTarget, geometry::Dimensions, pixelcolor::PixelColor,
+    primitives::Rectangle, Pixel,
+};
 
 /// Color conversion draw target.
 ///
@@ -37,7 +38,6 @@ where
     T: DrawTarget,
     C: PixelColor + Into<T::Color>,
 {
-    type Color = C;
     type Error = T::Error;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -65,10 +65,11 @@ where
     }
 }
 
-impl<T, C> Dimensions for ColorConverted<'_, T, C>
-where
-    T: DrawTarget,
-{
+impl<T, C: PixelColor> ColorType for ColorConverted<'_, T, C> {
+    type Color = C;
+}
+
+impl<T: DrawTarget, C> Dimensions for ColorConverted<'_, T, C> {
     fn bounding_box(&self) -> Rectangle {
         self.parent.bounding_box()
     }

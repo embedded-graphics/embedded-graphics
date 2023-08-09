@@ -1,4 +1,5 @@
 use crate::{
+    common::ColorType,
     draw_target::{DrawTarget, DrawTargetExt, Translated},
     geometry::{OriginDimensions, Size},
     primitives::Rectangle,
@@ -12,18 +13,12 @@ use crate::{
 ///
 /// [`cropped`]: DrawTargetExt::cropped
 #[derive(Debug)]
-pub struct Cropped<'a, T>
-where
-    T: DrawTarget,
-{
+pub struct Cropped<'a, T: DrawTarget> {
     parent: Translated<'a, T>,
     size: Size,
 }
 
-impl<'a, T> Cropped<'a, T>
-where
-    T: DrawTarget,
-{
+impl<'a, T: DrawTarget> Cropped<'a, T> {
     pub(super) fn new(parent: &'a mut T, area: &Rectangle) -> Self {
         let area = area.intersection(&parent.bounding_box());
 
@@ -34,11 +29,7 @@ where
     }
 }
 
-impl<T> DrawTarget for Cropped<'_, T>
-where
-    T: DrawTarget,
-{
-    type Color = T::Color;
+impl<T: DrawTarget> DrawTarget for Cropped<'_, T> {
     type Error = T::Error;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -60,10 +51,11 @@ where
     }
 }
 
-impl<T> OriginDimensions for Cropped<'_, T>
-where
-    T: DrawTarget,
-{
+impl<T: DrawTarget> ColorType for Cropped<'_, T> {
+    type Color = T::Color;
+}
+
+impl<T: DrawTarget> OriginDimensions for Cropped<'_, T> {
     fn size(&self) -> Size {
         self.size
     }

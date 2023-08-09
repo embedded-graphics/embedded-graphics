@@ -1,6 +1,6 @@
 use crate::pixelcolor::{
     raw::{RawData, RawU1},
-    PixelColor,
+    PixelColor, StorablePixelColor,
 };
 
 /// Binary color.
@@ -119,7 +119,9 @@ impl BinaryColor {
     }
 }
 
-impl PixelColor for BinaryColor {
+impl PixelColor for BinaryColor {}
+
+impl StorablePixelColor for BinaryColor {
     type Raw = RawU1;
 }
 
@@ -152,7 +154,7 @@ impl From<bool> for BinaryColor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::{IntoStorage, Rgb565, RgbColor};
+    use crate::pixelcolor::{Rgb565, RgbColor};
 
     #[test]
     fn default_color_is_off() {

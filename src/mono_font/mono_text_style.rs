@@ -1,4 +1,5 @@
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Point, Size},
     image::Image,
@@ -181,9 +182,11 @@ impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
     }
 }
 
-impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
+impl<C: PixelColor> ColorType for MonoTextStyle<'_, C> {
     type Color = C;
+}
 
+impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
     fn draw_string<D>(
         &self,
         text: &str,
@@ -281,8 +284,6 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
 }
 
 impl<C: PixelColor> CharacterStyle for MonoTextStyle<'_, C> {
-    type Color = C;
-
     fn set_text_color(&mut self, text_color: Option<Self::Color>) {
         self.text_color = text_color;
     }
@@ -1187,7 +1188,7 @@ mod tests {
     fn builder_change_font() {
         let _style = {
             let font = MonoFont {
-                image: ImageRaw::new(&[1, 2, 3], 1),
+                image: ImageRaw::new(&[1, 2, 3], Size::new(1, 3)).unwrap(),
                 character_size: Size::new(1, 2),
                 character_spacing: 0,
                 baseline: 0,

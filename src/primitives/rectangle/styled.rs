@@ -70,7 +70,6 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Rectangle {
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
-    type Color = C;
     type Output = ();
 
     fn draw_styled<D>(

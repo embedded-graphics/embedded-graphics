@@ -217,7 +217,7 @@ web_colors!(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pixelcolor::IntoStorage;
+    use crate::pixelcolor::StorablePixelColor;
 
     #[test]
     fn max_channels() {

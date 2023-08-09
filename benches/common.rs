@@ -1,4 +1,4 @@
-use embedded_graphics::prelude::*;
+use embedded_graphics::{common::ColorType, prelude::*};
 use std::convert::TryFrom;
 
 const SIZE: usize = 256;
@@ -36,7 +36,6 @@ impl<C> DrawTarget for Framebuffer<C>
 where
     C: PixelColor + Default,
 {
-    type Color = C;
     type Error = core::convert::Infallible;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -49,6 +48,10 @@ where
 
         Ok(())
     }
+}
+
+impl<C: PixelColor> ColorType for Framebuffer<C> {
+    type Color = C;
 }
 
 impl<C> OriginDimensions for Framebuffer<C> {

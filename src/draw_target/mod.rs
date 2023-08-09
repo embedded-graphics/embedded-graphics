@@ -164,13 +164,13 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// # Examples
     ///
-    /// This example draws a `BinaryColor` image to an `Rgb888` display.
+    /// This example draws a `BinaryColor` image to a `Rgb888` display.
     ///
     /// ```
     /// use embedded_graphics::{
     ///     image::{Image, ImageRaw},
     ///     mock_display::MockDisplay,
-    ///     pixelcolor::{BinaryColor, Rgb888},
+    ///     pixelcolor::{BinaryColor, Rgb888, raw::order::Msb0},
     ///     prelude::*,
     /// };
     ///
@@ -183,7 +183,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// ];
     ///
     /// // Create a `BinaryColor` image from the image data.
-    /// let raw_image = ImageRaw::<BinaryColor>::new(DATA, 4);
+    /// let raw_image = ImageRaw::<BinaryColor, Msb0>::new(DATA, Size::new(4, 4)).unwrap();
     /// let image = Image::new(&raw_image, Point::zero());
     ///
     /// // Create a `Rgb888` display.

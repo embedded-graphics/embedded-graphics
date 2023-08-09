@@ -1,4 +1,5 @@
 use crate::{
+    common::ColorType,
     draw_target::DrawTarget,
     geometry::{Dimensions, Point},
     iterator::PixelIteratorExt,
@@ -15,28 +16,18 @@ use crate::{
 /// [`translated`]: crate::draw_target::DrawTargetExt::translated
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct Translated<'a, T>
-where
-    T: DrawTarget,
-{
+pub struct Translated<'a, T: DrawTarget> {
     parent: &'a mut T,
     offset: Point,
 }
 
-impl<'a, T> Translated<'a, T>
-where
-    T: DrawTarget,
-{
+impl<'a, T: DrawTarget> Translated<'a, T> {
     pub(super) fn new(parent: &'a mut T, offset: Point) -> Self {
         Self { parent, offset }
     }
 }
 
-impl<T> DrawTarget for Translated<'_, T>
-where
-    T: DrawTarget,
-{
-    type Color = T::Color;
+impl<T: DrawTarget> DrawTarget for Translated<'_, T> {
     type Error = T::Error;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
@@ -65,10 +56,11 @@ where
     }
 }
 
-impl<T> Dimensions for Translated<'_, T>
-where
-    T: DrawTarget,
-{
+impl<T: DrawTarget> ColorType for Translated<'_, T> {
+    type Color = T::Color;
+}
+
+impl<T: DrawTarget> Dimensions for Translated<'_, T> {
     fn bounding_box(&self) -> Rectangle {
         self.parent.bounding_box().translate(-self.offset)
     }
