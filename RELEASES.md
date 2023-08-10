@@ -2,6 +2,11 @@
 
 Release notes for [embedded-graphics](https://crates.io/crates/embedded-graphics).
 
+## 0.8.1
+
+- `MonoTextStyleBuilder` methods are now `const`  
+- MSRV bumped to 1.71.1
+
 ## 0.7.0
 
 ### Primitives
