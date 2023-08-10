@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1
+
 ## [0.4.0] - 2023-05-14
 
 ### Added
