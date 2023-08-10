@@ -48,7 +48,10 @@ pub struct MonoTextStyle<'a, C> {
     pub font: &'a MonoFont<'a>,
 }
 
-impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
+impl<'a, C> MonoTextStyle<'a, C>
+where
+    C: PixelColor,
+{
     /// Creates a text style with transparent background.
     pub const fn new(font: &'a MonoFont<'a>, text_color: C) -> Self {
         MonoTextStyleBuilder::new()
@@ -181,7 +184,10 @@ impl<'a, C: PixelColor> MonoTextStyle<'a, C> {
     }
 }
 
-impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
+impl<C> TextRenderer for MonoTextStyle<'_, C>
+where
+    C: PixelColor,
+{
     type Color = C;
 
     fn draw_string<D>(
@@ -280,7 +286,10 @@ impl<C: PixelColor> TextRenderer for MonoTextStyle<'_, C> {
     }
 }
 
-impl<C: PixelColor> CharacterStyle for MonoTextStyle<'_, C> {
+impl<C> CharacterStyle for MonoTextStyle<'_, C>
+where
+    C: PixelColor,
+{
     type Color = C;
 
     fn set_text_color(&mut self, text_color: Option<Self::Color>) {
@@ -385,7 +394,10 @@ pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
 }
 
-impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
+impl<'a, C> MonoTextStyleBuilder<'a, C>
+where
+    C: PixelColor,
+{
     /// Creates a new text style builder.
     pub const fn new() -> Self {
         Self {
@@ -493,7 +505,10 @@ impl<'a, C: PixelColor> MonoTextStyleBuilder<'a, C> {
     }
 }
 
-impl<'a, C: PixelColor> From<&MonoTextStyle<'a, C>> for MonoTextStyleBuilder<'a, C> {
+impl<'a, C> From<&MonoTextStyle<'a, C>> for MonoTextStyleBuilder<'a, C>
+where
+    C: PixelColor,
+{
     fn from(style: &MonoTextStyle<'a, C>) -> Self {
         Self { style: *style }
     }
