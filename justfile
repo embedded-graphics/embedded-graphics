@@ -1,7 +1,6 @@
 targets := "arm-unknown-linux-gnueabi armv7-unknown-linux-gnueabihf x86_64-unknown-linux-gnu x86_64-unknown-linux-musl thumbv6m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf thumbv7m-none-eabi"
 
-# all features except defmt, which requires a newer MSRV
-all_features := "nalgebra fixed"
+all_features := "nalgebra fixed defmt"
 
 target_dir := "target"
 

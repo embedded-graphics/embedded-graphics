@@ -6,14 +6,14 @@ commands:
     steps:
       - checkout
       - restore_cache:
-          key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+          key: v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
       - run: cargo update
 
   # Save cache
   eg_finish:
     steps:
       - save_cache:
-          key: v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+          key: v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
           paths:
             - ./target
             - /home/circleci/.cargo/registry
@@ -38,7 +38,7 @@ jobs:
   precheck-msrv:
     resource_class: large
     docker: &docker
-      - image: jamwaffles/circleci-embedded-graphics:1.61.0-0
+      - image: jamwaffles/circleci-embedded-graphics:1.71.1-0
         auth:
           username: jamwaffles
           password: $DOCKERHUB_PASSWORD
