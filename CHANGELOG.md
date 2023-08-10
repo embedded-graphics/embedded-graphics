@@ -6,6 +6,18 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- [#730](https://github.com/embedded-graphics/embedded-graphics/pull/730) Made the following methods `const`:
+  - `MonoFontStyleBuilder::font`
+  - `MonoFontStyleBuilder::underline`
+  - `MonoFontStyleBuilder::strikethrough`
+  - `MonoFontStyleBuilder::reset_text_color`
+  - `MonoFontStyleBuilder::reset_background_color`
+  - `MonoFontStyleBuilder::reset_underline`
+  - `MonoFontStyleBuilder::reset_strikethrough`
+  - `MonoTextStyle::new`
+
 ## [0.8.0] - 2023-05-14
 
 ### Added
