@@ -227,6 +227,8 @@ macro_rules! rgb_color {
     };
 }
 
+rgb_color!(Rgb444, RawU16, u16, Rgb = (4, 4, 4));
+
 rgb_color!(Rgb555, RawU16, u16, Rgb = (5, 5, 5));
 rgb_color!(Bgr555, RawU16, u16, Bgr = (5, 5, 5));
 rgb_color!(Rgb565, RawU16, u16, Rgb = (5, 6, 5));
@@ -262,6 +264,13 @@ mod tests {
 
         assert_eq!(color.into(), value);
         assert_eq!(C::from(value), color);
+    }
+
+    #[test]
+    pub fn bit_positions_rgb444() {
+        test_bpp16(Rgb444::new(0b1001, 0, 0), 0b1001 << 4 + 4);
+        test_bpp16(Rgb444::new(0, 0b1001, 0), 0b1001 << 4);
+        test_bpp16(Rgb444::new(0, 0, 0b1001), 0b1001 << 0);
     }
 
     #[test]
@@ -322,6 +331,9 @@ mod tests {
 
     #[test]
     pub fn unused_bits_are_ignored() {
+        let color: Rgb444 = RawU16::from(0xFFFF).into();
+        assert_eq!(RawU16::from(color).into_inner(), 0xFFF);
+
         let color: Rgb555 = RawU16::from(0xFFFF).into();
         assert_eq!(RawU16::from(color).into_inner(), 0x7FFF);
 
