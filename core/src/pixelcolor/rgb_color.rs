@@ -1,5 +1,5 @@
 use crate::pixelcolor::{
-    raw::{RawData, RawU16, RawU24},
+    raw::{RawData, RawU12, RawU16, RawU24},
     PixelColor,
 };
 use core::fmt;
@@ -227,6 +227,8 @@ macro_rules! rgb_color {
     };
 }
 
+rgb_color!(Rgb444, RawU12, u16, Rgb = (4, 4, 4));
+
 rgb_color!(Rgb555, RawU16, u16, Rgb = (5, 5, 5));
 rgb_color!(Bgr555, RawU16, u16, Bgr = (5, 5, 5));
 rgb_color!(Rgb565, RawU16, u16, Rgb = (5, 6, 5));
@@ -322,6 +324,9 @@ mod tests {
 
     #[test]
     pub fn unused_bits_are_ignored() {
+        let color: Rgb444 = RawU12::from(0xFFFF).into();
+        assert_eq!(RawU12::from(color).into_inner(), 0xFFF);
+
         let color: Rgb555 = RawU16::from(0xFFFF).into();
         assert_eq!(RawU16::from(color).into_inner(), 0x7FFF);
 

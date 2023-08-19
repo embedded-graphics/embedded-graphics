@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- added `Rgb444` and `RawU12` to support 12bit RGB on ST7789 displays.
+
 ## [0.8.1] - 2023-08-10
 
 ### Changed
