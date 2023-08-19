@@ -116,7 +116,7 @@ where
 mod tests {
     use super::*;
     use crate::pixelcolor::{
-        Bgr565, Bgr666, Bgr888, BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb666, Rgb888,
+        Bgr565, Bgr666, Bgr888, BinaryColor, Gray2, Gray4, Gray8, Rgb444, Rgb565, Rgb666, Rgb888,
     };
 
     fn assert_all_orders<T>(value: T, bytes: T::Bytes)
@@ -151,6 +151,38 @@ mod tests {
     fn bpp8() {
         assert_all_orders(Gray8::new(0), [0]);
         assert_all_orders(Gray8::new(255), [255]);
+    }
+
+    #[test]
+    fn bpp12_rgb_be() {
+        assert_eq!(
+            Rgb444::new(15, 0, 0).to_be_bytes(),
+            [0b0000_1111, 0b000_00000]
+        );
+        assert_eq!(
+            Rgb444::new(0, 15, 0).to_be_bytes(),
+            [0b0000_0000, 0b1111_0000]
+        );
+        assert_eq!(
+            Rgb444::new(0, 0, 15).to_be_bytes(),
+            [0b0000_0000, 0b0000_1111]
+        );
+    }
+
+    #[test]
+    fn bpp12_rgb_le() {
+        assert_eq!(
+            Rgb444::new(15, 0, 0).to_le_bytes(),
+            [0b0000_0000, 0b1111_0000]
+        );
+        assert_eq!(
+            Rgb444::new(0, 15, 0).to_le_bytes(),
+            [0b1111_0000, 0b0000_0000]
+        );
+        assert_eq!(
+            Rgb444::new(0, 0, 15).to_le_bytes(),
+            [0b0000_1111, 0b0000_0000]
+        );
     }
 
     #[test]
