@@ -246,6 +246,64 @@ impl Rectangle {
         Rectangle::zero()
     }
 
+    /// Returns the minimum sized `Rectangle` that envelopes both `self` and `other`.
+    ///
+    /// # Examples
+    ///
+    /// ## Envelope
+    ///
+    /// This example draws two rectangles to a mock display using the `.` character, along with
+    /// their enveloping rectangle shown with `#` characters.
+    ///
+    /// ```rust
+    /// use embedded_graphics::{
+    ///     mock_display::MockDisplay, pixelcolor::BinaryColor, prelude::*,
+    ///     primitives::{Rectangle, PrimitiveStyle},
+    /// };
+    ///
+    /// let mut display = MockDisplay::new();
+    /// # display.set_allow_overdraw(true);
+    ///
+    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect2 = Rectangle::new(Point::new(2, 3), Size::new(10, 7));
+    ///
+    /// let envelope = rect1.envelope(&rect2);
+    ///
+    /// rect1
+    ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 1))
+    ///     .draw(&mut display)?;
+    ///
+    /// rect2
+    ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::Off, 1))
+    ///     .draw(&mut display)?;
+    ///
+    /// envelope
+    ///     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+    ///     .draw(&mut display)?;
+    ///
+    /// display.assert_pattern(&[
+    ///     "############",
+    ///     "#     .    #",
+    ///     "#     .    #",
+    ///     "# .........#",
+    ///     "# .   .    #",
+    ///     "# .   .    #",
+    ///     "# .   .    #",
+    ///     "#......    #",
+    ///     "# .        #",
+    ///     "############",
+    /// ]);
+    /// # Ok::<(), core::convert::Infallible>(())
+    /// ```
+    pub fn envelope(&self, other: &Rectangle) -> Rectangle {
+        let top_left = self.top_left.component_min(other.top_left);
+        let bottom_right = self
+            .anchor_point(AnchorPoint::BottomRight)
+            .component_max(other.anchor_point(AnchorPoint::BottomRight));
+
+        Rectangle::with_corners(top_left, bottom_right)
+    }
+
     /// Returns a resized copy of this rectangle.
     ///
     /// The rectangle is resized relative to the given anchor point.
@@ -585,6 +643,36 @@ mod tests {
 
         let even = Rectangle::new(Point::new(20, 30), Size::new(4, 8));
         assert_eq!(even.bottom_right(), Some(Point::new(23, 37)));
+    }
+
+    #[test]
+    fn rectangle_envelope() {
+        let rect1 = Rectangle::new(Point::new_equal(10), Size::new(20, 30));
+        let rect2 = Rectangle::new(Point::new_equal(20), Size::new(30, 40));
+
+        assert_eq!(
+            rect1.envelope(&rect2),
+            Rectangle::new(Point::new_equal(10), Size::new(40, 50))
+        );
+    }
+
+    #[test]
+    fn rectangle_no_envelope() {
+        let rect1 = Rectangle::new(Point::new_equal(10), Size::new(10, 10));
+        let rect2 = Rectangle::new(Point::new_equal(30), Size::new(10, 10));
+
+        assert_eq!(
+            rect1.envelope(&rect2),
+            Rectangle::new(Point::new_equal(10), Size::new(30, 30))
+        );
+    }
+
+    #[test]
+    fn rectangle_fully_envelope() {
+        let rect1 = Rectangle::new(Point::new_equal(10), Size::new(30, 30));
+        let rect2 = Rectangle::new(Point::new_equal(20), Size::new(10, 10));
+
+        assert_eq!(rect1.envelope(&rect2), rect1);
     }
 
     #[test]
