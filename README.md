@@ -154,14 +154,15 @@ Example usage of drawing primitives, text and images with embedded-graphics can 
 
 ### Shapes and text
 
-The following example draws some shapes and text to a [`MockDisplay`] in place of target
-hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
+The following example draws some shapes and text to a [`FrameBuffer`](crate::framebuffer::Framebuffer)
+in place of target hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
 debugging, development or if hardware is not available.
 
 ```rust
 use embedded_graphics::{
+    framebuffer::{buffer_size, Framebuffer},
     mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::BinaryColor,
+    pixelcolor::{raw::LittleEndian, BinaryColor},
     prelude::*,
     primitives::{
         Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
@@ -171,8 +172,15 @@ use embedded_graphics::{
 };
 
 fn main() -> Result<(), std::convert::Infallible> {
-    // Create a new mock display
-    let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+    // Create a new framebuffer
+    let mut display = Framebuffer::<
+       BinaryColor,
+       _,
+       LittleEndian,
+       320,
+       240,
+       { buffer_size::<BinaryColor>(320, 240) },
+  >::new();
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
