@@ -671,6 +671,26 @@ mod tests {
     }
 
     #[test]
+    fn rectangle_envelope_with_zero_along_axis() {
+        let rect1 = Rectangle::new(Point::new_equal(2), Size::new(5, 0));
+        let rect2 = Rectangle::new(Point::new_equal(3), Size::new(0, 6));
+
+        assert_eq!(
+            rect1.envelope(&rect2),
+            Rectangle::new(Point::new_equal(2), Size::new(5, 7))
+        );
+    }
+
+    #[test]
+    fn rectangle_envelope_zero_size_treated_as_one() {
+        let zero_sized = Rectangle::new(Point::new_equal(2), Size::zero());
+        assert_eq!(
+            zero_sized.envelope(&zero_sized),
+            Rectangle::new(Point::new_equal(2), Size::new_equal(1))
+        )
+    }
+
+    #[test]
     fn rectangle_envelope_all_zero_size() {
         let rect1 = Rectangle::new(Point::new_equal(2), Size::zero());
         let rect2 = Rectangle::new(Point::new_equal(11), Size::zero());
