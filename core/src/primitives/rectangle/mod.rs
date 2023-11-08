@@ -248,8 +248,9 @@ impl Rectangle {
 
     /// Returns the minimum sized `Rectangle` that envelopes both `self` and `other`.
     ///
-    /// For the purpose of this method, zero-sized [`Rectangle`]s will be treated
-    /// equivelant to 1x1 [`Rectangle`]s. This is done so that the [`Rectangle`] is
+    /// For the purpose of this method, [`Rectangle`]s will be treated as having a minimum
+    /// size of `1` along any specific axis. For example, an zero sized [`Rectangle`] will
+    /// be treated equivalent to 1x1 [`Rectangle`]. This is done so that the [`Rectangle`] is
     /// represented within the resulting bounding box, even if its [`Size`] would not
     /// result in it being drawn.
     ///

@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Add envelope() method to `Rectangle`
+
 ## [0.8.1] - 2023-08-10
 
 ### Changed
