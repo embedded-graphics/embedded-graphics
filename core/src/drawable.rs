@@ -1,6 +1,58 @@
 //! `Drawable` trait and helpers
 use crate::{draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor};
 
+/// A single pixel.
+///
+/// `Pixel` objects are used to specify the position and color of drawn pixels.
+///
+/// # Examples
+///
+/// The [`Drawable`] trait is implemented for `Pixel` which allows single pixels
+/// to be drawn to a [`DrawTarget`]:
+/// ```
+/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::new();
+///
+/// Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
+///
+/// Iterators with `Pixel` items can also be drawn:
+///
+/// ```
+/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
+/// # use embedded_graphics::mock_display::MockDisplay;
+/// # let mut display = MockDisplay::new();
+///
+/// (0..32)
+///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
+///     .draw(&mut display)?;
+/// # Ok::<(), core::convert::Infallible>(())
+/// ```
+///
+/// [`DrawTarget`]: crate::draw_target::DrawTarget
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
+pub struct Pixel<C>(pub Point, pub C)
+where
+    C: PixelColor;
+
+impl<C> Drawable for Pixel<C>
+where
+    C: PixelColor,
+{
+    type Color = C;
+    type Output = ();
+
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        target.draw_iter(core::iter::once(*self))
+    }
+}
+
 /// Marks an object as "drawable". Must be implemented for all graphics objects
 ///
 /// The `Drawable` trait describes how a particular graphical object is drawn. A `Drawable` object
@@ -106,57 +158,110 @@ pub trait Drawable {
         D: DrawTarget<Color = Self::Color>;
 }
 
-/// A single pixel.
-///
-/// `Pixel` objects are used to specify the position and color of drawn pixels.
-///
-/// # Examples
-///
-/// The [`Drawable`] trait is implemented for `Pixel` which allows single pixels
-/// to be drawn to a [`DrawTarget`]:
-/// ```
-/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::new();
-///
-/// Pixel(Point::new(1, 2), BinaryColor::On).draw(&mut display)?;
-/// # Ok::<(), core::convert::Infallible>(())
-/// ```
-///
-/// Iterators with `Pixel` items can also be drawn:
-///
-/// ```
-/// use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
-/// # use embedded_graphics::mock_display::MockDisplay;
-/// # let mut display = MockDisplay::new();
-///
-/// (0..32)
-///     .map(|i| Pixel(Point::new(i, i * 2), BinaryColor::On))
-///     .draw(&mut display)?;
-/// # Ok::<(), core::convert::Infallible>(())
-/// ```
-///
-/// [`DrawTarget`]: crate::draw_target::DrawTarget
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct Pixel<C>(pub Point, pub C)
-where
-    C: PixelColor;
-
-impl<C> Drawable for Pixel<C>
-where
-    C: PixelColor,
-{
-    type Color = C;
-    type Output = ();
+impl<T: Drawable> Drawable for &T {
+    type Color = T::Color;
+    type Output = T::Output;
 
     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
-        D: DrawTarget<Color = C>,
+        D: DrawTarget<Color = Self::Color>,
     {
-        target.draw_iter(core::iter::once(*self))
+        (**self).draw(target)
     }
 }
+
+impl<T: Drawable> Drawable for &mut T {
+    type Color = T::Color;
+    type Output = T::Output;
+
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        (**self).draw(target)
+    }
+}
+
+impl<T: Drawable, const N: usize> Drawable for [T; N] {
+    type Color = T::Color;
+    type Output = [T::Output; N];
+
+    // TODO: rewrite this funciton to use `slice::try_from_fn` once it is stabilized
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        let mut error = None;
+
+        let mut outputs: [_; N] = core::array::from_fn(|i| {
+            if error.is_some() {
+                None
+            } else {
+                match self[i].draw(target) {
+                    Ok(o) => Some(o),
+                    Err(e) => {
+                        error = Some(e);
+                        None
+                    }
+                }
+            }
+        });
+
+        if let Some(e) = error {
+            Err(e)
+        } else {
+            Ok(core::array::from_fn(|i| outputs[i].take().unwrap()))
+        }
+    }
+}
+
+macro_rules! tuple {
+    ($a:ident,) => {
+        #[doc = "This trait is implemented for tuples up to twelve items long."]
+        impl<$a> Drawable for ($a,)
+        where
+            $a: Drawable,
+        {
+            type Color = $a::Color;
+            type Output = ($a::Output,);
+
+            fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+            where
+                D: DrawTarget<Color = Self::Color>,
+            {
+                Ok((
+                    self.0.draw(target)?,
+                ))
+            }
+        }
+    };
+    ($a:ident, $($rest:ident,)+) => {
+        #[doc(hidden)]
+        impl<$a, $($rest,)+> Drawable for ($a, $($rest,)+)
+        where
+            $a: Drawable,
+            $($rest: Drawable<Color = $a::Color>,)+
+        {
+            type Color = $a::Color;
+            type Output = ($a::Output, $($rest::Output,)+);
+
+            #[allow(non_snake_case)]
+            fn draw<DIS>(&self, target: &mut DIS) -> Result<Self::Output, DIS::Error>
+            where
+                DIS: DrawTarget<Color = Self::Color>,
+            {
+                let ($a, $($rest,)+) = self;
+                Ok((
+                    $a.draw(target)?,
+                    $($rest.draw(target)?,)+
+                ))
+            }
+        }
+        tuple! { $($rest,)+ }
+    }
+}
+
+tuple!(L, K, J, I, H, G, F, E, D, C, B, A,);
 
 #[cfg(test)]
 mod tests {

@@ -40,12 +40,12 @@ use crate::primitives::Rectangle;
 ///
 /// The bounding box of [`ImageDrawable`]s must always start at the origin, therefore [`OriginDimensions`] must be implemented instead of this trait.
 ///
-/// [`Drawable`]: super::Drawable
-/// [`Drawable::draw`]: super::Drawable::draw
-/// [`DrawTarget`]: super::draw_target::DrawTarget
-/// [`ImageDrawable`]: super::image::ImageDrawable
-/// [`Rectangle`]: super::primitives::rectangle::Rectangle
-/// [`points`]: super::primitives::PointsIter
+/// [`Drawable`]: super::super::Drawable
+/// [`Drawable::draw`]: super::super::Drawable::draw
+/// [`DrawTarget`]: super::super::draw_target::DrawTarget
+/// [`ImageDrawable`]: super::super::image::ImageDrawable
+/// [`Rectangle`]: super::super::primitives::rectangle::Rectangle
+/// [`points`]: super::super::primitives::PointsIter
 /// [`MockDisplay::affected_area`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/mock_display/struct.MockDisplay.html#method.affected_area
 /// [`contains`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/trait.ContainsPoint.html#tymethod.contains
 /// [primitives]: https://docs.rs/embedded-graphics/latest/embedded_graphics/primitives/index.html
@@ -69,7 +69,7 @@ pub trait Dimensions {
 /// will always be at the origin, which will be the case for most display drivers. Some types, like [`ImageDrawable`],
 /// require a bounding box that starts at the origin and can only be used if [`OriginDimensions`] is implemented.
 ///
-/// [`ImageDrawable`]: super::image::ImageDrawable
+/// [`ImageDrawable`]: super::super::image::ImageDrawable
 pub trait OriginDimensions {
     /// Returns the size of the bounding box.
     fn size(&self) -> Size;
@@ -81,5 +81,123 @@ where
 {
     fn bounding_box(&self) -> Rectangle {
         Rectangle::new(Point::zero(), self.size())
+    }
+}
+
+impl<T: Dimensions, const N: usize> Dimensions for [T; N] {
+    fn bounding_box(&self) -> Rectangle {
+        // Proxy to the [T] implementation
+        self[..].bounding_box()
+    }
+}
+
+impl<T: Dimensions> Dimensions for [T] {
+    fn bounding_box(&self) -> Rectangle {
+        self.iter()
+            .map(|t| t.bounding_box())
+            .reduce(|bb, t| bb.envelope(&t))
+            .unwrap_or(Rectangle::zero())
+    }
+}
+
+macro_rules! tuple {
+    ($a:ident,) => {
+        #[doc = "This trait is implemented for tuples up to twelve items long."]
+        impl<$a:Dimensions> Dimensions for ($a,)
+        {
+            fn bounding_box(&self) -> Rectangle {
+                self.0.bounding_box()
+            }
+        }
+    };
+    ($a:ident, $($rest:ident,)+) => {
+        #[doc(hidden)]
+        impl<$a:Dimensions, $($rest:Dimensions),+> Dimensions for ($a, $($rest,)+)
+        {
+            #[allow(non_snake_case)]
+            fn bounding_box(&self) -> Rectangle {
+                let (a, $($rest),+) = self;
+                let bb = a.bounding_box();
+                $(let bb = $rest.bounding_box().envelope(&bb);)+
+                bb
+            }
+        }
+        tuple! { $($rest,)+ }
+    }
+}
+
+tuple!(L, K, J, I, H, G, F, E, D, C, B, A,);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dimension_slice_many_sizes() {
+        const CNT: usize = 10;
+        // An array of rectangles
+        let rects: [_; CNT] =
+            core::array::from_fn(|idx| Rectangle::new(Point::zero(), Size::new_equal(idx as u32)));
+
+        // Our expected bounding box
+        let bb = Rectangle::new(Point::zero(), Size::new_equal((CNT - 1) as u32));
+
+        // Confirm they match
+        assert_eq!(rects.bounding_box(), bb);
+    }
+
+    #[test]
+    fn dimension_slice_many_positions() {
+        const CNT: usize = 10;
+        // An array of rectangles
+        let rects: [_; CNT] = core::array::from_fn(|idx| {
+            Rectangle::new(Point::new_equal(idx as i32), Size::new_equal(1))
+        });
+
+        // Our expected bounding box
+        let bb = Rectangle::new(Point::zero(), Size::new_equal(CNT as u32));
+
+        // Confirm they match
+        assert_eq!(rects.bounding_box(), bb);
+    }
+
+    #[test]
+    fn dimension_tuple_many_sizes() {
+        // A tuple of rectangles
+        let rects = (
+            Rectangle::new(Point::zero(), Size::new_equal(0)),
+            Rectangle::new(Point::zero(), Size::new_equal(1)),
+            Rectangle::new(Point::zero(), Size::new_equal(2)),
+            Rectangle::new(Point::zero(), Size::new_equal(3)),
+            Rectangle::new(Point::zero(), Size::new_equal(4)),
+            Rectangle::new(Point::zero(), Size::new_equal(5)),
+            Rectangle::new(Point::zero(), Size::new_equal(6)),
+            Rectangle::new(Point::zero(), Size::new_equal(7)),
+            Rectangle::new(Point::zero(), Size::new_equal(8)),
+        );
+
+        // Our expected bounding box
+        let bb = Rectangle::new(Point::zero(), Size::new_equal(8));
+
+        // Confirm they match
+        assert_eq!(rects.bounding_box(), bb);
+    }
+
+    #[test]
+    fn dimension_tuple_many_positions() {
+        // A tuple of rectangles
+        let rects = (
+            Rectangle::new(Point::new_equal(0), Size::new_equal(1)),
+            Rectangle::new(Point::new_equal(1), Size::new_equal(1)),
+            Rectangle::new(Point::new_equal(2), Size::new_equal(1)),
+            Rectangle::new(Point::new_equal(3), Size::new_equal(1)),
+            Rectangle::new(Point::new_equal(4), Size::new_equal(1)),
+        );
+
+        // Our expected bounding box
+        let bb = Rectangle::new(Point::zero(), Size::new_equal(5));
+
+        // Confirm they match
+        assert_eq!(rects.bounding_box(), bb);
     }
 }

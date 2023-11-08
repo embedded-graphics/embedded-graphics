@@ -12,6 +12,9 @@
 
 ### Added
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Add envelope() method to `Rectangle`
+- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `Dimensions` for Slices, Arrays, and Tuples
+- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `PointsIter` for Arrays, Tuples, immutable references, and mutable references
+- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `Drawable` for Arrays, Tuples, immutable references, and mutable references
 
 ## [0.4.0] - 2023-05-14
 

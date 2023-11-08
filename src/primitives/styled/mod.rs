@@ -8,6 +8,14 @@ use crate::{
     Drawable,
 };
 
+pub use styled_dimensions::StyledDimensions;
+pub use styled_drawable::StyledDrawable;
+pub use styled_pixels::StyledPixels;
+
+mod styled_dimensions;
+mod styled_drawable;
+mod styled_pixels;
+
 /// Styled.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -135,32 +143,4 @@ impl<T: Transform, S: Clone> Transform for Styled<T, S> {
 
         self
     }
-}
-
-/// Styled drawable.
-pub trait StyledDrawable<S> {
-    /// Color type.
-    type Color: PixelColor;
-    /// Output type.
-    type Output;
-
-    /// Draws the primitive using the given style.
-    fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>;
-}
-
-/// Styled dimensions.
-pub trait StyledDimensions<S> {
-    /// Returns the bounding box using the given style.
-    fn styled_bounding_box(&self, style: &S) -> Rectangle;
-}
-
-/// Styled drawable.
-pub trait StyledPixels<S> {
-    /// Iterator type.
-    type Iter;
-
-    /// Returns an iterator over all pixels in this styled primitive.
-    fn pixels(&self, style: &S) -> Self::Iter;
 }
