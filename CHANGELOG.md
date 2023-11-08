@@ -9,14 +9,14 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Added
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Add envelope() method to `Rectangle`
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `Dimensions` for Slices, Arrays, and Tuples
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `PointsIter` for Arrays, Tuples, immutable references, and mutable references
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `Drawable` for Arrays, Tuples, immutable references, and mutable references
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `StyledDimensions` for Slices, Arrays, Tuples, immutable references, and mutable references
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `StyledDrawable` for Arrays, Tuples, immutable references, and mutable references
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `StyledPixels` for Arrays, Tuples, immutable references, and mutable references
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `ContainsPoint` for Slices, Arrays, Tuples, immutable references, and mutable references
-- [#734](https://github.com/embedded-graphics/embedded-graphics/pull/734) Implement `Transform` for Arrays and Tuples
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `Dimensions` for Slices, Arrays, and Tuples
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `PointsIter` for Arrays, Tuples, immutable references, and mutable references
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `Drawable` for Arrays, Tuples, immutable references, and mutable references
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `StyledDimensions` for Slices, Arrays, Tuples, immutable references, and mutable references
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `StyledDrawable` for Arrays, Tuples, immutable references, and mutable references
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `StyledPixels` for Arrays, Tuples, immutable references, and mutable references
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `ContainsPoint` for Slices, Arrays, Tuples, immutable references, and mutable references
+- [#735](https://github.com/embedded-graphics/embedded-graphics/pull/735) Implement `Transform` for Arrays and Tuples
 
 ## [0.8.1] - 2023-08-10
 
