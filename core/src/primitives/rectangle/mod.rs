@@ -248,9 +248,12 @@ impl Rectangle {
 
     /// Returns the minimum sized `Rectangle` that envelopes both `self` and `other`.
     ///
-    /// # Examples
+    /// For the purpose of this method, zero-sized [`Rectangle`]s will be treated
+    /// equivelant to 1x1 [`Rectangle`]s. This is done so that the [`Rectangle`] is
+    /// represented within the resulting bounding box, even if its [`Size`] would not
+    /// result in it being drawn.
     ///
-    /// ## Envelope
+    /// # Examples
     ///
     /// This example draws two rectangles to a mock display using the `.` character, along with
     /// their enveloping rectangle shown with `#` characters.
@@ -653,6 +656,28 @@ mod tests {
         assert_eq!(
             rect1.envelope(&rect2),
             Rectangle::new(Point::new_equal(10), Size::new(40, 50))
+        );
+    }
+
+    #[test]
+    fn rectangle_envelope_with_zero_size() {
+        let rect1 = Rectangle::new(Point::new_equal(2), Size::new(5, 5));
+        let rect2 = Rectangle::new(Point::new_equal(11), Size::zero());
+
+        assert_eq!(
+            rect1.envelope(&rect2),
+            Rectangle::new(Point::new_equal(2), Size::new_equal(10))
+        );
+    }
+
+    #[test]
+    fn rectangle_envelope_all_zero_size() {
+        let rect1 = Rectangle::new(Point::new_equal(2), Size::zero());
+        let rect2 = Rectangle::new(Point::new_equal(11), Size::zero());
+
+        assert_eq!(
+            rect1.envelope(&rect2),
+            Rectangle::new(Point::new_equal(2), Size::new_equal(10))
         );
     }
 
