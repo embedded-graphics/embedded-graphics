@@ -14,7 +14,7 @@ pub trait PointsIter {
     fn points(&self) -> Self::Iter;
 }
 
-impl<T: PointsIter> PointsIter for &T {
+impl<T: PointsIter + ?Sized> PointsIter for &T {
     type Iter = T::Iter;
 
     fn points(&self) -> Self::Iter {
@@ -22,7 +22,7 @@ impl<T: PointsIter> PointsIter for &T {
     }
 }
 
-impl<T: PointsIter> PointsIter for &mut T {
+impl<T: PointsIter + ?Sized> PointsIter for &mut T {
     type Iter = T::Iter;
 
     fn points(&self) -> Self::Iter {

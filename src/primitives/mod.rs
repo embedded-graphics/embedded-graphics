@@ -57,13 +57,13 @@ pub trait ContainsPoint {
     fn contains(&self, point: Point) -> bool;
 }
 
-impl<T: ContainsPoint> ContainsPoint for &T {
+impl<T: ContainsPoint + ?Sized> ContainsPoint for &T {
     fn contains(&self, point: Point) -> bool {
         (**self).contains(point)
     }
 }
 
-impl<T: ContainsPoint> ContainsPoint for &mut T {
+impl<T: ContainsPoint + ?Sized> ContainsPoint for &mut T {
     fn contains(&self, point: Point) -> bool {
         (**self).contains(point)
     }

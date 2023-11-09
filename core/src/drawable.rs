@@ -158,7 +158,7 @@ pub trait Drawable {
         D: DrawTarget<Color = Self::Color>;
 }
 
-impl<T: Drawable> Drawable for &T {
+impl<T: Drawable + ?Sized> Drawable for &T {
     type Color = T::Color;
     type Output = T::Output;
 
@@ -170,7 +170,7 @@ impl<T: Drawable> Drawable for &T {
     }
 }
 
-impl<T: Drawable> Drawable for &mut T {
+impl<T: Drawable + ?Sized> Drawable for &mut T {
     type Color = T::Color;
     type Output = T::Output;
 

@@ -13,7 +13,7 @@ pub trait StyledDrawable<S> {
         D: DrawTarget<Color = Self::Color>;
 }
 
-impl<S, T: StyledDrawable<S>> StyledDrawable<S> for &T {
+impl<S, T: StyledDrawable<S> + ?Sized> StyledDrawable<S> for &T {
     type Color = T::Color;
     type Output = T::Output;
 
@@ -25,7 +25,7 @@ impl<S, T: StyledDrawable<S>> StyledDrawable<S> for &T {
     }
 }
 
-impl<S, T: StyledDrawable<S>> StyledDrawable<S> for &mut T {
+impl<S, T: StyledDrawable<S> + ?Sized> StyledDrawable<S> for &mut T {
     type Color = T::Color;
     type Output = T::Output;
 
