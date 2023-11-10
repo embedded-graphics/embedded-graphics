@@ -9,6 +9,12 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Added
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Add envelope() method to `Rectangle`
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `PointsIter` for immutable and mutable references
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `Drawable` for immutable references and mutable references
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `StyledDimensions` for immutable and mutable references
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `StyledDrawable` for immutable and mutable references
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `StyledPixels` for immutable and mutable references
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `ContainsPoint` for immutable and mutable references
 
 ## [0.8.1] - 2023-08-10
 
