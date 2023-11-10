@@ -6,18 +6,6 @@ pub trait StyledDimensions<S> {
     fn styled_bounding_box(&self, style: &S) -> Rectangle;
 }
 
-impl<S, T: StyledDimensions<S> + ?Sized> StyledDimensions<S> for &T {
-    fn styled_bounding_box(&self, style: &S) -> Rectangle {
-        (**self).styled_bounding_box(style)
-    }
-}
-
-impl<S, T: StyledDimensions<S> + ?Sized> StyledDimensions<S> for &mut T {
-    fn styled_bounding_box(&self, style: &S) -> Rectangle {
-        (**self).styled_bounding_box(style)
-    }
-}
-
 impl<S, T, const N: usize> StyledDimensions<S> for [T; N]
 where
     T: StyledDimensions<S>,

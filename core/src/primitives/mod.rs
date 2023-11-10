@@ -1,5 +1,5 @@
 //! Core primitives.
-//!
+
 pub mod rectangle;
 
 use crate::geometry::Point;
@@ -12,22 +12,6 @@ pub trait PointsIter {
 
     /// Returns an iterator over all points inside the primitive.
     fn points(&self) -> Self::Iter;
-}
-
-impl<T: PointsIter + ?Sized> PointsIter for &T {
-    type Iter = T::Iter;
-
-    fn points(&self) -> Self::Iter {
-        (**self).points()
-    }
-}
-
-impl<T: PointsIter + ?Sized> PointsIter for &mut T {
-    type Iter = T::Iter;
-
-    fn points(&self) -> Self::Iter {
-        (**self).points()
-    }
 }
 
 impl<T: PointsIter, const N: usize> PointsIter for [T; N] {

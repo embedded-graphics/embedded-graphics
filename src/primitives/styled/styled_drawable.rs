@@ -13,30 +13,6 @@ pub trait StyledDrawable<S> {
         D: DrawTarget<Color = Self::Color>;
 }
 
-impl<S, T: StyledDrawable<S> + ?Sized> StyledDrawable<S> for &T {
-    type Color = T::Color;
-    type Output = T::Output;
-
-    fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        (**self).draw_styled(style, target)
-    }
-}
-
-impl<S, T: StyledDrawable<S> + ?Sized> StyledDrawable<S> for &mut T {
-    type Color = T::Color;
-    type Output = T::Output;
-
-    fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        (**self).draw_styled(style, target)
-    }
-}
-
 impl<S, T, const N: usize> StyledDrawable<S> for [T; N]
 where
     T: StyledDrawable<S>,

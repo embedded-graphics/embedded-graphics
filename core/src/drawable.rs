@@ -158,30 +158,6 @@ pub trait Drawable {
         D: DrawTarget<Color = Self::Color>;
 }
 
-impl<T: Drawable + ?Sized> Drawable for &T {
-    type Color = T::Color;
-    type Output = T::Output;
-
-    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        (**self).draw(target)
-    }
-}
-
-impl<T: Drawable + ?Sized> Drawable for &mut T {
-    type Color = T::Color;
-    type Output = T::Output;
-
-    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
-    where
-        D: DrawTarget<Color = Self::Color>,
-    {
-        (**self).draw(target)
-    }
-}
-
 impl<T: Drawable, const N: usize> Drawable for [T; N] {
     type Color = T::Color;
     type Output = [T::Output; N];

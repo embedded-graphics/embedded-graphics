@@ -7,22 +7,6 @@ pub trait StyledPixels<S> {
     fn pixels(&self, style: &S) -> Self::Iter;
 }
 
-impl<S, T: StyledPixels<S> + ?Sized> StyledPixels<S> for &T {
-    type Iter = T::Iter;
-
-    fn pixels(&self, style: &S) -> Self::Iter {
-        (**self).pixels(style)
-    }
-}
-
-impl<S, T: StyledPixels<S> + ?Sized> StyledPixels<S> for &mut T {
-    type Iter = T::Iter;
-
-    fn pixels(&self, style: &S) -> Self::Iter {
-        (**self).pixels(style)
-    }
-}
-
 impl<S, T: StyledPixels<S>, const N: usize> StyledPixels<S> for [T; N] {
     type Iter = core::array::IntoIter<T::Iter, N>;
 
