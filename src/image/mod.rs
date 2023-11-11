@@ -84,15 +84,14 @@
 //!
 //! # Implementing new image formats
 //!
-//! To add embedded-graphics support for an new image format the [`ImageDrawable`] and
-//! [`OriginDimensions`] traits must be implemented. See the [`ImageDrawable`] documentation
-//! for more information.
+//! To add embedded-graphics support for an new image format the
+//! [`ImageDrawable`] trait must be implemented. See the [`ImageDrawable`]
+//! documentation for more information.
 //!
 //! [tinytga]: https://crates.io/crates/tinytga
 //! [tinybmp]: https://crates.io/crates/tinybmp
 //! [raw pixel data]: ImageRaw
 //! [`sub_image`]: ImageDrawableExt::sub_image
-//! [`OriginDimensions`]: super::geometry::OriginDimensions
 //! [`prelude`]: super::prelude
 
 mod image_drawable_ext;
@@ -106,7 +105,7 @@ pub use sub_image::SubImage;
 
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt},
-    geometry::{Dimensions, OriginDimensions, Point},
+    geometry::{Dimensions, Point},
     primitives::Rectangle,
     transform::Transform,
     Drawable,
@@ -240,10 +239,10 @@ where
 
 impl<'a, T> Dimensions for Image<'a, T>
 where
-    T: OriginDimensions,
+    T: ImageDrawable,
 {
     fn bounding_box(&self) -> Rectangle {
-        self.image_drawable.bounding_box().translate(self.offset)
+        Rectangle::new(self.offset, self.image_drawable.size())
     }
 }
 

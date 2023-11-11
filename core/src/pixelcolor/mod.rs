@@ -52,9 +52,9 @@
 //!     }
 //! }
 //!
-//! impl OriginDimensions for EpdDisplay {
-//!     fn size(&self) -> Size {
-//!         Size::new(300, 300)
+//! impl Dimensions for EpdDisplay {
+//!     fn bounding_box(&self) -> Rectangle {
+//!         Rectangle::new(Point::zero(), Size::new(300, 300))
 //!     }
 //! }
 //!

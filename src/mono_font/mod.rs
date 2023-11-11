@@ -54,8 +54,8 @@ pub use generated::*;
 pub use mono_text_style::{MonoTextStyle, MonoTextStyleBuilder};
 
 use crate::{
-    geometry::{OriginDimensions, Point, Size},
-    image::{ImageRaw, SubImage},
+    geometry::{Point, Size},
+    image::{ImageDrawable, ImageRaw, SubImage},
     mono_font::mapping::GlyphMapping,
     pixelcolor::BinaryColor,
     primitives::Rectangle,

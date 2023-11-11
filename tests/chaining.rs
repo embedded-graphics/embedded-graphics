@@ -32,9 +32,9 @@ impl DrawTarget for FakeDisplay {
     }
 }
 
-impl OriginDimensions for FakeDisplay {
-    fn size(&self) -> Size {
-        Size::zero()
+impl Dimensions for FakeDisplay {
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::zero()
     }
 }
 

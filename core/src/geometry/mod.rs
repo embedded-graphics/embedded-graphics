@@ -41,11 +41,7 @@ use crate::primitives::Rectangle;
 /// the correct dimensions.
 ///
 /// [`DrawTarget`]s  (display drivers, etc) are required to implement `Dimensions`. The
-/// implementation must return a rectangle representing the drawing area. For display
-/// drivers it is recommended to implement [`OriginDimensions`] instead of implementing `Dimensions` directly,
-/// if the top left corner of the display area is at the origin `(0, 0)`.
-///
-/// The bounding box of [`ImageDrawable`]s must always start at the origin, therefore [`OriginDimensions`] must be implemented instead of this trait.
+/// implementation must return a rectangle representing the drawing area.
 ///
 /// [`Drawable`]: super::Drawable
 /// [`Drawable::draw`]: super::Drawable::draw
@@ -63,32 +59,6 @@ use crate::primitives::Rectangle;
 pub trait Dimensions {
     /// Returns the bounding box.
     fn bounding_box(&self) -> Rectangle;
-}
-
-/// Dimensions with `top_left` of the bounding box at `(0, 0)`.
-///
-/// A blanket implementation of `Dimensions` is provided for all types that implement this trait.
-/// See the [`Dimensions`] trait documentation for more information about bounding boxes.
-///
-/// # Implementation notes
-///
-/// This trait should be implemented instead of [`Dimensions`] if the top left corner of the bounding box
-/// will always be at the origin, which will be the case for most display drivers. Some types, like [`ImageDrawable`],
-/// require a bounding box that starts at the origin and can only be used if [`OriginDimensions`] is implemented.
-///
-/// [`ImageDrawable`]: super::image::ImageDrawable
-pub trait OriginDimensions {
-    /// Returns the size of the bounding box.
-    fn size(&self) -> Size;
-}
-
-impl<T> Dimensions for T
-where
-    T: OriginDimensions,
-{
-    fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(Point::zero(), self.size())
-    }
 }
 
 /// Anchor point.

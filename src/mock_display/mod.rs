@@ -186,7 +186,7 @@ mod fancy_panic;
 
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, OriginDimensions, Point, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::{PixelColor, Rgb888, RgbColor},
     primitives::{PointsIter, Rectangle},
     Pixel,
@@ -718,12 +718,12 @@ where
     }
 }
 
-impl<C> OriginDimensions for MockDisplay<C>
+impl<C> Dimensions for MockDisplay<C>
 where
     C: PixelColor,
 {
-    fn size(&self) -> Size {
-        DISPLAY_AREA.size
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), DISPLAY_AREA.size)
     }
 }
 
