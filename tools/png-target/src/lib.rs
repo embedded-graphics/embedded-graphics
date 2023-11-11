@@ -105,9 +105,12 @@ impl DrawTarget for PngTarget<Rgb888> {
     }
 }
 
-impl<C: EgToImageColor> OriginDimensions for PngTarget<C> {
-    fn size(&self) -> Size {
-        Size::new(self.image.width(), self.image.height())
+impl<C: EgToImageColor> Dimensions for PngTarget<C> {
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(
+            Point::zero(),
+            Size::new(self.image.width(), self.image.height()),
+        )
     }
 }
 

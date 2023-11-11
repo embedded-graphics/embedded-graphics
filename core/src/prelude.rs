@@ -4,7 +4,7 @@
 pub use crate::{
     draw_target::DrawTarget,
     drawable::{Drawable, Pixel},
-    geometry::{Dimensions, OriginDimensions, Point, Size},
+    geometry::{Dimensions, Point, Size},
     image::ImageDrawable,
     pixelcolor::{
         raw::{RawData, ToBytes as _},
