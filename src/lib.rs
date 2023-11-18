@@ -74,6 +74,7 @@
 //! * [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
 //! * [push2_display](https://crates.io/crates/push2_display): Ableton Push2 embedded-graphics display driver
 //! * [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
+//! * [sh1108](https://crates.io/crates/sh1108): I2C/SPI driver for the SH1108 OLED display
 //! * [smart-leds-matrix](https://github.com/smart-leds-rs/smart-leds-matrix): Driver for smart LED (like ws2812) based LED matrixes.
 //! * [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
 //! * [ssd1309](https://crates.io/crates/ssd1309): I2C/SPI driver for the SSD1309 OLED display written in 100% Rust.
