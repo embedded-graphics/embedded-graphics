@@ -74,6 +74,7 @@
 //! * [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
 //! * [push2_display](https://crates.io/crates/push2_display): Ableton Push2 embedded-graphics display driver
 //! * [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
+//! * [sh1108](https://crates.io/crates/sh1108): I2C/SPI driver for the SH1108 OLED display
 //! * [smart-leds-matrix](https://github.com/smart-leds-rs/smart-leds-matrix): Driver for smart LED (like ws2812) based LED matrixes.
 //! * [ssd1306](https://crates.io/crates/ssd1306): I2C and SPI (4 wire) driver for the SSD1306 OLED display
 //! * [ssd1309](https://crates.io/crates/ssd1309): I2C/SPI driver for the SSD1309 OLED display written in 100% Rust.
@@ -142,14 +143,15 @@
 //!
 //! ## Shapes and text
 //!
-//! The following example draws some shapes and text to a [`MockDisplay`] in place of target
-//! hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
+//! The following example draws some shapes and text to a [`FrameBuffer`](crate::framebuffer::Framebuffer)
+//! in place of target hardware. The [simulator](https://docs.rs/embedded-graphics-simulator/) can also be used for
 //! debugging, development or if hardware is not available.
 //!
 //! ```rust,no_run
 //! use embedded_graphics::{
+//!     framebuffer::{buffer_size, Framebuffer},
 //!     mono_font::{ascii::FONT_6X10, MonoTextStyle},
-//!     pixelcolor::BinaryColor,
+//!     pixelcolor::{raw::LittleEndian, BinaryColor},
 //!     prelude::*,
 //!     primitives::{
 //!         Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
@@ -159,9 +161,15 @@
 //! };
 //!
 //! fn main() -> Result<(), std::convert::Infallible> {
-//!     // Create a new mock display
-//!     let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
-//! #   display.set_allow_overdraw(true);
+//!     // Create a new framebuffer
+//!     let mut display = Framebuffer::<
+//!        BinaryColor,
+//!        _,
+//!        LittleEndian,
+//!        320,
+//!        240,
+//!        { buffer_size::<BinaryColor>(320, 240) },
+//!   >::new();
 //!
 //!     // Create styles used by the drawing operations.
 //!     let thin_stroke = PrimitiveStyle::with_stroke(BinaryColor::On, 1);
