@@ -32,7 +32,7 @@ use crate::{
 /// acceleration only the [`draw_iter`] method and [`OriginDimensions`] trait need to be implemented.
 ///
 /// To reduce the overhead caused by communicating with the display for each drawing operation
-/// the display driver uses and framebuffer to store the pixel data in memory. This way all drawing
+/// the display driver uses a framebuffer to store the pixel data in memory. This way all drawing
 /// operations can be executed in local memory and the actual display is only updated on demand
 /// by calling the `flush` method.
 ///
