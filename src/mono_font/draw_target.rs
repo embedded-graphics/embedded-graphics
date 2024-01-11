@@ -1,6 +1,6 @@
 use crate::{
-    draw_target::DrawTarget, geometry::Dimensions, iterator::ContiguousIteratorExt,
-    pixelcolor::BinaryColor, primitives::Rectangle, Pixel,
+    draw_target::DrawTarget, geometry::Dimensions, geometry::Point, geometry::Size,
+    iterator::ContiguousIteratorExt, pixelcolor::BinaryColor, primitives::Rectangle, Pixel,
 };
 
 pub struct MonoFontDrawTarget<'a, T, C> {
@@ -24,13 +24,24 @@ impl<T: DrawTarget> DrawTarget for MonoFontDrawTarget<'_, T, Foreground<T::Color
     {
         let foreground_color = self.colors.0;
 
-        self.parent.draw_iter(
-            colors
-                .into_iter()
-                .into_pixels(area)
-                .filter(|Pixel(_, color)| color.is_on())
-                .map(|Pixel(pos, _)| Pixel(pos, foreground_color)),
-        )
+        let mut colors = colors.into_iter().fuse();
+
+        for y in (area.top_left.y..).take(area.size.height as usize) {
+            let x_iter = (area.top_left.x..).take(area.size.width as usize);
+            let mut row_pixels = x_iter.zip(colors.by_ref());
+
+            while let Some((start_x, _)) = row_pixels.find(|(_, color)| color.is_on()) {
+                let extra = row_pixels
+                    .by_ref()
+                    .take_while(|(_, color)| color.is_on())
+                    .count();
+                let width = 1 + extra;
+                let section = Rectangle::new(Point::new(start_x, y), Size::new(width as _, 1));
+                self.parent.fill_solid(&section, foreground_color)?;
+            }
+        }
+
+        Ok(())
     }
 
     fn draw_iter<I>(&mut self, _pixels: I) -> Result<(), Self::Error>
