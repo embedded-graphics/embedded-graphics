@@ -16,7 +16,7 @@ A core goal of embedded-graphics is to draw graphics without using any buffers; 
 `no_std` compatible and works without a dynamic memory allocator, and without pre-allocating
 large chunks of memory. To achieve this, it takes an `Iterator` based approach, where pixel
 colors and positions are calculated on the fly, with the minimum of saved state. This allows the
-consuming application to use far less RAM at little to no performance penalty.
+consuming application to use far less RAM, albeit with a significant performance penalty.
 
 It contains built in items that make it easy to draw 2D graphics primitives:
 
