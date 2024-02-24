@@ -65,6 +65,24 @@ pub trait Dimensions {
     fn bounding_box(&self) -> Rectangle;
 }
 
+impl<D> Dimensions for &D
+where
+    D: Dimensions,
+{
+    fn bounding_box(&self) -> Rectangle {
+        (**self).bounding_box()
+    }
+}
+
+impl<D> Dimensions for &mut D
+where
+    D: Dimensions,
+{
+    fn bounding_box(&self) -> Rectangle {
+        (**self).bounding_box()
+    }
+}
+
 /// Dimensions with `top_left` of the bounding box at `(0, 0)`.
 ///
 /// A blanket implementation of `Dimensions` is provided for all types that implement this trait.
@@ -77,19 +95,37 @@ pub trait Dimensions {
 /// require a bounding box that starts at the origin and can only be used if [`OriginDimensions`] is implemented.
 ///
 /// [`ImageDrawable`]: super::image::ImageDrawable
-pub trait OriginDimensions {
+pub trait OriginDimensions: Dimensions {
     /// Returns the size of the bounding box.
     fn size(&self) -> Size;
 }
 
-impl<T> Dimensions for T
+impl<D> OriginDimensions for &D
 where
-    T: OriginDimensions,
+    D: OriginDimensions,
 {
-    fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(Point::zero(), self.size())
+    fn size(&self) -> Size {
+        (**self).size()
     }
 }
+
+impl<D> OriginDimensions for &mut D
+where
+    D: OriginDimensions,
+{
+    fn size(&self) -> Size {
+        (**self).size()
+    }
+}
+
+// impl<T> Dimensions for T
+// where
+//     T: OriginDimensions,
+// {
+//     fn bounding_box(&self) -> Rectangle {
+//         Rectangle::new(Point::zero(), self.size())
+//     }
+// }
 
 /// Anchor point.
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Copy, Clone)]

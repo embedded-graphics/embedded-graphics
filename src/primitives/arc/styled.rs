@@ -156,7 +156,9 @@ mod tests {
 
                 // Draw expected display by clipping the circle to the quadrant.
                 let mut expected = MockDisplay::new();
-                circle.draw(&mut expected.clipped(&clip_rect)).unwrap();
+                circle
+                    .draw(&mut (&mut expected).clipped(&clip_rect))
+                    .unwrap();
 
                 // Draw the arc.
                 let mut display = MockDisplay::new();

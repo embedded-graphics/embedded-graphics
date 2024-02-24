@@ -1,3 +1,5 @@
+use embedded_graphics_core::prelude::{Dimensions, Point};
+
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt, Translated},
     geometry::{OriginDimensions, Size},
@@ -12,19 +14,19 @@ use crate::{
 ///
 /// [`cropped`]: DrawTargetExt::cropped
 #[derive(Debug)]
-pub struct Cropped<'a, T>
+pub struct Cropped<T>
 where
     T: DrawTarget,
 {
-    parent: Translated<'a, T>,
+    parent: Translated<T>,
     size: Size,
 }
 
-impl<'a, T> Cropped<'a, T>
+impl<T> Cropped<T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(parent: &'a mut T, area: &Rectangle) -> Self {
+    pub(super) fn new(parent: T, area: &Rectangle) -> Self {
         let area = area.intersection(&parent.bounding_box());
 
         Self {
@@ -34,7 +36,7 @@ where
     }
 }
 
-impl<T> DrawTarget for Cropped<'_, T>
+impl<T> DrawTarget for Cropped<T>
 where
     T: DrawTarget,
 {
@@ -60,12 +62,21 @@ where
     }
 }
 
-impl<T> OriginDimensions for Cropped<'_, T>
+impl<T> OriginDimensions for Cropped<T>
 where
     T: DrawTarget,
 {
     fn size(&self) -> Size {
         self.size
+    }
+}
+
+impl<T> Dimensions for Cropped<T>
+where
+    T: DrawTarget,
+{
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), self.size)
     }
 }
 
@@ -86,7 +97,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(2, 3), Size::new(10, 10));
-        let mut cropped = display.cropped(&area);
+        let mut cropped = (&mut display).cropped(&area);
 
         let pixels = [
             Pixel(Point::new(0, 0), BinaryColor::On),
@@ -109,7 +120,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(10, 10));
-        let mut cropped = display.cropped(&area);
+        let mut cropped = (&mut display).cropped(&area);
 
         let colors = [
             1, 1, 1, 1, 1, //
@@ -139,7 +150,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(10, 10));
-        let mut cropped = display.cropped(&area);
+        let mut cropped = (&mut display).cropped(&area);
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(3, 4));
         cropped.fill_solid(&area, BinaryColor::On).unwrap();
@@ -161,7 +172,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
-        let mut cropped = display.cropped(&area);
+        let mut cropped = (&mut display).cropped(&area);
         cropped.clear(BinaryColor::On).unwrap();
 
         let mut expected = MockDisplay::new();
@@ -174,7 +185,7 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
 
         let size = Size::new(3, 4);
         let area = Rectangle::new(Point::new(1, 3), size);
@@ -185,7 +196,7 @@ mod tests {
 
     #[test]
     fn bounding_box_is_clipped() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
         let display_bb = display.bounding_box();
 
         let top_left = Point::new(10, 20);
