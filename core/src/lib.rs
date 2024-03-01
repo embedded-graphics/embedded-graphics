@@ -43,7 +43,6 @@
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 //! [`Rectangle`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_primitives-core/rectangle/struct.Rectangle.html
 //! [`Dimensions`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/trait.Dimensions.html
-//! [`OriginDimensions`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/geometry/trait.OriginDimensions.html
 //! [`BinaryColor`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/enum.BinaryColor.html
 //! [`Rgb888`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/pixelcolor/struct.Rgb888.html
 //! [`ImageDrawable`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/image/trait.ImageDrawable.html
@@ -63,7 +62,6 @@
 //! [`DrawTarget`]: draw_target::DrawTarget
 //! [`Rectangle`]: primitives::rectangle::Rectangle
 //! [`Dimensions`]: geometry::Dimensions
-//! [`OriginDimensions`]: geometry::OriginDimensions
 //! [`BinaryColor`]: pixelcolor::BinaryColor
 //! [`Rgb888`]: pixelcolor::Rgb888
 //! [`ImageDrawable`]: image::ImageDrawable

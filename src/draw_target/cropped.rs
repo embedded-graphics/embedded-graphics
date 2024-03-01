@@ -1,6 +1,6 @@
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt, Translated},
-    geometry::{OriginDimensions, Size},
+    geometry::{Dimensions, Point, Size},
     primitives::Rectangle,
     Pixel,
 };
@@ -60,12 +60,12 @@ where
     }
 }
 
-impl<T> OriginDimensions for Cropped<'_, T>
+impl<T> Dimensions for Cropped<'_, T>
 where
     T: DrawTarget,
 {
-    fn size(&self) -> Size {
-        self.size
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), self.size)
     }
 }
 
