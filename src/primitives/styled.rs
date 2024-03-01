@@ -150,17 +150,69 @@ pub trait StyledDrawable<S> {
         D: DrawTarget<Color = Self::Color>;
 }
 
+impl<S, T: StyledDrawable<S> + ?Sized> StyledDrawable<S> for &T {
+    type Color = T::Color;
+    type Output = T::Output;
+
+    fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        (**self).draw_styled(style, target)
+    }
+}
+
+impl<S, T: StyledDrawable<S> + ?Sized> StyledDrawable<S> for &mut T {
+    type Color = T::Color;
+    type Output = T::Output;
+
+    fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        (**self).draw_styled(style, target)
+    }
+}
+
 /// Styled dimensions.
 pub trait StyledDimensions<S> {
     /// Returns the bounding box using the given style.
     fn styled_bounding_box(&self, style: &S) -> Rectangle;
 }
 
-/// Styled drawable.
+impl<S, T: StyledDimensions<S> + ?Sized> StyledDimensions<S> for &T {
+    fn styled_bounding_box(&self, style: &S) -> Rectangle {
+        (**self).styled_bounding_box(style)
+    }
+}
+
+impl<S, T: StyledDimensions<S> + ?Sized> StyledDimensions<S> for &mut T {
+    fn styled_bounding_box(&self, style: &S) -> Rectangle {
+        (**self).styled_bounding_box(style)
+    }
+}
+
+/// Styled Pixels.
 pub trait StyledPixels<S> {
     /// Iterator type.
     type Iter;
 
     /// Returns an iterator over all pixels in this styled primitive.
     fn pixels(&self, style: &S) -> Self::Iter;
+}
+
+impl<S, T: StyledPixels<S> + ?Sized> StyledPixels<S> for &T {
+    type Iter = T::Iter;
+
+    fn pixels(&self, style: &S) -> Self::Iter {
+        (**self).pixels(style)
+    }
+}
+
+impl<S, T: StyledPixels<S> + ?Sized> StyledPixels<S> for &mut T {
+    type Iter = T::Iter;
+
+    fn pixels(&self, style: &S) -> Self::Iter {
+        (**self).pixels(style)
+    }
 }

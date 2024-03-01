@@ -12,6 +12,8 @@
 
 ### Added
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Add envelope() method to `Rectangle`
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `PointsIter` for immutable and mutable references
+- [#736](https://github.com/embedded-graphics/embedded-graphics/pull/736) Implement `Drawable` for immutable references and mutable references
 
 ## [0.4.0] - 2023-05-14
 

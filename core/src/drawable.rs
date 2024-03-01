@@ -106,6 +106,30 @@ pub trait Drawable {
         D: DrawTarget<Color = Self::Color>;
 }
 
+impl<T: Drawable + ?Sized> Drawable for &T {
+    type Color = T::Color;
+    type Output = T::Output;
+
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        (**self).draw(target)
+    }
+}
+
+impl<T: Drawable + ?Sized> Drawable for &mut T {
+    type Color = T::Color;
+    type Output = T::Output;
+
+    fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        (**self).draw(target)
+    }
+}
+
 /// A single pixel.
 ///
 /// `Pixel` objects are used to specify the position and color of drawn pixels.
