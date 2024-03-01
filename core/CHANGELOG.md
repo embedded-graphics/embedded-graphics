@@ -11,7 +11,9 @@
 - (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1
 
 ### Added
-- [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Add envelope() method to `Rectangle`
+
+- [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
+- [#738](https://github.com/embedded-graphics/embedded-graphics/pull/738) Added `new_at_origin` method to `Rectangle`.
 
 ## [0.4.0] - 2023-05-14
 

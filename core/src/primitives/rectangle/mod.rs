@@ -83,6 +83,14 @@ impl Rectangle {
         Rectangle { top_left, size }
     }
 
+    /// Creates a new rectangle with the given size and the top left corner at the origin.
+    pub const fn new_at_origin(size: Size) -> Self {
+        Rectangle {
+            top_left: Point::zero(),
+            size,
+        }
+    }
+
     /// Creates a new rectangle from two corners.
     pub fn with_corners(corner_1: Point, corner_2: Point) -> Self {
         let left = min(corner_1.x, corner_2.x);
