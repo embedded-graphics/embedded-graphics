@@ -12,7 +12,7 @@ pub use color_converted::ColorConverted;
 pub use cropped::Cropped;
 pub use translated::Translated;
 
-pub use embedded_graphics_core::draw_target::DrawTarget;
+pub use embedded_graphics_core::draw_target::*;
 
 /// Extension trait for `DrawTarget`s.
 pub trait DrawTargetExt: DrawTarget + Sized {
