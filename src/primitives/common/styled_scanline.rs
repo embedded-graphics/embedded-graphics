@@ -64,3 +64,31 @@ impl StyledScanline {
         self.stroke_right().draw(target, stroke_color)
     }
 }
+
+#[cfg(feature = "async_draw")]
+use crate::draw_target::AsyncDrawTarget;
+
+#[cfg(feature = "async_draw")]
+impl StyledScanline {
+    /// Draws the stroke regions.
+    pub async fn draw_stroke_async<T: AsyncDrawTarget>(
+        &self,
+        target: &mut T,
+        stroke_color: T::Color,
+    ) -> Result<(), T::Error> {
+        self.stroke_left().draw_async(target, stroke_color).await?;
+        self.stroke_right().draw_async(target, stroke_color).await
+    }
+
+    /// Draws the stroke and fill regions.
+    pub async fn draw_stroke_and_fill_async<T: AsyncDrawTarget>(
+        &self,
+        target: &mut T,
+        stroke_color: T::Color,
+        fill_color: T::Color,
+    ) -> Result<(), T::Error> {
+        self.stroke_left().draw_async(target, stroke_color).await?;
+        self.fill().draw_async(target, fill_color).await?;
+        self.stroke_right().draw_async(target, stroke_color).await
+    }
+}

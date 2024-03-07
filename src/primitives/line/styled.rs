@@ -10,6 +10,11 @@ use crate::{
 };
 use az::SaturatingAs;
 
+#[cfg(feature = "async_draw")]
+use crate::draw_target::AsyncDrawTarget;
+#[cfg(feature = "async_draw")]
+use crate::primitives::AsyncStyledDrawable;
+
 /// Styled line iterator.
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -65,6 +70,25 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
         D: DrawTarget<Color = C>,
     {
         target.draw_iter(StyledPixelsIterator::new(self, style))
+    }
+}
+
+#[cfg(feature = "async_draw")]
+impl<C: PixelColor> AsyncStyledDrawable<PrimitiveStyle<C>> for Line {
+    type Color = C;
+    type Output = ();
+
+    async fn draw_styled_async<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
+    where
+        D: AsyncDrawTarget<Color = C>,
+    {
+        target
+            .draw_iter_async(StyledPixelsIterator::new(self, style))
+            .await
     }
 }
 
