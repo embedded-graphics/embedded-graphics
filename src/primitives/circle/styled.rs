@@ -13,6 +13,51 @@ use crate::{
 };
 use az::SaturatingAs;
 
+#[cfg(feature = "async_draw")]
+use crate::draw_target::AsyncDrawTarget;
+#[cfg(feature = "async_draw")]
+use crate::primitives::styled::AsyncStyledDrawable;
+#[cfg(feature = "async_draw")]
+impl<C: PixelColor> AsyncStyledDrawable<PrimitiveStyle<C>> for Circle {
+    type Color = C;
+    type Output = ();
+    async fn draw_styled_async<D>(
+        &self,
+        style: &PrimitiveStyle<C>,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
+    where
+        D: AsyncDrawTarget<Color = C>,
+    {
+        match (style.effective_stroke_color(), style.fill_color) {
+            (Some(stroke_color), None) => {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
+                    scanline.draw_stroke_async(target, stroke_color).await?;
+                }
+            }
+            (Some(stroke_color), Some(fill_color)) => {
+                for scanline in
+                    StyledScanlines::new(&style.stroke_area(self), &style.fill_area(self))
+                {
+                    scanline
+                        .draw_stroke_and_fill_async(target, stroke_color, fill_color)
+                        .await?;
+                }
+            }
+            (None, Some(fill_color)) => {
+                for scanline in Scanlines::new(&style.fill_area(self)) {
+                    scanline.draw_async(target, fill_color).await?;
+                }
+            }
+            (None, None) => {}
+        }
+
+        Ok(())
+    }
+}
+
 /// Pixel iterator for each pixel in the circle border
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]

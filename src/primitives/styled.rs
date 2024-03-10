@@ -8,6 +8,9 @@ use crate::{
     Drawable,
 };
 
+#[cfg(feature = "async_draw")]
+use crate::draw_target::AsyncDrawTarget;
+
 /// Styled.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -148,6 +151,23 @@ pub trait StyledDrawable<S> {
     fn draw_styled<D>(&self, style: &S, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = Self::Color>;
+}
+
+#[cfg(feature = "async_draw")]
+/// Async version of `StyledDrawable`.
+pub trait AsyncStyledDrawable<S> {
+    /// Color type.
+    type Color: PixelColor;
+    /// Output type.
+    type Output;
+    /// Draws the primitive using the given style.
+    async fn draw_styled_async<D>(
+        &self,
+        style: &S,
+        target: &mut D,
+    ) -> Result<Self::Output, D::Error>
+    where
+        D: AsyncDrawTarget<Color = Self::Color>;
 }
 
 /// Styled dimensions.
