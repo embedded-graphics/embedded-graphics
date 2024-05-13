@@ -51,6 +51,11 @@ pub trait GlyphMapping: Sync {
     ///
     /// If `c` isn't included in the font the index of a suitable replacement glyph is returned.
     fn index(&self, c: char) -> usize;
+
+    /// Check the mapping contains the given char.
+    fn mappable(&self, _c: char) -> bool {
+        true
+    }
 }
 
 impl<F> GlyphMapping for F
@@ -144,6 +149,9 @@ impl GlyphMapping for StrGlyphMapping<'_> {
             .find(|(_, v)| c == *v)
             .map(|(index, _)| index)
             .unwrap_or(self.replacement_index)
+    }
+    fn mappable(&self, c: char) -> bool {
+        self.contains(c)
     }
 }
 
