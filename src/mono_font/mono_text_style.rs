@@ -1228,7 +1228,7 @@ mod tests {
         );
         assert_eq!(
             iter.next(),
-            Some((SPACED_FONT.character_size.width, LineElement::Spacing))
+            Some((SPACED_FONT.character_spacing, LineElement::Spacing))
         );
         assert_eq!(
             iter.next(),
