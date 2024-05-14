@@ -44,6 +44,7 @@ default = []
 nalgebra_support = [ "embedded-graphics-core/nalgebra_support" ]
 fixed_point = [ "fixed" ]
 defmt = [ "dep:defmt", "embedded-graphics-core/defmt" ]
+aux_font = []
 
 [[bench]]
 harness = false

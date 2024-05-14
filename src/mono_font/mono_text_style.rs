@@ -1,4 +1,3 @@
-use core::cell::Cell;
 use crate::{
     draw_target::DrawTarget,
     geometry::{Point, Size},
@@ -49,6 +48,7 @@ pub struct MonoTextStyle<'a, C> {
     pub font: &'a MonoFont<'a>,
 
     /// Aux font
+	#[cfg(feature = "aux_font")]
     pub aux_font: Option<&'a MonoFont<'a>>
 }
 
@@ -78,12 +78,10 @@ where
 
     fn line_elements<'t>(
         &self,
-        mut position: Point,
-        char_width_adj: &'t Cell<i32>,
         text: &'t str,
-    ) -> impl Iterator<Item = (Point, LineElement)> + 't {
-        let char_width = self.font.character_size.width as i32;
-        let spacing_width = self.font.character_spacing as i32;
+    ) -> impl Iterator<Item = (u32, LineElement)> + 't {
+        let char_width = self.font.character_size.width;
+        let spacing_width = self.font.character_spacing;
 
         let mut chars = text.chars();
         let mut next_char = chars.next();
@@ -91,23 +89,18 @@ where
 
         core::iter::from_fn(move || {
             if add_spacing {
-                let p = position;
-                position.x += spacing_width;
-
                 add_spacing = false;
 
-                Some((p, LineElement::Spacing))
+                Some((spacing_width, LineElement::Spacing))
             } else if let Some(c) = next_char {
-                position.x += char_width_adj.get();
-                let p = position;
-                position.x += char_width;
-
                 next_char = chars.next();
-                add_spacing = next_char.is_some();
+                if spacing_width > 0 {
+                    add_spacing = next_char.is_some();
+                }
 
-                Some((p, LineElement::Char(c)))
+                Some((char_width, LineElement::Char(c)))
             } else {
-                Some((position, LineElement::Done))
+                Some((0, LineElement::Done))
             }
         })
     }
@@ -134,6 +127,25 @@ where
         Ok(())
     }
 
+    #[inline]
+    fn get_font_info(&self, _c: char) -> (i32, &MonoFont<'a>) {
+	    #[cfg(feature = "aux_font")]
+        {
+            let mut width_delta = 0_i32;
+            let mut font= self.font;
+            if let Some(aux_font) = self.aux_font {
+                if aux_font.glyph_mapping.mappable(_c) {
+                    width_delta = aux_font.character_size.width as i32 - font.character_size.width as i32;
+                    font = aux_font;
+                }
+            }
+            (width_delta, font)
+        }
+
+        #[cfg(not(feature = "aux_font"))]
+        (0, self.font)
+    }
+
     fn draw_string_binary<D>(
         &self,
         text: &str,
@@ -143,27 +155,22 @@ where
     where
         D: DrawTarget<Color = BinaryColor>,
     {
-        let char_width_adj:Cell<i32> = Cell::new(0);
-        for (p, element) in self.line_elements(position, &char_width_adj, text) {
+        let mut next_pos = position;
+
+        for (w, element) in self.line_elements(text) {
             match element {
                 LineElement::Char(c) => {
-                    let mut font= self.font;
-                    char_width_adj.set(0);
-                    if let Some(aux_font) = self.aux_font {
-                        if aux_font.glyph_mapping.mappable(c) {
-                            char_width_adj.set(aux_font.character_size.width as i32 - font.character_size.width as i32);
-                            font = aux_font;
-                        }
-                    }
+                    let (width_delta, font) = self.get_font_info(c);
                     let glyph = font.glyph(c);
-                    Image::new(&glyph, p).draw(&mut target)?;
+                    Image::new(&glyph, next_pos).draw(&mut target)?;
+                    next_pos.x += width_delta;
                 }
                 // Fill space between characters if background color is set.
-                LineElement::Spacing if self.font.character_spacing > 0 => {
+                LineElement::Spacing => {
                     if self.background_color.is_some() {
                         target.fill_solid(
                             &Rectangle::new(
-                                p,
+                                next_pos,
                                 Size::new(
                                     self.font.character_spacing,
                                     self.font.character_size.height,
@@ -173,9 +180,9 @@ where
                         )?;
                     }
                 }
-                LineElement::Spacing => {}
-                LineElement::Done => return Ok(p),
+                LineElement::Done => return Ok(next_pos),
             }
+            next_pos.x += w as i32;
         }
 
         Ok(position)
@@ -422,6 +429,7 @@ where
                 text_color: None,
                 underline_color: DecorationColor::None,
                 strikethrough_color: DecorationColor::None,
+				#[cfg(feature = "aux_font")]
                 aux_font: None,
             },
         }
@@ -435,6 +443,7 @@ where
             text_color: self.style.text_color,
             underline_color: self.style.underline_color,
             strikethrough_color: self.style.strikethrough_color,
+			#[cfg(feature = "aux_font")]
             aux_font: None,
         };
 
@@ -442,6 +451,7 @@ where
     }
 
     /// Sets the aux font.
+	#[cfg(feature = "aux_font")]
     pub const fn aux_font<'c>(self, aux_font: &'c MonoFont<'c>) -> MonoTextStyleBuilder<'c, C> 
     where
         'a: 'c
@@ -591,6 +601,7 @@ mod tests {
                 background_color: None,
                 underline_color: DecorationColor::None,
                 strikethrough_color: DecorationColor::None,
+				#[cfg(feature = "aux_font")]
                 aux_font: None,
             }
         );
@@ -1029,6 +1040,7 @@ mod tests {
                 underline_color: DecorationColor::TextColor,
                 strikethrough_color: DecorationColor::Custom(BinaryColor::On),
                 font: &FONT_6X9,
+				#[cfg(feature = "aux_font")]
                 aux_font: None,
             }
         );
@@ -1193,39 +1205,38 @@ mod tests {
     fn elements_iter() {
         let style = MonoTextStyle::new(&SPACED_FONT, BinaryColor::On);
 
-        let char_width_adj:Cell<i32> = Cell::new(0);
-        let mut iter = style.line_elements(Point::new(10, 20), &char_width_adj, "");
-        assert_eq!(iter.next(), Some((Point::new(10, 20), LineElement::Done)));
+        let mut iter = style.line_elements("");
+        assert_eq!(iter.next(), Some((0, LineElement::Done)));
 
-        let mut iter = style.line_elements(Point::new(10, 20), &char_width_adj, "a");
+        let mut iter = style.line_elements("a");
         assert_eq!(
             iter.next(),
-            Some((Point::new(10, 20), LineElement::Char('a')))
+            Some((SPACED_FONT.character_size.width, LineElement::Char('a')))
         );
-        assert_eq!(iter.next(), Some((Point::new(16, 20), LineElement::Done)));
+        assert_eq!(iter.next(), Some((0, LineElement::Done)));
 
-        let mut iter = style.line_elements(Point::new(10, 20), &char_width_adj, "abc");
+        let mut iter = style.line_elements("abc");
         assert_eq!(
             iter.next(),
-            Some((Point::new(10, 20), LineElement::Char('a')))
+            Some((SPACED_FONT.character_size.width, LineElement::Char('a')))
         );
         assert_eq!(
             iter.next(),
-            Some((Point::new(16, 20), LineElement::Spacing))
+            Some((SPACED_FONT.character_spacing, LineElement::Spacing))
         );
         assert_eq!(
             iter.next(),
-            Some((Point::new(21, 20), LineElement::Char('b')))
+            Some((SPACED_FONT.character_size.width, LineElement::Char('b')))
         );
         assert_eq!(
             iter.next(),
-            Some((Point::new(27, 20), LineElement::Spacing))
+            Some((SPACED_FONT.character_size.width, LineElement::Spacing))
         );
         assert_eq!(
             iter.next(),
-            Some((Point::new(32, 20), LineElement::Char('c')))
+            Some((SPACED_FONT.character_size.width, LineElement::Char('c')))
         );
-        assert_eq!(iter.next(), Some((Point::new(38, 20), LineElement::Done)));
+        assert_eq!(iter.next(), Some((0, LineElement::Done)));
     }
 
     #[test]
