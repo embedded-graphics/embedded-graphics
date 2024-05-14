@@ -48,8 +48,8 @@ pub struct MonoTextStyle<'a, C> {
     pub font: &'a MonoFont<'a>,
 
     /// Aux font
-	#[cfg(feature = "aux_font")]
-    pub aux_font: Option<&'a MonoFont<'a>>
+    #[cfg(feature = "aux_font")]
+    pub aux_font: Option<&'a MonoFont<'a>>,
 }
 
 impl<'a, C> MonoTextStyle<'a, C>
@@ -76,10 +76,7 @@ where
             && self.strikethrough_color.is_none()
     }
 
-    fn line_elements<'t>(
-        &self,
-        text: &'t str,
-    ) -> impl Iterator<Item = (u32, LineElement)> + 't {
+    fn line_elements<'t>(&self, text: &'t str) -> impl Iterator<Item = (u32, LineElement)> + 't {
         let char_width = self.font.character_size.width;
         let spacing_width = self.font.character_spacing;
 
@@ -129,13 +126,14 @@ where
 
     #[inline]
     fn get_font_info(&self, _c: char) -> (i32, &MonoFont<'a>) {
-	    #[cfg(feature = "aux_font")]
+        #[cfg(feature = "aux_font")]
         {
             let mut width_delta = 0_i32;
-            let mut font= self.font;
+            let mut font = self.font;
             if let Some(aux_font) = self.aux_font {
                 if aux_font.glyph_mapping.mappable(_c) {
-                    width_delta = aux_font.character_size.width as i32 - font.character_size.width as i32;
+                    width_delta =
+                        aux_font.character_size.width as i32 - font.character_size.width as i32;
                     font = aux_font;
                 }
             }
@@ -429,7 +427,7 @@ where
                 text_color: None,
                 underline_color: DecorationColor::None,
                 strikethrough_color: DecorationColor::None,
-				#[cfg(feature = "aux_font")]
+                #[cfg(feature = "aux_font")]
                 aux_font: None,
             },
         }
@@ -443,7 +441,7 @@ where
             text_color: self.style.text_color,
             underline_color: self.style.underline_color,
             strikethrough_color: self.style.strikethrough_color,
-			#[cfg(feature = "aux_font")]
+            #[cfg(feature = "aux_font")]
             aux_font: None,
         };
 
@@ -451,10 +449,10 @@ where
     }
 
     /// Sets the aux font.
-	#[cfg(feature = "aux_font")]
-    pub const fn aux_font<'c>(self, aux_font: &'c MonoFont<'c>) -> MonoTextStyleBuilder<'c, C> 
+    #[cfg(feature = "aux_font")]
+    pub const fn aux_font<'c>(self, aux_font: &'c MonoFont<'c>) -> MonoTextStyleBuilder<'c, C>
     where
-        'a: 'c
+        'a: 'c,
     {
         let style = MonoTextStyle {
             font: self.style.font,
@@ -601,7 +599,7 @@ mod tests {
                 background_color: None,
                 underline_color: DecorationColor::None,
                 strikethrough_color: DecorationColor::None,
-				#[cfg(feature = "aux_font")]
+                #[cfg(feature = "aux_font")]
                 aux_font: None,
             }
         );
@@ -1040,7 +1038,7 @@ mod tests {
                 underline_color: DecorationColor::TextColor,
                 strikethrough_color: DecorationColor::Custom(BinaryColor::On),
                 font: &FONT_6X9,
-				#[cfg(feature = "aux_font")]
+                #[cfg(feature = "aux_font")]
                 aux_font: None,
             }
         );
