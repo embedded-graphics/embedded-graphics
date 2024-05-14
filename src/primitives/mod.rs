@@ -47,6 +47,18 @@ pub trait ContainsPoint {
     fn contains(&self, point: Point) -> bool;
 }
 
+impl<T: ContainsPoint + ?Sized> ContainsPoint for &T {
+    fn contains(&self, point: Point) -> bool {
+        (**self).contains(point)
+    }
+}
+
+impl<T: ContainsPoint + ?Sized> ContainsPoint for &mut T {
+    fn contains(&self, point: Point) -> bool {
+        (**self).contains(point)
+    }
+}
+
 /// Offset outline trait.
 pub trait OffsetOutline {
     /// Offsets the outline of the shape.
