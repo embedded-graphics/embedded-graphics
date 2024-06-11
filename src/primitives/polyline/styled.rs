@@ -283,7 +283,7 @@ mod tests {
 
         assert_eq!(
             styled.bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(28, 10))
+            Rectangle::new_at_origin(Size::new(28, 10))
         );
 
         styled.draw(&mut display).unwrap();

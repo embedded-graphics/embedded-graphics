@@ -357,7 +357,7 @@ mod tests {
 
     #[test]
     fn reuse() {
-        let rectangle = Rectangle::new(Point::zero(), Size::new_equal(10));
+        let rectangle = Rectangle::new_at_origin(Size::new_equal(10));
 
         let styled = rectangle.into_styled(PrimitiveStyle::with_fill(BinaryColor::On));
 

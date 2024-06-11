@@ -1,6 +1,6 @@
 use crate::{
     draw_target::{DrawTarget, DrawTargetExt, Translated},
-    geometry::{OriginDimensions, Size},
+    geometry::{Dimensions, Point, Size},
     primitives::Rectangle,
     Pixel,
 };
@@ -60,12 +60,12 @@ where
     }
 }
 
-impl<T> OriginDimensions for Cropped<'_, T>
+impl<T> Dimensions for Cropped<'_, T>
 where
     T: DrawTarget,
 {
-    fn size(&self) -> Size {
-        self.size
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new_at_origin(self.size)
     }
 }
 
@@ -180,7 +180,7 @@ mod tests {
         let area = Rectangle::new(Point::new(1, 3), size);
         let cropped = display.cropped(&area);
 
-        assert_eq!(cropped.bounding_box(), Rectangle::new(Point::zero(), size));
+        assert_eq!(cropped.bounding_box(), Rectangle::new_at_origin(size));
     }
 
     #[test]
@@ -197,7 +197,7 @@ mod tests {
 
         assert_eq!(
             cropped.bounding_box(),
-            Rectangle::new(Point::zero(), expected_size),
+            Rectangle::new_at_origin(expected_size),
         );
     }
 }

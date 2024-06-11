@@ -66,7 +66,7 @@ where
     I::Item: PixelColor,
 {
     pub(crate) fn new(mut iter: I, size: Size, crop_area: &Rectangle) -> Self {
-        let crop_area = Rectangle::new(Point::zero(), size).intersection(crop_area);
+        let crop_area = Rectangle::new_at_origin(size).intersection(crop_area);
 
         let initial_skip =
             crop_area.top_left.y as usize * size.width as usize + crop_area.top_left.x as usize;

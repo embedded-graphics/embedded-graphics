@@ -130,7 +130,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     ///
     /// let mut display = MockDisplay::new();
     ///
-    /// let area = Rectangle::new(Point::zero(), Size::new(4 * 10, 20));
+    /// let area = Rectangle::new_at_origin(Size::new(4 * 10, 20));
     /// let mut clipped_display = display.clipped(&area);
     ///
     /// let style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);

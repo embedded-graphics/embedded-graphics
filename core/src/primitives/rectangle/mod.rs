@@ -116,7 +116,7 @@ impl Rectangle {
 
     /// Returns a zero sized rectangle.
     pub const fn zero() -> Rectangle {
-        Rectangle::new(Point::zero(), Size::zero())
+        Rectangle::new_at_origin(Size::zero())
     }
 
     /// Returns the center of this rectangle.
@@ -171,7 +171,7 @@ impl Rectangle {
     /// let mut display = MockDisplay::new();
     /// # display.set_allow_overdraw(true);
     ///
-    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect1 = Rectangle::new_at_origin(Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(2, 3), Size::new(10, 7));
     ///
     /// let intersection = rect1.intersection(&rect2);
@@ -211,7 +211,7 @@ impl Rectangle {
     /// ```rust
     /// use embedded_graphics::{prelude::*, primitives::{Rectangle, PrimitiveStyle}};
     ///
-    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect1 = Rectangle::new_at_origin(Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(10, 15), Size::new(10, 7));
     ///
     /// let intersection = rect1.intersection(&rect2);
@@ -276,7 +276,7 @@ impl Rectangle {
     /// let mut display = MockDisplay::new();
     /// # display.set_allow_overdraw(true);
     ///
-    /// let rect1 = Rectangle::new(Point::zero(), Size::new(7, 8));
+    /// let rect1 = Rectangle::new_at_origin(Size::new(7, 8));
     /// let rect2 = Rectangle::new(Point::new(2, 3), Size::new(10, 7));
     ///
     /// let envelope = rect1.envelope(&rect2);
@@ -747,7 +747,7 @@ mod tests {
 
         assert_eq!(
             rect1.intersection(&rect2),
-            Rectangle::new(Point::zero(), Size::zero())
+            Rectangle::new_at_origin(Size::zero())
         );
     }
 

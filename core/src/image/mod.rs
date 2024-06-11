@@ -2,7 +2,7 @@
 
 use crate::{
     draw_target::DrawTarget,
-    geometry::{OriginDimensions, Point},
+    geometry::{Point, Size},
     pixelcolor::PixelColor,
     primitives::Rectangle,
 };
@@ -15,16 +15,13 @@ use crate::{
 /// The methods in this trait shouldn't be called directly by user code. Instead the object
 /// that implements `ImageDrawable` should be wrapped in an [`Image`] object.
 ///
-/// # Implementing `ImageDrawable`
-///
-/// All image drawables are positioned at the origin and need to implement [`OriginDimensions`], in
-/// addition to this trait, to define their dimensions.
-///
 /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
-/// [`OriginDimensions`]: crate::geometry::OriginDimensions
-pub trait ImageDrawable: OriginDimensions {
+pub trait ImageDrawable {
     /// The color type.
     type Color: PixelColor;
+
+    /// Returns the size of the image.
+    fn size(&self) -> Size;
 
     /// Draws the entire image to the target.
     ///
@@ -32,12 +29,11 @@ pub trait ImageDrawable: OriginDimensions {
     ///
     /// # Implementation notes
     ///
-    /// The implementation of this method must draw the image inside the bounding box defined by
-    /// the [`OriginDimensions`] trait implementation. This means that the top left corner is at the
-    /// origin and no drawing operations outside the bounding box are allowed.
+    /// The implementation of this method must draw the image with the top left corner in the origin
+    /// of the draw target. No drawing operations outside the rectangular area with the size returned
+    /// by the [`size`] method are allowed.
     ///
     /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
-    /// [`OriginDimensions`]: crate::geometry::OriginDimensions
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>;

@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn transparent_style_no_render() {
         let rounded_rect = RoundedRectangle::with_equal_corners(
-            Rectangle::new(Point::zero(), Size::new(10, 20)),
+            Rectangle::new_at_origin(Size::new(10, 20)),
             Size::new(4, 8),
         )
         .into_styled(PrimitiveStyleBuilder::<BinaryColor>::new().build());
@@ -227,13 +227,13 @@ mod tests {
             .build();
 
         let mut expected = MockDisplay::new();
-        Rectangle::new(Point::zero(), Size::new(20, 30))
+        Rectangle::new_at_origin(Size::new(20, 30))
             .into_styled(style)
             .draw(&mut expected)
             .unwrap();
 
         let rounded_rect = RoundedRectangle::with_equal_corners(
-            Rectangle::new(Point::zero(), Size::new(20, 30)),
+            Rectangle::new_at_origin(Size::new(20, 30)),
             Size::zero(),
         )
         .into_styled(style);
@@ -328,7 +328,7 @@ mod tests {
         ];
 
         let rounded_rect = RoundedRectangle::new(
-            Rectangle::new(Point::zero(), Size::new(20, 20)),
+            Rectangle::new_at_origin(Size::new(20, 20)),
             CornerRadii {
                 top_left: Size::new(3, 4),
                 top_right: Size::new(5, 6),
@@ -378,7 +378,7 @@ mod tests {
         ];
 
         let rounded_rect = RoundedRectangle::new(
-            Rectangle::new(Point::zero(), Size::new(40, 20)),
+            Rectangle::new_at_origin(Size::new(40, 20)),
             CornerRadii {
                 top_left: Size::new(20, 20),
                 top_right: Size::new(20, 20),

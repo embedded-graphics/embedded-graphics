@@ -37,7 +37,7 @@ fn custom_primitive_style() {
     let style = CheckerboardStyle(Rgb888::RED, Rgb888::GREEN);
 
     let mut display = MockDisplay::new();
-    Rectangle::new(Point::zero(), Size::new(4, 3))
+    Rectangle::new_at_origin(Size::new(4, 3))
         .into_styled(style)
         .draw(&mut display)
         .unwrap();

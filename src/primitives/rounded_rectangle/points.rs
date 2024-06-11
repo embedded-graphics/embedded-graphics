@@ -105,7 +105,7 @@ mod tests {
     #[test]
     fn points_equals_filled() {
         let rounded_rect = RoundedRectangle::with_equal_corners(
-            Rectangle::new(Point::zero(), Size::new(10, 20)),
+            Rectangle::new_at_origin(Size::new(10, 20)),
             Size::new(4, 8),
         );
 
