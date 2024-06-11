@@ -476,8 +476,8 @@ mod tests {
     #[test]
     #[cfg(feature = "nalgebra_support")]
     fn nalgebra_support() {
-        let left = nalgebra::Vector2::new(30u32, 40);
-        let right = nalgebra::Vector2::new(10, 20);
+        let left = Vector2::new(30u32, 40);
+        let right = Vector2::new(10, 20);
 
         assert_eq!(Size::from(left - right), Size::new(20, 20));
     }

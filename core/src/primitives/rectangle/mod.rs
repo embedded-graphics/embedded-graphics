@@ -65,7 +65,7 @@ impl PointsIter for Rectangle {
     type Iter = Points;
 
     fn points(&self) -> Self::Iter {
-        self::Points::new(self)
+        Points::new(self)
     }
 }
 
