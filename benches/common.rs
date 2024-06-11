@@ -53,6 +53,6 @@ where
 
 impl<C> Dimensions for Framebuffer<C> {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(Point::zero(), Size::new_equal(SIZE as u32))
+        Rectangle::new_at_origin(Size::new_equal(SIZE as u32))
     }
 }

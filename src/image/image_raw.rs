@@ -197,7 +197,7 @@ where
         let row_skip = self.data_width() - self.size.width;
 
         target.fill_contiguous(
-            &Rectangle::new(Point::zero(), self.size),
+            &Rectangle::new_at_origin(self.size),
             ContiguousPixels::new(self, self.size, 0, row_skip as usize),
         )
     }
@@ -222,7 +222,7 @@ where
         let row_skip = data_width - area.size.width as usize;
 
         target.fill_contiguous(
-            &Rectangle::new(Point::zero(), area.size),
+            &Rectangle::new_at_origin(area.size),
             ContiguousPixels::new(self, area.size, initial_skip, row_skip),
         )
     }

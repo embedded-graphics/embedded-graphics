@@ -199,7 +199,7 @@ use core::{
 use fancy_panic::FancyPanic;
 
 const SIZE: usize = 64;
-const DISPLAY_AREA: Rectangle = Rectangle::new(Point::zero(), Size::new_equal(SIZE as u32));
+const DISPLAY_AREA: Rectangle = Rectangle::new_at_origin(Size::new_equal(SIZE as u32));
 
 /// Mock display struct
 ///
@@ -723,7 +723,7 @@ where
     C: PixelColor,
 {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(Point::zero(), DISPLAY_AREA.size)
+        Rectangle::new_at_origin(DISPLAY_AREA.size)
     }
 }
 

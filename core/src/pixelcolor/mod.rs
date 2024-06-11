@@ -54,7 +54,7 @@
 //!
 //! impl Dimensions for EpdDisplay {
 //!     fn bounding_box(&self) -> Rectangle {
-//!         Rectangle::new(Point::zero(), Size::new(300, 300))
+//!         Rectangle::new_at_origin(Size::new(300, 300))
 //!     }
 //! }
 //!

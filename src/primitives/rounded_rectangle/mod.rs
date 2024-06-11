@@ -188,7 +188,7 @@ impl RoundedRectangle {
     ///
     /// let radii = CornerRadiiBuilder::new().all(Size::new(40, 40)).build();
     ///
-    /// let base_rectangle = Rectangle::new(Point::zero(), Size::new(50, 60));
+    /// let base_rectangle = Rectangle::new_at_origin(Size::new(50, 60));
     ///
     /// let rounded_rectangle = RoundedRectangle::new(base_rectangle, radii);
     ///
@@ -435,13 +435,13 @@ mod tests {
     #[test]
     fn clamp_radius_at_rect_size() {
         let clamped = RoundedRectangle::with_equal_corners(
-            Rectangle::new(Point::zero(), Size::new(20, 30)),
+            Rectangle::new_at_origin(Size::new(20, 30)),
             Size::new_equal(50),
         )
         .points();
 
         let expected = RoundedRectangle::with_equal_corners(
-            Rectangle::new(Point::zero(), Size::new(20, 30)),
+            Rectangle::new_at_origin(Size::new(20, 30)),
             Size::new_equal(10),
         )
         .points();

@@ -104,7 +104,7 @@ use crate::{
 ///
 /// impl Dimensions for ExampleDisplay {
 ///     fn bounding_box(&self) -> Rectangle {
-///         Rectangle::new(Point::zero(), Size::new(64, 64))
+///         Rectangle::new_at_origin(Size::new(64, 64))
 ///     }
 /// }
 ///
@@ -237,7 +237,7 @@ use crate::{
 ///
 /// impl Dimensions for ExampleDisplay {
 ///     fn bounding_box(&self) -> Rectangle {
-///         Rectangle::new(Point::zero(), Size::new(64, 64))
+///         Rectangle::new_at_origin(Size::new(64, 64))
 ///     }
 /// }
 ///
@@ -376,7 +376,7 @@ pub trait DrawTarget: Dimensions {
     ///
     /// impl Dimensions for ExampleDisplay {
     ///     fn bounding_box(&self) -> Rectangle {
-    ///         Rectangle::new(Point::zero(), Size::new(64, 64))
+    ///         Rectangle::new_at_origin(Size::new(64, 64))
     ///     }
     /// }
     /// ```

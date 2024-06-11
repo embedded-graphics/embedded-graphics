@@ -65,7 +65,7 @@ where
     T: DrawTarget,
 {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(Point::zero(), self.size)
+        Rectangle::new_at_origin(self.size)
     }
 }
 
@@ -180,7 +180,7 @@ mod tests {
         let area = Rectangle::new(Point::new(1, 3), size);
         let cropped = display.cropped(&area);
 
-        assert_eq!(cropped.bounding_box(), Rectangle::new(Point::zero(), size));
+        assert_eq!(cropped.bounding_box(), Rectangle::new_at_origin(size));
     }
 
     #[test]
@@ -197,7 +197,7 @@ mod tests {
 
         assert_eq!(
             cropped.bounding_box(),
-            Rectangle::new(Point::zero(), expected_size),
+            Rectangle::new_at_origin(expected_size),
         );
     }
 }

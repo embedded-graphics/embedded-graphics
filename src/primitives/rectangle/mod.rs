@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn contains() {
-        let outer = Rectangle::new(Point::zero(), Size::new(10, 10));
+        let outer = Rectangle::new_at_origin(Size::new(10, 10));
         let inner = Rectangle::new(Point::new(2, 4), Size::new(3, 5));
 
         for p in outer.points() {

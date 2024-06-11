@@ -282,7 +282,7 @@ impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> Dimensio
     for Framebuffer<C, R, BO, WIDTH, HEIGHT, N>
 {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(Point::zero(), Size::new(WIDTH as u32, HEIGHT as u32))
+        Rectangle::new_at_origin(Size::new(WIDTH as u32, HEIGHT as u32))
     }
 }
 
@@ -730,7 +730,7 @@ mod tests {
 
         assert_eq!(
             fb.bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(10, 5))
+            Rectangle::new_at_origin(Size::new(10, 5))
         );
         assert_eq!(fb.as_image().size(), Size::new(10, 5));
 

@@ -28,7 +28,7 @@ where
     T: ImageDrawable,
 {
     pub(super) fn new(parent: &'a T, area: &Rectangle) -> Self {
-        let parent_bb = Rectangle::new(Point::zero(), parent.size());
+        let parent_bb = Rectangle::new_at_origin(parent.size());
         let area = parent_bb.intersection(area);
 
         Self { parent, area }
@@ -121,7 +121,7 @@ mod tests {
         let area = Rectangle::new(Point::new(-5, -5), Size::new(20, 20));
 
         let image = MockImageDrawable {
-            expected_area: Rectangle::new(Point::zero(), Size::new(8, 10)),
+            expected_area: Rectangle::new_at_origin(Size::new(8, 10)),
         };
 
         let mut display = MockDisplay::new();
