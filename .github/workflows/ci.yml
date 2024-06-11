@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.17.1, beta, stable]
+        rust: [1.71.1, beta, stable]
     steps:
       - uses: taiki-e/install-action@just
       - uses: dtolnay/rust-toolchain@stable
@@ -41,6 +41,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: taiki-e/install-action@just
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-readme
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: lychee
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/checkout@v4
       - run: just check-readmes
