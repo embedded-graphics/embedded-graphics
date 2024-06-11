@@ -41,6 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: taiki-e/install-action@just
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-readme
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/checkout@v4
       - run: just check-readmes
