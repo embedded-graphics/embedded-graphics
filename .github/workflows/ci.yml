@@ -1,0 +1,57 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  precheck:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [1.17.1, beta, stable]
+    steps:
+      - uses: taiki-e/install-action@just
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{matrix.rust}}
+      - uses: actions/checkout@v4
+      - run: just build-benches
+      - run: just test
+        if: matrix.rust != 'stable'
+      - run: just test-all
+        if: matrix.rust == 'stable'
+
+  check-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@just
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - run: just check-formatting
+
+  check-drawing-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@just
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - run: just check-drawing-examples
+
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@just
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - run: just check-readmes
+      - run: just check-links
+
+  all-targets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@just
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "arm-unknown-linux-gnueabi,armv7-unknown-linux-gnueabihf,x86_64-unknown-linux-gnu,x86_64-unknown-linux-musl,thumbv6m-none-eabi,thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv7m-none-eabi"
+      - uses: actions/checkout@v4
+      - run: just build-targets --release
