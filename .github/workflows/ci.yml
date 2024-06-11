@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.17.1, beta, stable]
+        rust: [1.71.1, beta, stable]
     steps:
       - uses: taiki-e/install-action@just
       - uses: dtolnay/rust-toolchain@stable
