@@ -42,6 +42,7 @@ criterion = { version = "0.4.0", features = [ "html_reports" ] }
 [features]
 default = []
 nalgebra_support = [ "embedded-graphics-core/nalgebra_support" ]
+async_draw= [ "embedded-graphics-core/async_draw" ]
 fixed_point = [ "fixed" ]
 defmt = [ "dep:defmt", "embedded-graphics-core/defmt" ]
 

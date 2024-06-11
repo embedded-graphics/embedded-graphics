@@ -28,6 +28,10 @@ pub use self::{
 };
 use crate::geometry::{Dimensions, Point};
 pub use embedded_graphics_core::primitives::PointsIter;
+
+#[cfg(feature = "async_draw")]
+pub use styled::AsyncStyledDrawable;
+
 pub use styled::{Styled, StyledDimensions, StyledDrawable};
 
 /// Primitive trait

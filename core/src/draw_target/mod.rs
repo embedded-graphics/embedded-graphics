@@ -423,3 +423,95 @@ pub trait DrawTarget: Dimensions {
         self.fill_solid(&self.bounding_box(), color)
     }
 }
+
+/// The `AsyncDrawTarget` trait is used to add embedded-graphics support to a display
+/// driver or similar targets like framebuffers or image files for DMA or similar async operations.
+/// It is cloned from `DrawTarget` trait with similar method names post fixed with async.
+#[cfg(feature = "async_draw")]
+pub trait AsyncDrawTarget: Dimensions {
+    /// The pixel color type the targetted display supports.
+    type Color: PixelColor;
+
+    /// Error type to return when a drawing operation fails.
+    ///
+    /// This error is returned if an error occurred during a drawing operation. This mainly applies
+    /// to drivers that need to communicate with the display for each drawing operation, where a
+    /// communication error can occur. For drivers that use an internal framebuffer where drawing
+    /// operations can never fail, [`core::convert::Infallible`] can instead be used as the `Error`
+    /// type.
+    ///
+    /// [`core::convert::Infallible`]: https://doc.rust-lang.org/stable/core/convert/enum.Infallible.html
+    type Error;
+
+    /// Draw individual pixels to the display without a defined order.
+    ///
+    /// Due to the unordered nature of the pixel iterator, this method is likely to be the slowest
+    /// drawing method for a display that writes data to the hardware immediately. If possible, the
+    /// other methods in this trait should be implemented to improve performance when rendering
+    /// more contiguous pixel patterns.
+    async fn draw_iter_async<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>;
+
+    /// Fill a given area with an iterator providing a contiguous stream of pixel colors.
+    ///
+    /// Use this method to fill an area with contiguous, non-transparent pixel colors. Pixel
+    /// coordinates are iterated over from the top left to the bottom right corner of the area in
+    /// row-first order. The provided iterator must provide pixel color values based on this
+    /// ordering to produce correct output.
+    ///
+    /// As seen in the example below, the [`PointsIter::points`] method can be used to get an
+    /// iterator over all points in the provided area.
+    ///
+    /// The provided iterator is not required to provide `width * height` pixels to completely fill
+    /// the area. In this case, `fill_contiguous` should return without error.
+    ///
+    /// This method should not attempt to draw any pixels that fall outside the drawable area of the
+    /// target display. The `area` argument can be clipped to the drawable area using the
+    /// [`Rectangle::intersection`] method.
+    ///
+    /// The default implementation of this method delegates to [`draw_iter_async`](AsyncDrawTarget::draw_iter_async).
+    async fn fill_contiguous_async<I>(
+        &mut self,
+        area: &Rectangle,
+        colors: I,
+    ) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Self::Color>,
+    {
+        self.draw_iter_async(
+            area.points()
+                .zip(colors)
+                .map(|(pos, color)| Pixel(pos, color)),
+        )
+        .await
+    }
+
+    /// Fill a given area with a solid color.
+    ///
+    /// If the target display provides optimized hardware commands for filling a rectangular area of
+    /// the display with a solid color, this method should be overridden to use those commands to
+    /// improve performance.
+    ///
+    /// The default implementation of this method calls [`fill_contiguous_async`](AsyncDrawTarget::fill_contiguous_async())
+    /// with an iterator that repeats the given `color` for every point in `area`.
+    async fn fill_solid_async(
+        &mut self,
+        area: &Rectangle,
+        color: Self::Color,
+    ) -> Result<(), Self::Error> {
+        self.fill_contiguous_async(area, core::iter::repeat(color))
+            .await
+    }
+
+    /// Fill the entire display with a solid color.
+    ///
+    /// If the target hardware supports a more optimized way of filling the entire display with a
+    /// solid color, this method should be overridden to use those commands.
+    ///
+    /// The default implementation of this method delegates to [`fill_solid_async`](AsyncDrawTarget::fill_solid_async) to fill the
+    /// [`Dimensions::bounding_box`].
+    async fn clear_async(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        self.fill_solid_async(&self.bounding_box(), color).await
+    }
+}

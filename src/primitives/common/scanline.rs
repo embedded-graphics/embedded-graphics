@@ -5,6 +5,9 @@ use crate::{
 };
 use core::ops::Range;
 
+#[cfg(feature = "async_draw")]
+use crate::draw_target::AsyncDrawTarget;
+
 /// Scanline.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -151,6 +154,26 @@ impl Scanline {
             &Rectangle::new(Point::new(self.x.start, self.y), Size::new(width, 1)),
             color,
         )
+    }
+
+    #[cfg(feature = "async_draw")]
+    /// Draws the scanline asynchronoulsy.
+    pub async fn draw_async<T>(&self, target: &mut T, color: T::Color) -> Result<(), T::Error>
+    where
+        T: AsyncDrawTarget,
+    {
+        if self.is_empty() {
+            return Ok(());
+        }
+
+        let width = (self.x.end - self.x.start) as u32;
+
+        target
+            .fill_solid_async(
+                &Rectangle::new(Point::new(self.x.start, self.y), Size::new(width, 1)),
+                color,
+            )
+            .await
     }
 }
 
