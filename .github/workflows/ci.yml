@@ -44,6 +44,9 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-readme
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: lychee
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/checkout@v4
       - run: just check-readmes

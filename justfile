@@ -77,8 +77,9 @@ generate-docs:
 
 # Checks for broken links in cargo docs and readmes
 check-links: generate-docs generate-readmes
-    cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics
-    cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics_core
+    # TODO: check if cargo-deadlinks is still necessary
+    # cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics
+    # cargo deadlinks --ignore-fragments --dir target/doc/embedded_graphics_core
 
     cd tools/check-md-refs && cargo run -- '../../core/README.md'
     cd tools/check-md-refs && cargo run -- '../../README.md'
