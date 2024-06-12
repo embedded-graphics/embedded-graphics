@@ -54,14 +54,15 @@ macro_rules! impl_rgb_conversion {
     };
 }
 
-impl_rgb_conversion!(Rgb555 => Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
-impl_rgb_conversion!(Bgr555 => Rgb555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
-impl_rgb_conversion!(Rgb565 => Rgb555, Bgr555, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
-impl_rgb_conversion!(Bgr565 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Rgb888, Bgr888);
-impl_rgb_conversion!(Rgb666 => Rgb555, Bgr555, Rgb565, Bgr666, Bgr565, Bgr888, Rgb888);
-impl_rgb_conversion!(Bgr666 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr565, Bgr888, Rgb888);
-impl_rgb_conversion!(Rgb888 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Bgr888);
-impl_rgb_conversion!(Bgr888 => Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Rgb888);
+impl_rgb_conversion!(Rgb444 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb555 => Rgb444, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Bgr555 => Rgb444, Rgb555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb565 => Rgb444, Rgb555, Bgr555, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Bgr565 => Rgb444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_conversion!(Rgb666 => Rgb444, Rgb555, Bgr555, Rgb565, Bgr666, Bgr565, Bgr888, Rgb888);
+impl_rgb_conversion!(Bgr666 => Rgb444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr565, Bgr888, Rgb888);
+impl_rgb_conversion!(Rgb888 => Rgb444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Bgr888);
+impl_rgb_conversion!(Bgr888 => Rgb444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Rgb888);
 
 /// Macro to implement conversion between grayscale color types.
 macro_rules! impl_gray_conversion {
@@ -105,7 +106,7 @@ macro_rules! impl_rgb_to_and_from_gray {
     }
 }
 
-impl_rgb_to_and_from_gray!(Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_to_and_from_gray!(Gray2, Gray4, Gray8 => Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
 
 /// Macro to implement conversion from `BinaryColor` to RGB and grayscale types.
 macro_rules! impl_from_binary {
@@ -119,7 +120,7 @@ macro_rules! impl_from_binary {
 }
 
 impl_from_binary!(
-    Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888, Gray2, Gray4, Gray8
+    Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888, Gray2, Gray4, Gray8
 );
 
 /// Macro to implement conversion from grayscale types to `BinaryColor`.
@@ -146,13 +147,40 @@ macro_rules! impl_rgb_to_binary {
     };
 }
 
-impl_rgb_to_binary!(Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_to_binary!(Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
 
 #[cfg(test)]
 mod tests {
     use core::fmt::Debug;
 
     use super::*;
+
+    #[test]
+    fn convert_rgb444_to_rgb888_and_back() {
+        for r in 0..=Rgb444::MAX_R {
+            let c = Rgb444::new(r, 0, 0);
+            let c2 = Rgb888::from(c);
+            let c3 = Rgb444::from(c2);
+
+            assert_eq!(c, c3);
+        }
+
+        for g in 0..=Rgb444::MAX_G {
+            let c = Rgb444::new(0, g, 0);
+            let c2 = Rgb888::from(c);
+            let c3 = Rgb444::from(c2);
+
+            assert_eq!(c, c3);
+        }
+
+        for b in 0..=Rgb444::MAX_B {
+            let c = Rgb444::new(0, 0, b);
+            let c2 = Rgb888::from(c);
+            let c3 = Rgb444::from(c2);
+
+            assert_eq!(c, c3);
+        }
+    }
 
     #[test]
     fn convert_rgb565_to_rgb888_and_back() {
@@ -217,7 +245,7 @@ mod tests {
             assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
 
-        type_matrix!(test_rgb_to_rgb; Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+        type_matrix!(test_rgb_to_rgb; Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
     }
 
     #[test]
@@ -227,7 +255,7 @@ mod tests {
             assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
 
-        type_matrix!(test_rgb_to_gray; Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888 => Gray2, Gray4, Gray8);
+        type_matrix!(test_rgb_to_gray; Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888 => Gray2, Gray4, Gray8);
     }
 
     #[test]
@@ -240,7 +268,7 @@ mod tests {
             assert_eq!(BinaryColor::from(FromC::WHITE), BinaryColor::On);
         }
 
-        type_matrix!(test_rgb_to_binary; Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888 => BinaryColor);
+        type_matrix!(test_rgb_to_binary; Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888 => BinaryColor);
     }
 
     #[test]
@@ -260,7 +288,7 @@ mod tests {
             assert_eq!(ToC::from(FromC::WHITE), ToC::WHITE);
         }
 
-        type_matrix!(test_gray_to_rgb; Gray2, Gray4, Gray8 => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+        type_matrix!(test_gray_to_rgb; Gray2, Gray4, Gray8 => Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
     }
 
     #[test]
@@ -283,7 +311,7 @@ mod tests {
             assert_eq!(ToC::from(BinaryColor::On), ToC::WHITE);
         }
 
-        type_matrix!(test_binary_to_rgb; BinaryColor => Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+        type_matrix!(test_binary_to_rgb; BinaryColor => Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
     }
 
     #[test]
