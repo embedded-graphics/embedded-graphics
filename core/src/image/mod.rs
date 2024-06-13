@@ -2,8 +2,9 @@
 
 use crate::{
     draw_target::DrawTarget,
-    geometry::{OriginDimensions, Point},
+    geometry::Point,
     pixelcolor::PixelColor,
+    prelude::{Dimensions, OriginDimensions},
     primitives::Rectangle,
 };
 
@@ -22,7 +23,7 @@ use crate::{
 ///
 /// [`Image`]: https://docs.rs/embedded-graphics/latest/embedded_graphics/image/struct.Image.html
 /// [`OriginDimensions`]: crate::geometry::OriginDimensions
-pub trait ImageDrawable: OriginDimensions {
+pub trait ImageDrawable: OriginDimensions + Dimensions {
     /// The color type.
     type Color: PixelColor;
 

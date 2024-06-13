@@ -33,7 +33,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// };
     ///
     /// let mut display = MockDisplay::new();
-    /// let mut translated_display = display.translated(Point::new(5, 10));
+    /// let mut translated_display = (&mut display).translated(Point::new(5, 10));
     ///
     /// let style = MonoTextStyle::new(&FONT_6X9, BinaryColor::On);
     ///
@@ -48,7 +48,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn translated(&mut self, offset: Point) -> Translated<'_, Self>;
+    fn translated(self, offset: Point) -> Translated<Self>;
 
     /// Creates a cropped draw target based on this draw target.
     ///
@@ -104,7 +104,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn cropped(&mut self, area: &Rectangle) -> Cropped<'_, Self>;
+    fn cropped(self, area: &Rectangle) -> Cropped<Self>;
 
     /// Creates a clipped draw target based on this draw target.
     ///
@@ -131,7 +131,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// let mut display = MockDisplay::new();
     ///
     /// let area = Rectangle::new(Point::zero(), Size::new(4 * 10, 20));
-    /// let mut clipped_display = display.clipped(&area);
+    /// let mut clipped_display = (&mut display).clipped(&area);
     ///
     /// let style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
     ///
@@ -147,7 +147,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self>;
+    fn clipped(self, area: &Rectangle) -> Clipped<Self>;
 
     /// Creates a color conversion draw target.
     ///
@@ -194,7 +194,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// // image.draw(&mut display)?;
     ///
     /// // To fix this `color_converted` is added to enable color conversion.
-    /// image.draw(&mut display.color_converted())?;
+    /// image.draw(&mut (&mut display).color_converted())?;
     /// #
     /// # let mut expected = MockDisplay::from_pattern(&[
     /// #     "WWWW", //
@@ -207,7 +207,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// #
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn color_converted<C>(&mut self) -> ColorConverted<'_, Self, C>
+    fn color_converted<C>(self) -> ColorConverted<Self, C>
     where
         C: PixelColor + Into<Self::Color>;
 }
@@ -216,19 +216,19 @@ impl<T> DrawTargetExt for T
 where
     T: DrawTarget,
 {
-    fn translated(&mut self, offset: Point) -> Translated<'_, Self> {
+    fn translated(self, offset: Point) -> Translated<Self> {
         Translated::new(self, offset)
     }
 
-    fn cropped(&mut self, area: &Rectangle) -> Cropped<'_, Self> {
+    fn cropped(self, area: &Rectangle) -> Cropped<Self> {
         Cropped::new(self, area)
     }
 
-    fn clipped(&mut self, area: &Rectangle) -> Clipped<'_, Self> {
+    fn clipped(self, area: &Rectangle) -> Clipped<Self> {
         Clipped::new(self, area)
     }
 
-    fn color_converted<C>(&mut self) -> ColorConverted<'_, Self, C>
+    fn color_converted<C>(self) -> ColorConverted<Self, C>
     where
         C: PixelColor + Into<Self::Color>,
     {
@@ -252,7 +252,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(2, 4));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
 
         let pixels = [
             Pixel(Point::new(0, 1), BinaryColor::On),
@@ -282,7 +282,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(2, 3));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
 
         let colors = [
             1, 1, 1, 1, 1, //
@@ -309,7 +309,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(3, 2), Size::new(4, 2));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(6, 4));
         clipped.fill_solid(&area, BinaryColor::On).unwrap();
@@ -327,7 +327,7 @@ mod tests {
         let mut display = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(3, 4));
-        let mut clipped = display.clipped(&area);
+        let mut clipped = (&mut display).clipped(&area);
         clipped.clear(BinaryColor::On).unwrap();
 
         let mut expected = MockDisplay::new();
@@ -340,7 +340,7 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
 
         let area = Rectangle::new(Point::new(1, 3), Size::new(2, 4));
         let clipped = display.clipped(&area);
@@ -350,7 +350,7 @@ mod tests {
 
     #[test]
     fn bounding_box_is_clipped() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
         let display_bb = display.bounding_box();
 
         let top_left = Point::new(10, 20);

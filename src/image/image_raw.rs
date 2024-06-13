@@ -234,6 +234,16 @@ where
     }
 }
 
+impl<C, BO> Dimensions for ImageRaw<'_, C, BO>
+where
+    C: PixelColor + From<<C as PixelColor>::Raw>,
+    BO: ByteOrder,
+{
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), self.size)
+    }
+}
+
 impl<'a, C, BO> GetPixel for ImageRaw<'a, C, BO>
 where
     C: PixelColor + From<<C as PixelColor>::Raw>,

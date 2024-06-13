@@ -727,6 +727,15 @@ where
     }
 }
 
+impl<C> Dimensions for MockDisplay<C>
+where
+    C: PixelColor,
+{
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), DISPLAY_AREA.size)
+    }
+}
+
 /// Wrapper to implement `Display` for formatting function.
 struct MessageWrapper<F>(F);
 

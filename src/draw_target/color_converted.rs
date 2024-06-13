@@ -11,20 +11,20 @@ use core::marker::PhantomData;
 ///
 /// [`color_converted`]: crate::draw_target::DrawTargetExt::color_converted
 #[derive(Debug)]
-pub struct ColorConverted<'a, T, C> {
+pub struct ColorConverted<T, C> {
     /// The parent draw target.
-    parent: &'a mut T,
+    parent: T,
 
     /// The input color type.
     color_type: PhantomData<C>,
 }
 
-impl<'a, T, C> ColorConverted<'a, T, C>
+impl<T, C> ColorConverted<T, C>
 where
     T: DrawTarget,
     C: PixelColor + Into<T::Color>,
 {
-    pub(super) fn new(parent: &'a mut T) -> Self {
+    pub(super) fn new(parent: T) -> Self {
         Self {
             parent,
             color_type: PhantomData,
@@ -32,7 +32,7 @@ where
     }
 }
 
-impl<T, C> DrawTarget for ColorConverted<'_, T, C>
+impl<T, C> DrawTarget for ColorConverted<T, C>
 where
     T: DrawTarget,
     C: PixelColor + Into<T::Color>,
@@ -65,7 +65,7 @@ where
     }
 }
 
-impl<T, C> Dimensions for ColorConverted<'_, T, C>
+impl<T, C> Dimensions for ColorConverted<T, C>
 where
     T: DrawTarget,
 {
