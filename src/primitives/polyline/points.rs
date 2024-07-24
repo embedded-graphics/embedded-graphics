@@ -26,7 +26,7 @@ impl<'a> Points<'a> {
             .split_first()
             .and_then(|(start, rest)| {
                 // Polyline is 2 or more vertices long, return an iterator for it
-                rest.get(0).map(|end| Points {
+                rest.first().map(|end| Points {
                     vertices: rest,
                     translate: polyline.translate,
                     segment_iter: Line::new(*start + polyline.translate, *end + polyline.translate)
@@ -52,7 +52,7 @@ impl<'a> Iterator for Points<'a> {
             Some(p)
         } else {
             let (start, rest) = self.vertices.split_first()?;
-            let end = rest.get(0)?;
+            let end = rest.first()?;
 
             self.vertices = rest;
 

@@ -58,7 +58,7 @@ fn sector_150(c: &mut Criterion) {
         Sector::with_center(
             BOUNDING_BOX.center(),
             BOUNDING_BOX.size.width,
-            -30.0.deg(),
+            -(30.0.deg()),
             150.0.deg(),
         )
     });
@@ -69,7 +69,7 @@ fn sector_360(c: &mut Criterion) {
         Sector::with_center(
             BOUNDING_BOX.center(),
             BOUNDING_BOX.size.width,
-            -30.0.deg(),
+            -(30.0.deg()),
             150.0.deg(),
         )
     });
@@ -102,7 +102,7 @@ fn arc_150(c: &mut Criterion) {
         Arc::with_center(
             BOUNDING_BOX.center(),
             BOUNDING_BOX.size.width,
-            -30.0.deg(),
+            -(30.0.deg()),
             150.0.deg(),
         )
     });

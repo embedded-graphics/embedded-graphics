@@ -46,6 +46,12 @@ pub struct TextStyleBuilder {
     style: TextStyle,
 }
 
+impl Default for TextStyleBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TextStyleBuilder {
     /// Creates a new text style builder.
     pub const fn new() -> Self {
