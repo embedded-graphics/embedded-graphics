@@ -10,7 +10,7 @@ pub struct Framebuffer<C> {
 impl<C> Default for Framebuffer<C>
 where
     C: PixelColor + Default,
- {
+{
     fn default() -> Self {
         Self::new()
     }
