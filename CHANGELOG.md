@@ -10,6 +10,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
 - [#738](https://github.com/embedded-graphics/embedded-graphics/pull/738) Added `new_at_origin` method to `Rectangle`.
+- [#756](https://github.com/embedded-graphics/embedded-graphics/pull/756) Added `PartialEq, Eq` derives to `Image` and `SubImage`.
+- [#756](https://github.com/embedded-graphics/embedded-graphics/pull/756) Added `Clone, Copy` derives to `SubImage` and `Default` impls to `Framebuffer`, `MonoTextStyleBuilder` and `TextStyleBuilder`.
 
 ## [0.8.1] - 2023-08-10
 
@@ -763,10 +765,10 @@ A big release, focussed on ergonomics. There are new macros to make drawing and 
   ```
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.8.1...HEAD
 [0.8.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.8.0...embedded-graphics-v0.8.1
 [0.8.0]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.1...embedded-graphics-v0.8.0
-
 [0.7.1]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0...embedded-graphics-v0.7.1
 [0.7.0]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.2...embedded-graphics-v0.7.0
 [0.7.0-beta.2]: https://github.com/embedded-graphics/embedded-graphics/compare/embedded-graphics-v0.7.0-beta.1...embedded-graphics-v0.7.0-beta.2
