@@ -394,6 +394,15 @@ pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
 }
 
+impl<'a, C> Default for MonoTextStyleBuilder<'a, C>
+where
+    C: PixelColor,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a, C> MonoTextStyleBuilder<'a, C>
 where
     C: PixelColor,

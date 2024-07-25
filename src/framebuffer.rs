@@ -62,6 +62,16 @@ pub struct Framebuffer<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const 
     n_assert: (),
 }
 
+impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> Default
+    for Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+where
+    C: PixelColor,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
     Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
 where
