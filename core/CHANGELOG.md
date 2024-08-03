@@ -6,6 +6,9 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added - 2024-03-07
+- `DrawAsyncTrait` and the associated feature flag `async_draw`.
+
 ### Changed
 
 - (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1

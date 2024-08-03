@@ -30,3 +30,4 @@ arrayvec = { version = "0.7.2", default-features = false }
 [features]
 default = []
 nalgebra_support = [ "nalgebra" ]
+async_draw = []

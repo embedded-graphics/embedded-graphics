@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added - 2024-03-07
+
+- `AsyncDrawIter` trait behind its associated feature flag `async_draw`.
+
 ### Added
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
