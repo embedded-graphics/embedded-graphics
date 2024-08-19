@@ -1,6 +1,6 @@
 use embedded_graphics_core::pixelcolor::{
-    Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, Rgb555, Rgb565, Rgb888,
-    RgbColor, WebColors,
+    Bgr555, Bgr565, Bgr888, BinaryColor, Gray2, Gray4, Gray8, GrayColor, Rgb444, Rgb555, Rgb565,
+    Rgb888, RgbColor, WebColors,
 };
 
 /// Mapping between `char`s and colors.
@@ -122,6 +122,7 @@ macro_rules! impl_rgb_color_mapping {
     };
 }
 
+impl_rgb_color_mapping!(Rgb444);
 impl_rgb_color_mapping!(Rgb555);
 impl_rgb_color_mapping!(Bgr555);
 impl_rgb_color_mapping!(Rgb565);

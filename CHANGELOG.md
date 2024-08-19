@@ -6,6 +6,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- [#732](https://github.com/embedded-graphics/embedded-graphics/pull/732) Added `Rgb444` to support 12bit RGB displays. Note that this type is currently stored as a 16 bit value in `ImageRaw`s and `Framebuffer`s.
+
 ### Added
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
