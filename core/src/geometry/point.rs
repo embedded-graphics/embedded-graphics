@@ -238,6 +238,21 @@ impl Point {
     pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
     }
+
+    /// Returns a point with swapped x and y coordinates.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let result = Point::new(1, 2).swap_xy();
+    ///
+    /// assert_eq!(result, Point::new(2, 1));
+    /// ```
+    pub const fn swap_xy(self) -> Self {
+        Self::new(self.y, self.x)
+    }
 }
 
 impl Add for Point {

@@ -245,6 +245,21 @@ impl Size {
     pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.width / other.width, self.height / other.height)
     }
+
+    /// Returns a size with swapped width and height.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::geometry::Size;
+    ///
+    /// let result = Size::new(1, 2).swap_xy();
+    ///
+    /// assert_eq!(result, Size::new(2, 1));
+    /// ```
+    pub const fn swap_xy(self) -> Self {
+        Self::new(self.height, self.width)
+    }
 }
 
 impl Add for Size {

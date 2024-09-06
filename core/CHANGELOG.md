@@ -14,6 +14,7 @@
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
 - [#738](https://github.com/embedded-graphics/embedded-graphics/pull/738) Added `new_at_origin` method to `Rectangle`.
+- [#763](https://github.com/embedded-graphics/embedded-graphics/pull/763) Added `swap_xy` method to `Point` and `Size`.
 
 ## [0.4.0] - 2023-05-14
 

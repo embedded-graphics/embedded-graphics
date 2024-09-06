@@ -16,6 +16,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#738](https://github.com/embedded-graphics/embedded-graphics/pull/738) Added `new_at_origin` method to `Rectangle`.
 - [#756](https://github.com/embedded-graphics/embedded-graphics/pull/756) Added `PartialEq, Eq` derives to `Image` and `SubImage`.
 - [#756](https://github.com/embedded-graphics/embedded-graphics/pull/756) Added `Clone, Copy` derives to `SubImage` and `Default` impls to `Framebuffer`, `MonoTextStyleBuilder` and `TextStyleBuilder`.
+- [#763](https://github.com/embedded-graphics/embedded-graphics/pull/763) Added `swap_xy` method to `Point` and `Size`.
 
 ## [0.8.1] - 2023-08-10
 
