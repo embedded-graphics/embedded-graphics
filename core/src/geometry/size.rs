@@ -19,7 +19,7 @@ use crate::geometry::Point;
 /// ## Create a `Size` from two integers
 ///
 ///
-/// ```rust
+/// ```
 /// use embedded_graphics::geometry::Size;
 ///
 /// // Create a size using the `new` constructor method
@@ -32,7 +32,7 @@ use crate::geometry::Point;
 ///
 /// Any `Vector2<N>` can be used where `N: Into<u32> + nalgebra::Scalar`. This includes the primitive types `u32`, `u16` and `u8`.
 ///
-/// ```rust
+/// ```
 /// # #[cfg(feature = "nalgebra_support")] {
 /// use embedded_graphics::geometry::Size;
 /// use nalgebra::Vector2;
@@ -45,7 +45,7 @@ use crate::geometry::Point;
 ///
 /// `.into()` can also be used, but may require more type annotations:
 ///
-/// ```rust
+/// ```
 /// # #[cfg(feature = "nalgebra_support")] {
 /// use embedded_graphics::geometry::Size;
 /// use nalgebra::Vector2;
@@ -78,7 +78,7 @@ impl Size {
 
     /// Creates a size with width and height set to an equal value.
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let size = Size::new_equal(11);
@@ -110,9 +110,9 @@ impl Size {
     ///
     /// # Examples
     ///
-    /// ## Move a `Point` along the X axis.
+    /// Move a `Point` along the X axis:
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::{Point, Size};
     ///
     /// let size = Size::new(20, 30);
@@ -134,9 +134,9 @@ impl Size {
     ///
     /// # Examples
     ///
-    /// ## Move a `Point` along the Y axis.
+    /// Move a `Point` along the Y axis:
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::{Point, Size};
     ///
     /// let size = Size::new(20, 30);
@@ -167,7 +167,7 @@ impl Size {
     /// Saturating subtraction.
     ///
     /// Returns `0` for `width` and/or `height` instead of overflowing, if the
-    /// value in `other` is larger then in `self`.
+    /// value in `other` is larger than in `self`.
     pub const fn saturating_sub(self, other: Self) -> Self {
         Self {
             width: self.width.saturating_sub(other.width),
@@ -192,7 +192,7 @@ impl Size {
 
     /// Returns the componentwise minimum of two `Size`s.
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let min = Size::new(20, 30).component_min(Size::new(15, 50));
@@ -205,7 +205,7 @@ impl Size {
 
     /// Returns the componentwise maximum of two `Size`s.
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let min = Size::new(20, 30).component_max(Size::new(15, 50));
@@ -218,7 +218,7 @@ impl Size {
 
     /// Returns the componentwise multiplication of two `Size`s.
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let result = Size::new(20, 30).component_mul(Size::new(2, 3));
@@ -235,7 +235,7 @@ impl Size {
     ///
     /// Panics if one of the components of `other` equals zero.
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Size;
     ///
     /// let result = Size::new(20, 30).component_div(Size::new(5, 10));
