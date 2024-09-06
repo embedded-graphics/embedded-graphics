@@ -313,7 +313,7 @@ mod tests {
 
         assert_eq!(
             text.bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(2 * 6, 2 * 9))
+            Rectangle::new_at_origin(Size::new(2 * 6, 2 * 9))
         );
     }
 
@@ -429,7 +429,7 @@ mod tests {
         display.set_allow_overdraw(true);
 
         // Draw a background for the first character
-        Rectangle::new(Point::zero(), Size::new(6, 8))
+        Rectangle::new_at_origin(Size::new(6, 8))
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::Off))
             .draw(&mut display)
             .unwrap();

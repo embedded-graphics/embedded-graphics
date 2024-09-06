@@ -29,7 +29,7 @@ use crate::{
 ///
 /// In this example `DrawTarget` is implemented for an an imaginary 64px x 64px 8-bit grayscale display
 /// that is connected using a simplified SPI interface. Because the hardware doesn't support any
-/// acceleration only the [`draw_iter`] method and [`OriginDimensions`] trait need to be implemented.
+/// acceleration only the [`draw_iter`] method and [`Dimensions`] trait need to be implemented.
 ///
 /// To reduce the overhead caused by communicating with the display for each drawing operation
 /// the display driver uses a framebuffer to store the pixel data in memory. This way all drawing
@@ -44,7 +44,7 @@ use crate::{
 /// use embedded_graphics::{
 ///     pixelcolor::{Gray8, GrayColor},
 ///     prelude::*,
-///     primitives::{Circle, PrimitiveStyle},
+///     primitives::{Circle, PrimitiveStyle, Rectangle},
 /// };
 /// #
 /// # struct SPI1;
@@ -102,9 +102,9 @@ use crate::{
 ///     }
 /// }
 ///
-/// impl OriginDimensions for ExampleDisplay {
-///     fn size(&self) -> Size {
-///         Size::new(64, 64)
+/// impl Dimensions for ExampleDisplay {
+///     fn bounding_box(&self) -> Rectangle {
+///         Rectangle::new_at_origin(Size::new(64, 64))
 ///     }
 /// }
 ///
@@ -235,9 +235,9 @@ use crate::{
 ///     }
 /// }
 ///
-/// impl OriginDimensions for ExampleDisplay {
-///     fn size(&self) -> Size {
-///         Size::new(64, 64)
+/// impl Dimensions for ExampleDisplay {
+///     fn bounding_box(&self) -> Rectangle {
+///         Rectangle::new_at_origin(Size::new(64, 64))
 ///     }
 /// }
 ///
@@ -276,7 +276,6 @@ use crate::{
 /// [`fill_solid`]: DrawTarget::fill_solid()
 /// [`draw_iter`]: DrawTarget::draw_iter
 /// [`Dimensions`]: super::geometry::Dimensions
-/// [`OriginDimensions`]: super::geometry::OriginDimensions
 /// [`Error` type]: DrawTarget::Error
 pub trait DrawTarget: Dimensions {
     /// The pixel color type the targetted display supports.
@@ -375,9 +374,9 @@ pub trait DrawTarget: Dimensions {
     ///     }
     /// }
     ///
-    /// impl OriginDimensions for ExampleDisplay {
-    ///     fn size(&self) -> Size {
-    ///         Size::new(64, 64)
+    /// impl Dimensions for ExampleDisplay {
+    ///     fn bounding_box(&self) -> Rectangle {
+    ///         Rectangle::new_at_origin(Size::new(64, 64))
     ///     }
     /// }
     /// ```

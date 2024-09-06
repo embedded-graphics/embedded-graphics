@@ -1,6 +1,6 @@
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, OriginDimensions},
+    geometry::{Point, Size},
     image::ImageDrawable,
     primitives::Rectangle,
     transform::Transform,
@@ -28,7 +28,8 @@ where
     T: ImageDrawable,
 {
     pub(super) fn new(parent: &'a T, area: &Rectangle) -> Self {
-        let area = parent.bounding_box().intersection(area);
+        let parent_bb = Rectangle::new_at_origin(parent.size());
+        let area = parent_bb.intersection(area);
 
         Self { parent, area }
     }
@@ -38,17 +39,15 @@ where
     }
 }
 
-impl<T> OriginDimensions for SubImage<'_, T> {
-    fn size(&self) -> crate::prelude::Size {
-        self.area.size
-    }
-}
-
 impl<'a, T> ImageDrawable for SubImage<'a, T>
 where
     T: ImageDrawable,
 {
     type Color = T::Color;
+
+    fn size(&self) -> Size {
+        self.area.size
+    }
 
     fn draw<DT>(&self, target: &mut DT) -> Result<(), DT::Error>
     where
@@ -84,6 +83,10 @@ mod tests {
     impl ImageDrawable for MockImageDrawable {
         type Color = BinaryColor;
 
+        fn size(&self) -> Size {
+            Size::new(8, 10)
+        }
+
         fn draw<DT>(&self, _target: &mut DT) -> Result<(), DT::Error>
         where
             DT: DrawTarget<Color = BinaryColor>,
@@ -98,12 +101,6 @@ mod tests {
             assert_eq!(area, &self.expected_area);
 
             Ok(())
-        }
-    }
-
-    impl OriginDimensions for MockImageDrawable {
-        fn size(&self) -> Size {
-            Size::new(8, 10)
         }
     }
 
@@ -124,7 +121,7 @@ mod tests {
         let area = Rectangle::new(Point::new(-5, -5), Size::new(20, 20));
 
         let image = MockImageDrawable {
-            expected_area: Rectangle::new(Point::zero(), Size::new(8, 10)),
+            expected_area: Rectangle::new_at_origin(Size::new(8, 10)),
         };
 
         let mut display = MockDisplay::new();

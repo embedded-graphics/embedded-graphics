@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, OriginDimensions, Point, Size},
+    geometry::{Point, Size},
     image::{GetPixel, ImageDrawable},
     iterator::raw::RawDataSlice,
     pixelcolor::{
@@ -186,6 +186,10 @@ where
 {
     type Color = C;
 
+    fn size(&self) -> Size {
+        self.size
+    }
+
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = C>,
@@ -193,7 +197,7 @@ where
         let row_skip = self.data_width() - self.size.width;
 
         target.fill_contiguous(
-            &self.bounding_box(),
+            &Rectangle::new_at_origin(self.size),
             ContiguousPixels::new(self, self.size, 0, row_skip as usize),
         )
     }
@@ -218,19 +222,9 @@ where
         let row_skip = data_width - area.size.width as usize;
 
         target.fill_contiguous(
-            &Rectangle::new(Point::zero(), area.size),
+            &Rectangle::new_at_origin(area.size),
             ContiguousPixels::new(self, area.size, initial_skip, row_skip),
         )
-    }
-}
-
-impl<C, BO> OriginDimensions for ImageRaw<'_, C, BO>
-where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
-    BO: ByteOrder,
-{
-    fn size(&self) -> Size {
-        self.size
     }
 }
 
@@ -327,7 +321,7 @@ mod tests {
     use super::*;
     use crate::{
         draw_target::DrawTarget,
-        geometry::Point,
+        geometry::{Dimensions, Point},
         image::Image,
         iterator::PixelIteratorExt,
         mock_display::{ColorMapping, MockDisplay},

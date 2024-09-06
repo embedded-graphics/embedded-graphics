@@ -940,16 +940,16 @@ mod tests {
 
         assert_eq!(
             Text::with_baseline("#", Point::zero(), style, Baseline::Top).bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6, 9)),
+            Rectangle::new_at_origin(Size::new(6, 9)),
         );
 
         assert_eq!(
             Text::with_baseline("##", Point::zero(), style, Baseline::Top).bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6 * 2 + 5, 9)),
+            Rectangle::new_at_origin(Size::new(6 * 2 + 5, 9)),
         );
         assert_eq!(
             Text::with_baseline("###", Point::zero(), style, Baseline::Top).bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6 * 3 + 5 * 2, 9)),
+            Rectangle::new_at_origin(Size::new(6 * 3 + 5 * 2, 9)),
         );
     }
 
@@ -963,7 +963,7 @@ mod tests {
 
         assert_eq!(
             Text::with_baseline("#", Point::zero(), style, Baseline::Top).bounding_box(),
-            Rectangle::new(Point::zero(), Size::new(6, 10)),
+            Rectangle::new_at_origin(Size::new(6, 10)),
         );
     }
 

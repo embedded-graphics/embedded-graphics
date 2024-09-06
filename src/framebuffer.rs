@@ -4,7 +4,7 @@ use core::{convert::Infallible, marker::PhantomData};
 
 use crate::{
     draw_target::DrawTarget,
-    geometry::{OriginDimensions, Point, Size},
+    geometry::{Dimensions, Point, Size},
     image::{GetPixel, ImageRaw},
     iterator::raw::RawDataSlice,
     pixelcolor::{
@@ -14,6 +14,7 @@ use crate::{
         },
         PixelColor,
     },
+    primitives::Rectangle,
     Pixel,
 };
 
@@ -287,11 +288,11 @@ impl_bytes!(RawU16);
 impl_bytes!(RawU24);
 impl_bytes!(RawU32);
 
-impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> OriginDimensions
+impl<C, R, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> Dimensions
     for Framebuffer<C, R, BO, WIDTH, HEIGHT, N>
 {
-    fn size(&self) -> Size {
-        Size::new(WIDTH as u32, HEIGHT as u32)
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new_at_origin(Size::new(WIDTH as u32, HEIGHT as u32))
     }
 }
 
@@ -304,7 +305,7 @@ mod tests {
     use crate::{
         geometry::Dimensions,
         geometry::Point,
-        image::Image,
+        image::{Image, ImageDrawable},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb888, RgbColor},
         primitives::{Primitive, PrimitiveStyle},
@@ -737,11 +738,15 @@ mod tests {
             { buffer_size::<BinaryColor>(10, 5) * 3 / 2 },
         >::new();
 
-        assert_eq!(fb.size(), Size::new(10, 5));
+        assert_eq!(
+            fb.bounding_box(),
+            Rectangle::new_at_origin(Size::new(10, 5))
+        );
         assert_eq!(fb.as_image().size(), Size::new(10, 5));
 
-        let outside_x = Point::zero() + fb.size().x_axis();
-        let outside_y = Point::zero() + fb.size().y_axis();
+        let fb_size = fb.bounding_box().size;
+        let outside_x = Point::zero() + fb_size.x_axis();
+        let outside_y = Point::zero() + fb_size.y_axis();
 
         assert_eq!(fb.pixel(outside_x), None);
         assert_eq!(fb.pixel(outside_y), None);
