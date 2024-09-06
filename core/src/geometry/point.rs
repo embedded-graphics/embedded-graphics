@@ -21,7 +21,7 @@ use crate::geometry::Size;
 ///
 /// ## Create a `Point` from two integers
 ///
-/// ```rust
+/// ```
 /// use embedded_graphics::geometry::Point;
 ///
 /// // Create a coord using the `new` constructor method
@@ -32,7 +32,7 @@ use crate::geometry::Size;
 ///
 /// _Be sure to enable the `nalgebra_support` feature to get [Nalgebra] integration._
 ///
-/// ```rust
+/// ```
 /// # #[cfg(feature = "nalgebra_support")] {
 /// use embedded_graphics::geometry::Point;
 /// use nalgebra::Vector2;
@@ -49,7 +49,7 @@ use crate::geometry::Size;
 ///
 /// Smaller unsigned types that can be converted to `i32` are also supported in conversions.
 ///
-/// ```rust
+/// ```
 /// # #[cfg(feature = "nalgebra_support")] {
 /// use embedded_graphics::geometry::Point;
 /// use nalgebra::Vector2;
@@ -84,7 +84,7 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let point = Point::new_equal(11);
@@ -104,9 +104,9 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ## Move a `Point` along the X axis.
+    /// Move a `Point` along the X axis:
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let translate = Point::new(20, 30);
@@ -125,9 +125,9 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ## Move a `Point` along the Y axis.
+    /// Move a `Point` along the Y axis:
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let translate = Point::new(20, 30);
@@ -142,13 +142,13 @@ impl Point {
         Self { x: 0, y: self.y }
     }
 
-    /// Remove the sign from a coordinate
+    /// Returns a point with the componentwise absolute value of the coordinates.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use embedded_graphics::geometry::Point;
-    /// #
+    /// use embedded_graphics::geometry::Point;
+    ///
     /// let point = Point::new(-5, -10);
     ///
     /// assert_eq!(point.abs(), Point::new(5, 10));
@@ -179,7 +179,7 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let min = Point::new(20, 30).component_min(Point::new(15, 50));
@@ -194,7 +194,7 @@ impl Point {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let min = Point::new(20, 30).component_max(Point::new(15, 50));
@@ -207,7 +207,9 @@ impl Point {
 
     /// Returns the componentwise multiplication of two `Point`s.
     ///
-    /// ```rust
+    /// # Examples
+    ///
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let result = Point::new(20, 30).component_mul(Point::new(-2, 3));
@@ -218,13 +220,15 @@ impl Point {
         Self::new(self.x * other.x, self.y * other.y)
     }
 
-    /// Returns the componentwise division of two `Points`s.
+    /// Returns the componentwise division of two `Point`s.
     ///
     /// # Panics
     ///
     /// Panics if one of the components of `other` equals zero.
     ///
-    /// ```rust
+    /// # Examples
+    ///
+    /// ```
     /// use embedded_graphics::geometry::Point;
     ///
     /// let result = Point::new(20, 30).component_div(Point::new(10, -3));
@@ -233,6 +237,21 @@ impl Point {
     /// ```
     pub const fn component_div(self, other: Self) -> Self {
         Self::new(self.x / other.x, self.y / other.y)
+    }
+
+    /// Returns a point with swapped X and Y coordinates.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let result = Point::new(1, 2).swap_xy();
+    ///
+    /// assert_eq!(result, Point::new(2, 1));
+    /// ```
+    pub const fn swap_xy(self) -> Self {
+        Self::new(self.y, self.x)
     }
 }
 
