@@ -239,7 +239,7 @@ impl Point {
         Self::new(self.x / other.x, self.y / other.y)
     }
 
-    /// Returns a point with swapped x and y coordinates.
+    /// Returns a point with swapped X and Y coordinates.
     ///
     /// # Examples
     ///
