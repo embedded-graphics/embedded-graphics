@@ -215,7 +215,7 @@ impl DecorationDimensions {
 }
 
 const NULL_FONT: MonoFont = MonoFont {
-    image: ImageRaw::new(&[], 1),
+    image: ImageRaw::new_const(&[], Size::zero()),
     character_size: Size::zero(),
     character_spacing: 0,
     baseline: 0,
@@ -401,7 +401,7 @@ pub(crate) mod tests {
     #[test]
     fn zero_width_image() {
         const ZERO_WIDTH: MonoFont = MonoFont {
-            image: ImageRaw::new(&[], 0),
+            image: ImageRaw::new_const(&[], Size::zero()),
             character_size: Size::zero(),
             character_spacing: 0,
             baseline: 0,
@@ -425,7 +425,7 @@ pub(crate) mod tests {
     #[test]
     fn image_width_less_than_character_width() {
         const NOT_WIDE_ENOUGH: MonoFont = MonoFont {
-            image: ImageRaw::new(&[0xAA, 0xAA], 4),
+            image: ImageRaw::new_const(&[0xAA, 0xAA], Size::new(4, 2)),
             character_size: Size::new(5, 2),
             character_spacing: 0,
             baseline: 0,
@@ -449,7 +449,7 @@ pub(crate) mod tests {
     #[test]
     fn image_height_less_than_character_height() {
         const NOT_HIGH_ENOUGH: MonoFont = MonoFont {
-            image: ImageRaw::new(&[0xAA, 0xAA], 4),
+            image: ImageRaw::new_const(&[0xAA, 0xAA], Size::new(4, 2)),
             character_size: Size::new(4, 1),
             character_spacing: 0,
             baseline: 0,

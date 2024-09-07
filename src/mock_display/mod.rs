@@ -152,7 +152,7 @@
 //!     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
 //! ];
 //!
-//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4);
+//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, Size::new(4, 2)).unwrap();
 //!
 //! let image = Image::new(&raw, Point::zero());
 //!

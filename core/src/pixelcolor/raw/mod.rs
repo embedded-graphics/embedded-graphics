@@ -81,7 +81,7 @@
 //! ];
 //!
 //! // Create new image with RGBI colors.
-//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, 2);
+//! let image_raw: ImageRaw<RGBI> = ImageRaw::new(IMAGE_DATA, Size::new(2, 2)).unwrap();
 //!
 //! // In a real application the image could now be drawn to a display:
 //! // display.draw(&image);

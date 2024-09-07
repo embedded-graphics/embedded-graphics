@@ -1204,7 +1204,7 @@ mod tests {
     fn builder_change_font() {
         let _style = {
             let font = MonoFont {
-                image: ImageRaw::new(&[1, 2, 3], 1),
+                image: ImageRaw::new(&[1, 2, 3], Size::new(1, 3)).unwrap(),
                 character_size: Size::new(1, 2),
                 character_spacing: 0,
                 baseline: 0,
