@@ -35,7 +35,7 @@
 //!
 //! // Create a raw image instance. Other image formats will require different code to load them.
 //! // All code after loading is the same for any image format.
-//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, 4);
+//! let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, Size::new(4, 2)).unwrap();
 //!
 //! // Create an `Image` object to position the image at `Point::zero()`.
 //! let image = Image::new(&raw, Point::zero());
@@ -68,7 +68,7 @@
 //! // or: let data = include_bytes!("sprite_atlas.raw");
 //!
 //! # let data = [0u8; 32 * 16 * 2];
-//! let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, 32);
+//! let sprite_atlas: ImageRawBE<Rgb565> = ImageRaw::new(&data, Size::new(32, 16)).unwrap();
 //!
 //! // Create individual sub images for each sprite in the sprite atlas.
 //! // The position and size of the sub images is defined by a `Rectangle`.
@@ -101,7 +101,7 @@ mod sub_image;
 
 pub use embedded_graphics_core::image::{GetPixel, ImageDrawable};
 pub use image_drawable_ext::ImageDrawableExt;
-pub use image_raw::{ImageRaw, ImageRawBE, ImageRawLE};
+pub use image_raw::{ImageRaw, ImageRawBE, ImageRawError, ImageRawLE};
 pub use sub_image::SubImage;
 
 use crate::{
@@ -174,7 +174,7 @@ impl<T> Transform for Image<'_, T> {
     ///     prelude::*,
     /// };
     ///
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], Size::new(4, 4)).unwrap();
     ///
     /// let image = Image::new(&image, Point::zero());
     ///
@@ -207,7 +207,7 @@ impl<T> Transform for Image<'_, T> {
     ///     prelude::*,
     /// };
     ///
-    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+    /// let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], Size::new(4, 4)).unwrap();
     ///
     /// let mut image = Image::new(&image, Point::zero());
     ///
@@ -254,7 +254,8 @@ mod tests {
 
     #[test]
     fn negative_top_left() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], 4);
+        let image: ImageRaw<BinaryColor> =
+            ImageRaw::new(&[0xff, 0x00, 0xff, 0x00], Size::new(4, 4)).unwrap();
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(-1, -1));
 
@@ -266,7 +267,8 @@ mod tests {
 
     #[test]
     fn dimensions() {
-        let image: ImageRaw<BinaryColor> = ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], 4);
+        let image: ImageRaw<BinaryColor> =
+            ImageRaw::new(&[0xff, 0x00, 0xFF, 0x00], Size::new(4, 4)).unwrap();
 
         let image = Image::new(&image, Point::zero()).translate(Point::new(100, 200));
 
@@ -278,7 +280,8 @@ mod tests {
 
     #[test]
     fn position() {
-        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
+        let image_raw: ImageRaw<BinaryColor> =
+            ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], Size::new(4, 4)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::new(&image_raw, Point::new(1, 2))
@@ -297,7 +300,8 @@ mod tests {
 
     #[test]
     fn with_center() {
-        let image_raw: ImageRaw<BinaryColor> = ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], 4);
+        let image_raw: ImageRaw<BinaryColor> =
+            ImageRaw::new(&[0xAA, 0x55, 0xAA, 0x55], Size::new(4, 4)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::with_center(&image_raw, Point::new(1, 2))

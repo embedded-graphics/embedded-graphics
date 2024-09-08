@@ -18,6 +18,16 @@ pub type ImageRawLE<'a, C> = ImageRaw<'a, C, LittleEndian>;
 /// Image with big endian data.
 pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 
+/// Error returned by [`ImageRaw::new`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ImageRawError {
+    /// Invalid data size.
+    InvalidDataSize {
+        /// The expected data size in bytes.
+        expected_data_size: usize,
+    },
+}
+
 /// An image constructed from a slice of raw pixel data.
 ///
 /// The `ImageRaw` struct can be used to construct an image from a slice
@@ -61,10 +71,8 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 ///
 /// // The image dimensions and the format of the stored raw data must be specified
 /// // when the `new` function is called. The data format can, for example, be specified
-/// // by using the turbofish syntax. For the image dimensions only the width must be
-/// // passed to the `new` function. The image height will be calculated based on the
-/// // length of the image data and the data format.
-/// let raw_image = ImageRaw::<BinaryColor>::new(DATA, 12);
+/// // by using the turbofish syntax.
+/// let raw_image = ImageRaw::<BinaryColor>::new(DATA, Size::new(12, 5)).unwrap();
 ///
 /// let image = Image::new(&raw_image, Point::zero());
 ///
@@ -92,15 +100,15 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 /// # const DATA: &[u8] = &[0x55; 8 * 8 * 3];
 ///
 /// // Rgb888 image with 24 bits per pixel and big endian byte order
-/// let image1 = ImageRawBE::<Rgb888>::new(DATA, 8);
+/// let image1 = ImageRawBE::<Rgb888>::new(DATA, Size::new(8, 8)).unwrap();
 /// // or:
-/// let image2 = ImageRaw::<Rgb888, BigEndian>::new(DATA, 8);
+/// let image2 = ImageRaw::<Rgb888, BigEndian>::new(DATA, Size::new(8, 8)).unwrap();
 /// # assert_eq!(image1, image2);
 ///
 /// // Rgb565 image with 16 bits per pixel and little endian byte order
-/// let image1 = ImageRawLE::<Rgb565>::new(DATA, 16);
+/// let image1 = ImageRawLE::<Rgb565>::new(DATA, Size::new(12, 8)).unwrap();
 /// // or:
-/// let image2 = ImageRaw::<Rgb565, LittleEndian>::new(DATA, 16);
+/// let image2 = ImageRaw::<Rgb565, LittleEndian>::new(DATA, Size::new(12, 8)).unwrap();
 /// # assert_eq!(image1, image2);
 /// ```
 ///
@@ -133,28 +141,41 @@ where
 {
     /// Creates a new image.
     ///
-    /// Only the width of the image needs to be specified. The height of the image will be
-    /// calculated based on the length of the given image data. If the length of the image data
-    /// isn't an integer multiple of the data length for a single row the last partial row will
-    /// be ignored.
-    pub const fn new(data: &'a [u8], width: u32) -> Self {
-        // Prevent panic for `width == 0` by returning a zero sized image.
-        if width == 0 {
-            return Self {
-                data: &[],
-                size: Size::zero(),
-                pixel_type: PhantomData,
-                byte_order: PhantomData,
-            };
+    /// Returns an error if the length of the data size doesn't match the
+    /// expected size based on the given image dimensions and the color depth.
+    pub const fn new(data: &'a [u8], size: Size) -> Result<Self, ImageRawError> {
+        let expected_size =
+            bytes_per_row(size.width, C::Raw::BITS_PER_PIXEL) * size.height as usize;
+
+        if data.len() != expected_size {
+            return Err(ImageRawError::InvalidDataSize {
+                expected_data_size: expected_size,
+            });
         }
 
-        let height = data.len() / bytes_per_row(width, C::Raw::BITS_PER_PIXEL);
-
-        Self {
+        Ok(Self {
             data,
-            size: Size::new(width, height as u32),
+            size,
             pixel_type: PhantomData,
             byte_order: PhantomData,
+        })
+    }
+
+    /// Creates a new image in a const context.
+    ///
+    /// While [`ImageRaw::new`] is also `const` it cannot easily be used to
+    /// initialize a constant, because `unwrap()` isn't available in a const
+    /// context in stable Rust. This method provides an alternative that panics
+    /// instead of returning an error.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given slice of data doesn't have the correct length to
+    /// match the image size and bit depth.
+    pub const fn new_const(data: &'a [u8], size: Size) -> Self {
+        match Self::new(data, size) {
+            Ok(image) => image,
+            Err(ImageRawError::InvalidDataSize { .. }) => panic!("Invalid data size"),
         }
     }
 
@@ -369,27 +390,9 @@ mod tests {
             0x55, 0xFF, //
             0xAA, 0x80, //
         ];
-        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, Size::new(9, 3)).unwrap();
 
         assert_eq!(image_data.size(), Size::new(9, 3));
-    }
-
-    #[test]
-    fn truncated_data() {
-        let data = [
-            0xAA, 0x00, //
-            0x55, 0xFF, //
-            0xAA, //
-        ];
-        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
-
-        assert_pattern(
-            image_data,
-            &[
-                "#.#.#.#..", //
-                ".#.#.#.##", //
-            ],
-        );
     }
 
     #[test]
@@ -399,7 +402,7 @@ mod tests {
             0x55, 0xFF, //
             0xAA, 0x80, //
         ];
-        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, Size::new(9, 3)).unwrap();
 
         assert_pattern(
             image_data,
@@ -418,7 +421,7 @@ mod tests {
             0x55, 0xFF, //
             0xAA, 0x80, //
         ];
-        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, 9);
+        let image_data: ImageRaw<BinaryColor> = ImageRaw::new(&data, Size::new(9, 3)).unwrap();
 
         assert_eq!(image_data.pixel(Point::new(0, 0)), Some(BinaryColor::On));
         assert_eq!(image_data.pixel(Point::new(8, 0)), Some(BinaryColor::Off));
@@ -436,7 +439,7 @@ mod tests {
             0b11_10_01_00, //
             0b11_11_11_11, //
         ];
-        let image_data: ImageRaw<Gray2> = ImageRaw::new(&data, 5);
+        let image_data: ImageRaw<Gray2> = ImageRaw::new(&data, Size::new(5, 2)).unwrap();
 
         assert_pattern(
             image_data,
@@ -455,7 +458,7 @@ mod tests {
             0b0101_1010, //
             0b0000_0000, //
         ];
-        let image_data: ImageRaw<Gray4> = ImageRaw::new(&data, 3);
+        let image_data: ImageRaw<Gray4> = ImageRaw::new(&data, Size::new(3, 2)).unwrap();
 
         assert_pattern(
             image_data,
@@ -473,7 +476,7 @@ mod tests {
             0x33, 0x44, //
             0x55, 0x66, //
         ];
-        let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, 2);
+        let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, Size::new(2, 3)).unwrap();
 
         assert_pattern(
             image_data,
@@ -490,7 +493,7 @@ mod tests {
     #[test]
     fn bpp8_2() {
         let data = [0x01, 0x08, 0x10, 0x80];
-        let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, 4);
+        let image_data: ImageRaw<Gray8> = ImageRaw::new(&data, Size::new(4, 1)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::new(&image_data, Point::zero())
@@ -516,7 +519,7 @@ mod tests {
             0x1F, 0x00, //
             0x00, 0x00, //
         ];
-        let image_data: ImageRawLE<Rgb565> = ImageRaw::new(&data, 1);
+        let image_data: ImageRawLE<Rgb565> = ImageRaw::new(&data, Size::new(1, 4)).unwrap();
 
         assert_pattern(
             image_data,
@@ -537,7 +540,7 @@ mod tests {
             0x00, 0x1F, //
             0x00, 0x00, //
         ];
-        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2);
+        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, Size::new(2, 2)).unwrap();
 
         assert_pattern(
             image_data,
@@ -556,7 +559,7 @@ mod tests {
             0x00, 0x1F, //
             0x00, 0x00, //
         ];
-        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, 2);
+        let image_data: ImageRawBE<Rgb565> = ImageRaw::new(&data, Size::new(2, 2)).unwrap();
 
         assert_eq!(image_data.pixel(Point::new(0, 0)), Some(Rgb565::RED));
         assert_eq!(image_data.pixel(Point::new(1, 0)), Some(Rgb565::GREEN));
@@ -572,7 +575,7 @@ mod tests {
             0x00, 0x00, 0xFF, //
             0x00, 0x00, 0x00, //
         ];
-        let image_data: ImageRawLE<Bgr888> = ImageRaw::new(&data, 1);
+        let image_data: ImageRawLE<Bgr888> = ImageRaw::new(&data, Size::new(1, 4)).unwrap();
 
         assert_pattern(
             image_data,
@@ -593,7 +596,7 @@ mod tests {
             0x00, 0x00, 0xFF, //
             0x00, 0x00, 0x00, //
         ];
-        let image_data: ImageRawBE<Rgb888> = ImageRaw::new(&data, 4);
+        let image_data: ImageRawBE<Rgb888> = ImageRaw::new(&data, Size::new(4, 1)).unwrap();
 
         assert_pattern(image_data, &["RGBK"]);
     }
@@ -606,7 +609,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, //
             0xFF, 0xFF, 0xFF, 0xFF, //
         ];
-        let image_data: ImageRawLE<TestColorU32> = ImageRaw::new(&data, 2);
+        let image_data: ImageRawLE<TestColorU32> = ImageRaw::new(&data, Size::new(2, 2)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::new(&image_data, Point::zero())
@@ -639,7 +642,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, //
             0xFF, 0xFF, 0xFF, 0xFF, //
         ];
-        let image_data: ImageRawBE<TestColorU32> = ImageRaw::new(&data, 4);
+        let image_data: ImageRawBE<TestColorU32> = ImageRaw::new(&data, Size::new(4, 1)).unwrap();
 
         let mut display = MockDisplay::new();
         Image::new(&image_data, Point::zero())
@@ -665,25 +668,29 @@ mod tests {
     }
 
     #[test]
-    fn calculated_height() {
-        let data = [0u8; 1];
-        assert_eq!(ImageRaw::<BinaryColor>::new(&data, 12).size().height, 0);
+    fn binary_image_with_zero_width() {
+        let image = ImageRaw::<BinaryColor>::new(&[], Size::new(0, 10)).unwrap();
+        assert_eq!(image.size, Size::new(0, 10));
 
-        let data = [0u8; 2];
-        assert_eq!(ImageRaw::<BinaryColor>::new(&data, 12).size().height, 1);
+        let mut display = MockDisplay::new();
+        Image::new(&image, Point::zero())
+            .draw(&mut display)
+            .unwrap();
 
-        let data = [0u8; 3];
-        assert_eq!(ImageRaw::<BinaryColor>::new(&data, 12).size().height, 1);
-
-        let data = [0u8; 4];
-        assert_eq!(ImageRaw::<BinaryColor>::new(&data, 12).size().height, 2);
+        display.assert_pattern(&[]);
     }
 
     #[test]
-    fn binary_image_with_zero_width() {
-        let image = ImageRaw::<BinaryColor>::new(&[], 0);
+    fn binary_image_with_zero_height() {
+        let image = ImageRaw::<BinaryColor>::new(&[], Size::new(5, 0)).unwrap();
+        assert_eq!(image.size, Size::new(5, 0));
 
-        assert_eq!(image.size, Size::zero());
+        let mut display = MockDisplay::new();
+        Image::new(&image, Point::zero())
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[]);
     }
 
     #[test]
@@ -693,7 +700,7 @@ mod tests {
             0x55, 0xFF, //
             0xAA, 0x80, //
         ];
-        let image_data = ImageRaw::<BinaryColor>::new(&data, 9);
+        let image_data = ImageRaw::<BinaryColor>::new(&data, Size::new(9, 3)).unwrap();
 
         assert_eq!(image_data.pixel(Point::new(-1, 0)), None);
         assert_eq!(image_data.pixel(Point::new(0, -1)), None);

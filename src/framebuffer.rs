@@ -117,7 +117,11 @@ where
 {
     /// Returns an image based on the framebuffer content.
     pub fn as_image(&self) -> ImageRaw<'_, C, BO> {
-        ImageRaw::new(&self.data[0..Self::BUFFER_SIZE], WIDTH as u32)
+        ImageRaw::new(
+            &self.data[0..Self::BUFFER_SIZE],
+            Size::new(WIDTH as u32, HEIGHT as u32),
+        )
+        .unwrap()
     }
 }
 

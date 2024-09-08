@@ -13,9 +13,9 @@
 
 /// 6x13 pixel monospace font.
 pub const FONT_6X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new(
+    image: crate::image::ImageRaw::new_const(
         include_bytes!("../../../fonts/raw/jis_x0201/font_6x13.raw"),
-        96,
+        crate::geometry::Size::new(96, 130),
     ),
     glyph_mapping: &crate::mono_font::mapping::JIS_X0201,
     character_size: crate::geometry::Size::new(6, 13),
@@ -27,9 +27,9 @@ pub const FONT_6X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 7x14 pixel monospace font.
 pub const FONT_7X14: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new(
+    image: crate::image::ImageRaw::new_const(
         include_bytes!("../../../fonts/raw/jis_x0201/font_7x14.raw"),
-        112,
+        crate::geometry::Size::new(112, 140),
     ),
     glyph_mapping: &crate::mono_font::mapping::JIS_X0201,
     character_size: crate::geometry::Size::new(7, 14),
@@ -41,9 +41,9 @@ pub const FONT_7X14: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 8x13 pixel monospace font.
 pub const FONT_8X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new(
+    image: crate::image::ImageRaw::new_const(
         include_bytes!("../../../fonts/raw/jis_x0201/font_8x13.raw"),
-        128,
+        crate::geometry::Size::new(128, 130),
     ),
     glyph_mapping: &crate::mono_font::mapping::JIS_X0201,
     character_size: crate::geometry::Size::new(8, 13),
@@ -55,9 +55,9 @@ pub const FONT_8X13: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 9x15 pixel monospace font.
 pub const FONT_9X15: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new(
+    image: crate::image::ImageRaw::new_const(
         include_bytes!("../../../fonts/raw/jis_x0201/font_9x15.raw"),
-        144,
+        crate::geometry::Size::new(144, 150),
     ),
     glyph_mapping: &crate::mono_font::mapping::JIS_X0201,
     character_size: crate::geometry::Size::new(9, 15),
@@ -69,9 +69,9 @@ pub const FONT_9X15: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 9x18 pixel monospace font.
 pub const FONT_9X18: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new(
+    image: crate::image::ImageRaw::new_const(
         include_bytes!("../../../fonts/raw/jis_x0201/font_9x18.raw"),
-        144,
+        crate::geometry::Size::new(144, 180),
     ),
     glyph_mapping: &crate::mono_font::mapping::JIS_X0201,
     character_size: crate::geometry::Size::new(9, 18),
@@ -83,9 +83,9 @@ pub const FONT_9X18: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
 
 /// 10x20 pixel monospace font.
 pub const FONT_10X20: crate::mono_font::MonoFont = crate::mono_font::MonoFont {
-    image: crate::image::ImageRaw::new(
+    image: crate::image::ImageRaw::new_const(
         include_bytes!("../../../fonts/raw/jis_x0201/font_10x20.raw"),
-        160,
+        crate::geometry::Size::new(160, 200),
     ),
     glyph_mapping: &crate::mono_font::mapping::JIS_X0201,
     character_size: crate::geometry::Size::new(10, 20),

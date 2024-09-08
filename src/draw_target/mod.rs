@@ -183,7 +183,7 @@ pub trait DrawTargetExt: DrawTarget + Sized {
     /// ];
     ///
     /// // Create a `BinaryColor` image from the image data.
-    /// let raw_image = ImageRaw::<BinaryColor>::new(DATA, 4);
+    /// let raw_image = ImageRaw::<BinaryColor>::new(DATA, Size::new(4, 4)).unwrap();
     /// let image = Image::new(&raw_image, Point::zero());
     ///
     /// // Create a `Rgb888` display.
