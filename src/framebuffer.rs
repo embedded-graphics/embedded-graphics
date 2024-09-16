@@ -111,7 +111,7 @@ where
 impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
     Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
 where
-    C: PixelColor + From<C::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -128,7 +128,7 @@ where
 impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
     for Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
 where
-    C: PixelColor + From<C::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -144,7 +144,7 @@ macro_rules! impl_bit {
         impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
             Framebuffer<C, $raw_type, BO, WIDTH, HEIGHT, N>
         where
-            C: PixelColor + Into<$raw_type>,
+            C: PixelColor<Raw = $raw_type>,
         {
             /// Sets the color of a pixel.
             ///
@@ -196,7 +196,7 @@ impl_bit!(RawU4);
 impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
     Framebuffer<C, RawU8, BO, WIDTH, HEIGHT, N>
 where
-    C: PixelColor + Into<RawU8>,
+    C: PixelColor<Raw = RawU8>,
 {
     /// Sets the color of a pixel.
     ///
@@ -238,7 +238,7 @@ macro_rules! impl_bytes {
         impl<C, const WIDTH: usize, const HEIGHT: usize, const N: usize>
             Framebuffer<C, $raw_type, $bo_type, WIDTH, HEIGHT, N>
         where
-            C: PixelColor + Into<$raw_type>,
+            C: PixelColor<Raw = $raw_type>,
         {
             /// Sets the color of a pixel.
             ///

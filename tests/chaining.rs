@@ -1,6 +1,7 @@
 extern crate embedded_graphics;
 
 use embedded_graphics::{
+    pixelcolor::raw::RawU1,
     prelude::*,
     primitives::{Circle, Line, Primitive, PrimitiveStyle, Rectangle},
 };
@@ -11,12 +12,24 @@ struct FakeDisplay {}
 pub struct TestPixelColor(pub bool);
 
 impl PixelColor for TestPixelColor {
-    type Raw = ();
+    type Raw = RawU1;
 }
 
 impl From<u8> for TestPixelColor {
     fn from(other: u8) -> Self {
         TestPixelColor(other != 0)
+    }
+}
+
+impl From<RawU1> for TestPixelColor {
+    fn from(value: RawU1) -> Self {
+        TestPixelColor(value.into_inner() != 0)
+    }
+}
+
+impl From<TestPixelColor> for RawU1 {
+    fn from(color: TestPixelColor) -> Self {
+        RawU1::new(color.0 as u8)
     }
 }
 

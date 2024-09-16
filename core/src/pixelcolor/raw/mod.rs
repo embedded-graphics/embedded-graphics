@@ -73,6 +73,13 @@
 //!     }
 //! }
 //!
+//! /// Implement conversion into `RawU4` to make `RGBI` usable in framebuffers.
+//! impl From<RGBI> for RawU4 {
+//!     fn from(color: RGBI) -> Self {
+//!         color.0
+//!     }
+//! }
+//!
 //! /// Raw image data with 2 pixels per byte.
 //! #[rustfmt::skip]
 //! const IMAGE_DATA: &[u8] = &[
@@ -137,21 +144,6 @@ pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + 
     /// the same integer type. If the width of the `RawData` type is less than
     /// 32 bits only the least significant bits are used.
     fn from_u32(value: u32) -> Self;
-}
-
-/// Dummy implementation for `()`.
-///
-/// `()` can be used as [`PixelColor::Raw`] if raw data conversion isn't required.
-///
-/// [`PixelColor::Raw`]: super::PixelColor::Raw
-impl RawData for () {
-    type Storage = ();
-
-    const BITS_PER_PIXEL: usize = 0;
-
-    fn into_inner(self) {}
-
-    fn from_u32(_value: u32) {}
 }
 
 impl private::Sealed for () {}

@@ -93,10 +93,7 @@ impl ToBytes for () {
     }
 }
 
-impl<C> ToBytes for C
-where
-    C: PixelColor + Into<<C as PixelColor>::Raw>,
-{
+impl<C: PixelColor> ToBytes for C {
     type Bytes = <<C as PixelColor>::Raw as ToBytes>::Bytes;
 
     fn to_le_bytes(self) -> Self::Bytes {

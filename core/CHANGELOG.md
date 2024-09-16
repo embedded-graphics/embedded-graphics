@@ -9,6 +9,7 @@
 ### Changed
 
 - (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1
+- **(breaking)** [#765](https://github.com/embedded-graphics/embedded-graphics/pull/765) Made conversion to and from `RawUx` types mandatory for all `PixelColor` implementations.
 
 ### Added
 
