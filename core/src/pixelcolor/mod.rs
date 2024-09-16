@@ -13,6 +13,7 @@
 //! ```
 //! use embedded_graphics::{
 //!     geometry::Size, prelude::*, primitives::{Rectangle, PrimitiveStyle},
+//!     pixelcolor::raw::RawU2,
 //! };
 //!
 //! /// Color with 3 states.
@@ -23,10 +24,33 @@
 //!     Red,
 //! }
 //!
-//! /// The `Raw` can be is set to `()` because `EpdColor` doesn't need to be
-//! /// converted to raw data for the display and isn't stored in images.
+//! /// Implement the `PixelColor` trait to mark this type as an embedded-graphics
+//! /// color and associated binary storage format.
 //! impl PixelColor for EpdColor {
-//!     type Raw = ();
+//!     // 2 bits per pixel are required to store the 3 colors.
+//!     type Raw = RawU2;
+//! }
+//!
+//! /// Implement conversion from `RawU2` to `EpdColor` to make the type usable
+//! /// for raw images.
+//! impl From<RawU2> for EpdColor {
+//!     fn from(data: RawU2) -> Self {
+//!         match data.into_inner() {
+//!             0 => Self::White,
+//!             1 => Self::Black,
+//!             2 => Self::Red,
+//!             // Interpret the invalid encoding 0b11 as white:
+//!             _ => Self::White,
+//!         }
+//!     }
+//! }
+//!
+//! /// Implement conversion from `EpdColor` to `RawU2` to make the type usable
+//! /// in framebuffers.
+//! impl From<EpdColor> for RawU2 {
+//!     fn from(color: EpdColor) -> RawU2 {
+//!         RawU2::new(color as u8)
+//!     }
 //! }
 //!
 //! /// Mock EPD display.
@@ -102,7 +126,7 @@ pub use web_colors::WebColors;
 /// See the [module-level documentation] for more details.
 ///
 /// [module-level documentation]: self
-pub trait PixelColor: Copy + PartialEq {
+pub trait PixelColor: Copy + PartialEq + From<Self::Raw> + Into<Self::Raw> {
     /// Raw data type.
     ///
     /// Specifies the raw storage type that can be used to represent this color.
@@ -142,14 +166,10 @@ pub trait IntoStorage {
     fn into_storage(self) -> Self::Storage;
 }
 
-impl<C> IntoStorage for C
-where
-    C: PixelColor,
-    C::Raw: From<C>,
-{
+impl<C: PixelColor> IntoStorage for C {
     type Storage = <<C as PixelColor>::Raw as RawData>::Storage;
 
     fn into_storage(self) -> Self::Storage {
-        C::Raw::from(self).into_inner()
+        self.into().into_inner()
     }
 }

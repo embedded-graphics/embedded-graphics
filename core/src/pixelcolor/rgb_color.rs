@@ -247,7 +247,7 @@ mod tests {
     /// Convert color to integer and back again to test bit positions
     fn test_bpp16<C>(color: C, value: u16)
     where
-        C: RgbColor + From<RawU16> + Into<RawU16> + fmt::Debug,
+        C: PixelColor<Raw = RawU16> + fmt::Debug,
     {
         let value = RawU16::new(value);
 
@@ -258,7 +258,7 @@ mod tests {
     /// Convert color to integer and back again to test bit positions
     fn test_bpp24<C>(color: C, value: u32)
     where
-        C: RgbColor + From<RawU24> + Into<RawU24> + fmt::Debug,
+        C: PixelColor<Raw = RawU24> + fmt::Debug,
     {
         let value = RawU24::new(value);
 

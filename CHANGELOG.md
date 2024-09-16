@@ -9,6 +9,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Changed
 
 - **(breaking)** [#764](https://github.com/embedded-graphics/embedded-graphics/pull/764) Changed `ImageRaw::new` to return an error instead of truncating the image height.
+- **(breaking)** [#765](https://github.com/embedded-graphics/embedded-graphics/pull/765) Made conversion to and from `RawUx` types mandatory for all `PixelColor` implementations.
 - [#732](https://github.com/embedded-graphics/embedded-graphics/pull/732) Added `Rgb444` to support 12bit RGB displays. Note that this type is currently stored as a 16 bit value in `ImageRaw`s and `Framebuffer`s.
 
 ### Added

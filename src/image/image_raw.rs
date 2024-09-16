@@ -121,7 +121,7 @@ pub enum ImageRawError {
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ImageRaw<'a, C, BO = BigEndian>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
 {
     /// Image data, packed as dictated by raw data type `C::Raw`
@@ -136,7 +136,7 @@ where
 
 impl<'a, C, BO> ImageRaw<'a, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
 {
     /// Creates a new image.
@@ -201,7 +201,7 @@ const fn bytes_per_row(width: u32, bits_per_pixel: usize) -> usize {
 
 impl<'a, C, BO> ImageDrawable for ImageRaw<'a, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -247,7 +247,7 @@ where
 
 impl<C, BO> OriginDimensions for ImageRaw<'_, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
 {
     fn size(&self) -> Size {
@@ -257,7 +257,7 @@ where
 
 impl<'a, C, BO> GetPixel for ImageRaw<'a, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -277,7 +277,7 @@ where
 
 struct ContiguousPixels<'a, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -292,7 +292,7 @@ where
 
 impl<'a, C, BO> ContiguousPixels<'a, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -318,7 +318,7 @@ where
 
 impl<'a, C, BO> Iterator for ContiguousPixels<'a, C, BO>
 where
-    C: PixelColor + From<<C as PixelColor>::Raw>,
+    C: PixelColor,
     BO: ByteOrder,
     RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
 {
@@ -369,10 +369,16 @@ mod tests {
         }
     }
 
+    impl From<TestColorU32> for RawU32 {
+        fn from(color: TestColorU32) -> Self {
+            color.0
+        }
+    }
+
     /// Tests if the given image data matches an excepted `MockDisplay` pattern.
     fn assert_pattern<C, BO>(image_data: ImageRaw<C, BO>, expected_pattern: &[&str])
     where
-        C: PixelColor + From<<C as PixelColor>::Raw> + ColorMapping,
+        C: PixelColor + ColorMapping,
         BO: ByteOrder,
         for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
     {
