@@ -24,8 +24,8 @@
 //!     Red,
 //! }
 //!
-//! /// Implement the `PixelColor` trait to mark this type as a embedded-graphics
-//! /// color and to specify the binary storage format.
+//! /// Implement the `PixelColor` trait to mark this type as an embedded-graphics
+//! /// color and associated binary storage format.
 //! impl PixelColor for EpdColor {
 //!     // 2 bits per pixel are required to store the 3 colors.
 //!     type Raw = RawU2;
