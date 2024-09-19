@@ -1,5 +1,6 @@
 use super::{
-    DataOrder, OutOfBoundsError, RawData, RawU1, RawU16, RawU2, RawU24, RawU32, RawU4, RawU8,
+    u12, DataOrder, OutOfBoundsError, RawData, RawU1, RawU12, RawU16, RawU2, RawU24, RawU32, RawU4,
+    RawU8,
 };
 
 pub(crate) trait LoadStore<O: DataOrder>: Sized {
@@ -64,6 +65,26 @@ impl<O: DataOrder> LoadStore<O> for RawU8 {
             .get_mut(index)
             .ok_or(OutOfBoundsError)
             .map(|byte| *byte = self.0)
+    }
+}
+
+impl<O: DataOrder> LoadStore<O> for RawU12 {
+    fn load(buffer: &[u8], index: usize) -> Option<Self> {
+        let value = if O::IS_ALTERNATE_ORDER {
+            u12::load_u12_be(buffer, index)
+        } else {
+            u12::load_u12_le(buffer, index)
+        };
+
+        value.map(Self::new)
+    }
+
+    fn store(self, buffer: &mut [u8], index: usize) -> Result<(), OutOfBoundsError> {
+        if O::IS_ALTERNATE_ORDER {
+            u12::store_u12_be(buffer, index, self.into_inner())
+        } else {
+            u12::store_u12_le(buffer, index, self.into_inner())
+        }
     }
 }
 
