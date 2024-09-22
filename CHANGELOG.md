@@ -11,6 +11,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#764](https://github.com/embedded-graphics/embedded-graphics/pull/764) Changed `ImageRaw::new` to return an error instead of truncating the image height.
 - **(breaking)** [#765](https://github.com/embedded-graphics/embedded-graphics/pull/765) Made conversion to and from `RawUx` types mandatory for all `PixelColor` implementations.
 - [#732](https://github.com/embedded-graphics/embedded-graphics/pull/732) Added `Rgb444` to support 12bit RGB displays. Note that this type is currently stored as a 16 bit value in `ImageRaw`s and `Framebuffer`s.
+- **(breaking)** [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Renamed `ByteOrder`, `LittleEndian`, and `BigEndian` to `DataOrder`, `LittleEndianMsb0`, and `BigEndianLsb0`.
+- **(breaking)** [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Changed default data order for `ImageRaw` to `LittleEndianMsb0`.
 
 ### Added
 
@@ -20,6 +22,8 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#756](https://github.com/embedded-graphics/embedded-graphics/pull/756) Added `Clone, Copy` derives to `SubImage` and `Default` impls to `Framebuffer`, `MonoTextStyleBuilder` and `TextStyleBuilder`.
 - [#763](https://github.com/embedded-graphics/embedded-graphics/pull/763) Added `swap_xy` method to `Point` and `Size`.
 - [#764](https://github.com/embedded-graphics/embedded-graphics/pull/764) Added `ImageRaw::new_const` as a panicking alternative to the new `ImageRaw::new` for ease of use in const contexts.
+- [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `load` and `store` methods to `RawData` trait.
+- [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `MASK` constant to `RawData` trait.
 
 ## [0.8.1] - 2023-08-10
 

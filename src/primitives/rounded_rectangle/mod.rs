@@ -25,7 +25,7 @@ pub use styled::StyledPixelsIterator;
 /// radius for each corner, use the [`with_equal_corners`](RoundedRectangle::with_equal_corners()) method.
 ///
 /// Rounded rectangles with different radii for each corner can be created by passing a
-/// [`CornerRadii`](super::CornerRadii) configuration struct to the [`new`](RoundedRectangle::new())
+/// [`CornerRadii`] configuration struct to the [`new`](RoundedRectangle::new())
 /// method.
 ///
 /// # Overlapping corners
@@ -73,7 +73,7 @@ pub use styled::StyledPixelsIterator;
 /// ## Different corner radii
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Each corner is given a distinct
-/// radius in the x and y direction by creating a [`CornerRadii`](super::CornerRadii)
+/// radius in the x and y direction by creating a [`CornerRadii`]
 /// object and passing that to [`RoundedRectangle::new`](RoundedRectangle::new()).
 ///
 /// ```rust
@@ -107,7 +107,7 @@ pub use styled::StyledPixelsIterator;
 /// ## Using `CornerRadiiBuilder`
 ///
 /// This example creates a rounded rectangle 50px wide by 60px tall. Corner radii are set using the
-/// [`CornerRadiiBuilder`](super::CornerRadiiBuilder) builder.
+/// [`CornerRadiiBuilder`] builder.
 ///
 /// ```rust
 /// use embedded_graphics::{

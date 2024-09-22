@@ -236,7 +236,7 @@ pub(crate) mod tests {
         mock_display::MockDisplay,
         mono_font::{mapping::Mapping, MonoTextStyleBuilder},
         pixelcolor::{
-            raw::{LittleEndian, RawU1},
+            raw::{LittleEndianMsb0, RawU1},
             BinaryColor,
         },
         text::{Baseline, Text},
@@ -315,7 +315,7 @@ pub(crate) mod tests {
     fn new_framebuffer() -> Framebuffer<
         BinaryColor,
         RawU1,
-        LittleEndian,
+        LittleEndianMsb0,
         96,
         200,
         { buffer_size::<BinaryColor>(96, 200) },

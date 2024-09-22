@@ -118,9 +118,14 @@
 //! [`into_storage`]: super::IntoStorage::into_storage
 //! [`to_be_bytes`]: ToBytes::to_be_bytes
 
+mod load_store;
 mod to_bytes;
 
 pub use to_bytes::ToBytes;
+
+/// Out of bounds error.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct OutOfBoundsError;
 
 /// Trait implemented by all `RawUx` types.
 pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + ToBytes {
@@ -131,6 +136,9 @@ pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + 
 
     /// Bits per pixel.
     const BITS_PER_PIXEL: usize;
+
+    /// Bit mask.
+    const MASK: Self::Storage;
 
     /// Converts this raw data into the storage type.
     ///
@@ -144,12 +152,22 @@ pub trait RawData: Sized + private::Sealed + From<<Self as RawData>::Storage> + 
     /// the same integer type. If the width of the `RawData` type is less than
     /// 32 bits only the least significant bits are used.
     fn from_u32(value: u32) -> Self;
+
+    /// Loads raw data from a buffer.
+    ///
+    /// Returns `None` if the index is out of bounds.
+    fn load<O: DataOrder>(buffer: &[u8], index: usize) -> Option<Self>;
+
+    /// Stores raw data into a buffer.
+    ///
+    /// Returns an error if the index is out of bounds.
+    fn store<O: DataOrder>(self, buffer: &mut [u8], index: usize) -> Result<(), OutOfBoundsError>;
 }
 
 impl private::Sealed for () {}
 
 macro_rules! impl_raw_data {
-    ($type:ident : $storage_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr, $doc:expr) => {
+    ($type:ident : $storage_type:ident, $bpp:expr, $bpp_str:expr, $doc:expr) => {
         #[doc = $bpp_str]
         #[doc = "per pixel raw data."]
         #[doc = ""]
@@ -166,7 +184,13 @@ macro_rules! impl_raw_data {
             /// of value.
             #[inline]
             pub const fn new(value: $storage_type) -> Self {
-                $type(value & $mask)
+                $type(value & <Self as RawData>::MASK)
+            }
+
+            #[inline]
+            #[allow(unused)]
+            pub(crate) const fn new_unmasked(value: $storage_type) -> Self {
+                Self(value)
             }
         }
 
@@ -174,6 +198,7 @@ macro_rules! impl_raw_data {
             type Storage = $storage_type;
 
             const BITS_PER_PIXEL: usize = $bpp;
+            const MASK: Self::Storage = Self::Storage::MAX >> (Self::Storage::BITS - $bpp);
 
             fn into_inner(self) -> Self::Storage {
                 self.0
@@ -182,6 +207,15 @@ macro_rules! impl_raw_data {
             fn from_u32(value: u32) -> Self {
                 #[allow(trivial_numeric_casts)]
                 Self::new(value as $storage_type)
+            }
+
+            fn load<O: DataOrder>(buffer: &[u8], index: usize) -> Option<Self> {
+                load_store::LoadStore::<O>::load(buffer, index)
+
+            }
+
+            fn store<O: DataOrder>(self, buffer: &mut [u8], index: usize) -> Result<(), OutOfBoundsError> {
+                load_store::LoadStore::<O>::store(self, buffer, index)
             }
         }
 
@@ -194,11 +228,10 @@ macro_rules! impl_raw_data {
 
         impl private::Sealed for $type {}
     };
-    ($type:ident : $storage_type:ident, $bpp:expr, $mask:expr, $bpp_str:expr) => {
+    ($type:ident : $storage_type:ident, $bpp:expr, $bpp_str:expr) => {
         impl_raw_data!(
             $type: $storage_type,
             $bpp,
-            $mask,
             $bpp_str,
             concat!(
                 "`",
@@ -223,37 +256,55 @@ macro_rules! impl_raw_data {
     };
 }
 
-impl_raw_data!(RawU1: u8, 1, 0x01, "1 bit");
-impl_raw_data!(RawU2: u8, 2, 0x03, "2 bits");
-impl_raw_data!(RawU4: u8, 4, 0x0F, "4 bits");
-impl_raw_data!(RawU8: u8, 8, 0xFF, "8 bits");
-impl_raw_data!(RawU16: u16, 16, 0xFFFF, "16 bits");
-impl_raw_data!(RawU24: u32, 24, 0xFF_FFFF, "24 bits");
-impl_raw_data!(RawU32: u32, 32, 0xFFFF_FFFF, "32 bits");
+impl_raw_data!(RawU1: u8, 1, "1 bit");
+impl_raw_data!(RawU2: u8, 2, "2 bits");
+impl_raw_data!(RawU4: u8, 4, "4 bits");
+impl_raw_data!(RawU8: u8, 8, "8 bits");
+impl_raw_data!(RawU16: u16, 16, "16 bits");
+impl_raw_data!(RawU24: u32, 24, "24 bits");
+impl_raw_data!(RawU32: u32, 32, "32 bits");
 
-/// Raw data byte order.
-pub trait ByteOrder: private::Sealed {}
-
-/// Little endian byte order marker.
+/// Little endian or most significant bits first data order.
+///
+/// For buffers where the pixel bit depth is a multiple of 8, the pixel data is
+/// stored in least significant byte first order. For other bit depths, the
+/// pixel data is packed into bytes from left to right with the most significant
+/// bits used first within each byte.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub enum LittleEndian {}
+pub enum LittleEndianMsb0 {}
 
-impl ByteOrder for LittleEndian {}
-impl private::Sealed for LittleEndian {}
-
-/// Big endian byte order marker.
+/// Big endian or least significant bits first data order.
+///
+/// For buffers where the pixel bit depth is a multiple of 8, the pixel data is
+/// stored in most significant byte first order. For other bit depths, the pixel
+/// data is packed into bytes from right to left with the least significant bits
+/// used first within each byte.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub enum BigEndian {}
+pub enum BigEndianLsb0 {}
 
-impl ByteOrder for BigEndian {}
-impl private::Sealed for BigEndian {}
+/// Raw data order.
+pub trait DataOrder: private::Sealed {
+    /// Alternate order.
+    ///
+    /// Internal use constant to simulate a type level enum.
+    const IS_ALTERNATE_ORDER: bool;
+}
+impl DataOrder for LittleEndianMsb0 {
+    const IS_ALTERNATE_ORDER: bool = false;
+}
+impl DataOrder for BigEndianLsb0 {
+    const IS_ALTERNATE_ORDER: bool = true;
+}
 
 mod private {
     /// Sealed trait to prevent implementation of traits in other crates.
     pub trait Sealed {}
 }
+
+impl private::Sealed for LittleEndianMsb0 {}
+impl private::Sealed for BigEndianLsb0 {}
 
 #[cfg(test)]
 mod tests {
