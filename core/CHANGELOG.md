@@ -10,12 +10,15 @@
 
 - (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1
 - **(breaking)** [#765](https://github.com/embedded-graphics/embedded-graphics/pull/765) Made conversion to and from `RawUx` types mandatory for all `PixelColor` implementations.
+- **(breaking)** [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Renamed `ByteOrder`, `LittleEndian`, and `BigEndian` to `DataOrder`, `LittleEndianMsb0`, and `BigEndianLsb0`.
 
 ### Added
 
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
 - [#738](https://github.com/embedded-graphics/embedded-graphics/pull/738) Added `new_at_origin` method to `Rectangle`.
 - [#763](https://github.com/embedded-graphics/embedded-graphics/pull/763) Added `swap_xy` method to `Point` and `Size`.
+- [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `load` and `store` methods to `RawData` trait.
+- [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `MASK` constant to `RawData` trait.
 
 ## [0.4.0] - 2023-05-14
 

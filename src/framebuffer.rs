@@ -9,8 +9,8 @@ use crate::{
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{
-            BigEndian, ByteOrder, LittleEndian, RawData, RawU1, RawU16, RawU2, RawU24, RawU32,
-            RawU4, RawU8, ToBytes,
+            BigEndianLsb0, DataOrder, LittleEndianMsb0, RawData, RawU1, RawU16, RawU2, RawU24,
+            RawU32, RawU4, RawU8, ToBytes,
         },
         PixelColor,
     },
@@ -41,12 +41,12 @@ pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
 /// use embedded_graphics::{
 ///     framebuffer,
 ///     framebuffer::{Framebuffer, buffer_size},
-///     pixelcolor::{Rgb565, raw::LittleEndian},
+///     pixelcolor::{Rgb565, raw::LittleEndianMsb0},
 ///     prelude::*,
 ///     primitives::PrimitiveStyle,
 /// };
 ///
-/// let mut fb = Framebuffer::<Rgb565, _, LittleEndian, 320, 240, {buffer_size::<Rgb565>(320, 240)}>::new();
+/// let mut fb = Framebuffer::<Rgb565, _, LittleEndianMsb0, 320, 240, {buffer_size::<Rgb565>(320, 240)}>::new();
 ///
 /// fb.bounding_box()
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
@@ -108,15 +108,15 @@ where
     }
 }
 
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize>
-    Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+impl<C, O, const WIDTH: usize, const HEIGHT: usize, const N: usize>
+    Framebuffer<C, C::Raw, O, WIDTH, HEIGHT, N>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    for<'a> RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
     /// Returns an image based on the framebuffer content.
-    pub fn as_image(&self) -> ImageRaw<'_, C, BO> {
+    pub fn as_image(&self) -> ImageRaw<'_, C, O> {
         ImageRaw::new(
             &self.data[0..Self::BUFFER_SIZE],
             Size::new(WIDTH as u32, HEIGHT as u32),
@@ -125,12 +125,12 @@ where
     }
 }
 
-impl<C, BO, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
-    for Framebuffer<C, C::Raw, BO, WIDTH, HEIGHT, N>
+impl<C, O, const WIDTH: usize, const HEIGHT: usize, const N: usize> GetPixel
+    for Framebuffer<C, C::Raw, O, WIDTH, HEIGHT, N>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    for<'a> RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
     type Color = C;
 
@@ -282,8 +282,8 @@ macro_rules! impl_bytes {
     };
 
     ($raw_type:ty) => {
-        impl_bytes!($raw_type, LittleEndian, to_le_bytes);
-        impl_bytes!($raw_type, BigEndian, to_be_bytes);
+        impl_bytes!($raw_type, LittleEndianMsb0, to_le_bytes);
+        impl_bytes!($raw_type, BigEndianLsb0, to_be_bytes);
     };
 }
 
@@ -332,7 +332,7 @@ mod tests {
             $crate::framebuffer::Framebuffer::<
                 $color_type,
                 <$color_type as $crate::pixelcolor::PixelColor>::Raw,
-                $crate::pixelcolor::raw::LittleEndian,
+                $crate::pixelcolor::raw::LittleEndianMsb0,
                 $width,
                 $height,
                 { $crate::framebuffer::buffer_size::<$color_type>($width, $height) },
@@ -510,7 +510,7 @@ mod tests {
 
     #[test]
     fn raw_u16_be() {
-        let mut fb = <framebuffer!(Rgb565, BigEndian, 3, 2)>::new();
+        let mut fb = <framebuffer!(Rgb565, BigEndianLsb0, 3, 2)>::new();
 
         fb.draw_iter(
             [
@@ -568,7 +568,7 @@ mod tests {
 
     #[test]
     fn raw_u24_be() {
-        let mut fb = <framebuffer!(Rgb888, BigEndian, 3, 2)>::new();
+        let mut fb = <framebuffer!(Rgb888, BigEndianLsb0, 3, 2)>::new();
 
         fb.draw_iter(
             [
@@ -626,7 +626,7 @@ mod tests {
 
     #[test]
     fn raw_u32_be() {
-        let mut fb = <framebuffer!(U32Color, BigEndian, 3, 2)>::new();
+        let mut fb = <framebuffer!(U32Color, BigEndianLsb0, 3, 2)>::new();
 
         fb.draw_iter(
             [
@@ -735,7 +735,7 @@ mod tests {
         let fb = Framebuffer::<
             BinaryColor,
             _,
-            LittleEndian,
+            LittleEndianMsb0,
             10,
             5,
             { buffer_size::<BinaryColor>(10, 5) * 3 / 2 },
