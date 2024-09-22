@@ -3,7 +3,7 @@ use embedded_graphics::{
     framebuffer::{buffer_size, Framebuffer},
     geometry::Point,
     image::GetPixel,
-    pixelcolor::{raw::LittleEndian, BinaryColor, Rgb565},
+    pixelcolor::{raw::LittleEndianMsb0, BinaryColor, Rgb565},
     prelude::{DrawTarget, Size, WebColors},
     primitives::{Primitive, PrimitiveStyle, Rectangle},
 };
@@ -13,7 +13,7 @@ fn framebuffer_set_1bpp(c: &mut Criterion) {
         let mut fb = Framebuffer::<
             BinaryColor,
             _,
-            LittleEndian,
+            LittleEndianMsb0,
             320,
             240,
             { buffer_size::<BinaryColor>(320, 240) },
@@ -31,7 +31,7 @@ fn framebuffer_get_1bpp(c: &mut Criterion) {
         let fb = Framebuffer::<
             BinaryColor,
             _,
-            LittleEndian,
+            LittleEndianMsb0,
             320,
             240,
             { buffer_size::<BinaryColor>(320, 240) },
@@ -49,7 +49,7 @@ fn framebuffer_1bpp_draw_iter(c: &mut Criterion) {
         let mut fb = Framebuffer::<
             BinaryColor,
             _,
-            LittleEndian,
+            LittleEndianMsb0,
             320,
             240,
             { buffer_size::<BinaryColor>(320, 240) },
@@ -70,7 +70,7 @@ fn framebuffer_set_rgb565(c: &mut Criterion) {
         let mut fb = Framebuffer::<
             Rgb565,
             _,
-            LittleEndian,
+            LittleEndianMsb0,
             320,
             240,
             { buffer_size::<Rgb565>(320, 240) },
@@ -88,7 +88,7 @@ fn framebuffer_get_rgb565(c: &mut Criterion) {
         let fb = Framebuffer::<
             Rgb565,
             _,
-            LittleEndian,
+            LittleEndianMsb0,
             320,
             240,
             { buffer_size::<Rgb565>(320, 240) },

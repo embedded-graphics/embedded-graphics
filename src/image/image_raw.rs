@@ -6,17 +6,17 @@ use crate::{
     image::{GetPixel, ImageDrawable},
     iterator::raw::RawDataSlice,
     pixelcolor::{
-        raw::{BigEndian, ByteOrder, LittleEndian, RawData},
+        raw::{BigEndianLsb0, DataOrder, LittleEndianMsb0, RawData},
         PixelColor,
     },
     primitives::Rectangle,
 };
 
 /// Image with little endian data.
-pub type ImageRawLE<'a, C> = ImageRaw<'a, C, LittleEndian>;
+pub type ImageRawLE<'a, C> = ImageRaw<'a, C, LittleEndianMsb0>;
 
 /// Image with big endian data.
-pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
+pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndianLsb0>;
 
 /// Error returned by [`ImageRaw::new`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -32,8 +32,7 @@ pub enum ImageRawError {
 ///
 /// The `ImageRaw` struct can be used to construct an image from a slice
 /// of raw image data. The storage format is determined by the [`PixelColor`]
-/// type `C` and the [`ByteOrder`] `BO`. The byteorder doesn't need to be
-/// specified for colors which aren't stored in multiple bytes.
+/// type `C` and the [`DataOrder`] `O`.
 ///
 /// For color types with less than 8 bits per pixels the start of each row is
 /// aligned to the next whole byte.
@@ -92,7 +91,7 @@ pub enum ImageRawError {
 /// use embedded_graphics::{
 ///     image::{Image, ImageRaw, ImageRawBE, ImageRawLE},
 ///     pixelcolor::{
-///         raw::{BigEndian, LittleEndian},
+///         raw::{BigEndianLsb0, LittleEndianMsb0},
 ///         Rgb565, Rgb888,
 ///     },
 ///     prelude::*,
@@ -102,13 +101,13 @@ pub enum ImageRawError {
 /// // Rgb888 image with 24 bits per pixel and big endian byte order
 /// let image1 = ImageRawBE::<Rgb888>::new(DATA, Size::new(8, 8)).unwrap();
 /// // or:
-/// let image2 = ImageRaw::<Rgb888, BigEndian>::new(DATA, Size::new(8, 8)).unwrap();
+/// let image2 = ImageRaw::<Rgb888, BigEndianLsb0>::new(DATA, Size::new(8, 8)).unwrap();
 /// # assert_eq!(image1, image2);
 ///
 /// // Rgb565 image with 16 bits per pixel and little endian byte order
 /// let image1 = ImageRawLE::<Rgb565>::new(DATA, Size::new(12, 8)).unwrap();
 /// // or:
-/// let image2 = ImageRaw::<Rgb565, LittleEndian>::new(DATA, Size::new(12, 8)).unwrap();
+/// let image2 = ImageRaw::<Rgb565, LittleEndianMsb0>::new(DATA, Size::new(12, 8)).unwrap();
 /// # assert_eq!(image1, image2);
 /// ```
 ///
@@ -119,10 +118,10 @@ pub enum ImageRawError {
 /// [`ByteOrder`]: crate::pixelcolor::raw::ByteOrder
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct ImageRaw<'a, C, BO = BigEndian>
+pub struct ImageRaw<'a, C, O = LittleEndianMsb0>
 where
     C: PixelColor,
-    BO: ByteOrder,
+    O: DataOrder,
 {
     /// Image data, packed as dictated by raw data type `C::Raw`
     data: &'a [u8],
@@ -131,13 +130,13 @@ where
     size: Size,
 
     pixel_type: PhantomData<C>,
-    byte_order: PhantomData<BO>,
+    data_order: PhantomData<O>,
 }
 
-impl<'a, C, BO> ImageRaw<'a, C, BO>
+impl<'a, C, O> ImageRaw<'a, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
+    O: DataOrder,
 {
     /// Creates a new image.
     ///
@@ -157,7 +156,7 @@ where
             data,
             size,
             pixel_type: PhantomData,
-            byte_order: PhantomData,
+            data_order: PhantomData,
         })
     }
 
@@ -199,11 +198,11 @@ const fn bytes_per_row(width: u32, bits_per_pixel: usize) -> usize {
     (width as usize * bits_per_pixel + 7) / 8
 }
 
-impl<'a, C, BO> ImageDrawable for ImageRaw<'a, C, BO>
+impl<'a, C, O> ImageDrawable for ImageRaw<'a, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
     type Color = C;
 
@@ -245,21 +244,21 @@ where
     }
 }
 
-impl<C, BO> OriginDimensions for ImageRaw<'_, C, BO>
+impl<C, O> OriginDimensions for ImageRaw<'_, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
+    O: DataOrder,
 {
     fn size(&self) -> Size {
         self.size
     }
 }
 
-impl<'a, C, BO> GetPixel for ImageRaw<'a, C, BO>
+impl<'a, C, O> GetPixel for ImageRaw<'a, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
     type Color = C;
 
@@ -275,13 +274,13 @@ where
     }
 }
 
-struct ContiguousPixels<'a, C, BO>
+struct ContiguousPixels<'a, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
-    iter: <RawDataSlice<'a, C::Raw, BO> as IntoIterator>::IntoIter,
+    iter: <RawDataSlice<'a, C::Raw, O> as IntoIterator>::IntoIter,
 
     remaining_x: u32,
     width: u32,
@@ -290,13 +289,13 @@ where
     row_skip: usize,
 }
 
-impl<'a, C, BO> ContiguousPixels<'a, C, BO>
+impl<'a, C, O> ContiguousPixels<'a, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
-    fn new(image: &ImageRaw<'a, C, BO>, size: Size, initial_skip: usize, row_skip: usize) -> Self {
+    fn new(image: &ImageRaw<'a, C, O>, size: Size, initial_skip: usize, row_skip: usize) -> Self {
         let mut iter = RawDataSlice::new(image.data).into_iter();
 
         if initial_skip > 0 {
@@ -316,11 +315,11 @@ where
     }
 }
 
-impl<'a, C, BO> Iterator for ContiguousPixels<'a, C, BO>
+impl<'a, C, O> Iterator for ContiguousPixels<'a, C, O>
 where
     C: PixelColor,
-    BO: ByteOrder,
-    RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+    O: DataOrder,
+    RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
 {
     type Item = C;
 
@@ -376,11 +375,11 @@ mod tests {
     }
 
     /// Tests if the given image data matches an excepted `MockDisplay` pattern.
-    fn assert_pattern<C, BO>(image_data: ImageRaw<C, BO>, expected_pattern: &[&str])
+    fn assert_pattern<C, O>(image_data: ImageRaw<C, O>, expected_pattern: &[&str])
     where
         C: PixelColor + ColorMapping,
-        BO: ByteOrder,
-        for<'a> RawDataSlice<'a, C::Raw, BO>: IntoIterator<Item = C::Raw>,
+        O: DataOrder,
+        for<'a> RawDataSlice<'a, C::Raw, O>: IntoIterator<Item = C::Raw>,
     {
         let image = Image::new(&image_data, Point::zero());
         let mut display = MockDisplay::new();
