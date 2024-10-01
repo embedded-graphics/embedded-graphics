@@ -1,3 +1,5 @@
+use embedded_graphics_core::prelude::Point;
+
 use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions},
@@ -41,6 +43,12 @@ where
 impl<T> OriginDimensions for SubImage<'_, T> {
     fn size(&self) -> crate::prelude::Size {
         self.area.size
+    }
+}
+
+impl<T> Dimensions for SubImage<'_, T> {
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), self.area.size)
     }
 }
 
@@ -104,6 +112,12 @@ mod tests {
     impl OriginDimensions for MockImageDrawable {
         fn size(&self) -> Size {
             Size::new(8, 10)
+        }
+    }
+
+    impl Dimensions for MockImageDrawable {
+        fn bounding_box(&self) -> Rectangle {
+            Rectangle::new(Point::zero(), Size::new(8, 10))
         }
     }
 

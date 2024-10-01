@@ -51,6 +51,12 @@ impl OriginDimensions for FakeDisplay {
     }
 }
 
+impl Dimensions for FakeDisplay {
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), Size::zero())
+    }
+}
+
 #[test]
 fn it_supports_chaining() -> Result<(), core::convert::Infallible> {
     let mut display = FakeDisplay {};

@@ -15,24 +15,24 @@ use crate::{
 /// [`translated`]: crate::draw_target::DrawTargetExt::translated
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct Translated<'a, T>
+pub struct Translated<T>
 where
     T: DrawTarget,
 {
-    parent: &'a mut T,
+    parent: T,
     offset: Point,
 }
 
-impl<'a, T> Translated<'a, T>
+impl<T> Translated<T>
 where
     T: DrawTarget,
 {
-    pub(super) fn new(parent: &'a mut T, offset: Point) -> Self {
+    pub(super) fn new(parent: T, offset: Point) -> Self {
         Self { parent, offset }
     }
 }
 
-impl<T> DrawTarget for Translated<'_, T>
+impl<T> DrawTarget for Translated<T>
 where
     T: DrawTarget,
 {
@@ -65,7 +65,7 @@ where
     }
 }
 
-impl<T> Dimensions for Translated<'_, T>
+impl<T> Dimensions for Translated<T>
 where
     T: DrawTarget,
 {
@@ -91,7 +91,7 @@ mod tests {
     fn draw_iter() {
         let mut display = MockDisplay::new();
 
-        let mut translated = display.translated(Point::new(2, 3));
+        let mut translated = (&mut display).translated(Point::new(2, 3));
 
         let pixels = [
             Pixel(Point::new(0, 0), BinaryColor::On),
@@ -113,7 +113,7 @@ mod tests {
     fn fill_contiguous() {
         let mut display = MockDisplay::new();
 
-        let mut translated = display.translated(Point::new(3, 2));
+        let mut translated = (&mut display).translated(Point::new(3, 2));
 
         let colors = [
             1, 1, 1, 1, 1, //
@@ -142,7 +142,7 @@ mod tests {
     fn fill_solid() {
         let mut display = MockDisplay::new();
 
-        let mut translated = display.translated(Point::new(1, 3));
+        let mut translated = (&mut display).translated(Point::new(1, 3));
 
         let area = Rectangle::new(Point::new(2, 1), Size::new(3, 4));
         translated.fill_solid(&area, BinaryColor::On).unwrap();
@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn clear() {
         let mut display = MockDisplay::new();
-        let mut translated = display.translated(Point::new(1, 3));
+        let mut translated = (&mut display).translated(Point::new(1, 3));
         translated.clear(BinaryColor::On).unwrap();
 
         let mut expected = MockDisplay::new();
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn bounding_box() {
-        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        let display: MockDisplay<BinaryColor> = MockDisplay::new();
         let display_bb = display.bounding_box();
 
         let translated = display.translated(Point::new(1, 3));

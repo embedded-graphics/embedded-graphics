@@ -1,4 +1,4 @@
-use embedded_graphics::prelude::*;
+use embedded_graphics::{prelude::*, primitives::Rectangle};
 use std::convert::TryFrom;
 
 const SIZE: usize = 256;
@@ -63,5 +63,11 @@ where
 impl<C> OriginDimensions for Framebuffer<C> {
     fn size(&self) -> Size {
         Size::new_equal(SIZE as u32)
+    }
+}
+
+impl<C> Dimensions for Framebuffer<C> {
+    fn bounding_box(&self) -> Rectangle {
+        Rectangle::new(Point::zero(), Size::new_equal(SIZE as u32))
     }
 }
