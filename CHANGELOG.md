@@ -20,6 +20,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#756](https://github.com/embedded-graphics/embedded-graphics/pull/756) Added `Clone, Copy` derives to `SubImage` and `Default` impls to `Framebuffer`, `MonoTextStyleBuilder` and `TextStyleBuilder`.
 - [#763](https://github.com/embedded-graphics/embedded-graphics/pull/763) Added `swap_xy` method to `Point` and `Size`.
 - [#764](https://github.com/embedded-graphics/embedded-graphics/pull/764) Added `ImageRaw::new_const` as a panicking alternative to the new `ImageRaw::new` for ease of use in const contexts.
+- [#768](https://github.com/embedded-graphics/embedded-graphics/pull/768) Added 8bit `Rgb332` support.
 
 ## [0.8.1] - 2023-08-10
 
