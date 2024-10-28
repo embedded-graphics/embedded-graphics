@@ -1,5 +1,5 @@
 use crate::pixelcolor::{
-    raw::{RawData, RawU16, RawU24},
+    raw::{RawData, RawU16, RawU24, RawU8},
     PixelColor,
 };
 use core::fmt;
@@ -71,6 +71,7 @@ macro_rules! impl_rgb_color {
         #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
         pub struct $type($storage_type);
 
+        #[allow(trivial_numeric_casts)]
         impl $type {
             const R_MASK: $storage_type = ($type::MAX_R as $storage_type) << $r_pos;
             const G_MASK: $storage_type = ($type::MAX_G as $storage_type) << $g_pos;
@@ -114,6 +115,7 @@ macro_rules! impl_rgb_color {
             #[doc = "color.\n"]
             #[doc = "Too large channel values will be limited by setting the"]
             #[doc = "unused most significant bits to zero."]
+            #[allow(trivial_numeric_casts)]
             pub const fn new(r: u8, g: u8, b: u8) -> Self {
                 let r_shifted = (r & Self::MAX_R) as $storage_type << $r_pos;
                 let g_shifted = (g & Self::MAX_G) as $storage_type << $g_pos;
@@ -227,6 +229,8 @@ macro_rules! rgb_color {
     };
 }
 
+rgb_color!(Rgb332, RawU8, u8, Rgb = (3, 3, 2));
+
 rgb_color!(Rgb444, RawU16, u16, Rgb = (4, 4, 4));
 
 rgb_color!(Rgb555, RawU16, u16, Rgb = (5, 5, 5));
@@ -243,6 +247,17 @@ rgb_color!(Bgr888, RawU24, u32, Bgr = (8, 8, 8));
 mod tests {
     use super::*;
     use crate::pixelcolor::IntoStorage;
+
+    /// Convert color to integer and back again to test bit positions
+    fn test_bpp8<C>(color: C, value: u8)
+    where
+        C: PixelColor<Raw = RawU8> + fmt::Debug,
+    {
+        let value = RawU8::new(value);
+
+        assert_eq!(color.into(), value);
+        assert_eq!(C::from(value), color);
+    }
 
     /// Convert color to integer and back again to test bit positions
     fn test_bpp16<C>(color: C, value: u16)
@@ -264,6 +279,13 @@ mod tests {
 
         assert_eq!(color.into(), value);
         assert_eq!(C::from(value), color);
+    }
+
+    #[test]
+    pub fn bit_positions_rgb332() {
+        test_bpp8(Rgb332::new(0b101, 0, 0), 0b101 << 2 + 3);
+        test_bpp8(Rgb332::new(0, 0b101, 0), 0b101 << 2);
+        test_bpp8(Rgb332::new(0, 0, 0b11), 0b11 << 0);
     }
 
     #[test]
