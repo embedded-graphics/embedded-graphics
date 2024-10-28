@@ -167,7 +167,7 @@ debugging, development or if hardware is not available.
 use embedded_graphics::{
     framebuffer::{buffer_size, Framebuffer},
     mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::{raw::LittleEndian, BinaryColor},
+    pixelcolor::{raw::LittleEndianMsb0, BinaryColor},
     prelude::*,
     primitives::{
         Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
@@ -181,7 +181,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     let mut display = Framebuffer::<
        BinaryColor,
        _,
-       LittleEndian,
+       LittleEndianMsb0,
        320,
        240,
        { buffer_size::<BinaryColor>(320, 240) },

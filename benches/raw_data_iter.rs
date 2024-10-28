@@ -7,13 +7,13 @@ macro_rules! impl_bench {
     ($fn:ident, $type:ident) => {
         fn $fn(c: &mut Criterion) {
             c.bench_function(stringify!($type), |b| {
-                let slice = RawDataSlice::<$type, LittleEndian>::new(TEST_DATA);
+                let slice = RawDataSlice::<$type, LittleEndianMsb0>::new(TEST_DATA);
 
                 b.iter(|| slice.into_iter().collect::<Vec<_>>())
             });
 
             c.bench_function(concat!(stringify!($type), " step by 20"), |b| {
-                let slice = RawDataSlice::<$type, LittleEndian>::new(TEST_DATA);
+                let slice = RawDataSlice::<$type, LittleEndianMsb0>::new(TEST_DATA);
 
                 b.iter(|| slice.into_iter().step_by(20).collect::<Vec<_>>())
             });
