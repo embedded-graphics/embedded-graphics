@@ -222,7 +222,6 @@ impl Real {
         }
     }
 
-    #[allow(unused)]
     pub(crate) fn round(self) -> Self {
         Self(self.0.round())
     }
