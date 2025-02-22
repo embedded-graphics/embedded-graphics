@@ -21,7 +21,7 @@ pub use self::{
     ellipse::Ellipse,
     line::Line,
     polyline::Polyline,
-    primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment},
+    primitive_style::{PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, StrokeStyle},
     rounded_rectangle::{CornerRadii, CornerRadiiBuilder, RoundedRectangle},
     sector::Sector,
     triangle::Triangle,
