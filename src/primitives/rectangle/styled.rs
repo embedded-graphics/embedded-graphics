@@ -545,4 +545,102 @@ mod tests {
 
         assert_eq!(transparent_rect.bounding_box(), filled_rect.bounding_box(),);
     }
+
+    #[test]
+    fn dotted_border_is_inside_the_regular_border() {
+        let base = PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 5));
+
+        let rectangles = [
+            Rectangle::new(Point::new(5, 6), Size::new(40, 3)),
+            Rectangle::new(Point::new(4, 5), Size::new(40, 39)),
+        ];
+
+        for rect in &rectangles {
+            let mut regular = MockDisplay::new();
+            let mut dotted = MockDisplay::new();
+
+            rect.into_styled(base.build()).draw(&mut regular).unwrap();
+            rect.into_styled(base.stroke_style(StrokeStyle::Dotted).build())
+                .draw(&mut dotted)
+                .unwrap();
+
+            for p in regular.bounding_box().points() {
+                if dotted.get_pixel(p) == Some(BinaryColor::On) {
+                    assert_eq!(regular.get_pixel(p), Some(BinaryColor::On));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn dotted_border_dots_have_correct_shape_and_size() {
+        // The diameter of the dots should be the border width, except in the case
+        // where this causes corner dots to overlap.
+        // Rectangles are used for dots with size <= 3.
+        let base = PrimitiveStyleBuilder::new()
+            .stroke_color(BinaryColor::On)
+            .stroke_width(5)
+            .stroke_alignment(StrokeAlignment::Inside);
+
+        let rectangle1 = Rectangle::new(Point::new(5, 6), Size::new(40, 7));
+        let rectangle2 = Rectangle::new(Point::new(4, 5), Size::new(40, 39));
+
+        let top_left_dot1 = Rectangle::new(Point::new(5, 6), Size::new_equal(3)); // because the height is 7
+        let top_left_dot2 = Circle::new(Point::new(4, 5), 5);
+
+        let mut dot = MockDisplay::new();
+        let mut dotted_border = MockDisplay::new();
+
+        top_left_dot1
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut dot)
+            .unwrap();
+        rectangle1
+            .into_styled(base.stroke_style(StrokeStyle::Dotted).build())
+            .draw(&mut dotted_border)
+            .unwrap();
+
+        for p in top_left_dot1.bounding_box().points() {
+            assert_eq!(dot.get_pixel(p), dotted_border.get_pixel(p));
+        }
+
+        let mut dot = MockDisplay::new();
+        let mut dotted_border = MockDisplay::new();
+
+        top_left_dot2
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
+            .draw(&mut dot)
+            .unwrap();
+        rectangle2
+            .into_styled(base.stroke_style(StrokeStyle::Dotted).build())
+            .draw(&mut dotted_border)
+            .unwrap();
+
+        for p in top_left_dot2.bounding_box().points() {
+            assert_eq!(dot.get_pixel(p), dotted_border.get_pixel(p));
+        }
+    }
+
+    #[test]
+    fn dotted_border_fill_is_independent_of_stroke_alignment() {
+        let rect = Rectangle::new(Point::new(3, 4), Size::new(9, 13));
+        let base = PrimitiveStyleBuilder::new()
+            .fill_color(BinaryColor::On)
+            .stroke_width(5)
+            .stroke_style(StrokeStyle::Dotted);
+
+        let mut inside = MockDisplay::new();
+        let mut outside = MockDisplay::new();
+
+        rect.into_styled(base.stroke_alignment(StrokeAlignment::Inside).build())
+            .draw(&mut inside)
+            .unwrap();
+        rect.into_styled(base.stroke_alignment(StrokeAlignment::Outside).build())
+            .draw(&mut outside)
+            .unwrap();
+
+        for p in rect.bounding_box().points() {
+            assert_eq!(inside.get_pixel(p), outside.get_pixel(p));
+        }
+    }
 }
