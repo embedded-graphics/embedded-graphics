@@ -128,10 +128,10 @@ cargo run --example hello-world
 Additional features can be enabled by adding the following features to your `Cargo.toml`.
 
 * `nalgebra_support` - use the [Nalgebra](https://crates.io/crates/nalgebra) crate with `no_std`
-support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
+  support to enable conversions from `nalgebra::Vector2` to [`Point`] and [`Size`].
 
 * `fixed_point` - use fixed point arithmetic instead of floating point for all trigonometric
-calculation.
+  calculation.
 
 * `defmt` - provide implementations of `defmt::Format` for all types where possible. [`defmt`]
   is a library for logging that moves as much work as possible over to a separate logging
