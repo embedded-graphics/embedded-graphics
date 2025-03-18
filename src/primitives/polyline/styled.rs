@@ -20,10 +20,7 @@ pub(in crate::primitives::polyline) fn untranslated_bounding_box<C: PixelColor>(
     if style.effective_stroke_color().is_some() && primitive.vertices.len() > 1 {
         let (min, max) =
             ThickSegmentIter::new(primitive.vertices, style.stroke_width, StrokeOffset::None).fold(
-                (
-                    Point::new_equal(core::i32::MAX),
-                    Point::new_equal(core::i32::MIN),
-                ),
+                (Point::new_equal(i32::MAX), Point::new_equal(i32::MIN)),
                 |(min, max), segment| {
                     let bb = segment.edges_bounding_box();
 
