@@ -42,6 +42,14 @@ where
     /// This property only applies to closed shapes (rectangle, circle, ...) and is
     /// ignored for open shapes (line, ...).
     pub stroke_alignment: StrokeAlignment,
+
+    /// Stroke style.
+    ///
+    /// The stroke style sets the border style (default is [`StrokeStyle::Solid`]).
+    ///
+    /// [`StrokeStyle::Dotted`] is only implemented for the [`Rectangle`](crate::primitives::Rectangle)
+    /// primitive, the default will be used for all other primitives.
+    pub stroke_style: StrokeStyle,
 }
 
 impl<C> PrimitiveStyle<C>
@@ -118,7 +126,13 @@ where
     /// Returns the fill area.
     pub(in crate::primitives) fn fill_area<P: OffsetOutline>(&self, primitive: &P) -> P {
         // saturate offset at i32::min_value() if stroke width is to large
-        let offset = -self.inside_stroke_width().saturating_as::<i32>();
+        let offset = if self.stroke_style == StrokeStyle::Solid {
+            -self.inside_stroke_width().saturating_as::<i32>()
+        } else {
+            // do not shrink the fill area for non solid borders, because the entire fill
+            // area is visible through the gaps in the border
+            0
+        };
 
         primitive.offset(offset)
     }
@@ -131,6 +145,7 @@ where
             stroke_color: None,
             stroke_width: 0,
             stroke_alignment: StrokeAlignment::Center,
+            stroke_style: StrokeStyle::const_default(),
         }
     }
 }
@@ -254,6 +269,16 @@ where
         self
     }
 
+    /// Sets the stroke style.
+    ///
+    /// This feature is not supported for all primitives, see [PrimitiveStyle::stroke_style]
+    /// for the complete list.
+    pub const fn stroke_style(mut self, stroke_style: StrokeStyle) -> Self {
+        self.style.stroke_style = stroke_style;
+
+        self
+    }
+
     /// Builds the primitive style.
     pub const fn build(self) -> PrimitiveStyle<C> {
         self.style
@@ -287,6 +312,24 @@ impl Default for StrokeAlignment {
     }
 }
 
+/// Stroke style.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
+#[non_exhaustive]
+pub enum StrokeStyle {
+    /// Solid.
+    #[default]
+    Solid,
+    /// Dotted.
+    Dotted,
+}
+
+impl StrokeStyle {
+    const fn const_default() -> Self {
+        Self::Solid
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -301,6 +344,7 @@ mod tests {
                 stroke_color: None,
                 stroke_width: 0,
                 stroke_alignment: StrokeAlignment::Center,
+                stroke_style: StrokeStyle::Solid,
             }
         );
 
