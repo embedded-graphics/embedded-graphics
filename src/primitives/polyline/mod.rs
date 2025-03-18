@@ -75,7 +75,7 @@ impl<'a> Polyline<'a> {
     }
 }
 
-impl<'a> Primitive for Polyline<'a> {}
+impl Primitive for Polyline<'_> {}
 
 impl<'a> PointsIter for Polyline<'a> {
     type Iter = Points<'a>;
@@ -85,7 +85,7 @@ impl<'a> PointsIter for Polyline<'a> {
     }
 }
 
-impl<'a> Dimensions for Polyline<'a> {
+impl Dimensions for Polyline<'_> {
     fn bounding_box(&self) -> Rectangle {
         match self.vertices {
             [] => Rectangle::zero(),
@@ -111,7 +111,7 @@ impl<'a> Dimensions for Polyline<'a> {
     }
 }
 
-impl<'a> Transform for Polyline<'a> {
+impl Transform for Polyline<'_> {
     /// Translate the polyline from its current position to a new position by (x, y) pixels, returning
     /// a new `Polyline`. For a mutating transform, see `translate_mut`.
     ///

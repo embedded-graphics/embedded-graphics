@@ -394,7 +394,7 @@ pub struct MonoTextStyleBuilder<'a, C> {
     style: MonoTextStyle<'a, C>,
 }
 
-impl<'a, C> Default for MonoTextStyleBuilder<'a, C>
+impl<C> Default for MonoTextStyleBuilder<'_, C>
 where
     C: PixelColor,
 {

@@ -44,7 +44,7 @@ impl<'a> Points<'a> {
     }
 }
 
-impl<'a> Iterator for Points<'a> {
+impl Iterator for Points<'_> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {

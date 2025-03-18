@@ -103,7 +103,7 @@ impl<'a> ScanlineIntersections<'a> {
 ///      ⇓
 /// A---A B---B
 /// ```
-impl<'a> Iterator for ScanlineIntersections<'a> {
+impl Iterator for ScanlineIntersections<'_> {
     type Item = Scanline;
 
     fn next(&mut self) -> Option<Self::Item> {

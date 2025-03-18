@@ -57,7 +57,7 @@ impl<'a> ScanlineIterator<'a> {
     }
 }
 
-impl<'a> Iterator for ScanlineIterator<'a> {
+impl Iterator for ScanlineIterator<'_> {
     type Item = Scanline;
 
     fn next(&mut self) -> Option<Self::Item> {
