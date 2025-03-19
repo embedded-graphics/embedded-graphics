@@ -43,6 +43,7 @@ macro_rules! impl_rgb_conversion {
         })*
 
         impl $from_type {
+            #[allow(unused)]
             pub(crate) const fn with_rgb888(r: u8, g: u8, b: u8) -> Self {
                 Self::new(
                     convert_channel::<{Rgb888::MAX_R}, {$from_type::MAX_R}>(r),
