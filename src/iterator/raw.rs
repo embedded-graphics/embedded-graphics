@@ -89,9 +89,8 @@ impl<R: RawData, O: DataOrder> Iterator for RawDataIterator<'_, R, O> {
     type Item = R;
 
     fn next(&mut self) -> Option<Self::Item> {
-        R::load::<O>(self.data, self.index).map(|v| {
+        R::load::<O>(self.data, self.index).inspect(|_| {
             self.index += 1;
-            v
         })
     }
 
