@@ -166,6 +166,7 @@
 //! [external crates list]: super#additional-functions-provided-by-external-crates
 
 pub mod renderer;
+#[allow(clippy::module_inception)]
 mod text;
 mod text_style;
 
