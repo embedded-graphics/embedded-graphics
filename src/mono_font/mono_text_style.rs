@@ -115,13 +115,13 @@ where
     where
         D: DrawTarget<Color = C>,
     {
-        if let Some(color) = self.strikethrough_color.to_color(self.text_color) {
-            let rect = self.font.strikethrough.to_rectangle(position, width);
+        if let Some(color) = self.strikethrough_color.effective_color(self.text_color) {
+            let rect = self.font.strikethrough.get_bounding_box(position, width);
             target.fill_solid(&rect, color)?;
         }
 
-        if let Some(color) = self.underline_color.to_color(self.text_color) {
-            let rect = self.font.underline.to_rectangle(position, width);
+        if let Some(color) = self.underline_color.effective_color(self.text_color) {
+            let rect = self.font.underline.get_bounding_box(position, width);
             target.fill_solid(&rect, color)?;
         }
 

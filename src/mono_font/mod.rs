@@ -206,7 +206,7 @@ impl DecorationDimensions {
         }
     }
 
-    fn to_rectangle(&self, position: Point, width: u32) -> Rectangle {
+    fn get_bounding_box(&self, position: Point, width: u32) -> Rectangle {
         let top_left = position + Size::new(0, self.offset);
         let size = Size::new(width, self.height);
 
