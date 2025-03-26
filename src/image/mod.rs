@@ -222,7 +222,7 @@ impl<T> Transform for Image<'_, T> {
     }
 }
 
-impl<'a, T> Drawable for Image<'a, T>
+impl<T> Drawable for Image<'_, T>
 where
     T: ImageDrawable,
 {
@@ -238,7 +238,7 @@ where
     }
 }
 
-impl<'a, T> Dimensions for Image<'a, T>
+impl<T> Dimensions for Image<'_, T>
 where
     T: OriginDimensions,
 {

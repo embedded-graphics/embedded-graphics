@@ -136,10 +136,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Triangle {
             StrokeOffset::from(style.stroke_alignment),
         )
         .fold(
-            (
-                Point::new_equal(core::i32::MAX),
-                Point::new_equal(core::i32::MIN),
-            ),
+            (Point::new_equal(i32::MAX), Point::new_equal(i32::MIN)),
             |(min, max), segment| {
                 let bb = segment.edges_bounding_box();
 

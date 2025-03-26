@@ -44,7 +44,7 @@ impl<T> OriginDimensions for SubImage<'_, T> {
     }
 }
 
-impl<'a, T> ImageDrawable for SubImage<'a, T>
+impl<T> ImageDrawable for SubImage<'_, T>
 where
     T: ImageDrawable,
 {

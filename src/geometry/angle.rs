@@ -119,6 +119,7 @@ pub(crate) trait Trigonometry {
     fn cos(self) -> Real;
 
     /// Get the tangent of the angle.
+    #[allow(unused)]
     fn tan(self) -> Option<Real>;
 }
 

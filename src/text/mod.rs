@@ -166,6 +166,7 @@
 //! [external crates list]: super#additional-functions-provided-by-external-crates
 
 pub mod renderer;
+#[allow(clippy::module_inception)]
 mod text;
 mod text_style;
 
@@ -227,7 +228,7 @@ impl<C: PixelColor> DecorationColor<C> {
         matches!(self, Self::Custom(_))
     }
 
-    pub(crate) const fn to_color(&self, text_color: Option<C>) -> Option<C> {
+    pub(crate) const fn effective_color(&self, text_color: Option<C>) -> Option<C> {
         match self {
             DecorationColor::TextColor => text_color,
             DecorationColor::Custom(custom_color) => Some(*custom_color),

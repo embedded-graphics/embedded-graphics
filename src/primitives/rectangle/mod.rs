@@ -17,9 +17,8 @@ impl Primitive for Rectangle {}
 impl ContainsPoint for Rectangle {
     fn contains(&self, point: Point) -> bool {
         if point.x >= self.top_left.x && point.y >= self.top_left.y {
-            self.bottom_right().map_or(false, |bottom_right| {
-                point.x <= bottom_right.x && point.y <= bottom_right.y
-            })
+            self.bottom_right()
+                .is_some_and(|bottom_right| point.x <= bottom_right.x && point.y <= bottom_right.y)
         } else {
             false
         }

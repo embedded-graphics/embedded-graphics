@@ -75,7 +75,7 @@ impl<'a> Polyline<'a> {
     }
 }
 
-impl<'a> Primitive for Polyline<'a> {}
+impl Primitive for Polyline<'_> {}
 
 impl<'a> PointsIter for Polyline<'a> {
     type Iter = Points<'a>;
@@ -85,7 +85,7 @@ impl<'a> PointsIter for Polyline<'a> {
     }
 }
 
-impl<'a> Dimensions for Polyline<'a> {
+impl Dimensions for Polyline<'_> {
     fn bounding_box(&self) -> Rectangle {
         match self.vertices {
             [] => Rectangle::zero(),
@@ -94,14 +94,14 @@ impl<'a> Dimensions for Polyline<'a> {
                 let top_left = vertices
                     .iter()
                     .map(|v| *v + self.translate)
-                    .fold(Point::new(core::i32::MAX, core::i32::MAX), |accum, v| {
+                    .fold(Point::new(i32::MAX, i32::MAX), |accum, v| {
                         Point::new(accum.x.min(v.x), accum.y.min(v.y))
                     });
 
                 let bottom_right = vertices
                     .iter()
                     .map(|v| *v + self.translate)
-                    .fold(Point::new(core::i32::MIN, core::i32::MIN), |accum, v| {
+                    .fold(Point::new(i32::MIN, i32::MIN), |accum, v| {
                         Point::new(accum.x.max(v.x), accum.y.max(v.y))
                     });
 
@@ -111,7 +111,7 @@ impl<'a> Dimensions for Polyline<'a> {
     }
 }
 
-impl<'a> Transform for Polyline<'a> {
+impl Transform for Polyline<'_> {
     /// Translate the polyline from its current position to a new position by (x, y) pixels, returning
     /// a new `Polyline`. For a mutating transform, see `translate_mut`.
     ///

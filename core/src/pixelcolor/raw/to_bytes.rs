@@ -113,7 +113,7 @@ impl<C: PixelColor> ToBytes for C {
 mod tests {
     use super::*;
     use crate::pixelcolor::{
-        Bgr565, Bgr666, Bgr888, BinaryColor, Gray2, Gray4, Gray8, Rgb444, Rgb565, Rgb666, Rgb888,
+        Bgr565, Bgr666, Bgr888, BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb666, Rgb888,
     };
 
     fn assert_all_orders<T>(value: T, bytes: T::Bytes)

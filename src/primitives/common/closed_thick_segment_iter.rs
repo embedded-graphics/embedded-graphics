@@ -88,7 +88,7 @@ impl<'a> ClosedThickSegmentIter<'a> {
     }
 }
 
-impl<'a> Iterator for ClosedThickSegmentIter<'a> {
+impl Iterator for ClosedThickSegmentIter<'_> {
     type Item = ThickSegment;
 
     fn next(&mut self) -> Option<Self::Item> {
