@@ -133,3 +133,95 @@ impl Iterator for DottedLinePoints {
         self.points.nth(self.index_bresenham.next()?)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::geometry::Real;
+
+    #[test]
+    fn dotted_line_has_correct_number_of_dots() {
+        // The desired number of dots should be clamped between 2 and the number of dots in the line
+        // (except if the line is reduced to a point).
+        let line = Line::new(Point::new(-17, 8), Point::new(-38, 25)); // 22 pixels
+
+        // Testing an appropriate number of dots.
+        for i in [3, 8, 15, 17, 21] {
+            let dotted_line_points = DottedLinePoints::new(&line, i);
+            assert_eq!(dotted_line_points.count(), i as usize);
+        }
+
+        // Testing too few dots.
+        for i in [0, 1, 2] {
+            let dotted_line_points = DottedLinePoints::new(&line, i);
+            assert_eq!(dotted_line_points.count(), 2);
+        }
+
+        // Testing too many dots and checking the resulting dotted line is a regular line.
+        for i in [22, 23, 30] {
+            let dotted_line_points = DottedLinePoints::new(&line, i);
+            assert_eq!(dotted_line_points.count(), 22);
+            assert!(dotted_line_points.eq(Points::new(&line)));
+        }
+    }
+
+    #[test]
+    fn one_pixel_dotted_line() {
+        // When the line is reduced to a point, the iterator should exceptionally contain only one item.
+        let p = Point::new(-35, 15);
+        assert!(DottedLinePoints::new(&Line::new(p, p), 5).eq(core::iter::once(p)));
+    }
+
+    #[test]
+    fn dotted_line_has_correct_start_and_end() {
+        // The starting and ending items of the `DottedLinePoints` iterator should be the line endpoints.
+        let start_end = [Point::new(5, -6), Point::new(23, 45)];
+
+        let line = Line::new(start_end[0], start_end[1]);
+        let opposite_line = Line::new(start_end[1], start_end[0]);
+
+        // Testing with 2 dots.
+        let mut dotted_endpoints = DottedLinePoints::new(&line, 2);
+        assert!(dotted_endpoints.next().eq(&Some(line.start)));
+        assert!(dotted_endpoints.next().eq(&Some(line.end)));
+
+        let mut opposite_dotted_endpoints = DottedLinePoints::new(&opposite_line, 2);
+        assert_eq!(opposite_dotted_endpoints.next(), Some(opposite_line.start));
+        assert_eq!(opposite_dotted_endpoints.next(), Some(opposite_line.end));
+
+        // Testing with 5 dots.
+        let mut dotted_endpoints = DottedLinePoints::new(&line, 5);
+        assert_eq!(dotted_endpoints.next(), Some(line.start));
+        assert_eq!(dotted_endpoints.last(), Some(line.end));
+
+        let mut opposite_dotted_endpoints = DottedLinePoints::new(&opposite_line, 5);
+        assert_eq!(opposite_dotted_endpoints.next(), Some(opposite_line.start));
+        assert_eq!(opposite_dotted_endpoints.last(), Some(opposite_line.end));
+    }
+
+    #[test]
+    fn dotted_line_dots_are_correct() {
+        // The dot indices should match those calculated with floats.
+        let point = Point::new(37, 50).abs();
+        let max = point.x.max(point.y);
+        let nb_dots = 21; // should be between 2 and `max`
+
+        let line = Line::new(Point::zero(), point);
+        let line_points = Points::new(&line).into_iter();
+
+        let dot_offset = Real::from(max) / Real::from(nb_dots - 1);
+        let idx_iter = 0..nb_dots;
+        let float_dotted_line_points = idx_iter.map(move |idx| {
+            line_points
+                .clone()
+                .nth(Into::<i32>::into((dot_offset * Real::from(idx)).round()) as usize)
+                .unwrap()
+        });
+
+        let dotted_line_points = DottedLinePoints::new(&line, nb_dots);
+
+        for (bresenham, float) in core::iter::zip(dotted_line_points, float_dotted_line_points) {
+            assert_eq!(bresenham, float);
+        }
+    }
+}
