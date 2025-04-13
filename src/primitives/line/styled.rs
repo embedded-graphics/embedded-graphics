@@ -4,7 +4,7 @@ use crate::{
     primitives::{
         line::{thick_points::ThickPoints, Line, StrokeOffset},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        PrimitiveStyle, Rectangle,
+        PrimitiveStyle, Rectangle, StrokeStyle,
     },
     Pixel,
 };
@@ -24,9 +24,44 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
         let stroke_color = style.effective_stroke_color();
         let stroke_width = style.stroke_width.saturating_as();
 
+        let mut line_iter = ThickPoints::new(primitive, stroke_width);
+
+        if style.stroke_style == StrokeStyle::Dotted {
+            match style.stroke_width {
+                1 => line_iter.skip_one_point_out_of_two(),
+                2 => line_iter.skip_two_points_out_of_four(),
+                /* 3 => {
+                    let delta = primitive.delta();
+                    let (max, min) = if delta.x >= delta.y {
+                        (delta.x, delta.y)
+                    } else {
+                        (delta.y, delta.x)
+                    };
+
+                    if 2 * min > max {
+                        // When 4 bresenham lines are used, draw 4 x 2 pixels
+                        line_iter.skip_two_points_out_of_four();
+                    } else {
+                        // When 3 bresenham lines are used, draw 3 x 3 pixels
+                        line_iter.skip_three_points_out_of_six();
+                    }
+                } */
+                // ON TRYING TO DRAW PARTIAL LINE for `thickness = 3`
+                //
+                // The issue with this is that it looks weird for 45° lines
+                // (the dots are elongated and look like dashes).
+                //
+                // Since diagonal lines use 4 (and not 3) bresenham lines,
+                // setting `alternate = 2` seems reasonable. That way, the dots
+                // are rounder and their surface would be 8 pixels instead of 12.
+                // But then, the dots seem very close with some angles.
+                _ => {}
+            }
+        }
+
         Self {
             stroke_color,
-            line_iter: ThickPoints::new(primitive, stroke_width),
+            line_iter,
         }
     }
 }
