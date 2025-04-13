@@ -4,7 +4,7 @@ use crate::{
     primitives::{
         line::{thick_points::ThickPoints, Line, StrokeOffset},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        PrimitiveStyle, Rectangle,
+        PrimitiveStyle, Rectangle, StrokeStyle,
     },
     Pixel,
 };
@@ -24,9 +24,15 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
         let stroke_color = style.effective_stroke_color();
         let stroke_width = style.stroke_width.saturating_as();
 
+        let mut line_iter = ThickPoints::new(primitive, stroke_width);
+
+        if style.stroke_style == StrokeStyle::Dotted && style.stroke_width == 1 {
+            line_iter.skip_one_point_out_of_two()
+        }
+
         Self {
             stroke_color,
-            line_iter: ThickPoints::new(primitive, stroke_width),
+            line_iter,
         }
     }
 }
@@ -93,7 +99,7 @@ mod tests {
     use crate::{
         geometry::{Dimensions, Point},
         mock_display::MockDisplay,
-        pixelcolor::{Rgb888, RgbColor},
+        pixelcolor::{BinaryColor, Rgb888, RgbColor},
         primitives::{Primitive, PrimitiveStyleBuilder},
         Drawable,
     };
@@ -154,5 +160,75 @@ mod tests {
         let stroked_line = line.into_styled(PrimitiveStyle::with_stroke(Rgb888::RED, 10));
 
         assert_eq!(transparent_line.bounding_box(), stroked_line.bounding_box(),);
+    }
+
+    #[test]
+    /// Dotted lines of width 1 are drawn by skipping one out of two pixels.
+    /// The last pixel is always drawn (so the first pixel is skipped if
+    /// and only if the line has an even number of pixels).
+    fn dotted_line_by_skipping_pixels() {
+        let solid_style = PrimitiveStyle::with_stroke(BinaryColor::Off, 1);
+        let dotted_style = PrimitiveStyleBuilder::from(&solid_style)
+            .stroke_style(StrokeStyle::Dotted)
+            .stroke_color(BinaryColor::On)
+            .build();
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Line::new(Point::new(2, 2), Point::new(20, 8))
+            .into_styled(solid_style)
+            .draw(&mut display)
+            .unwrap();
+        Line::new(Point::new(2, 2), Point::new(20, 8))
+            .into_styled(dotted_style)
+            .draw(&mut display)
+            .unwrap();
+
+        // Drawing a 1px line to check the pixel is drawn
+        Line::new(Point::new(8, 8), Point::new(8, 8))
+            .into_styled(dotted_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "                       ",
+            "                       ",
+            "  #.                   ",
+            "    #.#                ",
+            "       .#.             ",
+            "          #.#          ",
+            "             .#.       ",
+            "                #.#    ",
+            "        #          .#  ",
+            "                       ",
+            "                       ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Line::new(Point::new(2, 2), Point::new(19, 8))
+            .into_styled(solid_style)
+            .draw(&mut display)
+            .unwrap();
+        Line::new(Point::new(2, 2), Point::new(19, 8))
+            .into_styled(dotted_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "                       ",
+            "                       ",
+            "  .#                   ",
+            "    .#.                ",
+            "       #.#             ",
+            "          .#           ",
+            "            .#.        ",
+            "               #.#     ",
+            "                  .#   ",
+            "                       ",
+            "                       ",
+        ]);
     }
 }
