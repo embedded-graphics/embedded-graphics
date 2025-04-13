@@ -12,6 +12,7 @@ use crate::{
 use az::SaturatingAs;
 
 mod bresenham;
+mod dotted_bresenham;
 pub(in crate::primitives) mod intersection_params;
 mod points;
 mod styled;
