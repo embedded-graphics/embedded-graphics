@@ -1,10 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
+    geometry::PointExt,
     pixelcolor::PixelColor,
     primitives::{
-        line::{thick_points::ThickPoints, Line, StrokeOffset},
+        line::{dotted_bresenham::DottedLinePoints, thick_points::ThickPoints, Line, StrokeOffset},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        PrimitiveStyle, Rectangle,
+        Circle, PrimitiveStyle, Rectangle, StrokeStyle,
     },
     Pixel,
 };
@@ -24,9 +25,44 @@ impl<C: PixelColor> StyledPixelsIterator<C> {
         let stroke_color = style.effective_stroke_color();
         let stroke_width = style.stroke_width.saturating_as();
 
+        let mut line_iter = ThickPoints::new(primitive, stroke_width);
+
+        if style.stroke_style == StrokeStyle::Dotted {
+            match style.stroke_width {
+                1 => line_iter.skip_one_point_out_of_two(),
+                2 => line_iter.skip_two_points_out_of_four(),
+                /* 3 => {
+                    let delta = primitive.delta();
+                    let (max, min) = if delta.x >= delta.y {
+                        (delta.x, delta.y)
+                    } else {
+                        (delta.y, delta.x)
+                    };
+
+                    if 2 * min > max {
+                        // When 4 bresenham lines are used, draw 4 x 2 pixels
+                        line_iter.skip_two_points_out_of_four();
+                    } else {
+                        // When 3 bresenham lines are used, draw 3 x 3 pixels
+                        line_iter.skip_three_points_out_of_six();
+                    }
+                } */
+                // ON TRYING TO DRAW PARTIAL LINE for `thickness = 3`
+                //
+                // The issue with this is that it looks weird for 45° lines
+                // (the dots are elongated and look like dashes).
+                //
+                // Since diagonal lines use 4 (and not 3) bresenham lines,
+                // setting `alternate = 2` seems reasonable. That way, the dots
+                // are rounder and their surface would be 8 pixels instead of 12.
+                // But then, the dots seem very close with some angles.
+                _ => {}
+            }
+        }
+
         Self {
             stroke_color,
-            line_iter: ThickPoints::new(primitive, stroke_width),
+            line_iter,
         }
     }
 }
@@ -64,7 +100,33 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     where
         D: DrawTarget<Color = C>,
     {
-        target.draw_iter(StyledPixelsIterator::new(self, style))
+        let dot_size = style.stroke_width;
+        if dot_size == 0 {
+            return Ok(());
+        }
+
+        let Some(stroke_color) = style.effective_stroke_color() else {
+            return Ok(());
+        };
+
+        if style.stroke_style == StrokeStyle::Dotted && dot_size > 2 {
+            // Draw circles along the line.
+            let length = self.delta().length_squared().isqrt() as u32;
+            // The gaps between dots ideally have the same size as the dots
+            // (both positive and negative error is allowed).
+            // The 2 endpoint dots take half the space of a regular dot.
+            let nb_dots_desired = (length + dot_size) / (2 * dot_size) + 1;
+            let line_points = DottedLinePoints::new(self, nb_dots_desired);
+            let dot_style = PrimitiveStyle::with_fill(stroke_color);
+
+            for position in line_points {
+                Circle::with_center(position, dot_size).draw_styled(&dot_style, target)?;
+            }
+            Ok(())
+        } else {
+            // Draw line, optionally skipping some pixels.
+            target.draw_iter(StyledPixelsIterator::new(self, style))
+        }
     }
 }
 
