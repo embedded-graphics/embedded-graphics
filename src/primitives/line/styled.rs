@@ -1,10 +1,11 @@
 use crate::{
     draw_target::DrawTarget,
+    geometry::PointExt,
     pixelcolor::PixelColor,
     primitives::{
-        line::{thick_points::ThickPoints, Line, StrokeOffset},
+        line::{dotted_bresenham::DottedLinePoints, thick_points::ThickPoints, Line, StrokeOffset},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        PrimitiveStyle, Rectangle, StrokeStyle,
+        Circle, PrimitiveStyle, Rectangle, StrokeStyle,
     },
     Pixel,
 };
@@ -99,7 +100,33 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     where
         D: DrawTarget<Color = C>,
     {
-        target.draw_iter(StyledPixelsIterator::new(self, style))
+        let dot_size = style.stroke_width;
+        if dot_size == 0 {
+            return Ok(());
+        }
+
+        let Some(stroke_color) = style.effective_stroke_color() else {
+            return Ok(());
+        };
+
+        if style.stroke_style == StrokeStyle::Dotted && dot_size > 2 {
+            // Draw circles along the line.
+            let length = self.delta().length_squared().isqrt() as u32;
+            // The gaps between dots ideally have the same size as the dots
+            // (both positive and negative error is allowed).
+            // The 2 endpoint dots take half the space of a regular dot.
+            let nb_dots_desired = (length + dot_size) / (2 * dot_size) + 1;
+            let line_points = DottedLinePoints::new(self, nb_dots_desired);
+            let dot_style = PrimitiveStyle::with_fill(stroke_color);
+
+            for position in line_points {
+                Circle::with_center(position, dot_size).draw_styled(&dot_style, target)?;
+            }
+            Ok(())
+        } else {
+            // Draw line, optionally skipping some pixels.
+            target.draw_iter(StyledPixelsIterator::new(self, style))
+        }
     }
 }
 
