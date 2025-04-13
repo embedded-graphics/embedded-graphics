@@ -1,11 +1,13 @@
 use crate::{
     draw_target::DrawTarget,
+    geometry::{PointExt, Size},
     pixelcolor::PixelColor,
     primitives::{
-        line::{thick_points::ThickPoints, Line, StrokeOffset},
+        line::{dotted_bresenham::DottedLinePoints, thick_points::ThickPoints, Line, StrokeOffset},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        PrimitiveStyle, Rectangle, StrokeStyle,
+        Circle, PrimitiveStyle, Rectangle, StrokeStyle,
     },
+    transform::Transform,
     Pixel,
 };
 use az::SaturatingAs;
@@ -58,6 +60,23 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Line {
     }
 }
 
+fn draw_dotted_line<TS, C, D>(
+    dot: &TS,
+    dotted_line_points: &DottedLinePoints,
+    dot_style: &PrimitiveStyle<C>,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    TS: Transform + StyledDrawable<PrimitiveStyle<C>, Output = ()>,
+    C: PixelColor,
+    D: DrawTarget<Color = TS::Color>,
+{
+    for position in *dotted_line_points {
+        dot.translate(position).draw_styled(dot_style, target)?;
+    }
+    Ok(())
+}
+
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     type Color = C;
     type Output = ();
@@ -70,7 +89,49 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     where
         D: DrawTarget<Color = C>,
     {
-        target.draw_iter(StyledPixelsIterator::new(self, style))
+        let dot_size = style.stroke_width as i32;
+        if dot_size == 0 {
+            return Ok(());
+        }
+
+        let Some(stroke_color) = style.effective_stroke_color() else {
+            return Ok(());
+        };
+
+        if style.stroke_style == StrokeStyle::Dotted && dot_size > 1 {
+            // Draw circles along the line.
+            let mut length = self.delta().length_squared().isqrt();
+            // The gaps between dots ideally have the same size as the dots
+            // If `dot_size <= 3`, only positive error is allowed,
+            // otherwise both positive and negative error are allowed.
+            if dot_size > 3 {
+                length += dot_size;
+            }
+            // The 2 endpoint dots take half the space of a regular dot.
+            let nb_dots_desired = length / (2 * dot_size) + 1;
+            let dotted_line_points =
+                DottedLinePoints::new(&self.translate(-self.start), nb_dots_desired);
+            let dot_style = PrimitiveStyle::with_fill(stroke_color);
+
+            if dot_size > 3 {
+                draw_dotted_line(
+                    &Circle::with_center(self.start, dot_size as u32),
+                    &dotted_line_points,
+                    &dot_style,
+                    target,
+                )
+            } else {
+                draw_dotted_line(
+                    &Rectangle::with_center(self.start, Size::new_equal(dot_size as u32)),
+                    &dotted_line_points,
+                    &dot_style,
+                    target,
+                )
+            }
+        } else {
+            // Draw line, optionally skipping some pixels.
+            target.draw_iter(StyledPixelsIterator::new(self, style))
+        }
     }
 }
 
@@ -229,6 +290,40 @@ mod tests {
             "                  .#   ",
             "                       ",
             "                       ",
+        ]);
+    }
+
+    #[test]
+    fn dotted_line_using_dotted_bresenham() {
+        let solid_style = PrimitiveStyle::with_stroke(BinaryColor::Off, 3);
+        let dotted_style = PrimitiveStyleBuilder::from(&solid_style)
+            .stroke_style(StrokeStyle::Dotted)
+            .stroke_color(BinaryColor::On)
+            .build();
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_overdraw(true);
+
+        Line::new(Point::new(2, 2), Point::new(20, 8))
+            .into_styled(solid_style)
+            .draw(&mut display)
+            .unwrap();
+        Line::new(Point::new(2, 2), Point::new(20, 8))
+            .into_styled(dotted_style)
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "                       ",
+            " ###                   ",
+            " ###...                ",
+            " ###...###             ",
+            "    ...###...          ",
+            "       ###...###       ",
+            "          ...###...    ",
+            "             ###...### ",
+            "                ...### ",
+            "                   ### ",
         ]);
     }
 }
