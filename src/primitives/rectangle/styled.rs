@@ -70,12 +70,16 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Rectangle {
     }
 }
 
+/// Compute dot positions from a `length` and `dot_size`.
+///
+/// A dot will be positioned at each endpoint. These 2 endpoints
+/// can be either included or excluded from the resulting iterator.
 fn dot_positions_with_dotted_corners(
     length: u32,
     dot_size: u32,
     include_corners: bool,
 ) -> impl Iterator<Item = i32> {
-    let nb_dots = (length + dot_size) / (2 * dot_size);
+    let nb_dots = (length + dot_size) / (2 * dot_size); // gaps can have negative or positive error
     let dot_offset = Real::from(length) / Real::from(nb_dots);
 
     let idx_iter = if include_corners {
@@ -85,6 +89,23 @@ fn dot_positions_with_dotted_corners(
     };
 
     idx_iter.map(move |idx| (dot_offset * Real::from(idx)).round().into())
+}
+
+/// Compute dot and gap positions from a `length` and `dot_size`.
+///
+/// A dot or a gap can be positioned at each endpoint. The starting endpoint
+/// is included in the resulting iterator but not the ending endpoint.
+fn unit_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterator<Item = i32> {
+    let nb_units = length / dot_size; // units can only have positive error
+    let unit_offset = if nb_units != 0 {
+        Real::from(length) / Real::from(nb_units)
+    } else {
+        Real::from(0) // this value won't be used
+    };
+
+    let idx_iter = 0..nb_units;
+
+    idx_iter.map(move |idx| (unit_offset * Real::from(idx)).round().into())
 }
 
 /// Draw a dotted rectangular border with dots in the 4 corners.
@@ -127,19 +148,6 @@ where
     Ok(())
 }
 
-fn dot_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterator<Item = i32> {
-    let nb_dots = length / (2 * dot_size);
-    let dot_offset = if nb_dots != 0 {
-        Real::from(length) / Real::from(nb_dots)
-    } else {
-        Real::from(0) // this value won't be used
-    };
-
-    let idx_iter = 0..nb_dots;
-
-    idx_iter.map(move |idx| (dot_offset * Real::from(idx)).round().into())
-}
-
 /// Draw a dotted rectangular border.
 ///
 /// The dot type is [`Rectangle`] (this method is meant to be used with smaller values of `dot_size`).
@@ -162,7 +170,7 @@ where
     for (side_idx, side) in border_sides.iter().enumerate() {
         let length = side[side_idx % 2].unsigned_abs();
 
-        for offset in dot_positions_in_clockwise_order(length, dot_size) {
+        for offset in unit_positions_in_clockwise_order(length, dot_size) {
             if unit_is_dot {
                 let translation = *side / length as i32 * offset;
                 corner_dot
@@ -642,5 +650,76 @@ mod tests {
         for p in rect.bounding_box().points() {
             assert_eq!(inside.get_pixel(p), outside.get_pixel(p));
         }
+    }
+
+    #[test]
+    fn thin_dotted_border_matches_prediction() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "              ",
+            "    # #       ",
+            "       #      ",
+            "    #         ",
+            "       #      ",
+            "    # #       ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 2))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "   ##  ##     ",
+            "   ##  ##     ",
+            "              ",
+            "              ",
+            "              ",
+            "   ##  ##     ",
+            "   ##  ##     ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 3))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "   ###        ",
+            "   ###        ",
+            "   ###        ",
+            "              ",
+            "      ###     ",
+            "      ###     ",
+            "      ###     ",
+        ]);
     }
 }
