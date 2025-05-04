@@ -72,20 +72,31 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Rectangle {
 
 /// Compute dot positions from a `length` and `dot_size`.
 ///
-/// A dot will be positioned at each endpoint. These 2 endpoints
-/// can be either included or excluded from the resulting iterator.
+/// A dot will be positioned at each endpoint (except in cases described below).
+/// These 2 endpoints can be either included or excluded from the resulting iterator.
+///
+/// If `dot_size` is 0 or greater than `length`:
+/// - and `include_corners` is true, an iterator containing 0 is returned;
+/// - and `include_corners` is false, an empty iterator is returned.
 fn dot_positions_with_dotted_corners(
     length: u32,
     dot_size: u32,
     include_corners: bool,
 ) -> impl Iterator<Item = i32> {
-    let nb_dots = (length + dot_size) / (2 * dot_size); // gaps can have negative or positive error
-    let dot_offset = Real::from(length) / Real::from(nb_dots);
+    // gaps can have negative or positive error
+    let nb_dots = (length + dot_size)
+        .checked_div(2 * dot_size)
+        .unwrap_or_default();
+    let dot_offset = if nb_dots != 0 {
+        Real::from(length) / Real::from(nb_dots)
+    } else {
+        Real::from(0)
+    };
 
     let idx_iter = if include_corners {
         0..=nb_dots
     } else {
-        1..=nb_dots - 1
+        1..=nb_dots.saturating_sub(1)
     };
 
     idx_iter.map(move |idx| (dot_offset * Real::from(idx)).round().into())
@@ -95,8 +106,11 @@ fn dot_positions_with_dotted_corners(
 ///
 /// A dot or a gap can be positioned at each endpoint. The starting endpoint
 /// is included in the resulting iterator but not the ending endpoint.
+///
+/// If `dot_size` is 0 or greater than `length`, an empty iterator is returned.
 fn unit_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterator<Item = i32> {
-    let nb_units = length / dot_size; // units can only have positive error
+    // units can only have positive error
+    let nb_units = length.checked_div(dot_size).unwrap_or_default();
     let unit_offset = if nb_units != 0 {
         Real::from(length) / Real::from(nb_units)
     } else {
@@ -721,5 +735,31 @@ mod tests {
             "      ###     ",
             "      ###     ",
         ]);
+    }
+
+    #[test]
+    fn dot_positions_edge_cases() {
+        // Test `dot_positions_with_dotted_corners` and `unit_positions_in_clockwise_order`
+        // when `dot_size` is 0 or greater than `length`.
+
+        let mut positions = dot_positions_with_dotted_corners(10, 0, false);
+        assert_eq!(positions.next(), None);
+
+        let mut positions = dot_positions_with_dotted_corners(0, 6, false);
+        assert_eq!(positions.next(), None);
+
+        let mut positions = dot_positions_with_dotted_corners(12, 0, true);
+        assert_eq!(positions.next(), Some(0));
+        assert_eq!(positions.next(), None);
+
+        let mut positions = dot_positions_with_dotted_corners(9, 11, true);
+        assert_eq!(positions.next(), Some(0));
+        assert_eq!(positions.next(), None);
+
+        let mut positions = unit_positions_in_clockwise_order(8, 0);
+        assert_eq!(positions.next(), None);
+
+        let mut positions = unit_positions_in_clockwise_order(7, 10);
+        assert_eq!(positions.next(), None);
     }
 }
