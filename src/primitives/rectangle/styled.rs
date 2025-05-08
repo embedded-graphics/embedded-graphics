@@ -141,21 +141,25 @@ where
 
     // Draw horizontal sides (including corner dots)
     for x in dot_positions_with_dotted_corners(border_size.width, dot_size, true) {
+        // top size (from left to right)
         top_left_dot
             .translate(Point::new(x, 0))
             .draw_styled(style, target)?;
+        // bottom side (from right to left)
         top_left_dot
-            .translate(Point::new(x, 0) + border_size.y_axis())
+            .translate(-Point::new(x, 0) + *border_size)
             .draw_styled(style, target)?;
     }
 
     // Draw vertical sides (without corner dots)
     for y in dot_positions_with_dotted_corners(border_size.height, dot_size, false) {
-        top_left_dot
-            .translate(Point::new(0, y))
-            .draw_styled(style, target)?;
+        // right side (from top to bottom)
         top_left_dot
             .translate(Point::new(0, y) + border_size.x_axis())
+            .draw_styled(style, target)?;
+        // left side (from bottom to top)
+        top_left_dot
+            .translate(-Point::new(0, y) + border_size.y_axis())
             .draw_styled(style, target)?;
     }
 
@@ -321,7 +325,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Rectangle {
 mod tests {
     use super::*;
     use crate::{
-        geometry::{Point, Size},
+        geometry::{OriginDimensions, Point, Size},
         iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
@@ -735,6 +739,39 @@ mod tests {
             "      ###     ",
             "      ###     ",
         ]);
+    }
+
+    #[test]
+    fn thick_border_has_central_symmetry() {
+        let dotted_style =
+            PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 5))
+                .stroke_alignment(StrokeAlignment::Inside)
+                .stroke_style(StrokeStyle::Dotted)
+                .build();
+
+        let top_lefts = [Point::new(8, 12), Point::new(4, 3)];
+
+        for top_left in top_lefts {
+            let mut dotted = MockDisplay::new();
+            let mut dotted_copy = MockDisplay::new();
+
+            let opposite_zero = Point::new_equal(-1) + dotted.size();
+
+            let rect = Rectangle::with_corners(top_left, opposite_zero - top_left);
+
+            rect.into_styled(dotted_style).draw(&mut dotted).unwrap();
+
+            rect.into_styled(dotted_style)
+                .draw(&mut dotted_copy)
+                .unwrap();
+
+            for p in rect.bounding_box().points() {
+                assert_eq!(
+                    dotted.get_pixel(p),
+                    dotted_copy.get_pixel(-p + opposite_zero)
+                );
+            }
+        }
     }
 
     #[test]
