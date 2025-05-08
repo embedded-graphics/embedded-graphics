@@ -186,7 +186,7 @@ where
 
         for offset in unit_positions_in_clockwise_order(length, dot_size) {
             if unit_is_dot {
-                let translation = *side / length as i32 * offset;
+                let translation = Point::new(side.x.signum(), side.y.signum()) * offset;
                 corner_dot
                     .translate(translation)
                     .draw_styled(style, target)?;
@@ -233,7 +233,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
                 return Ok(());
             }
 
-            let border_size = stroke_area.size - Size::new_equal(dot_size);
+            let border_size = stroke_area.size.saturating_sub(Size::new_equal(dot_size));
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
 
             if dot_size < 4 {
