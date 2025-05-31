@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
+pub(super) const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -220,6 +220,15 @@ impl ThickPoints {
             parallel_points_remaining: 0,
             iter: ParallelsIterator::new(line, thickness, StrokeOffset::None),
         }
+    }
+
+    /// Returns `true` when the line uses a number of bresenham lines greater than the stroke width.
+    ///
+    /// Horizontal and vertical lines use `x` bresenham lines where `x` is the stroke width.
+    /// Diagonal lines however, may require more bresenham lines to have the same visual width.
+    pub(super) fn has_more_lines_than_expected(line: &Line, thickness: i32) -> bool {
+        let iter = ParallelsIterator::new(line, thickness, StrokeOffset::None);
+        iter.count() as i32 > thickness
     }
 }
 
