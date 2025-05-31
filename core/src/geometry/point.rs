@@ -253,6 +253,22 @@ impl Point {
     pub const fn swap_xy(self) -> Self {
         Self::new(self.y, self.x)
     }
+
+    /// Returns the dot product of `self` and `other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use embedded_graphics::geometry::Point;
+    ///
+    /// let a = Point::new(1, 2);
+    /// let b = Point::new(2, -1);
+    ///
+    /// assert_eq!(a.dot_product(&b), 0);
+    /// ```
+    pub const fn dot_product(&self, other: &Self) -> i32 {
+        self.x * other.x + self.y * other.y
+    }
 }
 
 impl Add for Point {

@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
+pub(super) const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -234,6 +234,11 @@ impl ThickPoints {
         } else {
             self.parallel_points_remaining % (2 * self.skip_alternate) >= self.skip_alternate
         }
+    }
+
+    pub fn has_more_lines_than_expected(line: &Line, thickness: i32) -> bool {
+        let iter = ParallelsIterator::new(line, thickness, StrokeOffset::None);
+        iter.count() as i32 > thickness
     }
 }
 
