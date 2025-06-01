@@ -6,7 +6,7 @@ use crate::{
         line::{
             dotted_bresenham::DottedLinePoints,
             thick_points::{ThickPoints, HORIZONTAL_LINE},
-            Line, StrokeOffset,
+            Line, Points, StrokeOffset,
         },
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
         Circle, PrimitiveStyle, Rectangle, StrokeStyle,
@@ -135,6 +135,18 @@ fn start_dot_offset(line: &Line, dot_size: i32) -> Point {
     }
 }
 
+fn extend_line_by_one_unit(line: &Line) -> Line {
+    let mut points = Points::new(line);
+
+    let Some(second) = points.nth(1) else {
+        // If there is only one point in the iterator, the line is expected to be reduced to a point.
+        // In that case we don't extend the line.
+        return *line;
+    };
+
+    Line::new(line.start, line.end + second - line.start)
+}
+
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
     type Color = C;
     type Output = ();
@@ -157,8 +169,18 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
         };
 
         if style.stroke_style == StrokeStyle::Dotted && dot_size > 1 {
+            let line = if dot_size % 2 == 0 {
+                // When drawing a dotted rectangle border, the distance between the endpoint dots
+                // is longer by one pixel when the dot size is even.
+                // So that the dotted rectangle border matches 4 lines drawn in clockwise order,
+                // the line is extended by one pixel when the dot size is even.
+                extend_line_by_one_unit(self)
+            } else {
+                *self
+            };
+
             // Draw dots along the line.
-            let mut length = self.delta().length_squared().integer_sqrt();
+            let mut length = line.delta().length_squared().integer_sqrt();
             // The gaps between dots ideally have the same size as the dots
             // If `dot_size <= 3`, only positive error is allowed,
             // otherwise both positive and negative error are allowed.
@@ -168,7 +190,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
             // The 2 endpoint dots take half the space of a regular dot.
             let nb_dots_desired = length / (2 * dot_size) + 1;
             let dotted_line_points =
-                DottedLinePoints::new(&self.translate(-self.start), nb_dots_desired);
+                DottedLinePoints::new(&line.translate(-line.start), nb_dots_desired);
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
             // Improve the positioning of the dots.
             let start = start_dot_offset(self, dot_size);
@@ -549,14 +571,14 @@ mod tests {
         ];
 
         let lines = [
-            Line::new(origin + orientations[0] * 4, origin + orientations[0] * 8),
-            Line::new(origin + orientations[1] * 4, origin + orientations[1] * 8),
-            Line::new(origin + orientations[2] * 4, origin + orientations[2] * 8),
-            Line::new(origin + orientations[3] * 4, origin + orientations[3] * 8),
-            Line::new(origin + orientations[4] * 4, origin + orientations[4] * 8),
-            Line::new(origin + orientations[5] * 4, origin + orientations[5] * 8),
-            Line::new(origin + orientations[6] * 4, origin + orientations[6] * 8),
-            Line::new(origin + orientations[7] * 4, origin + orientations[7] * 8),
+            Line::new(origin + orientations[0] * 4, origin + orientations[0] * 7),
+            Line::new(origin + orientations[1] * 4, origin + orientations[1] * 7),
+            Line::new(origin + orientations[2] * 4, origin + orientations[2] * 7),
+            Line::new(origin + orientations[3] * 4, origin + orientations[3] * 7),
+            Line::new(origin + orientations[4] * 4, origin + orientations[4] * 7),
+            Line::new(origin + orientations[5] * 4, origin + orientations[5] * 7),
+            Line::new(origin + orientations[6] * 4, origin + orientations[6] * 7),
+            Line::new(origin + orientations[7] * 4, origin + orientations[7] * 7),
         ];
 
         let solid_fill_style = PrimitiveStyle::with_fill(Gray2::new(0x0));
@@ -584,23 +606,101 @@ mod tests {
         }
 
         display.assert_pattern(&[
-            "02     20      20 ",
-            "22     22     122 ",
+            "22     22      22 ",
+            "20     20     102 ",
             " 11    11    11   ",
             "  11   11   11    ",
             "   102 20  20     ",
             "    22 22  22     ",
             "                  ",
             "           221122 ",
-            "021102     201120 ",
+            "201102     201102 ",
             "221122            ",
             "                  ",
             "    22  22 22     ",
             "    02  02 201    ",
             "   11   11   11   ",
             "  11    11    11  ",
-            "221     22     22 ",
-            "02      02     20 ",
+            "201     02     02 ",
+            "22      22     22 ",
         ]);
+    }
+
+    #[test]
+    /// A dotted rectangle border should exactly match the 4 dotted lines drawn in clockwise order when:
+    /// 1. the border width is greater or equal to 4 (when the width is smaller,
+    /// there's not always a dot in each corner)
+    /// AND
+    /// the opposite borders of the rectangle don't overlap (this causes the size of the dots
+    /// to be reduced, so line dots and rectangle dots will have different sizes).
+    ///
+    /// A dotted rectangle border should exactly match the 2 first dotted lines drawn in clockwise order when:
+    /// 2. the rectangle `stroke_area` is flattened to a line and the stroke width is 1.
+    fn dotted_lines_match_dotted_rectangle_border() {
+        let base_style = PrimitiveStyleBuilder::new()
+            .stroke_color(BinaryColor::On)
+            .stroke_style(StrokeStyle::Dotted);
+
+        // see 1.
+        let topleft = [Point::new(5, 6), Point::new(22, 8), Point::new(4, 12)];
+        // For the lines to be drawn in clockwise order, `bottomright` coordinates must be greater than `topleft`.
+        let bottomright = [Point::new(31, 23), Point::new(46, 36), Point::new(27, 33)];
+        let stroke_width = [5, 6, 4];
+
+        for i in 0..3 {
+            let rect = Rectangle::with_corners(topleft[i], bottomright[i]);
+            let topright = Point::new(bottomright[i].x, topleft[i].y);
+            let bottomleft = Point::new(topleft[i].x, bottomright[i].y);
+            let lines = [
+                Line::new(topleft[i], topright),
+                Line::new(topright, bottomright[i]),
+                Line::new(bottomright[i], bottomleft),
+                Line::new(bottomleft, topleft[i]),
+            ];
+
+            let mut lines_display = MockDisplay::new();
+            lines_display.set_allow_overdraw(true);
+            let mut rect_display = MockDisplay::new();
+
+            rect.into_styled(base_style.stroke_width(stroke_width[i]).build())
+                .draw(&mut rect_display)
+                .unwrap();
+            for line in lines {
+                line.into_styled(base_style.stroke_width(stroke_width[i]).build())
+                    .draw(&mut lines_display)
+                    .unwrap();
+            }
+
+            assert_eq!(lines_display, rect_display);
+        }
+
+        // see 2.
+        let topleft = [Point::new(2, 6), Point::new(2, 6)];
+        let bottomright = [Point::new(16, 6), Point::new(2, 19)];
+        let stroke_width = [1, 1];
+
+        for i in 0..2 {
+            let rect = Rectangle::with_corners(topleft[i], bottomright[i]);
+            let topright = Point::new(bottomright[i].x, topleft[i].y);
+            let lines = [
+                Line::new(topleft[i], topright),
+                Line::new(topright, bottomright[i]),
+            ];
+
+            let mut lines_display = MockDisplay::new();
+            lines_display.set_allow_overdraw(true);
+            let mut rect_display = MockDisplay::new();
+
+            rect.into_styled(base_style.stroke_width(stroke_width[i]).build())
+                .draw(&mut rect_display)
+                .unwrap();
+            for line in lines {
+                line.into_styled(base_style.stroke_width(stroke_width[i]).build())
+                    .draw(&mut lines_display)
+                    .unwrap();
+            }
+
+            assert_eq!(lines_display, rect_display);
+        }
     }
 }
