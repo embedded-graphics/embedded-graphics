@@ -113,9 +113,7 @@ pub enum ImageRawError {
 ///
 /// [`raw` module documentation]: crate::pixelcolor::raw
 /// [`Image`]: crate::image::Image
-/// [`Drawable`]: crate::drawable::Drawable
 /// [`PixelColor`]: crate::pixelcolor::PixelColor
-/// [`ByteOrder`]: crate::pixelcolor::raw::ByteOrder
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ImageRaw<'a, C, O = LittleEndianMsb0>
