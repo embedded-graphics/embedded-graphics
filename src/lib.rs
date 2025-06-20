@@ -272,7 +272,6 @@
 //! [Rounded rectangles]: primitives::rounded_rectangle::RoundedRectangle
 //! [Text]: text
 //! [Monospaced fonts]: mono_font
-//! [`Drawable`]: drawable::Drawable
 //! [`DrawTarget`]: https://docs.rs/embedded-graphics-core/latest/embedded_graphics_core/draw_target/trait.DrawTarget.html
 //! [`embedded-graphics-core`]: https://docs.rs/embedded-graphics-core/
 //! [simulator]: https://github.com/embedded-graphics/simulator
