@@ -16,6 +16,7 @@ exclude = [
 	"convert_1bpp.sh",
 ]
 edition = "2021"
+rust-version = "1.81"
 
 [workspace]
 members = ["core"]
