@@ -12,6 +12,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - **(breaking)** [#765](https://github.com/embedded-graphics/embedded-graphics/pull/765) Made conversion to and from `RawUx` types mandatory for all `PixelColor` implementations.
 - **(breaking)** [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Renamed `ByteOrder`, `LittleEndian`, and `BigEndian` to `DataOrder`, `LittleEndianMsb0`, and `BigEndianLsb0`.
 - **(breaking)** [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Changed default data order for `ImageRaw` from `BigEndian` to `LittleEndianMsb0`.
+- **(breaking)** [#781](https://github.com/embedded-graphics/embedded-graphics/pull/781) Bump MSRV to 1.81.
 
 ### Added
 

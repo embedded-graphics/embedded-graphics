@@ -4,6 +4,7 @@ description = "Core traits and functionality for embedded-graphics"
 version = "0.4.0"
 authors = ["James Waples <james@wapl.es>", "Ralf Fuest <mail@rfuest.de>"]
 edition = "2021"
+rust-version = "1.81"
 repository = "https://github.com/embedded-graphics/embedded-graphics"
 documentation = "https://docs.rs/embedded-graphics-core"
 categories = ["embedded", "no-std"]

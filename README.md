@@ -273,7 +273,7 @@ Additional examples can be found in the [examples](https://github.com/embedded-g
 
 ## Minimum supported Rust version
 
-The minimum supported Rust version for embedded-graphics is `1.71.1` or greater.
+The minimum supported Rust version for embedded-graphics is `1.81` or greater.
 Ensure you have the correct version of Rust installed, preferably through <https://rustup.rs>.
 
 ## Development setup
