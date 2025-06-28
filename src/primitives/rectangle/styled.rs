@@ -185,7 +185,18 @@ where
     let mut corner_dot = Rectangle::new(*top_left, Size::new_equal(dot_size));
     let mut unit_is_dot = true;
 
-    for (side_idx, side) in border_sides.iter().enumerate() {
+    let nb_sides_to_draw = match (
+        border_sides[0] == Point::zero(),
+        border_sides[1] == Point::zero(),
+    ) {
+        (false, false) => 4,
+        (true, true) => 0,
+        // In case one pair of opposite borders overlap,
+        // only draw the first 2 sides in clockwise order to avoid overwriting in the buffer.
+        (_, _) => 2,
+    };
+
+    for (side_idx, side) in border_sides[0..nb_sides_to_draw].iter().enumerate() {
         let length = side[side_idx % 2].unsigned_abs();
 
         for offset in unit_positions_in_clockwise_order(length, dot_size) {
@@ -194,13 +205,17 @@ where
                 corner_dot
                     .translate(translation)
                     .draw_styled(style, target)?;
-            };
+            }
             unit_is_dot = !unit_is_dot; // alternating dots and gaps
         }
         corner_dot.translate_mut(*side);
     }
 
-    Ok(())
+    if nb_sides_to_draw < 4 && unit_is_dot {
+        corner_dot.draw_styled(style, target)
+    } else {
+        Ok(())
+    }
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
@@ -230,13 +245,16 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
         let stroke_area = style.stroke_area(self);
 
         if style.stroke_style == StrokeStyle::Dotted {
-            let dot_size = stroke_width
-                .min(stroke_area.size.height / 2)
-                .min(stroke_area.size.width / 2);
-            if dot_size == 0 {
+            if stroke_width == 0 {
                 return Ok(());
             }
-
+            let dot_size = stroke_width
+                // Shrink dots to prevent overlap between dots when opposite borders overlap.
+                .min(stroke_area.size.height / 2)
+                .min(stroke_area.size.width / 2)
+                // Don't shrink below 1px to prevent dots disappearing when `stroke_area` is 1px high or wide.
+                // In this case the last two sides in clockwise order will not be drawn.
+                .max(1);
             let border_size = stroke_area.size.saturating_sub(Size::new_equal(dot_size));
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
 
@@ -742,7 +760,76 @@ mod tests {
     }
 
     #[test]
-    fn thick_border_has_central_symmetry() {
+    fn dotted_border_1px_matches_prediction() {
+        // Check dot positions when `stroke_area` is 1px high or wide.
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 0))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "              ",
+            "    # #       ",
+            "              ",
+            "              ",
+            "              ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 2), Size::new(0, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "    #         ",
+            "              ",
+            "    #         ",
+            "              ",
+            "    #         ",
+            "              ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 2), Size::new(0, 0))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "             ",
+            "             ",
+            "    #        ",
+            "             ",
+        ]);
+    }
+
+    #[test]
+    fn thick_dotted_border_has_central_symmetry() {
+        // Central symmetry only applies when all 4 sides of the rectangle are drawn,
+        // so when `stroke_area` is higher and wider than 1px.
+
         let dotted_style =
             PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 5))
                 .stroke_alignment(StrokeAlignment::Inside)
