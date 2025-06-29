@@ -70,21 +70,56 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Rectangle {
     }
 }
 
+/// Compute dot positions from a `length` and `dot_size`.
+///
+/// A dot will be positioned at each endpoint (except in cases described below).
+/// These 2 endpoints can be either included or excluded from the resulting iterator.
+///
+/// If `dot_size` is 0 or greater than `length`:
+/// - and `include_corners` is true, an iterator containing 0 is returned;
+/// - and `include_corners` is false, an empty iterator is returned.
 fn dot_positions_with_dotted_corners(
     length: u32,
     dot_size: u32,
     include_corners: bool,
 ) -> impl Iterator<Item = i32> {
-    let nb_dots = (length + dot_size) / (2 * dot_size);
-    let dot_offset = Real::from(length) / Real::from(nb_dots);
+    // gaps can have negative or positive error
+    let nb_dots = (length + dot_size)
+        .checked_div(2 * dot_size)
+        .unwrap_or_default();
+    let dot_offset = if nb_dots != 0 {
+        Real::from(length) / Real::from(nb_dots)
+    } else {
+        Real::from(0)
+    };
 
     let idx_iter = if include_corners {
         0..=nb_dots
     } else {
-        1..=nb_dots - 1
+        1..=nb_dots.saturating_sub(1)
     };
 
     idx_iter.map(move |idx| (dot_offset * Real::from(idx)).round().into())
+}
+
+/// Compute dot and gap positions from a `length` and `dot_size`.
+///
+/// A dot or a gap can be positioned at each endpoint. The starting endpoint
+/// is included in the resulting iterator but not the ending endpoint.
+///
+/// If `dot_size` is 0 or greater than `length`, an empty iterator is returned.
+fn unit_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterator<Item = i32> {
+    // units can only have positive error
+    let nb_units = length.checked_div(dot_size).unwrap_or_default();
+    let unit_offset = if nb_units != 0 {
+        Real::from(length) / Real::from(nb_units)
+    } else {
+        Real::from(0) // this value won't be used
+    };
+
+    let idx_iter = 0..nb_units;
+
+    idx_iter.map(move |idx| (unit_offset * Real::from(idx)).round().into())
 }
 
 /// Draw a dotted rectangular border with dots in the 4 corners.
@@ -106,38 +141,29 @@ where
 
     // Draw horizontal sides (including corner dots)
     for x in dot_positions_with_dotted_corners(border_size.width, dot_size, true) {
+        // top size (from left to right)
         top_left_dot
             .translate(Point::new(x, 0))
             .draw_styled(style, target)?;
+        // bottom side (from right to left)
         top_left_dot
-            .translate(Point::new(x, 0) + border_size.y_axis())
+            .translate(-Point::new(x, 0) + *border_size)
             .draw_styled(style, target)?;
     }
 
     // Draw vertical sides (without corner dots)
     for y in dot_positions_with_dotted_corners(border_size.height, dot_size, false) {
-        top_left_dot
-            .translate(Point::new(0, y))
-            .draw_styled(style, target)?;
+        // right side (from top to bottom)
         top_left_dot
             .translate(Point::new(0, y) + border_size.x_axis())
+            .draw_styled(style, target)?;
+        // left side (from bottom to top)
+        top_left_dot
+            .translate(-Point::new(0, y) + border_size.y_axis())
             .draw_styled(style, target)?;
     }
 
     Ok(())
-}
-
-fn dot_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterator<Item = i32> {
-    let nb_dots = length / (2 * dot_size);
-    let dot_offset = if nb_dots != 0 {
-        Real::from(length) / Real::from(nb_dots)
-    } else {
-        Real::from(0) // this value won't be used
-    };
-
-    let idx_iter = 0..nb_dots;
-
-    idx_iter.map(move |idx| (dot_offset * Real::from(idx)).round().into())
 }
 
 /// Draw a dotted rectangular border.
@@ -159,22 +185,37 @@ where
     let mut corner_dot = Rectangle::new(*top_left, Size::new_equal(dot_size));
     let mut unit_is_dot = true;
 
-    for (side_idx, side) in border_sides.iter().enumerate() {
+    let nb_sides_to_draw = match (
+        border_sides[0] == Point::zero(),
+        border_sides[1] == Point::zero(),
+    ) {
+        (false, false) => 4,
+        (true, true) => 0,
+        // In case one pair of opposite borders overlap,
+        // only draw the first 2 sides in clockwise order to avoid overwriting in the buffer.
+        (_, _) => 2,
+    };
+
+    for (side_idx, side) in border_sides[0..nb_sides_to_draw].iter().enumerate() {
         let length = side[side_idx % 2].unsigned_abs();
 
-        for offset in dot_positions_in_clockwise_order(length, dot_size) {
+        for offset in unit_positions_in_clockwise_order(length, dot_size) {
             if unit_is_dot {
-                let translation = *side / length as i32 * offset;
+                let translation = Point::new(side.x.signum(), side.y.signum()) * offset;
                 corner_dot
                     .translate(translation)
                     .draw_styled(style, target)?;
-            };
+            }
             unit_is_dot = !unit_is_dot; // alternating dots and gaps
         }
         corner_dot.translate_mut(*side);
     }
 
-    Ok(())
+    if nb_sides_to_draw < 4 && unit_is_dot {
+        corner_dot.draw_styled(style, target)
+    } else {
+        Ok(())
+    }
 }
 
 impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
@@ -204,14 +245,17 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
         let stroke_area = style.stroke_area(self);
 
         if style.stroke_style == StrokeStyle::Dotted {
-            let dot_size = stroke_width
-                .min(stroke_area.size.height / 2)
-                .min(stroke_area.size.width / 2);
-            if dot_size == 0 {
+            if stroke_width == 0 {
                 return Ok(());
             }
-
-            let border_size = stroke_area.size - Size::new_equal(dot_size);
+            let dot_size = stroke_width
+                // Shrink dots to prevent overlap between dots when opposite borders overlap.
+                .min(stroke_area.size.height / 2)
+                .min(stroke_area.size.width / 2)
+                // Don't shrink below 1px to prevent dots disappearing when `stroke_area` is 1px high or wide.
+                // In this case the last two sides in clockwise order will not be drawn.
+                .max(1);
+            let border_size = stroke_area.size.saturating_sub(Size::new_equal(dot_size));
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
 
             if dot_size < 4 {
@@ -299,7 +343,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Rectangle {
 mod tests {
     use super::*;
     use crate::{
-        geometry::{Point, Size},
+        geometry::{OriginDimensions, Point, Size},
         iterator::PixelIteratorExt,
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, RgbColor},
@@ -642,5 +686,204 @@ mod tests {
         for p in rect.bounding_box().points() {
             assert_eq!(inside.get_pixel(p), outside.get_pixel(p));
         }
+    }
+
+    #[test]
+    fn thin_dotted_border_matches_prediction() {
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "              ",
+            "    # #       ",
+            "       #      ",
+            "    #         ",
+            "       #      ",
+            "    # #       ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 2))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "   ##  ##     ",
+            "   ##  ##     ",
+            "              ",
+            "              ",
+            "              ",
+            "   ##  ##     ",
+            "   ##  ##     ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 3))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "   ###        ",
+            "   ###        ",
+            "   ###        ",
+            "              ",
+            "      ###     ",
+            "      ###     ",
+            "      ###     ",
+        ]);
+    }
+
+    #[test]
+    fn dotted_border_1px_matches_prediction() {
+        // Check dot positions when `stroke_area` is 1px high or wide.
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 3), Size::new(4, 0))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "              ",
+            "    # #       ",
+            "              ",
+            "              ",
+            "              ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 2), Size::new(0, 5))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "              ",
+            "              ",
+            "    #         ",
+            "              ",
+            "    #         ",
+            "              ",
+            "    #         ",
+            "              ",
+        ]);
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+
+        Rectangle::new(Point::new(4, 2), Size::new(0, 0))
+            .into_styled(
+                PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 1))
+                    .stroke_style(StrokeStyle::Dotted)
+                    .build(),
+            )
+            .draw(&mut display)
+            .unwrap();
+
+        display.assert_pattern(&[
+            "             ",
+            "             ",
+            "    #        ",
+            "             ",
+        ]);
+    }
+
+    #[test]
+    fn thick_dotted_border_has_central_symmetry() {
+        // Central symmetry only applies when all 4 sides of the rectangle are drawn,
+        // so when `stroke_area` is higher and wider than 1px.
+
+        let dotted_style =
+            PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(BinaryColor::On, 5))
+                .stroke_alignment(StrokeAlignment::Inside)
+                .stroke_style(StrokeStyle::Dotted)
+                .build();
+
+        let top_lefts = [Point::new(8, 12), Point::new(4, 3)];
+
+        for top_left in top_lefts {
+            let mut dotted = MockDisplay::new();
+            let mut dotted_copy = MockDisplay::new();
+
+            let opposite_zero = Point::new_equal(-1) + dotted.size();
+
+            let rect = Rectangle::with_corners(top_left, opposite_zero - top_left);
+
+            rect.into_styled(dotted_style).draw(&mut dotted).unwrap();
+
+            rect.into_styled(dotted_style)
+                .draw(&mut dotted_copy)
+                .unwrap();
+
+            for p in rect.bounding_box().points() {
+                assert_eq!(
+                    dotted.get_pixel(p),
+                    dotted_copy.get_pixel(-p + opposite_zero)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn dot_positions_edge_cases() {
+        // Test `dot_positions_with_dotted_corners` and `unit_positions_in_clockwise_order`
+        // when `dot_size` is 0 or greater than `length`.
+
+        let mut positions = dot_positions_with_dotted_corners(10, 0, false);
+        assert_eq!(positions.next(), None);
+
+        let mut positions = dot_positions_with_dotted_corners(0, 6, false);
+        assert_eq!(positions.next(), None);
+
+        let mut positions = dot_positions_with_dotted_corners(12, 0, true);
+        assert_eq!(positions.next(), Some(0));
+        assert_eq!(positions.next(), None);
+
+        let mut positions = dot_positions_with_dotted_corners(9, 11, true);
+        assert_eq!(positions.next(), Some(0));
+        assert_eq!(positions.next(), None);
+
+        let mut positions = unit_positions_in_clockwise_order(8, 0);
+        assert_eq!(positions.next(), None);
+
+        let mut positions = unit_positions_in_clockwise_order(7, 10);
+        assert_eq!(positions.next(), None);
     }
 }
