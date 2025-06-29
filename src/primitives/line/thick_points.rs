@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
+pub(super) const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
@@ -207,6 +207,7 @@ pub struct ThickPoints {
     parallel: Bresenham,
     parallel_length: u32,
     parallel_points_remaining: u32,
+    skip_alternate: u32,
 
     iter: ParallelsIterator,
 }
@@ -218,8 +219,26 @@ impl ThickPoints {
             parallel: Bresenham::new(line.start),
             parallel_length: bresenham::major_length(line),
             parallel_points_remaining: 0,
+            skip_alternate: 0,
             iter: ParallelsIterator::new(line, thickness, StrokeOffset::None),
         }
+    }
+
+    pub fn skip_one_point_out_of_two(&mut self) {
+        self.skip_alternate = 1;
+    }
+
+    fn skip_point(&self) -> bool {
+        if self.skip_alternate == 0 {
+            false
+        } else {
+            self.parallel_points_remaining % (2 * self.skip_alternate) >= self.skip_alternate
+        }
+    }
+
+    pub fn has_more_lines_than_expected(line: &Line, thickness: i32) -> bool {
+        let iter = ParallelsIterator::new(line, thickness, StrokeOffset::None);
+        iter.count() as i32 > thickness
     }
 }
 
@@ -231,7 +250,10 @@ impl Iterator for ThickPoints {
             if self.parallel_points_remaining > 0 {
                 self.parallel_points_remaining -= 1;
 
-                return Some(self.parallel.next(&self.iter.parallel_parameters));
+                let point = self.parallel.next(&self.iter.parallel_parameters);
+                if !self.skip_point() {
+                    return Some(point);
+                }
             } else {
                 let (parallel, line_type) = self.iter.next()?;
 
