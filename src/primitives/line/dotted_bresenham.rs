@@ -4,18 +4,18 @@
 use super::{bresenham::MajorMinor, Line, Points};
 use crate::geometry::Point;
 
-/// Dotted bresenham parameters.
+/// Bresenham algorithm for dotted lines.
 ///
 /// [`super::bresenham::BresenhamParameters`] describes a major and
 /// a minor step, classically vectors along opposing axes.
 ///
-/// [`DottedBresenhamParameters`] describes a scalar major step and a
+/// [`DottedBresenham`] describes a scalar major step and a
 /// scalar minor step. It is used to draw a dotted line with the
-/// desired number of dots by selecting the appropriate points in a
+/// desired number of dots by selecting the appropriate indices in a
 /// bresenham line.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-struct DottedBresenhamParameters {
+struct DottedBresenham {
     /// Error threshold.
     ///
     /// If the accumulated error exceeds the threshold a minor move is made.
@@ -26,10 +26,18 @@ struct DottedBresenhamParameters {
 
     /// Change in index for major and minor steps.
     index_step: MajorMinor<usize>,
+
+    /// Current index increment.
+    ///
+    /// It is used to retrieve the next dot from a [`Points`] iterator.
+    index_nth: Option<usize>,
+
+    /// Error accumulator.
+    error: i32,
 }
 
-impl DottedBresenhamParameters {
-    /// Create a new bresenham parameters object.
+impl DottedBresenham {
+    /// Create a new bresenham object.
     fn new(line: &Line, nb_dots_desired: i32) -> Self {
         let delta = line.delta().abs();
         let line_max_index = delta.x.max(delta.y);
@@ -49,6 +57,8 @@ impl DottedBresenhamParameters {
             error_threshold,
             error_step: MajorMinor::new(remainder * 2, error_threshold * 2),
             index_step,
+            index_nth: Some(0),
+            error: 0,
         }
     }
 
@@ -56,10 +66,10 @@ impl DottedBresenhamParameters {
     ///
     /// If the error threshold is reached the error is reduced by a minor step and
     /// `true` is returned.
-    fn increase_error(&self, error: &mut i32) -> bool {
-        *error += self.error_step.major;
-        if *error >= self.error_threshold {
-            *error -= self.error_step.minor;
+    fn increase_error(&mut self) -> bool {
+        self.error += self.error_step.major;
+        if self.error >= self.error_threshold {
+            self.error -= self.error_step.minor;
 
             true
         } else {
@@ -68,38 +78,19 @@ impl DottedBresenhamParameters {
     }
 }
 
-/// Bresenham algorithm for dotted lines.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-#[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-struct DottedBresenham {
-    /// Current index increment.
-    ///
-    /// It is used to retrieve the next dot from a [`Points`] iterator.
-    index_nth: Option<usize>,
-
-    /// Error accumulator.
-    error: i32,
-}
-
-impl DottedBresenham {
-    /// Create a new bresenham object.
-    const fn new() -> Self {
-        Self {
-            index_nth: Some(0),
-            error: 0,
-        }
-    }
+impl Iterator for DottedBresenham {
+    type Item = usize;
 
     /// Return the increment to the next point on the line.
     /// This iterator is infinite, except if `parameters.index_step.major = 0`.
-    fn next(&mut self, parameters: &DottedBresenhamParameters) -> Option<usize> {
+    fn next(&mut self) -> Option<usize> {
         let ret = self.index_nth;
 
         if self.index_nth.is_some() {
-            let mut increment = parameters.index_step.major;
+            let mut increment = self.index_step.major;
 
-            if parameters.increase_error(&mut self.error) {
-                increment += parameters.index_step.minor;
+            if self.increase_error() {
+                increment += self.index_step.minor;
             }
 
             self.index_nth = if increment > 0 {
@@ -118,7 +109,6 @@ impl DottedBresenham {
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub(super) struct DottedLinePoints {
     points: Points,
-    index_parameters: DottedBresenhamParameters,
     index_bresenham: DottedBresenham,
 }
 
@@ -127,12 +117,10 @@ impl DottedLinePoints {
     /// taking into account the desired number of dots.
     pub(super) fn new(line: &Line, nb_dots_desired: i32) -> Self {
         let points = Points::new(line);
-        let index_parameters = DottedBresenhamParameters::new(line, nb_dots_desired);
-        let index_bresenham = DottedBresenham::new();
+        let index_bresenham = DottedBresenham::new(line, nb_dots_desired);
 
         Self {
             points,
-            index_parameters,
             index_bresenham,
         }
     }
@@ -142,7 +130,6 @@ impl Iterator for DottedLinePoints {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.points
-            .nth(self.index_bresenham.next(&self.index_parameters)?)
+        self.points.nth(self.index_bresenham.next()?)
     }
 }
