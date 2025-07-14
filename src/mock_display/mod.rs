@@ -293,8 +293,7 @@ where
     pub fn set_pixel(&mut self, point: Point, color: Option<C>) {
         assert!(
             point.x >= 0 && point.y >= 0 && point.x < SIZE as i32 && point.y < SIZE as i32,
-            "point must be inside display bounding box: {:?}",
-            point
+            "point must be inside display bounding box: {point:?}",
         );
 
         let i = point.x + point.y * SIZE as i32;
@@ -520,13 +519,11 @@ where
         let pattern_height = pattern.len();
         assert!(
             pattern_width <= SIZE,
-            "Test pattern must not be wider than {} columns",
-            SIZE
+            "Test pattern must not be wider than {SIZE} columns",
         );
         assert!(
             pattern_height <= SIZE,
-            "Test pattern must not be taller than {} rows",
-            SIZE
+            "Test pattern must not be taller than {SIZE} rows",
         );
         for (row_idx, row) in pattern.iter().enumerate() {
             assert_eq!(
@@ -689,7 +686,7 @@ where
             writeln!(f)?;
         }
         if empty_rows > 0 {
-            writeln!(f, "({} empty rows skipped)", empty_rows)?;
+            writeln!(f, "({empty_rows} empty rows skipped)")?;
         }
         writeln!(f, "]")?;
 

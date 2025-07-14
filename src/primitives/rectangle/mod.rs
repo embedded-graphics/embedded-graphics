@@ -127,7 +127,7 @@ mod tests {
         for p in outer.points() {
             let expected = p.x >= 2 && p.x < 2 + 3 && p.y >= 4 && p.y < 4 + 5;
 
-            assert_eq!(inner.contains(p), expected, "{:?}", p);
+            assert_eq!(inner.contains(p), expected, "{p:?}");
         }
     }
 
@@ -276,8 +276,7 @@ mod tests {
             assert_eq!(
                 resized,
                 Rectangle::new(expected_top_left, Size::new(10, 20)),
-                "{:?}",
-                anchor_point,
+                "{anchor_point:?}"
             );
         }
     }
@@ -302,8 +301,7 @@ mod tests {
             assert_eq!(
                 resized,
                 Rectangle::new(expected_top_left, Size::new(40, 50)),
-                "{:?}",
-                anchor_point,
+                "{anchor_point:?}"
             );
         }
     }
@@ -328,8 +326,7 @@ mod tests {
             assert_eq!(
                 resized,
                 Rectangle::new(expected_top_left, Size::new(5, 7)),
-                "{:?}",
-                anchor_point,
+                "{anchor_point:?}"
             );
         }
     }
@@ -354,8 +351,7 @@ mod tests {
             assert_eq!(
                 resized,
                 Rectangle::new(expected_top_left, Size::zero()),
-                "{:?}",
-                anchor_point,
+                "{anchor_point:?}"
             );
         }
     }
@@ -378,8 +374,7 @@ mod tests {
             assert_eq!(
                 rect.anchor_point(anchor_point),
                 expected,
-                "{:?}",
-                anchor_point,
+                "{anchor_point:?}"
             );
         }
     }

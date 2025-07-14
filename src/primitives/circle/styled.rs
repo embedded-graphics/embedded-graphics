@@ -226,11 +226,11 @@ mod tests {
 
             let mut drawable = MockDisplay::new();
             circle.draw(&mut drawable).unwrap();
-            drawable.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
+            drawable.assert_eq_with_message(&expected, |f| write!(f, "diameter = {diameter}"));
 
             let mut pixels = MockDisplay::new();
             circle.pixels().draw(&mut pixels).unwrap();
-            pixels.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
+            pixels.assert_eq_with_message(&expected, |f| write!(f, "diameter = {diameter}"));
         }
     }
 
@@ -250,21 +250,13 @@ mod tests {
             let mut drawable = MockDisplay::new();
             circle.draw(&mut drawable).unwrap();
             drawable.assert_eq_with_message(&expected, |f| {
-                write!(
-                    f,
-                    "diameter = {}, stroke_width = {}",
-                    diameter, stroke_width
-                )
+                write!(f, "diameter = {diameter}, stroke_width = {stroke_width}")
             });
 
             let mut pixels = MockDisplay::new();
             circle.pixels().draw(&mut pixels).unwrap();
             pixels.assert_eq_with_message(&expected, |f| {
-                write!(
-                    f,
-                    "diameter = {}, stroke_width = {}",
-                    diameter, stroke_width
-                )
+                write!(f, "diameter = {diameter}, stroke_width = {stroke_width}")
             });
         }
     }
@@ -291,21 +283,13 @@ mod tests {
             let mut drawable = MockDisplay::new();
             circle.draw(&mut drawable).unwrap();
             drawable.assert_eq_with_message(&expected, |f| {
-                write!(
-                    f,
-                    "diameter = {}, stroke_width = {}",
-                    diameter, stroke_width
-                )
+                write!(f, "diameter = {diameter}, stroke_width = {stroke_width}")
             });
 
             let mut pixels = MockDisplay::new();
             circle.pixels().draw(&mut pixels).unwrap();
             pixels.assert_eq_with_message(&expected, |f| {
-                write!(
-                    f,
-                    "diameter = {}, stroke_width = {}",
-                    diameter, stroke_width
-                )
+                write!(f, "diameter = {diameter}, stroke_width = {stroke_width}")
             });
         }
     }
@@ -434,13 +418,11 @@ mod tests {
             assert_eq!(
                 circle_stroke.bounding_box(),
                 circle_no_stroke.bounding_box(),
-                "Filled and unfilled circle bounding boxes are unequal for radius {}",
-                size
+                "Filled and unfilled circle bounding boxes are unequal for radius {size}"
             );
             assert!(
                 circle_no_stroke.pixels().eq(circle_stroke.pixels()),
-                "Filled and unfilled circle iters are unequal for radius {}",
-                size
+                "Filled and unfilled circle iters are unequal for radius {size}"
             );
         }
     }

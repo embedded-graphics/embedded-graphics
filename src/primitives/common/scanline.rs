@@ -175,7 +175,7 @@ mod tests {
         l2.extend(s2);
         l2.extend(e2);
 
-        assert_eq!(l1.touches(&l2), expected, "{}", ident);
+        assert_eq!(l1.touches(&l2), expected, "{ident}");
     }
 
     #[test]

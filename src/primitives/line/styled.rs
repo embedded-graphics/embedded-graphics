@@ -287,9 +287,7 @@ mod tests {
                 assert_eq!(
                     display.affected_area(),
                     styled.bounding_box(),
-                    "{}, {} px",
-                    name,
-                    thickness
+                    "{name}, {thickness} px"
                 );
             }
         }
@@ -337,11 +335,11 @@ mod tests {
 
                 // Check that the affected area is contained in the bounding box.
                 let intersection = affected_area.intersection(&bounding_box);
-                assert_eq!(affected_area, intersection, "{}, {} px", name, thickness);
+                assert_eq!(affected_area, intersection, "{name}, {thickness} px");
 
                 // Check that the bounding box area is only slightly larger than the affected area.
                 let intersection = affected_area.offset(1).intersection(&bounding_box);
-                assert_eq!(bounding_box, intersection, "{}, {} px", name, thickness);
+                assert_eq!(bounding_box, intersection, "{name}, {thickness} px");
             }
         }
     }

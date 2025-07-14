@@ -382,9 +382,7 @@ mod tests {
                 assert_eq!(
                     triangle.contains(point),
                     should_contain,
-                    "{:?}, {:?}",
-                    point,
-                    triangle
+                    "{point:?}, {triangle:?}"
                 );
             }
         }

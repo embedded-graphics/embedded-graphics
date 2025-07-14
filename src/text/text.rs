@@ -660,9 +660,7 @@ mod tests {
                 assert_eq!(
                     display.affected_area(),
                     text.bounding_box(),
-                    "alignment: {:?}, baseline: {:?}",
-                    alignment,
-                    baseline
+                    "alignment: {alignment:?}, baseline: {baseline:?}"
                 );
             }
         }

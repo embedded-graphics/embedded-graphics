@@ -33,10 +33,7 @@ where
                 .and_then(|row| row.get_mut(x))
                 .map(|pixel| *pixel = color);
         } else {
-            panic!(
-                "tried to set pixel outside the framebuffer at {:?}",
-                position
-            );
+            panic!("tried to set pixel outside the framebuffer at {position:?}");
         }
     }
 }
