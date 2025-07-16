@@ -230,20 +230,24 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Line {
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let (l, r) = self.extents(style.stroke_width, StrokeOffset::None);
+        if style.stroke_style == StrokeStyle::Dotted {
+            Rectangle::with_corners(self.start, self.end).offset((style.stroke_width / 2) as i32)
+        } else {
+            let (l, r) = self.extents(style.stroke_width, StrokeOffset::None);
 
-        let min = l
-            .start
-            .component_min(l.end)
-            .component_min(r.start)
-            .component_min(r.end);
-        let max = l
-            .start
-            .component_max(l.end)
-            .component_max(r.start)
-            .component_max(r.end);
+            let min = l
+                .start
+                .component_min(l.end)
+                .component_min(r.start)
+                .component_min(r.end);
+            let max = l
+                .start
+                .component_max(l.end)
+                .component_max(r.start)
+                .component_max(r.end);
 
-        Rectangle::with_corners(min, max)
+            Rectangle::with_corners(min, max)
+        }
     }
 }
 
@@ -298,6 +302,57 @@ mod tests {
                     name,
                     thickness
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn bounding_box_for_dotted_line() {
+        let lines = [
+            (
+                Line::new(Point::new(10, 20), Point::new(10, 50)),
+                "vertical",
+            ),
+            (
+                Line::new(Point::new(20, 20), Point::new(50, 20)),
+                "horizontal",
+            ),
+            (
+                Line::new(Point::new(20, 20), Point::new(55, 55)),
+                "diagonal",
+            ),
+            (Line::new(Point::new(20, 20), Point::new(55, 55)), "thin"),
+            (
+                Line::new(Point::new(40, 40), Point::new(13, 14)),
+                "random angle 1",
+            ),
+            (
+                Line::new(Point::new(30, 30), Point::new(12, 53)),
+                "random angle 2",
+            ),
+        ];
+
+        let dotted_style =
+            PrimitiveStyleBuilder::from(&PrimitiveStyle::with_stroke(Rgb888::RED, 0))
+                .stroke_style(StrokeStyle::Dotted);
+
+        for (line, name) in lines.iter() {
+            for thickness in 1..15 {
+                let style = dotted_style.stroke_width(thickness).build();
+                let styled = line.into_styled(style);
+                let bounding_box = styled.bounding_box();
+
+                let mut display = MockDisplay::new();
+                styled.draw(&mut display).unwrap();
+                let affected_area = display.affected_area();
+
+                // Check that the affected area is contained in the bounding box.
+                let intersection = affected_area.intersection(&bounding_box);
+                assert_eq!(affected_area, intersection, "{}, {} px", name, thickness);
+
+                // Check that the bounding box area is only slightly larger than the affected area.
+                let intersection = affected_area.offset(1).intersection(&bounding_box);
+                assert_eq!(bounding_box, intersection, "{}, {} px", name, thickness);
             }
         }
     }
