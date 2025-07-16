@@ -76,63 +76,73 @@ where
 }
 
 /// Compute the translation needed so that the dotted line fits the line as well as possible.
-/// The naive positioning of the dots might not be ideal for the following reasons :
 ///
-/// 1. Considering that a dot is either a `Circle` or a squared `Rectangle`, the geometric
-///    center of a dot can either be on a pixel center (when the dot size is odd),
-///    or on a 4-pixel intersection (when the dot size is even).
-///    In the second case, the "center point" used in e-g is actually the neighboring top-left
-///    pixel, which causes the dot to be moved slightly to the bottom right.
+/// Rasterization of lines and dots causes positioning errors in the following situations :
+/// - when the dot size is even, the rasterized dot is shifted to the bottom right by 0.5px;
+/// - when the line has an even number of bresenham lines, the line is shifted by 0.5px
+///   to the left.
 ///
-/// 2. A line with an odd number of bresenham lines is symmetric. However when there is an
-///    even number of bresenham lines, the line is slightly thicker on the left.
+/// When both sources of error add up, the naive dot positioning can be improved
+/// (by translating the dots to the top left).
 fn start_dot_offset(line: &Line, dot_size: i32) -> Point {
     if dot_size % 2 == 1 {
-        // No translation is applied for dots of odd diameter
-        // (their geometric center coincides with their "center point" as computed in e-g).
+        // The dot size is odd so the positioning is already ideal.
         return line.start;
     }
 
-    // Dots of even diameter (with a geometric center on a 4-pixel intersection).
+    // Depending on the line orientation, the number of bresenham lines might be odd or even.
+    // The code below supposes that nearly horizontal/vertical lines are thicker on the left and
+    // that diagonals are symmetric. This is an approximation (there can be diagonal lines with
+    // an even number of bresenham lines).
     //
-    // A translation is applied to get the following result:
-    // - on horizontal, vertical and other lines using the minimal (odd) number of bresenham lines,
-    // the geometric center of the starting dot will lie on the left starting corner of the
-    // bresenham line;
-    // If possible, the translation as a function of the line orientation should change
-    // when the number of bresenham lines changes.
+    // The code also makes the choice that the geometric center of the first dot should lie
+    // on the edge of the rasterized line.
+    //
+    // There's a drawing of the resulting alignment in test `start_dot_offset_matches_drawing`.
     let mut start = line.start;
     let delta = if start != line.end {
         line.delta()
     } else {
         HORIZONTAL_LINE.delta()
     };
-    if !ThickPoints::has_more_lines_than_expected(line, dot_size) {
-        // Horizontal, vertical, and other lines that use the minimal (odd) number of bresenham lines.
+    if is_nearly_horizontal_or_vertical(line) {
         let to_bottom_right = delta.dot_product(Point::new(1, 1));
         let to_top_right = delta.dot_product(Point::new(1, -1));
 
-        if to_bottom_right > 0 || to_bottom_right == 0 && to_top_right < 0 {
+        if to_bottom_right > 0 {
             start.y -= 1;
         };
-        if to_top_right > 0 || to_top_right == 0 && to_bottom_right > 0 {
+        if to_top_right > 0 {
             start.x -= 1;
         };
         start
     } else {
-        // Lines that have more bresenham lines than the minimum.
-        // The same offset is used as on the previous horizontal/vertical line in clockwise order.
         let to_right = delta.dot_product(Point::new(1, 0));
         let to_bottom = delta.dot_product(Point::new(0, 1));
 
-        if to_right > 0 || to_right == 0 && to_bottom < 0 {
+        if to_right > 0 {
             start.x -= 1;
         };
-        if to_bottom > 0 || to_bottom == 0 && to_right > 0 {
+        if to_bottom > 0 {
             start.y -= 1;
         };
         start
     }
+}
+
+fn is_nearly_horizontal_or_vertical(line: &Line) -> bool {
+    let mut points = Points::new(line);
+
+    let Some(second) = points.nth(1) else {
+        // The orientation of the degenerated line is horizontal.
+        return true;
+    };
+
+    let diff = second - line.start;
+    let sum = diff.abs().dot_product(Point::new(1, 1));
+
+    // If the first two pixels share an edge, the line is nearly horizontal or vertical.
+    sum == 1
 }
 
 fn extend_line_by_one_unit(line: &Line) -> Line {
