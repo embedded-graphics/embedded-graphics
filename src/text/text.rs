@@ -221,7 +221,7 @@ mod tests {
         text::{Alignment, Baseline, LineHeight, TextStyleBuilder},
     };
 
-    const HELLO_WORLD: &'static str = "Hello World!";
+    const HELLO_WORLD: &str = "Hello World!";
 
     #[test]
     fn constructor() {
