@@ -683,10 +683,10 @@ mod tests {
     #[test]
     /// A dotted rectangle border should exactly match the 4 dotted lines drawn in clockwise order when:
     /// 1. the border width is greater or equal to 4 (when the width is smaller,
-    /// there's not always a dot in each corner)
-    /// AND
-    /// the opposite borders of the rectangle don't overlap (this causes the size of the dots
-    /// to be reduced, so line dots and rectangle dots will have different sizes).
+    ///    there's not always a dot in each corner)
+    ///    AND
+    ///    the opposite borders of the rectangle don't overlap (this causes the size of the dots
+    ///    to be reduced, so line dots and rectangle dots will have different sizes).
     ///
     /// A dotted rectangle border should exactly match the 2 first dotted lines drawn in clockwise order when:
     /// 2. the rectangle `stroke_area` is flattened to a line and the stroke width is 1.
