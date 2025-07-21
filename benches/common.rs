@@ -28,10 +28,9 @@ where
 
     fn set_pixel(&mut self, position: Point, color: C) {
         if let (Ok(x), Ok(y)) = (usize::try_from(position.x), usize::try_from(position.y)) {
-            self.pixels
-                .get_mut(y)
-                .and_then(|row| row.get_mut(x))
-                .map(|pixel| *pixel = color);
+            if let Some(pixel) = self.pixels.get_mut(y).and_then(|row| row.get_mut(x)) {
+                *pixel = color;
+            }
         } else {
             panic!("tried to set pixel outside the framebuffer at {position:?}");
         }
