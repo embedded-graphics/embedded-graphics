@@ -380,7 +380,7 @@ pub(crate) mod tests {
             Text::with_baseline(
                 &text,
                 Point::zero(),
-                MonoTextStyle::new(&font, BinaryColor::On),
+                MonoTextStyle::new(font, BinaryColor::On),
                 Baseline::Top,
             )
             .draw(&mut output)

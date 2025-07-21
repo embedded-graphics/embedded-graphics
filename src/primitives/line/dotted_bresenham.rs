@@ -127,7 +127,7 @@ impl DottedLinePoints {
         // The 2 endpoint dots take half the space of a regular dot.
         let nb_dots_desired = length / (2 * dot_size) + 1;
 
-        Self::new(&line, nb_dots_desired)
+        Self::new(line, nb_dots_desired)
     }
 
     /// Creates an iterator over all points on the given line
