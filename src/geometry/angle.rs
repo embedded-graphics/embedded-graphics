@@ -392,31 +392,11 @@ mod tests {
 
     #[test]
     fn sin_correct() {
-        let degree_sin_pairs = [
-            (-90.0, -1.0),
-            (-60.0, -0.86602540),
-            (-45.0, -0.70710678),
-            (-30.0, -0.5),
-            (0.0, 0.0),
-            (30.0, 0.5),
-            (45.0, 0.70710678),
-            (60.0, 0.86602540),
-            (90.0, 1.0),
-            (120.0, 0.86602540),
-            (135.0, 0.70710678),
-            (150.0, 0.5),
-            (180.0, 0.0),
-            (210.0, -0.5),
-            (225.0, -0.70710678),
-            (240.0, -0.86602540),
-            (270.0, -1.0),
-        ];
-
-        for (angle, sin) in &degree_sin_pairs {
+        for angle in -90..=270 {
             assert!(approx_eq!(
                 Real,
-                angle.deg().sin(),
-                (*sin).into(),
+                Angle::from_degrees(angle as f32).sin(),
+                Real::from((angle as f32).to_radians().sin()),
                 epsilon = 0.0001
             ));
         }
@@ -424,31 +404,11 @@ mod tests {
 
     #[test]
     fn cos_correct() {
-        let degree_cos_pairs = [
-            (-90.0, 0.0),
-            (-60.0, 0.5),
-            (-45.0, 0.70710678),
-            (-30.0, 0.86602540),
-            (0.0, 1.0),
-            (30.0, 0.86602540),
-            (45.0, 0.70710678),
-            (60.0, 0.5),
-            (90.0, 0.0),
-            (120.0, -0.5),
-            (135.0, -0.70710678),
-            (150.0, -0.86602540),
-            (180.0, -1.0),
-            (210.0, -0.86602540),
-            (225.0, -0.70710678),
-            (240.0, -0.5),
-            (270.0, -0.0),
-        ];
-
-        for (angle, cos) in &degree_cos_pairs {
+        for angle in -90..=270 {
             assert!(approx_eq!(
                 Real,
-                angle.deg().cos(),
-                (*cos).into(),
+                Angle::from_degrees(angle as f32).cos(),
+                Real::from((angle as f32).to_radians().cos()),
                 epsilon = 0.0001
             ));
         }
@@ -456,21 +416,11 @@ mod tests {
 
     #[test]
     fn tan_correct() {
-        let degree_tan_pairs = [
-            (-60.0, -1.73205080),
-            (-45.0, -1.0),
-            (-30.0, -0.57735026),
-            (0.0, 0.0),
-            (30.0, 0.57735026),
-            (45.0, 1.0),
-            (60.0, 1.73205080),
-        ];
-
-        for (angle, tan) in &degree_tan_pairs {
+        for angle in -70..70 {
             assert!(approx_eq!(
                 Real,
-                angle.deg().tan().unwrap(),
-                (*tan).into(),
+                Angle::from_degrees(angle as f32).tan().unwrap(),
+                Real::from((angle as f32).to_radians().tan()),
                 epsilon = 0.0001
             ));
         }
