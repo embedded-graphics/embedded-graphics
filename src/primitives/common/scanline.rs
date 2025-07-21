@@ -199,11 +199,11 @@ mod tests {
         let mut l1 = Scanline { y: 5, x: 18..20 };
         let l2 = Scanline { y: 5, x: 11..26 };
 
-        assert_eq!(l1.touches(&l2), true, "l1 touches l2");
+        assert!(l1.touches(&l2), "l1 touches l2");
 
         let result = l1.try_extend(&l2);
 
-        assert_eq!(result, true);
+        assert!(result);
         assert_eq!(l1, Scanline { y: 5, x: 11..26 });
     }
 }
