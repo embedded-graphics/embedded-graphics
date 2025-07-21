@@ -315,7 +315,6 @@ mod tests {
         let circle = Circle::with_center(Point::new(10, 10), 5);
 
         let styled_points = circle
-            .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .pixels()
             .map(|Pixel(p, _)| p);

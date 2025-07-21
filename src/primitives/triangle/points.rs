@@ -60,7 +60,6 @@ mod tests {
         let triangle = Triangle::new(Point::new(5, 10), Point::new(15, 20), Point::new(10, 15));
 
         let styled_points = triangle
-            .clone()
             .into_styled(PrimitiveStyle::with_fill(BinaryColor::On))
             .pixels()
             .map(|Pixel(p, _)| p);
