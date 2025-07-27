@@ -2,7 +2,8 @@
 //! points from a bresenham line in order to draw a dotted line.
 
 use super::{bresenham::MajorMinor, Line, Points};
-use crate::geometry::Point;
+use crate::geometry::{Point, PointExt};
+use integer_sqrt::IntegerSquareRoot;
 
 /// Bresenham algorithm for dotted lines.
 ///
@@ -114,8 +115,24 @@ pub(super) struct DottedLinePoints {
 
 impl DottedLinePoints {
     /// Creates an iterator over all points on the given line
+    /// taking into account the size of the dots.
+    pub(super) fn with_dot_size(line: &Line, dot_size: i32) -> Self {
+        let mut length = line.delta().length_squared().integer_sqrt();
+        // The gaps between dots ideally have the same size as the dots
+        // If `dot_size <= 3`, only positive error is allowed,
+        // otherwise both positive and negative error are allowed.
+        if dot_size > 3 {
+            length += dot_size;
+        }
+        // The 2 endpoint dots take half the space of a regular dot.
+        let nb_dots_desired = length / (2 * dot_size) + 1;
+
+        Self::new(&line, nb_dots_desired)
+    }
+
+    /// Creates an iterator over all points on the given line
     /// taking into account the desired number of dots.
-    pub(super) fn new(line: &Line, nb_dots_desired: i32) -> Self {
+    fn new(line: &Line, nb_dots_desired: i32) -> Self {
         let points = Points::new(line);
         let index_bresenham = DottedBresenham::new(line, nb_dots_desired);
 

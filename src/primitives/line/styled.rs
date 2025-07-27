@@ -15,7 +15,6 @@ use crate::{
     Pixel,
 };
 use az::SaturatingAs;
-use integer_sqrt::IntegerSquareRoot;
 
 /// Styled line iterator.
 #[derive(Clone, Debug)]
@@ -190,17 +189,8 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
             };
 
             // Draw dots along the line.
-            let mut length = line.delta().length_squared().integer_sqrt();
-            // The gaps between dots ideally have the same size as the dots
-            // If `dot_size <= 3`, only positive error is allowed,
-            // otherwise both positive and negative error are allowed.
-            if dot_size > 3 {
-                length += dot_size;
-            }
-            // The 2 endpoint dots take half the space of a regular dot.
-            let nb_dots_desired = length / (2 * dot_size) + 1;
             let dotted_line_points =
-                DottedLinePoints::new(&line.translate(-line.start), nb_dots_desired);
+                DottedLinePoints::with_dot_size(&line.translate(-line.start), dot_size);
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
             // Improve the positioning of the dots.
             let start = start_dot_offset(self, dot_size);
