@@ -86,7 +86,7 @@ where
 fn start_dot_offset(line: &Line, dot_size: i32) -> Point {
     if dot_size % 2 == 1 {
         // The dot size is odd so the positioning is already ideal.
-        return line.start;
+        return Point::zero();
     }
 
     // Depending on the line orientation, the number of bresenham lines might be odd or even.
@@ -98,8 +98,8 @@ fn start_dot_offset(line: &Line, dot_size: i32) -> Point {
     // on the edge of the rasterized line.
     //
     // There's a drawing of the resulting alignment in test `start_dot_offset_matches_drawing`.
-    let mut start = line.start;
-    let delta = if start != line.end {
+    let mut start = Point::zero();
+    let delta = if line.start != line.end {
         line.delta()
     } else {
         HORIZONTAL_LINE.delta()
@@ -183,28 +183,27 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
                 // is longer by one pixel when the dot size is even.
                 // So that the dotted rectangle border matches 4 lines drawn in clockwise order,
                 // the line is extended by one pixel when the dot size is even.
-                extend_line_by_one_unit(self)
+                let extended = extend_line_by_one_unit(self);
+                // Improve the positioning of the dots.
+                extended.translate(start_dot_offset(self, dot_size))
             } else {
                 *self
             };
 
             // Draw dots along the line.
-            let dotted_line_points =
-                DottedLinePoints::with_dot_size(&line.translate(-line.start), dot_size);
+            let dotted_line_points = DottedLinePoints::with_dot_size(&line, dot_size);
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
-            // Improve the positioning of the dots.
-            let start = start_dot_offset(self, dot_size);
 
             if dot_size > 3 {
                 draw_dotted_line(
-                    &Circle::with_center(start, dot_size as u32),
+                    &Circle::with_center(Point::zero(), dot_size as u32),
                     &dotted_line_points,
                     &dot_style,
                     target,
                 )
             } else {
                 draw_dotted_line(
-                    &Rectangle::with_center(start, Size::new_equal(dot_size as u32)),
+                    &Rectangle::with_center(Point::zero(), Size::new_equal(dot_size as u32)),
                     &dotted_line_points,
                     &dot_style,
                     target,
