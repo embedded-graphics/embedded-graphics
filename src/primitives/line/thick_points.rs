@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
+pub(super) const HORIZONTAL_LINE: Line = Line::new(Point::zero(), Point::new(1, 0));
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]

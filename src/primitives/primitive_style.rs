@@ -48,7 +48,7 @@ where
     /// The stroke style sets the border style (default is [`StrokeStyle::Solid`]).
     ///
     /// [`StrokeStyle::Dotted`] is only implemented for the [`Rectangle`](crate::primitives::Rectangle)
-    /// primitive, the default will be used for all other primitives.
+    /// and the [`Line`](crate::primitives::Line) primitive, the default will be used for all other primitives.
     pub stroke_style: StrokeStyle,
 }
 
