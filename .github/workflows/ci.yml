@@ -61,3 +61,12 @@ jobs:
           targets: "arm-unknown-linux-gnueabi,armv7-unknown-linux-gnueabihf,x86_64-unknown-linux-gnu,x86_64-unknown-linux-musl,thumbv6m-none-eabi,thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv7m-none-eabi"
       - uses: actions/checkout@v4
       - run: just build-targets --release
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: actions/checkout@v4
+      - run: cargo clippy --all-targets -- --deny=warnings
