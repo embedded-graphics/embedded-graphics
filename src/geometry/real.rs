@@ -73,12 +73,6 @@ mod real_impl {
     #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
     pub(crate) struct Real(pub(super) I16F16);
 
-    impl Real {
-        pub(crate) const fn zero() -> Self {
-            Self(I16F16::from_bits(0))
-        }
-    }
-
     impl From<I16F16> for Real {
         fn from(src: I16F16) -> Self {
             Self(src)

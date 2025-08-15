@@ -117,10 +117,6 @@ pub(crate) trait Trigonometry {
 
     /// Get the cosine of the angle.
     fn cos(self) -> Real;
-
-    /// Get the tangent of the angle.
-    #[allow(unused)]
-    fn tan(self) -> Option<Real>;
 }
 
 #[cfg(not(feature = "fixed_point"))]
@@ -133,19 +129,6 @@ impl Trigonometry for Angle {
     fn cos(self) -> Real {
         let angle: f32 = self.0.into();
         angle.cos().into()
-    }
-
-    fn tan(self) -> Option<Real> {
-        let angle: f32 = self.0.into();
-        let tan = angle.tan();
-        // FRAC_PI_2.tan() has no value, but the approximate method used by micromath actually return a huge
-        // value which is > 20000000.0, so we check for this to decide that the angle was approximately
-        // FRAC_PI_2 and that tan() has actually no value.
-        if tan.is_nan() || tan.abs() > 20000000.0 {
-            None
-        } else {
-            Some(tan.into())
-        }
     }
 }
 
@@ -265,15 +248,6 @@ impl Trigonometry for Angle {
 
     fn cos(self) -> Real {
         (self + angle_consts::ANGLE_90DEG).sin()
-    }
-
-    fn tan(self) -> Option<Real> {
-        let cos = self.cos();
-        if cos != Real::zero() {
-            Some(self.sin() / cos)
-        } else {
-            None
-        }
     }
 }
 
@@ -412,20 +386,5 @@ mod tests {
                 epsilon = 0.0001
             ));
         }
-    }
-
-    #[test]
-    fn tan_correct() {
-        for angle in -70..70 {
-            assert!(approx_eq!(
-                Real,
-                Angle::from_degrees(angle as f32).tan().unwrap(),
-                Real::from((angle as f32).to_radians().tan()),
-                epsilon = 0.0001
-            ));
-        }
-
-        assert_eq!((-90.0.deg()).tan(), None);
-        assert_eq!(90.0.deg().tan(), None);
     }
 }
