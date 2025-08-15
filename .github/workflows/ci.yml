@@ -70,3 +70,4 @@ jobs:
           components: clippy
       - uses: actions/checkout@v4
       - run: cargo clippy --all-targets -- --deny=warnings
+      - run: cargo clippy --all-targets --all-features -- --deny=warnings
