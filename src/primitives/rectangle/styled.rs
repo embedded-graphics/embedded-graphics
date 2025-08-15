@@ -374,7 +374,6 @@ mod tests {
         let rectangle = Rectangle::new(Point::new(10, 10), Size::new(20, 30));
 
         let styled_points = rectangle
-            .clone()
             .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
             .pixels()
             .map(|Pixel(p, _)| p);

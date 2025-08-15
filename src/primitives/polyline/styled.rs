@@ -389,7 +389,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            display.assert_pattern_with_message(expected, |f| write!(f, "Join {}", case));
+            display.assert_pattern_with_message(expected, |f| write!(f, "Join {case}"));
         }
     }
 
@@ -435,7 +435,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            display.assert_eq_with_message(&expected_display, |f| write!(f, "{:?}", alignment));
+            display.assert_eq_with_message(&expected_display, |f| write!(f, "{alignment:?}"));
         }
     }
 

@@ -97,7 +97,7 @@ pub struct MonoFont<'a> {
 
 impl MonoFont<'_> {
     /// Returns a subimage for a glyph.
-    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<BinaryColor>> {
+    pub(crate) fn glyph(&self, c: char) -> SubImage<'_, ImageRaw<'_, BinaryColor>> {
         if self.character_size.width == 0 || self.image.size().width < self.character_size.width {
             return SubImage::new_unchecked(&self.image, Rectangle::zero());
         }
@@ -380,7 +380,7 @@ pub(crate) mod tests {
             Text::with_baseline(
                 &text,
                 Point::zero(),
-                MonoTextStyle::new(&font, BinaryColor::On),
+                MonoTextStyle::new(font, BinaryColor::On),
                 Baseline::Top,
             )
             .draw(&mut output)

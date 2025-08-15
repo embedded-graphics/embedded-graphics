@@ -193,7 +193,7 @@ where
 
 /// Returns the length of each row in bytes.
 const fn bytes_per_row(width: u32, bits_per_pixel: usize) -> usize {
-    (width as usize * bits_per_pixel + 7) / 8
+    (width as usize * bits_per_pixel).div_ceil(8)
 }
 
 impl<'a, C, O> ImageDrawable for ImageRaw<'a, C, O>

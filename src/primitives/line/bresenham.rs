@@ -246,7 +246,7 @@ mod tests {
 
         for line in lines {
             let mut bresenham = Bresenham::new(line.start);
-            let parameters = BresenhamParameters::new(&line);
+            let parameters = BresenhamParameters::new(line);
 
             for point in core::iter::from_fn(|| Some(bresenham.next_all(&parameters))).take(7) {
                 match point {

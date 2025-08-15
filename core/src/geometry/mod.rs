@@ -14,20 +14,20 @@ use crate::primitives::Rectangle;
 ///
 /// * Primitives ([`Rectangle`], [`Circle`], ...)
 ///
-///    For unstyled [primitives] the bounding box is defined as the smallest rectangle that surrounds the entire primitive.
+///   For unstyled [primitives] the bounding box is defined as the smallest rectangle that surrounds the entire primitive.
 /// * Styled primitives and other [`Drawable`]s ([`Image`], [`Text`], ...)
 ///
-///    The bounding box of a drawable is defined as the smallest rectangle that contains all drawn pixels.
-///    While all builtin [`Drawable`]s in embedded-graphics provide an implementation of this trait, this might
-///    not be true for third party drawables.
+///   The bounding box of a drawable is defined as the smallest rectangle that contains all drawn pixels.
+///   While all builtin [`Drawable`]s in embedded-graphics provide an implementation of this trait, this might
+///   not be true for third party drawables.
 ///
-///    Note that a styled primitive can have a different bounding box than the underlying unstyled primitive;
-///    depending on the stroke width and alignment the bounding box of the styled primitive may be larger.
+///   Note that a styled primitive can have a different bounding box than the underlying unstyled primitive;
+///   depending on the stroke width and alignment the bounding box of the styled primitive may be larger.
 /// * [`DrawTarget`]s (displays, simulator, ...)
 ///
-///    The bounding box of a draw target is defined as the area that should be used for drawing operations.
-///    For most display drivers the top left corner of the bounding box will be at the origin but other draw targets
-///    can have different positions of the top left corner.
+///   The bounding box of a draw target is defined as the area that should be used for drawing operations.
+///   For most display drivers the top left corner of the bounding box will be at the origin but other draw targets
+///   can have different positions of the top left corner.
 ///
 /// The bounding box will be returned as a [`Rectangle`]. The methods provided by [`Rectangle`] make
 /// it easy to implement additional functions like hit testing (by using [`contains`]) or drawing a focus

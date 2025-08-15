@@ -37,14 +37,14 @@ pub trait ImageDrawableExt: Sized {
     ///
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    fn sub_image(&self, area: &Rectangle) -> SubImage<Self>;
+    fn sub_image(&self, area: &Rectangle) -> SubImage<'_, Self>;
 }
 
 impl<T> ImageDrawableExt for T
 where
     T: ImageDrawable,
 {
-    fn sub_image(&self, area: &Rectangle) -> SubImage<T> {
+    fn sub_image(&self, area: &Rectangle) -> SubImage<'_, T> {
         SubImage::new(self, area)
     }
 }

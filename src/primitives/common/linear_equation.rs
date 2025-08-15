@@ -197,17 +197,13 @@ mod tests {
             assert_eq!(
                 eq1.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
 
             assert_eq!(
                 eq2.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
         }
     }
@@ -231,17 +227,13 @@ mod tests {
             assert_eq!(
                 eq1.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
 
             assert_eq!(
                 eq2.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
         }
     }
@@ -265,17 +257,13 @@ mod tests {
             assert_eq!(
                 eq1.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
 
             assert_eq!(
                 eq2.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
         }
     }
@@ -299,17 +287,13 @@ mod tests {
             assert_eq!(
                 eq1.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
 
             assert_eq!(
                 eq2.check_side(point.into(), side),
                 expected,
-                "{:?}, {:?}",
-                point,
-                side
+                "{point:?}, {side:?}"
             );
         }
     }

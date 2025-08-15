@@ -1028,8 +1028,7 @@ mod tests {
 
             assert_eq!(
                 next, expected_next,
-                "Unexpected next point for {:?}: {:?} (expected {:?})",
-                baseline, next, expected_next
+                "Unexpected next point for {baseline:?}: {next:?} (expected {expected_next:?})"
             );
         }
     }
@@ -1055,8 +1054,7 @@ mod tests {
 
             assert_eq!(
                 next, expected_next,
-                "Unexpected next point for {:?}: {:?} (expected {:?})",
-                baseline, next, expected_next
+                "Unexpected next point for {baseline:?}: {next:?} (expected {expected_next:?})"
             );
         }
     }

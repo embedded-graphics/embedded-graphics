@@ -287,9 +287,7 @@ mod tests {
                 assert_eq!(
                     display.affected_area(),
                     styled.bounding_box(),
-                    "{}, {} px",
-                    name,
-                    thickness
+                    "{name}, {thickness} px"
                 );
             }
         }
@@ -337,11 +335,11 @@ mod tests {
 
                 // Check that the affected area is contained in the bounding box.
                 let intersection = affected_area.intersection(&bounding_box);
-                assert_eq!(affected_area, intersection, "{}, {} px", name, thickness);
+                assert_eq!(affected_area, intersection, "{name}, {thickness} px");
 
                 // Check that the bounding box area is only slightly larger than the affected area.
                 let intersection = affected_area.offset(1).intersection(&bounding_box);
-                assert_eq!(bounding_box, intersection, "{}, {} px", name, thickness);
+                assert_eq!(bounding_box, intersection, "{name}, {thickness} px");
             }
         }
     }
@@ -683,10 +681,10 @@ mod tests {
     #[test]
     /// A dotted rectangle border should exactly match the 4 dotted lines drawn in clockwise order when:
     /// 1. the border width is greater or equal to 4 (when the width is smaller,
-    /// there's not always a dot in each corner)
-    /// AND
-    /// the opposite borders of the rectangle don't overlap (this causes the size of the dots
-    /// to be reduced, so line dots and rectangle dots will have different sizes).
+    ///    there's not always a dot in each corner)
+    ///    AND
+    ///    the opposite borders of the rectangle don't overlap (this causes the size of the dots
+    ///    to be reduced, so line dots and rectangle dots will have different sizes).
     ///
     /// A dotted rectangle border should exactly match the 2 first dotted lines drawn in clockwise order when:
     /// 2. the rectangle `stroke_area` is flattened to a line and the stroke width is 1.

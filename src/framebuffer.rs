@@ -30,7 +30,7 @@ pub const fn buffer_size<C: PixelColor>(width: usize, height: usize) -> usize {
 /// This function is a workaround for current limitations in Rust const generics.
 /// It can be used to calculate the `N` parameter based on the size and bit depth of the framebuffer.
 pub const fn buffer_size_bpp(width: usize, height: usize, bpp: usize) -> usize {
-    (width * bpp + 7) / 8 * height
+    (width * bpp).div_ceil(8) * height
 }
 
 /// A framebuffer.
@@ -154,7 +154,7 @@ macro_rules! impl_bit {
                     if x < WIDTH && y < HEIGHT {
                         let pixels_per_bit = 8 / C::Raw::BITS_PER_PIXEL;
                         let bits_per_row = WIDTH * C::Raw::BITS_PER_PIXEL;
-                        let bytes_per_row = (bits_per_row + 7) / 8;
+                        let bytes_per_row = bits_per_row.div_ceil(8);
                         let byte_index = bytes_per_row * y + (x / pixels_per_bit);
                         let bit_index = 8 - (x % pixels_per_bit + 1) * C::Raw::BITS_PER_PIXEL;
 

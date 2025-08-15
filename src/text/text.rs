@@ -221,7 +221,7 @@ mod tests {
         text::{Alignment, Baseline, LineHeight, TextStyleBuilder},
     };
 
-    const HELLO_WORLD: &'static str = "Hello World!";
+    const HELLO_WORLD: &str = "Hello World!";
 
     #[test]
     fn constructor() {
@@ -660,9 +660,7 @@ mod tests {
                 assert_eq!(
                     display.affected_area(),
                     text.bounding_box(),
-                    "alignment: {:?}, baseline: {:?}",
-                    alignment,
-                    baseline
+                    "alignment: {alignment:?}, baseline: {baseline:?}"
                 );
             }
         }

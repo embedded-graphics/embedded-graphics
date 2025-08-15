@@ -65,7 +65,6 @@ mod tests {
         let arc = Arc::with_center(Point::new(10, 10), 5, 0.0.deg(), 90.0.deg());
 
         let styled_points = arc
-            .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .pixels()
             .map(|Pixel(p, _)| p);

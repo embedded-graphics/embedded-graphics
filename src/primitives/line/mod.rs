@@ -426,7 +426,6 @@ mod tests {
         let line = Line::new(Point::new(10, 10), Point::new(20, 30));
 
         let styled_points: ArrayVec<_, 32> = line
-            .clone()
             .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 1))
             .pixels()
             .map(|Pixel(p, _)| p)

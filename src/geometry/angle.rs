@@ -117,10 +117,6 @@ pub(crate) trait Trigonometry {
 
     /// Get the cosine of the angle.
     fn cos(self) -> Real;
-
-    /// Get the tangent of the angle.
-    #[allow(unused)]
-    fn tan(self) -> Option<Real>;
 }
 
 #[cfg(not(feature = "fixed_point"))]
@@ -133,19 +129,6 @@ impl Trigonometry for Angle {
     fn cos(self) -> Real {
         let angle: f32 = self.0.into();
         angle.cos().into()
-    }
-
-    fn tan(self) -> Option<Real> {
-        let angle: f32 = self.0.into();
-        let tan = angle.tan();
-        // FRAC_PI_2.tan() has no value, but the approximate method used by micromath actually return a huge
-        // value which is > 20000000.0, so we check for this to decide that the angle was approximately
-        // FRAC_PI_2 and that tan() has actually no value.
-        if tan.is_nan() || tan.abs() > 20000000.0 {
-            None
-        } else {
-            Some(tan.into())
-        }
     }
 }
 
@@ -266,15 +249,6 @@ impl Trigonometry for Angle {
     fn cos(self) -> Real {
         (self + angle_consts::ANGLE_90DEG).sin()
     }
-
-    fn tan(self) -> Option<Real> {
-        let cos = self.cos();
-        if cos != Real::zero() {
-            Some(self.sin() / cos)
-        } else {
-            None
-        }
-    }
 }
 
 impl Add for Angle {
@@ -392,31 +366,11 @@ mod tests {
 
     #[test]
     fn sin_correct() {
-        let degree_sin_pairs = [
-            (-90.0, -1.0),
-            (-60.0, -0.86602540),
-            (-45.0, -0.70710678),
-            (-30.0, -0.5),
-            (0.0, 0.0),
-            (30.0, 0.5),
-            (45.0, 0.70710678),
-            (60.0, 0.86602540),
-            (90.0, 1.0),
-            (120.0, 0.86602540),
-            (135.0, 0.70710678),
-            (150.0, 0.5),
-            (180.0, 0.0),
-            (210.0, -0.5),
-            (225.0, -0.70710678),
-            (240.0, -0.86602540),
-            (270.0, -1.0),
-        ];
-
-        for (angle, sin) in &degree_sin_pairs {
+        for angle in -90..=270 {
             assert!(approx_eq!(
                 Real,
-                angle.deg().sin(),
-                (*sin).into(),
+                Angle::from_degrees(angle as f32).sin(),
+                Real::from((angle as f32).to_radians().sin()),
                 epsilon = 0.0001
             ));
         }
@@ -424,58 +378,13 @@ mod tests {
 
     #[test]
     fn cos_correct() {
-        let degree_cos_pairs = [
-            (-90.0, 0.0),
-            (-60.0, 0.5),
-            (-45.0, 0.70710678),
-            (-30.0, 0.86602540),
-            (0.0, 1.0),
-            (30.0, 0.86602540),
-            (45.0, 0.70710678),
-            (60.0, 0.5),
-            (90.0, 0.0),
-            (120.0, -0.5),
-            (135.0, -0.70710678),
-            (150.0, -0.86602540),
-            (180.0, -1.0),
-            (210.0, -0.86602540),
-            (225.0, -0.70710678),
-            (240.0, -0.5),
-            (270.0, -0.0),
-        ];
-
-        for (angle, cos) in &degree_cos_pairs {
+        for angle in -90..=270 {
             assert!(approx_eq!(
                 Real,
-                angle.deg().cos(),
-                (*cos).into(),
+                Angle::from_degrees(angle as f32).cos(),
+                Real::from((angle as f32).to_radians().cos()),
                 epsilon = 0.0001
             ));
         }
-    }
-
-    #[test]
-    fn tan_correct() {
-        let degree_tan_pairs = [
-            (-60.0, -1.73205080),
-            (-45.0, -1.0),
-            (-30.0, -0.57735026),
-            (0.0, 0.0),
-            (30.0, 0.57735026),
-            (45.0, 1.0),
-            (60.0, 1.73205080),
-        ];
-
-        for (angle, tan) in &degree_tan_pairs {
-            assert!(approx_eq!(
-                Real,
-                angle.deg().tan().unwrap(),
-                (*tan).into(),
-                epsilon = 0.0001
-            ));
-        }
-
-        assert_eq!((-90.0.deg()).tan(), None);
-        assert_eq!(90.0.deg().tan(), None);
     }
 }

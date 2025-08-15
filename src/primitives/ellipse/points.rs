@@ -94,7 +94,7 @@ mod tests {
             let ellipse_points =
                 Ellipse::new(Point::new(0, 0), Size::new(diameter, diameter)).points();
 
-            assert!(circle_points.eq(ellipse_points), "diameter = {}", diameter);
+            assert!(circle_points.eq(ellipse_points), "diameter = {diameter}");
         }
     }
 }

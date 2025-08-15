@@ -382,9 +382,7 @@ mod tests {
                 assert_eq!(
                     triangle.contains(point),
                     should_contain,
-                    "{:?}, {:?}",
-                    point,
-                    triangle
+                    "{point:?}, {triangle:?}"
                 );
             }
         }
@@ -400,7 +398,7 @@ mod tests {
 
         for triangle in triangles.iter() {
             for point in Rectangle::new(Point::new(-5, -5), Size::new(70, 70)).points() {
-                assert_eq!(triangle.contains(point), false);
+                assert!(!triangle.contains(point));
             }
         }
     }
@@ -443,6 +441,6 @@ mod tests {
     fn check_collapsed() {
         let triangle = Triangle::new(Point::new(10, 10), Point::new(30, 20), Point::new(20, 25));
 
-        assert_eq!(triangle.is_collapsed(20, StrokeOffset::None), true);
+        assert!(triangle.is_collapsed(20, StrokeOffset::None));
     }
 }

@@ -210,7 +210,7 @@ mod tests {
                 .draw(&mut display)
                 .unwrap();
 
-            display.assert_eq_with_message(&expected, |f| write!(f, "diameter = {}", diameter));
+            display.assert_eq_with_message(&expected, |f| write!(f, "diameter = {diameter}"));
         }
     }
 
