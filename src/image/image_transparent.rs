@@ -1,9 +1,9 @@
 use crate::draw_target::DrawTarget;
 use crate::geometry::{Dimensions, OriginDimensions, Size};
-use crate::Pixel;
 use crate::pixelcolor::PixelColor;
 use crate::prelude::ImageDrawable;
 use crate::primitives::Rectangle;
+use crate::Pixel;
 
 /// A thin wrapper around an `ImageDrawable` to make it handle transparency.
 ///
@@ -47,10 +47,13 @@ pub struct ImageTransparent<T, C> {
     transparent_color: C,
 }
 
-impl<T: ImageDrawable, C: PixelColor> ImageTransparent<T,C> {
+impl<T: ImageDrawable, C: PixelColor> ImageTransparent<T, C> {
     /// Creates a new `ImageTransparent` use it within `Image`
     pub fn new(drawable: T, transparent_color: C) -> Self {
-        ImageTransparent { drawable, transparent_color }
+        ImageTransparent {
+            drawable,
+            transparent_color,
+        }
     }
 }
 
@@ -60,39 +63,55 @@ impl<T: ImageDrawable, C: PixelColor> OriginDimensions for ImageTransparent<T, C
     }
 }
 
-impl<T: ImageDrawable<Color=C>, C: PixelColor> ImageDrawable for ImageTransparent<T,C> {
+impl<T: ImageDrawable<Color = C>, C: PixelColor> ImageDrawable for ImageTransparent<T, C> {
     type Color = C;
 
-    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error> where D: DrawTarget<Color=Self::Color> {
-        let mut drawer = Drawer { target, transparent_color: self.transparent_color };
+    fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        let mut drawer = Drawer {
+            target,
+            transparent_color: self.transparent_color,
+        };
         self.drawable.draw(&mut drawer)
     }
 
-    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error> where D: DrawTarget<Color=Self::Color> {
-        let mut drawer = Drawer { target, transparent_color: self.transparent_color };
+    fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
+    where
+        D: DrawTarget<Color = Self::Color>,
+    {
+        let mut drawer = Drawer {
+            target,
+            transparent_color: self.transparent_color,
+        };
         self.drawable.draw_sub_image(&mut drawer, area)
     }
 }
 
-struct Drawer<'a, T,C> {
+struct Drawer<'a, T, C> {
     target: &'a mut T,
     transparent_color: C,
 }
 
-impl<'a, T: DrawTarget<Color=C>, C> Dimensions for Drawer<'a, T, C> {
+impl<'a, T: DrawTarget<Color = C>, C> Dimensions for Drawer<'a, T, C> {
     fn bounding_box(&self) -> Rectangle {
         self.target.bounding_box()
     }
 }
 
-impl<'a,T: DrawTarget<Color=C>, C: PixelColor> DrawTarget for Drawer<'a, T,C> {
+impl<'a, T: DrawTarget<Color = C>, C: PixelColor> DrawTarget for Drawer<'a, T, C> {
     type Color = C;
     type Error = T::Error;
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Pixel<Self::Color>> {
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
         self.target.draw_iter(
-            pixels.into_iter()
-                .filter(|pixel| pixel.1 != self.transparent_color ))
+            pixels
+                .into_iter()
+                .filter(|pixel| pixel.1 != self.transparent_color),
+        )
     }
 }
-
