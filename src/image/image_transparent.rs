@@ -5,36 +5,43 @@ use crate::prelude::ImageDrawable;
 use crate::primitives::Rectangle;
 use crate::Pixel;
 
-/// A thin wrapper around an `ImageDrawable` to make it handle transparency.
+/// A wrapper to add basic transparency to an `ImageDrawable`.
 ///
-/// The new object can be used inside an `Image` like the previous one.
+/// `ImageTransparent` works by designating one color in the source
+/// [`ImageDrawable`] as being transparent. All pixels with this color are
+/// skipped during drawing, while all other pixels remain unchanged.
 ///
-/// `ImageTransparent` has the same content as its source `ImageDrawable`
-/// but it doesn't draw anything when it encounters a transparent color.
+/// # Performance
 ///
-/// This makes it possible to create transparent images from types that don't support it.
+/// When this wrapper is used, the image is drawn pixel by pixel to allow
+/// transparent pixels to be skipped. This can have a negative impact on
+/// performance.
 ///
-/// Example:
+/// # Examples
+///
 /// ```
-/// # use embedded_graphics::{
-/// # image::{Image, ImageRaw, ImageRawBE, ImageTransparent},
-/// #     pixelcolor::Rgb565,
-/// #     prelude::*,
-/// # };
+/// use embedded_graphics::{
+///     image::{Image, ImageRaw, ImageTransparent},
+///     pixelcolor::Gray8,
+///     prelude::*,
+/// };
 /// # use embedded_graphics::mock_display::MockDisplay as Display;
 ///
-/// let mut display: Display<Rgb565> = Display::default();
-/// // Example with an ImageRaw as ImageTransparent source
+/// let mut display: Display<Gray8> = Display::default();
+///
+/// // Source image without transparency.
 /// let data = [
-///     0x00, 0x00, 0xF8, 0x00, 0x07, 0xE0, 0xFF, 0xE0, //
-///     0x00, 0x1F, 0x07, 0xFF, 0xF8, 0x1F, 0xFF, 0xFF, //
+///     0x00, 0x00, 0xF8, 0x00, //
+///     0x07, 0xE0, 0xFF, 0xE0, //
+///     0x00, 0x1F, 0x07, 0xFF, //
+///     0xF8, 0x1F, 0xFF, 0xFF, //
 /// ];
-/// let raw: ImageRawBE<Rgb565> = ImageRaw::new(&data, Size::new(4, 2)).unwrap();
+/// let source: ImageRaw<Gray8> = ImageRaw::new(&data, Size::new(4, 4)).unwrap();
 ///
-/// // Create the transparent object
-/// let transparent = ImageTransparent::new(raw, Rgb565::WHITE);
+/// // Make all white pixels (`0xFF`) in the source image transparent.
+/// let transparent = ImageTransparent::new(source, Rgb565::WHITE);
 ///
-/// // Create an Image object from ImageTransparent
+/// // Draw the transparent image at `(0, 0)`.
 /// let image = Image::new(&transparent, Point::zero());
 /// image.draw(&mut display)?;
 ///
@@ -43,15 +50,17 @@ use crate::Pixel;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub struct ImageTransparent<T, C> {
-    drawable: T,
+    source: T,
     transparent_color: C,
 }
 
 impl<T: ImageDrawable, C: PixelColor> ImageTransparent<T, C> {
-    /// Creates a new `ImageTransparent` use it within `Image`
-    pub fn new(drawable: T, transparent_color: C) -> Self {
+    /// Creates a new `ImageTransparent` based on a source image.
+    ///
+    /// All pixels with the given transparent color will be skipped during drawing.
+    pub fn new(source: T, transparent_color: C) -> Self {
         ImageTransparent {
-            drawable,
+            source,
             transparent_color,
         }
     }
@@ -59,7 +68,7 @@ impl<T: ImageDrawable, C: PixelColor> ImageTransparent<T, C> {
 
 impl<T: ImageDrawable, C: PixelColor> OriginDimensions for ImageTransparent<T, C> {
     fn size(&self) -> Size {
-        self.drawable.size()
+        self.source.size()
     }
 }
 
@@ -70,38 +79,38 @@ impl<T: ImageDrawable<Color = C>, C: PixelColor> ImageDrawable for ImageTranspar
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        let mut drawer = Drawer {
+        let mut draw_target = TransparentDrawTarget {
             target,
             transparent_color: self.transparent_color,
         };
-        self.drawable.draw(&mut drawer)
+        self.source.draw(&mut draw_target)
     }
 
     fn draw_sub_image<D>(&self, target: &mut D, area: &Rectangle) -> Result<(), D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        let mut drawer = Drawer {
+        let mut draw_target = TransparentDrawTarget {
             target,
             transparent_color: self.transparent_color,
         };
-        self.drawable.draw_sub_image(&mut drawer, area)
+        self.source.draw_sub_image(&mut draw_target, area)
     }
 }
 
-struct Drawer<'a, T, C> {
+struct TransparentDrawTarget<'a, T: DrawTarget> {
     target: &'a mut T,
-    transparent_color: C,
+    transparent_color: T::Color,
 }
 
-impl<'a, T: DrawTarget<Color = C>, C> Dimensions for Drawer<'a, T, C> {
+impl<'a, T: DrawTarget> Dimensions for TransparentDrawTarget<'a, T> {
     fn bounding_box(&self) -> Rectangle {
         self.target.bounding_box()
     }
 }
 
-impl<'a, T: DrawTarget<Color = C>, C: PixelColor> DrawTarget for Drawer<'a, T, C> {
-    type Color = C;
+impl<'a, T: DrawTarget> DrawTarget for TransparentDrawTarget<'a, T> {
+    type Color = T::Color;
     type Error = T::Error;
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
