@@ -1,9 +1,11 @@
-use crate::draw_target::DrawTarget;
-use crate::geometry::{Dimensions, OriginDimensions, Size};
-use crate::pixelcolor::PixelColor;
-use crate::prelude::ImageDrawable;
-use crate::primitives::Rectangle;
-use crate::Pixel;
+use crate::{
+    draw_target::DrawTarget,
+    geometry::{Dimensions, OriginDimensions, Size},
+    image::ImageDrawable,
+    pixelcolor::PixelColor,
+    primitives::Rectangle,
+    Pixel,
+};
 
 /// A wrapper to add basic transparency to an `ImageDrawable`.
 ///
