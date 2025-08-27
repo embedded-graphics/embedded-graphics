@@ -48,6 +48,7 @@ this are adding support for different image formats or implementing custom fonts
 * [MogeeFont proportional font with kerning and ligatures - `embedded-mogeefont`](https://crates.io/crates/embedded_mogeefont)
 * [IBM437 font - `ibm437`](https://crates.io/crates/ibm437)
 * [The fonts shipped with `embedded-graphics` 0.6 - `embedded-vintage-fonts`](https://crates.io/crates/embedded-vintage-fonts)
+* [TTF and OTF font support - `embedded-ttf`](https://crates.io/crates/embedded-ttf)
 * [Simple layout/alignment functions - `embedded-layout`](https://crates.io/crates/embedded-layout)
 * [TextBox with text alignment options - `embedded-text`](https://crates.io/crates/embedded-text)
 * [Heapless plotting library for small embedded targets - `embedded-plots`](https://crates.io/crates/embedded-plots)
