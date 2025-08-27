@@ -138,11 +138,9 @@ impl<'a> StrGlyphMapping<'a> {
 
 impl GlyphMapping for StrGlyphMapping<'_> {
     fn index(&self, c: char) -> usize {
-        // PERF: use ranges instead of chars iter
-        self.chars()
-            .enumerate()
-            .find(|(_, v)| c == *v)
-            .map(|(index, _)| index)
+        self.ranges()
+            .find(|(_, v)| v.contains(&c))
+            .map(|(index, range)| index + (c as usize - *range.start() as usize))
             .unwrap_or(self.replacement_index)
     }
 }
@@ -348,10 +346,11 @@ mod tests {
 
     #[test]
     fn dyn_str_glyph_mapping() {
-        let mapping = StrGlyphMapping::new("ab", 0);
+        let mapping = StrGlyphMapping::new("ab\0xz", 0);
         let dyn_mapping: &dyn GlyphMapping = &mapping;
 
         assert_eq!(dyn_mapping.index('b'), 1);
+        assert_eq!(dyn_mapping.index('z'), 4);
     }
 
     #[test]
