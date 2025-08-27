@@ -27,6 +27,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `MASK` constant to `RawData` trait.
 - [#768](https://github.com/embedded-graphics/embedded-graphics/pull/768) Added 8bit `Rgb332` support.
 - [#772](https://github.com/embedded-graphics/embedded-graphics/pull/772), [#776](https://github.com/embedded-graphics/embedded-graphics/pull/776) Added `PrimitiveStyle::stroke_style` property to draw dotted borders (currently only supported for `Rectangle` and `Line`).
+- [#786](https://github.com/embedded-graphics/embedded-graphics/pull/786) Added `ImageTransparent` to add transparency to an `ImageDrawable`
 
 ## [0.8.1] - 2023-08-10
 
