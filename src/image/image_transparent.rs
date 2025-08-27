@@ -2,7 +2,6 @@ use crate::{
     draw_target::DrawTarget,
     geometry::{Dimensions, OriginDimensions, Size},
     image::ImageDrawable,
-    pixelcolor::PixelColor,
     primitives::Rectangle,
     Pixel,
 };
@@ -41,7 +40,7 @@ use crate::{
 /// let source: ImageRaw<Gray8> = ImageRaw::new(&data, Size::new(4, 4)).unwrap();
 ///
 /// // Make all white pixels (`0xFF`) in the source image transparent.
-/// let transparent = ImageTransparent::new(source, Rgb565::WHITE);
+/// let transparent = ImageTransparent::new(source, Gray8::WHITE);
 ///
 /// // Draw the transparent image at `(0, 0)`.
 /// let image = Image::new(&transparent, Point::zero());
@@ -51,16 +50,16 @@ use crate::{
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub struct ImageTransparent<T, C> {
+pub struct ImageTransparent<T: ImageDrawable> {
     source: T,
-    transparent_color: C,
+    transparent_color: T::Color,
 }
 
-impl<T: ImageDrawable, C: PixelColor> ImageTransparent<T, C> {
+impl<T: ImageDrawable> ImageTransparent<T> {
     /// Creates a new `ImageTransparent` based on a source image.
     ///
     /// All pixels with the given transparent color will be skipped during drawing.
-    pub fn new(source: T, transparent_color: C) -> Self {
+    pub fn new(source: T, transparent_color: T::Color) -> Self {
         ImageTransparent {
             source,
             transparent_color,
@@ -68,14 +67,14 @@ impl<T: ImageDrawable, C: PixelColor> ImageTransparent<T, C> {
     }
 }
 
-impl<T: ImageDrawable, C: PixelColor> OriginDimensions for ImageTransparent<T, C> {
+impl<T: ImageDrawable> OriginDimensions for ImageTransparent<T> {
     fn size(&self) -> Size {
         self.source.size()
     }
 }
 
-impl<T: ImageDrawable<Color = C>, C: PixelColor> ImageDrawable for ImageTransparent<T, C> {
-    type Color = C;
+impl<T: ImageDrawable> ImageDrawable for ImageTransparent<T> {
+    type Color = T::Color;
 
     fn draw<D>(&self, target: &mut D) -> Result<(), D::Error>
     where
