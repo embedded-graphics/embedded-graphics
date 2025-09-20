@@ -177,6 +177,22 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
             return Ok(());
         };
 
+        // Try hardware acceleration for solid lines only (technically
+        // only 1pix wide lines are ok, but the HAL will reject fat lines).
+        if style.stroke_style == StrokeStyle::Solid {
+            if let Some(result) = target.draw_line_solid(
+                self.start.x,
+                self.start.y,
+                self.end.x,
+                self.end.y,
+                style.stroke_width,
+                stroke_color
+            ) {
+                return result;
+            }
+            // Acceleration not available: fall through to software implementation
+        }
+
         if style.stroke_style == StrokeStyle::Dotted && dot_size > 1 {
             let line = if dot_size % 2 == 0 {
                 // When drawing a dotted rectangle border, the distance between the endpoint dots

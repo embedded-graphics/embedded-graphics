@@ -176,6 +176,10 @@ where
         }
     }
 
+    pub const fn data(&self) -> &'a [u8] {
+        self.data
+    }
+
     /// Returns the actual row width in pixels.
     ///
     /// For images with less than 8 bits per pixel each row is padded to contain an integer number

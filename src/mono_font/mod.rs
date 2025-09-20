@@ -121,6 +121,38 @@ impl MonoFont<'_> {
             ),
         )
     }
+
+    /// Unique key for this font for hardware spritesheet caching.
+    pub fn spritesheet_key(&self) -> u32 {
+        self.image.data().as_ptr() as u32
+    }
+
+    /// Returns the raw font spritesheet suitable for hardware blitting.
+    pub fn spritesheet_pixels(&self) -> &[u8] {
+        self.image.data()
+    }
+
+    /// (entire) spritesheet dimensions.
+    pub fn spritesheet_size(&self) -> (u32, u32) {
+        (self.image.size().width, self.image.size().height)
+    }
+
+    /// (single) character dimensions for sprite blitting.
+    pub fn character_size(&self) -> (u32, u32) {
+        (self.character_size.width, self.character_size.height)
+    }
+
+    /// Source coordinates for a character in the spritesheet, given an ASCII character.
+    ///
+    /// Returns subrectangle (src_x, src_y) coordinates for the given character.
+    /// Width/height for source blitting should come from `self.character_size()`
+    pub fn character_source_coords(&self, c: char) -> (u32, u32) {
+        let glyph_index = self.glyph_mapping.index(c) as u32;
+        let tiles_per_row = self.image.size().width / self.character_size.width;
+        let tile_x = glyph_index % tiles_per_row;
+        let tile_y = glyph_index / tiles_per_row;
+        (tile_x * self.character_size.width, tile_y * self.character_size.height)
+    }
 }
 
 impl PartialEq for MonoFont<'_> {

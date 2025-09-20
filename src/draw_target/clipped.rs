@@ -67,6 +67,7 @@ where
 
         self.parent.fill_solid(&area, color)
     }
+
 }
 
 impl<T> Dimensions for Clipped<'_, T>

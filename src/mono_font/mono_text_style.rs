@@ -2,10 +2,7 @@ use crate::{
     draw_target::DrawTarget,
     geometry::{Point, Size},
     image::Image,
-    mono_font::{
-        draw_target::{Background, Both, Foreground, MonoFontDrawTarget},
-        MonoFont,
-    },
+    mono_font::MonoFont,
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
     text::{
@@ -128,6 +125,41 @@ where
         Ok(())
     }
 
+    /// Draw string using hardware sprite blitting.
+    fn draw_string_tiled<D>(
+        &self,
+        text: &str,
+        position: Point,
+        target: &mut D,
+        spritesheet_key: u32,
+    ) -> Result<Point, D::Error>
+    where
+        D: DrawTarget<Color = C>,
+    {
+        let (char_width, char_height) = self.font.character_size();
+        for (p, element) in self.line_elements(position, text) {
+            match element {
+                LineElement::Char(c) => {
+                    let (src_x, src_y) = self.font.character_source_coords(c);
+                    if let Some(color) = self.text_color {
+                        target.blit_sprite(
+                            spritesheet_key,
+                            src_x, src_y,
+                            char_width, char_height,
+                            p.x, p.y,
+                            color
+                        )?;
+                    }
+                }
+                // For spacing, just skip - don't blit anything
+                LineElement::Spacing => {}
+                LineElement::Done => return Ok(p),
+            }
+        }
+
+        Ok(position)
+    }
+
     fn draw_string_binary<D>(
         &self,
         text: &str,
@@ -202,36 +234,26 @@ where
     {
         let position = position - Point::new(0, self.baseline_offset(baseline));
 
-        let next = match (self.text_color, self.background_color) {
-            (Some(text_color), Some(background_color)) => self.draw_string_binary(
-                text,
-                position,
-                MonoFontDrawTarget::new(target, Both(text_color, background_color)),
-            )?,
-            (Some(text_color), None) => self.draw_string_binary(
-                text,
-                position,
-                MonoFontDrawTarget::new(target, Foreground(text_color)),
-            )?,
-            (None, Some(background_color)) => self.draw_string_binary(
-                text,
-                position,
-                MonoFontDrawTarget::new(target, Background(background_color)),
-            )?,
-            (None, None) => {
-                let dx = (self.font.character_size.width + self.font.character_spacing)
-                    * text.chars().count() as u32;
+        // TODO: add a graceful fallback for case where SoC doesn't have
+        // hardware blitting support!
 
-                position + Size::new(dx, 0)
-            }
-        };
+        // Upload spritesheet to hardware
+        let spritesheet_key = self.font.spritesheet_key();
+        let (width, height) = self.font.spritesheet_size();
+        let pixels = self.font.spritesheet_pixels();
+        target.upload_spritesheet(spritesheet_key, pixels, width, height)?;
 
+        // Use hardware sprite blitting
+        let next = self.draw_string_tiled(text, position, target, spritesheet_key)?;
+        let final_pos = next + Point::new(0, self.baseline_offset(baseline));
+
+        // Still need to draw decorations using regular rendering
         if next.x > position.x {
             let width = (next.x - position.x) as u32;
             self.draw_decorations(width, position, target)?;
         }
 
-        Ok(next + Point::new(0, self.baseline_offset(baseline)))
+        Ok(final_pos)
     }
 
     fn draw_whitespace<D>(
