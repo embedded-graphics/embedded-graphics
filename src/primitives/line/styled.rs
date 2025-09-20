@@ -180,7 +180,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
         // Try hardware acceleration for solid lines only (technically
         // only 1pix wide lines are ok, but the HAL will reject fat lines).
         if style.stroke_style == StrokeStyle::Solid {
-            if let Some(result) = target.draw_line_solid(
+            if target.draw_line_solid(
                 self.start.x,
                 self.start.y,
                 self.end.x,
@@ -188,7 +188,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Line {
                 style.stroke_width,
                 stroke_color
             ) {
-                return result;
+                return Ok(());
             }
             // Acceleration not available: fall through to software implementation
         }

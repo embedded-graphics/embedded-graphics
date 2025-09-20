@@ -2,7 +2,10 @@ use crate::{
     draw_target::DrawTarget,
     geometry::{Point, Size},
     image::Image,
-    mono_font::MonoFont,
+    mono_font::{
+        draw_target::{Background, Both, Foreground, MonoFontDrawTarget},
+        MonoFont,
+    },
     pixelcolor::{BinaryColor, PixelColor},
     primitives::Rectangle,
     text::{
@@ -148,7 +151,7 @@ where
                             char_width, char_height,
                             p.x, p.y,
                             color
-                        )?;
+                        );
                     }
                 }
                 // For spacing, just skip - don't blit anything
@@ -234,26 +237,46 @@ where
     {
         let position = position - Point::new(0, self.baseline_offset(baseline));
 
-        // TODO: add a graceful fallback for case where SoC doesn't have
-        // hardware blitting support!
-
-        // Upload spritesheet to hardware
+        // Try uploading spritesheet to hardware, may fail
         let spritesheet_key = self.font.spritesheet_key();
         let (width, height) = self.font.spritesheet_size();
         let pixels = self.font.spritesheet_pixels();
-        target.upload_spritesheet(spritesheet_key, pixels, width, height)?;
 
-        // Use hardware sprite blitting
-        let next = self.draw_string_tiled(text, position, target, spritesheet_key)?;
-        let final_pos = next + Point::new(0, self.baseline_offset(baseline));
-
-        // Still need to draw decorations using regular rendering
-        if next.x > position.x {
-            let width = (next.x - position.x) as u32;
-            self.draw_decorations(width, position, target)?;
+        if target.upload_spritesheet(spritesheet_key, pixels, width, height, 1) {
+            // Use hardware sprite blitting
+            let next = self.draw_string_tiled(text, position, target, spritesheet_key)?;
+            let final_pos = next + Point::new(0, self.baseline_offset(baseline));
+            // Still need to draw decorations using regular rendering
+            if next.x > position.x {
+                let width = (next.x - position.x) as u32;
+                self.draw_decorations(width, position, target)?;
+            }
+            Ok(final_pos)
+        } else {
+            let next = match (self.text_color, self.background_color) {
+                (Some(text_color), Some(background_color)) => self.draw_string_binary(
+                    text,
+                    position,
+                    MonoFontDrawTarget::new(target, Both(text_color, background_color)),
+                )?,
+                (Some(text_color), None) => self.draw_string_binary(
+                    text,
+                    position,
+                    MonoFontDrawTarget::new(target, Foreground(text_color)),
+                )?,
+                (None, Some(background_color)) => self.draw_string_binary(
+                    text,
+                    position,
+                    MonoFontDrawTarget::new(target, Background(background_color)),
+                )?,
+                (None, None) => {
+                    let dx = (self.font.character_size.width + self.font.character_spacing)
+                        * text.chars().count() as u32;
+                    position + Size::new(dx, 0)
+                }
+            };
+            Ok(next + Point::new(0, self.baseline_offset(baseline)))
         }
-
-        Ok(final_pos)
     }
 
     fn draw_whitespace<D>(

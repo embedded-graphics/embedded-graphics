@@ -427,16 +427,16 @@ pub trait DrawTarget: Dimensions {
     ///
     /// If the key is already present in hardware, this should be a no-op.
     ///
-    fn upload_spritesheet(&mut self, key: u32, pixels: &[u8], width: u32, height: u32) -> Result<(), Self::Error> {
-        let _ = (key, pixels, width, height);
-        Ok(())
+    fn upload_spritesheet(&mut self, key: u32, pixels: &[u8], width: u32, height: u32, bpp: u8) -> bool {
+        let _ = (key, pixels, width, height, bpp);
+        false // no hardware acceleration available
     }
 
     /// Blit a rectangular region from the last uploaded spritesheet to the target.
     ///
-    fn blit_sprite(&mut self, key: u32, src_x: u32, src_y: u32, width: u32, height: u32, dst_x: i32, dst_y: i32, color: Self::Color) -> Result<(), Self::Error> {
+    fn blit_sprite(&mut self, key: u32, src_x: u32, src_y: u32, width: u32, height: u32, dst_x: i32, dst_y: i32, color: Self::Color) -> bool {
         let _ = (key, src_x, src_y, width, height, dst_x, dst_y, color);
-        Ok(())
+        false // no hardware acceleration available
     }
 
     /// Draw a solid line using hardware acceleration if available.
@@ -444,8 +444,8 @@ pub trait DrawTarget: Dimensions {
     /// If this returns 'None', a per-pixel fallback is used. At the moment, the fallback is
     /// also used on Tiliqua hardware for stroke_width > 1 or dashed lines etc.
     ///
-    fn draw_line_solid(&mut self, start_x: i32, start_y: i32, end_x: i32, end_y: i32, stroke_width: u32, color: Self::Color) -> Option<Result<(), Self::Error>> {
+    fn draw_line_solid(&mut self, start_x: i32, start_y: i32, end_x: i32, end_y: i32, stroke_width: u32, color: Self::Color) -> bool {
         let _ = (start_x, start_y, end_x, end_y, stroke_width, color);
-        None // no hardware acceleration available
+        false // no hardware acceleration available
     }
 }
