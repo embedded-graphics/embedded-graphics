@@ -106,6 +106,7 @@ Note that some drivers may not support the latest version of embedded-graphics.
 * [st7789](https://crates.io/crates/st7789): A Rust driver library for ST7789 displays
 * [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
 * [gc9a01-rs](https://crates.io/crates/gc9a01-rs): SPI 4-wire driver for the Gc9a01 display driver
+* [rp-cvideo](https://crates.io/crates/rp-cvideo): Driver to generate a binary monochrome composite video signal on the RP2040 and RP235x MCU's
 
 ## Simulator
 
