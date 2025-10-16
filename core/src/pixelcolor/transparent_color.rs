@@ -12,7 +12,7 @@ use crate::pixelcolor::PixelColor;
 /// may have the same [`PixelColor::Raw`] type as its underlying opaque color.
 ///
 /// A transparent color SHOULD implement [`From<Self::OpaqueColor>`] so that a color converted
-/// target can easy be created. This makes sure it is always possible to draw with an opaque color
+/// target can easily be created. This makes sure it is always possible to draw with an opaque color
 /// over a `DrawTarget` that supports transparency.
 ///
 /// # Example
@@ -53,8 +53,7 @@ use crate::pixelcolor::PixelColor;
 /// }
 ///
 /// // Implement required methods
-/// impl TransparentColor for TransparentGray {
-///     type OpaqueColor = Gray8;
+/// impl TransparentColor<Gray8> for TransparentGray {
 ///     fn blend_over(&self, other: Gray8) -> Gray8 {
 ///         let luma = (self.alpha * self.gray.luma() as f32) + (1.-self.alpha) * other.luma() as f32;
 ///         Gray8::new(luma as u8)
@@ -106,19 +105,36 @@ use crate::pixelcolor::PixelColor;
 /// let raw_image = ImageRaw::<Gray8>::new(DATA, Size::new(4,4)).unwrap();
 /// let image = Image::new(&raw_image, Point::zero());
 ///
-/// // Create a transtparent handling display
+/// // Create a transparent handling display
 /// let mut display = Display{};
 ///
-/// // Draw a non transparent object on a transparent handling display
-/// // Conversion is automatically handled by the From trait above and the DrawTargetExt trait
+/// // Draw a non-transparent object on a transparent handling display
+/// // Conversion is automatically handled by the `From` trait above and the `DrawTargetExt` trait
 /// image.draw(&mut display.color_converted()).unwrap();
 /// ```
-pub trait TransparentColor: PixelColor {
+pub trait TransparentColor<C: PixelColor=Self>: PixelColor {
+    /// Blend this color over another underlying color
+    fn blend_over(&self, other: C) -> C;
+}
+
+/// Trait for transparent colors that expose their alpha channel
+pub trait AlphaColor: TransparentColor<Self::OpaqueColor> {
+    /// Alpha channel type
+    type Alpha;
+
     /// Base color type.
-    ///
     /// Specifies the original color type that this transparent color is based on.
     type OpaqueColor: PixelColor;
 
-    /// Blend this color over another underlying opaque color
-    fn blend_over(&self, other: Self::OpaqueColor) -> Self::OpaqueColor;
+    /// Create transparent color from opaque color
+    fn from_opaque(opaque: Self::OpaqueColor, alpha: Self::Alpha) -> Self;
+
+    /// Provide read access to alpha channel
+    fn alpha(&self) -> Self::Alpha;
+
+    /// Provide write access to alpha channel
+    fn opaque(&self) -> Self::OpaqueColor;
+
+    /// The maximum value in the alpha channel.
+    const MAX_A: Self::Alpha;
 }
