@@ -3,7 +3,7 @@ use core::{
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign},
 };
 
-use crate::geometry::Point;
+use crate::geometry::{u32_max, u32_min, Point};
 
 /// 2D size.
 ///
@@ -198,8 +198,11 @@ impl Size {
     ///
     /// assert_eq!(min, Size::new(15, 30));
     /// ```
-    pub fn component_min(self, other: Self) -> Self {
-        Self::new(self.width.min(other.width), self.height.min(other.height))
+    pub const fn component_min(self, other: Self) -> Self {
+        Self::new(
+            u32_min(self.width, other.width),
+            u32_min(self.height, other.height),
+        )
     }
 
     /// Returns the componentwise maximum of two `Size`s.
@@ -211,8 +214,11 @@ impl Size {
     ///
     /// assert_eq!(min, Size::new(20, 50));
     /// ```
-    pub fn component_max(self, other: Self) -> Self {
-        Self::new(self.width.max(other.width), self.height.max(other.height))
+    pub const fn component_max(self, other: Self) -> Self {
+        Self::new(
+            u32_max(self.width, other.width),
+            u32_max(self.height, other.height),
+        )
     }
 
     /// Returns the componentwise multiplication of two `Size`s.

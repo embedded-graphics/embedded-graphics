@@ -4,7 +4,7 @@ use core::{
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
-use crate::geometry::Size;
+use crate::geometry::{i32_max, i32_min, Size};
 
 /// 2D point.
 ///
@@ -186,8 +186,8 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(15, 30));
     /// ```
-    pub fn component_min(self, other: Self) -> Self {
-        Self::new(self.x.min(other.x), self.y.min(other.y))
+    pub const fn component_min(self, other: Self) -> Self {
+        Self::new(i32_min(self.x, other.x), i32_min(self.y, other.y))
     }
 
     /// Returns the componentwise maximum of two `Point`s
@@ -201,8 +201,8 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(20, 50));
     /// ```
-    pub fn component_max(self, other: Self) -> Self {
-        Self::new(self.x.max(other.x), self.y.max(other.y))
+    pub const fn component_max(self, other: Self) -> Self {
+        Self::new(i32_max(self.x, other.x), i32_max(self.y, other.y))
     }
 
     /// Returns the componentwise multiplication of two `Point`s.

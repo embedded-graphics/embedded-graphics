@@ -3,14 +3,11 @@
 mod points;
 
 use crate::{
-    geometry::{AnchorPoint, AnchorX, AnchorY, Dimensions, Point, Size},
+    geometry::{i32_min, AnchorPoint, AnchorX, AnchorY, Dimensions, Point, Size},
     primitives::PointsIter,
 };
 use az::SaturatingAs;
-use core::{
-    cmp::min,
-    ops::{Range, RangeInclusive},
-};
+use core::ops::{Range, RangeInclusive};
 pub use points::Points;
 
 /// Rectangle primitive
@@ -92,9 +89,9 @@ impl Rectangle {
     }
 
     /// Creates a new rectangle from two corners.
-    pub fn with_corners(corner_1: Point, corner_2: Point) -> Self {
-        let left = min(corner_1.x, corner_2.x);
-        let top = min(corner_1.y, corner_2.y);
+    pub const fn with_corners(corner_1: Point, corner_2: Point) -> Self {
+        let left = i32_min(corner_1.x, corner_2.x);
+        let top = i32_min(corner_1.y, corner_2.y);
 
         Rectangle {
             top_left: Point::new(left, top),
