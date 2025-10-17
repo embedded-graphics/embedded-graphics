@@ -304,13 +304,7 @@ impl Add<Size> for Point {
     /// This function will panic if `width` or `height` are too large to be represented as an `i32`
     /// and debug assertions are enabled.
     fn add(self, other: Size) -> Point {
-        let width = other.width as i32;
-        let height = other.height as i32;
-
-        debug_assert!(width >= 0, "width is too large");
-        debug_assert!(height >= 0, "height is too large");
-
-        Point::new(self.x + width, self.y + height)
+        self.add_size(other)
     }
 }
 

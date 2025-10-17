@@ -406,8 +406,7 @@ impl Rectangle {
 
     const fn resize_width_mut(&mut self, width: u32, anchor_x: AnchorX) {
         // Assume size = 1 for zero sized dimensions.
-        let delta =
-            self.size.nonzero_signed_width() - u32_clamp(width, 1, i32::MAX as _).cast_signed();
+        let delta = self.size.nonzero_signed_width() - u32_clamp(width, 1, i32::MAX as _) as i32;
 
         self.top_left.x += match anchor_x {
             AnchorX::Left => 0,
@@ -419,8 +418,7 @@ impl Rectangle {
 
     const fn resize_height_mut(&mut self, height: u32, anchor_y: AnchorY) {
         // Assume size = 1 for zero sized dimensions.
-        let delta =
-            self.size.nonzero_signed_height() - u32_clamp(height, 1, i32::MAX as _).cast_signed();
+        let delta = self.size.nonzero_signed_height() - u32_clamp(height, 1, i32::MAX as _) as i32;
 
         self.top_left.y += match anchor_y {
             AnchorY::Top => 0,
