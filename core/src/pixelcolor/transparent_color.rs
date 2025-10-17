@@ -1,31 +1,35 @@
 use crate::pixelcolor::PixelColor;
 
-/// Transparent color trait.
-///
-/// This trait is used to represent color that have an alpha channel to handle transparency level.
-/// Transparent colors are a special kind of [`PixelColor`].
+/// Transparent colors
 ///
 /// # Implementing transparent color types
 ///
-/// Transparent color types can be added by implementing the [`TransparentColor`] trait with
-/// an existing [`PixelColor`] as a matching opaque color. Please note that the transparent color
-/// may have the same [`PixelColor::Raw`] type as its underlying opaque color.
+/// Transparent color types can be added by implementing the [`TransparentColor<C>`] trait with
+/// an existing [`PixelColor`] as the underling color.
+/// Please note that the transparent color may have the same [`PixelColor::Raw`] type as
+/// its underlying color.
 ///
-/// A transparent color SHOULD implement [`From<Self::OpaqueColor>`] so that a color converted
+/// A transparent color SHOULD implement [`From<C>`] so that a color converted
 /// target can easily be created. This makes sure it is always possible to draw with an opaque color
 /// over a `DrawTarget` that supports transparency.
 ///
-/// # Example
+/// If a transparent color is implemented with an alpha channel (most of the time), it should also
+/// implement `AlphaColor` to expose its alpha channel.
+///
+/// If a transparent color has a natural underlying color, it should implement `HasAlphaColor` on
+/// its underlying color to make it easy to create a blendable version of the color.
+///
+/// # Implementation example
 /// ```
 /// use embedded_graphics::pixelcolor::{Gray8, TransparentColor};
 /// use embedded_graphics::image::{Image, ImageRaw};
 /// use embedded_graphics::prelude::*;
 /// use embedded_graphics::pixelcolor::raw::RawU16;
 ///
-/// // A transparent color where alpha is handled as an f32
+/// // A transparent color where alpha is handled as a u8
 /// #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 /// pub struct TransparentGray {
-///     alpha: f32,
+///     alpha: u8,
 ///     gray: Gray8,
 /// }
 ///
@@ -39,7 +43,7 @@ use crate::pixelcolor::PixelColor;
 /// impl From<RawU16> for TransparentGray {
 ///     fn from(value: RawU16) -> Self {
 ///         let inner = value.into_inner();
-///         let alpha = ((inner & 0xFF00) >> 8) as f32 / 255.;
+///         let alpha = ((inner & 0xFF00) >> 8) as u8;
 ///         TransparentGray { alpha, gray: Gray8::new((inner & 0xFF) as u8)}
 ///     }
 /// }
@@ -48,22 +52,23 @@ use crate::pixelcolor::PixelColor;
 /// impl From<TransparentGray> for RawU16 {
 ///     fn from(value: TransparentGray) -> Self {
 ///         let TransparentGray { alpha, gray } = value;
-///         RawU16::new(((alpha * 255.) as u16) << 8 + gray.luma())
+///         RawU16::new((alpha as u16) << 8 + gray.luma())
 ///     }
 /// }
 ///
 /// // Implement required methods
 /// impl TransparentColor<Gray8> for TransparentGray {
-///     fn blend_over(&self, other: Gray8) -> Gray8 {
-///         let luma = (self.alpha * self.gray.luma() as f32) + (1.-self.alpha) * other.luma() as f32;
-///         Gray8::new(luma as u8)
+///     fn blend_over(self, other: Gray8) -> Gray8 {
+///         let luma = (self.alpha as u16 * self.gray.luma() as u16) +
+///                    (255 - self.alpha as u16) * other.luma() as u16;
+///         Gray8::new((luma / 255) as u8)
 ///     }
 /// }
 ///
 /// // Make conversion available for `DrawTargetExt::color_converted`
 /// impl From<Gray8> for TransparentGray {
 ///     fn from(value: Gray8) -> Self {
-///         TransparentGray { alpha: 1., gray: value }
+///         TransparentGray { alpha: 255, gray: value }
 ///     }
 /// }
 ///
@@ -112,29 +117,39 @@ use crate::pixelcolor::PixelColor;
 /// // Conversion is automatically handled by the `From` trait above and the `DrawTargetExt` trait
 /// image.draw(&mut display.color_converted()).unwrap();
 /// ```
+
+/// Transparent color trait.
+///
+/// This trait is used to represent color that handle transparency level.
+/// They can blend with other colors, transparent or nor.
+///
+/// Transparent colors are a special kind of [`PixelColor`].
 pub trait TransparentColor<C: PixelColor=Self>: PixelColor {
     /// Blend this color over another underlying color
-    fn blend_over(&self, other: C) -> C;
+    fn blend_over(self, other: C) -> C;
 }
 
 /// Trait for transparent colors that expose their alpha channel
-pub trait AlphaColor: TransparentColor<Self::OpaqueColor> {
-    /// Alpha channel type
-    type Alpha;
+pub trait AlphaColor {
+    ///Returns the alpha channel value.
+    fn alpha(&self) -> u8;
 
-    /// Base color type.
-    /// Specifies the original color type that this transparent color is based on.
-    type OpaqueColor: PixelColor;
+    /// The maximum value of the alpha channel.
+    const MAX_A: u8;
+}
+
+/// Trait used to find a transparent color that hold a pixelcolor with a compatible alpha channel
+/// Example:
+/// ```
+/// use embedded_graphics_core::pixelcolor::{Rgb888,HasAlphaColor,AlphaColor};
+/// let color = Rgb888::new(0x0,0x80,0xFF);
+/// let transparent = color.into_alpha_color(0);
+/// ```
+pub trait HasAlphaColor: PixelColor {
+    /// Associated AlphaColor
+    type AlphaColor: AlphaColor + TransparentColor<Self>;
 
     /// Create transparent color from opaque color
-    fn from_opaque(opaque: Self::OpaqueColor, alpha: Self::Alpha) -> Self;
-
-    /// Provide read access to alpha channel
-    fn alpha(&self) -> Self::Alpha;
-
-    /// Provide write access to alpha channel
-    fn opaque(&self) -> Self::OpaqueColor;
-
-    /// The maximum value in the alpha channel.
-    const MAX_A: Self::Alpha;
+    fn into_alpha_color(self, alpha: u8) -> Self::AlphaColor;
 }
+
