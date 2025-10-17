@@ -182,7 +182,17 @@ impl Size {
     }
 
     /// Creates a size from two corner points of a bounding box.
-    pub(crate) const fn from_bounding_box(corner_1: Point, corner_2: Point) -> Self {
+    ///
+    /// ```
+    /// use embedded_graphics::geometry::{Size, Point};
+    ///
+    /// let top_left = Point::new(5, 5);
+    /// let bottom_right = Point::new(314, 234);
+    /// let bounded = Size::from_bounding_box(top_left, bottom_right);
+    ///
+    /// assert_eq!(bounded, Size::new(310, 230));
+    /// ```
+    pub const fn from_bounding_box(corner_1: Point, corner_2: Point) -> Self {
         let width = (corner_1.x - corner_2.x).unsigned_abs() + 1;
         let height = (corner_1.y - corner_2.y).unsigned_abs() + 1;
 
