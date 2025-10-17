@@ -3,11 +3,11 @@
 mod points;
 
 use crate::{
-    geometry::{i32_min, AnchorPoint, AnchorX, AnchorY, Dimensions, Point, Size},
+    geometry::{i32_min, u32_clamp, AnchorPoint, AnchorX, AnchorY, Dimensions, Point, Size},
     primitives::PointsIter,
 };
 use az::SaturatingAs;
-use core::ops::{Range, RangeInclusive};
+use core::ops::Range;
 pub use points::Points;
 
 /// Rectangle primitive
@@ -120,8 +120,8 @@ impl Rectangle {
     ///
     /// For rectangles with even width and/or height the returned value is rounded down
     /// to the nearest integer coordinate.
-    pub fn center(&self) -> Point {
-        self.top_left + center_offset(self.size)
+    pub const fn center(&self) -> Point {
+        self.top_left.add_size(center_offset(self.size))
     }
 
     /// Returns the bottom right corner of this rectangle.
@@ -129,22 +129,29 @@ impl Rectangle {
     /// Because the smallest rectangle that can be represented by its corners
     /// has a size of 1 x 1 pixels, this function returns `None` if the width or
     /// height of the rectangle is zero.
-    pub fn bottom_right(&self) -> Option<Point> {
+    pub const fn bottom_right(&self) -> Option<Point> {
         if self.size.width > 0 && self.size.height > 0 {
-            Some(self.top_left + self.size - Point::new(1, 1))
+            Some(
+                self.top_left
+                    .add_size(self.size)
+                    .sub_point(Point::new(1, 1)),
+            )
         } else {
             None
         }
     }
 
     /// Return whether the rectangle contains a given point.
-    pub fn contains(&self, point: Point) -> bool {
+    pub const fn contains(&self, point: Point) -> bool {
         if point.x >= self.top_left.x && point.y >= self.top_left.y {
-            self.bottom_right()
-                .is_some_and(|bottom_right| point.x <= bottom_right.x && point.y <= bottom_right.y)
-        } else {
-            false
+            if let Some(bottom_right) = self.bottom_right() {
+                if point.x <= bottom_right.x && point.y <= bottom_right.y {
+                    return true;
+                }
+            }
         }
+
+        false
     }
 
     /// Returns a new `Rectangle` containing the intersection of `self` and `other`.
@@ -215,15 +222,19 @@ impl Rectangle {
     /// assert!(intersection.is_zero_sized());
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    pub fn intersection(&self, other: &Rectangle) -> Rectangle {
+    pub const fn intersection(&self, other: &Rectangle) -> Rectangle {
         match (other.bottom_right(), self.bottom_right()) {
             (Some(other_bottom_right), Some(self_bottom_right)) => {
                 if overlaps(
-                    self.top_left.x..=self_bottom_right.x,
-                    other.top_left.x..=other_bottom_right.x,
+                    self.top_left.x,
+                    self_bottom_right.x,
+                    other.top_left.x,
+                    other_bottom_right.x,
                 ) && overlaps(
-                    self.top_left.y..=self_bottom_right.y,
-                    other.top_left.y..=other_bottom_right.y,
+                    self.top_left.y,
+                    self_bottom_right.y,
+                    other.top_left.y,
+                    other_bottom_right.y,
                 ) {
                     return Rectangle::with_corners(
                         self.top_left.component_max(other.top_left),
@@ -303,7 +314,7 @@ impl Rectangle {
     /// ]);
     /// # Ok::<(), core::convert::Infallible>(())
     /// ```
-    pub fn envelope(&self, other: &Rectangle) -> Rectangle {
+    pub const fn envelope(&self, other: &Rectangle) -> Rectangle {
         let top_left = self.top_left.component_min(other.top_left);
         let bottom_right = self
             .anchor_point(AnchorPoint::BottomRight)
@@ -333,7 +344,7 @@ impl Rectangle {
     ///     Rectangle::new(Point::new(15, 25), Size::new(20, 10))
     /// );
     /// ```
-    pub fn resized(&self, size: Size, anchor_point: AnchorPoint) -> Self {
+    pub const fn resized(&self, size: Size, anchor_point: AnchorPoint) -> Self {
         let mut resized = *self;
         resized.resize_width_mut(size.width, anchor_point.x());
         resized.resize_height_mut(size.height, anchor_point.y());
@@ -360,7 +371,7 @@ impl Rectangle {
     ///     Rectangle::new(Point::new(15, 20), Size::new(20, 20))
     /// );
     /// ```
-    pub fn resized_width(&self, width: u32, anchor_x: AnchorX) -> Self {
+    pub const fn resized_width(&self, width: u32, anchor_x: AnchorX) -> Self {
         let mut resized = *self;
         resized.resize_width_mut(width, anchor_x);
 
@@ -386,17 +397,17 @@ impl Rectangle {
     ///     Rectangle::new(Point::new(20, 25), Size::new(10, 10))
     /// );
     /// ```
-    pub fn resized_height(&self, height: u32, anchor_y: AnchorY) -> Self {
+    pub const fn resized_height(&self, height: u32, anchor_y: AnchorY) -> Self {
         let mut resized = *self;
         resized.resize_height_mut(height, anchor_y);
 
         resized
     }
 
-    fn resize_width_mut(&mut self, width: u32, anchor_x: AnchorX) {
+    const fn resize_width_mut(&mut self, width: u32, anchor_x: AnchorX) {
         // Assume size = 1 for zero sized dimensions.
         let delta =
-            self.size.width.saturating_as::<i32>().max(1) - width.saturating_as::<i32>().max(1);
+            self.size.nonzero_signed_width() - u32_clamp(width, 1, i32::MAX as _).cast_signed();
 
         self.top_left.x += match anchor_x {
             AnchorX::Left => 0,
@@ -406,10 +417,10 @@ impl Rectangle {
         self.size.width = width;
     }
 
-    fn resize_height_mut(&mut self, height: u32, anchor_y: AnchorY) {
+    const fn resize_height_mut(&mut self, height: u32, anchor_y: AnchorY) {
         // Assume size = 1 for zero sized dimensions.
         let delta =
-            self.size.height.saturating_as::<i32>().max(1) - height.saturating_as::<i32>().max(1);
+            self.size.nonzero_signed_height() - u32_clamp(height, 1, i32::MAX as _).cast_signed();
 
         self.top_left.y += match anchor_y {
             AnchorY::Top => 0,
@@ -422,7 +433,7 @@ impl Rectangle {
     /// Offset the rectangle by a given value.
     ///
     /// Negative values will shrink the rectangle.
-    pub fn offset(&self, offset: i32) -> Self {
+    pub const fn offset(&self, offset: i32) -> Self {
         let size = if offset >= 0 {
             self.size.saturating_add(Size::new_equal(offset as u32 * 2))
         } else {
@@ -451,7 +462,7 @@ impl Rectangle {
     ///     Point::new(25, 40)
     /// );
     /// ```
-    pub fn anchor_point(&self, anchor_point: AnchorPoint) -> Point {
+    pub const fn anchor_point(&self, anchor_point: AnchorPoint) -> Point {
         Point::new(
             self.anchor_x(anchor_point.x()),
             self.anchor_y(anchor_point.y()),
@@ -474,9 +485,9 @@ impl Rectangle {
     /// assert_eq!(rect.anchor_x(AnchorX::Left), 20);
     /// assert_eq!(rect.anchor_x(AnchorX::Center), 25);
     /// ```
-    pub fn anchor_x(&self, anchor_x: AnchorX) -> i32 {
+    pub const fn anchor_x(&self, anchor_x: AnchorX) -> i32 {
         // Assume size = 1 for zero sized dimensions.
-        let delta = self.size.width.saturating_as::<i32>().max(1) - 1;
+        let delta = self.size.nonzero_signed_width() - 1;
 
         self.top_left.x
             + match anchor_x {
@@ -502,9 +513,9 @@ impl Rectangle {
     /// assert_eq!(rect.anchor_y(AnchorY::Top), 20);
     /// assert_eq!(rect.anchor_y(AnchorY::Bottom), 40);
     /// ```
-    pub fn anchor_y(&self, anchor_y: AnchorY) -> i32 {
+    pub const fn anchor_y(&self, anchor_y: AnchorY) -> i32 {
         // Assume size = 1 for zero sized dimensions.
-        let delta = self.size.height.saturating_as::<i32>().max(1) - 1;
+        let delta = self.size.nonzero_signed_height() - 1;
 
         self.top_left.y
             + match anchor_y {
@@ -610,11 +621,12 @@ impl Rectangle {
     }
 }
 
-/// Checks if the two ranges overlap.
-fn overlaps(first: RangeInclusive<i32>, second: RangeInclusive<i32>) -> bool {
-    second.contains(first.start())
-        || second.contains(first.end())
-        || first.start() < second.start() && first.end() > second.end()
+/// Checks if the two inclusive ranges overlap.
+const fn overlaps(first_start: i32, first_end: i32, second_start: i32, second_end: i32) -> bool {
+    first_start < second_start && first_end > second_end
+        || second_start < first_start && second_end > first_end
+        || first_start >= second_start && first_start <= second_end
+        || second_start >= first_start && second_start <= first_end
 }
 
 #[cfg(test)]

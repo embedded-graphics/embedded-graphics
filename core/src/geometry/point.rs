@@ -175,6 +175,37 @@ impl Point {
         Point::new(self.x - width, self.y - height)
     }
 
+    /// Offsets a point by adding a size.
+    ///
+    /// This method provides a workaround for the `Add` trait not being usable in `const` contexts.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
+    pub(crate) const fn add_size(self, other: Size) -> Self {
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        Point::new(self.x + width, self.y + height)
+    }
+
+    /// Offset a point by adding another point.
+    ///
+    /// This method provides a workaround for the `Add` trait not being usable in `const` contexts.
+    pub(crate) const fn add_point(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y)
+    }
+    /// Offset a point by subtracting another point.
+    ///
+    /// This method provides a workaround for the `Sub` trait not being usable in `const` contexts.
+    pub(crate) const fn sub_point(self, other: Self) -> Self {
+        Self::new(self.x - other.x, self.y - other.y)
+    }
+
     /// Returns the componentwise minimum of two `Point`s
     ///
     /// # Examples
@@ -259,7 +290,7 @@ impl Add for Point {
     type Output = Point;
 
     fn add(self, other: Point) -> Point {
-        Point::new(self.x + other.x, self.y + other.y)
+        self.add_point(other)
     }
 }
 
@@ -313,7 +344,7 @@ impl Sub for Point {
     type Output = Point;
 
     fn sub(self, other: Point) -> Point {
-        Point::new(self.x - other.x, self.y - other.y)
+        self.sub_point(other)
     }
 }
 

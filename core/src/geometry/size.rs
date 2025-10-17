@@ -3,7 +3,7 @@ use core::{
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign},
 };
 
-use crate::geometry::{u32_max, u32_min, Point};
+use crate::geometry::{u32_clamp, u32_max, u32_min, Point};
 
 /// 2D size.
 ///
@@ -274,6 +274,15 @@ impl Size {
     /// ```
     pub const fn swap_xy(self) -> Self {
         Self::new(self.height, self.width)
+    }
+
+    /// A helper function to cast the height in a consistent way for const fn
+    pub(crate) const fn nonzero_signed_height(&self) -> i32 {
+        u32_clamp(self.height, 1, i32::MAX as _).cast_signed()
+    }
+    /// A helper function to cast the width in a consistent way for const fn
+    pub(crate) const fn nonzero_signed_width(&self) -> i32 {
+        u32_clamp(self.width, 1, i32::MAX as _).cast_signed()
     }
 }
 

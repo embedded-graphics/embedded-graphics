@@ -117,7 +117,7 @@ pub enum AnchorPoint {
 
 impl AnchorPoint {
     /// Creates an anchor point from an X and Y component.
-    pub fn from_xy(x: AnchorX, y: AnchorY) -> Self {
+    pub const fn from_xy(x: AnchorX, y: AnchorY) -> Self {
         match (y, x) {
             (AnchorY::Top, AnchorX::Left) => AnchorPoint::TopLeft,
             (AnchorY::Top, AnchorX::Center) => AnchorPoint::TopCenter,
@@ -132,7 +132,7 @@ impl AnchorPoint {
     }
 
     /// Returns the X axis component.
-    pub fn x(self) -> AnchorX {
+    pub const fn x(self) -> AnchorX {
         match self {
             AnchorPoint::TopLeft | AnchorPoint::CenterLeft | AnchorPoint::BottomLeft => {
                 AnchorX::Left
@@ -147,7 +147,7 @@ impl AnchorPoint {
     }
 
     /// Returns the Y axis component.
-    pub fn y(self) -> AnchorY {
+    pub const fn y(self) -> AnchorY {
         match self {
             AnchorPoint::TopLeft | AnchorPoint::TopCenter | AnchorPoint::TopRight => AnchorY::Top,
             AnchorPoint::CenterLeft | AnchorPoint::Center | AnchorPoint::CenterRight => {
@@ -219,6 +219,11 @@ pub(crate) const fn u32_max(a: u32, b: u32) -> u32 {
     } else {
         b
     }
+}
+/// A polyfill for `#![feature(const_cmp)]`
+#[inline]
+pub(crate) const fn u32_clamp(src: u32, min: u32, max: u32) -> u32 {
+    u32_min(u32_max(src, min), max)
 }
 
 #[cfg(test)]
