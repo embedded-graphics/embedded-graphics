@@ -88,7 +88,7 @@ Note that some drivers may not support the latest version of embedded-graphics.
 * [hub75](https://crates.io/crates/hub75): A rust driver for hub75 rgb matrix displays
 * [ili9341](https://crates.io/crates/ili9341): A platform agnostic driver to interface with the ILI9341 (and ILI9340C) TFT LCD display
 * [ls010b7dh01](https://crates.io/crates/ls010b7dh01): A platform agnostic driver for the LS010B7DH01 memory LCD display
-* [oled-async](https://crates.io/crates/oled_async): Extensible I2C/SPI async driver for OLED displays(SH1107, SH1108 & SSD1309...)
+* [oled-async](https://crates.io/crates/oled_async): Extensible I2C/SPI async driver for OLED displays (SH1107, SH1108 & SSD1309...)
 * [push2_display](https://crates.io/crates/push2_display): Ableton Push2 embedded-graphics display driver
 * [retro-display](https://crates.io/crates/retro-display): Display drivers for retro-computers incl. Commodore 64
 * [sh1106](https://crates.io/crates/sh1106): I2C driver for the SH1106 OLED display
