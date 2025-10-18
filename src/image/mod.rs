@@ -97,11 +97,13 @@
 
 mod image_drawable_ext;
 mod image_raw;
+mod image_transparent;
 mod sub_image;
 
 pub use embedded_graphics_core::image::{GetPixel, ImageDrawable};
 pub use image_drawable_ext::ImageDrawableExt;
 pub use image_raw::{ImageRaw, ImageRawBE, ImageRawError, ImageRawLE};
+pub use image_transparent::ImageTransparent;
 pub use sub_image::SubImage;
 
 use crate::{
