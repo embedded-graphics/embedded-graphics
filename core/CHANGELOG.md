@@ -21,6 +21,7 @@
 - [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `load` and `store` methods to `RawData` trait.
 - [#767](https://github.com/embedded-graphics/embedded-graphics/pull/767) Added `MASK` constant to `RawData` trait.
 - [#768](https://github.com/embedded-graphics/embedded-graphics/pull/768) Added 8bit `Rgb332` support.
+- [#792](https://github.com/embedded-graphics/embedded-graphics/pull/792) Added `AlphaColor`, `ColorBlend` and `HasAlphaColor` traits.
 
 ## [0.4.0] - 2023-05-14
 
