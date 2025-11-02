@@ -295,21 +295,16 @@ where
 }
 
 /// Stroke alignment.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum StrokeAlignment {
     /// Inside.
     Inside,
     /// Center.
+    #[default]
     Center,
     /// Outside.
     Outside,
-}
-
-impl Default for StrokeAlignment {
-    fn default() -> Self {
-        Self::Center
-    }
 }
 
 /// Stroke style.
