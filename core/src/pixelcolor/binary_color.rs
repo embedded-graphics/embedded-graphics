@@ -39,20 +39,15 @@ use crate::pixelcolor::{
 /// };
 /// assert_eq!(color, BinaryColor::On);
 /// ```
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
 pub enum BinaryColor {
     /// Inactive pixel.
+    #[default]
     Off,
 
     /// Active pixel.
     On,
-}
-
-impl Default for BinaryColor {
-    fn default() -> Self {
-        Self::Off
-    }
 }
 
 impl BinaryColor {
