@@ -50,14 +50,15 @@ pub trait RgbColor: PixelColor {
 }
 
 /// Macro to implement a RgbColor type with the given channel bit positions.
-macro_rules! impl_rgb_color {
+/// This part is common with rgba colors
+macro_rules! impl_rgb_color_common {
     (
         $type:ident,
         $data_type:ty,
         $storage_type:ty,
         ($r_bits:expr, $g_bits:expr, $b_bits:expr),
         ($r_pos:expr, $g_pos:expr, $b_pos:expr),
-        $type_str:expr
+        $a_max:tt, $type_str:expr
     ) => {
         #[doc = $type_str]
         #[doc = "color."]
@@ -78,6 +79,77 @@ macro_rules! impl_rgb_color {
             const B_MASK: $storage_type = ($type::MAX_B as $storage_type) << $b_pos;
             const RGB_MASK: $storage_type = Self::R_MASK | Self::B_MASK | Self::G_MASK;
         }
+
+        impl RgbColor for $type {
+            fn r(&self) -> u8 {
+                #![allow(trivial_numeric_casts)]
+
+                (self.0 >> $r_pos) as u8 & Self::MAX_R
+            }
+
+            fn g(&self) -> u8 {
+                #![allow(trivial_numeric_casts)]
+
+                (self.0 >> $g_pos) as u8 & Self::MAX_G
+            }
+
+            fn b(&self) -> u8 {
+                #![allow(trivial_numeric_casts)]
+
+                (self.0 >> $b_pos) as u8 & Self::MAX_B
+            }
+
+            const MAX_R: u8 = ((1usize << $r_bits) - 1) as u8;
+            const MAX_G: u8 = ((1usize << $g_bits) - 1) as u8;
+            const MAX_B: u8 = ((1usize << $b_bits) - 1) as u8;
+
+            const_rgb!(BLACK, 0, 0, 0, $a_max);
+            const_rgb!(RED, Self::MAX_R, 0, 0, $a_max);
+            const_rgb!(GREEN, 0, Self::MAX_G, 0, $a_max);
+            const_rgb!(BLUE, 0, 0, Self::MAX_B, $a_max);
+            const_rgb!(YELLOW, Self::MAX_R, Self::MAX_G, 0, $a_max);
+            const_rgb!(MAGENTA, Self::MAX_R, 0, Self::MAX_B, $a_max);
+            const_rgb!(CYAN, 0, Self::MAX_G, Self::MAX_B, $a_max);
+            const_rgb!(WHITE, Self::MAX_R, Self::MAX_G, Self::MAX_B, $a_max);
+        }
+
+        impl PixelColor for $type {
+            type Raw = $data_type;
+        }
+
+        impl From<$data_type> for $type {
+            fn from(data: $data_type) -> Self {
+                let data = data.into_inner();
+
+                Self(data & Self::RGB_MASK)
+            }
+        }
+
+        impl From<$type> for $data_type {
+            fn from(color: $type) -> Self {
+                Self::new(color.0)
+            }
+        }
+    };
+}
+pub(crate) use impl_rgb_color_common;
+
+/// Macro to implement a RgbColor type with the given channel bit positions.
+macro_rules! impl_rgb_color {
+    (
+        $type:ident,
+        $data_type:ty,
+        $storage_type:ty,
+        ($r_bits:expr, $g_bits:expr, $b_bits:expr),
+        ($r_pos:expr, $g_pos:expr, $b_pos:expr),
+        $type_str:expr
+    ) => {
+        impl_rgb_color_common!(
+            $type, $data_type, $storage_type,
+            ($r_bits, $g_bits, $b_bits),
+            ($r_pos, $g_pos, $b_pos),
+            (), $type_str
+        );
 
         impl fmt::Debug for $type {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -125,76 +197,19 @@ macro_rules! impl_rgb_color {
             }
         }
 
-        impl RgbColor for $type {
-            fn r(&self) -> u8 {
-                #![allow(trivial_numeric_casts)]
-
-                (self.0 >> $r_pos) as u8 & Self::MAX_R
-            }
-
-            fn g(&self) -> u8 {
-                #![allow(trivial_numeric_casts)]
-
-                (self.0 >> $g_pos) as u8 & Self::MAX_G
-            }
-
-            fn b(&self) -> u8 {
-                #![allow(trivial_numeric_casts)]
-
-                (self.0 >> $b_pos) as u8 & Self::MAX_B
-            }
-
-            const MAX_R: u8 = ((1usize << $r_bits) - 1) as u8;
-            const MAX_G: u8 = ((1usize << $g_bits) - 1) as u8;
-            const MAX_B: u8 = ((1usize << $b_bits) - 1) as u8;
-
-            const BLACK: Self = Self::new(0, 0, 0);
-            const RED: Self = Self::new(Self::MAX_R, 0, 0);
-            const GREEN: Self = Self::new(0, Self::MAX_G, 0);
-            const BLUE: Self = Self::new(0, 0, Self::MAX_B);
-            const YELLOW: Self = Self::new(Self::MAX_R, Self::MAX_G, 0);
-            const MAGENTA: Self = Self::new(Self::MAX_R, 0, Self::MAX_B);
-            const CYAN: Self = Self::new(0, Self::MAX_G, Self::MAX_B);
-            const WHITE: Self = Self::new(Self::MAX_R, Self::MAX_G, Self::MAX_B);
-        }
-
-        impl PixelColor for $type {
-            type Raw = $data_type;
-        }
-
-        impl From<$data_type> for $type {
-            fn from(data: $data_type) -> Self {
-                let data = data.into_inner();
-
-                Self(data & Self::RGB_MASK)
-            }
-        }
-
-        impl From<$type> for $data_type {
-            fn from(color: $type) -> Self {
-                Self::new(color.0)
-            }
-        }
-    };
-
-    // Recursive macro to stringify the type.
-    (
-        $type:ident,
-        $data_type:ty,
-        $storage_type:ty,
-        ($r_bits:expr, $g_bits:expr, $b_bits:expr),
-        ($r_pos:expr, $g_pos:expr, $b_pos:expr)
-    ) => {
-        impl_rgb_color!(
-            $type,
-            $data_type,
-            $storage_type,
-            ($r_bits, $g_bits, $b_bits),
-            ($r_pos, $g_pos, $b_pos),
-            stringify!($type)
-        );
     };
 }
+
+/// create RGB constants
+macro_rules! const_rgb {
+    ($name:ident, $r:expr, $g:expr, $b:expr, ()) => {
+        const $name: Self = Self::new($r, $g, $b);
+    };
+    ($name:ident, $r:expr, $g:expr, $b:expr, MAX_A) => {
+        const $name: Self = Self::new($r, $g, $b, Self::MAX_A);
+    };
+}
+pub(crate) use const_rgb;
 
 /// Helper macro to calculate bit positions for RGB and BGR colors
 macro_rules! rgb_color {
@@ -209,7 +224,8 @@ macro_rules! rgb_color {
             $data_type,
             $storage_type,
             ($r_bits, $g_bits, $b_bits),
-            ($g_bits + $b_bits, $b_bits, 0)
+            ($g_bits + $b_bits, $b_bits, 0),
+            stringify!($type)
         );
     };
 
@@ -224,7 +240,8 @@ macro_rules! rgb_color {
             $data_type,
             $storage_type,
             ($r_bits, $g_bits, $b_bits),
-            (0, $r_bits, $r_bits + $g_bits)
+            (0, $r_bits, $r_bits + $g_bits),
+            stringify!($type)
         );
     };
 }

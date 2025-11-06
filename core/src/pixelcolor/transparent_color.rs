@@ -122,6 +122,8 @@
 
 use crate::pixelcolor::{Bgr666, Bgr888, Rgb444, Rgb666, Rgb888, PixelColor, RgbColor, IntoStorage};
 use crate::pixelcolor::raw::{RawU16, RawU24, RawU32, RawData};
+use crate::pixelcolor::{impl_rgb_color_common,const_rgb};
+use core::fmt;
 
 /// Transparent color trait.
 ///
@@ -175,7 +177,8 @@ macro_rules! argb_color {
             $data_type,
             $storage_type,
             ($a_bits, $r_bits, $g_bits, $b_bits),
-            ($r_bits + $g_bits + $b_bits, $g_bits + $b_bits, $b_bits, 0)
+            ($r_bits + $g_bits + $b_bits, $g_bits + $b_bits, $b_bits, 0),
+            stringify!($type)
         );
     };
 
@@ -192,9 +195,21 @@ macro_rules! argb_color {
             $data_type,
             $storage_type,
             ($a_bits, $r_bits, $g_bits, $b_bits),
-            (0, $r_bits, $r_bits + $g_bits, $r_bits + $g_bits + $a_bits)
+            (0, $r_bits, $r_bits + $g_bits, $r_bits + $g_bits + $a_bits),
+            stringify!($type)
         );
     };
+}
+
+/// Divides by Self::MAX_A (rounded to nearest bit)
+/// input `a` is u16 that must be < 255*255, Result is u8 (rounded to the nearest result)
+#[inline(always)]
+fn r_div(a: u16, b: u8) -> u8 {
+    // Round by pre-adding half denominator to keep value inside u16
+    // this works because b <= 255, and a <= 255*255
+    // thus  a + b/2 < 65536
+    let r = (a + b as u16 / 2) / b as u16;
+    r as u8
 }
 
 macro_rules! impl_argb_color {
@@ -204,19 +219,47 @@ macro_rules! impl_argb_color {
         $data_type:ty,
         $storage_type:ty,
         ($a_bits:expr, $r_bits:expr, $g_bits:expr, $b_bits:expr),
-        ($a_pos:expr, $r_pos:expr, $g_pos:expr, $b_pos:expr)
+        ($a_pos:expr, $r_pos:expr, $g_pos:expr, $b_pos:expr),
+        $type_str:expr
     ) => {
-        #[doc = "TODO"]
-        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Debug)]
-        pub struct $type($storage_type);
+        impl_rgb_color_common!(
+            $type, $data_type, $storage_type,
+            ($r_bits, $g_bits, $b_bits),
+            ($r_pos, $g_pos, $b_pos),
+            MAX_A, $type_str
+        );
+
+        impl fmt::Debug for $type {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(
+                    f,
+                    "{}(r: {}, g: {}, b: {}, a: {})",
+                    stringify!($type),
+                    self.r(),
+                    self.g(),
+                    self.b(),
+                    self.alpha()
+                )
+            }
+        }
+
+        #[cfg(feature = "defmt")]
+        impl ::defmt::Format for $type {
+            fn format(&self, f: ::defmt::Formatter) {
+                ::defmt::write!(
+                    f,
+                    "{}(r: {=u8}, g: {=u8}, b: {=u8}, a: {=u8})",
+                    stringify!($type),
+                    self.r(),
+                    self.g(),
+                    self.b(),
+                    self.alpha()
+                )
+            }
+        }
 
         impl $type {
-            // those are private in the base type so we have to recreate them here
             const A_MASK: $storage_type = ($type::MAX_A as $storage_type) << $a_pos;
-            const R_MASK: $storage_type = ($type::MAX_R as $storage_type) << $r_pos;
-            const G_MASK: $storage_type = ($type::MAX_G as $storage_type) << $g_pos;
-            const B_MASK: $storage_type = ($type::MAX_B as $storage_type) << $b_pos;
-            //const RGB_MASK: $storage_type = Self::R_MASK | Self::B_MASK | Self::G_MASK;
             const ARGB_MASK: $storage_type = Self::A_MASK | Self::R_MASK | Self::B_MASK | Self::G_MASK;
 
             /// create from channels
@@ -228,26 +271,39 @@ macro_rules! impl_argb_color {
                 let b_shifted = (b & Self::MAX_B) as $storage_type << $b_pos;
                 Self(a_shifted | r_shifted | g_shifted | b_shifted)
             }
-        }
 
-        impl PixelColor for $type {
-            type Raw = $data_type;
         }
 
         impl ColorBlend<$base_type> for $type {
             fn blend_over(self, other: $base_type) -> $base_type {
                 let a1 = self.alpha() as u16;
-                let r1 = self.r() as u16 * a1 / Self::MAX_A as u16;
-                let g1 = self.g() as u16 * a1 / Self::MAX_A as u16;
-                let b1 = self.b() as u16 * a1 / Self::MAX_A as u16;
-                let a2 = Self::MAX_A as u16 - self.alpha() as u16;
-                let r2 = other.r() as u16 * a2 / Self::MAX_A as u16;
-                let g2 = other.g() as u16 * a2 / Self::MAX_A as u16;
-                let b2 = other.b() as u16 * a2 / Self::MAX_A as u16;
-                let r = (r1 + r2) as u8;
-                let g = (g1 + g2) as u8;
-                let b = (b1 + b2) as u8;
+                let a2 = Self::MAX_A as u16 - a1;
+
+                let r0 = self.r() as u16 * a1 + other.r() as u16 * a2;
+                let g0 = self.g() as u16 * a1 + other.g() as u16 * a2;
+                let b0 = self.b() as u16 * a1 + other.b() as u16 * a2;
+
+                let r = r_div(r0, Self::MAX_A);
+                let g = r_div(g0, Self::MAX_A);
+                let b = r_div(b0, Self::MAX_A);
                 <$base_type>::new(r, g, b)
+            }
+        }
+
+        impl ColorBlend<$type> for $type {
+            fn blend_over(self, other: $type) -> $type {
+                let a1 = self.alpha() as u16 ;
+                let a2 = r_div(a1 * (Self::MAX_A as u16 - a1), Self::MAX_A) as u16;
+
+                let r0 = self.r() as u16 * a1 + other.r() as u16 * a2;
+                let g0 = self.g() as u16 * a1 + other.g() as u16 * a2;
+                let b0 = self.b() as u16 * a1 + other.b() as u16 * a2;
+                let a0 = self.alpha() + r_div(a1 * a2, Self::MAX_A);
+
+                let r = r_div(r0, a0);
+                let g = r_div(g0, a0);
+                let b = r_div(b0, a0);
+                <$type>::new(r, g, b, a0)
             }
         }
 
@@ -264,53 +320,6 @@ macro_rules! impl_argb_color {
 
             fn with_alpha(self, alpha: u8) -> Self::AlphaColor {
                 $type(self.into_storage() | (alpha as $storage_type) << $a_pos)
-            }
-        }
-
-        impl RgbColor for $type {
-            fn r(&self) -> u8 {
-                #![allow(trivial_numeric_casts)]
-
-                (self.0 >> $r_pos) as u8 & Self::MAX_R
-            }
-
-            fn g(&self) -> u8 {
-                #![allow(trivial_numeric_casts)]
-
-                (self.0 >> $g_pos) as u8 & Self::MAX_G
-            }
-
-            fn b(&self) -> u8 {
-                #![allow(trivial_numeric_casts)]
-
-                (self.0 >> $b_pos) as u8 & Self::MAX_B
-            }
-
-            const MAX_R: u8 = ((1usize << $r_bits) - 1) as u8;
-            const MAX_G: u8 = ((1usize << $g_bits) - 1) as u8;
-            const MAX_B: u8 = ((1usize << $b_bits) - 1) as u8;
-
-            const BLACK: Self = Self::new(0, 0, 0, Self::MAX_A);
-            const RED: Self = Self::new(Self::MAX_R, 0, 0, Self::MAX_A);
-            const GREEN: Self = Self::new(0, Self::MAX_G, 0, Self::MAX_A);
-            const BLUE: Self = Self::new(0, 0, Self::MAX_B, Self::MAX_A);
-            const YELLOW: Self = Self::new(Self::MAX_R, Self::MAX_G, 0, Self::MAX_A);
-            const MAGENTA: Self = Self::new(Self::MAX_R, 0, Self::MAX_B, Self::MAX_A);
-            const CYAN: Self = Self::new(0, Self::MAX_G, Self::MAX_B, Self::MAX_A);
-            const WHITE: Self = Self::new(Self::MAX_R, Self::MAX_G, Self::MAX_B, Self::MAX_A);
-        }
-
-        impl From<$data_type> for $type {
-            fn from(data: $data_type) -> Self {
-                let data = data.into_inner();
-
-                Self(data & Self::ARGB_MASK)
-            }
-        }
-
-        impl From<$type> for $data_type {
-            fn from(color: $type) -> Self {
-                Self::new(color.0)
             }
         }
 
