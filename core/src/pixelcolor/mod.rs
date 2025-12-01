@@ -111,12 +111,14 @@ mod conversion;
 mod gray_color;
 pub mod raw;
 mod rgb_color;
+mod transparent_color;
 mod web_colors;
 
 pub use binary_color::*;
 pub use gray_color::*;
 use raw::RawData;
 pub use rgb_color::*;
+pub use transparent_color::*;
 pub use web_colors::WebColors;
 
 /// Pixel color trait.
