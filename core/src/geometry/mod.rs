@@ -117,7 +117,7 @@ pub enum AnchorPoint {
 
 impl AnchorPoint {
     /// Creates an anchor point from an X and Y component.
-    pub fn from_xy(x: AnchorX, y: AnchorY) -> Self {
+    pub const fn from_xy(x: AnchorX, y: AnchorY) -> Self {
         match (y, x) {
             (AnchorY::Top, AnchorX::Left) => AnchorPoint::TopLeft,
             (AnchorY::Top, AnchorX::Center) => AnchorPoint::TopCenter,
@@ -132,7 +132,7 @@ impl AnchorPoint {
     }
 
     /// Returns the X axis component.
-    pub fn x(self) -> AnchorX {
+    pub const fn x(self) -> AnchorX {
         match self {
             AnchorPoint::TopLeft | AnchorPoint::CenterLeft | AnchorPoint::BottomLeft => {
                 AnchorX::Left
@@ -147,7 +147,7 @@ impl AnchorPoint {
     }
 
     /// Returns the Y axis component.
-    pub fn y(self) -> AnchorY {
+    pub const fn y(self) -> AnchorY {
         match self {
             AnchorPoint::TopLeft | AnchorPoint::TopCenter | AnchorPoint::TopRight => AnchorY::Top,
             AnchorPoint::CenterLeft | AnchorPoint::Center | AnchorPoint::CenterRight => {
@@ -184,6 +184,48 @@ pub enum AnchorY {
     Bottom,
 }
 
+/// A polyfill for `#![feature(const_cmp)]`
+#[inline]
+pub(crate) const fn i32_min(a: i32, b: i32) -> i32 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
+/// A polyfill for `#![feature(const_cmp)]`
+#[inline]
+pub(crate) const fn i32_max(a: i32, b: i32) -> i32 {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
+/// A polyfill for `#![feature(const_cmp)]`
+#[inline]
+pub(crate) const fn u32_min(a: u32, b: u32) -> u32 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
+/// A polyfill for `#![feature(const_cmp)]`
+#[inline]
+pub(crate) const fn u32_max(a: u32, b: u32) -> u32 {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
+/// A polyfill for `#![feature(const_cmp)]`
+#[inline]
+pub(crate) const fn u32_clamp(src: u32, min: u32, max: u32) -> u32 {
+    u32_min(u32_max(src, min), max)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -209,5 +251,19 @@ mod tests {
 
             assert_eq!(AnchorPoint::from_xy(x, y), p);
         }
+    }
+
+    #[test]
+    fn const_cmp_polyfills() {
+        assert_ne!(i32_max(932, 56), 932.min(56));
+        assert_ne!(i32_min(57, 56), 57.max(56));
+        assert_eq!(
+            i32_min(i32::MAX.wrapping_add(1), i32::MAX),
+            i32::MIN.min(76)
+        );
+
+        assert_ne!(u32_max(932, 56), 932.min(56));
+        assert_ne!(u32_min(57, 56), 57.max(56));
+        assert_eq!(u32_min(u32::MAX.wrapping_add(1), 76), u32::MIN.min(980));
     }
 }

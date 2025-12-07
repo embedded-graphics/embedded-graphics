@@ -6,6 +6,31 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+- Made `Size::from_bounding_box` public
+- Made the following methods `const`:
+  - `AnchorPoint::from_xy`
+  - `AnchorPoint::x`
+  - `AnchorPoint::y`
+  - `Point::component_min`
+  - `Point::component_max`
+  - `Size::component_min`
+  - `Size::component_max`
+  - `Rectangle::with_corners`
+  - `Rectangle::center`
+  - `Rectangle::bottom_right`
+  - `Rectangle::contains`
+  - `Rectangle::intersection`
+  - `Rectangle::envelope`
+  - `Rectangle::resized`
+  - `Rectangle::resized_width`
+  - `Rectangle::resized_height`
+  - `Rectangle::offset`
+  - `Rectangle::anchor_point`
+  - `Rectangle::anchor_x`
+  - `Rectangle::anchor_y`
+
+
 ### Changed
 
 - **(breaking)** [#764](https://github.com/embedded-graphics/embedded-graphics/pull/764) Changed `ImageRaw::new` to return an error instead of truncating the image height.
