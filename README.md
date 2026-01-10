@@ -58,6 +58,8 @@ this are adding support for different image formats or implementing custom fonts
 * [Framebuffer with DMA support - `embedded-graphics-framebuf`](https://crates.io/crates/embedded-graphics-framebuf)
 * [Alpha compositing Canvas with a framebuffer - `embedded-rgba`](https://crates.io/crates/embedded-rgba)
 * [Use any font with embedded-graphics - antialiased bitmap font format - `minitype`](https://crates.io/crates/minitype)
+* [Convert images to raw `BinaryColor` image format](https://crates.io/crates/embedded-mono-img)
+* [Translate `BinaryColor` images to other colors (with transparency support) - `embedded-graphics-colorcast`](https://crates.io/crates/embedded-graphics-colorcast)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
