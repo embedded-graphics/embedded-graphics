@@ -1,6 +1,7 @@
-.vscode/
 target/
 **/*.rs.bk
 Cargo.lock
 .DS_Store
+.vscode/
 .idea/
+.fleet/

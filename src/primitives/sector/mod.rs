@@ -14,6 +14,8 @@ mod styled;
 pub use points::Points;
 pub use styled::StyledPixelsIterator;
 
+use super::Arc;
+
 /// Sector primitive
 ///
 /// # Examples
@@ -121,7 +123,7 @@ impl Sector {
 
     /// Return the center point of the sector
     pub fn center(&self) -> Point {
-        self.bounding_box().center()
+        self.to_circle().center()
     }
 
     /// Returns the center point of the sector scaled by a factor of 2.
@@ -167,7 +169,21 @@ impl ContainsPoint for Sector {
 
 impl Dimensions for Sector {
     fn bounding_box(&self) -> Rectangle {
-        Rectangle::new(self.top_left, Size::new_equal(self.diameter))
+        let arc_bb = Arc::new(
+            self.top_left,
+            self.diameter,
+            self.angle_start,
+            self.angle_sweep,
+        )
+        .bounding_box();
+
+        let min_top_left = arc_bb.top_left.component_min(self.center());
+        let max_bottom_right = arc_bb
+            .bottom_right()
+            .unwrap_or_else(|| self.center())
+            .component_max(self.center());
+
+        Rectangle::with_corners(min_top_left, max_bottom_right)
     }
 }
 
