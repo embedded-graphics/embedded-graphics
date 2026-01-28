@@ -60,6 +60,8 @@ this are adding support for different image formats or implementing custom fonts
 * [Use any font with embedded-graphics - antialiased bitmap font format - `minitype`](https://crates.io/crates/minitype)
 * [Convert images to raw `BinaryColor` image format - `embedded-mono-img`](https://crates.io/crates/embedded-mono-img)
 * [Translate `BinaryColor` images to other colors (with transparency support) - `embedded-graphics-colorcast`](https://crates.io/crates/embedded-graphics-colorcast)
+* [Create text-based user interfaces using Ratatui - `mousefood`](https://crates.io/crates/mousefood)
+* [Monospace fonts with a large range of Unicode characters - `embedded-graphics-unicodefonts`](https://crates.io/crates/embedded-graphics-unicodefonts)
 
 Note that some of these crates may not support the latest version of embedded-graphics.
 
