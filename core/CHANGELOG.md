@@ -10,6 +10,10 @@
 
 - (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1
 
+### Fixed
+
+- [#?](https://github.com/embedded-graphics/embedded-graphics/pull/?) Fixed build on MSRV by using tighter dependencies.
+
 ## [0.4.0] - 2023-05-14
 
 ### Added
