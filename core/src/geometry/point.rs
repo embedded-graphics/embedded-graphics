@@ -736,8 +736,8 @@ mod tests {
     #[test]
     #[cfg(feature = "nalgebra_support")]
     fn nalgebra_support() {
-        let left = nalgebra::Vector2::new(30, 40);
-        let right = nalgebra::Vector2::new(10, 20);
+        let left = Vector2::new(30, 40);
+        let right = Vector2::new(10, 20);
 
         assert_eq!(Point::from(left - right), Point::new(20, 20));
     }
@@ -745,8 +745,8 @@ mod tests {
     #[test]
     #[cfg(feature = "nalgebra_support")]
     fn convert_ref() {
-        let left = nalgebra::Vector2::new(30, 40);
-        let right = nalgebra::Vector2::new(10, 20);
+        let left = Vector2::new(30, 40);
+        let right = Vector2::new(10, 20);
 
         let c = left - right;
 
