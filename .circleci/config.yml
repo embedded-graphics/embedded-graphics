@@ -1,13 +1,12 @@
 version: 2.1
 
 commands:
-  # Checkout repo, restore cache and update Cargo.lock
+  # Checkout repo, restore cache
   eg_init:
     steps:
       - checkout
       - restore_cache:
           key: v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
-      - run: cargo update
 
   # Save cache
   eg_finish:
