@@ -8,8 +8,9 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Fixed
 
-- [#?](https://github.com/embedded-graphics/embedded-graphics/pull/?) Fixed build on MSRV by using tighter dependencies.
-- [#?](https://github.com/embedded-graphics/embedded-graphics/pull/?) Added Cargo.lock for dev-dependencies.
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Fixed build on MSRV by using tighter dependencies.
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Added Cargo.lock for dev-dependencies.
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Fixed some broken documentation links.
 
 ## [0.8.1] - 2023-08-10
 

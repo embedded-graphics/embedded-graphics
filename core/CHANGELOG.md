@@ -12,7 +12,7 @@
 
 ### Fixed
 
-- [#?](https://github.com/embedded-graphics/embedded-graphics/pull/?) Fixed build on MSRV by using tighter dependencies.
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Fixed build on MSRV by using tighter dependencies.
 
 ## [0.4.0] - 2023-05-14
 
