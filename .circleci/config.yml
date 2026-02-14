@@ -74,6 +74,7 @@ jobs:
     steps:
       - eg_init
       - run: just install-targets
+      - run: cargo update
       - run: just build-targets --release
       - eg_finish
 
