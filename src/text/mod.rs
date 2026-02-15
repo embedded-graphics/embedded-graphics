@@ -153,7 +153,7 @@
 //! # Ok::<(), core::convert::Infallible>(())
 //! ```
 //!
-//! [`Text::new`]: TextStyle::new()
+//! [`Text::new`]: Text::new()
 //! [`with_alignment`]: Text::with_alignment()
 //! [`with_baseline`]: Text::with_baseline()
 //! [`with_text_style`]: Text::with_text_style()

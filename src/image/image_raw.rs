@@ -106,7 +106,7 @@ pub type ImageRawBE<'a, C> = ImageRaw<'a, C, BigEndian>;
 ///
 /// [`raw` module documentation]: crate::pixelcolor::raw
 /// [`Image`]: crate::image::Image
-/// [`Drawable`]: crate::drawable::Drawable
+/// [`Drawable`]: crate::Drawable
 /// [`PixelColor`]: crate::pixelcolor::PixelColor
 /// [`ByteOrder`]: crate::pixelcolor::raw::ByteOrder
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

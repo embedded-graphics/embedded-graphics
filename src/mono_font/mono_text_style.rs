@@ -64,7 +64,7 @@ where
     ///
     /// Drawing a `Text` with a transparent `MonoTextStyle` will not draw any pixels.
     ///
-    /// [`Text`]: super::text::Text
+    /// [`Text`]: crate::text::Text
     pub fn is_transparent(&self) -> bool {
         self.text_color.is_none()
             && self.background_color.is_none()
