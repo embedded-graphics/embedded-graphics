@@ -14,7 +14,7 @@ pub struct StyledScanline {
 impl StyledScanline {
     /// Creates a new styled scanline.
     pub fn new(y: i32, stroke_range: Range<i32>, fill_range: Option<Range<i32>>) -> Self {
-        let fill_range = fill_range.unwrap_or_else(|| stroke_range.end..stroke_range.end);
+        let fill_range = fill_range.unwrap_or(stroke_range.end..stroke_range.end);
 
         Self {
             y,
