@@ -23,6 +23,16 @@
 - [#768](https://github.com/embedded-graphics/embedded-graphics/pull/768) Added 8bit `Rgb332` support.
 - [#792](https://github.com/embedded-graphics/embedded-graphics/pull/792) Added `AlphaColor`, `ColorBlend` and `HasAlphaColor` traits.
 
+## [0.4.1] - 2026-02-15
+
+### Changed
+
+- (technically breaking) [#731](https://github.com/embedded-graphics/embedded-graphics/pull/731) Bump MSRV to 1.71.1
+
+### Fixed
+
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Fixed build on MSRV by using tighter dependencies.
+
 ## [0.4.0] - 2023-05-14
 
 ### Added

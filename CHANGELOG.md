@@ -30,6 +30,13 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#786](https://github.com/embedded-graphics/embedded-graphics/pull/786) Added `ImageTransparent` to add transparency to an `ImageDrawable`
 - [#792](https://github.com/embedded-graphics/embedded-graphics/pull/792) Added `AlphaColor`, `ColorBlend` and `HasAlphaColor` traits.
 
+## [0.8.2] - 2026-02-15
+
+### Fixed
+
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Fixed build on MSRV by using tighter dependencies.
+- [#806](https://github.com/embedded-graphics/embedded-graphics/pull/806) Fixed some broken documentation links.
+
 ## [0.8.1] - 2023-08-10
 
 ### Changed
