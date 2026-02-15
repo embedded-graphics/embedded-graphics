@@ -15,8 +15,6 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
       - uses: actions/checkout@v4
-      - run: cargo update
-        if: matrix.rust == 'stable' || matrix.rust == 'beta'
       - run: just build-benches
       - run: just test
         if: matrix.rust != 'stable'
@@ -65,6 +63,5 @@ jobs:
         with:
           targets: "arm-unknown-linux-gnueabi,armv7-unknown-linux-gnueabihf,x86_64-unknown-linux-gnu,x86_64-unknown-linux-musl,thumbv6m-none-eabi,thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv7m-none-eabi"
       - uses: actions/checkout@v4
-      - run: cargo update
       - run: just build-targets --release
 
