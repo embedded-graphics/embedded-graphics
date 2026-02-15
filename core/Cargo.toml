@@ -19,7 +19,7 @@ all-features = true
 circle-ci = { repository = "embedded-graphics/embedded-graphics", branch = "master" }
 
 [dependencies]
-az = "1.1"
+az = "~1.2.0"
 nalgebra = { version = "0.30.1", optional = true, default-features = false }
 defmt = { version = "0.3.2", optional = true}
 
