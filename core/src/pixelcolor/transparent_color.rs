@@ -120,7 +120,7 @@
 //! image.draw(&mut display.color_converted()).unwrap();
 //! ```
 
-use crate::pixelcolor::{Bgr666, Bgr888, Rgb444, Rgb666, Rgb888, PixelColor, RgbColor, IntoStorage};
+use crate::pixelcolor::{Bgr444, Bgr666, Bgr888, Rgb444, Rgb666, Rgb888, PixelColor, RgbColor, IntoStorage, Rgb555};
 use crate::pixelcolor::raw::{RawU16, RawU24, RawU32, RawData};
 use crate::pixelcolor::{impl_rgb_color_common,const_rgb};
 use core::fmt;
@@ -149,8 +149,7 @@ pub trait AlphaColor: PixelColor {
 /// There can be only one matching AlphaColor for a given color.
 ///
 /// Example:
-/// ```ignore
-/// # TODO we need some Rgba implementation for this test to pass
+/// ```
 /// use embedded_graphics_core::pixelcolor::{Rgb888,HasAlphaColor,AlphaColor};
 /// let color = Rgb888::new(0x0,0x80,0xFF);
 /// let transparent = color.with_alpha(0);
@@ -168,8 +167,8 @@ macro_rules! argb_color {
         $type:ident,
         $base_type:ty,
         $data_type:ty,
-        $storage_type:ty,Argb =
-        ($a_bits:expr, $r_bits:expr, $g_bits:expr, $b_bits:expr)
+        $storage_type:ty,
+        Argb = ($a_bits:expr, $r_bits:expr, $g_bits:expr, $b_bits:expr)
     ) => {
         impl_argb_color!(
             $type,
@@ -186,8 +185,8 @@ macro_rules! argb_color {
         $type:ident,
         $base_type:ty,
         $data_type:ty,
-        $storage_type:ty,Bgra =
-        ($a_bits:expr, $r_bits:expr, $g_bits:expr, $b_bits:expr)
+        $storage_type:ty,
+        Bgra = ($b_bits:expr, $g_bits:expr, $r_bits:expr, $a_bits:expr)
     ) => {
         impl_argb_color!(
             $type,
@@ -195,7 +194,43 @@ macro_rules! argb_color {
             $data_type,
             $storage_type,
             ($a_bits, $r_bits, $g_bits, $b_bits),
-            (0, $r_bits, $r_bits + $g_bits, $r_bits + $g_bits + $a_bits),
+            (0, $a_bits, $r_bits + $a_bits, $g_bits + $r_bits + $a_bits),
+            stringify!($type)
+        );
+    };
+
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        Abgr = ($a_bits:expr, $b_bits:expr, $g_bits:expr, $r_bits:expr)
+    ) => {
+        impl_argb_color!(
+            $type,
+            $base_type,
+            $data_type,
+            $storage_type,
+            ($a_bits, $b_bits, $g_bits, $r_bits),
+            ($b_bits + $g_bits + $r_bits, 0, $r_bits, $g_bits + $r_bits),
+            stringify!($type)
+        );
+    };
+
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        Rgba = ($r_bits:expr, $g_bits:expr, $b_bits:expr, $a_bits:expr)
+    ) => {
+        impl_argb_color!(
+            $type,
+            $base_type,
+            $data_type,
+            $storage_type,
+            ($a_bits, $r_bits, $g_bits, $b_bits),
+            (0, $g_bits + $b_bits + $a_bits, $b_bits + $a_bits, $a_bits),
             stringify!($type)
         );
     };
@@ -210,6 +245,30 @@ fn r_div(a: u16, b: u8) -> u8 {
     // thus  a + b/2 < 65536
     let r = (a + b as u16 / 2) / b as u16;
     r as u8
+}
+
+/// Implement blending over an opaque color for a single channel
+/// Some computation are done at each call but inlining + optimization should remove it
+#[inline(always)]
+fn blend_over_opaque(a_value: u8, a_alpha: u8, b_value: u8, max_alpha: u8) -> u8 {
+    let a_value = u16::from(a_value);
+    let a_alpha = u16::from(a_alpha);
+    let b_value = u16::from(b_value);
+    let b_alpha = u16::from(max_alpha) - a_alpha;
+
+    r_div(a_value * a_alpha + b_value * b_alpha, max_alpha)
+}
+
+/// Implement blending over a transparent color for a single channel
+/// Some computation are done at each call but inlining + optimization should remove it
+#[inline(always)]
+fn blend_over_transparent(a_value: u8, a_alpha: u8, b_value: u8, b_alpha: u8) -> u8 {
+    let a_value_u16 = u16::from(a_value);
+    let a_alpha_u16 = u16::from(a_alpha);
+    let b_value_u16 = u16::from(b_value);
+    let b_alpha_u16 = u16::from(b_alpha);
+
+    r_div(a_value_u16 * a_alpha_u16 + b_value_u16 * b_alpha_u16, b_alpha + a_alpha)
 }
 
 macro_rules! impl_argb_color {
@@ -275,35 +334,28 @@ macro_rules! impl_argb_color {
         }
 
         impl ColorBlend<$base_type> for $type {
+            /// For simplicity this implementation ignores gamma correction
+            /// This might give visually surprising results when blending between dark and bright colors
             fn blend_over(self, other: $base_type) -> $base_type {
-                let a1 = self.alpha() as u16;
-                let a2 = Self::MAX_A as u16 - a1;
-
-                let r0 = self.r() as u16 * a1 + other.r() as u16 * a2;
-                let g0 = self.g() as u16 * a1 + other.g() as u16 * a2;
-                let b0 = self.b() as u16 * a1 + other.b() as u16 * a2;
-
-                let r = r_div(r0, Self::MAX_A);
-                let g = r_div(g0, Self::MAX_A);
-                let b = r_div(b0, Self::MAX_A);
+                let r = blend_over_opaque(self.r(), self.alpha(), other.r(), Self::MAX_A);
+                let g = blend_over_opaque(self.g(), self.alpha(), other.g(), Self::MAX_A);
+                let b = blend_over_opaque(self.b(), self.alpha(), other.b(), Self::MAX_A);
                 <$base_type>::new(r, g, b)
             }
         }
 
         impl ColorBlend<$type> for $type {
+            /// For simplicity this implementation ignores gamma correction
+            /// This might give visually surprising results when blending between dark and bright colors
             fn blend_over(self, other: $type) -> $type {
-                let a1 = self.alpha() as u16 ;
-                let a2 = r_div(a1 * (Self::MAX_A as u16 - a1), Self::MAX_A) as u16;
+                let other_alpha = r_div(u16::from(other.alpha()) * (u16::from(Self::MAX_A) - u16::from(self.alpha())), Self::MAX_A);
 
-                let r0 = self.r() as u16 * a1 + other.r() as u16 * a2;
-                let g0 = self.g() as u16 * a1 + other.g() as u16 * a2;
-                let b0 = self.b() as u16 * a1 + other.b() as u16 * a2;
-                let a0 = self.alpha() + r_div(a1 * a2, Self::MAX_A);
+                let r = blend_over_transparent(self.r(), self.alpha(), other.r(), other_alpha);
+                let g = blend_over_transparent(self.g(), self.alpha(), other.g(), other_alpha);
+                let b = blend_over_transparent(self.b(), self.alpha(), other.b(), other_alpha);
+                let a = self.alpha() + other_alpha;
 
-                let r = r_div(r0, a0);
-                let g = r_div(g0, a0);
-                let b = r_div(b0, a0);
-                <$type>::new(r, g, b, a0)
+                <$type>::new(r, g, b, a)
             }
         }
 
@@ -332,16 +384,28 @@ macro_rules! impl_argb_color {
     }
 }
 
+// 4 variations for each major rgb types
+
 argb_color!(Argb4444, Rgb444, RawU16, u16, Argb = (4, 4, 4, 4));
+argb_color!(Bgra4444, Bgr444, RawU16, u16, Bgra = (4, 4, 4, 4));
+//argb_color!(Rgba4444, Rgb444, RawU16, u16, Rgba = (4, 4, 4, 4));
+//argb_color!(Abgr4444, Bgr444, RawU16, u16, Abgr = (4, 4, 4, 4));
+
 argb_color!(Argb6666, Rgb666, RawU24, u32, Argb = (6, 6, 6, 6));
 argb_color!(Bgra6666, Bgr666, RawU24, u32, Bgra = (6, 6, 6, 6));
+//argb_color!(Rgba6666, Rgb666, RawU24, u32, Rgba = (6, 6, 6, 6));
+//argb_color!(Abgr6666, Bgr666, RawU24, u32, Abgr = (6, 6, 6, 6));
+
 argb_color!(Argb8888, Rgb888, RawU32, u32, Argb = (8, 8, 8, 8));
 argb_color!(Bgra8888, Bgr888, RawU32, u32, Bgra = (8, 8, 8, 8));
+//argb_color!(Rgba8888, Rgb888, RawU32, u32, Rgba = (8, 8, 8, 8));
+//argb_color!(Abgr8888, Bgr888, RawU32, u32, Abgr = (8, 8, 8, 8));
 
-// No obvious impl
+// supported bySTM32 microcontrollers
+argb_color!(Argb1555, Rgb555, RawU16, u16, Argb = (1, 5, 5, 5));
+
+// This probably need a specific implementation since it will be lossy
 //argb_color!(???, Rgb332, RawU8, u8, Rgb = (3, 3, 2));
-//argb_color!(Argb5555, Rgb555, RawU24, u32, Argb = (5, 5, 5, 5));
-//argb_color!(Bgra5555, Bgr555, RawU24, u32, Bgra = (5, 5, 5, 5));
-//argb_color!(Rgb565, Rgb565, RawU16, u16, Rgb = (5, 6, 5));
-//argb_color!(Bgr565, Bgr565, RawU16, u16, Bgr = (5, 6, 5));
 
+// TODO tests
+// TODO conversions
