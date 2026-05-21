@@ -2,8 +2,6 @@
 //!
 //! # Usage example
 //!
-//! TODO we need some implementation for a working usage.
-//!
 //! # Implementing transparent color types
 //!
 //! Transparent color types can be added by implementing the [`ColorBlend<C>`] trait with
@@ -317,6 +315,14 @@ macro_rules! impl_argb_color {
             }
         }
 
+        impl From<$data_type> for $type {
+            fn from(data: $data_type) -> Self {
+                let data = data.into_inner();
+
+                Self(data & Self::ARGB_MASK)
+            }
+        }
+
         impl $type {
             const A_MASK: $storage_type = ($type::MAX_A as $storage_type) << $a_pos;
             const ARGB_MASK: $storage_type = Self::A_MASK | Self::R_MASK | Self::B_MASK | Self::G_MASK;
@@ -407,5 +413,54 @@ argb_color!(Argb1555, Rgb555, RawU16, u16, Argb = (1, 5, 5, 5));
 // This probably need a specific implementation since it will be lossy
 //argb_color!(???, Rgb332, RawU8, u8, Rgb = (3, 3, 2));
 
-// TODO tests
 // TODO conversions
+
+#[cfg(test)]
+mod tests {
+    use core::fmt::Debug;
+    use super::*;
+
+    /// Convert color to integer and back again to test bit positions
+    fn test_bpp16<C>(color: C, value: u16)
+    where
+        C: PixelColor<Raw = RawU16> + Debug,
+    {
+        let value = RawU16::new(value);
+
+        assert_eq!(color.into(), value);
+        assert_eq!(color, C::from(value));
+    }
+
+    /// Convert color to integer and back again to test bit positions
+    fn test_bpp24<C>(color: C, value: u32)
+    where
+        C: PixelColor<Raw = RawU24> + Debug,
+    {
+        let value = RawU24::new(value);
+
+        assert_eq!(color.into(), value);
+        assert_eq!(color, C::from(value));
+    }
+
+    #[test]
+    pub fn bit_positions_argb6666() {
+        test_bpp24(Argb6666::new(0b100001, 0, 0, 0b10), 0b10 << 6+6+6 | 0b100001 << 6 + 6);
+        test_bpp24(Argb6666::new(0, 0b100001, 0, 0b10), 0b10 << 6+6+6 | 0b100001 << 6);
+        test_bpp24(Argb6666::new(0, 0, 0b100001, 0b10), 0b10 << 6+6+6 | 0b100001 << 0);
+    }
+
+    #[test]
+    pub fn bit_positions_bgra6666() {
+        test_bpp24(Bgra6666::new(0b100001, 0, 0, 0b10), 0b10 | 0b100001 << 6);
+        test_bpp24(Bgra6666::new(0, 0b100001, 0, 0b10), 0b10 | 0b100001 << 6 + 6);
+        test_bpp24(Bgra6666::new(0, 0, 0b100001, 0b10), 0b10 | 0b100001 << 6 + 6 + 6);
+    }
+
+    #[test]
+    pub fn bit_positions_argb1555() {
+        test_bpp16(Argb1555::new(0b10001, 0, 0, 0b1), 0b1 << 5+5+5 | 0b10001 << 5+ 5);
+        test_bpp16(Argb1555::new(0, 0b10001, 0, 0b1), 0b1 << 5+5+5 | 0b10001 << 5);
+        test_bpp16(Argb1555::new(0, 0, 0b10001, 0b1), 0b1 << 5+5+5 | 0b10001 << 0);
+    }
+
+}

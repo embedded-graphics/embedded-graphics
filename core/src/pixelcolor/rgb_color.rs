@@ -77,7 +77,6 @@ macro_rules! impl_rgb_color_common {
             const R_MASK: $storage_type = ($type::MAX_R as $storage_type) << $r_pos;
             const G_MASK: $storage_type = ($type::MAX_G as $storage_type) << $g_pos;
             const B_MASK: $storage_type = ($type::MAX_B as $storage_type) << $b_pos;
-            const RGB_MASK: $storage_type = Self::R_MASK | Self::B_MASK | Self::G_MASK;
         }
 
         impl RgbColor for $type {
@@ -117,14 +116,6 @@ macro_rules! impl_rgb_color_common {
             type Raw = $data_type;
         }
 
-        impl From<$data_type> for $type {
-            fn from(data: $data_type) -> Self {
-                let data = data.into_inner();
-
-                Self(data & Self::RGB_MASK)
-            }
-        }
-
         impl From<$type> for $data_type {
             fn from(color: $type) -> Self {
                 Self::new(color.0)
@@ -151,6 +142,10 @@ macro_rules! impl_rgb_color {
             (), $type_str
         );
 
+        impl $type {
+            const RGB_MASK: $storage_type = Self::R_MASK | Self::B_MASK | Self::G_MASK;
+        }
+
         impl fmt::Debug for $type {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 write!(
@@ -175,6 +170,14 @@ macro_rules! impl_rgb_color {
                     self.g(),
                     self.b()
                 )
+            }
+        }
+
+        impl From<$data_type> for $type {
+            fn from(data: $data_type) -> Self {
+                let data = data.into_inner();
+
+                Self(data & Self::RGB_MASK)
             }
         }
 
@@ -274,7 +277,7 @@ mod tests {
         let value = RawU8::new(value);
 
         assert_eq!(color.into(), value);
-        assert_eq!(C::from(value), color);
+        assert_eq!(color, C::from(value));
     }
 
     /// Convert color to integer and back again to test bit positions
@@ -285,7 +288,7 @@ mod tests {
         let value = RawU16::new(value);
 
         assert_eq!(color.into(), value);
-        assert_eq!(C::from(value), color);
+        assert_eq!(color, C::from(value));
     }
 
     /// Convert color to integer and back again to test bit positions
@@ -296,7 +299,7 @@ mod tests {
         let value = RawU24::new(value);
 
         assert_eq!(color.into(), value);
-        assert_eq!(C::from(value), color);
+        assert_eq!(color, C::from(value));
     }
 
     #[test]
