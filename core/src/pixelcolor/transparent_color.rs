@@ -520,7 +520,10 @@ mod tests {
         assert_eq!(opaque.blend_over(mild), opaque);
         assert_eq!(opaque.blend_over(transparent), opaque);
         // manual check: color takes the middle ground, opaque alpha
-        assert_eq!(mild.blend_over(opaque), Argb8888::new(0xBF, 0x40, 0x80, 0xFF));
+        assert_eq!(
+            mild.blend_over(opaque),
+            Argb8888::new(0xBF, 0x40, 0x80, 0xFF)
+        );
         // manual check: no color change, alpha ("opaqueness" divided by 2)
         assert_eq!(mild.blend_over(mild), Argb8888::new(0x80, 0x0, 0xFF, 0xC0));
         assert_eq!(mild.blend_over(transparent), mild);

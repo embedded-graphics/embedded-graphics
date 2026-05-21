@@ -102,7 +102,6 @@ impl_rgba_conversion!(Bgra6666 => Argb4444, Bgra4444, Argb6666, Bgra8888, Argb88
 impl_rgba_conversion!(Argb8888 => Argb4444, Bgra4444, Argb6666, Bgra6666, Bgra8888);
 impl_rgba_conversion!(Bgra8888 => Argb4444, Bgra4444, Argb6666, Bgra6666, Argb8888);
 
-
 /// Macro to implement conversion between Alpha and no alpha color types.
 macro_rules! impl_to_alpha_conversion {
     ($from_type:ident <=> $($to_type:ident),+) => {
