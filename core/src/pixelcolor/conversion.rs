@@ -1,4 +1,4 @@
-use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*};
+use crate::pixelcolor::{binary_color::*, gray_color::*, rgb_color::*, transparent_color::*};
 
 /// Convert color channel values from one bit depth to another.
 ///
@@ -55,6 +55,34 @@ macro_rules! impl_rgb_conversion {
     };
 }
 
+/// Macro to implement conversion between RGBA color types.
+macro_rules! impl_rgba_conversion {
+    ($from_type:ident => $($to_type:ident),+) => {
+        $(impl From<$from_type> for $to_type {
+            fn from(other: $from_type) -> Self {
+                Self::new(
+                    convert_channel::<{$from_type::MAX_R}, {$to_type::MAX_R}>(other.r()),
+                    convert_channel::<{$from_type::MAX_G}, {$to_type::MAX_G}>(other.g()),
+                    convert_channel::<{$from_type::MAX_B}, {$to_type::MAX_B}>(other.b()),
+                    convert_channel::<{$from_type::MAX_A}, {$to_type::MAX_A}>(other.alpha()),
+                )
+            }
+        })*
+
+        impl $from_type {
+            #[allow(unused)]
+            pub(crate) const fn with_rgba8888(r: u8, g: u8, b: u8, a:u8) -> Self {
+                Self::new(
+                    convert_channel::<{Argb8888::MAX_R}, {$from_type::MAX_R}>(r),
+                    convert_channel::<{Argb8888::MAX_G}, {$from_type::MAX_G}>(g),
+                    convert_channel::<{Argb8888::MAX_B}, {$from_type::MAX_B}>(b),
+                    convert_channel::<{Argb8888::MAX_A}, {$from_type::MAX_A}>(a),
+                )
+            }
+        }
+    };
+}
+
 impl_rgb_conversion!(Rgb332 => Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
 impl_rgb_conversion!(Rgb444 => Rgb332, Bgr444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
 impl_rgb_conversion!(Bgr444 => Rgb332, Rgb444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
@@ -66,6 +94,49 @@ impl_rgb_conversion!(Rgb666 => Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, B
 impl_rgb_conversion!(Bgr666 => Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr565, Bgr888, Rgb888);
 impl_rgb_conversion!(Rgb888 => Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Bgr888);
 impl_rgb_conversion!(Bgr888 => Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Rgb666, Bgr666, Bgr565, Rgb888);
+
+impl_rgba_conversion!(Argb4444 => Bgra4444, Argb6666, Bgra6666, Argb8888, Bgra8888);
+impl_rgba_conversion!(Bgra4444 => Argb4444, Argb6666, Bgra6666, Argb8888, Bgra8888);
+impl_rgba_conversion!(Argb6666 => Argb4444, Bgra4444, Bgra6666, Bgra8888, Argb8888);
+impl_rgba_conversion!(Bgra6666 => Argb4444, Bgra4444, Argb6666, Bgra8888, Argb8888);
+impl_rgba_conversion!(Argb8888 => Argb4444, Bgra4444, Argb6666, Bgra6666, Bgra8888);
+impl_rgba_conversion!(Bgra8888 => Argb4444, Bgra4444, Argb6666, Bgra6666, Argb8888);
+
+
+/// Macro to implement conversion between Alpha and no alpha color types.
+macro_rules! impl_to_alpha_conversion {
+    ($from_type:ident <=> $($to_type:ident),+) => {
+        $(impl From<$from_type> for $to_type {
+            fn from(other: $from_type) -> Self {
+                Self::new(
+                    convert_channel::<{$from_type::MAX_R}, {$to_type::MAX_R}>(other.r()),
+                    convert_channel::<{$from_type::MAX_G}, {$to_type::MAX_G}>(other.g()),
+                    convert_channel::<{$from_type::MAX_B}, {$to_type::MAX_B}>(other.b()),
+                )
+            }
+        })*
+
+        $(impl From<$to_type> for $from_type {
+            fn from(other: $to_type) -> Self {
+                Self::new(
+                    convert_channel::<{$from_type::MAX_R}, {$to_type::MAX_R}>(other.r()),
+                    convert_channel::<{$from_type::MAX_G}, {$to_type::MAX_G}>(other.g()),
+                    convert_channel::<{$from_type::MAX_B}, {$to_type::MAX_B}>(other.b()),
+                    $from_type::MAX_A,
+                )
+            }
+        })*
+    };
+
+}
+
+impl_to_alpha_conversion!(Argb4444 <=> Rgb444);
+impl_to_alpha_conversion!(Bgra4444 <=> Bgr444);
+impl_to_alpha_conversion!(Argb6666 <=> Rgb666);
+impl_to_alpha_conversion!(Bgra6666 <=> Bgr666);
+impl_to_alpha_conversion!(Argb8888 <=> Rgb888);
+impl_to_alpha_conversion!(Bgra8888 <=> Bgr888);
+impl_to_alpha_conversion!(Argb1555 <=> Rgb555);
 
 /// Macro to implement conversion between grayscale color types.
 macro_rules! impl_gray_conversion {
@@ -123,8 +194,8 @@ macro_rules! impl_from_binary {
 }
 
 impl_from_binary!(
-    Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888, Gray2, Gray4,
-    Gray8
+    Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888, Gray2,
+    Gray4, Gray8
 );
 
 /// Macro to implement conversion from grayscale types to `BinaryColor`.
@@ -151,7 +222,9 @@ macro_rules! impl_rgb_to_binary {
     };
 }
 
-impl_rgb_to_binary!(Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888);
+impl_rgb_to_binary!(
+    Rgb332, Rgb444, Bgr444, Rgb555, Bgr555, Rgb565, Bgr565, Rgb666, Bgr666, Rgb888, Bgr888
+);
 
 #[cfg(test)]
 mod tests {
