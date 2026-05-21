@@ -2,8 +2,6 @@
 //!
 //! # Usage example
 //!
-//! TODO we need some implementation for a working usage.
-//!
 //! # Implementing transparent color types
 //!
 //! Transparent color types can be added by implementing the [`ColorBlend<C>`] trait with
@@ -120,7 +118,12 @@
 //! image.draw(&mut display.color_converted()).unwrap();
 //! ```
 
-use crate::pixelcolor::PixelColor;
+use crate::pixelcolor::raw::{RawData, RawU16, RawU24, RawU32};
+use crate::pixelcolor::{const_rgb, impl_rgb_color_common};
+use crate::pixelcolor::{
+    Bgr444, Bgr666, Bgr888, IntoStorage, PixelColor, Rgb444, Rgb555, Rgb666, Rgb888, RgbColor,
+};
+use core::fmt;
 
 /// Transparent color trait.
 ///
@@ -146,8 +149,7 @@ pub trait AlphaColor: PixelColor {
 /// There can be only one matching AlphaColor for a given color.
 ///
 /// Example:
-/// ```ignore
-/// # TODO we need some Rgba implementation for this test to pass
+/// ```
 /// use embedded_graphics_core::pixelcolor::{Rgb888,HasAlphaColor,AlphaColor};
 /// let color = Rgb888::new(0x0,0x80,0xFF);
 /// let transparent = color.with_alpha(0);
@@ -155,4 +157,378 @@ pub trait AlphaColor: PixelColor {
 pub trait HasAlphaColor: PixelColor {
     /// Associated AlphaColor
     type AlphaColor: AlphaColor + ColorBlend<Self>;
+
+    /// Create transparent color from opaque color
+    fn with_alpha(self, alpha: u8) -> Self::AlphaColor;
+}
+
+macro_rules! argb_color {
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        Argb = ($a_bits:expr, $r_bits:expr, $g_bits:expr, $b_bits:expr)
+    ) => {
+        impl_argb_color!(
+            $type,
+            $base_type,
+            $data_type,
+            $storage_type,
+            ($a_bits, $r_bits, $g_bits, $b_bits),
+            ($r_bits + $g_bits + $b_bits, $g_bits + $b_bits, $b_bits, 0),
+            stringify!($type)
+        );
+    };
+
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        Bgra = ($b_bits:expr, $g_bits:expr, $r_bits:expr, $a_bits:expr)
+    ) => {
+        impl_argb_color!(
+            $type,
+            $base_type,
+            $data_type,
+            $storage_type,
+            ($a_bits, $r_bits, $g_bits, $b_bits),
+            (0, $a_bits, $r_bits + $a_bits, $g_bits + $r_bits + $a_bits),
+            stringify!($type)
+        );
+    };
+
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        Abgr = ($a_bits:expr, $b_bits:expr, $g_bits:expr, $r_bits:expr)
+    ) => {
+        impl_argb_color!(
+            $type,
+            $base_type,
+            $data_type,
+            $storage_type,
+            ($a_bits, $b_bits, $g_bits, $r_bits),
+            ($b_bits + $g_bits + $r_bits, 0, $r_bits, $g_bits + $r_bits),
+            stringify!($type)
+        );
+    };
+
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        Rgba = ($r_bits:expr, $g_bits:expr, $b_bits:expr, $a_bits:expr)
+    ) => {
+        impl_argb_color!(
+            $type,
+            $base_type,
+            $data_type,
+            $storage_type,
+            ($a_bits, $r_bits, $g_bits, $b_bits),
+            (0, $g_bits + $b_bits + $a_bits, $b_bits + $a_bits, $a_bits),
+            stringify!($type)
+        );
+    };
+}
+
+/// Divides by Self::MAX_A (rounded to nearest bit)
+/// input `a` is u16 that must be < 255*255, Result is u8 (rounded to the nearest result)
+#[inline(always)]
+fn r_div(a: u16, b: u8) -> u8 {
+    // Round by pre-adding half denominator to keep value inside u16
+    // this works because b <= 255, and a <= 255*255
+    // thus  a + b/2 < 65536
+    let r = (a + b as u16 / 2) / b as u16;
+    r as u8
+}
+
+/// Implement blending over an opaque color for a single channel
+/// Some computation are done at each call but inlining + optimization should remove it
+#[inline(always)]
+fn blend_over_opaque(a_value: u8, a_alpha: u8, b_value: u8, max_alpha: u8) -> u8 {
+    let a_value = u16::from(a_value);
+    let a_alpha = u16::from(a_alpha);
+    let b_value = u16::from(b_value);
+    let b_alpha = u16::from(max_alpha) - a_alpha;
+
+    r_div(a_value * a_alpha + b_value * b_alpha, max_alpha)
+}
+
+/// Implement blending over a transparent color for a single channel
+/// Some computation are done at each call but inlining + optimization should remove it
+#[inline(always)]
+fn blend_over_transparent(a_value: u8, a_alpha: u8, b_value: u8, b_alpha: u8) -> u8 {
+    let a_value_u16 = u16::from(a_value);
+    let a_alpha_u16 = u16::from(a_alpha);
+    let b_value_u16 = u16::from(b_value);
+    let b_alpha_u16 = u16::from(b_alpha);
+
+    r_div(
+        a_value_u16 * a_alpha_u16 + b_value_u16 * b_alpha_u16,
+        b_alpha + a_alpha,
+    )
+}
+
+macro_rules! impl_argb_color {
+    (
+        $type:ident,
+        $base_type:ty,
+        $data_type:ty,
+        $storage_type:ty,
+        ($a_bits:expr, $r_bits:expr, $g_bits:expr, $b_bits:expr),
+        ($a_pos:expr, $r_pos:expr, $g_pos:expr, $b_pos:expr),
+        $type_str:expr
+    ) => {
+        impl_rgb_color_common!(
+            $type, $data_type, $storage_type,
+            ($r_bits, $g_bits, $b_bits),
+            ($r_pos, $g_pos, $b_pos),
+            MAX_A, $type_str
+        );
+
+        impl fmt::Debug for $type {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(
+                    f,
+                    "{}(r: {}, g: {}, b: {}, a: {})",
+                    stringify!($type),
+                    self.r(),
+                    self.g(),
+                    self.b(),
+                    self.alpha()
+                )
+            }
+        }
+
+        #[cfg(feature = "defmt")]
+        impl ::defmt::Format for $type {
+            fn format(&self, f: ::defmt::Formatter) {
+                ::defmt::write!(
+                    f,
+                    "{}(r: {=u8}, g: {=u8}, b: {=u8}, a: {=u8})",
+                    stringify!($type),
+                    self.r(),
+                    self.g(),
+                    self.b(),
+                    self.alpha()
+                )
+            }
+        }
+
+        impl From<$data_type> for $type {
+            fn from(data: $data_type) -> Self {
+                let data = data.into_inner();
+
+                Self(data & Self::ARGB_MASK)
+            }
+        }
+
+        impl $type {
+            const A_MASK: $storage_type = ($type::MAX_A as $storage_type) << $a_pos;
+            const ARGB_MASK: $storage_type = Self::A_MASK | Self::R_MASK | Self::B_MASK | Self::G_MASK;
+
+            /// create from channels
+            pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+                // into_storage is not const, it would allow removing some code here
+                let a_shifted = (a & Self::MAX_A) as $storage_type << $a_pos;
+                let r_shifted = (r & Self::MAX_R) as $storage_type << $r_pos;
+                let g_shifted = (g & Self::MAX_G) as $storage_type << $g_pos;
+                let b_shifted = (b & Self::MAX_B) as $storage_type << $b_pos;
+                Self(a_shifted | r_shifted | g_shifted | b_shifted)
+            }
+
+        }
+
+        impl ColorBlend<$base_type> for $type {
+            /// For simplicity this implementation ignores gamma correction
+            /// This might give visually inaccurate results when blending between dark and bright colors
+            fn blend_over(self, other: $base_type) -> $base_type {
+                if self.alpha() == 0 {
+                    // Faster
+                    return other;
+                }
+                let r = blend_over_opaque(self.r(), self.alpha(), other.r(), Self::MAX_A);
+                let g = blend_over_opaque(self.g(), self.alpha(), other.g(), Self::MAX_A);
+                let b = blend_over_opaque(self.b(), self.alpha(), other.b(), Self::MAX_A);
+                <$base_type>::new(r, g, b)
+            }
+        }
+
+        impl ColorBlend<$type> for $type {
+            /// For simplicity this implementation ignores gamma correction
+            /// This might give visually inaccurate results when blending between dark and bright colors
+            fn blend_over(self, other: $type) -> $type {
+                if self.alpha() == 0 {
+                    // Faster and avoids division by 0
+                    return other;
+                }
+                // other.alpha() * (MAX - self.alpha()), which is <= (MAX - self.alpha())
+                let applied_alpha = r_div(u16::from(other.alpha()) * (u16::from(Self::MAX_A) - u16::from(self.alpha())), Self::MAX_A);
+
+                let r = blend_over_transparent(self.r(), self.alpha(), other.r(), applied_alpha);
+                let g = blend_over_transparent(self.g(), self.alpha(), other.g(), applied_alpha);
+                let b = blend_over_transparent(self.b(), self.alpha(), other.b(), applied_alpha);
+                let a = self.alpha() + applied_alpha;
+
+                <$type>::new(r, g, b, a)
+            }
+        }
+
+        impl AlphaColor for $type {
+            fn alpha(&self) -> u8 {
+                (self.0 >> $a_pos) as u8 & Self::MAX_A
+            }
+
+            const MAX_A: u8 = ((1usize << $a_bits) - 1) as u8;
+        }
+
+        impl HasAlphaColor for $base_type {
+            type AlphaColor = $type;
+
+            fn with_alpha(self, alpha: u8) -> Self::AlphaColor {
+                $type(self.into_storage() | (alpha as $storage_type) << $a_pos)
+            }
+        }
+    }
+}
+
+// 4 variations for each major rgb types
+
+argb_color!(Argb4444, Rgb444, RawU16, u16, Argb = (4, 4, 4, 4));
+argb_color!(Bgra4444, Bgr444, RawU16, u16, Bgra = (4, 4, 4, 4));
+//argb_color!(Rgba4444, Rgb444, RawU16, u16, Rgba = (4, 4, 4, 4));
+//argb_color!(Abgr4444, Bgr444, RawU16, u16, Abgr = (4, 4, 4, 4));
+
+argb_color!(Argb6666, Rgb666, RawU24, u32, Argb = (6, 6, 6, 6));
+argb_color!(Bgra6666, Bgr666, RawU24, u32, Bgra = (6, 6, 6, 6));
+//argb_color!(Rgba6666, Rgb666, RawU24, u32, Rgba = (6, 6, 6, 6));
+//argb_color!(Abgr6666, Bgr666, RawU24, u32, Abgr = (6, 6, 6, 6));
+
+argb_color!(Argb8888, Rgb888, RawU32, u32, Argb = (8, 8, 8, 8));
+argb_color!(Bgra8888, Bgr888, RawU32, u32, Bgra = (8, 8, 8, 8));
+//argb_color!(Rgba8888, Rgb888, RawU32, u32, Rgba = (8, 8, 8, 8));
+//argb_color!(Abgr8888, Bgr888, RawU32, u32, Abgr = (8, 8, 8, 8));
+
+// supported bySTM32 microcontrollers
+argb_color!(Argb1555, Rgb555, RawU16, u16, Argb = (1, 5, 5, 5));
+
+// This probably need a specific implementation since it will be lossy
+//argb_color!(???, Rgb332, RawU8, u8, Rgb = (3, 3, 2));
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::fmt::Debug;
+
+    /// Convert color to integer and back again to test bit positions
+    fn test_bpp16<C>(color: C, value: u16)
+    where
+        C: PixelColor<Raw = RawU16> + Debug,
+    {
+        let value = RawU16::new(value);
+
+        assert_eq!(color.into(), value);
+        assert_eq!(color, C::from(value));
+    }
+
+    /// Convert color to integer and back again to test bit positions
+    fn test_bpp24<C>(color: C, value: u32)
+    where
+        C: PixelColor<Raw = RawU24> + Debug,
+    {
+        let value = RawU24::new(value);
+
+        assert_eq!(color.into(), value);
+        assert_eq!(color, C::from(value));
+    }
+
+    #[test]
+    pub fn bit_positions_argb6666() {
+        test_bpp24(
+            Argb6666::new(0b100001, 0, 0, 0b10),
+            0b10 << 6 + 6 + 6 | 0b100001 << 6 + 6,
+        );
+        test_bpp24(
+            Argb6666::new(0, 0b100001, 0, 0b10),
+            0b10 << 6 + 6 + 6 | 0b100001 << 6,
+        );
+        test_bpp24(
+            Argb6666::new(0, 0, 0b100001, 0b10),
+            0b10 << 6 + 6 + 6 | 0b100001 << 0,
+        );
+    }
+
+    #[test]
+    pub fn bit_positions_bgra6666() {
+        test_bpp24(Bgra6666::new(0b100001, 0, 0, 0b10), 0b10 | 0b100001 << 6);
+        test_bpp24(
+            Bgra6666::new(0, 0b100001, 0, 0b10),
+            0b10 | 0b100001 << 6 + 6,
+        );
+        test_bpp24(
+            Bgra6666::new(0, 0, 0b100001, 0b10),
+            0b10 | 0b100001 << 6 + 6 + 6,
+        );
+    }
+
+    #[test]
+    pub fn bit_positions_argb1555() {
+        test_bpp16(
+            Argb1555::new(0b10001, 0, 0, 0b1),
+            0b1 << 5 + 5 + 5 | 0b10001 << 5 + 5,
+        );
+        test_bpp16(
+            Argb1555::new(0, 0b10001, 0, 0b1),
+            0b1 << 5 + 5 + 5 | 0b10001 << 5,
+        );
+        test_bpp16(
+            Argb1555::new(0, 0, 0b10001, 0b1),
+            0b1 << 5 + 5 + 5 | 0b10001 << 0,
+        );
+    }
+
+    #[test]
+    pub fn blending_opaque_argb8888() {
+        let opaque = Argb8888::new(0xFF, 0x80, 0x0, 0xFF);
+        let mild = Argb8888::new(0xFF, 0x80, 0x0, 0x80);
+        let transparent = Argb8888::new(0xFF, 0x80, 0x0, 0x0);
+        let base1 = Rgb888::new(0xFF, 0x80, 0x0);
+        let base2 = Rgb888::new(0x80, 0x10, 0xFF);
+
+        assert_eq!(opaque.blend_over(base1), opaque.into());
+        assert_eq!(opaque.blend_over(base2), opaque.into());
+        // this is because mild is the same color as base1
+        assert_eq!(mild.blend_over(base1), base1);
+        // This one's not obvious, manual check: color takes the middle ground
+        assert_eq!(mild.blend_over(base2), Rgb888::new(0xC0, 0x48, 0x7F));
+        assert_eq!(transparent.blend_over(base1), base1);
+        assert_eq!(transparent.blend_over(base2), base2);
+    }
+
+    #[test]
+    pub fn blending_transparent_argb8888() {
+        let opaque = Argb8888::new(0xFF, 0x80, 0x0, 0xFF);
+        let mild = Argb8888::new(0x80, 0x0, 0xFF, 0x80);
+        let transparent = Argb8888::new(0x0, 0xFF, 0x80, 0x0);
+
+        assert_eq!(opaque.blend_over(opaque), opaque);
+        assert_eq!(opaque.blend_over(mild), opaque);
+        assert_eq!(opaque.blend_over(transparent), opaque);
+        // manual check: color takes the middle ground, opaque alpha
+        assert_eq!(
+            mild.blend_over(opaque),
+            Argb8888::new(0xBF, 0x40, 0x80, 0xFF)
+        );
+        // manual check: no color change, alpha ("opaqueness" divided by 2)
+        assert_eq!(mild.blend_over(mild), Argb8888::new(0x80, 0x0, 0xFF, 0xC0));
+        assert_eq!(mild.blend_over(transparent), mild);
+        assert_eq!(transparent.blend_over(opaque), opaque);
+        assert_eq!(transparent.blend_over(mild), mild);
+        assert_eq!(transparent.blend_over(transparent), transparent);
+    }
 }
