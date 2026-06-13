@@ -120,6 +120,7 @@
 
 mod load_store;
 mod to_bytes;
+mod u12;
 
 pub use to_bytes::ToBytes;
 
