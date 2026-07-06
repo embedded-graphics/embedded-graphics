@@ -9,8 +9,8 @@ use crate::{
     iterator::raw::RawDataSlice,
     pixelcolor::{
         raw::{
-            BigEndianLsb0, DataOrder, LittleEndianMsb0, RawData, RawU1, RawU16, RawU2, RawU24,
-            RawU32, RawU4, RawU8, ToBytes,
+            BigEndianLsb0, DataOrder, LittleEndianMsb0, RawData, RawU1, RawU12, RawU16, RawU2,
+            RawU24, RawU32, RawU4, RawU8, ToBytes,
         },
         PixelColor,
     },
@@ -287,6 +287,58 @@ macro_rules! impl_bytes {
     };
 }
 
+macro_rules! impl_load_store_bytes {
+    ($raw_type:ty, $bo_type:ty) => {
+        impl<C, const WIDTH: usize, const HEIGHT: usize, const N: usize>
+            Framebuffer<C, $raw_type, $bo_type, WIDTH, HEIGHT, N>
+        where
+            C: PixelColor<Raw = $raw_type>,
+        {
+            /// Sets the color of a pixel.
+            ///
+            /// Trying to set a pixel outside the framebuffer is a noop.
+            pub fn set_pixel(&mut self, p: Point, c: C) {
+                if let (Ok(x), Ok(y)) = (usize::try_from(p.x), usize::try_from(p.y)) {
+                    if x < WIDTH && y < HEIGHT {
+                        let x = p.x as usize;
+                        let y = p.y as usize;
+
+                        let index = (y * WIDTH + x);
+
+                        c.into().store::<$bo_type>(&mut self.data, index).unwrap();
+                    }
+                }
+            }
+        }
+
+        impl<C, const WIDTH: usize, const HEIGHT: usize, const N: usize> DrawTarget
+            for Framebuffer<C, $raw_type, $bo_type, WIDTH, HEIGHT, N>
+        where
+            C: PixelColor<Raw = $raw_type> + Into<$raw_type>,
+        {
+            type Color = C;
+            type Error = Infallible;
+
+            fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+            where
+                I: IntoIterator<Item = Pixel<Self::Color>>,
+            {
+                for Pixel(p, c) in pixels {
+                    self.set_pixel(p, c);
+                }
+
+                Ok(())
+            }
+        }
+    };
+
+    ($raw_type:ty) => {
+        impl_load_store_bytes!($raw_type, LittleEndianMsb0);
+        impl_load_store_bytes!($raw_type, BigEndianLsb0);
+    };
+}
+
+impl_load_store_bytes!(RawU12);
 impl_bytes!(RawU16);
 impl_bytes!(RawU24);
 impl_bytes!(RawU32);
@@ -310,7 +362,7 @@ mod tests {
         geometry::Point,
         image::Image,
         mock_display::MockDisplay,
-        pixelcolor::{BinaryColor, Gray2, Gray4, Gray8, Rgb565, Rgb888, RgbColor},
+        pixelcolor::{BinaryColor, Gray2, Gray4, Gray8, Rgb444, Rgb565, Rgb888, RgbColor},
         primitives::{Primitive, PrimitiveStyle},
         Drawable,
     };
@@ -475,6 +527,67 @@ mod tests {
             &[
                 0x10, 0x3F, 0x00, //
                 0x00, 0xF0, 0x22, //
+            ]
+        );
+    }
+
+    #[test]
+    fn raw_u12_le() {
+        let mut fb = <framebuffer!(Rgb444, 3, 2)>::new();
+
+        fb.draw_iter(
+            [
+                ((0, 0), 0x100),  //
+                ((2, 1), 0x001),  //
+                ((1, 0), 0x123),  //
+                ((1, 1), 0x654),  //
+                ((-1, 0), 0xFFF), //
+                ((0, -1), 0xFFF), //
+                ((3, 0), 0xFFF),  //
+                ((0, 2), 0xFFF),  //
+            ]
+            .iter()
+            .map(|(p, c)| Pixel(Point::from(*p), Rgb444::from(RawU12::new(*c)))),
+        )
+        .unwrap();
+
+        assert_eq!(
+            fb.data(),
+            &[
+                0x00, 0x31, 0x12, 0x00, 0x00, // GB, BR, RG, GB, BR, (3.5 pixels)
+                0x00, 0x54, 0x16, 0x00,
+                0x00, // RG, GB, BR, RG, ??, (2.5 pixels, 1 extra byte)
+            ]
+        );
+    }
+
+    #[test]
+    fn raw_u12_be() {
+        let mut fb = <framebuffer!(Rgb444, BigEndianLsb0, 3, 2)>::new();
+
+        fb.draw_iter(
+            [
+                ((0, 0), 0x100),  //
+                ((2, 1), 0x001),  //
+                ((1, 0), 0x123),  //
+                ((2, 0), 0x456),  //
+                ((0, 1), 0x789),  //
+                ((1, 1), 0x765),  //
+                ((-1, 0), 0xFFF), //
+                ((0, -1), 0xFFF), //
+                ((3, 0), 0xFFF),  //
+                ((0, 2), 0xFFF),  //
+            ]
+            .iter()
+            .map(|(p, c)| Pixel(Point::from(*p), Rgb444::from(RawU12::new(*c)))),
+        )
+        .unwrap();
+
+        assert_eq!(
+            fb.data(),
+            &[
+                0x10, 0x01, 0x23, 0x45, 0x67, // RG, BR, GB, RG, BR
+                0x89, 0x76, 0x50, 0x01, 0x00, // GB, RG, BR, GB, ??
             ]
         );
     }
@@ -725,6 +838,7 @@ mod tests {
         <framebuffer!(Gray2, 10, 10)>::new().set_pixel(Point::zero(), Gray2::WHITE);
         <framebuffer!(Gray4, 10, 10)>::new().set_pixel(Point::zero(), Gray4::WHITE);
         <framebuffer!(Gray8, 10, 10)>::new().set_pixel(Point::zero(), Gray8::WHITE);
+        <framebuffer!(Rgb444, 10, 10)>::new().set_pixel(Point::zero(), Rgb444::WHITE);
         <framebuffer!(Rgb565, 10, 10)>::new().set_pixel(Point::zero(), Rgb565::WHITE);
         <framebuffer!(Rgb888, 10, 10)>::new().set_pixel(Point::zero(), Rgb888::WHITE);
         <framebuffer!(U32Color, 10, 10)>::new().set_pixel(Point::zero(), U32Color(0));
