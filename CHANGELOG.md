@@ -16,6 +16,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 
 ### Added
 
+- [#816](https://github.com/embedded-graphics/embedded-graphics/pull/816) Added `RawU12` support to `Framebuffer` and adds tests for `Rgb444` to `ImageRaw`.
 - [#815](https://github.com/embedded-graphics/embedded-graphics/pull/815) Added `RawU12` type to support storing 12 bit values in `ImageRaw`s and `Framebuffer`s.
 - [#732](https://github.com/embedded-graphics/embedded-graphics/pull/732) Added `Rgb444` to support 12bit RGB displays.
 - [#733](https://github.com/embedded-graphics/embedded-graphics/pull/733) Added `envelope` method to `Rectangle`.
