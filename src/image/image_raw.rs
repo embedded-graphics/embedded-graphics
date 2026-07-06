@@ -515,6 +515,42 @@ mod tests {
     }
 
     #[test]
+    fn bpp12_little_endian() {
+        let data = [
+            0x00, 0x0F, // GB, BR
+            0x0F, 0x0F, // RG, GB
+            0x00, 0x00, // BR, RG
+        ];
+        let image_data: ImageRawLE<Rgb444> = ImageRaw::new(&data, Size::new(2, 2)).unwrap();
+
+        assert_pattern(
+            image_data,
+            &[
+                "RG", //
+                "BK", //
+            ],
+        );
+    }
+
+    #[test]
+    fn bpp12_big_endian() {
+        let data = [
+            0xF0, 0x00, // RG, BR
+            0xF0, 0x00, // GB, RG
+            0xF0, 0x00, // BR, GB
+        ];
+        let image_data: ImageRawBE<Rgb444> = ImageRaw::new(&data, Size::new(2, 2)).unwrap();
+
+        assert_pattern(
+            image_data,
+            &[
+                "RG", //
+                "BK", //
+            ],
+        );
+    }
+
+    #[test]
     fn bpp16_little_endian() {
         let data = [
             0x00, 0xF8, //
