@@ -1,3 +1,5 @@
+use core::cmp::min;
+
 use crate::{
     draw_target::DrawTarget,
     geometry::Dimensions,
@@ -6,7 +8,7 @@ use crate::{
         arc::Arc,
         common::{DistanceIterator, PlaneSector},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        OffsetOutline, PrimitiveStyle, Rectangle,
+        OffsetOutline, PrimitiveStyle, Rectangle, StrokeAlignment,
     },
     Pixel,
 };
@@ -94,11 +96,42 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Arc {
 }
 
 impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Arc {
-    // FIXME: This doesn't take into account start/end angles. This should be fixed to close #405.
     fn styled_bounding_box(&self, style: &PrimitiveStyle<C>) -> Rectangle {
-        let offset = style.outside_stroke_width().saturating_as();
+        let (inside_diameter, outside_diameter) = match style.stroke_alignment {
+            StrokeAlignment::Outside => (self.diameter, self.diameter + style.stroke_width * 2),
+            StrokeAlignment::Center => (
+                self.diameter - min(style.stroke_width, self.diameter),
+                self.diameter + style.stroke_width,
+            ),
+            StrokeAlignment::Inside => (
+                self.diameter - min(style.stroke_width * 2 + 2, self.diameter),
+                self.diameter,
+            ),
+        };
 
-        self.bounding_box().offset(offset)
+        let outside_bb = Arc::with_center(
+            self.center(),
+            outside_diameter,
+            self.angle_start,
+            self.angle_sweep,
+        )
+        .bounding_box();
+
+        let inside_bb = Arc::with_center(
+            self.center(),
+            inside_diameter,
+            self.angle_start,
+            self.angle_sweep,
+        )
+        .bounding_box();
+
+        let min_top_left = outside_bb.top_left.component_min(inside_bb.top_left);
+        let max_bottom_right = outside_bb
+            .bottom_right()
+            .unwrap_or_else(|| self.center())
+            .component_max(inside_bb.bottom_right().unwrap_or_else(|| self.center()));
+
+        Rectangle::with_corners(min_top_left, max_bottom_right)
     }
 }
 
