@@ -32,6 +32,10 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 - [#786](https://github.com/embedded-graphics/embedded-graphics/pull/786) Added `ImageTransparent` to add transparency to an `ImageDrawable`
 - [#792](https://github.com/embedded-graphics/embedded-graphics/pull/792) Added `AlphaColor`, `ColorBlend` and `HasAlphaColor` traits.
 
+### Fixed
+
+- [#824](https://github.com/embedded-graphics/embedded-graphics/pull/824) Fixed an integer overflow in the line joint calculation, which caused a panic when a `Triangle` or `Polyline` with a large corner was drawn with a stroke.
+
 ## [0.8.2] - 2026-02-15
 
 ### Fixed
