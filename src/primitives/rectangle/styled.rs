@@ -174,7 +174,7 @@ where
 /// A corner can be filled either by a dot or a gap (sides are drawn in clockwise order).
 fn draw_dotted_rectangle_border_in_clockwise_order<D>(
     top_left: &Point,
-    border_sides: &[Point],
+    border_size: &Size,
     dot_size: u32,
     style: &PrimitiveStyle<D::Color>,
     target: &mut D,
@@ -182,6 +182,12 @@ fn draw_dotted_rectangle_border_in_clockwise_order<D>(
 where
     D: DrawTarget,
 {
+    let mut border_sides: [Point; 4] = [Point::zero(); 4];
+    border_sides[0] += border_size.x_axis();
+    border_sides[1] += border_size.y_axis();
+    border_sides[2] -= border_size.x_axis();
+    border_sides[3] -= border_size.y_axis();
+
     let mut corner_dot = Rectangle::new(*top_left, Size::new_equal(dot_size));
     let mut unit_is_dot = true;
 
@@ -244,10 +250,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
         let stroke_width = style.stroke_width;
         let stroke_area = style.stroke_area(self);
 
-        if style.stroke_style == StrokeStyle::Dotted {
-            if stroke_width == 0 {
-                return Ok(());
-            }
+        if style.stroke_style == StrokeStyle::Dotted && stroke_width > 0 {
             let dot_size = stroke_width
                 // Shrink dots to prevent overlap between dots when opposite borders overlap.
                 .min(stroke_area.size.height / 2)
@@ -259,15 +262,9 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
 
             if dot_size < 4 {
-                let mut border_sides: [Point; 4] = [Point::zero(); 4];
-                border_sides[0] += border_size.x_axis();
-                border_sides[1] += border_size.y_axis();
-                border_sides[2] -= border_size.x_axis();
-                border_sides[3] -= border_size.y_axis();
-
                 draw_dotted_rectangle_border_in_clockwise_order(
                     &stroke_area.top_left,
-                    &border_sides,
+                    &border_size,
                     dot_size,
                     &dot_style,
                     target,
