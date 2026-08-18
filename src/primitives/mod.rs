@@ -28,6 +28,7 @@ pub use self::{
 };
 use crate::geometry::{Dimensions, Point};
 pub use embedded_graphics_core::primitives::PointsIter;
+use line::DottedLinePoints;
 pub use styled::{Styled, StyledDimensions, StyledDrawable};
 
 /// Primitive trait

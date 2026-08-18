@@ -108,7 +108,7 @@ impl Iterator for DottedBresenham {
 /// Iterator over all points on a dotted line.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 #[cfg_attr(feature = "defmt", derive(::defmt::Format))]
-pub(super) struct DottedLinePoints {
+pub(in crate::primitives) struct DottedLinePoints {
     points: Points,
     index_bresenham: DottedBresenham,
 }
@@ -116,7 +116,7 @@ pub(super) struct DottedLinePoints {
 impl DottedLinePoints {
     /// Creates an iterator over all points on the given line
     /// taking into account the size of the dots.
-    pub(super) fn with_dot_size(line: &Line, dot_size: i32) -> Self {
+    pub(in crate::primitives) fn with_dot_size(line: &Line, dot_size: i32) -> Self {
         let mut length = line.delta().length_squared().integer_sqrt();
         // The gaps between dots ideally have the same size as the dots
         // If `dot_size <= 3`, only positive error is allowed,
