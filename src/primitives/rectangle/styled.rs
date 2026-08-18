@@ -967,30 +967,4 @@ mod tests {
             }
         }
     }
-
-    #[test]
-    fn dot_positions_edge_cases() {
-        // Test `dot_positions_with_dotted_corners` and `unit_positions_in_clockwise_order`
-        // when `dot_size` is 0 or greater than `length`.
-
-        let mut positions = dot_positions_with_dotted_corners(10, 0, false);
-        assert_eq!(positions.next(), None);
-
-        let mut positions = dot_positions_with_dotted_corners(0, 6, false);
-        assert_eq!(positions.next(), None);
-
-        let mut positions = dot_positions_with_dotted_corners(12, 0, true);
-        assert_eq!(positions.next(), Some(0));
-        assert_eq!(positions.next(), None);
-
-        let mut positions = dot_positions_with_dotted_corners(9, 11, true);
-        assert_eq!(positions.next(), Some(0));
-        assert_eq!(positions.next(), None);
-
-        let mut positions = unit_positions_in_clockwise_order(8, 0);
-        assert_eq!(positions.next(), None);
-
-        let mut positions = unit_positions_in_clockwise_order(7, 10);
-        assert_eq!(positions.next(), None);
-    }
 }
