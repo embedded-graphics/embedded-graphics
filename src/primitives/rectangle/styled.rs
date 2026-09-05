@@ -6,7 +6,7 @@ use crate::{
         primitive_style::StrokeStyle,
         rectangle::{Points, Rectangle},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        Circle, PointsIter, PrimitiveStyle,
+        Circle, DottedLinePoints, Line, PointsIter, PrimitiveStyle,
     },
     transform::Transform,
     Pixel,
@@ -127,7 +127,7 @@ fn unit_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterato
 /// The gaps between dots ideally have the same size as the dots.
 /// The gaps can be smaller or larger than ideal.
 /// Opposite borders are identical (horizontal and vertical sides are independent).
-fn draw_dotted_rectangle_border_with_dotted_corners<D>(
+fn draw_dotted_rectangle_border_with_dotted_corners_old<D>(
     top_left: &Point,
     border_size: &Size,
     dot_size: u32,
@@ -166,13 +166,124 @@ where
     Ok(())
 }
 
+/// Draw a non-degenerate rectangle border using 4 dotted lines.
+/// Each corner is a dot and the result has central symmetry.
+fn draw_dotted_rectangle_border_with_dotted_corners<D>(
+    top_left: &Point,
+    border_size: &Size,
+    dot_size: u32,
+    style: &PrimitiveStyle<D::Color>,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    D: DrawTarget,
+{
+    let top_left_dot = Circle::new(*top_left, dot_size);
+    let horizontal_line = Line::new(Point::zero(), Point::zero() + border_size.x_axis());
+    let vertical_line = Line::new(Point::zero(), Point::zero() + border_size.y_axis());
+    let horizontal_dotted_line = DottedLinePoints::with_dot_size(&horizontal_line, dot_size as i32);
+    let vertical_dotted_line = DottedLinePoints::with_dot_size(&vertical_line, dot_size as i32);
+
+    // Draw horizontal sides (including top right and bottom left corner dots)
+    for position in horizontal_dotted_line.skip(1) {
+        top_left_dot
+            .translate(position)
+            .draw_styled(style, target)?;
+        top_left_dot
+            .translate(-position + *border_size)
+            .draw_styled(style, target)?;
+    }
+
+    // Draw vertical sides (including top left and bottom right corner dots)
+    for position in vertical_dotted_line.skip(1) {
+        top_left_dot
+            .translate(position + border_size.x_axis())
+            .draw_styled(style, target)?;
+        top_left_dot
+            .translate(-position + border_size.y_axis())
+            .draw_styled(style, target)?;
+    }
+
+    Ok(())
+}
+
+/// Ignores the starting point then alternates between keeping and skipping
+/// the remaining points, carrying the state between consecutive lines.
+fn dotted_line_with_carry(
+    positions: DottedLinePoints,
+    next_unit_is_dot: &mut bool,
+) -> impl Iterator<Item = Point> + '_ {
+    positions.skip(1).filter(|_| {
+        let draw = *next_unit_is_dot;
+        *next_unit_is_dot = !*next_unit_is_dot;
+
+        draw
+    })
+}
+
+/// Draw a (possibly degenerate) rectangle border using 0, 2 or 4 dotted lines.
+/// Corners can be dots or gaps (the result doesn't have central symmetry), except for the top left corner which is a dot.
+fn draw_dotted_rectangle_border_in_clockwise_order<D>(
+    top_left: &Point,
+    border_size: &Size,
+    dot_size: u32,
+    style: &PrimitiveStyle<D::Color>,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    D: DrawTarget,
+{
+    let top_left_dot = Rectangle::new(*top_left, Size::new_equal(dot_size));
+    let horizontal_line = Line::new(Point::zero(), Point::zero() + border_size.x_axis());
+    let vertical_line = Line::new(Point::zero(), Point::zero() + border_size.y_axis());
+    let horizontal_dotted_line =
+        DottedLinePoints::with_dot_size_including_gaps(&horizontal_line, dot_size as i32);
+    let vertical_dotted_line =
+        DottedLinePoints::with_dot_size_including_gaps(&vertical_line, dot_size as i32);
+
+    let mut next_unit_is_dot = false; // the top left corner is drawn last and it's a dot
+
+    // Draw top and right sides (starting top left corner excluded, ending bottom right corner included)
+    if border_size.width != 0 || border_size.height != 0 {
+        for position in dotted_line_with_carry(horizontal_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(position)
+                .draw_styled(style, target)?;
+        }
+
+        for position in dotted_line_with_carry(vertical_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(position + border_size.x_axis())
+                .draw_styled(style, target)?;
+        }
+    }
+
+    // Draw bottom and left sides (starting right bottom corner excluded, ending top left corner included)
+    if border_size.width != 0 && border_size.height != 0 {
+        for position in dotted_line_with_carry(horizontal_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(-position + *border_size)
+                .draw_styled(style, target)?;
+        }
+
+        for position in dotted_line_with_carry(vertical_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(-position + border_size.y_axis())
+                .draw_styled(style, target)?;
+        }
+    } else {
+        top_left_dot.draw_styled(style, target)?;
+    }
+
+    Ok(())
+}
 /// Draw a dotted rectangular border.
 ///
 /// The dot type is [`Rectangle`] (this method is meant to be used with smaller values of `dot_size`).
 /// The gaps between dots ideally have the same size as the dots.
 /// The gaps can be larger than ideal, but not smaller.
 /// A corner can be filled either by a dot or a gap (sides are drawn in clockwise order).
-fn draw_dotted_rectangle_border_in_clockwise_order<D>(
+fn draw_dotted_rectangle_border_in_clockwise_order_old<D>(
     top_left: &Point,
     border_size: &Size,
     dot_size: u32,

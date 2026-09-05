@@ -114,9 +114,21 @@ pub(in crate::primitives) struct DottedLinePoints {
 }
 
 impl DottedLinePoints {
-    /// Creates an iterator over all points on the given line
+    /// Creates an iterator over all dots on the given line
     /// taking into account the size of the dots.
+    /// There are dots on the two line endpoints.
     pub(in crate::primitives) fn with_dot_size(line: &Line, dot_size: i32) -> Self {
+        Self::new_with_dot_size(line, dot_size, false)
+    }
+
+    /// Creates an iterator over all gaps and dots on the given line
+    /// taking into account the size of the dots.
+    /// Useful when the line endpoints can be dots or gaps.
+    pub(in crate::primitives) fn with_dot_size_including_gaps(line: &Line, dot_size: i32) -> Self {
+        Self::new_with_dot_size(line, dot_size, true)
+    }
+
+    fn new_with_dot_size(line: &Line, dot_size: i32, include_gaps: bool) -> Self {
         let mut length = line.delta().length_squared().integer_sqrt();
         // The gaps between dots ideally have the same size as the dots
         // If `dot_size <= 3`, only positive error is allowed,
@@ -124,8 +136,9 @@ impl DottedLinePoints {
         if dot_size > 3 {
             length += dot_size;
         }
+        let unit = if include_gaps { dot_size } else { 2 * dot_size };
         // The 2 endpoint dots take half the space of a regular dot.
-        let nb_dots_desired = length / (2 * dot_size) + 1;
+        let nb_dots_desired = length.checked_div(unit).unwrap_or_default() + 1;
 
         Self::new(line, nb_dots_desired)
     }
