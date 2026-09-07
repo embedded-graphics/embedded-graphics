@@ -1,12 +1,14 @@
+#[cfg(all(not(feature = "fixed_point"), test))]
+use crate::geometry::Real;
 use crate::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, Point, Real, Size},
+    geometry::{Dimensions, Point, Size},
     pixelcolor::PixelColor,
     primitives::{
         primitive_style::StrokeStyle,
         rectangle::{Points, Rectangle},
         styled::{StyledDimensions, StyledDrawable, StyledPixels},
-        Circle, PointsIter, PrimitiveStyle,
+        Circle, DottedLinePoints, Line, PointsIter, PrimitiveStyle,
     },
     transform::Transform,
     Pixel,
@@ -70,6 +72,7 @@ impl<C: PixelColor> StyledPixels<PrimitiveStyle<C>> for Rectangle {
     }
 }
 
+#[cfg(all(not(feature = "fixed_point"), test))]
 /// Compute dot positions from a `length` and `dot_size`.
 ///
 /// A dot will be positioned at each endpoint (except in cases described below).
@@ -102,6 +105,7 @@ fn dot_positions_with_dotted_corners(
     idx_iter.map(move |idx| (dot_offset * Real::from(idx)).round().into())
 }
 
+#[cfg(all(not(feature = "fixed_point"), test))]
 /// Compute dot and gap positions from a `length` and `dot_size`.
 ///
 /// A dot or a gap can be positioned at each endpoint. The starting endpoint
@@ -122,12 +126,13 @@ fn unit_positions_in_clockwise_order(length: u32, dot_size: u32) -> impl Iterato
     idx_iter.map(move |idx| (unit_offset * Real::from(idx)).round().into())
 }
 
+#[cfg(all(not(feature = "fixed_point"), test))]
 /// Draw a dotted rectangular border with dots in the 4 corners.
 ///
 /// The gaps between dots ideally have the same size as the dots.
 /// The gaps can be smaller or larger than ideal.
 /// Opposite borders are identical (horizontal and vertical sides are independent).
-fn draw_dotted_rectangle_border_with_dotted_corners<D>(
+fn draw_dotted_rectangle_border_with_dotted_corners_old<D>(
     top_left: &Point,
     border_size: &Size,
     dot_size: u32,
@@ -166,15 +171,11 @@ where
     Ok(())
 }
 
-/// Draw a dotted rectangular border.
-///
-/// The dot type is [`Rectangle`] (this method is meant to be used with smaller values of `dot_size`).
-/// The gaps between dots ideally have the same size as the dots.
-/// The gaps can be larger than ideal, but not smaller.
-/// A corner can be filled either by a dot or a gap (sides are drawn in clockwise order).
-fn draw_dotted_rectangle_border_in_clockwise_order<D>(
+/// Draw a non-degenerate rectangle border using 4 dotted lines.
+/// Each corner is a dot and the result has central symmetry.
+fn draw_dotted_rectangle_border_with_dotted_corners<D>(
     top_left: &Point,
-    border_sides: &[Point],
+    border_size: &Size,
     dot_size: u32,
     style: &PrimitiveStyle<D::Color>,
     target: &mut D,
@@ -182,6 +183,135 @@ fn draw_dotted_rectangle_border_in_clockwise_order<D>(
 where
     D: DrawTarget,
 {
+    let top_left_dot = Circle::new(*top_left, dot_size);
+    let horizontal_line = Line::new(Point::zero(), Point::zero() + border_size.x_axis());
+    let vertical_line = Line::new(Point::zero(), Point::zero() + border_size.y_axis());
+    let horizontal_dotted_line = DottedLinePoints::with_dot_size(&horizontal_line, dot_size as i32);
+    let vertical_dotted_line = DottedLinePoints::with_dot_size(&vertical_line, dot_size as i32);
+
+    // Draw horizontal sides (including top right and bottom left corner dots)
+    for position in horizontal_dotted_line.skip(1) {
+        top_left_dot
+            .translate(position)
+            .draw_styled(style, target)?;
+        top_left_dot
+            .translate(-position + *border_size)
+            .draw_styled(style, target)?;
+    }
+
+    // Draw vertical sides (including top left and bottom right corner dots)
+    for position in vertical_dotted_line.skip(1) {
+        top_left_dot
+            .translate(position + border_size.x_axis())
+            .draw_styled(style, target)?;
+        top_left_dot
+            .translate(-position + border_size.y_axis())
+            .draw_styled(style, target)?;
+    }
+
+    Ok(())
+}
+
+/// Ignores the starting point then alternates between keeping and skipping
+/// the remaining points, carrying the state between consecutive lines.
+fn dotted_line_with_carry(
+    positions: DottedLinePoints,
+    next_unit_is_dot: &mut bool,
+) -> impl Iterator<Item = Point> + '_ {
+    positions.skip(1).filter(|_| {
+        let draw = *next_unit_is_dot;
+        *next_unit_is_dot = !*next_unit_is_dot;
+
+        draw
+    })
+}
+
+/// Draw a (possibly degenerate) rectangle border using 0, 2 or 4 dotted lines.
+/// Corners can be dots or gaps (the result doesn't have central symmetry), except for the top left corner which is a dot.
+fn draw_dotted_rectangle_border_in_clockwise_order<D>(
+    top_left: &Point,
+    border_size: &Size,
+    dot_size: u32,
+    style: &PrimitiveStyle<D::Color>,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    D: DrawTarget,
+{
+    let top_left_dot = Rectangle::new(*top_left, Size::new_equal(dot_size));
+    let horizontal_line = Line::new(Point::zero(), Point::zero() + border_size.x_axis());
+    let vertical_line = Line::new(Point::zero(), Point::zero() + border_size.y_axis());
+    let horizontal_dotted_line =
+        DottedLinePoints::with_dot_size_including_gaps(&horizontal_line, dot_size as i32);
+    let vertical_dotted_line =
+        DottedLinePoints::with_dot_size_including_gaps(&vertical_line, dot_size as i32);
+
+    let mut next_unit_is_dot = false; // the top left corner is drawn last and it's a dot
+
+    // Draw top and right sides (starting top left corner excluded, ending bottom right corner included)
+    if border_size.width != 0 || border_size.height != 0 {
+        for position in dotted_line_with_carry(horizontal_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(position)
+                .draw_styled(style, target)?;
+        }
+
+        for position in dotted_line_with_carry(vertical_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(position + border_size.x_axis())
+                .draw_styled(style, target)?;
+        }
+    }
+
+    // Draw bottom and left sides (starting right bottom corner excluded, ending top left corner included)
+    if border_size.width != 0 && border_size.height != 0 {
+        for position in dotted_line_with_carry(horizontal_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(-position + *border_size)
+                .draw_styled(style, target)?;
+        }
+
+        for position in dotted_line_with_carry(vertical_dotted_line, &mut next_unit_is_dot) {
+            top_left_dot
+                .translate(-position + border_size.y_axis())
+                .draw_styled(style, target)?;
+        }
+    } else {
+        top_left_dot.draw_styled(style, target)?;
+    }
+
+    Ok(())
+}
+
+fn is_valid_dot_size(dot_size: u32, border_size: Size) -> bool {
+    let dot_size_leq_border_size = border_size.height >= dot_size && border_size.width >= dot_size;
+
+    dot_size_leq_border_size || dot_size == 1
+}
+
+#[cfg(all(not(feature = "fixed_point"), test))]
+/// Draw a dotted rectangular border.
+///
+/// The dot type is [`Rectangle`] (this method is meant to be used with smaller values of `dot_size`).
+/// The gaps between dots ideally have the same size as the dots.
+/// The gaps can be larger than ideal, but not smaller.
+/// A corner can be filled either by a dot or a gap (sides are drawn in clockwise order).
+fn draw_dotted_rectangle_border_in_clockwise_order_old<D>(
+    top_left: &Point,
+    border_size: &Size,
+    dot_size: u32,
+    style: &PrimitiveStyle<D::Color>,
+    target: &mut D,
+) -> Result<(), D::Error>
+where
+    D: DrawTarget,
+{
+    let mut border_sides: [Point; 4] = [Point::zero(); 4];
+    border_sides[0] += border_size.x_axis();
+    border_sides[1] += border_size.y_axis();
+    border_sides[2] -= border_size.x_axis();
+    border_sides[3] -= border_size.y_axis();
+
     let mut corner_dot = Rectangle::new(*top_left, Size::new_equal(dot_size));
     let mut unit_is_dot = true;
 
@@ -244,10 +374,7 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
         let stroke_width = style.stroke_width;
         let stroke_area = style.stroke_area(self);
 
-        if style.stroke_style == StrokeStyle::Dotted {
-            if stroke_width == 0 {
-                return Ok(());
-            }
+        if style.stroke_style == StrokeStyle::Dotted && stroke_width > 0 {
             let dot_size = stroke_width
                 // Shrink dots to prevent overlap between dots when opposite borders overlap.
                 .min(stroke_area.size.height / 2)
@@ -258,16 +385,12 @@ impl<C: PixelColor> StyledDrawable<PrimitiveStyle<C>> for Rectangle {
             let border_size = stroke_area.size.saturating_sub(Size::new_equal(dot_size));
             let dot_style = PrimitiveStyle::with_fill(stroke_color);
 
-            if dot_size < 4 {
-                let mut border_sides: [Point; 4] = [Point::zero(); 4];
-                border_sides[0] += border_size.x_axis();
-                border_sides[1] += border_size.y_axis();
-                border_sides[2] -= border_size.x_axis();
-                border_sides[3] -= border_size.y_axis();
+            debug_assert!(is_valid_dot_size(dot_size, border_size));
 
+            if dot_size < 4 {
                 draw_dotted_rectangle_border_in_clockwise_order(
                     &stroke_area.top_left,
-                    &border_sides,
+                    &border_size,
                     dot_size,
                     &dot_style,
                     target,
@@ -861,28 +984,80 @@ mod tests {
     }
 
     #[test]
-    fn dot_positions_edge_cases() {
-        // Test `dot_positions_with_dotted_corners` and `unit_positions_in_clockwise_order`
-        // when `dot_size` is 0 or greater than `length`.
+    #[cfg(not(feature = "fixed_point"))]
+    fn draw_dotted_rectangle_border_with_dotted_corners_are_equivalent(
+    ) -> Result<(), <MockDisplay<BinaryColor> as DrawTarget>::Error> {
+        let dot_style = PrimitiveStyle::with_fill(BinaryColor::On);
+        for dot_size in 4..9 {
+            for width in 0..50 {
+                for height in 0..50 {
+                    if !is_valid_dot_size(dot_size, Size::new(width, height)) {
+                        continue;
+                    }
 
-        let mut positions = dot_positions_with_dotted_corners(10, 0, false);
-        assert_eq!(positions.next(), None);
+                    let new: &mut MockDisplay<BinaryColor> = &mut MockDisplay::new();
 
-        let mut positions = dot_positions_with_dotted_corners(0, 6, false);
-        assert_eq!(positions.next(), None);
+                    draw_dotted_rectangle_border_with_dotted_corners(
+                        &Point::zero(),
+                        &Size::new(width, height),
+                        dot_size,
+                        &dot_style,
+                        new,
+                    )?;
 
-        let mut positions = dot_positions_with_dotted_corners(12, 0, true);
-        assert_eq!(positions.next(), Some(0));
-        assert_eq!(positions.next(), None);
+                    let old: &mut MockDisplay<BinaryColor> = &mut MockDisplay::new();
 
-        let mut positions = dot_positions_with_dotted_corners(9, 11, true);
-        assert_eq!(positions.next(), Some(0));
-        assert_eq!(positions.next(), None);
+                    draw_dotted_rectangle_border_with_dotted_corners_old(
+                        &Point::zero(),
+                        &Size::new(width, height),
+                        dot_size,
+                        &dot_style,
+                        old,
+                    )?;
 
-        let mut positions = unit_positions_in_clockwise_order(8, 0);
-        assert_eq!(positions.next(), None);
+                    assert_eq!(old, new);
+                }
+            }
+        }
+        Ok(())
+    }
 
-        let mut positions = unit_positions_in_clockwise_order(7, 10);
-        assert_eq!(positions.next(), None);
+    #[test]
+    #[cfg(not(feature = "fixed_point"))]
+    fn draw_dotted_rectangle_border_in_clockwise_order_are_equivalent(
+    ) -> Result<(), <MockDisplay<BinaryColor> as DrawTarget>::Error> {
+        let dot_style = PrimitiveStyle::with_fill(BinaryColor::On);
+        for dot_size in 0..4 {
+            for width in 0..50 {
+                for height in 0..50 {
+                    if !is_valid_dot_size(dot_size, Size::new(width, height)) {
+                        continue;
+                    }
+
+                    let new: &mut MockDisplay<BinaryColor> = &mut MockDisplay::new();
+
+                    draw_dotted_rectangle_border_in_clockwise_order(
+                        &Point::zero(),
+                        &Size::new(width, height),
+                        dot_size,
+                        &dot_style,
+                        new,
+                    )?;
+
+                    let old: &mut MockDisplay<BinaryColor> = &mut MockDisplay::new();
+
+                    draw_dotted_rectangle_border_in_clockwise_order_old(
+                        &Point::zero(),
+                        &Size::new(width, height),
+                        dot_size,
+                        &dot_style,
+                        old,
+                    )?;
+
+                    assert_eq!(old, new);
+                }
+            }
+        }
+        Ok(())
     }
 }
