@@ -70,7 +70,10 @@ impl<'a> IntersectionParams<'a> {
     /// Check whether two almost-colinear lines are intersecting in the wrong place due to numerical
     /// inaccuracies.
     pub fn nearly_colinear_has_error(&self) -> bool {
-        self.denominator.pow(2) < self.line1.delta().dot_product(self.line2.delta()).abs()
+        // The determinant is squared using `i64` arithmetic, because the result doesn't fit into an
+        // `i32` for determinants with a magnitude larger than `sqrt(i32::MAX)`.
+        i64::from(self.denominator).pow(2)
+            < i64::from(self.line1.delta().dot_product(self.line2.delta()).abs())
     }
 
     /// Compute the intersection point.
@@ -129,6 +132,14 @@ impl<'a> IntersectionParams<'a> {
 mod tests {
     use super::*;
 
+    /// Calls `nearly_colinear_has_error` for two lines with the given deltas.
+    fn nearly_colinear_has_error(delta1: Point, delta2: Point) -> bool {
+        let line1 = Line::new(Point::zero(), delta1);
+        let line2 = Line::new(Point::zero(), delta2);
+
+        IntersectionParams::from_lines(&line1, &line2).nearly_colinear_has_error()
+    }
+
     #[test]
     fn point_left() {
         let line1 = Line::new(Point::new(50, 0), Point::new(20, 0));
@@ -166,5 +177,49 @@ mod tests {
 
         let params = IntersectionParams::from_lines(&line1, &line2);
         assert_eq!(params.intersection(), Intersection::Colinear);
+    }
+
+    #[test]
+    fn nearly_colinear() {
+        // determinant: 100, dot product: 10100
+        assert!(nearly_colinear_has_error(
+            Point::new(100, 0),
+            Point::new(101, 1)
+        ));
+
+        // determinant: 100, dot product: 10000
+        assert!(!nearly_colinear_has_error(
+            Point::new(100, 0),
+            Point::new(100, 1)
+        ));
+
+        // determinant: 10000, dot product: 0
+        assert!(!nearly_colinear_has_error(
+            Point::new(100, 0),
+            Point::new(0, 100)
+        ));
+    }
+
+    #[test]
+    fn nearly_colinear_large_determinant() {
+        // 46340 is the largest determinant that can be squared without overflowing an `i32`.
+        // determinant: 46340, dot product: 1
+        assert!(!nearly_colinear_has_error(
+            Point::new(46340, 1),
+            Point::new(0, 1)
+        ));
+
+        // determinant: 46341, dot product: 1
+        assert!(!nearly_colinear_has_error(
+            Point::new(46341, 1),
+            Point::new(0, 1)
+        ));
+
+        // Deltas of the two edges that meet at the bottom left corner of the triangle in #817.
+        // determinant: -50400, dot product: -28800
+        assert!(!nearly_colinear_has_error(
+            Point::new(-120, 210),
+            Point::new(240, 0)
+        ));
     }
 }

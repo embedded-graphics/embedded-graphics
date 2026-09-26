@@ -155,7 +155,7 @@ impl<C: PixelColor> StyledDimensions<PrimitiveStyle<C>> for Triangle {
 mod tests {
     use super::*;
     use crate::{
-        geometry::Point,
+        geometry::{Point, Size},
         mock_display::MockDisplay,
         pixelcolor::{BinaryColor, Rgb565, Rgb888, RgbColor},
         primitives::{Line, Primitive, PrimitiveStyleBuilder, StrokeAlignment},
@@ -549,5 +549,31 @@ mod tests {
             " RR          ",
             "R            ",
         ]);
+    }
+
+    /// Regression test for #817.
+    ///
+    /// Triangles with edges that are long enough to make the determinant used to calculate the
+    /// line joints exceed `sqrt(i32::MAX)` used to panic in debug builds and silently produced a
+    /// too small bounding box in release builds.
+    #[test]
+    fn large_determinant() {
+        let styled = Triangle::new(
+            Point::new(480, 310),
+            Point::new(360, 520),
+            Point::new(600, 520),
+        )
+        .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 4));
+
+        assert_eq!(
+            styled.bounding_box(),
+            Rectangle::new(Point::new(357, 307), Size::new(247, 216))
+        );
+
+        let mut display: MockDisplay<BinaryColor> = MockDisplay::new();
+        display.set_allow_out_of_bounds_drawing(true);
+        display.set_allow_overdraw(true);
+
+        styled.draw(&mut display).unwrap();
     }
 }
