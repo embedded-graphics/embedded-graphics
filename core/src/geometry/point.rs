@@ -4,7 +4,7 @@ use core::{
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
-use crate::geometry::Size;
+use crate::geometry::{i32_max, i32_min, Size};
 
 /// 2D point.
 ///
@@ -175,6 +175,37 @@ impl Point {
         Point::new(self.x - width, self.y - height)
     }
 
+    /// Offsets a point by adding a size.
+    ///
+    /// This method provides a workaround for the `Add` trait not being usable in `const` contexts.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `width` or `height` are too large to be represented as an `i32`
+    /// and debug assertions are enabled.
+    pub(crate) const fn add_size(self, other: Size) -> Self {
+        let width = other.width as i32;
+        let height = other.height as i32;
+
+        debug_assert!(width >= 0, "width is too large");
+        debug_assert!(height >= 0, "height is too large");
+
+        Point::new(self.x + width, self.y + height)
+    }
+
+    /// Offset a point by adding another point.
+    ///
+    /// This method provides a workaround for the `Add` trait not being usable in `const` contexts.
+    pub(crate) const fn add_point(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y)
+    }
+    /// Offset a point by subtracting another point.
+    ///
+    /// This method provides a workaround for the `Sub` trait not being usable in `const` contexts.
+    pub(crate) const fn sub_point(self, other: Self) -> Self {
+        Self::new(self.x - other.x, self.y - other.y)
+    }
+
     /// Returns the componentwise minimum of two `Point`s
     ///
     /// # Examples
@@ -186,8 +217,8 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(15, 30));
     /// ```
-    pub fn component_min(self, other: Self) -> Self {
-        Self::new(self.x.min(other.x), self.y.min(other.y))
+    pub const fn component_min(self, other: Self) -> Self {
+        Self::new(i32_min(self.x, other.x), i32_min(self.y, other.y))
     }
 
     /// Returns the componentwise maximum of two `Point`s
@@ -201,8 +232,8 @@ impl Point {
     ///
     /// assert_eq!(min, Point::new(20, 50));
     /// ```
-    pub fn component_max(self, other: Self) -> Self {
-        Self::new(self.x.max(other.x), self.y.max(other.y))
+    pub const fn component_max(self, other: Self) -> Self {
+        Self::new(i32_max(self.x, other.x), i32_max(self.y, other.y))
     }
 
     /// Returns the componentwise multiplication of two `Point`s.
@@ -259,7 +290,7 @@ impl Add for Point {
     type Output = Point;
 
     fn add(self, other: Point) -> Point {
-        Point::new(self.x + other.x, self.y + other.y)
+        self.add_point(other)
     }
 }
 
@@ -273,13 +304,7 @@ impl Add<Size> for Point {
     /// This function will panic if `width` or `height` are too large to be represented as an `i32`
     /// and debug assertions are enabled.
     fn add(self, other: Size) -> Point {
-        let width = other.width as i32;
-        let height = other.height as i32;
-
-        debug_assert!(width >= 0, "width is too large");
-        debug_assert!(height >= 0, "height is too large");
-
-        Point::new(self.x + width, self.y + height)
+        self.add_size(other)
     }
 }
 
@@ -313,7 +338,7 @@ impl Sub for Point {
     type Output = Point;
 
     fn sub(self, other: Point) -> Point {
-        Point::new(self.x - other.x, self.y - other.y)
+        self.sub_point(other)
     }
 }
 
