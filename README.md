@@ -109,7 +109,8 @@ Note that some drivers may not support the latest version of embedded-graphics.
 * [st7567_rs](https://crates.io/crates/st7567_rs): SPI driver for ST7567 displays
 * [st7567s](https://crates.io/crates/st7567s): Driver for the ST7567S LCD controller
 * [st7735-lcd](https://crates.io/crates/st7735-lcd): Rust library for displays using the ST7735 driver
-* [st7789](https://crates.io/crates/st7789): A Rust driver library for ST7789 displays
+* [st7789](https://crates.io/crates/st7789): A Rust driver library for ST7789 displays (EOL)
+* [mipidsi](https://github.com/almindor/mipidsi): A generic driver library for SPI and parallel TFT displays that implement the MIPI Display Command Set (including ST7789)
 * [st7920](https://crates.io/crates/st7920): ST7920 LCD driver in Rust
 * [gc9a01-rs](https://crates.io/crates/gc9a01-rs): SPI 4-wire driver for the Gc9a01 display driver
 * [rp-cvideo](https://crates.io/crates/rp-cvideo): Driver to generate a binary monochrome composite video signal on the RP2040 and RP235x MCU's
