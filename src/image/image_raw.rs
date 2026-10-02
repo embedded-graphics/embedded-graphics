@@ -221,11 +221,16 @@ where
         D: DrawTarget<Color = Self::Color>,
     {
         // Don't draw anything if `area` is zero sized or partially outside the image.
+        // Checked additions are used to prevent overflows for very large areas.
         if area.is_zero_sized()
             || area.top_left.x < 0
             || area.top_left.y < 0
-            || area.top_left.x as u32 + area.size.width > self.size.width
-            || area.top_left.y as u32 + area.size.height > self.size.height
+            || (area.top_left.x as u32)
+                .checked_add(area.size.width)
+                .map_or(true, |right| right > self.size.width)
+            || (area.top_left.y as u32)
+                .checked_add(area.size.height)
+                .map_or(true, |bottom| bottom > self.size.height)
         {
             return Ok(());
         }
@@ -745,5 +750,29 @@ mod tests {
         assert_eq!(image_data.pixel(Point::new(0, -1)), None);
         assert_eq!(image_data.pixel(Point::new(9, 0)), None);
         assert_eq!(image_data.pixel(Point::new(9, 3)), None);
+    }
+
+    #[test]
+    fn draw_sub_image_with_overflowing_area() {
+        let data = [
+            0xAA, 0x00, //
+            0x55, 0xFF, //
+            0xAA, 0x80, //
+        ];
+        let image_data = ImageRaw::<BinaryColor>::new(&data, Size::new(9, 3)).unwrap();
+
+        // `top_left + size` overflows `u32` and would wrap around to a value inside the image.
+        let areas = [
+            Rectangle::new(Point::new(1, 0), Size::new(u32::MAX, 1)),
+            Rectangle::new(Point::new(0, 1), Size::new(1, u32::MAX)),
+            Rectangle::new(Point::new(i32::MAX, 0), Size::new(u32::MAX, 1)),
+            Rectangle::new(Point::new(0, i32::MAX), Size::new(1, u32::MAX)),
+        ];
+
+        for area in areas {
+            let mut display = MockDisplay::<BinaryColor>::new();
+            image_data.draw_sub_image(&mut display, &area).unwrap();
+            display.assert_pattern(&[]);
+        }
     }
 }
