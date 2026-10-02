@@ -18,6 +18,7 @@ mod points;
 mod styled;
 mod thick_points;
 
+pub(in crate::primitives) use dotted_bresenham::DottedLinePoints;
 pub use points::Points;
 pub use styled::StyledPixelsIterator;
 
