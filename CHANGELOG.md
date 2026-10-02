@@ -35,6 +35,7 @@ Embedded Graphics is a `no_std` library for adding graphics features to display 
 ### Fixed
 
 - [#824](https://github.com/embedded-graphics/embedded-graphics/pull/824) Fixed an integer overflow in the line joint calculation, which caused a panic when a `Triangle` or `Polyline` with a large corner was drawn with a stroke.
+- [#830](https://github.com/embedded-graphics/embedded-graphics/pull/830) Fixed an integer overflow in the bounds check of `ImageRaw::draw_sub_image`, which caused a panic in debug builds or an incorrect bounds check in release builds when a very large sub image area was used.
 
 ## [0.8.2] - 2026-02-15
 
